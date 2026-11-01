@@ -16,6 +16,7 @@ async function gotoChecked(page: Page, path: string): Promise<void> {
   const response = await page.goto(path, { waitUntil: "load" });
   if (!response) throw new Error(`Navigation to ${path} produced no response`);
   expect(await page.evaluate(() => document.compatMode)).toBe("CSS1Compat");
+  expect(response.headers()["referrer-policy"]).toBe("same-origin");
   if (response.status() >= 400) {
     throw new Error(
       `GET ${path} -> HTTP ${response.status()} at ${SP_WEB_URL}`,

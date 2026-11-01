@@ -105,6 +105,7 @@ test("web auth covers assets, health and unknown routes before API access", asyn
 test("web rejects invalid CSRF before API access", async () => {
   for (const modify of [
     (o) => delete o.headers.Origin,
+    (o) => (o.headers.Origin = "null"),
     (o) => (o.headers.Origin = "https://evil.test"),
     (o) => o.body.delete("csrf"),
     (o) => (o.headers.Cookie = `sp_csrf=${"b".repeat(43)}`),
@@ -372,4 +373,9 @@ test("HTML responses select standards mode with a doctype", async () => {
     (await response.text()).slice(0, 15).toLowerCase(),
     "<!doctype html>",
   );
+});
+
+test("native form pages retain same-origin referrers without relaxing CSRF", async () => {
+  const response = await request("/scripts/new", binding());
+  assert.equal(response.headers.get("referrer-policy"), "same-origin");
 });

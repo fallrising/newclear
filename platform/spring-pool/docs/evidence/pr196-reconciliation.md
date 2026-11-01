@@ -110,3 +110,22 @@ exact conflict notice; this avoids two visible matches for the original conflict
 journey. The normal screenshot fixture uses a short code line; no overflow check
 or product code-scrolling behavior changes. These two small final changes await
 the same original browser gate.
+
+## Approved native-form correction — 2026-11-01
+
+Owner approved the exact proposal in the current session:「好，按你建議。」
+Approval was observed at10:59:22Z; exact message timestamp is unavailable. SDD
+section3.4 and the web response header now use `same-origin`. Exact Origin
+comparison, double-submit, no-JS forms and all previous E2E assertions remain.
+Missing, literal-null and foreign Origin values are explicitly rejected in unit
+and real-runtime regression. Cross-origin referrers remain absent.
+
+Focused policy RED failed on `no-referrer` versus `same-origin`; final local
+`npm test`:40passed/0failed/0skipped,9.207s. Typecheck, format and web dry-run
+pass. `npm run test:local:integration`:21passed, then seed and byte-identical
+persistence/export after restart each pass. Browser/PNG and final CI still pending.
+No deploy or release authority is inferred from this approval.
+
+SSH fetch stalled on resume; a bounded SSH attempt timed out. HTTPS to the same
+repository succeeded without credential/config changes. The exact owned initial
+SSH child was stopped; unrelated Git work was preserved.

@@ -34,3 +34,5 @@ Final bounded T994 follow-up accepted capture/build/icon/multiline scope and fou
 CI41278663845: nativequality/realintegrationpassed; eight browserlaunches failed No usable sandbox on ubuntu-latest. Runner correction1 pins supportedubuntu22.04, retainschromiumSandboxtrue/alltests; no sysctl/AppArmor/permissionchange. Currentmain HAI changes preserved; rootPLAN uses a scoped pointer to avoid simultaneous append conflicts.
 
 CI41279099301:38Nodepass/1configfail from missingtomllib on Python3.10; add explicitPython3.12 with repo-pinned setupaction, preserveassertion. Directsandboxpreflight added; bodyfixtures/duplicateheading corrected before finalbrowsergate. No runtime dependency change.
+
+Resume2026-11-01T10:59:22Z: owner approved the exact same-origin proposal. Root implements the header/SDD correction with RED/GREEN, strictnull/missing/foreignOrigin regression and unchanged native no-JS journeys. No new worker necessary for this bounded correction; existing independent review findings retained. CI/browser/PNG then normalPRmerge/readback and ledgerclosure remain. No staging/release authority renewed.

@@ -88,8 +88,9 @@ All state-changing web routes are `POST` and must pass **both** checks, otherwis
 - Headers on every web response:
   - `Content-Security-Policy: default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; form-action 'self'; frame-ancestors 'none'; base-uri 'none'`
   - `X-Content-Type-Options: nosniff`
-  - `Referrer-Policy: no-referrer`
+  - `Referrer-Policy: same-origin`
   - `Cache-Control: no-store`
+- Owner-approved correction (2026-11-01): `same-origin` keeps cross-origin referrers absent while allowing native same-origin form POSTs to carry their Origin. The prior `no-referrer` policy produced `Origin: null` in Chromium and conflicted with §3.3 and the no-JS requirement. Missing, null and foreign Origin values remain rejected.
 - Assets `/assets/app.css` and `/assets/app.js` are served by the web worker from bundled strings. No inline scripts or styles, no external origins.
 - The Markdown export is served as `text/markdown; charset=utf-8` with `Content-Disposition: attachment` so it is never rendered as HTML.
 

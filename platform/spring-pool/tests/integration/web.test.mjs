@@ -217,6 +217,7 @@ test("T-CSRF-1: state-changing web POSTs must pass Origin and double-submit chec
 
   const rejected = [
     await attempt({ origin: null }),
+    await attempt({ origin: "null" }),
     await attempt({ origin: "https://evil.example" }),
     await attempt({ withCsrf: false }),
     await attempt({ cookie: null }),

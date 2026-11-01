@@ -23,7 +23,7 @@ const security = {
   "Content-Security-Policy":
     "default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; form-action 'self'; frame-ancestors 'none'; base-uri 'none'",
   "X-Content-Type-Options": "nosniff",
-  "Referrer-Policy": "no-referrer",
+  "Referrer-Policy": "same-origin",
   "Cache-Control": "no-store",
 };
 function page(

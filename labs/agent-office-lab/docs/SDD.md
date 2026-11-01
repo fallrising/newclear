@@ -138,6 +138,8 @@ MVP 完成要求 AC-01–AC-09、AC-11、AC-13 通過；Strata 實驗另以 AC-1
 
 T-0014 的 [Pi 401／429 故障驗收](FAILURES.md) 使用真實原生工位與本機注入 HTTP 錯誤，已驗證失敗、不自動重試、清理與結果分類。這是 AC-07 子集，不代表 DeepSeek 真實服務故障、其他 provider 或完整顯式重試流程通過。
 
+T-0015 的 [Pi CLI crash 驗收](CRASH.md) 已確認 working → exited、不自動重跑、清理與明確新 session 啟動；不以 PTY exit code 0 當任務成功。這是 AC-07／08／09／11 子集，原 session 恢復、其他 provider 與完整顯式重試仍待驗。
+
 ## 9. 實作順序與退出條件
 
 1. **P0：基底驗證。** 固定上游 checkout、保留授權，啟動 lite/office；記錄 package lock 與 CLI 版本。核對四種 provider，特別是 Grok 版別與 Pi + DeepSeek。若現有 adapter 失效，先小範圍修 adapter；只有 host 無法支援生命週期才另寫輕量 host。

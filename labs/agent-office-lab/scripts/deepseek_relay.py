@@ -55,12 +55,17 @@ class Budget:
 
 
 class Relay:
-    def __init__(self, token, api_key=None, *, fault_status=None):
+    def __init__(self, token, api_key=None, *, fault_status=None, hold_request=False):
+        if type(hold_request) is not bool or (hold_request and (api_key is not None or fault_status is not None)):
+            raise ValueError('held_request_requires_no_key_or_http_fault')
         if fault_status is not None and (type(fault_status) is not int or fault_status not in (401, 429) or api_key is not None):
             raise ValueError('fault_injection_requires_401_or_429_and_no_api_key')
         self.token = token
         self.api_key = api_key  # None is the startup-only gate; it cannot forward any request.
         self.fault_status = fault_status
+        self.hold_request = hold_request
+        self.request_held = threading.Event()
+        self.release_request = threading.Event()
         self.client_requests = 0
         self.external_requests = 0
         self.budget = Budget()
@@ -86,7 +91,7 @@ class Relay:
                 if not hmac.compare_digest(self.headers.get('Authorization', ''), 'Bearer ' + relay.token):
                     self.error(401, 'unauthorized'); return
                 relay.client_requests += 1
-                if relay.api_key is None and relay.fault_status is None:
+                if relay.api_key is None and relay.fault_status is None and not relay.hold_request:
                     self.error(403, 'startup_only_no_remote_requests'); return
                 try:
                     if self.headers.get('Transfer-Encoding'):
@@ -104,6 +109,13 @@ class Relay:
                 record = {'request': relay.budget.requests, 'model': MODEL, 'max_output_tokens': MAX_OUTPUT,
                           'status': 'failed', 'input_bytes': length}
                 relay.records.append(record)
+                if relay.hold_request:
+                    record.update(origin='held_loopback', status='held')
+                    relay.request_held.set()
+                    relay.release_request.wait(timeout=60)
+                    record['status'] = 'interrupted'
+                    relay.budget.finish(failed=True)
+                    return
                 if relay.fault_status is not None:
                     record.update(http_status=relay.fault_status, origin='injected_loopback')
                     try:
@@ -161,6 +173,7 @@ class Relay:
         return self.server.server_address[1]
 
     def close(self):
+        self.release_request.set()
         self.server.shutdown()
         self.server.server_close()
         self.thread.join(timeout=5)

@@ -53,8 +53,15 @@ try {
   for (const run of data.runs.filter(r => r.test_scenario && r.status === 'failed')) {
     await page.locator('#runs tr').filter({hasText:run.id}).getByRole('button').click();
     const detail = await page.locator('#detail').innerText();
-    assert(detail.includes(`本機注入 HTTP ${run.test_scenario.slice(-3)}`));
+    assert(detail.includes(run.test_scenario === 'injected_cli_crash' ? '本機注入 CLI crash' : `本機注入 HTTP ${run.test_scenario.slice(-3)}`));
     assert(detail.includes(run.failure_check_passed ? '故障測試通過；任務仍為失敗。' : '故障測試未通過。'));
+  }
+  await page.selectOption('#status', 'startup_only');
+  const startup = data.runs.filter(r => r.provider === 'pi' && r.status === 'startup_only');
+  assert.equal(await page.locator('#runs tr').count(), startup.length);
+  if (startup.length) {
+    await page.locator('#runs button').first().click();
+    assert((await page.locator('#detail').innerText()).includes('僅啟動檢查'));
   }
   await page.reload();
   assert.equal(await page.locator('#runs tr').count(), data.runs.length);

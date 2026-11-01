@@ -174,3 +174,12 @@ Owner 指示繼續開發並盤點剩餘任務；本輪以本機錯誤回應驅�
 | T-0014-02 | 無憑證／外部請求的故障注入邊界與結果顯示 | AC-09／AC-11 子集 | done | 2026-11-01T14:54:05Z | 2026-11-01T15:12:30Z | 2026-11-01T15:12:57Z |
 
 T-0014 結案：[PR #935](https://github.com/fallrising/newclear/pull/935) 已合併，commit `8c2459de277b3793832a4c9cf4af055952085502`，offline／validate 兩項 CI success。已回讀主線證據：135 tests、四筆 Pi 本機注入故障紀錄，最終 401／429 各一次本機請求、零外部模型請求、原生錯誤／無產物、所屬程序全退出後釋放執行鎖；原兩筆清理證據不足紀錄保留。結果頁的四筆任務均為失敗，僅最終兩筆故障驗收通過；40 筆結果瀏覽器核對通過。沒有載入 owner API key、啟動 Strata 或付費推論。完成 AC-07／09／11 子集；CLI crash、其他 provider、顯式重試與完整 MVP 仍 pending，沒有 release／deploy／usable tag。
+
+## T-0015：Pi CLI crash 與明確重新啟動
+
+Owner 指示繼續；本輪不呼叫遠端模型、不載入 owner API key。
+
+| ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| T-0015-01 | 真實執行中 Pi CLI crash、退出分類及程序清理 | AC-07 子集 | in_progress | 2026-11-01T15:24:51Z | — | 2026-11-01T15:30:28Z |
+| T-0015-02 | 不自動重跑、明確新 session 啟動及結果回讀 | AC-08／09／11 子集 | in_progress | 2026-11-01T15:24:51Z | — | 2026-11-01T15:30:28Z |

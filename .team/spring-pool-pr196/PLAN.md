@@ -36,3 +36,7 @@ CI41278663845: nativequality/realintegrationpassed; eight browserlaunches failed
 CI41279099301:38Nodepass/1configfail from missingtomllib on Python3.10; add explicitPython3.12 with repo-pinned setupaction, preserveassertion. Directsandboxpreflight added; bodyfixtures/duplicateheading corrected before finalbrowsergate. No runtime dependency change.
 
 Resume2026-11-01T10:59:22Z: owner approved the exact same-origin proposal. Root implements the header/SDD correction with RED/GREEN, strictnull/missing/foreignOrigin regression and unchanged native no-JS journeys. No new worker necessary for this bounded correction; existing independent review findings retained. CI/browser/PNG then normalPRmerge/readback and ledgerclosure remain. No staging/release authority renewed.
+
+Final CSS inspection found author button display overrides the UA hidden rule, violating SDD§9 Copy-without-JS behavior. Root will restore hidden display precedence and add a no-JS browser visibility assertion; browser RED is impractical on the current sandbox-incompatible local host, so CI validates the regression. Original browser assertions stay intact.
+
+Gate2026-11-01T11:10Z: CI41300325025 source85542bbe passed46Rust/40Node/21integration/persistence/6browser;2original project skips. Root opened9PNGs and9healthJSONs,0blocking findings, retained touch advisories. Accept bounded worker/reviewer scope using observed root evidence, preserving PARTIAL historical reports. Final hidden-Copy regression plus docs require final-head CI; AC05 remains pending.

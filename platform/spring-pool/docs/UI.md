@@ -1,6 +1,6 @@
 # Interface brief
 
-Status: design input; rendered verification pending.
+Status: rendered verification passed on CI41300325025/source85542bbe; final head CI remains the merge gate.
 
 The owner’s main task is to find a saved script, inspect its exact revision, and assemble a runbook whose steps keep those revisions. The interface is an operator notebook: a readable index beside precise code and ordered instructions. No execution button or live terminal is present.
 
@@ -26,4 +26,4 @@ Runtime dependencies remain Hono only. No remote fonts, imagery, analytics or co
 
 ## Rendered evidence required
 
-Use the requested codex-ui-design and codex-ui-evidence workflows. Capture desktop/mobile list, detail and step editor after real local integration. Inspect PNGs for hierarchy/clipping/contrast and review browser-health JSON for overflow, exceptions and failed requests. Run the no-JS happy path, literal XSS display and two-tab conflict E2E journeys. These artifacts remain pending until the interface exists; static checks are not visual acceptance.
+Use the requested codex-ui-design and codex-ui-evidence workflows. Capture desktop/mobile list, detail and step editor after real local integration. Inspect PNGs for hierarchy/clipping/contrast and review browser-health JSON for overflow, exceptions and failed requests. Run the no-JS happy path, literal XSS display and two-tab conflict E2E journeys. All nine light-mode PNGs were inspected on CI41300325025: navigation, code and editor controls fit; long synthetic titles wrap without page overflow. Health JSON has zero blocking findings. Small inline links and native selects have advisory touch-size findings; buttons remain generous. Dark-mode contrast and protected staging are not claimed by these light-mode captures.

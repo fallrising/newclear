@@ -92,6 +92,7 @@ test.describe("T-E2E-1 no-JS paste + file -> reordered runbook export", () => {
     await saveScript(page);
     const idA = page.url().match(/\/scripts\/(\d+)/)?.[1];
     expect(idA, "script A detail URL should carry its id").toBeTruthy();
+    await expect(page.locator("[data-copy]")).toBeHidden();
 
     await gotoChecked(page, "/scripts/new");
     await page.getByLabel("Title").fill(titleB);

@@ -129,3 +129,32 @@ No deploy or release authority is inferred from this approval.
 SSH fetch stalled on resume; a bounded SSH attempt timed out. HTTPS to the same
 repository succeeded without credential/config changes. The exact owned initial
 SSH child was stopped; unrelated Git work was preserved.
+
+## Browser and responsive acceptance
+
+[CI41300325025](https://github.com/fallrising/newclear/actions/runs/41300325025),
+source85542bbe1c46504e4a4e433919632e4949f70ac2, passed all four required workflows.
+Component commands: Rust fmt/test/clippy, npm lint/format/test/build and
+`npm run test:local`. Observed46Rust,40Node,21realAPI/web,1seed,1restart-verification,
+6browser passed. Two original selection skips are mobile conflict/desktop mobile-only
+cases; both intended scenarios execute on the other project. Sandbox preflight passed.
+
+All9 list/detail/step-editor PNGs at1440x900,768x1024,390x844 were opened and
+inspected. Hierarchy, labels, text/code wrapping, archive grouping and editor actions
+remain readable; no clipping or page horizontal overflow. All9healthJSONs have0blocking
+findings (no exceptions/console errors/failed requests/HTTP errors/outside-viewport).
+Inline links and native selects carry touch-size advisories; these are recorded, not
+relabelled as clean. Light-mode captures do not establish dark-mode or staging acceptance.
+Artifacts: `spring-pool-evidence-41300325025-1`, retained14days by CI; private backup
+preserves the downloaded evidence. Earlier failing runs remain historical failures.
+
+Final inspection found CSS `button{display:inline-block}` overrides the browser's
+hidden styling. Add `[hidden]{display:none!important}` plus a native no-JS journey
+assertion that Copy is hidden, as SDD§9 already requires. Browser RED is impractical
+on the local sandbox-incompatible host; this regression must pass final-head CI.
+Local typecheck/format/diff checks pass. No original assertion is removed.
+
+Evidence gate: accept the bounded writer/reviewer scope with the root's observed
+CRLF/doctype/security/runtime/browser evidence. Their historical PARTIAL reports and
+skips stay intact. Final-head CI and normal merge/readback are still mandatory;
+AC05 protected staging/owner acceptance remains pending, no full-product completion.

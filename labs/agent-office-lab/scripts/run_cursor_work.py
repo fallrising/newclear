@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Prepare, dry-run or explicitly authorize one native Office/Cursor fixture."""
 import argparse
+from execution_slot import guarded_main, mark_started, mark_clean
 import datetime
 import hashlib
 import json
@@ -21,7 +22,7 @@ from remote_cli import LAB, private_directory, write_new_private
 from run_grok_startup import process_table, collect_owned, alive_owned
 from grok_startup import sandbox_profile
 
-SOURCES = ['run_cursor_work.py', 'cursor_cli.py', 'cursor_task_hook.py', 'cursor_work_policy.mjs',
+SOURCES = ['execution_slot.py','run_cursor_work.py', 'cursor_cli.py', 'cursor_task_hook.py', 'cursor_work_policy.mjs',
            'office_cursor_work.mjs', 'cursor_hook_preflight.mjs', 'cursor-task/cursor-agent', 'remote_cli.py', 'run_grok_startup.py', 'grok_startup.py']
 
 
@@ -79,7 +80,7 @@ def prepare(out, socket_dir, remote, timeout_seconds=120):
 
 
 def main():
-    parser = argparse.ArgumentParser(description=__doc__)
+    parser = argparse.ArgumentParser(description=__doc__, allow_abbrev=False)
     group = parser.add_mutually_exclusive_group()
     group.add_argument('--check-startup', action='store_true', help='Authenticated CLI startup with HTTPS metadata access; no prompt')
     group.add_argument('--allow-remote', action='store_true', help='Explicitly authorize one quota-consuming fixture')
@@ -94,6 +95,7 @@ def main():
             'host_retries': 0, 'provider_request_cap': None, 'token_cap': None, 'money_cap': None,
             'command': f'python3 scripts/run_cursor_work.py --allow-remote --timeout-seconds {args.timeout_seconds}', 'remote_requests_sent': False}, indent=2)); return 0
     if not probe()['compatible']: raise ValueError('preflight_failed')
+    mark_started()
     out = private_directory(LAB / 'runs' / ('cursor-work-' + datetime.datetime.now(datetime.timezone.utc).strftime('%Y%m%dT%H%M%S%fZ')))
     socket_dir = Path(tempfile.mkdtemp(prefix='office-cursor-', dir='/private/tmp'))
     report = {'status': 'starting', 'provider': 'cursor', 'version': PIN['version'], 'model': MODEL,
@@ -156,10 +158,12 @@ def main():
         if not report['cleanup_errors']: shutil.rmtree(socket_dir)
         print(json.dumps({'status': report['status'], 'model_inference_verified': report['model_inference_verified'],
                           'cleanup_errors': report['cleanup_errors'], 'artifacts': str(out)}, indent=2))
+    if not report['cleanup_errors']:
+        mark_clean()
     return 0 if report['status'] == 'completed' else 1
 
 
 if __name__ == '__main__':
-    try: raise SystemExit(main())
+    try: raise SystemExit(guarded_main(main, bool(set(sys.argv[1:]) & {'--allow-remote', '--check-startup'})))
     except (OSError, ValueError, subprocess.SubprocessError):
         print('Cursor fixture preflight failed; no credential is printed', file=sys.stderr); raise SystemExit(1)

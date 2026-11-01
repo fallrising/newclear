@@ -5,6 +5,7 @@ Run from an environment that permits Metal, loopback and Codex sandbox creation.
 No cloud fallback. No permission escalation. Uses synthetic input only.
 """
 import argparse
+from execution_slot import guarded_main, mark_started, mark_clean
 import ctypes
 import datetime
 import json
@@ -66,7 +67,7 @@ def stop_owned(proc):
         raise RuntimeError('Owned descendants remain alive')
 
 def main():
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(allow_abbrev=False)
     parser.add_argument('--prepare-only', action='store_true')
     parser.add_argument('--task', choices=('file', 'queue-repair'), default='file')
     parser.add_argument('--harness', choices=('codex', 'opencode', 'office-opencode'), default='codex')
@@ -81,13 +82,14 @@ def main():
         parser.error('--check-lifecycle is a bounded file test; do not combine with --check-cancel or --keep-open')
     if args.check_restart and (args.task != 'file' or args.check_cancel or args.check_lifecycle or args.keep_open):
         parser.error('--check-restart is a separate bounded file acceptance')
+    mark_started()
     out = LAB / 'runs' / ('local-work-' + datetime.datetime.now(
         datetime.timezone.utc).strftime('%Y%m%dT%H%M%S%fZ'))
     workspace = out / 'workspace'
     workspace.mkdir(parents=True)
     (out / 'runner.py').write_text(Path(__file__).read_text())
     if args.harness != 'codex':
-        for name in ('local_opencode.py', 'office_opencode.mjs', 'local_office_policy.mjs', 'permission_probe.mjs', 'manual_recovery.mjs',
+        for name in ('execution_slot.py', 'local_opencode.py', 'office_opencode.mjs', 'local_office_policy.mjs', 'permission_probe.mjs', 'manual_recovery.mjs',
                      'office_runtime.mjs', 'office_host.mjs', 'office_restart.mjs'):
             (out / name).write_text((LAB / 'scripts' / name).read_text())
         (out / 'opencode-launcher.py').write_text((LAB / 'scripts/bin/opencode').read_text())
@@ -314,7 +316,9 @@ def main():
         report['elapsed_s'] = time.monotonic() - started
         (out / 'result.json').write_text(json.dumps(report, indent=2) + '\n')
         print(json.dumps(dict(report, artifacts=str(out)), indent=2), flush=True)
+    if not report['cleanup_errors'] and (args.harness != 'office-opencode' or report.get('office_result', {}).get('cleanup_completed') is True):
+        mark_clean()
     return 0 if report['status'] in ('completed', 'stopped') else 1
 
 if __name__ == '__main__':
-    sys.exit(main())
+    sys.exit(guarded_main(main, '--prepare-only' not in sys.argv and not set(sys.argv[1:]) & {'--help', '-h'}))

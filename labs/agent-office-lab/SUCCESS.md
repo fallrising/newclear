@@ -6,7 +6,7 @@ kind: lab
 mainline: incomplete
 usable_tag: none
 reviewed: 2026-11-01
-source_commit: 22e5b66730b31963cb93b48428436ccd0fd8c981
+source_commit: 211da65fffe195dc795656e31a785eceb885d9f4
 ---
 
 # Agent Office Lab 驗收
@@ -14,6 +14,10 @@ source_commit: 22e5b66730b31963cb93b48428436ccd0fd8c981
 四個 provider 的合成任務已實測通過：OpenCode、Grok、Pi + DeepSeek、Cursor。各次獨立付費授權已使用，沒有自動重跑；歷史失敗及修正見 [HANDOFF](HANDOFF.md) 和 [任務板](docs/tasks/BOARD.md)。完整 MVP 保持 incomplete。
 
 ## 主線與範圍
+
+T-0012：統一四 provider 的 detect／plan／run CLI，預設不執行任務；遠端執行須同時明示 execute 與 allow-remote。共用持續到清理完成的執行鎖，直接 runner 也納入；異常退出留下未確認紀錄，禁止自動重跑。只支援既有合成任務與預設限額，沒有任意 shell、prompt、模型 fallback 或自動排程。
+
+驗證計畫：四 CLI 在 OS 拒絕網路下檢查真實版本／help；離線測試授權 gate、固定 argv、互斥、exec 繼承、異常中斷與清理紀錄。驗證不發新模型請求、不啟動 Strata，完整派工到模型結果與跨 provider 生命週期保留待驗。
 
 依 [SDD](docs/SDD.md) 完成單專案、單執行佇列、四 provider 的本機 Office。原 AC 條件不縮減；AC-10 是獨立研究，AC-12 是公開匯入，AC-13 是 owner 要求的 Cursor 擴充。
 
@@ -27,7 +31,7 @@ T-0011：整合四 provider 的唯讀結果入口，列出來源、模型、任�
 
 | AC ID | Given／When／Then | 狀態 | 證據或缺口 |
 | --- | --- | --- | --- |
-| AC-01 | Given 四種 CLI，When detect，Then 正確識別版本／能力，缺失或不相容不啟動。 | pending | [Grok／Pi 固定套件與實際 version/help 已通過](docs/evidence/remote-preflight-2026-11-01.json)；四 provider 統一 launch gate 與完整偵測整合仍待完成。 |
+| AC-01 | Given 四種 CLI，When detect，Then 正確識別版本／能力，缺失或不相容不啟動。 | pending | [Grok／Pi 固定套件與實際 version/help 已通過](docs/evidence/remote-preflight-2026-11-01.json)；[統一 CLI 偵測與 launch gate](docs/DISPATCH.md) 及四 CLI 真實斷網預檢通過；新入口的模型任務尚待驗收。 |
 | AC-02 | Given fixture workspace，When OpenCode 執行指定任務，Then 原生事件、session 與檔案 hash 證明成功。 | passed | [本輪實測](docs/evidence/lifecycle.md) 再驗證原生檔案任務；[原歷史摘要](docs/evidence/2026-10-31.json) 保留。 |
 | AC-03 | Given 確認版 Grok，When 執行同等任務，Then CLI 身分、session 與產物可核對。 | passed | [Grok 原生真實任務](docs/evidence/grok-completed-2026-11-01.json)：同 session／模型、兩讀一改、end_turn、產物 hash 與清理通過。 |
 | AC-04 | Given Pi + DeepSeek，When 執行同等任務，Then provider/model、settled 事件及檔案正確。 | passed | [Pi 原生工位實測](docs/evidence/pi-live-2026-11-01.json)：3 次 DeepSeek 請求、agent_settled、同 session/model、read/write、產物 hash 及清理通過。 |
@@ -43,9 +47,11 @@ T-0011：整合四 provider 的唯讀結果入口，列出來源、模型、任�
 
 本輪結果：T-0011：新增[統一結果入口](docs/RESULTS.md)，以白名單回讀四 provider 原生紀錄、重新核對合成產物內容與 SHA-256，提供離線篩選與詳細頁。96 項離線測試通過，既有 33 筆 run 回讀保留成功／失敗／啟動檢查／未完成區別，四 provider 各有成功產物通過重驗；Chrome 篩選、詳細內容、刷新通過，零外部請求。沒有新增模型呼叫或重啟 Strata。[本輪證據](docs/evidence/results-console-2026-11-01.json)。完整 AC-09／AC-11 保持 pending；下一步仍是統一偵測／派工與跨 provider 生命週期。交付狀態見[任務板](docs/tasks/BOARD.md)。
 
+T-0012：新增[統一偵測與派工入口](docs/DISPATCH.md)。四個固定 CLI 的實際斷網版本／help 檢查通過；run 預設只顯示計畫，遠端執行須明示 execute 與 allow-remote。四個直接 runner 共用執行鎖，跨 exec 保留，清理未確認或強制中斷會阻擋下一次派工；不自動重試。117 項離線測試通過。本輪沒有新模型呼叫或啟動 Strata，完整派工到產物與跨 provider 生命週期尚未重驗。[證據](docs/evidence/dispatch-2026-11-01.json)，交付狀態見[任務板](docs/tasks/BOARD.md)。
+
 ## 現況與缺口
 
-四種原生 runner 各有真實成功證據；目前仍分別啟動。AC-01 的統一偵測／派工、AC-05–AC-08 的跨 provider 權限／取消／錯誤／恢復、AC-09 完整四工位流程仍待驗。OpenCode 的生命週期與 host 重啟子集已通過，不能代替其他 provider。
+四種原生 runner 各有原受測版本的真實成功證據；本輪提供統一 CLI，預設 plan，模型任務尚未從新入口重驗。AC-01 的統一偵測／派工、AC-05–AC-08 的跨 provider 權限／取消／錯誤／恢復、AC-09 完整四工位流程仍待驗。OpenCode 的生命週期與 host 重啟子集已通過，不能代替其他 provider。
 
 OpenCode sandbox 仍允許區外讀取；Office／Strata 整棵程序樹尚未做 egress audit。維持 `strict_network_isolation_verified=false`，僅使用合成資料。614 個上游測試不能代替四 provider 整合。
 

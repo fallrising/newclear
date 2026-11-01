@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Prepare or run one native Office/Pi synthetic task with a bounded DeepSeek relay."""
 import argparse
+from execution_slot import guarded_main, mark_started, mark_clean
 import datetime
 import hashlib
 import json
@@ -45,7 +46,7 @@ def prepare(out, port, token):
 
 
 def main():
-    parser = argparse.ArgumentParser(description=__doc__)
+    parser = argparse.ArgumentParser(description=__doc__, allow_abbrev=False)
     group = parser.add_mutually_exclusive_group()
     group.add_argument('--check-startup', action='store_true', help='Real Office/Pi boot, no remote request permitted')
     group.add_argument('--allow-remote', action='store_true', help='Authorize one bounded paid DeepSeek fixture run')
@@ -67,6 +68,7 @@ def main():
         if saved.get('type') != 'api_key' or not isinstance(saved.get('key'), str) or not saved['key']:
             raise ValueError('DeepSeek key missing')
         api_key = saved['key']
+    mark_started()
     out = private_directory(LAB / 'runs' / ('pi-work-' + datetime.datetime.now(datetime.timezone.utc).strftime('%Y%m%dT%H%M%S%fZ')))
     token = secrets.token_urlsafe(32)
     relay = Relay(token, api_key)
@@ -81,7 +83,7 @@ def main():
     try:
         port = relay.start()
         env = prepare(out, port, token)
-        for name in ('run_pi_work.py', 'deepseek_relay.py', 'office_pi.mjs', 'pi_boundary.mjs', 'pi_office_policy.mjs', 'remote_cli.py'):
+        for name in ('execution_slot.py', 'run_pi_work.py', 'deepseek_relay.py', 'office_pi.mjs', 'pi_boundary.mjs', 'pi_office_policy.mjs', 'remote_cli.py'):
             shutil.copy2(LAB / 'scripts' / name, out / name)
         shutil.copy2(LAB / 'scripts/bin/pi', out / 'pi-launcher.py')
         command = [shutil.which('node'), str(LAB / 'scripts/office_pi.mjs'), str(out)]
@@ -118,11 +120,13 @@ def main():
         (out / 'result.json').write_text(json.dumps(report, indent=2) + '\n')
         print(json.dumps({'status': report['status'], 'model_inference_verified': report['model_inference_verified'],
               'requests': len(relay.records), 'cleanup_errors': report['cleanup_errors'], 'artifacts': str(out)}, indent=2))
+    if not report['cleanup_errors']:
+        mark_clean()
     return 0 if report['status'] == 'completed' else 1
 
 
 if __name__ == '__main__':
-    try: raise SystemExit(main())
+    try: raise SystemExit(guarded_main(main, bool(set(sys.argv[1:]) & {'--allow-remote', '--check-startup'})))
     except (OSError, ValueError):
         print('Pi fixture could not start; check preflight and isolated credentials. No secret is printed.', file=sys.stderr)
         raise SystemExit(1)

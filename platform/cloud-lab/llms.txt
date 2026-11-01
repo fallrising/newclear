@@ -133,3 +133,5 @@ M1 provides a local-tested Worker, SQL outbox, fixed-minute scheduler, Python OS
 
 - [Cloud Lab direction review](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/direction-review.md): owner-requested Claude Opus5.5 recommends REPLAN; lead corrects stale status, separates historical health-loop evidence from daily access, and prioritizes existing CF catalog/overlap then a second useful capability. No runtime/authority changes or full-mainline completion.
 - [Milestone history](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/milestone-history.md): preserved prior SUCCESS timeline; time-relative statements are historical, current status lives in SUCCESS and direction review.
+
+- [CF tool catalog](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/tool-catalog.md): 64 connection-visible repositories pinned; public/private evidence separated, Edge Ops mock versus real node-health compared; keep existing ownership and select an inventory-report adapter next. No migration, retirement or live/authority change.

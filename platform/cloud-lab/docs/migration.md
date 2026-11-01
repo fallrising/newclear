@@ -1,5 +1,7 @@
 # 來源歸位、遷移與封存
 
+當前處置以[2026-11-01 CF工具盤點](tool-catalog.md)為準：本輪0個move-candidate、0個新封存；Edge Ops改為reference、Kith與私人筆記keep-in-place、私人inventory只接報告adapter。下表保留M0候選設計，**不是本輪啟動清單**；實際遷移仍須逐項通過gate。
+
 本文件是計畫，不是搬遷命令。M0 沒有搬程式／資料、切入口、停止服務或封存元件。來源版本見[來源表](sources.md)，目前能力與證據見[知識樹](knowledge-tree.md)。
 
 ## 處置詞彙

@@ -5,7 +5,7 @@ kind: application
 mainline: incomplete
 usable_tag: none
 reviewed: 2026-11-01
-source_commit: 882ccb000fdae8654bec636b70816d12699fc49c
+source_commit: 053e2bcd63cedb36e463c9b8f640fd2831101f23
 ---
 
 # Cloud Lab 成功契約
@@ -35,9 +35,19 @@ M0知識樹與介面已完成；M1固定node-health profile已實作／部署並
 
 - 已有一個Worker/D1控制面、一個non-root runner、一種固定健康recipe、15分鐘schedule、看板、獨立bot工具；沒有任意shell或通用recipe registry。
 - human／bot短窗口已過期；最後保存的resident政策截止2026-11-05T07:24:25Z。本次方向審查未查live或續權。
-- 既有CF專案仍在原路徑；沒有真正的工具目錄產品、來源搬遷、重複退役或agent平台adapter。
+- [CF工具目錄](docs/tool-catalog.md)已核對64個連線可見repo並比較Edge Ops；這是文件導航，尚無runtime工具目錄、來源搬遷、重複退役或agent平台adapter。
 - 保留Access/HMAC/scoped grants、unknown不重播、單一writer、journal與既有測試。暫停新增授權層、provider API接線、Event/seq、active failover與模板平台。
 - 先交付日常使用方案、CF來源處置目錄、第二種有用的唯讀能力；各自範圍與停止條件以[近期計畫](docs/direction-review.md)為準。
+
+## 本輪盤點範圍（CAT）
+
+| AC | Given / When / Then | 狀態 | 證據／邊界 |
+| --- | --- | --- | --- |
+| CAT-01 | Given GitHub連線可見來源，When完整分頁及固定來源盤點，Then範圍、用途、API／Cron、證據、owner與缺口可追溯 | passed | [目錄與公開快照](docs/tool-catalog.md)；64repo／41public／23private，非全帳號或當前部署普查 |
+| CAT-02 | Given Edge Ops與node-health，When比較實際行為，Then有具體保留／reference建議並保留不可替代責任 | passed | 目錄逐項比較；不抽共用collector、不退役Edge Ops；caller全量調查未做 |
+| CAT-03 | Given原整合目標，When選第二種能力，Then有界接入沿用既有來源且不新增付費或第二controller | passed | 建議接既有GET-only資源盤點報告；JSON介面／看板接入與live驗收未執行 |
+
+本輪只驗收文件盤點與建議，不提升原主線資格；審查與實際檢查見[T-866報告](../../.team/reports/T-866.md)。
 
 ## 啟動與驗證
 

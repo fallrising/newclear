@@ -1,3 +1,48 @@
+# T-0442 Fanzloud M2 — 2026-11-01
+
+Owner explicitly requests M2; desk claim PR349 merged/read back 42e474182de3d64b0be8023d7f6ae26d02904ada.
+Base newclear d3207b3a97a5b223da501af1418e64e94745bf10. Preserve old dirty M1 worker tree.
+
+Objective: same Web selects real Claude and Codex, fixed-base repairs/results; two simultaneous
+isolated tasks, denial/cancel independence and cleanup. No M3, Cloud catalog, paid API,
+release, public deployment, additional lifecycle authority or resource expansion.
+
+Started 2026-11-01T04:15Z (approx); estimate 120–180 min active plus CI. Report every20min.
+Provider requests/tokens/cost unknown. Outer tool calls, nested tools, agents and waits
+are separate; historical aggregate not automatically measured, unknown where unavailable.
+One read-only route worker (20min), then at most one implementation worker and one
+fresh-context independent reviewer (20min each); no recursive delegation. Same problem
+initial+at most2 justified fixes; route live qualification once+at most1 justified correction.
+Coding max600s; currently one4CPU/4GiB VM only. Do independent code/single-route work first.
+Concurrent2 validation requires concrete owner resource approval. No time-implied approval.
+CI wait bounded30min per unchanged source; preserve pending status if exceeded.
+
+Order/gates:
+1. Normative M2 spec and route/source prerequisites; read-only official Codex capability audit.
+2. Focused RED/GREEN tests, minimal subscription adapter/catalog and multi-task Web changes.
+3. Single route actual Chromium/Rust/AP/VM/Codex bounded repair, no accepted M1 repeat.
+4. Approved concurrent resource experiment only after explicit approval; retain missing AC otherwise.
+5. Native tests, independent acceptance, evidence gate, authorized PR/CI/merge/readback,
+   desk/journal/handoff with exact limitations. Never label partial FN02/FN03 full acceptance.
+
+Current status2026-11-01T05:00Z: claim merged; independent ACCEPT_CODE after three
+review fixes. Native backup31, Codex protocol8, Web17, Rust fmt/clippy/workspace tests/
+binaries and project contract50 passed. Full AP lint/format+45base+809platform passed; actual second-vendor and
+parallel FN02/FN03 NOT_RUN. No live VM/provider started. Three bounded workers used:
+route audit then same worker prep; routing then same worker backup correction; independent
+review then focused correction review. No recursive agents. Parent owns final live/evidence.
+Initial red/config/backup failures retained; no checks weakened. Private CLI startup and
+synthetic Responses adversarial receipts distinguish actual binary from fake provider.
+
+Single-route evidence gate2026-11-01: ACCEPT_SINGLE_LIVE, overall PARTIAL. Actual
+Codex run142e9aee sourcea51a8663; four VM tools, fixed-base285-byte diffc5134c80...fdb,
+checks and downloaded patch tests passed. Hosted four workflows allgreen. AP backup
+created/verified; runtime0claims/VMM/cgroups, services stopped, capacity remains1.
+One additional10min evidence-only independent audit reviewed genuinely new live receipts;
+no repeated code review/provider. Concurrent approval question remains pending, not granted.
+
+---
+
 # Repository team ledger
 
 > 補救註記（2026-09-28）：本文件引用的部分 `.team` 紀錄或 evidence 的 SHA-256 是主機資訊遮蔽前的值；新舊對照見 [../docs/remediation/2026-09-host-info.md](../docs/remediation/2026-09-host-info.md)。
@@ -2651,3 +2696,9 @@ Claude follow-up ACCEPT148.581s with schema-specific subject bound, already-enfo
 proved by tests, and observation/headroom text closed without a third call as explicitly allowed.
 Root closed worker cursor PARTIAL by regression Red→Green. All original failures/source manifests
 preserved; exact-head full CI/merge/readback/BOARD/desk are the remaining delivery gate.
+
+## XR cross-snapshot restoration qualification — 2026-11-01T05:22:43Z
+
+Owner continues after RAL. Lead solewriter for XR01–04/T0035, isolated six-case actualworkerd/D1 plusPythonrunner andSQLiteonlinebackup. No live/private/networkauthority/paidchange. Test-first snapshotfixture, qualification before runtimefix if needed, fullregression and sourcehash preservation. One fresh native readonly reviewer T860, inheritedmodel/effort/permissions, <=1500tokens plus onefocusedfollowup, five-minute monitored/nativeinterrupt, unknowncost/quota; no tests/writes/private/network/delegation. Instructionscope notOSisolation. No originalrunnerstop or remoteexport/import claim.
+
+XR source/local evidence gate ACCEPT 2026-11-01T05:33:30Z: RED4→GREEN4,130Node/308Python=438tests; XR2 sixactualworkerd/Pythonrunner cases,zero restoredcollection/sourceunchanged,9hashes; XM1/XM2 badguardsdetected without productmutation; T860 finalACCEPT. XR1 metadata-countfailure retained andexplicitplatformtablefilterfixed, no weakenedapplicationoracle. Productruntime/liveauthority unchanged. NormalGit CI/merge/readback andboardclosure remain; fullmainlineincomplete.

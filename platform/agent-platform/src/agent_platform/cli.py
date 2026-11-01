@@ -300,7 +300,17 @@ def main():
                 from .subscription_claude import ClaudeSubscription
 
                 subscription = ClaudeSubscription(os.environ["SUBSCRIPTION_CONFIG"])
-            runner = Worker(db, RuntimeClient.from_env(), subscription=subscription)
+            codex_subscription = None
+            if os.environ.get("CODEX_SUBSCRIPTION_CONFIG"):
+                from .subscription_codex import CodexSubscription
+
+                codex_subscription = CodexSubscription(os.environ["CODEX_SUBSCRIPTION_CONFIG"])
+            runner = Worker(
+                db,
+                RuntimeClient.from_env(),
+                subscription=subscription,
+                codex_subscription=codex_subscription,
+            )
             if args.once:
                 runner.run_once()
             else:

@@ -8,7 +8,15 @@ from uuid import uuid4
 from psycopg.types.json import Jsonb
 
 from .auth import audit
-from .domain import TERMINAL, Problem, capabilities, execution_mode
+from .domain import (
+    RUNTIME_BACKENDS,
+    SUBSCRIPTION_BACKENDS,
+    SUBSCRIPTION_MODELS,
+    TERMINAL,
+    Problem,
+    capabilities,
+    execution_mode,
+)
 from .task_query import decode_cursor, encode_cursor, literal_pattern, scope_key
 
 
@@ -127,7 +135,7 @@ class Store:
             raise Problem(409, "unsupported_capability:mock_tools")
         if data.require_approval and data.backend != "openhands":
             raise Problem(409, "unsupported_capability:approval")
-        if data.backend == "claude-subscription" and (
+        if data.backend in SUBSCRIPTION_BACKENDS and (
             data.deadline_seconds > 600 or data.verification.mode != "commands"
         ):
             raise Problem(422, "subscription_requires_bounded_verified_run")
@@ -147,7 +155,7 @@ class Store:
             revision = old["revision"] + 1
         template = "fixture:m1"
         egress_policy = None
-        if data.backend in {"openhands", "claude-subscription"}:
+        if data.backend in RUNTIME_BACKENDS:
             catalog = conn.execute(
                 "SELECT * FROM runtime_catalog WHERE node_id='cocoon-local'"
             ).fetchone()
@@ -169,15 +177,15 @@ class Store:
                 revision,
                 data.name,
                 data.backend,
-                "claude-subscription:claude-opus-5-5"
-                if data.backend == "claude-subscription"
+                SUBSCRIPTION_MODELS[data.backend]
+                if data.backend in SUBSCRIPTION_BACKENDS
                 else "openai-compatible:chat-completions"
                 if data.backend == "openhands"
                 else "fixture:m1",
                 template,
                 Jsonb(
                     {
-                        "exec": data.backend in {"openhands", "claude-subscription"},
+                        "exec": data.backend in RUNTIME_BACKENDS,
                         "network": data.backend == "openhands",
                         "egress_policy_sha256": egress_policy,
                         "require_approval": data.require_approval,
@@ -204,7 +212,7 @@ class Store:
             "profile_not_found",
         )
         egress_policy = profile["tool_policy"].get("egress_policy_sha256")
-        if profile["backend"] in {"openhands", "claude-subscription"}:
+        if profile["backend"] in RUNTIME_BACKENDS:
             catalog = conn.execute(
                 "SELECT * FROM runtime_catalog WHERE node_id='cocoon-local'"
             ).fetchone()

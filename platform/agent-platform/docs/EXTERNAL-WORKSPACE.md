@@ -54,3 +54,21 @@ runs. Recovery can observe/save a completed result or cancel an owned VM, but ca
 restart an uncertain CLI. Fanzloud submits to AP and observes its run ID. The connector
 configuration can narrow the existing4 slots to1; sealed sandboxd max_claims and
 registered AP capacity must match that narrower ceiling. No additional lease authority.
+
+
+## M2 second vendor (T-0442)
+
+`codex-subscription:gpt-6.1-sol` uses the same external-workspace contract and
+existing worker/lease/connector authority. Inject `CodexSubscription` through
+`CODEX_SUBSCRIPTION_CONFIG`; `SUBSCRIPTION_CONFIG` continues to select Claude only.
+No configured driver means no new claim for that route. Both routes refuse uncertain
+CLI recovery; cancellation and result collection remain AP operations.
+
+Codex0.166.0 uses official app-server dynamic tools with explicit empty execution
+environments on fresh thread and turn. Trusted temporary HOME/CODEX_HOME references
+existing personal ChatGPT authentication; no user config/plugins/MCP or repository
+execution is inherited. Fixed binary/catalog, startup settings, effective config,
+thread/model/tool binding and deadline are checked before accepting completion.
+[Normative M2 scope and limits](../../fanzloud/docs/specs/SPEC-M2-two-vendors.md).
+Single-VM host authorization remains unchanged; M2 live and parallel acceptance must
+be recorded separately from protocol fixtures and native database tests.

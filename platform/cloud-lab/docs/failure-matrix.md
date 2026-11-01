@@ -17,8 +17,8 @@
 | F11 事件重複／亂序／漏seq | control report重送、[dashboard](../tests/dashboard.test.mjs) session失效／舊inflight處理 | M1採輪詢快照，沒有seq事件consumer；原事件場景尚未實作／驗收。不能用report去重替代漏seq恢復，也不能靠本文件默默豁免原要求。 |
 | F12 runner/control恢復與schedule重送 | [health-schedule](../tests/health-schedule.test.mjs) concurrent due／revision CAS、same due／misfire／rollback；[quota](../tests/quota.test.mjs)不補跑舊due；[service](../tests/test_service_runner.py)真程序restart journal；FQ expiry七天後原due不改firings | local；ULR歷史remote保留舊journal／firing且新Cron成功。不是遠端整個控制面故障切換或長期uptime。 |
 | F13 瀏覽器離線／stale | dashboard freshness／unknown及[UI瀏覽器證據](evidence/m1-dashboard.md)真Chromium/workerd offline-stale；[UL](evidence/m1-usage-live.md)owner Safari登入／手動usage與D1相符 | local browser＋owner歷史功能讀取；不宣稱Safari重演全部故障。依owner指示不再要求Console hash／手機驗收。 |
-| F14 隔離備份還原 | [首次D1還原](evidence/m1-isolated-restore.md)真export/import、schema/rows/artifact一致、completed及未派送對帳 | 歷史remote限定子集；unknown／in-flight跨D1與journal還原、正式failover尚未驗。RF與ULR不是restore測試。 |
+| F14 隔離備份還原 | [首次D1還原](evidence/m1-isolated-restore.md)真export/import、schema/rows/artifact一致、completed及未派送對帳 | 歷史remote限定子集；[XR六案](evidence/m1-restore-qualification.md)已驗本機unknown／in-flight、缺journal與錯位快照，恢復後零採集；官方遠端unknown/in-flight export/import及正式failover仍未驗。RF與ULR不是restore測試。 |
 
 ## 接續順序
 
-成果完整性下載已補DI source／local browser驗證，RA補有界拒絕稽核的source/local驗證，接續設計unknown/in-flight的隔離還原演練；跨系統快照必須按identity對帳。事件seq／通知場景需先明確對齊M1輪詢設計與原契約，不能為填表加入未要求的事件平台。所有新live故障或資料處置另需具體可審閱方案；不再次打斷目前正常runner。
+成果完整性下載已補DI source／local browser驗證，RA補有界拒絕稽核的source/local驗證，XR已補六案本機跨快照還原及identity對帳；遠端unknown/in-flight恢復仍待具體方案。事件seq／通知場景需先明確對齊M1輪詢設計與原契約，不能為填表加入未要求的事件平台。所有新live故障或資料處置另需具體可審閱方案；不再次打斷目前正常runner。

@@ -357,6 +357,6 @@ Owner approved D1–D3 and the fixed contract on2026-11-01; [normative entry](..
 
 | ID | Task | AC | Status | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| HM2C | Define and review verified-coverage contract; then implement only after acceptance — approved, implementation active | COV-AC-01..06; H02 support | in_progress | 2026-11-01T04:25:19Z | — | 2026-11-01T05:26:26Z |
+| HM2C | Define and review verified-coverage contract; then implement only after acceptance — approved, implementation active | COV-AC-01..06; H02 support | in_progress | 2026-11-01T04:25:19Z | — | 2026-11-01T05:41:45Z |
 
 Full M2, completion UI and SUCCESS AC-02..04 remain incomplete. No new UI/provider/dependency/release/deploy.

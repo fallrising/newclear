@@ -35,3 +35,15 @@ M1–M3 固定見 SDD；M1 qualification 已開始，不再擴張舊 Cloud 或�
 
 Single Ready Fanzloud production task; [contract](../specs/SPEC-M1-isolated-web.md).
 No Cloud catalog investigation, UI redesign or new milestone.
+
+## T-0442 M2 — second vendor and isolated tasks
+
+| ID | 任務 | 對應AC | 狀態 | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| M2-1 | Official Codex route qualification and same Web integration | FN-02 | in_progress | 2026-11-01T04:27:00Z | — | 2026-11-01T04:27:00Z |
+| M2-2 | Concurrent workspace denial, cancellation independence and cleanup; resource approval pending | FN-03 | todo | — | — | 2026-11-01T04:27:00Z |
+
+
+M2 single-route checkpoint2026-11-01T05:10Z: actual Codex Web run142e9aee passed,
+fixed-base diff/check/download and cleanup confirmed; see [acceptance](../acceptance/M2-two-vendors.md).
+Concurrent FN03 remains pending explicit two-VM approval; no M3 work started.

@@ -37,3 +37,5 @@ FQ的七天案例使用合成有效授權覆蓋時間旅行，原artifact bytes�
 ## 拒絕稽核的獨立上限
 
 [RA拒絕稽核](rejection-audit.md)的rejection_audit與commands分開，最多10000列，不自動DELETE／覆寫。容量滿時保留原證據、回應full；DB失敗回unavailable。無限期保存不是完整安全日誌保證；Access邊緣拒絕、5xx、傳輸失敗及程序中斷未必有列。歸檔／清理仍需另訂保全與批准，不能重置表假裝所有拒絕已收集。
+
+[XR跨快照還原](evidence/m1-restore-qualification.md)補本機started／unknown／completed回報未達、缺journal、identity mismatch及較舊accepted D1六案；SQLite online backup包含已提交WAL。這不取代官方遠端還原或archive/tombstone gate，不新增清理或復活舊grant。

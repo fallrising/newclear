@@ -667,10 +667,10 @@ ULR01–04線上操作及保全已通過，T855獨立公開證據ACCEPT；實際
 
 | ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| T-0038-1 | 有界純對帳器 | RX-01 | done | 2026-11-01T14:31:46Z | 2026-11-01T14:44:33Z | 2026-11-01T15:04:10Z |
-| T-0038-2 | 官方遠端還原（owner已批准） | RX-02 | in_progress | 2026-11-01T14:31:46Z | — | 2026-11-01T15:04:10Z |
-| T-0038-3 | 遠端原結果及未知保留 | RX-03 | in_progress | 2026-11-01T14:31:46Z | — | 2026-11-01T15:04:10Z |
-| T-0038-4 | 驗證審查交付 | RX-04 | in_progress | 2026-11-01T14:31:46Z | — | 2026-11-01T15:04:10Z |
+| T-0038-1 | 有界純對帳器 | RX-01 | done | 2026-11-01T14:31:46Z | 2026-11-01T14:44:33Z | 2026-11-01T15:07:29Z |
+| T-0038-2 | 官方遠端還原（owner已批准） | RX-02 | done | 2026-11-01T14:31:46Z | 2026-11-01T15:06:46Z | 2026-11-01T15:07:29Z |
+| T-0038-3 | 遠端原結果及未知保留 | RX-03 | done | 2026-11-01T14:31:46Z | 2026-11-01T15:06:46Z | 2026-11-01T15:07:29Z |
+| T-0038-4 | 驗證審查交付 | RX-04 | done | 2026-11-01T14:31:46Z | 2026-11-01T15:06:46Z | 2026-11-01T15:07:29Z |
 
 PR925／927時RX為partial：純對帳器與來源唯讀核對已完成；自動審批拒絕完整敏感export下載，未執行遠端匯出／新D1／import。等待owner批准具體payload與私人保存位置，不宣稱RX02／03通過。
 
@@ -681,3 +681,11 @@ RX01 source交付PR[925](https://github.com/fallrising/newclear/pull/925)於2026
 RX02／03實際完成：官方export兩poll、16454bytes、單一新D1／signed PUT／ingest；source-before／SQL／restore／source-after完整schema及42列相同、remote quick_check／FK通過。3份online journal backup／原BLOB與source main hash相同，2completed原bytes／時間保留、1unknown仍active1／started，零runner。四Worker無新D1binding；額外Pages清單缺page.read回403，不擴權、不聲稱全域盤點通過。等本輪獨立review／Gitmerge後填RX02–04 end。
 
 T864獨立審查ACCEPT bounded remote data restore；主導privateaudit接受，69inputs不變支持歷史463tests；52contracts／9indexes／436links／9private-literals掃描通過。保留Pages403／fullmainline與failover未完成，正常Git交付中。
+
+### T-0038 遠端還原驗證交付
+
+- RX01已由PR925／927交付；RX02–04在owner明確批准完整payload／私人目的地後完成，PR[931](https://github.com/fallrising/newclear/pull/931)於2026-11-01T15:06:46Z合併：head `b916bc22dcde251ae534b9d6303c385ed5374bc7`，merge `75b31f332e50612ccdb2b1f34d251475970a7e9f`。
+- Exact-head CI全過：CloudLab `41319376995`、Project success `41319376982`、llms `41319376951`。T864獨立ACCEPT與lead privateaudit接受限定資料還原；52contracts／9indexes／436links、9private-literals無命中。正常merge保留並行main，fulltree回讀相同／clean／head為main祖先，69runtime/test/tool/recipe inputs與歷史463tests版本一致。
+- 官方export2polls、16454bytes、單一新D1／signed PUT／ingest14:55:43Z完成；四方schema（5應用表、3explicit／6implicit indexes，僅_cf_KV排除）與42列相同。3journal onlinebackup完整schema／raw BLOB rows及source main bytes一致；2completed原artifact bytes／digest／outcome／時間保留，1unknown仍reconciling／active1／journal started。6grant已到期，schedule關閉、testtoken停用、無Cron，零runnerinvocations。
+- D1清單5→6，未刪除舊DB，四Worker settings無新binding；本輪沒有Worker／Access／Cron／Pages設定寫入或原Lab變更。額外Pages全域GET403缺page.read，沒有重試／擴權，不宣稱其盤點通過。初次自動審批拒絕與後續owner明確批准保留。
+- 本輪RX限定資料還原完成；不是活躍程序failover、新fence補報或跨系統原子快照，沒有續權／付費升級。provider用量／帳單仍unknown，完整mainline incomplete／無usable tag。後續補provider用量觀測；本收尾PR只改任務板。

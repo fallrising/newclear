@@ -120,6 +120,21 @@ def normalize(run_fd, run_id):
     if type(elapsed) in (int, float) and 0 <= elapsed < 10**7 and math.isfinite(elapsed):
         row['elapsed_seconds'] = round(elapsed, 2)
     row['artifact'] = artifact(run_fd, office.get('artifact_sha256'))
+    if 'fault_injection' in report:
+        fault = report['fault_injection']
+        if (provider != 'pi' or not isinstance(fault, dict) or fault.get('source') != 'loopback'
+                or type(fault.get('http_status')) is not int or fault.get('http_status') not in (401, 429)):
+            return dict(row, status='invalid', reason='invalid_fault_test_metadata')
+        row['test_scenario'] = 'injected_http_' + str(fault['http_status'])
+        row['failure_check_passed'] = (report.get('failure_check_passed') is True
+                                      and report.get('status') == 'failed' and row['cleanup_verified']
+                                      and report.get('model_inference_verified') is False
+                                      and office.get('native_error_verified') is True
+                                      and report.get('client_requests') == 1 and report.get('external_requests') == 0
+                                      and report.get('remaining_owned_processes') == 0
+                                      and row['artifact']['status'] == 'unavailable')
+        return dict(row, status='failed' if report.get('status') == 'failed' else 'unverified',
+                    reason='injected_loopback_failure')
     native_fields = {
         'opencode': ('office_native_status_verified', 'file_task_passed', 'model_inference_verified'),
         'pi': ('agent_settled_verified', 'file_task_passed'),

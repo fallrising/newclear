@@ -30,6 +30,7 @@ td{overflow-wrap:anywhere}.table-wrap{overflow-x:auto}small{color:#b5c3d8}#detai
 const data = JSON.parse(document.getElementById('data').textContent);
 const labels = {completed:'完成且產物已核對',failed:'失敗',cancelled:'已取消',stopped:'已停止',startup_only:'僅啟動檢查',incomplete:'未完成紀錄',invalid:'無效紀錄',unverified:'證據不足'};
 const artifactLabels = {verified:'已核對',unavailable:'無產物',unverified:'未通過核對'};
+const scenarioLabels = {injected_http_401:'本機注入 HTTP 401（未呼叫遠端模型）',injected_http_429:'本機注入 HTTP 429（未呼叫遠端模型）'};
 const el = (tag,text) => {const node=document.createElement(tag);node.textContent=text;return node;};
 document.getElementById('generated').textContent = `快照時間：${data.generated_at}`;
 for (const provider of data.providers) {
@@ -47,6 +48,7 @@ function show(run) {
     fields.append(el('dt',label),el('dd',value));
   }
   detail.append(fields);
+  if (run.test_scenario) detail.append(el('p',scenarioLabels[run.test_scenario]),el('p',run.failure_check_passed?'故障測試通過；任務仍為失敗。':'故障測試未通過。'));
   if (run.artifact.content) detail.append(el('h3','result.json'),el('pre',JSON.stringify(run.artifact.content,null,2)));
   else detail.append(el('p','沒有可顯示的已核對產物。'));
   const close=el('button','關閉詳細結果');close.onclick=()=>{detail.hidden=true;document.getElementById('provider').focus();};detail.append(close);
@@ -61,7 +63,8 @@ function render() {
     const tr=el('tr',''),agent=el('td',run.provider);agent.append(el('br',''),el('small',run.model||'模型未記錄'));
     const state=el('td',labels[run.status]);if(run.status==='completed')state.className='complete';
     const action=el('td',''),button=el('button',`${artifactLabels[run.artifact.status]} · 詳細`);button.onclick=()=>show(run);action.append(button);
-    tr.append(agent,el('td',run.id),state,action);body.append(tr);
+    const source=el('td',run.id);if(run.test_scenario)source.append(el('br',''),el('small',scenarioLabels[run.test_scenario]));
+    tr.append(agent,source,state,action);body.append(tr);
   }
 }
 document.getElementById('provider').onchange=render;document.getElementById('status').onchange=render;render();

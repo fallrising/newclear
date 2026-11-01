@@ -6,7 +6,7 @@ kind: lab
 mainline: incomplete
 usable_tag: none
 reviewed: 2026-11-01
-source_commit: caad3c3a811456da767872aa6fc02d859955011c
+source_commit: b2bcbd4a7e8391c21875fe099857f8d1f369d276
 ---
 
 # Agent Office Lab 驗收
@@ -14,6 +14,10 @@ source_commit: caad3c3a811456da767872aa6fc02d859955011c
 四個 provider 的合成任務已實測通過：OpenCode、Grok、Pi + DeepSeek、Cursor。各次獨立付費授權已使用，沒有自動重跑；歷史失敗及修正見 [HANDOFF](HANDOFF.md) 和 [任務板](docs/tasks/BOARD.md)。完整 MVP 保持 incomplete。
 
 ## 主線與範圍
+
+T-0014：以真實原生 Office／Pi 工位驗證本機注入的 401／429，區分故障驗收通過與任務成功；停止自動重試、保留失敗、核對同 session 錯誤事件及清理。測試端點不得持有 owner API key 或建立外部 HTTPS 連線，worker 保持 OS 外網拒絕；不把錯誤測試算成 DeepSeek 推論成功。
+
+驗證計畫：離線測試注入／授權／budget 邊界與錯誤狀態；兩個真實 Pi CLI 故障 run，核對一次本機請求、零外部請求、原生失敗而非成功、無產物、所屬程序與執行鎖清理，再回讀結果入口。完整 AC-07 與跨 provider MVP 保持 pending。
 
 T-0013：以新派工入口實測本地 OpenCode／Strata 合成任務，加入明確的本地原生取消驗收選項；核對互斥、同 session 原生取消、產物與結果查詢、清理及執行鎖釋放。再驗證 runner 收到中斷時的保守結果與清理；保留失敗，不自動重試。沿用既有 Q2_0／32K／資源 guard，不新增遠端付費呼叫。
 
@@ -41,7 +45,7 @@ T-0011：整合四 provider 的唯讀結果入口，列出來源、模型、任�
 | AC-04 | Given Pi + DeepSeek，When 執行同等任務，Then provider/model、settled 事件及檔案正確。 | passed | [Pi 原生工位實測](docs/evidence/pi-live-2026-11-01.json)：3 次 DeepSeek 請求、agent_settled、同 session/model、read/write、產物 hash 及清理通過。 |
 | AC-05 | Given 原生權限或使用者問題，When 等待與回覆，Then waiting_input 後繼續。 | pending | [OpenCode edit 權限子集通過](docs/evidence/lifecycle.md)；Grok／Pi／Cursor 與其他互動待驗。 |
 | AC-06 | Given 執行中任務，When 取消，Then 10 秒 grace 後所屬程序全部退出。 | pending | [OpenCode 新入口原生取消與 Ctrl+C](docs/evidence/local-dispatch-2026-11-01.json) 通過；Grok／Pi／Cursor 待驗。 |
-| AC-07 | Given crash／401／429，When 失敗，Then 不顯示成功且最多兩次顯式重試。 | pending | 尚缺故障驗收。 |
+| AC-07 | Given crash／401／429，When 失敗，Then 不顯示成功且最多兩次顯式重試。 | pending | [Pi 401／429 本機注入＋原生錯誤與清理已通過](docs/FAILURES.md)；CLI crash、其他 provider 與顯式重試流程仍待驗。 |
 | AC-08 | Given browser refresh 或 host 重啟，When 恢復，Then 不重跑、unfinished 標 interrupted。 | pending | [OpenCode 新程序／同 session 與瀏覽器刷新通過](docs/evidence/lifecycle.md)；[host restart 與手動恢復通過](docs/evidence/restart.md)；Grok／Pi／Cursor 待驗。 |
 | AC-09 | Given 四 provider 真實 run，When 開啟結果，Then 產物、模型與來源可分辨。 | pending | [唯讀結果入口](docs/RESULTS.md) 已回讀四 provider 真實產物；尚缺派工到結果的四工位整合流程。 |
 | AC-10 | Given 本地 Strata，When 執行公開 GitHub tool loop，Then 真實 tool_call、API 結果與後續回答完成。 | pending | 獨立研究未通過，非 MVP 阻塞。 |
@@ -54,6 +58,8 @@ T-0011：整合四 provider 的唯讀結果入口，列出來源、模型、任�
 T-0012：新增[統一偵測與派工入口](docs/DISPATCH.md)。四個固定 CLI 的實際斷網版本／help 檢查通過；run 預設只顯示計畫，遠端執行須明示 execute 與 allow-remote。四個直接 runner 共用執行鎖，跨 exec 保留，清理未確認或強制中斷會阻擋下一次派工；不自動重試。117 項離線測試通過。本輪沒有新模型呼叫或啟動 Strata，完整派工到產物與跨 provider 生命週期尚未重驗。[證據](docs/evidence/dispatch-2026-11-01.json)，交付狀態見[任務板](docs/tasks/BOARD.md)。
 
 T-0013：新派工入口的 OpenCode／Strata 真實本地任務與原生取消通過。最終 runner 整輪任務／取消驗收 54.95 秒、產物 hash 正確；原生取消與所屬程序退出 202 ms，全程追蹤 60 個程序，最後全部退出。另一次原生 working 後 Ctrl+C 正確顯示 cancelled／exit 130，10.399 秒後追蹤到的 23 個程序（含 runner）全部退出；這包含模型關閉，不是工位取消耗時。三次實測均拒絕重複派工、釋放執行鎖，資源 guard 未觸發，沒有遠端模型呼叫。122 tests 與 36 筆結果的瀏覽器篩選／產物／刷新通過。[證據](docs/evidence/local-dispatch-2026-11-01.json)，[操作](docs/DISPATCH.md)，交付狀態見[任務板](docs/tasks/BOARD.md)。遠端 provider 的新入口與取消／恢復仍待驗，完整 MVP 保持 incomplete。
+
+T-0014：完成[Pi 原生 401／429 故障驗收](docs/FAILURES.md)。本機注入錯誤，真實 Pi 呈現 needs_input／error 且從未 done；各一次本機請求、零外部模型請求、無產物或推論成功。發現並修正 Pi 過早判定清理：最終兩次 runner 與外層觀察均確認所屬程序全退出、鎖釋放；原兩次清理證據不足紀錄保留。結果頁標示注入來源，任務仍為失敗。135 tests 與 40 筆結果的瀏覽器核對通過。[證據](docs/evidence/pi-failures-2026-11-01.json)，交付狀態見[任務板](docs/tasks/BOARD.md)。完整 AC-07、其他 provider 及 MVP 仍 pending。
 
 ## 現況與缺口
 

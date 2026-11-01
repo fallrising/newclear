@@ -78,6 +78,27 @@ class DispatchTest(unittest.TestCase):
                 dispatch.launch('opencode', False, self.lab, check_cancel=True)
             self.assertEqual(execute.call_args.args[1][-1], '--check-cancel')
 
+    def test_failure_plan_never_executes_and_rejects_paid_or_other_provider_modes(self):
+        with patch.object(dispatch, 'detect') as probe, patch.object(os, 'execve') as execute:
+            with contextlib.redirect_stdout(io.StringIO()) as output:
+                self.assertEqual(dispatch.main(['run', 'pi', '--check-failure', '401']), 0)
+            plan = json.loads(output.getvalue())
+            self.assertFalse(plan['remote'])
+            self.assertNotIn('--allow-remote', plan['command'])
+            for provider, remote, cancel in [('pi', True, False), ('grok', False, False), ('pi', False, True)]:
+                with self.assertRaises(SlotError):
+                    dispatch.launch(provider, remote, self.lab, check_cancel=cancel, check_failure=401)
+            probe.assert_not_called(); execute.assert_not_called()
+
+    def test_failure_launch_needs_runtime_but_not_credentials_and_uses_only_fault_argv(self):
+        check = {'launch_prerequisites_present': False, 'cli_compatible': True,
+                 'runtime': {'office_build': True}, 'credentials': 'missing'}
+        with patch.object(dispatch, 'detect', return_value=check), \
+                patch.object(os, 'execve', side_effect=OSError('no real launch')) as execute:
+            with self.assertRaises(OSError):
+                dispatch.launch('pi', False, self.lab, check_failure=429)
+            self.assertEqual(execute.call_args.args[1][2:], ['--check-failure', '429'])
+
     def test_credentials_metadata_is_not_authentication(self):
         for provider, relative in [('grok', '.local/remote/grok/auth.json'),
                                    ('pi', '.local/remote/pi/auth.json'),
@@ -128,7 +149,10 @@ class DispatchTest(unittest.TestCase):
 
     def test_all_direct_runner_entrypoints_obey_busy_slot(self):
         scripts = Path(__file__).resolve().parent
-        for provider, spec in dispatch.SPECS.items():
+        cases = [(spec, spec['args']) for spec in dispatch.SPECS.values()]
+        cases += [(dispatch.SPECS['pi'], ['--check-failure', '401']),
+                  (dispatch.SPECS['pi'], ['--check-failure=429'])]
+        for spec, args in cases:
             # Replace probes with a tripwire; even a broken gate cannot issue a model request.
             code = f'''import sys,runpy,types
 from pathlib import Path
@@ -140,7 +164,7 @@ def forbidden(*a,**k): raise AssertionError('preflight reached before busy gate'
 remote_cli.probe=forbidden
 cursor_cli.probe=forbidden
 sys.modules['psutil']=types.ModuleType('psutil')
-sys.argv={[str(scripts / spec['runner']), *spec['args']]!r}
+sys.argv={[str(scripts / spec['runner']), *args]!r}
 runpy.run_path(sys.argv[0],run_name='__main__')
 '''
             with execution_slot(self.lab):

@@ -8,12 +8,14 @@ import json
 import os
 from pathlib import Path
 import secrets
+import re
 import stat
 import sys
 
 LAB = Path(__file__).resolve().parents[1]
 FD_ENV = 'LAB_EXECUTION_SLOT_FD'
 _active = None
+RETRY_RUN = re.compile(r'pi-work-[A-Za-z0-9_-]{1,100}\Z')
 
 
 class SlotError(ValueError):
@@ -61,6 +63,8 @@ def _read(directory):
             or type(value.get('pid')) is not int or value['pid'] <= 0
             or value.get('phase') not in ('guarded', 'running', 'uncertain')):
         raise SlotError('invalid_slot_journal')
+    if 'retry_parent' in value and (not isinstance(value['retry_parent'], str) or not RETRY_RUN.fullmatch(value['retry_parent'])):
+        raise SlotError('invalid_retry_parent')
     return value
 
 
@@ -69,13 +73,22 @@ class Slot:
         self.directory, self.fd = directory, fd
         self.started = False
         self.clean = False
+        self.retry_parent = None
+
+    def select_retry(self, run_id):
+        if self.started or not isinstance(run_id, str) or not RETRY_RUN.fullmatch(run_id):
+            raise SlotError('invalid_retry_parent')
+        self.retry_parent = run_id
+        self.write('guarded')
 
     def write(self, phase):
         name = '.active-' + secrets.token_hex(12)
         fd = os.open(name, os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW, 0o600, dir_fd=self.directory)
         try:
             with os.fdopen(fd, 'w') as stream:
-                json.dump({'schema': 1, 'pid': os.getpid(), 'phase': phase}, stream)
+                value = {'schema': 1, 'pid': os.getpid(), 'phase': phase}
+                if self.retry_parent is not None: value['retry_parent'] = self.retry_parent
+                json.dump(value, stream)
                 stream.flush()
                 os.fsync(stream.fileno())
             os.replace(name, 'active.json', src_dir_fd=self.directory, dst_dir_fd=self.directory)
@@ -117,10 +130,11 @@ def execution_slot(lab=LAB):
         if inherited is None and prior is not None:
             raise SlotError('cleanup_unconfirmed')
         if inherited is not None:
-            if prior != {'schema': 1, 'pid': os.getpid(), 'phase': 'guarded'}:
+            if prior is None or {k:v for k,v in prior.items() if k != 'retry_parent'} != {'schema': 1, 'pid': os.getpid(), 'phase': 'guarded'}:
                 raise SlotError('invalid_inherited_journal')
             os.close(int(inherited))
         slot = Slot(directory, fd)
+        if inherited is not None: slot.retry_parent = prior.get('retry_parent')
         slot.write('guarded')
         _active = slot
         try:
@@ -141,6 +155,13 @@ def mark_started():
     if _active is not None:
         _active.started = True
         _active.write('running')
+
+
+def retry_parent(lab=LAB):
+    """Require this checkout's live execution slot for retry mutations."""
+    if _active is None or not os.path.samestat(os.fstat(_active.directory), os.stat(lab / 'state/dispatch', follow_symlinks=False)):
+        raise SlotError('retry_requires_execution_slot')
+    return _active.retry_parent
 
 
 def mark_clean():

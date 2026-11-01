@@ -63,6 +63,14 @@ try {
     await page.locator('#runs button').first().click();
     assert((await page.locator('#detail').innerText()).includes('僅啟動檢查'));
   }
+  await page.selectOption('#status', 'all');
+  for (const run of data.runs.filter(r => r.retry)) {
+    await page.locator('#runs tr').filter({hasText:run.id}).getByRole('button').click();
+    const detail = await page.locator('#detail').innerText();
+    assert(detail.includes(run.retry.attempt===0?'首次執行':`明確重試 ${run.retry.attempt} / 2`));
+    assert(detail.includes(`原始紀錄：${run.retry.root}`));
+    if (run.retry.parent) assert(detail.includes(`前次紀錄：${run.retry.parent}`));
+  }
   await page.reload();
   assert.equal(await page.locator('#runs tr').count(), data.runs.length);
   assert.deepEqual(errors, []);assert.deepEqual(external, []);

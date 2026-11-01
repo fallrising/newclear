@@ -88,7 +88,7 @@ def artifact(run_fd, expected_hash):
         return {'status': 'unverified', 'reason': 'artifact_invalid'}
 
 
-def normalize(run_fd, run_id):
+def _normalize(run_fd, run_id):
     row = {'id': run_id, 'provider': 'unknown', 'model': None, 'version': None,
            'status': 'invalid', 'artifact': {'status': 'unavailable'}, 'cleanup_verified': False}
     try:
@@ -176,6 +176,26 @@ def normalize(run_fd, run_id):
         row['status'] = 'completed'
     else:
         row.update(status='unverified', reason='completion_evidence_incomplete')
+    return row
+
+
+def normalize(run_fd, run_id):
+    row = _normalize(run_fd, run_id)
+    try:
+        saved, _ = read_json(run_fd, ('attempt.json',), 4096)
+    except FileNotFoundError:
+        return row
+    except (OSError, ValueError, UnicodeError, RecursionError):
+        return dict(row, status='invalid', reason='invalid_retry_metadata')
+    try:
+        from pi_retry import receipt
+        saved = receipt(saved)
+        name = run_id.split(':')[-1]
+        if row['provider'] != 'pi' or (saved['attempt'] == 0 and saved['root'] != name):
+            raise ValueError('invalid_retry_source')
+        row['retry'] = {k:saved[k] for k in ('root','parent','attempt')}
+    except (ValueError, TypeError, KeyError):
+        return dict(row, status='invalid', reason='invalid_retry_metadata')
     return row
 
 

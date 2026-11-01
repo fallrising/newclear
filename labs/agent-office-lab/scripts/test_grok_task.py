@@ -35,7 +35,7 @@ class GrokTaskBoundary(unittest.TestCase):
             self.state={};self.assertFalse(self.call('SessionStart',**payload)[1]['allowed'])
         self.state={};self.plan['deadline']=1;self.assertFalse(self.call('SessionStart',modelId=MODEL)[1]['allowed'])
     def test_paths_unread_edit_and_other_tools_rejected(self):
-        for tool,path in [('read_file','result.json'),('read_file','../input.json'),('read_file','secret'),('search_replace','result.json'),('run_terminal_command','input.json')]:
+        for tool,path in [('read_file','../input.json'),('read_file','secret'),('search_replace','result.json'),('run_terminal_command','input.json')]:
             self.state={};self.start();self.assertEqual(self.call('PreToolUse',toolName=tool,toolUseId='a',toolInput={'file_path':path})[0]['decision'],'deny')
         (self.workspace/'input.json').unlink();(self.workspace/'input.json').symlink_to(self.workspace/'result.json')
         self.state={};self.start();self.assertEqual(self.call('PreToolUse',toolName='read_file',toolUseId='a',toolInput={'file_path':'input.json'})[0]['decision'],'deny')
@@ -84,6 +84,26 @@ class GrokTaskBoundary(unittest.TestCase):
         self.plan['cleanup']=True
         reply,record=self.call('Stop',reason='end_turn',stopHookActive=False)
         self.assertTrue(record['cleanup_event']);self.assertFalse(reply['continue']);self.assertNotIn('stop',self.state)
+
+    def test_observed_target_file_batch_and_reverse_completion(self):
+        self.start()
+        for ident,target in [('a','input.json'),('b','result.json')]:
+            reply,record=self.call('PreToolUse',toolName='read_file',toolUseId=ident,toolInput={'target_file':target})
+            self.assertEqual(reply['decision'],'allow');self.assertEqual(record['path_field'],'target_file')
+        for ident in ['b','a']:
+            self.assertTrue(self.call('PostToolUse',toolName='read_file',toolUseId=ident,toolResult={'type':'ReadFile','FileContent':{}})[1]['allowed'])
+        self.tool('search_replace','result.json','c',old_string='{}',new_string='{"total":25}')
+        self.assertFalse(self.state['pending']);self.assertCountEqual(self.state['calls'],self.state['completed'])
+        self.assertTrue(self.call('Stop',reason='end_turn',stopHookActive=False)[1]['allowed'])
+
+    def test_ambiguous_paths_duplicate_id_and_edit_during_read_rejected(self):
+        for params in [{'target_file':'input.json','file_path':'input.json'}, {'target_file':'../input.json'}]:
+            self.state={};self.start()
+            self.assertEqual(self.call('PreToolUse',toolName='read_file',toolUseId='a',toolInput=params)[0]['decision'],'deny')
+        self.state={};self.start();self.tool('read_file','input.json','a')
+        self.assertEqual(self.call('PreToolUse',toolName='read_file',toolUseId='a',toolInput={'target_file':'result.json'})[0]['decision'],'deny')
+        self.state={};self.start();self.call('PreToolUse',toolName='read_file',toolUseId='a',toolInput={'target_file':'input.json'})
+        self.assertEqual(self.call('PreToolUse',toolName='search_replace',toolUseId='b',toolInput={'file_path':'result.json','old_string':'{}','new_string':'[]'})[0]['decision'],'deny')
 
     def test_payload_content_and_private_paths_not_logged(self):
         self.start();_,record=self.call('PreToolUse',toolName='other',toolUseId='a',toolInput={'file_path':'/PRIVATE','secret':'PRIVATE'})

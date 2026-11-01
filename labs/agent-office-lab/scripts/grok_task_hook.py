@@ -42,33 +42,43 @@ def evaluate(event, payload, state, workspace, plan, now):
         reply = {} if valid else {'decision':'block','reason':'Lab task boundary'}
     elif event == 'PreToolUse':
         tool = payload.get('toolName'); params = payload.get('toolInput'); tool_id=payload.get('toolUseId')
-        target='other'
+        target='other';path_field='missing'
         if isinstance(params,dict):
-            for name in ['input.json','result.json']:
-                if safe_path(params.get('file_path'),workspace,name,True):target=name
-        valid = valid and plan['allow_remote'] and state.get('prompts')==1 and plan.get('native_model')==MODEL and isinstance(tool_id,str) and 0<len(tool_id)<=160 and not payload.get('toolInputTruncated') and not state.get('pending') and len(state.get('calls',[]))<4
-        done=state.get('completed',[])
+            fields=[k for k in ['target_file','file_path','path'] if k in params]
+            path_field=fields[0] if len(fields)==1 else 'ambiguous' if fields else 'missing'
+            if len(fields)==1:
+                for name in ['input.json','result.json']:
+                    if safe_path(params[fields[0]],workspace,name,True):target=name
+        pending=state.get('pending',{})
+        valid = valid and plan['allow_remote'] and state.get('prompts')==1 and plan.get('native_model')==MODEL and isinstance(tool_id,str) and 0<len(tool_id)<=160 and tool_id not in state.get('tool_ids',[]) and not payload.get('toolInputTruncated') and len(state.get('calls',[]))<4
+        done=state.get('completed',[]);calls=state.get('calls',[])
         if tool=='read_file':
-            valid = valid and target!='other' and ((target=='input.json' and not state.get('calls')) or (target=='result.json' and 'read_file:input.json' in done))
+            # Independent fixture reads may share one native tool batch and finish in either order.
+            valid = valid and target!='other' and not any(v['tool']=='search_replace' for v in pending.values())
+            count=calls.count('read_file:'+target)
+            valid = valid and (count==0 or (target=='result.json' and count==1 and 'search_replace:result.json' in done))
         elif tool=='search_replace':
             new=params.get('new_string') if isinstance(params,dict) else None
-            valid = valid and target=='result.json' and len(done)>=2 and all(x in done for x in ['read_file:input.json','read_file:result.json']) and not state.get('edited') and isinstance(new,str) and len(new.encode())<=4096 and params.get('old_string') in ['{}','{}\n'] and params.get('replace_all',False) is False
+            valid = valid and not pending and target=='result.json' and all(x in done for x in ['read_file:input.json','read_file:result.json']) and not state.get('edited') and isinstance(new,str) and len(new.encode())<=4096 and params.get('old_string') in ['{}','{}\n'] and params.get('replace_all',False) is False
             if valid: state['edited']=True
         else: valid=False
         if valid:
-            state['pending']={'id':tool_id,'tool':tool,'target':target}
+            state.setdefault('pending',{})[tool_id]={'tool':tool,'target':target}
+            state.setdefault('tool_ids',[]).append(tool_id)
             state.setdefault('calls',[]).append(tool+':'+target)
+        record['path_field']=path_field
         record.update(tool=tool if tool in ['read_file','search_replace'] else 'other',target=target)
         reply={'decision':'allow' if valid else 'deny','reason':'Lab task boundary'}
     elif event=='PostToolUse':
-        pending=state.get('pending',{})
-        valid = valid and pending.get('id')==payload.get('toolUseId') and pending.get('tool')==payload.get('toolName') and not payload.get('toolResultTruncated')
+        tool_id=payload.get('toolUseId')
+        pending=state.get('pending',{}).get(tool_id,{})
+        valid = valid and bool(pending) and pending.get('tool')==payload.get('toolName') and not payload.get('toolResultTruncated')
         result=payload.get('toolResult')
         expected=('ReadFile','FileContent') if pending.get('tool')=='read_file' else ('SearchReplace','EditsApplied')
         valid = valid and isinstance(result,dict) and result.get('type')==expected[0] and isinstance(result.get(expected[1]),dict)
         record['tool_succeeded']=bool(valid)
         if valid:
-            state.setdefault('completed',[]).append(pending['tool']+':'+pending['target']);state.pop('pending')
+            state.setdefault('completed',[]).append(pending['tool']+':'+pending['target']);state['pending'].pop(tool_id)
     elif event=='Stop':
         valid = valid and plan.get('native_model')==MODEL and payload.get('reason')=='end_turn' and payload.get('stopHookActive') is False and not payload.get('backgroundTasks') and not payload.get('sessionCrons')
         record['reason_present']='reason' in payload

@@ -121,6 +121,8 @@ Owner 指示繼續開發；先完成原生協定、隔離憑證副本、工具 g
 
 | ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| T-0010-01 | Grok runner／78 tests／原生無 prompt 啟動通過，等 owner 單次付費驗收批准 | AC-03 | in_progress | 2026-11-01T04:50:31Z | — | 2026-11-01T04:58:13Z |
+| T-0010-01 | 真實任務因路徑參數不相容未通過；離線修正／80 tests 通過，等新單次付費批准 | AC-03 | in_progress | 2026-11-01T04:50:31Z | — | 2026-11-01T05:34:00Z |
 
 T-0010 已準備 Grok 1.0.70／grok-4.6 單任務 runner：原生 inspect 確認 hooks、已登入無 prompt 啟動與同 session 模型選擇、清理通過（12.52 秒）；78 項離線測試通過。[證據](../evidence/grok-ready-2026-11-01.json)、[單次範圍](../GROK-WORK.md)。沒有送模型 prompt；AC-03 仍 pending，等 owner 明確批准一次付費驗收。四工具 hook gate 會受原生 fail-open 行為限制，沒有 request／token／金額硬上限。
+
+T-0010 的一次已授權 Grok 任務已執行，12.55 秒後因 lab 只識別 file_path、未識別原生 read_file 的 target_file 而停止；兩次讀取請求被拒，seed output 未變，AC-03 未通過。原生 session／模型／prompt 正確，程序與憑證副本清理完整。[失敗與離線修正](../evidence/grok-live-2026-11-01.json)：已支援無歧義路徑別名、兩檔並行讀取、按 tool ID 核對完成，保留四次工具 gate／唯一編輯；80 tests 通過。沒有追加付費重跑；PR #897 保持 draft，等新的單次批准。

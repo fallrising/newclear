@@ -103,9 +103,9 @@ try {
     await until(() => worker?.status === 'done' && events().some(e => e.event === 'Stop'), Math.max(0,plan.deadline*1000-Date.now()), 'Native task did not complete');
     const recorded=events();
     const state=JSON.parse(fs.readFileSync(path.join(out,'boundary-state.json')));
-    assert(!state.failed && state.prompts===1 && nativeModel(worker.sessionId)===plan.model && state.stop && !state.pending);
+    assert(!state.failed && state.prompts===1 && nativeModel(worker.sessionId)===plan.model && state.stop && Object.keys(state.pending ?? {}).length===0);
     assert(state.calls.length>=3 && state.calls.length<=4 && state.edited);
-    assert.deepEqual(state.completed,state.calls);
+    assert.deepEqual([...state.completed].sort(),[...state.calls].sort());
     assert(recorded.every(e => e.session===worker.sessionId));
     assert(report.authenticated_hooks.some(e=>e.event==='Stop' && e.session===worker.sessionId));
     const target=path.join(workspace,'result.json');

@@ -1,4 +1,6 @@
-# T-0351 PP1b checkpoint — 2026-11-01
+# T-0351 PP1b pre-approval checkpoint — 2026-11-01
+
+Historical snapshot before owner approval; current runtime outcome and remaining gates are in [RUNTIME-REPORT.md](RUNTIME-REPORT.md). Original failures and pending statements below describe that earlier checkpoint.
 
 Status: PARTIAL; PR334 remains Draft. No live PP1 run has started. Source is original68610e9513e1fce2ad2a0e7aad9cf6647723903b plus normal current-main merge and the narrowly reviewed E01 cleanup fix. Raw local output is ignored/private under `local/reconcile-20261101/`; no credentials or raw logs are committed.
 

@@ -7,6 +7,7 @@ import org.springframework.core.env.MapPropertySource;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.jdbc.DataSourceBuilder;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
+import org.springframework.jdbc.datasource.SingleConnectionDataSource;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
 import com.fallrising.cms.platform.ProductionEnvironmentValidator;
@@ -43,7 +44,7 @@ public final class IdentityMaintenanceConfiguration {
                 .url(environment.getRequiredProperty("spring.datasource.url"))
                 .username(environment.getRequiredProperty("spring.datasource.username"))
                 .password(environment.getRequiredProperty("spring.datasource.password")).build(),
-                ds -> Flyway.configure().dataSource(ds).locations("classpath:db/migration").load().validate()) : dependencies;
+                IdentityMaintenanceConfiguration::validateSchema) : dependencies;
         DataSource source = deps.dataSourceFactory().get();
         if (!(source instanceof HikariDataSource pool)) {
             if (source instanceof AutoCloseable closeable) {
@@ -92,6 +93,17 @@ public final class IdentityMaintenanceConfiguration {
             try { context.close(); } catch (Throwable ignored) { }
             try { pool.close(); } catch (Throwable ignored) { }
             if (failure instanceof IdentityMaintenanceCommand.Failure known) throw known;
+            throw new IdentityMaintenanceCommand.Failure(IdentityMaintenanceCommand.FailureCode.MAINTENANCE_INTERNAL_ERROR);
+        }
+    }
+
+    private static void validateSchema(DataSource source) {
+        // Flyway's validation callback requests another logical connection. Both
+        // handles must share the already-bound backend; keep the pool at one.
+        try (var connection = source.getConnection()) {
+            var single = new SingleConnectionDataSource(connection, true);
+            Flyway.configure().dataSource(single).locations("classpath:db/migration").load().validate();
+        } catch (java.sql.SQLException failure) {
             throw new IdentityMaintenanceCommand.Failure(IdentityMaintenanceCommand.FailureCode.MAINTENANCE_INTERNAL_ERROR);
         }
     }

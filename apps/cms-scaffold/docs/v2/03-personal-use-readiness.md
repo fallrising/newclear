@@ -132,3 +132,9 @@ Owner指定先完成正式運行、正式帳號／Q25、DB＋媒體一致備份�
 本地第一子波[PP1a施工圖](waves/PP1a.md)獨立封板，14張S/M卡（文件PR #324／#326已合併；實作 PR #327 已合併，必要 PR／main CI與本地驗收通過，VERIFIED local scope）；帳號/Q25、backup/restore、upgrade/ops後續分波，不因第一波完成而標PP1整體或BW6 VERIFIED。
 
 下一子波[PP1b施工圖](waves/PP1b.md)細化本地帳號初始化、受控維護與Q25最小介面，父里程碑34張有界卡，分為帳號／維護21卡與治理／旅程／交付13卡兩子波，各≤30。獨立文件審查已通過，必要CI及本文件PR正常合併後DOC_READY生效；不是產品完成。管理員恢復核心與缺備份拒絕可先驗，真host恢復成功必須等PP1c匹配的DB＋media完整備份驗證，沒有mini-backup捷徑。
+
+## 2026-11-01 PP1b 本地驗收
+
+已在隔離 prod runtime 通過 fresh-init 真 TTY、initialized SQL 七項 rollback 語義負例、guard live 負例、可信 TLS 正式帳號／distinct operator／explicit public grants／Q25／reset 旅程；旅程後同 API 容器重啟，20 張表 counts/hash 相同。Flyway validation 需要第二個 logical handle 的問題已修正，仍共用同一 bound PostgreSQL backend，Hikari pool 上限保持 1。
+
+[本輪證據](../../.team/resume-20261101/RUNTIME-REPORT.md)記錄實際來源、工具例外、失敗與重驗。狀態為 local acceptance，最終整合202/202與mock93/93已通過；獨立review收尾／CI／正常合併及遠端回讀仍待完成。host recover-success 仍缺 PP1c matching verified DB＋media rollback bundle；PP1c DRAFT、完整備份還原、正式 host/offsite/upgrade/ops 與全 BW6 均未因此完成。沒有部署或 usable tag。

@@ -25,7 +25,14 @@ ACTIONLINT_ARCHIVE=/tmp/token-economizer-workflow-lint/actionlint_1.7.12_linux_a
 
 本機 Linux／Python 3.12.14 執行：4 scenarios、36 scenario assertions、18 lab tests 通過；完整 report 多次重跑 byte-identical。fresh prepare clone 和既有 clone verify 均通過。
 Repo gates：51 project contracts＋9 llms files／0 errors；20 repo validator tests 通過；43 workflows actionlint 1.7.12 通過；7 workflow-validator tests 通過。
-CI 配置以 Python 3.12.14 fresh runner 再跑，結果以 PR checks 為準；本記錄尚不冒稱遠端 CI 已完成。
+遠端 Ubuntu 24.04／Python 3.12.14 已從 fresh runner 再跑成功。對應 runtime commit `f122e4f41b392d590de486ddfd2f22fa9f0c3fd7`：
+
+- [TokenEconomizer lab CI](https://github.com/fallrising/newclear/actions/runs/41281175010)：18 tests、完整 report 通過；回讀 job log 的 JSON 與本地 committed report **完全相同**。
+- [Project success contracts](https://github.com/fallrising/newclear/actions/runs/41281174983)：success。
+- [llms.txt CI](https://github.com/fallrising/newclear/actions/runs/41281174947)：success。
+- [Workflow static validation](https://github.com/fallrising/newclear/actions/runs/41281174937)：success。
+
+[CI artifact](https://github.com/fallrising/newclear/actions/runs/41281175010/artifacts/13073272846) 保存 7 天（2026-11-08 到期）；本目錄 report 才是長期精簡證據。實作 tree `a6b5a84fba3a93ab0ad82b185c823196f73bbbdf` 與已驗證本機 tree 相同；其後僅收尾文件。最終 PR head checks 仍須通過。
 
 ## 審查修復
 

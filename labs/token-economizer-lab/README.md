@@ -54,3 +54,5 @@ runtime 約數秒，下載需網路；完成 prepare 後 runtime 不需網路。
 baseline 和 optimized 要分開 state，固定模型／任務順序／起點；要保留冷啟動與暖啟動結果，將 input/cache-read/cache-write/output 與 proposer/judge 全計入；同時記錄 task success、wall time 及人工中斷。不可只比較 raw tokens，亦不可把這裡的合成報告拿來回答 A/B。
 
 上游：[固定 README](https://github.com/microsoft/TokenEconomizer/blob/c53a4a6dcdebaeb9df6fcaa5c7026f0401cd8f23/README.md)、[plugin 說明](https://github.com/microsoft/TokenEconomizer/blob/c53a4a6dcdebaeb9df6fcaa5c7026f0401cd8f23/plugin/README.md)。
+
+知識沉澱：[knowledge-base PR #272](https://github.com/fallrising/knowledge-base/pull/272)；本 lab 交付：[Draft PR #903](https://github.com/fallrising/newclear/pull/903)，待確認合併。

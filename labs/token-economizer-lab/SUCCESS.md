@@ -2,10 +2,10 @@
 project: labs/token-economizer-lab
 purpose: 實跑 TokenEconomizer 三種成本控制機制的固定版本離線實驗
 kind: lab
-mainline: incomplete
+mainline: complete
 usable_tag: none
 reviewed: 2026-11-01
-source_commit: 8ede33258dbda7cedc5220829c8b3745224304e0
+source_commit: f122e4f41b392d590de486ddfd2f22fa9f0c3fd7
 ---
 
 # TokenEconomizer lab 成功契約
@@ -23,11 +23,11 @@ source_commit: 8ede33258dbda7cedc5220829c8b3745224304e0
 | AC-03 | Given 工具使用歷史，When 真提案／apply／restore，Then 門檻與保護規則成立。 | passed | [實跑報告與紀錄](docs/evidence/README.md)。 |
 | AC-04 | Given 冷／暖 envelope，When 失敗循環與有進展的長 turn，Then backstop redirect／notice 邊界正確。 | passed | [loop-guard report](docs/evidence/report.json)：25 redirect／36 notice；paused judge fixture，未測模型判斷。 |
 | AC-05 | Given 合成 usage，When 真 pricing／CLI，Then cache-aware 算術與 CLI 可核對。 | passed | [accounting report](docs/evidence/report.json)：去重、明示權重算術與 CLI；不代表 savings。 |
-| AC-06 | Given 乾淨環境，When 重跑與 checks，Then scenarios、安全負例、repo gates、CI 與獨立審查通過。 | pending | [本機 gates](docs/evidence/README.md) 通過；[獨立 ACCEPT](docs/evidence/review.md)；遠端 CI 待完成。 |
+| AC-06 | Given 乾淨環境，When 重跑與 checks，Then scenarios、安全負例、repo gates、CI 與獨立審查通過。 | passed | [本機 gates／4 項遠端 CI](docs/evidence/README.md) 通過；[獨立 ACCEPT](docs/evidence/review.md)。 |
 
 ## 現況與缺口
 
-已實作並實跑真 upstream：4 scenarios／36 assertions、18 lab tests 與本機 repo gates 通過。獨立審查 ACCEPT；剩餘：遠端 CI。合成輸入不取代 live provider／host 安裝或 savings 證據；這些未授權範圍不宣稱通過。
+已實作並實跑真 upstream：4 scenarios／36 assertions、18 lab tests 與本機 repo gates 通過。獨立審查 ACCEPT，4 項遠端 CI 全通過；本輪有界實驗完成，尚未合併。合成輸入不取代 live provider／host 安裝或 savings 證據；這些未授權範圍不宣稱通過。
 
 ## 啟動與驗證
 
@@ -35,4 +35,6 @@ source_commit: 8ede33258dbda7cedc5220829c8b3745224304e0
 
 ## 可用版本
 
-`usable_tag: none`；本輪僅 Draft PR，未授權 merge／release／deploy。
+`usable_tag: none`。[Draft PR #903](https://github.com/fallrising/newclear/pull/903) 尚未合併，等待 owner 確認這個 PR；未授權 release／deploy。
+
+`source_commit` 指已通過本機／CI 的 runtime 實作 commit；其後僅補驗收／索引文件，沒有改動執行器、fixtures、tests 或 lock。

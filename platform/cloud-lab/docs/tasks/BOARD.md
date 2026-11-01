@@ -633,7 +633,15 @@ ULR01–04線上操作及保全已通過，T855獨立公開證據ACCEPT；實際
 
 | ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| T-0036-1 | 協定範圍對齊 | PS-01 | in_progress | 2026-11-01T11:02:36Z | — | 2026-11-01T11:09:00Z |
-| T-0036-2 | 看板版本防倒退 | PS-02 | in_progress | 2026-11-01T11:02:36Z | — | 2026-11-01T11:09:00Z |
-| T-0036-3 | 持久outbox恢復 | PS-03 | in_progress | 2026-11-01T11:02:36Z | — | 2026-11-01T11:09:00Z |
-| T-0036-4 | 驗證審查交付 | PS-04 | in_progress | 2026-11-01T11:02:36Z | — | 2026-11-01T11:09:00Z |
+| T-0036-1 | 協定範圍對齊 | PS-01 | done | 2026-11-01T11:02:36Z | 2026-11-01T11:11:21Z | 2026-11-01T11:12:00Z |
+| T-0036-2 | 看板版本防倒退 | PS-02 | done | 2026-11-01T11:02:36Z | 2026-11-01T11:11:21Z | 2026-11-01T11:12:00Z |
+| T-0036-3 | 持久outbox恢復 | PS-03 | done | 2026-11-01T11:02:36Z | 2026-11-01T11:11:21Z | 2026-11-01T11:12:00Z |
+| T-0036-4 | 驗證審查交付 | PS-04 | done | 2026-11-01T11:02:36Z | 2026-11-01T11:11:21Z | 2026-11-01T11:12:00Z |
+
+### T-0036 Git交付與source/local收尾
+
+- [PR905](https://github.com/fallrising/newclear/pull/905) head `2c4a112351d77d40a2201044d3872fbaef7e7c22`，merge `b184ada9957cd2b97aa3566458c42c12509d51cb`，2026-11-01T11:11:21Z合併。exact-head CI全過：CloudLab `41300651110`、Project success `41300651083`、llms `41300651067`。
+- PS01–04：沿已授權ADR-08，持久outbox在commit後ACK遺失及SQLite重開仍可領取原command；同key重送與完成後重開保持原結果、無第二個assignment。看板拒絕低revision／同版衝突整批更新，保留上次資料且停操作，fresh polling恢復；scope改變清除舊view，lease到期衍生投影不偽造DB revision，最多20筆比較基準。
+- 真RED6fail／1existingpass，GREEN52dashboard；完整138Node＋308Python＝446tests，零fail/skip；PS1真Chromium/workerd/D1/Python16checks／114API／零browser errors，三asset hash與公開原receipt相同。兩種快照GET注入均拒絕、原D1列不變；HTTP ACK遺失及原artifact精確下載回歸保持。T861最終獨立ACCEPT。
+- 初次default-isolation只有file級失敗，不算行為RED；sandbox full的Node native assertion／35Python socket EPERM保留，正常escalation後同套測試全過，無跳測。既有SQLite warnings保留。50contracts／8indexes初驗，正常合併並行main後51contracts／9indexes通過；task/report／syntax／diff／437links與67inputs固定。回讀local/remote fulltree相等、clean、head為main祖先，67inputs皆相符。
+- 本輪只改dashboard source及驗證／文件；Worker／runner／D1 schema未改，原看板尚未部署。M0 Event/source_seq/cursor未實作，不以完整snapshot跳版冒充漏seq恢復；原要求與source/local/live差別保留，完整mainline incomplete／usable_tag none。沒有private/live操作、續權、付費升級或owner重測。後續按既有流程接入已驗證看板修正；本結案只改任務板。

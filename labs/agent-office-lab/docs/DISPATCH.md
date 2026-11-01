@@ -48,6 +48,8 @@ Grok／Cursor 沒有可保證的 request／token／金額硬上限；工具 hook
 
 `run pi --check-failure 401` 或 `429` 預設只顯示計畫；加 `--execute` 後啟動真實 Pi，僅接收本機錯誤回應，不讀 owner key、不連遠端模型。此模式不需登入檔，仍需 CLI／Office runtime；不可同時加 `--allow-remote`。詳見[故障驗收](FAILURES.md)。
 
+`run pi --check-crash` 預設只顯示計畫；加 `--execute` 後，在本機請求留住且原生 Pi working 時對本 run 的 CLI 注入 SIGKILL。不讀 owner key、不連遠端模型，不可混用其他驗收模式或 `--allow-remote`。清理完成後可另以 `run_pi_work.py --check-startup` 明確啟動新 session，詳見 [CLI crash 驗收](CRASH.md)。
+
 ## 單一執行與中斷
 
 四個 `run_*_work.py` 的直接命令及統一入口共用本 lab 的 `state/dispatch/execution.lock`。第二次執行會立即回報 `execution_busy`；沒有背景等待佇列。鎖跨 dispatcher 的 `exec` 保留，同一 PID 的 runner 接手後持有到清理完成；不增加中間父程序攔截 Ctrl+C，仍由各 runner 處理原生清理。

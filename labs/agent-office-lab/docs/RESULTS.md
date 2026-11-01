@@ -47,3 +47,5 @@ node scripts/check_office_results_browser.mjs runs/combined-results.html
 瀏覽器檢查需既有 vendor 的 playwright-core、本機 Chrome，以及包含四 provider 成功紀錄的快照；驗證篩選、詳細產物與 hash、重新整理和零額外網路請求。它不會執行付費任務。[本輪證據](evidence/results-console-2026-11-01.json) 回讀既有真實 runs，沒有新推論。
 
 本輪完成 AC-09 的唯讀結果子集與 AC-11 的讀取／顯示邊界子集。完整四工位派工、偵測、單佇列及跨 provider 生命週期尚未整合，完整 AC 和 MVP 仍 pending；本頁不是上游 Office 終端的替代品。
+
+Pi crash 注入紀錄明示來源「本機注入 CLI crash」，僅在原生崩潰、所屬 PID 核對、零外部請求及完整清理均通過時顯示故障測試通過；任務仍是失敗。後續無 prompt 的新 session 仍為啟動檢查，不算任務成功。

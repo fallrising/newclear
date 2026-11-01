@@ -1,6 +1,7 @@
 """Observe descendants by PID and ps start time, including later reparenting."""
 import subprocess
 import os
+import signal
 
 
 def parse_processes(text):
@@ -38,3 +39,10 @@ def collect_owned(rows, known, root):
 
 def alive_owned(rows, owned):
     return [pid for pid, started in owned.items() if pid in rows and rows[pid]['started'] == started]
+
+
+def crash_owned(pid, owned):
+    """Inject one crash only into a still-matching, previously observed descendant."""
+    if type(pid) is not int or pid <= 1 or pid == os.getpid() or pid not in alive_owned(process_table(), owned):
+        raise ValueError('crash_target_not_owned')
+    os.kill(pid, signal.SIGKILL)

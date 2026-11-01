@@ -99,6 +99,30 @@ class DispatchTest(unittest.TestCase):
                 dispatch.launch('pi', False, self.lab, check_failure=429)
             self.assertEqual(execute.call_args.args[1][2:], ['--check-failure', '429'])
 
+    def test_crash_plan_is_inert_and_rejects_remote_other_provider_and_other_modes(self):
+        with patch.object(dispatch, 'detect') as detect, patch.object(os, 'execve') as execute:
+            with contextlib.redirect_stdout(io.StringIO()) as output:
+                self.assertEqual(dispatch.main(['run', 'pi', '--check-crash']), 0)
+            plan = json.loads(output.getvalue())
+            self.assertFalse(plan['remote'])
+            self.assertEqual(plan['limits']['provider_request_cap'], 0)
+            self.assertNotIn('--allow-remote', plan['command'])
+            for provider, remote, options in [('pi', True, {}), ('grok', False, {}), ('pi', False, {'check_cancel':True}), ('pi', False, {'check_failure':401})]:
+                with self.assertRaises(SlotError):
+                    dispatch.launch(provider, remote, self.lab, check_crash=True, **options)
+            detect.assert_not_called(); execute.assert_not_called()
+
+    def test_crash_launch_needs_runtime_but_no_credentials(self):
+        check = {'launch_prerequisites_present': False, 'cli_compatible': True, 'runtime': {'office_build': True}}
+        with patch.object(dispatch, 'detect', return_value=check), patch.object(os, 'execve', side_effect=OSError('no launch')) as execute:
+            with self.assertRaises(OSError):
+                dispatch.launch('pi', False, self.lab, check_crash=True)
+            self.assertEqual(execute.call_args.args[1][2:], ['--check-crash'])
+            check['runtime']['office_build'] = False
+            with contextlib.redirect_stdout(io.StringIO()):
+                self.assertEqual(dispatch.launch('pi', False, self.lab, check_crash=True), 1)
+            self.assertEqual(execute.call_count, 1)
+
     def test_credentials_metadata_is_not_authentication(self):
         for provider, relative in [('grok', '.local/remote/grok/auth.json'),
                                    ('pi', '.local/remote/pi/auth.json'),
@@ -151,7 +175,8 @@ class DispatchTest(unittest.TestCase):
         scripts = Path(__file__).resolve().parent
         cases = [(spec, spec['args']) for spec in dispatch.SPECS.values()]
         cases += [(dispatch.SPECS['pi'], ['--check-failure', '401']),
-                  (dispatch.SPECS['pi'], ['--check-failure=429'])]
+                  (dispatch.SPECS['pi'], ['--check-failure=429']),
+                  (dispatch.SPECS['pi'], ['--check-crash'])]
         for spec, args in cases:
             # Replace probes with a tripwire; even a broken gate cannot issue a model request.
             code = f'''import sys,runpy,types

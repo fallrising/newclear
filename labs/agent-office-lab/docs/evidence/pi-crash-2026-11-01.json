@@ -1,0 +1,199 @@
+{
+  "schema": 1,
+  "recorded_at": "2026-11-01T15:30:28Z",
+  "source_commit": "cb6771c7017e2477460f74e0259a659bd97df940",
+  "provider": "pi",
+  "version": "1.4.0",
+  "scenario": "owned_native_cli_crash_and_explicit_fresh_startup",
+  "remote_model_calls": 0,
+  "owner_api_key_loaded": false,
+  "strata_started": false,
+  "cases": [
+    {
+      "mode": "crash",
+      "exit_code": 0,
+      "owned_processes_seen": 50,
+      "remaining_owned_processes": 0,
+      "active_journal_present": false,
+      "run_count": 1,
+      "elapsed_seconds": 31.493,
+      "duplicate_attempt": {
+        "exit_code": 1,
+        "blocked_busy": true
+      },
+      "new_runs_after_exit_observation": 0,
+      "after_exit_observation_seconds": 3,
+      "run_id": "pi-work-20261101T152714504674Z",
+      "report": {
+        "status": "failed",
+        "startup_only": false,
+        "crash_check_passed": true,
+        "crash_target_verified": true,
+        "model_inference_verified": false,
+        "client_requests": 1,
+        "external_requests": 0,
+        "cleanup_errors": [],
+        "elapsed_s": 30.793902958976105,
+        "owned_processes_seen": 7,
+        "remaining_owned_processes": 0
+      },
+      "office": {
+        "status": "failed",
+        "native_crash_verified": true,
+        "native_exit_code": 0,
+        "no_automatic_restart_observation_ms": 3000,
+        "cleanup_completed": true,
+        "states": [
+          "starting",
+          "idle",
+          "working",
+          "exited"
+        ]
+      },
+      "case": "initial_crash",
+      "artifact_present": false,
+      "runtime_source_sha256": {
+        "run_pi_work.py": "4296305f80e82f5caf28bee67e70f9777fd974c89a1b286769ab3b025ab64b32",
+        "deepseek_relay.py": "2818c617139b50c58aff74fce808ad8120a329969d057faf02b93c4ef3b8cd62",
+        "office_pi.mjs": "98cc1c4b42643ff67a60fc27905f43d96c2801c58b9f97584cb76b2077f92130",
+        "process_ownership.py": "085326e0c84e0b9d3ef545a9cf07ffede5ebdf33ac985f5babec90a40f062ec4"
+      }
+    },
+    {
+      "mode": "crash",
+      "exit_code": 0,
+      "owned_processes_seen": 40,
+      "remaining_owned_processes": 0,
+      "active_journal_present": false,
+      "run_count": 1,
+      "elapsed_seconds": 31.487,
+      "duplicate_attempt": {
+        "exit_code": 1,
+        "blocked_busy": true
+      },
+      "new_runs_after_exit_observation": 0,
+      "after_exit_observation_seconds": 3,
+      "run_id": "pi-work-20261101T152812843176Z",
+      "report": {
+        "status": "failed",
+        "startup_only": false,
+        "crash_check_passed": true,
+        "crash_target_verified": true,
+        "model_inference_verified": false,
+        "client_requests": 1,
+        "external_requests": 0,
+        "cleanup_errors": [],
+        "elapsed_s": 30.794812999898568,
+        "owned_processes_seen": 10,
+        "remaining_owned_processes": 0
+      },
+      "office": {
+        "status": "failed",
+        "native_crash_verified": true,
+        "native_exit_code": 0,
+        "no_automatic_restart_observation_ms": 3000,
+        "cleanup_completed": true,
+        "states": [
+          "starting",
+          "idle",
+          "working",
+          "exited"
+        ]
+      },
+      "case": "final_crash",
+      "artifact_present": false,
+      "runtime_source_sha256": {
+        "run_pi_work.py": "4552e9a9e3b822f03798fd26861b2c7198a2f82eb1e532d852c908ab643d35dc",
+        "deepseek_relay.py": "2818c617139b50c58aff74fce808ad8120a329969d057faf02b93c4ef3b8cd62",
+        "office_pi.mjs": "168dda19b1c8ce7b583db462527e16bfbcc702936fcdcc092c5184ac9fc4855e",
+        "process_ownership.py": "085326e0c84e0b9d3ef545a9cf07ffede5ebdf33ac985f5babec90a40f062ec4"
+      }
+    },
+    {
+      "mode": "startup",
+      "exit_code": 0,
+      "owned_processes_seen": 38,
+      "remaining_owned_processes": 0,
+      "active_journal_present": false,
+      "run_count": 1,
+      "elapsed_seconds": 31.019,
+      "duplicate_attempt": null,
+      "new_runs_after_exit_observation": 0,
+      "after_exit_observation_seconds": 3,
+      "run_id": "pi-work-20261101T152858014207Z",
+      "report": {
+        "status": "completed",
+        "startup_only": true,
+        "crash_check_passed": null,
+        "crash_target_verified": null,
+        "model_inference_verified": false,
+        "client_requests": 0,
+        "external_requests": 0,
+        "cleanup_errors": [],
+        "elapsed_s": 30.623374708928168,
+        "owned_processes_seen": 5,
+        "remaining_owned_processes": 0
+      },
+      "office": {
+        "status": "completed",
+        "native_crash_verified": null,
+        "native_exit_code": null,
+        "no_automatic_restart_observation_ms": null,
+        "cleanup_completed": true,
+        "states": [
+          "starting",
+          "idle"
+        ]
+      },
+      "case": "explicit_startup",
+      "artifact_present": false,
+      "runtime_source_sha256": {
+        "run_pi_work.py": "4552e9a9e3b822f03798fd26861b2c7198a2f82eb1e532d852c908ab643d35dc",
+        "deepseek_relay.py": "2818c617139b50c58aff74fce808ad8120a329969d057faf02b93c4ef3b8cd62",
+        "office_pi.mjs": "168dda19b1c8ce7b583db462527e16bfbcc702936fcdcc092c5184ac9fc4855e",
+        "process_ownership.py": "085326e0c84e0b9d3ef545a9cf07ffede5ebdf33ac985f5babec90a40f062ec4"
+      }
+    }
+  ],
+  "fresh_session_verified": true,
+  "automatic_restart_observed": false,
+  "same_session_resume_tested": false,
+  "tests": {
+    "python": 106,
+    "node": 35,
+    "total": 141
+  },
+  "browser": {
+    "runs": 43,
+    "four_provider_artifact_details": true,
+    "crash_tasks_failed": true,
+    "crash_checks_passed": 2,
+    "startup_only_classification": true,
+    "filters": true,
+    "refresh": true,
+    "external_requests": 0,
+    "javascript_errors": 0
+  },
+  "source_sha256": {
+    "run_pi_work.py": "4552e9a9e3b822f03798fd26861b2c7198a2f82eb1e532d852c908ab643d35dc",
+    "deepseek_relay.py": "2818c617139b50c58aff74fce808ad8120a329969d057faf02b93c4ef3b8cd62",
+    "office_pi.mjs": "168dda19b1c8ce7b583db462527e16bfbcc702936fcdcc092c5184ac9fc4855e",
+    "office_dispatch.py": "bd3fbec6b3b29d63faf3543d30189cc2963f2b9712e50257cef9bb3a45585d36",
+    "process_ownership.py": "085326e0c84e0b9d3ef545a9cf07ffede5ebdf33ac985f5babec90a40f062ec4",
+    "office_results.py": "ca4683e88744d7e456c8f4e1e0e2adc572ba884d8ca603a83f319606ffd3c359",
+    "office_results.html": "961dae576cece041c0a22810098d13fea8391a52c6189d6e51106c92bfa0bf8d",
+    "check_office_results_browser.mjs": "5a85e8000682a403ff2ef445a6f5a650c839bffd70dc45044c06105870f37028",
+    "test_relay_failures.py": "a740506f5cd54ae2ec3759d1292b881eb1c86752d4c5c14193574af5b23fc940",
+    "test_process_ownership.py": "6094c8010be1685ff1a947dcbb677e3409c29abac60fea48a3f3620ebf9ec75c",
+    "test_office_dispatch.py": "4fa54cd534ebf245286d188dd4dda04938ee4acf1ef3d2784d3360070e1b3b9c",
+    "test_office_results.py": "ea02c48ddba41a29ab03a3010e73b8b4ab71bc1542313b83567a8cfbc2dfcad1"
+  },
+  "limitations": [
+    "SIGKILL is injected only into an observed owned native Pi process during a held loopback request; no actual model inference occurs",
+    "upstream PTY reports exit code 0 after SIGKILL; acceptance uses injected signal and native exited events rather than exit code alone",
+    "restart observation is bounded to three seconds in the live host and three seconds after runner exit",
+    "process ownership uses polling and ps start timestamps, not an OS security boundary",
+    "fresh startup is explicitly requested in a new session, not same-session resume or retry of the failed task",
+    "other provider crashes, host restart, bounded explicit task retries and full MVP remain pending"
+  ]
+}

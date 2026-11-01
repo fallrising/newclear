@@ -117,6 +117,28 @@ class OfficeResultsTest(unittest.TestCase):
             (run / 'result.json').write_text(json.dumps(report))
             self.assertEqual(self.read()[0]['status'], 'invalid')
 
+    def test_crash_check_never_completes_and_requires_cleanup_and_native_evidence(self):
+        run, report = self.make_run('pi')
+        (run / 'workspace/result.json').unlink()
+        report.update(status='failed', crash_injection={'source':'owned_cli','signal':'SIGKILL'},
+                      crash_check_passed=True, crash_target_verified=True, model_inference_verified=False,
+                      client_requests=1, external_requests=0, remaining_owned_processes=0)
+        report['office'].update(status='failed', native_crash_verified=True)
+        def save():
+            (run / 'result.json').write_text(json.dumps(report))
+            return self.read()[0]
+        self.assertTrue(save()['failure_check_passed'])
+        self.assertEqual(save()['status'], 'failed')
+        for key, bad in [('crash_target_verified',False), ('remaining_owned_processes',1), ('external_requests',1), ('client_requests',True), ('status','completed')]:
+            old = report[key]; report[key] = bad
+            self.assertFalse(save()['failure_check_passed'])
+            self.assertNotEqual(save()['status'], 'completed')
+            report[key] = old
+        report['office']['native_crash_verified'] = False
+        self.assertFalse(save()['failure_check_passed'])
+        report['crash_injection']['source'] = 'unowned'
+        self.assertEqual(save()['status'], 'invalid')
+
     def test_missing_artifact_or_report(self):
         run, _ = self.make_run()
         (run / 'workspace/result.json').unlink()

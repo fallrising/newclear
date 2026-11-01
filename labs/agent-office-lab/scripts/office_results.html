@@ -30,7 +30,7 @@ td{overflow-wrap:anywhere}.table-wrap{overflow-x:auto}small{color:#b5c3d8}#detai
 const data = JSON.parse(document.getElementById('data').textContent);
 const labels = {completed:'完成且產物已核對',failed:'失敗',cancelled:'已取消',stopped:'已停止',startup_only:'僅啟動檢查',incomplete:'未完成紀錄',invalid:'無效紀錄',unverified:'證據不足'};
 const artifactLabels = {verified:'已核對',unavailable:'無產物',unverified:'未通過核對'};
-const scenarioLabels = {injected_http_401:'本機注入 HTTP 401（未呼叫遠端模型）',injected_http_429:'本機注入 HTTP 429（未呼叫遠端模型）'};
+const scenarioLabels = {injected_cli_crash:'本機注入 CLI crash（未呼叫遠端模型）',injected_http_401:'本機注入 HTTP 401（未呼叫遠端模型）',injected_http_429:'本機注入 HTTP 429（未呼叫遠端模型）'};
 const el = (tag,text) => {const node=document.createElement(tag);node.textContent=text;return node;};
 document.getElementById('generated').textContent = `快照時間：${data.generated_at}`;
 for (const provider of data.providers) {

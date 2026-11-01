@@ -1,6 +1,6 @@
 # 知識樹與能力目錄
 
-本樹是 Cloud Lab 的產品知識導航。它描述責任與關係，不保存私人知識庫或覆寫來源元件的主線狀態。M0 表保留來源映射；M1 局部能力已有 **locally_verified** 實作，見下方實作對照，沒有 live_verified 宣告。
+本樹是 Cloud Lab 的產品知識導航。它描述責任與關係，不保存私人知識庫或覆寫來源元件的主線狀態。M0表保留來源映射；下方M1對照已按具名live證據更新。live_verified只表示曾完成該子集驗證，不保證當前授權仍有效；近期方向見[重排計畫](direction-review.md)。
 
 ## 知識樹
 
@@ -26,7 +26,7 @@ CL Cloud Lab
 | ID | 用途與唯一責任 | 提案契約／設計 | 現行來源與證據入口 | Cloud Lab 目標 |
 | --- | --- | --- | --- | --- |
 | ID-01 | 認證與 scoped caller；准入層決定 | [identity](../contracts/identity.md) | [Kith auth 邊界](../../../products/kith/SDD.md)僅供對照，不共用 session | M1 |
-| ID-02 | 私人入口與機器入口；部署政策擁有 | [架構](architecture.md) | [CF Access 來源](sources.md)；無本次帳號驗證 | M1 |
+| ID-02 | 私人入口與機器入口；部署政策擁有 | [架構](architecture.md) | [CF Access 來源](sources.md)；後續Access實證見下方M1對照 | M1 |
 | RS-01 | 雲資源盤點；inventory adapter 提供 observed | [架構](architecture.md) | 外部私人盤點器，公開僅保留介面需求 | M2 候選 |
 | RS-02 | 服務與能力目錄；原服務 owner 保留 lifecycle | [遷移表](migration.md) | [Fleet SUCCESS](../../../specs/fleet/SUCCESS.md)；非 Cloud Lab catalog 實作 | M1 最小 reference |
 | AU-01 | 命令准入／去重；Cloud Lab command store | [commands/runs](../contracts/commands-runs.md) | [Edge Ops SDD](../../edge-ops/SDD.md)；跨產品契約尚未接線 | M1 |
@@ -47,31 +47,16 @@ CL Cloud Lab
 
 未來機器可讀 catalog 可由這個欄位集合設計 schema；M0 不提供可自動派工的 registry，文件中的 capability ID 也不授權任何操作。
 
-## M1 實作對照
+## M1 實作與實際證據
 
-| 能力 | 本次位置與範圍 | 狀態／證據 |
+| 能力 | 現行實作 | 驗證層次／限制 |
 | --- | --- | --- |
-| ID-01 | [Worker auth](../apps/control/worker/auth.mjs)：Access JWT、HMAC、D1 grant | locally_verified；真實 Access 未驗 |
-| AU-01／AU-02 | [控制面](../apps/control/worker/index.mjs)、[D1 schema](../apps/control/migrations/0001.sql)：准入、outbox、具期限低頻schedule | locally_verified；沒有啟用排程 |
-| EX-01 | [Python OS collector](../adapters/node-health/README.md)：單節點負載與根目錄空間、durable journal | locally_verified；未接指定遠端節點 |
-| OB-01／OB-02 | [看板](../apps/control/public/index.html)、snapshot／有界 health artifact | locally_verified 的 UI 模型／HTTP；互動瀏覽器與 live gate 待驗 |
+| ID-01／ID-02 | [Worker auth](../apps/control/worker/auth.mjs)、Access／HMAC／scoped grant | live_verified子集：[首輪接入](evidence/m1-first-live.md)、[撤權](evidence/m1-remote-recovery.md)、[Safari登入](evidence/m1-usage-live.md)。human／bot窗口已到期，不代表目前可登入使用。 |
+| AU-01／AU-02 | [控制面](../apps/control/worker/index.mjs)、D1 outbox、15分鐘schedule | live_verified子集：[Cron閉環](evidence/m1-health-schedule-window-live.md)、[unknown處置後新Cron](evidence/m1-unknown-resolution-live.md)；限一種recipe／單節點，原授權期限保持。 |
+| EX-01 | [Python collector](../adapters/node-health/README.md)、journal／resident | live_verified子集：[服務接入](evidence/m1-service-live.md)；最後保存政策截止2026-11-05T07:24:25Z，非本次程序存活證明。 |
+| OB-01／OB-02 | [看板](../apps/control/public/index.html)、snapshot／artifact／應用用量 | live_verified子集：Safari手動用量與[新版看板](evidence/m1-snapshot-rollout.md)。完整Event/seq未實作，provider用量／帳單unknown。 |
+| AU-01 bot | [bot bridge](../tools/bot_bridge.py)、[MCP](mcp-stdio.md)、[獨立Grok工具接線](grok-connection.md) | [真實工具閉環](evidence/m1-bot-activation-live.md)已驗；沒有模型對話驗收，過期bot不會自動續權。 |
+| OP-01 | 配額／稽核／[隔離還原](evidence/m1-remote-restore.md) | 5應用表／42列與3journal恢復已驗；沒有活躍程序failover，Pages全域盤點缺讀取權限。 |
+| RS-01／RS-02、EX-02／EX-03、AP、OP-02 | 來源／adapter／遷移設計 | proposed；沒有既有應用搬遷／封存或agent平台接入。這是接下來的產品工作，不能被更多node-health加固取代。 |
 
-共同證據：[M1 evidence](evidence/m1-implementation.md)。其餘能力保持 proposed／後續計畫，不因本次實作自動升級。
-
-BC補充：AU-01的[固定bot caller](../tools/bot_bridge.py)及[JSON契約](bot-bridge.md)已本機驗證durable提交／查詢；[證據](evidence/m1-bot-bridge.md)區分真正HTTP collector與尚未接線的Grok。它不接管Kith聊天室或agent原生run，亦不改HL部署pending。
-
-MT補充：AU-01的[本機MCP接入](mcp-stdio.md)重用BC固定工具與durable ID，不建立第二份命令權威；[證據](evidence/m1-mcp-stdio.md)含實際stdio／HTTP／collector，Kith INV-09保持。
-
-GC補充：AU-01的[獨立Grok工具端](grok-connection.md)已登記status-only MCP，原生client發現通過；bot grant過期與自然語言執行仍待後續，Kith權責保持。
-
-BL補充：AU-01獨立MCP工具已完成[一筆真實原runner閉環](evidence/m1-bot-live.md)，bot僅短期窗口，Grok恢復status-only；沒有新增聊天權威、model或常態授權。
-
-BP補充：AU-01的[持久bot政策](bot-policy.md)補上獨立工具host的本機租期與跨連線配額，維持原API／runner權威；常態live啟用另行驗收。
-
-BR補充：AU-01以[顯式政策續租](bot-policy-renewal.md)連接原state的下一期，保持原API／runner權威；模型不具續租工具，live啟用另驗。
-
-BA補充：AU-01的[首期有界啟用方案](bot-activation.md)固定獨立host候選與原state；bot-only期限提議受原runner／Access限制，準備與實際權限分開。
-
-BT補充：AU-01首期政策與獨立host已[實際啟用](evidence/m1-bot-activation-live.md)，原bot-only截止與持久額度並行；工具驗證不等於模型對話驗收。
-
-BI補充：AU-01以[本機租期與額度觀測](bot-inspection.md)顯示剩餘預算及待對帳ID；只讀原state，保持遠端授權／執行權威。
+歷史細項見[里程碑紀錄](milestone-history.md)及[任務板](tasks/BOARD.md)。本樹只投影證據，不產生新的執行或授權權威。

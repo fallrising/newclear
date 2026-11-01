@@ -192,5 +192,7 @@ Owner 指示繼續下一項；本輪使用本機故障，不新增模型呼叫�
 
 | ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| T-0016-01 | Pi 重試計畫／執行與持久化最多兩次限制 | AC-07／08 子集 | in_progress | 2026-11-01T16:44:12Z | — | 2026-11-01T16:52:27Z |
-| T-0016-02 | 保留 fixture／失敗來源、結果關聯與真實故障重試驗收 | AC-09／11 子集 | in_progress | 2026-11-01T16:44:12Z | — | 2026-11-01T16:52:27Z |
+| T-0016-01 | Pi 重試計畫／執行與持久化最多兩次限制 | AC-07／08 子集 | done | 2026-11-01T16:44:12Z | 2026-11-01T16:54:06Z | 2026-11-01T16:54:34Z |
+| T-0016-02 | 保留 fixture／失敗來源、結果關聯與真實故障重試驗收 | AC-09／11 子集 | done | 2026-11-01T16:44:12Z | 2026-11-01T16:54:06Z | 2026-11-01T16:54:34Z |
+
+T-0016 結案：[PR #947](https://github.com/fallrising/newclear/pull/947) 已合併，commit `adbc2dda0ac037a947201a1320e0591745fbcc93`，offline／validate 兩項 CI success。已回讀主線證據：152 tests；真實 Pi 本機 429 初次＋兩次明確重試，三個獨立 session、相同 fixture、原報告／事件不變；第三次及過期 parent 的 plan／execute 六項全部拒絕，不新增 run。三次追蹤 41／35／46 個程序全部退出，執行鎖釋放，46 筆結果的瀏覽器關聯／分類／刷新通過。零本地或遠端模型推論、未載入 owner key 或 Strata。完成 AC-07／08／09／11 的 Pi 子集；其他 provider 重試／生命週期、UI 派工、安全整合及完整 MVP 仍 pending，沒有 release／deploy／usable tag。

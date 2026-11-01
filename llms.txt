@@ -54,6 +54,7 @@ Boundaries between components are recorded in [PORTFOLIO.md](https://github.com/
 
 ## Specifications, labs and examples
 
+- [labs/token-economizer-lab](https://github.com/fallrising/newclear/blob/main/labs/token-economizer-lab/llms.txt): **ungraded** — pinned real TokenEconomizer hooks/CLI on synthetic traces: envfacts, pruning, paused-judge backstop and accounting. No live provider, installation or savings claim.
 - [labs/graphify-lab](https://github.com/fallrising/newclear/blob/main/labs/graphify-lab/llms.txt): **ungraded** — pinned Graphify code-only CLI/MCP experiment with shared reference snapshots, source provenance and measured developer scenarios; see SUCCESS for current acceptance.
 - [specs/fleet](https://github.com/fallrising/newclear/blob/main/specs/fleet/README.md): **B** — executable Fleet Catalog: `fleet.yaml`, Compose, outbound agents, Cloudflare. A component with code and tests despite living under `specs/`; see [docs/taxonomy.md](https://github.com/fallrising/newclear/blob/main/docs/taxonomy.md). JSON Schemas in [schemas/](https://github.com/fallrising/newclear/blob/main/specs/fleet/schemas/). Apache-2.0.
 - [labs/eru-vps-mvp](https://github.com/fallrising/newclear/blob/main/labs/eru-vps-mvp/README.md): **A** — four-machine VPS MVP experiment for Project Eru. Real host changes require separate authorisation.

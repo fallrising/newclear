@@ -616,7 +616,15 @@ ULR01–04線上操作及保全已通過，T855獨立公開證據ACCEPT；實際
 
 | ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| T-0035-1 | 獨立快照與還原 | XR-01 | in_progress | 2026-11-01T05:22:43Z | — | 2026-11-01T05:33:30Z |
-| T-0035-2 | 未知及原結果對帳 | XR-02 | in_progress | 2026-11-01T05:22:43Z | — | 2026-11-01T05:33:30Z |
-| T-0035-3 | 錯位缺失拒絕重做 | XR-03 | in_progress | 2026-11-01T05:22:43Z | — | 2026-11-01T05:33:30Z |
-| T-0035-4 | 隔離驗證審查交付 | XR-04 | in_progress | 2026-11-01T05:22:43Z | — | 2026-11-01T05:33:30Z |
+| T-0035-1 | 獨立快照與還原 | XR-01 | done | 2026-11-01T05:22:43Z | 2026-11-01T05:35:57Z | 2026-11-01T05:36:29Z |
+| T-0035-2 | 未知及原結果對帳 | XR-02 | done | 2026-11-01T05:22:43Z | 2026-11-01T05:35:57Z | 2026-11-01T05:36:29Z |
+| T-0035-3 | 錯位缺失拒絕重做 | XR-03 | done | 2026-11-01T05:22:43Z | 2026-11-01T05:35:57Z | 2026-11-01T05:36:29Z |
+| T-0035-4 | 隔離驗證審查交付 | XR-04 | done | 2026-11-01T05:22:43Z | 2026-11-01T05:35:57Z | 2026-11-01T05:36:29Z |
+
+### T-0035 Git交付與source/local收尾
+
+- [PR900](https://github.com/fallrising/newclear/pull/900) head `61c78bba4e188900c20c987a47f91cc705b62e1f`，merge `20d8352392a75ce1cf37f290c82336f1c9364a18`，2026-11-01T05:35:57Z合併。exact-head CI全過：CloudLab `41277463559`、Project success `41277463658`、llms `41277463755`。
+- XR01–04：六種真本機workerd/D1＋Python runner＋SQLite online backup跨快照恢復全過，source每案1次採集、restore均0次；原source schema/rows/journal保持。started及unknown保守active，completed回報原bytes與時間；缺journal只unknown、identity mismatch拒絕、舊accepted控制面缺dispatch權限拒絕。先精確還原再目的地quarantine，舊fence409不改命令。
+- RED4→GREEN4，完整130Node＋308Python＝438tests，零fail/skip；XM1去模式保護與XM2去identity核對均被oracle偵測，原runtime未改。XR1平台metadata誤計數失敗保留，只明示排除_cf_METADATA及既有_cf_KV；初次索引因新文件未stage報錯，stage後通過；既有SQLite warnings保留。T860首輪REWORK後集中複審ACCEPT。
+- 50contracts／8indexes／task-report／syntax／diff／397links通過；九份workerd來源hash與公開原摘要相符。正常main merge保留並行工作；合併回讀本機與remote fulltree相等、工作樹乾淨、head為main祖先，67份runtime/test/tool input與remote main相同。
+- 原Worker／auth／protocol／migrations／runner／看板未改；沒有原服務或private state操作、授權續期、付費升級或真人重測。此為local logical restore，官方遠端unknown/in-flight export/import與正式failover仍pending；完整mainline incomplete／usable_tag none。接續對齊事件seq／通知原契約與M1輪詢範圍；本結案只改任務板。

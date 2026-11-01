@@ -1,0 +1,350 @@
+{
+  "documents": [
+    {
+      "path": "/home/ckc/test/codex/cms-pp1c-blueprint/apps/cms-scaffold/docs/v2/waves/PP1c.md",
+      "sha256": "a215a8382e7e72f3cbfb4fdc258629a5d24de001a1af79131fe20f9588a258bc",
+      "lines": 663
+    },
+    {
+      "path": "/home/ckc/test/codex/cms-pp1c-blueprint/apps/cms-scaffold/docs/v2/contracts/PP1-recovery.md",
+      "sha256": "1ec69daefc753f0d514f8b0783f5466e60e98b91098ba84fc3808f9bbd644170",
+      "lines": 149
+    }
+  ],
+  "relativeLinks": [
+    {
+      "source": "docs/v2/waves/PP1c.md",
+      "target": "PP1.md",
+      "exists": true
+    },
+    {
+      "source": "docs/v2/waves/PP1c.md",
+      "target": "../contracts/PP1-recovery.md",
+      "exists": true
+    },
+    {
+      "source": "docs/v2/waves/PP1c.md",
+      "target": "../contracts/PP1-recovery.md",
+      "exists": true
+    },
+    {
+      "source": "docs/v2/waves/PP1c.md",
+      "target": "../contracts/PP1-recovery.md",
+      "exists": true
+    },
+    {
+      "source": "docs/v2/contracts/PP1-recovery.md",
+      "target": "../waves/PP1.md",
+      "exists": true
+    },
+    {
+      "source": "docs/v2/contracts/PP1-recovery.md",
+      "target": "../waves/PP1c.md",
+      "exists": true
+    }
+  ],
+  "cards": [
+    {
+      "id": "C01",
+      "title": "strict manifest Red",
+      "line": 214,
+      "estimate": 240,
+      "contract": "- 目標：canonical/schema拒絕行為先紅。\n- 輸入：§4.1與parent §4.1–4.2。\n- 精確可寫路徑：scripts/ops/recovery-protocol.mjs; scripts/ops/recovery-protocol.test.mjs。\n- 步驟：建安全scaffold；測duplicate/unknown/noncanonical UTF-8、batch/hash/order/size/path/secret canary。\n- 可觀察完成條件：named assertion Red、無compile/import錯。\n- 驗證命令：node --test scripts/ops/recovery-protocol.test.mjs（Red卡須保留named預期行為失敗；此DRAFT author task未執行產品命令）。\n- AC/FM：AC03 FM08/12。\n- 預估：240 handwritten lines，含tests，上限400。"
+    },
+    {
+      "id": "C02",
+      "title": "manifest Green",
+      "line": 225,
+      "estimate": 280,
+      "contract": "- 目標：strict parser/schema/hash與receipt。\n- 輸入：C01；parent canonical schema。\n- 精確可寫路徑：同C01兩檔。\n- 步驟：canonical byte equality後schema；綁artifact/release；固定failure輸出。\n- 可觀察完成條件：所有invalid拒絕、合法bytes穩定、無canary。\n- 驗證命令：node --test scripts/ops/recovery-protocol.test.mjs（Red卡須保留named預期行為失敗；此DRAFT author task未執行產品命令）。\n- AC/FM：AC03 FM08/10/12。\n- 預估：280 handwritten lines，含tests，上限400。"
+    },
+    {
+      "id": "C03",
+      "title": "inventory Red",
+      "line": 236,
+      "estimate": 340,
+      "contract": "- 目標：暴露media/raw unsafe/path/schema錯誤。\n- 輸入：MediaService、ImageVariants、LocalDiskMediaObjectStore、migration allowlist。\n- 精確可寫路徑：RecoveryInventory.java; RecoveryInventoryTests.java。\n- 步驟：PNG/PDF/decode-null/orphan/deleted fixtures；missing/unsafe/changed/extra-column行為。\n- 可觀察完成條件：預期安全assertion Red、source不變。\n- 驗證命令：./gradlew test --tests *RecoveryInventoryTests --no-daemon --no-parallel（Red卡須保留named預期行為失敗；此DRAFT author task未執行產品命令）。\n- AC/FM：AC03 FM08/12。\n- 預估：340 handwritten lines，含tests，上限400。"
+    },
+    {
+      "id": "C04a",
+      "title": "DB inventory Green",
+      "line": 247,
+      "estimate": 380,
+      "contract": "- 目標：20 relation固定column/catalog/raw snapshot。\n- 輸入：C03；V2–V9、V7/V10、Flyway 11.7.2。\n- 精確可寫路徑：RecoveryInventory.java; RecoveryInventoryTests.java; RecoveryInventoryIntegrationTests.java。\n- 步驟：逐欄::text、固定session、REPEATABLE_READ；metadata另取；完整Flyway逐row compare。\n- 可觀察完成條件：PG16證query-only與schema/raw equality；unknown relation/column拒絕。\n- 驗證命令：./gradlew test --tests *RecoveryInventoryTests --no-daemon --no-parallel; ./gradlew integrationTest --tests *RecoveryInventoryIntegrationTests --no-daemon --no-parallel（Red卡須保留named預期行為失敗；此DRAFT author task未執行產品命令）。\n- AC/FM：AC03 FM08/12。\n- 預估：380 handwritten lines，含tests，上限400。"
+    },
+    {
+      "id": "C04b",
+      "title": "media composition Green",
+      "line": 258,
+      "estimate": 360,
+      "contract": "- 目標：同snapshot組合DB與逐檔media完整性。\n- 輸入：C04a與ImageVariants、PP1CMEDIA1 header。\n- 精確可寫路徑：RecoveryInventory.java; RecoveryInventoryTests.java; RecoveryInventoryIntegrationTests.java。\n- 步驟：核original/variant/hash/size/dimensions；no-follow files；orphan/deleted保留；null-safe records。\n- 可觀察完成條件：兩側完整一致；unsafe/missing/change拒絕且不變source。\n- 驗證命令：同C04a Gradle focused命令（Red卡須保留named預期行為失敗；此DRAFT author task未執行產品命令）。\n- AC/FM：AC03 FM08。\n- 預估：360 handwritten lines，含tests，上限400。"
+    },
+    {
+      "id": "C05",
+      "title": "offline inventory dispatch Red",
+      "line": 269,
+      "estimate": 240,
+      "contract": "- 目標：精確首token、maintenance優先及Spring前拒絕。\n- 輸入：現有CmsApiApplication.main路由與測試。\n- 精確可寫路徑：CmsApiApplication.java; CmsApiApplicationTests.java; RecoveryInventoryMain.java; RecoveryInventoryMainTests.java。\n- 步驟：建立compile-safe seam；測first/repeated/misplaced tokens、legacy maintenance、Spring spy=0。\n- 可觀察完成條件：行為測試Red而非compile Red；舊測試不退化。\n- 驗證命令：./gradlew test --tests *CmsApiApplicationTests --tests *RecoveryInventoryMainTests --no-daemon --no-parallel（Red卡須保留named預期行為失敗；此DRAFT author task未執行產品命令）。\n- AC/FM：AC03 FM08。\n- 預估：240 handwritten lines，含tests，上限400。"
+    },
+    {
+      "id": "C06",
+      "title": "offline inventory dispatch Green",
+      "line": 280,
+      "estimate": 320,
+      "contract": "- 目標：用既有API image跑offline JDBC inventory。\n- 輸入：C05、C04a/b、request/ready/permit/result schema。\n- 精確可寫路徑：上述Java四檔。\n- 步驟：maintenance後新增exact ops-inventory；strict refs/secret file；single JDBC read-only；固定receipt。\n- 可觀察完成條件：Spring不啟動、DB rollback/close、無JavaExec。\n- 驗證命令：同C05命令（Red卡須保留named預期行為失敗；此DRAFT author task未執行產品命令）。\n- AC/FM：AC03 FM08/12。\n- 預估：320 handwritten lines，含tests，上限400。"
+    },
+    {
+      "id": "L01",
+      "title": "v1 store extraction",
+      "line": 291,
+      "estimate": 350,
+      "contract": "- 目標：抽取持久registry primitives保留v1行為。\n- 輸入：PP1b frozen v1 source/tests。\n- 精確可寫路徑：maintenance-guard.mjs/.test.mjs; maintenance-store.mjs/.test.mjs。\n- 步驟：移private reserve/load/fsync/release；比較原fixture bytes與所有v1回歸。\n- 可觀察完成條件：API/schema/ordering/errors不變。\n- 驗證命令：node --test scripts/local/maintenance-guard.test.mjs scripts/local/maintenance-store.test.mjs（Red卡須保留named預期行為失敗；此DRAFT author task未執行產品命令）。\n- AC/FM：AC02 FM09。\n- 預估：350 handwritten lines，含tests，上限400。"
+    },
+    {
+      "id": "L02",
+      "title": "LeaseV2 registry",
+      "line": 302,
+      "estimate": 390,
+      "contract": "- 目標：同registry strict versioned union和永久operation ID。\n- 輸入：L01、T002 schema proposal、G06/G07 freeze。\n- 精確可寫路徑：maintenance-store.mjs/.test.mjs; maintenance-workflow.mjs/.test.mjs。\n- 步驟：required/null schema；journal BEGIN/END hash；unknown/partial/duplicate/lock cases；no replay/migrate。\n- 可觀察完成條件：v1全綠；V2 invalid fail closed並保留lock。\n- 驗證命令：node --test scripts/local/maintenance-store.test.mjs scripts/local/maintenance-workflow.test.mjs（Red卡須保留named預期行為失敗；此DRAFT author task未執行產品命令）。\n- AC/FM：AC02/03 FM09/10。\n- 預估：390 handwritten lines，含tests，上限400。"
+    },
+    {
+      "id": "L03",
+      "title": "source/child capability",
+      "line": 313,
+      "estimate": 390,
+      "contract": "- 目標：Opaque token綁inode/device、source及單一child。\n- 輸入：L02、target ownership rules。\n- 精確可寫路徑：maintenance-workflow.mjs/.test.mjs; maintenance-target.mjs/.test.mjs。\n- 步驟：WeakMap capability；reserve marker；forgery/second-child/adoption/state tests。\n- 可觀察完成條件：無token仿造或target adoption；v1 assertions不變。\n- 驗證命令：node --test scripts/local/maintenance-workflow.test.mjs scripts/local/maintenance-target.test.mjs（Red卡須保留named預期行為失敗；此DRAFT author task未執行產品命令）。\n- AC/FM：AC02/03 FM09/12。\n- 預估：390 handwritten lines，含tests，上限400。"
+    },
+    {
+      "id": "H01",
+      "title": "full-ID helper lifecycle",
+      "line": 324,
+      "estimate": 390,
+      "contract": "- 目標：安全create/inspect/start/wait/remove。\n- 輸入：L02/L03、既有probe生命周期。\n- 精確可寫路徑：maintenance-helper.mjs/.test.mjs。\n- 步驟：固定kind policy；start前/運行/退出完整inspect；限owned full ID cleanup；Docker故障注入。\n- 可觀察完成條件：錯image/argv/env/mount/network/security不start。\n- 驗證命令：node --test scripts/local/maintenance-helper.test.mjs（Red卡須保留named預期行為失敗；此DRAFT author task未執行產品命令）。\n- AC/FM：AC03 FM09/10/12。\n- 預估：390 handwritten lines，含tests，上限400。"
+    },
+    {
+      "id": "H02",
+      "title": "JDBC/tool session proof",
+      "line": 335,
+      "estimate": 390,
+      "contract": "- 目標：Ready/permit與PG工具observational proof分流。\n- 輸入：H01、PG16 inspect/activity contracts。\n- 精確可寫路徑：maintenance-helper.mjs/.test.mjs; maintenance-helper-session.test.mjs。\n- 步驟：同connection固定PID tuple；full container/network/IP核驗；PG tool唯一process/backend、結束零backend。\n- 可觀察完成條件：拒PID change/extra backend/wrong IP/application-name-only。\n- 驗證命令：node --test scripts/local/maintenance-helper.test.mjs scripts/local/maintenance-helper-session.test.mjs（Red卡須保留named預期行為失敗；此DRAFT author task未執行產品命令）。\n- AC/FM：AC03 FM09/10。\n- 預估：390 handwritten lines，含tests，上限400。"
+    },
+    {
+      "id": "C07",
+      "title": "backup Red",
+      "line": 346,
+      "estimate": 320,
+      "contract": "- 目標：暴露writer race/partial capture failure。\n- 輸入：L01–L03、PP1a receipt、C01–C06。\n- 精確可寫路徑：local-bundle.mjs; local-bundle.test.mjs。\n- 步驟：scaffold + barrier faults：restart/writer/partial dump/media change/cancel/old bundle。\n- 可觀察完成條件：行為斷言Red，不是缺class compile紅。\n- 驗證命令：node --test scripts/ops/local-bundle.test.mjs（Red卡須保留named預期行為失敗；此DRAFT author task未執行產品命令）。\n- AC/FM：AC03 FM08/09/10。\n- 預估：320 handwritten lines，含tests，上限400。"
+    },
+    {
+      "id": "C08",
+      "title": "lease capture Green",
+      "line": 357,
+      "estimate": 390,
+      "contract": "- 目標：同一source LeaseV2產immutable local bundle。\n- 輸入：C07、H01–03、C02/C04b、PP1a receipt。\n- 精確可寫路徑：local-bundle.mjs; local-bundle.test.mjs。\n- 步驟：停寫；dump/media stream；pre/post DB/files compare；atomic marker；依原service state finish。\n- 可觀察完成條件：完整lineage/writer proof才LOCAL_VERIFIED；failure留lock/staging。\n- 驗證命令：node --test scripts/ops/local-bundle.test.mjs（Red卡須保留named預期行為失敗；此DRAFT author task未執行產品命令）。\n- AC/FM：AC03 FM08–10。\n- 預估：390 handwritten lines，含tests，上限400。"
+    },
+    {
+      "id": "H03",
+      "title": "framed media transport",
+      "line": 368,
+      "estimate": 390,
+      "contract": "- 目標：PP1CMEDIA1 bounded stream與UID安全。\n- 輸入：C04b、PP1a Node24.18/API UID constraints。\n- 精確可寫路徑：scripts/ops/local-media.mjs; local-media.test.mjs。\n- 步驟：header/EOF/path/count/capacity/hash驗證；verified FD/stdin restore；拒chmod/chown。\n- 可觀察完成條件：trailing/truncated/link/hash/permission均拒絕，bytes相同。\n- 驗證命令：node --test scripts/ops/local-media.test.mjs（Red卡須保留named預期行為失敗；此DRAFT author task未執行產品命令）。\n- AC/FM：AC03 FM08/10。\n- 預估：390 handwritten lines，含tests，上限400。"
+    },
+    {
+      "id": "C09",
+      "title": "proof verifier Red",
+      "line": 379,
+      "estimate": 300,
+      "contract": "- 目標：測試locator/artifact/source錯配不寫target。\n- 輸入：schema、PP1a source hashes、L02。\n- 精確可寫路徑：local-recovery-verify.mjs; local-recovery-verify.test.mjs。\n- 步驟：改一個proof/artifact/source/raw field；receipt-only/stale sessions/audit。\n- 可觀察完成條件：所有preflight fail且stop/helper/write=0。\n- 驗證命令：node --test scripts/ops/local-recovery-verify.test.mjs（Red卡須保留named預期行為失敗；此DRAFT author task未執行產品命令）。\n- AC/FM：AC02/03 FM08/12。\n- 預估：300 handwritten lines，含tests，上限400。"
+    },
+    {
+      "id": "C10",
+      "title": "proof verifier Green",
+      "line": 390,
+      "estimate": 390,
+      "contract": "- 目標：完整artifact/source/20-table/files proof。\n- 輸入：C09、C02/C04a/b、H03、PP1a provenance。\n- 精確可寫路徑：同C09兩檔。\n- 步驟：重hash每bytes與lineage；比完整source/target schema/raw/files；固定proof receipt。\n- 可觀察完成條件：只有完整匹配成功；locator不能授權。\n- 驗證命令：node --test scripts/ops/local-recovery-verify.test.mjs（Red卡須保留named預期行為失敗；此DRAFT author task未執行產品命令）。\n- AC/FM：AC02/03 FM08/12。\n- 預估：390 handwritten lines，含tests，上限400。"
+    },
+    {
+      "id": "T01",
+      "title": "private restore prepare",
+      "line": 401,
+      "estimate": 380,
+      "contract": "- 目標：新增不走正常prepare/verify的內部child prepare。\n- 輸入：PP1a source、L03。\n- 精確可寫路徑：scripts/local/prepare.mjs/.test.mjs; restore-target.mjs/.test.mjs。\n- 步驟：private mode略8443/host forwarder；綁receipt/ref；normal prepare unchanged；不start services。\n- 可觀察完成條件：無publish/pull/source mutation；無法證明則ADAPTER_UNSEALED。\n- 驗證命令：node --test scripts/local/prepare.test.mjs scripts/local/restore-target.test.mjs（Red卡須保留named預期行為失敗；此DRAFT author task未執行產品命令）。\n- AC/FM：AC03 FM12。\n- 預估：380 handwritten lines，含tests，上限400。"
+    },
+    {
+      "id": "T02",
+      "title": "create-only blank target",
+      "line": 412,
+      "estimate": 390,
+      "contract": "- 目標：建立distinct fresh PG/media與stopped API/ingress。\n- 輸入：T01、L03、H01。\n- 精確可寫路徑：restore-target.mjs/.test.mjs; maintenance-target.mjs/.test.mjs。\n- 步驟：exclusive project；PG first blank query；API/ingress create-stopped；full inspect。\n- 可觀察完成條件：existing/nonblank/shared target在write前拒絕。\n- 驗證命令：node --test scripts/local/restore-target.test.mjs scripts/local/maintenance-target.test.mjs（Red卡須保留named預期行為失敗；此DRAFT author task未執行產品命令）。\n- AC/FM：AC03 FM12。\n- 預估：390 handwritten lines，含tests，上限400。"
+    },
+    {
+      "id": "C11",
+      "title": "restore Red",
+      "line": 423,
+      "estimate": 340,
+      "contract": "- 目標：證明restore順序/故障target不可重用。\n- 輸入：T02、C09/C10、C04a/b、H03。\n- 精確可寫路徑：local-restore.mjs; local-restore.test.mjs。\n- 步驟：phase scaffold；fault dump/media/raw/revoke/API；assert source unchanged/isolation。\n- 可觀察完成條件：named behavior Red、非compile error。\n- 驗證命令：node --test scripts/ops/local-restore.test.mjs（Red卡須保留named預期行為失敗；此DRAFT author task未執行產品命令）。\n- AC/FM：AC03 FM10/12。\n- 預估：340 handwritten lines，含tests，上限400。"
+    },
+    {
+      "id": "C12",
+      "title": "restore core Green",
+      "line": 434,
+      "estimate": 390,
+      "contract": "- 目標：還原至空target並驗RAW_VERIFIED。\n- 輸入：C11、T02、H01–03、C10、C04a/b。\n- 精確可寫路徑：local-restore.mjs; local-restore.test.mjs。\n- 步驟：PG16 single transaction restore; no clean/create/jobs；media restore；full raw/files/release compare。\n- 可觀察完成條件：只有全等到RAW_VERIFIED；retry需new target/ID。\n- 驗證命令：node --test scripts/ops/local-restore.test.mjs scripts/ops/local-recovery-verify.test.mjs（Red卡須保留named預期行為失敗；此DRAFT author task未執行產品命令）。\n- AC/FM：AC03 FM10/12。\n- 預估：390 handwritten lines，含tests，上限400。"
+    },
+    {
+      "id": "C13",
+      "title": "revoke Red",
+      "line": 445,
+      "estimate": 280,
+      "contract": "- 目標：暴露sessions/audit半提交。\n- 輸入：C12、JdbcIdentityStore.insertAudit。\n- 精確可寫路徑：RestoreSessionRevoker.java; unit/PG integration tests。\n- 步驟：audit/update/commit faults；API-start=0；非session tables unchanged。\n- 可觀察完成條件：rollback assertion Red而非compile error。\n- 驗證命令：./gradlew integrationTest --tests *RestoreSessionRevokerIntegrationTests --no-daemon --no-parallel（Red卡須保留named預期行為失敗；此DRAFT author task未執行產品命令）。\n- AC/FM：AC02/03 FM10/12。\n- 預估：280 handwritten lines，含tests，上限400。"
+    },
+    {
+      "id": "C14",
+      "title": "revoke Green",
+      "line": 456,
+      "estimate": 360,
+      "contract": "- 目標：atomic revoke + exact AUTH receipt。\n- 輸入：C13、parent §5.4。\n- 精確可寫路徑：同C13 Java/test paths。\n- 步驟：同transaction single timestamp；preallocated ID；revoke all active；insert exact AUTH；commit receipt。\n- 可觀察完成條件：PG證session delta + 1 AUTH；fault rollback/no API。\n- 驗證命令：同C13 PG integration command（Red卡須保留named預期行為失敗；此DRAFT author task未執行產品命令）。\n- AC/FM：AC02/03 FM10。\n- 預估：360 handwritten lines，含tests，上限400。"
+    },
+    {
+      "id": "R01",
+      "title": "proof locked revalidation",
+      "line": 467,
+      "estimate": 390,
+      "contract": "- 目標：Locator轉完整lineage，lease內驗source。\n- 輸入：C10、L02/L03、accounts §10.1a。\n- 精確可寫路徑：local-recovery-verify.mjs/.test.mjs; maintenance-workflow.mjs/.test.mjs。\n- 步驟：preflight before stop；under lock rehash proof/bundle/source raw/files；reject stale/receipt-only。\n- 可觀察完成條件：只有complete released proof/current equality接受。\n- 驗證命令：node --test scripts/ops/local-recovery-verify.test.mjs scripts/local/maintenance-workflow.test.mjs（Red卡須保留named預期行為失敗；此DRAFT author task未執行產品命令）。\n- AC/FM：AC02 FM09/12。\n- 預估：390 handwritten lines，含tests，上限400。"
+    },
+    {
+      "id": "R02",
+      "title": "recover CLI attachment",
+      "line": 478,
+      "estimate": 380,
+      "contract": "- 目標：接現有recover命令，不改六欄result或狀態。\n- 輸入：R01、accepted G06/G07。\n- 精確可寫路徑：maintenance.mjs/.test.mjs; maintenance-workflow.mjs/.test.mjs。\n- 步驟：proof before connection/stop；single registry attach；finish KEEP_STOPPED；no nested lock。\n- 可觀察完成條件：v1 FRESH_INIT全回歸；stopped recovery不restart。\n- 驗證命令：node --test scripts/local/maintenance.test.mjs scripts/local/maintenance-workflow.test.mjs（Red卡須保留named預期行為失敗；此DRAFT author task未執行產品命令）。\n- AC/FM：AC02 FM09。\n- 預估：380 handwritten lines，含tests，上限400。"
+    },
+    {
+      "id": "R03",
+      "title": "Java guard projection",
+      "line": 489,
+      "estimate": 390,
+      "contract": "- 目標：Java只接受host驗證的proof projection。\n- 輸入：accepted G06、accounts policy、R01/R02。\n- 精確可寫路徑：LocalMaintenanceGuard.java; IdentityMaintenanceCommandTests.java。\n- 步驟：strict V2 proof projection；backupId僅供原audit；不擴Operation。\n- 可觀察完成條件：六欄result及v1 predicate不變；無bypass。\n- 驗證命令：./gradlew test --tests *IdentityMaintenanceCommandTests --no-daemon --no-parallel（Red卡須保留named預期行為失敗；此DRAFT author task未執行產品命令）。\n- AC/FM：AC02 FM09/12。\n- 預估：390 handwritten lines，含tests，上限400。"
+    },
+    {
+      "id": "R04",
+      "title": "offline revoke dispatch",
+      "line": 500,
+      "estimate": 360,
+      "contract": "- 目標：精確第一token在Spring前進transaction core。\n- 輸入：C13/C14、existing maintenance routing。\n- 精確可寫路徑：CmsApiApplication.java/CmsApiApplicationTests.java; RestoreSessionRevokerMain.java/tests。\n- 步驟：maintenance branch先保留；精確首token；strict request/handshake；reject misplaced/repeated。\n- 可觀察完成條件：Spring不啟動；舊路由不變；只commit success。\n- 驗證命令：./gradlew test --tests *CmsApiApplicationTests --tests *RestoreSessionRevokerMainTests --no-daemon --no-parallel（Red卡須保留named預期行為失敗；此DRAFT author task未執行產品命令）。\n- AC/FM：AC02/03 FM10。\n- 預估：360 handwritten lines，含tests，上限400。"
+    },
+    {
+      "id": "T03",
+      "title": "child Chromium/socket smoke",
+      "line": 511,
+      "estimate": 390,
+      "contract": "- 目標：child web network內一次性Chromium與密碼傳遞。\n- 輸入：T02/C14/matched health、PP1a CA/browser。\n- 精確可寫路徑：scripts/ops/local-restore-smoke.mjs/.test.mjs; 不改forward.mjs。\n- 步驟：eligibility gates；NSS trust；one-use Unix socket；no argv/env/mount/host route；teardown。\n- 可觀察完成條件：premature run拒絕；source/DB不可達；browser/child stopped。\n- 驗證命令：node --test scripts/ops/local-restore-smoke.test.mjs（Red卡須保留named預期行為失敗；此DRAFT author task未執行產品命令）。\n- AC/FM：AC03/06 FM10/15。\n- 預估：390 handwritten lines，含tests，上限400。"
+    },
+    {
+      "id": "C15",
+      "title": "lifecycle Red",
+      "line": 522,
+      "estimate": 350,
+      "contract": "- 目標：暴露release/startup/smoke前置不足。\n- 輸入：C14/T03/PP1a receipts；zero startup delta。\n- 精確可寫路徑：local-restore.mjs/.test.mjs; local-recovery-verify.mjs/.test.mjs。\n- 步驟：fault image/jar/dist/config/flyway/revoke/startup/health/privacy；route spy=0。\n- 可觀察完成條件：behavior Red、target retained/stopped。\n- 驗證命令：node --test scripts/ops/local-restore.test.mjs scripts/ops/local-recovery-verify.test.mjs（Red卡須保留named預期行為失敗；此DRAFT author task未執行產品命令）。\n- AC/FM：AC03/06 FM10/12/15。\n- 預估：350 handwritten lines，含tests，上限400。"
+    },
+    {
+      "id": "C16",
+      "title": "lifecycle Green",
+      "line": 533,
+      "estimate": 390,
+      "contract": "- 目標：依序API health→child ingress→browser smoke。\n- 輸入：C15/T03、release and revoke receipts。\n- 精確可寫路徑：same C15 paths。\n- 步驟：assert gate order；post-start raw delta；unexpected startup mutation fail；stop child。\n- 可觀察完成條件：exact source provenance and smoke proof; RESTORE-only target。\n- 驗證命令：same C15 Node command（Red卡須保留named預期行為失敗；此DRAFT author task未執行產品命令）。\n- AC/FM：AC03/06 FM10/12/15。\n- 預估：390 handwritten lines，含tests，上限400。"
+    },
+    {
+      "id": "C17",
+      "title": "root local drill",
+      "line": 544,
+      "estimate": 300,
+      "contract": "- 目標：真實第二copy+不同空target閉環。\n- 輸入：C16、PP1a verified、accepted PP1b guards。\n- 精確可寫路徑：root evidence only; no added product paths。\n- 步驟：root runs stopped source capture, fresh project/volumes restore/raw/revoke/API/child browser; preserve IDs/hashes。\n- 可觀察完成條件：actual identities/proof recorded; local only, no SLA claim。\n- 驗證命令：root-approved runtime+PG+browser commands with captured outputs（Red卡須保留named預期行為失敗；此DRAFT author task未執行產品命令）。\n- AC/FM：AC03/06 FM08–12/15。\n- 預估：300 handwritten lines，含tests，上限400。"
+    },
+    {
+      "id": "C18",
+      "title": "handoff/evidence",
+      "line": 555,
+      "estimate": 250,
+      "contract": "- 目標：獨立檢查、CI、文件交接。\n- 輸入：C01–C17 and root evidence。\n- 精確可寫路徑：no additional product paths。\n- 步驟：scope/secret/hash checks; required tests and real evidence mapped; preserve PD follow-ups。\n- 可觀察完成條件：all required evidence visible; no offsite claim。\n- 驗證命令：root required repo gates and CI（Red卡須保留named預期行為失敗；此DRAFT author task未執行產品命令）。\n- AC/FM：AC02/03 FM08–12。\n- 預估：250 handwritten lines，含tests，上限400。"
+    },
+    {
+      "id": "E01",
+      "title": "independent evidence gate",
+      "line": 566,
+      "estimate": 0,
+      "contract": "- 目標：由root完成獨立交付證據審核，不新增產品功能。\n- 輸入：C01–C18、L01–L03、H01–H03、T01–T03、R01–R04及實際run receipts。\n- 精確可寫路徑：root-owned coordination report/evidence；無產品路徑。\n- 步驟：逐項映射CI、unit/PG/integration/browser與真restore輸出；核source hashes、scope、secret scan、停機狀態及正式未決gate。\n- 可觀察完成條件：required checks均有可追溯證據；明列failed/skipped/unrun；不把local copy說成offsite。\n- 驗證命令：root依task evidence-gate及repo-required CI執行，結果逐項記錄於root evidence。\n- AC/FM：PP1-AC02/03；FM08–FM15。\n- 預估：0 product lines，含root review；驗收工作不是零成本。"
+    }
+  ],
+  "sourceInputs": [
+    {
+      "path": "/home/ckc/test/codex/cms-pp1b-implementation/apps/cms-scaffold/scripts/local/maintenance-guard.mjs",
+      "sha256": "cab6ed5b313c6b4aedd70acfaeb71c0df56fb214a5c64e2c81695d52674ccd83"
+    },
+    {
+      "path": "/home/ckc/test/codex/cms-pp1b-implementation/apps/cms-scaffold/scripts/local/maintenance-target.mjs",
+      "sha256": "5d8c1b2bf747485744e3d06252fa269aa41d6fb3fef9a6d759936e9527e6bd5b"
+    },
+    {
+      "path": "/home/ckc/test/codex/cms-pp1b-implementation/apps/cms-scaffold/scripts/local/maintenance.mjs",
+      "sha256": "699d235d51b2b9bb4f073691bb6bd6e0bac12fce4f45c2fab1a81ec7d2de581a"
+    },
+    {
+      "path": "/home/ckc/test/codex/cms-pp1b-implementation/apps/cms-scaffold/scripts/local/prepare.mjs",
+      "sha256": "652f171d28fa6e303babee7ac381427b67b830e7a324df75c3381f81c894c21d"
+    },
+    {
+      "path": "/home/ckc/test/codex/cms-pp1b-implementation/apps/cms-scaffold/compose.pp1-local.yaml",
+      "sha256": "5350e6b5f929f7b21fa97e859197aa721a0303c52a260870bf11bf4738cd2d7e"
+    },
+    {
+      "path": "/home/ckc/test/codex/cms-pp1b-implementation/apps/cms-scaffold/docker/pp1-api.Dockerfile",
+      "sha256": "ad323f4d66934d44e2eb1eea4c4667b04484c66fe0b72f24b72b966c5683883b"
+    },
+    {
+      "path": "/home/ckc/test/codex/cms-pp1b-implementation/apps/cms-scaffold/services/cms-api/src/main/java/com/fallrising/cms/CmsApiApplication.java",
+      "sha256": "4a7c5152004bca3c50be5392237b6aa028afc68185d502e83a9b0193d49fc02d"
+    },
+    {
+      "path": "/home/ckc/test/codex/cms-pp1b-implementation/apps/cms-scaffold/services/cms-api/src/main/java/com/fallrising/cms/identity/maintenance/LocalMaintenanceGuard.java",
+      "sha256": "f821690bfb9fe85e58d38f8484dd0a775a7ba1fdcf0e04bd60f00a4430fdca1b"
+    },
+    {
+      "path": "/home/ckc/test/codex/cms-pp1b-implementation/apps/cms-scaffold/services/cms-api/src/main/java/com/fallrising/cms/media/ImageVariants.java",
+      "sha256": "dc44f6cfee0ac42a8280e03fc72a723ea104194c00820a14d6586931d7a5ddcc"
+    },
+    {
+      "path": "/home/ckc/test/codex/cms-pp1b-implementation/apps/cms-scaffold/services/cms-api/src/main/java/com/fallrising/cms/media/service/MediaService.java",
+      "sha256": "880c68dc633927d7385999e3345c5ba4ea1c541a2ec0953cdea9e6b64bf6c5fa"
+    },
+    {
+      "path": "/home/ckc/test/codex/cms-pp1b-implementation/apps/cms-scaffold/docs/v2/contracts/PP1-accounts.md",
+      "sha256": "35e63847aec8bf17e405fa15ecb7161d7bcabe6ad49cbc7072a43ae8f901efe0"
+    },
+    {
+      "path": "/home/ckc/test/codex/cms-pp1b-implementation/apps/cms-scaffold/docs/v2/waves/PP1a.md",
+      "sha256": "adeea5c1cd9740b48ce3a555bf1d262fc25dab60cb5da341a6357754c1a162bb"
+    },
+    {
+      "path": "/home/ckc/test/codex/cms-pp1b-implementation/apps/cms-scaffold/docs/v2/waves/PP1b.md",
+      "sha256": "ee8ec64a21ee43f4425dfa2b56cc5bfdbe04253b398512af0dc6b8d18155f8df"
+    }
+  ],
+  "originalPolicy": [
+    {
+      "originalHEADLine": 138,
+      "text": "檔案演算法：\n\n1. mediaRoot本身必須real directory非symlink；walk不FOLLOW_LINKS。逐path component檢查symlink、拒絕absolute／`.`／`..`／backslash／NUL/drive prefix，root-relative POSIX objectKey。非regular文件、hardlink（link count>1）、unsafe path或無法確認link count時回UNSAFE_MEDIA_PATH，不跟到root外；link-count需host支持，未知adapter待封板，不能跨平台假設。\n2. 所有file計size/SHA256並記before/after attrs（size/mtime/file identity）；變動回WRITER_NOT_QUIESCED。異常不刪檔，檔案key唯一；variants同asset的名稱唯一且只有original/thumbnail/web，objectKey不能被兩個DBvariant共用。每declared variant需file存在且size相等。\n3. 每asset恰一個original，original.size=asset.byteSize、original.sha256=checksum；storedBytes=該asset全部variant.size總和；status只能available/deleted。original缺／checksum錯／size錯分別固定code。image original依同版ImageVariants.read解碼：非null時variant集合恰original/thumbnail/web且asset與originalwidth/height=decode尺寸；thumbnail/web都需可解碼JPEG，尺寸依既有fit的320／1600等比計算；不重新生成bytes或比較ImageIO encoder輸出。decode null：width/height均null且只有original，否則IMAGE_VARIANTS_INCOMPLETE。PDF只original且dims null。不引入新image decoder。\n4. 不被任何declared variant引用的regular file分類orphan，完整保留。無DB asset的檔案不自動造asset；soft-deleted媒體也全部驗證。未知contentType回SCHEMA_UNSUPPORTED，不猜file extension。asset/variant缺owner/attachment歷史索引不是disk完整性證明，raw DBsnapshot與§5.4 API隔離fixture還必須驗。"
+    },
+    {
+      "originalHEADLine": 189,
+      "text": "RAW_VERIFIED先比較全部sessions與credentials原始備份。之後固定執行revokeRestoredSessions adapter，再啟動API；隔離drill與未來正式恢復都使用相同政策。此adapter在同一DB transaction執行 `UPDATE cms_session SET revoked_at = ? WHERE revoked_at IS NULL`（綁單一恢復時間），並在呼叫端先產生auditEventId，用同DataSource的既有JdbcIdentityStore.insertAudit寫一筆AUTH事件（不使用void AuditLog.record來取得ID），at與撤銷時間相同，targetType=restore、targetId=null、ip=null，action=`PRODUCTION_SESSIONS_INVALIDATED_AFTER_RESTORE`、actor=null、surface=admin、outcome=ok，detail僅operationId/backupId/targetRef/revokedCount，不存token；audit失敗全rollback且不得啟動。保留已撤銷列原值、principal/credentials/roles/grants原樣。輸出 `{operationId,backupId,revokedCount:string,auditEventId,committed:true}`，phase才成SESSIONS_REVOKED。這是恢復必要的明示狀態差異，不把它混入raw snapshot比對；前後只允許上述session欄位與一筆AUTH新增。所有舊恢復token在啟動後必須被拒絕，然後以正式測試管理員/operator重新login。不得靠不同API host當session失效證明。adapter的Java檔案／CLI／交易故障測試卡仍需與host維護接線共同封板；未有它就不得越過RAW_VERIFIED。\n\n若SESSIONS_REVOKED已commit但API啟動前程序中斷，或之後啟動／smoke失敗，本波不提供就地resume／重做撤銷。target保持隔離且停止，保留失敗卷與journal；下一次人工重試必須使用新operationId與另一組owned空白target，從原immutable backup重新完整還原。不得把已變更的target當blank，原incidentStartedAt不重設，額外重試時間納入同一次事故RTO。R09增加「session撤銷commit後crash」fault：start0、舊target重試拒絕、只有newtarget/newoperation可重新跑，且原target保持。\n\nMATCHED_STARTED前snapshot與啟動後snapshot分開核對：fresh/no-demo契約不允許principal/permission/demoentry意外補建。smoke只允許具名test-owned rows／AUTH事件／sessiontouch等精確預期差異，不許忽略整table。真正smoke要求新帳號login、公開已發布snapshot原三variantbytes/hash、private/draft／工作替換未發布媒體匿名404或embeddednull、deletedprivate410/public404、revision回讀、staleversion409與重啟後同資料；重用既有MediaApiTests／EntryAtomicWriteTests斷言。傳入smokeReceipt只包含各固定assertion true與產物hash，不含secret。\n"
+    },
+    {
+      "originalHEADLine": 195,
+      "text": "RTO起点incidentStartedAt為request中由owner/操作流程宣告的服務中斷時間，receipt逐字保留；startedAt只記本命令開始，不能代替incidentStartedAt。elapsedMs=(startedAt UTC−incidentStartedAt UTC)+本命令monotonic經過毫秒；前項不得負數，任何UTC倒退／與本命令monotonic跨度不相容回OBJECTIVE_UNKNOWN，不用較短數值宣稱達標。environment欄位必須與request相等。RTO起點，不以下載或pg_restore開始重新起算；若純演練，用取回命令開始時間並标`environment=isolated-drill`。需保留等待人員/secret/image取回／解密時間，clock欄位倒退或未知回OBJECTIVE_UNKNOWN，不能宣稱達標。SERVICE_VERIFIED且elapsed<=14400000ms才withinRto=true；超時成功恢復仍記withinRto=false、exit非零/OBJECTIVE_MISSED，不能重新啟計時掩蓋。\n\nupgrade-drill只在同lock與已RESTORE_VERIFIED oldbackup下執行：`OLD_RAW_VERIFIED→CANDIDATE_MIGRATING→CANDIDATE_SMOKE→CANDIDATE_VERIFIED`。任一before/during/after故障停止candidate，neveropenwrites，再呼叫restore核心至第二組fresh target／oldtuple，產生RECOVERED_OLD或RECOVERY_FAILED；原卷／失敗candidate卷保留。拒絕backupId與release/media不匹配、onlyimage rollback或新app自動migration oldrestoretarget。公開開寫後不進這條自動回復路徑，回WRITES_ALREADY_OPEN，需要owner事故決策，不丟newwrites。source backupimmutable、faultmigration只有test-onlyclasspath不改V1–V10。\n\n### 5.5 保留selection與RPO\n"
+    }
+  ],
+  "recommendation": "REWORK",
+  "productChecksRun": false,
+  "firstEvidenceScripts": "two metadata extractor errors before output; DOTALL heading greediness fixed; no document/product mutation"
+}

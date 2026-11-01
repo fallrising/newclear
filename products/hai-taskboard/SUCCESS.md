@@ -207,3 +207,10 @@ and Claude plan/code reviews pass with explicit final test-delta evidence. POL-A
 normal final-commit CI/merge/readback/ledger, tracked by BOARD. See [evidence](docs/evidence/project-policy-20261031.md).
 No full M2/coverage/UI/provider/AC-02..04 claim.
 Status and scope: BOARD HMPOL.
+
+## M2 verified coverage proposal — 2026-11-01
+
+[Proposed contract and fixed acceptance](docs/plans/m2-verified-coverage-20261101.md), BOARD HM2C:
+authenticated per-AC verified observation, separate QA eligibility, full material revalidation and zero
+read-side writes/ID allocation. Contract requires owner acceptance before production/API changes;
+COV-AC-01..06 remain NotRun. Identity/policy are already delivered; full M2 and product ACs stay pending.

@@ -324,3 +324,12 @@ The next planned slice after M1b is M1c human report persistence/submission; it 
 
 
 M2 continuation: [identity plan](plans/m2-ac-identity-20261031.md) and [evidence](evidence/m2-ac-identity-20261031.md) track accepted-workflow AC alignment. Legacy nonempty Draft stays compatible; general policy and verified coverage remain pending. Current state is BOARD HM2ID; full P0-A is incomplete.
+
+
+## Verified coverage entry — 2026-11-01
+
+Identity and immutable local project policy are delivered (#854/#855/#868/#880); desk #346
+records the prior closeout. The sole active continuation is BOARD HM2C and its
+[concrete coverage proposal](plans/m2-verified-coverage-20261101.md). The preceding policy-pending
+note is historical. Coverage implementation requires acceptance of that new contract, following
+Claude plan review; UI and full M2 remain incomplete. No policy redesign or Git authorization is needed.

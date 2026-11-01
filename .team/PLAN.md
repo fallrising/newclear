@@ -2601,3 +2601,20 @@ acceptedEX01–03/FN01/singleFN03. FN06 found reason/cancel and never-allocated 
 gaps; narrow correction plus realdenial/queuedcancel/noVM and labelledmockprojections
 passed; original success read back unchanged, no second coding CLI invocation. Final review/CI/merge
 and ledger closure remain. M2/M3/CloudAC04/AC05 not claimed.
+
+
+## HAI M2 verified coverage — 2026-11-01 / T-0339
+
+BOARD HM2C owns status. Root prepares the concrete contract in
+`products/hai-taskboard/docs/plans/m2-verified-coverage-20261101.md`; production/OpenAPI wait
+for owner acceptance. Claude Code2.1.312 exact claude-opus-5-5/high is a no-tools independent
+plan reviewer (480s host deadline; at most one material revision follow-up), no writers/children.
+Initial sandbox invocation failed with EAI_AGAIN, zero reported model usage; raw failure retained.
+No-model outer DNS check succeeded; same bounded reviewer was submitted through normal escalation.
+Review acceptance is not product-contract approval. Root owns disposition and evidence gate,
+document checks, required PR CI/merge/readback and desk/handoff synchronization. Full M2 pending.
+
+Claude substantive plan137.257s REWORK → follow-up186.133s ACCEPT for owner presentation, not
+production approval. Root disposed all findings; final R1–R7 conditions incorporated without another
+model call, as reviewer explicitly allowed. Product COV-ACs remain NotRun; only proposal publication
+is accepted. See product evidence/m2-coverage-proposal-20261101.md for measured/unknown accounting.

@@ -471,3 +471,18 @@ Reviewed head `c0a979c8093a08a2c9ce4bf4505575fcdcbc7d9b` passed HAI CI 414388008
 41438800758; remote HAI files match the reviewed head. HDTL end uses the merge time. DTL-AC-01..06 accepted for this
 backend read slice ([evidence](../evidence/work-item-detail-20261102.md)); completion UI, Done validity, whole-M2 and SUCCESS
 AC-02..04 remain open. T-0339 stays in_progress.
+
+## T-0339 — ReopenWorkItem contract
+
+Owner asked to continue after HDTL. Source 973f2e2a; no open HAI PR at intake. Accepted `ReopenWorkItem` (domain-and-gates,
+OpenAPI payload, pure domain transition) has no command, service or HTTP branch, so Done is a dead end; Ready dispatch also
+skips the settled/strict-clock guards that a reopened item with Run history needs. HROPP proposes the contract with no
+migration; implementation waits for owner D1. UI, Done validity, Impact, providers and release stay out of scope.
+
+| ID | Task | AC | Status | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| HROPP | Propose and review ReopenWorkItem and Ready-with-history dispatch contract | ROP-PLAN-01..03 | in_progress | 2026-11-02T12:16:09Z |  | 2026-11-02T12:20:33Z |
+
+ROP-PLAN-01 maps the Done dead end to source. ROP-PLAN-02 fixes ROP-01..04, ROP-AC-01..04 and the minimal owner
+decision. ROP-PLAN-03 disposes Claude review, passes document checks and completes Git/CI/readback/ledger delivery.
+[Proposal](../plans/reopen-work-item-20261102.md); [review evidence](../evidence/reopen-work-item-plan-20261102.md).

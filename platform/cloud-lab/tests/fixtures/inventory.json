@@ -1,0 +1,57 @@
+{
+  "schema_version": "cloudlab.inventory.v1",
+  "source": {
+    "id": "cf-inventory",
+    "revision": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+  },
+  "started_at": "2026-11-02T10:59:00Z",
+  "observed_at": "2026-11-02T11:00:00Z",
+  "sections": [
+    {
+      "kind": "zones",
+      "state": "readable",
+      "error": null,
+      "resources": []
+    },
+    {
+      "kind": "workers",
+      "state": "readable",
+      "error": null,
+      "resources": [
+        {
+          "name": "demo-worker",
+          "use": "synthetic service",
+          "present": true,
+          "status": null,
+          "drift": [
+            "unexpected"
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "worker_domains",
+      "state": "readable",
+      "error": null,
+      "resources": []
+    },
+    {
+      "kind": "pages",
+      "state": "unreadable",
+      "error": "HTTP_403",
+      "resources": []
+    },
+    {
+      "kind": "tunnels",
+      "state": "readable",
+      "error": null,
+      "resources": []
+    },
+    {
+      "kind": "access_apps",
+      "state": "readable",
+      "error": null,
+      "resources": []
+    }
+  ]
+}

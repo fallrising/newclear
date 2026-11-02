@@ -1,3 +1,4 @@
+import {inventoryPanel} from './inventory.mjs';
 const DELIVERY = {
   accepted: '已接受，等待派送', dispatching: '派送中', awaiting_result: '等待執行結果',
   closed_unknown: '已結案，結果仍未知', reconciling: '對帳中，結果未知', result_recorded: '已保存結果',
@@ -119,6 +120,7 @@ export function createClient(fetcher = globalThis.fetch.bind(globalThis)) {
   return {
     bootstrap: () => request('/api/bootstrap'), commands: () => request('/api/commands'),
     schedule: () => request('/api/health-schedule'), usage: () => request('/api/usage'),
+    inventory: () => request('/api/inventory'), publishInventory: raw => request('/api/inventory', raw),
     command: id => request(route(id)), submit: raw => request('/api/commands', raw),
     cancel: id => request(`${route(id)}/cancel`, '{}'), artifact: id => request(`${route(id)}/artifact`, undefined, true),
   };
@@ -265,11 +267,13 @@ export function mount(document, client = createClient()) {
   const byId = id => document.getElementById(id);
   const state = { bootstrap: null, records: [], scheduleData: null, usageData: null, usageBusy: false, usageConfirmed: false, usageSignature: '', clockUncertainty: 0, pending: null, busy: false, refreshing: false, synced: false, serverTime: NaN, measuredAt: 0, renderedSignature: '', refreshError: false, authBlocked: false, authRevision: 0 };
   const now = () => new Date(state.serverTime + performance.now() - state.measuredAt).toISOString().replace(/\.\d{3}Z$/, 'Z');
+  const inventory = inventoryPanel(document,client,()=>({bootstrap:state.bootstrap,revision:state.authRevision,now:Number.isFinite(state.serverTime)?now():null,confirmed:state.synced&&!state.authBlocked}),failed);
   function message(content = '', error = false) {
     const box = byId('message'); box.textContent = content; box.hidden = !content;
     box.className = error ? 'message error' : 'message'; box.setAttribute('role', error ? 'alert' : 'status');
   }
   function updateControls() {
+    inventory.render();
     const caps = state.bootstrap?.capabilities;
     byId('submit').disabled = state.busy || !state.synced || state.authBlocked || !!state.pending || !can(caps, 'commands:submit') || !can(caps, 'node:health:read');
     byId('retry').hidden = !state.pending; byId('retry').disabled = state.busy || !state.synced || state.authBlocked || !can(caps, 'commands:submit') || !can(caps, 'node:health:read');
@@ -282,6 +286,7 @@ export function mount(document, client = createClient()) {
   }
   function failed(error) {
     if (error.status !== 401 && error.status !== 403) return;
+    inventory.clear();
     state.authRevision++; state.authBlocked = true; state.synced = false; state.refreshError = true;
     state.records = []; state.scheduleData = null; byId('schedule').replaceChildren(); state.bootstrap = null; state.serverTime = NaN; state.renderedSignature = '';
     state.usageData = null; state.usageConfirmed = false; state.usageSignature = ''; byId('usage').replaceChildren();
@@ -327,6 +332,7 @@ export function mount(document, client = createClient()) {
     },
   };
   function render() {
+    inventory.render();
     if (!state.bootstrap || !Number.isFinite(state.serverTime)) return;
     const current = now(), caps = state.bootstrap.capabilities;
     const usageSignature = JSON.stringify([state.usageData, usageScope(state.bootstrap), current, state.clockUncertainty, state.usageConfirmed && state.synced]);
@@ -453,6 +459,6 @@ export function mount(document, client = createClient()) {
   const age = setInterval(() => { if (!document.hidden) render(); }, 1000);
   globalThis.addEventListener('beforeunload', event => { if (state.pending) { event.preventDefault(); event.returnValue = ''; } });
   refresh();
-  return () => { clearInterval(poll); clearInterval(age); };
+  return () => { clearInterval(poll); clearInterval(age); inventory.clear(); };
 }
 if (typeof document !== 'undefined') mount(document);

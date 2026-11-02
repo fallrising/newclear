@@ -4,8 +4,8 @@ purpose: 以共同契約與知識樹組合個人 Cloudflare 工具、遠端運�
 kind: application
 mainline: incomplete
 usable_tag: none
-reviewed: 2026-11-01
-source_commit: 053e2bcd63cedb36e463c9b8f640fd2831101f23
+reviewed: 2026-11-02
+source_commit: 2b9a0136cef3e5872a643446da40ebfe0ea24175
 ---
 
 # Cloud Lab 成功契約
@@ -49,9 +49,13 @@ M0知識樹與介面已完成；M1固定node-health profile已實作／部署並
 
 本輪只驗收文件盤點與建議，不提升原主線資格；審查與實際檢查見[T-866報告](../../.team/reports/T-866.md)。
 
+## 本輪開發範圍（IR）
+
+Owner繼續開發第二種能力：既有CF inventory JSON→有界D1快照→看板。驗收IR-01～04、權限與停止條件見[報告契約](docs/inventory-report.md)；IR-01～04已完成來源實作與本機驗證，見[T-867報告](../../.team/reports/T-867.md)。原producer37項及consumer471項測試通過，真實本機workerd／D1／Chromium七組閉環通過。既有憑證的真實GET讀取於2026-11-02T11:39:31Z得到HTTP_403，六區段均為unknown；沒有取得可讀的帳號資源快照。live發布與新scope未執行。
+
 ## 啟動與驗證
 
-[本機啟動](docs/quickstart.md)、[操作紀錄](docs/live-operations.md)、[M1實作契約](docs/m1-implementation.md)。測試由既有launcher執行`python3 platform/cloud-lab/tools/check.py`；本次只改文件，不宣稱重跑463項測試或更新live。
+[本機啟動](docs/quickstart.md)、[操作紀錄](docs/live-operations.md)、[M1實作契約](docs/m1-implementation.md)。測試由既有launcher執行`python3 platform/cloud-lab/tools/check.py`；本次實際執行146項Node與325項Python測試；本機驗證不等於live已更新。
 
 ## 可用版本
 

@@ -74,4 +74,4 @@ GitHub 連線以 owner 篩選取得 **64 個 repo：41 public、23 private；53 
 2. Cloud Lab只讀這份有界報告，提供與node-health並列的唯讀入口；資料只在受保護部署保存。先手動一次收集，不新增Cron、generic plugin registry或provider憑證副本；不要解析不穩定人類文字當契約。
 3. 必要負面測試涵蓋過期／無法讀取／部分資料／錯誤版本，及原CLI相容性；在既有授權允許下取得一次真實報告並顯示source／time／error即停止。Pages缺scope可明示unknown，不為全綠自動擴權；新的live發布或權限變更仍須具體方案。保留Workers Free，不新增付費產品。
 
-這是下一任務的範圍建議，本輪尚未新增JSON介面、接入看板或完成第二種能力。A的日常授權與本報告分開處理，無需再安排固定兩小時人工驗證窗口。
+以上為CAT時的範圍建議；2026-11-02已完成[IR報告介面](inventory-report.md)與本機閉環。真實盤點讀取403、live看板接入未啟用，沒有來源搬遷。A的日常授權與本報告分開處理，無需再安排固定兩小時人工驗證窗口。

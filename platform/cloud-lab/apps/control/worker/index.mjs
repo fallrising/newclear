@@ -1,3 +1,4 @@
+import {inventory} from './inventory.mjs';
 import {Fault,requireThat,strictJSON,readBody,enc,iso,timestamp,integer,fields,id,digest,recipeRef,sameRef,sameRecipe} from './protocol.mjs';
 import {authenticate,getGrant,capability} from './auth.mjs';
 
@@ -145,7 +146,7 @@ function auditRoute(request){
  if(Object.hasOwn(fixed,path))return fixed[path];
  const match=path.match(/^\/api\/commands\/[A-Za-z0-9_-]{1,128}(?:\/(cancel|artifact))?$/);
  if(match)return match[1]??'command';
- return ['/','/styles.css','/dashboard.mjs'].includes(path)?'assets':'other';
+ return ['/','/styles.css','/dashboard.mjs','/inventory.mjs'].includes(path)?'assets':'other';
 }
 async function auditRejection(request,db,request_id,now,status,code,authenticated){
  if(status<400||status>499)return 'not_applicable';
@@ -172,6 +173,7 @@ export async function handle(request,env,now=Date.now(),fetcher=fetch){
   }
   if(url.pathname==='/api/bootstrap'&&request.method==='GET'){capability(ctx,'commands:read');return send({workspace_id:ctx.grant.policy.workspace_id,resource_ref:ctx.grant.policy.resource_ref,recipe_ref:await recipeRef(),capabilities:ctx.grant.policy.capabilities,now:iso(now)});}
   if(url.pathname==='/api/health-schedule'&&request.method==='GET')return send(await healthSchedule(env,ctx,now));
+  if(url.pathname==='/api/inventory'){const r=await inventory(db,ctx,b,now,request.method);return send(r.data,r.status);}
   if(url.pathname==='/api/usage'&&request.method==='GET')return send(await usage(db,ctx,now));
   if(url.pathname==='/api/commands'){
    if(request.method==='POST')return send({command:publicRecord(await submit(db,ctx,b,new TextDecoder().decode(bytes),now))},202);
@@ -185,7 +187,7 @@ export async function handle(request,env,now=Date.now(),fetcher=fetch){
    if(match[2]==='artifact'&&request.method==='GET'){capability(ctx,'artifact:read');requireThat(v.result&&v.artifact,404,'NOT_FOUND');requireThat(timestamp(v.result.artifact_expires_at)>now,410,'EVIDENCE_EXPIRED');return new Response(v.artifact,{headers:{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store','X-Content-Type-Options':'nosniff','Content-Disposition':'attachment; filename="health.json"','X-Request-Id':request_id}});}
    if(!match[2]&&request.method==='GET'){capability(ctx,'commands:read');return send({command:publicRecord(view(r,now))});}
   }
-  if(['/', '/styles.css','/dashboard.mjs'].includes(url.pathname)&&request.method==='GET'){
+  if(['/', '/styles.css','/dashboard.mjs','/inventory.mjs'].includes(url.pathname)&&request.method==='GET'){
    requireThat(ctx.human,403,'SCOPE_DENIED');capability(ctx,'commands:read');requireThat(env.ASSETS,503,'ASSETS_UNAVAILABLE');const res=await env.ASSETS.fetch(request),headers=new Headers(res.headers);headers.set('Cache-Control','no-store');headers.set('Content-Security-Policy',"default-src 'none'; script-src 'self'; style-src 'self'; connect-src 'self'; img-src 'self'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'");headers.set('X-Content-Type-Options','nosniff');headers.set('Referrer-Policy','no-referrer');return new Response(res.body,{status:res.status,headers});
   }
   throw new Fault(404,'NOT_FOUND');

@@ -135,3 +135,5 @@ M1 provides a local-tested Worker, SQL outbox, fixed-minute scheduler, Python OS
 - [Milestone history](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/milestone-history.md): preserved prior SUCCESS timeline; time-relative statements are historical, current status lives in SUCCESS and direction review.
 
 - [CF tool catalog](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/tool-catalog.md): 64 connection-visible repositories pinned; public/private evidence separated, Edge Ops mock versus real node-health compared; keep existing ownership and select an inventory-report adapter next. No migration, retirement or live/authority change.
+
+- [Inventory report adapter](https://github.com/fallrising/newclear/blob/main/platform/cloud-lab/docs/inventory-report.md): existing GET-only producer JSON, workspace-scoped latest D1 snapshot and manual dashboard upload/read. Local runtime/browser verified; live read returned403, deployment and new capabilities not activated.

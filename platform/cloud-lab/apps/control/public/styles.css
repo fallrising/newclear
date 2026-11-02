@@ -105,3 +105,6 @@ footer{flex-direction:column;padding:18px}
 }
 @media(prefers-reduced-motion:reduce){*{transition:none!important}
 }
+
+#inventory{overflow-wrap:anywhere}
+#inventory-file{max-width:100%;min-width:0}

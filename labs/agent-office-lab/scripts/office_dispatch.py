@@ -18,7 +18,7 @@ import tempfile
 import time
 
 import cursor_cli
-from execution_slot import SlotError, acknowledge_stopped, execution_slot
+from execution_slot import SlotError, acknowledge_stopped, execution_slot, inspect_slot
 import remote_cli
 
 LAB = Path(__file__).resolve().parents[1]
@@ -276,6 +276,7 @@ def retry_plan(run_id, lab=LAB):
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     commands = parser.add_subparsers(dest='action', required=True)
+    commands.add_parser('status', help='Read the shared execution state without launching or acknowledging anything')
     check = commands.add_parser('detect'); check.add_argument('--provider', choices=[*SPECS, 'all'], default='all')
     preview = commands.add_parser('plan'); preview.add_argument('provider', choices=SPECS)
     run = commands.add_parser('run'); run.add_argument('provider', choices=SPECS)
@@ -290,6 +291,10 @@ def main(argv=None):
     ack.add_argument('--confirm-all-owned-processes-stopped', action='store_true', required=True)
     args = parser.parse_args(argv)
     try:
+        if args.action == 'status':
+            state = inspect_slot(LAB)
+            print(json.dumps({'shared_execution':state,'model_task_started':False}))
+            return 1 if state['status'] == 'unavailable' else 0
         if args.action == 'retry':
             preview, options = retry_plan(args.run_id)
             if not args.execute:

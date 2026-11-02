@@ -32,6 +32,37 @@ API 要求 bearer token、精確 Host；寫入另外要求相同 Origin 與 JSON
 
 瀏覽器與 job 清單不是持久化排程。操作台重啟不接管／重跑舊 job，磁碟 run 紀錄仍可讀取；強制終止操作台或 runner 的清理未確認時，沿用 `cleanup_unconfirmed` 阻擋與人工核對流程。正常關閉等待最多 45 秒；若 runner 尚未退出會提示清理未確認，不按名稱批量 kill 或自動解除鎖。
 
+## 跨入口與重啟後的執行狀態
+
+頁面頂部顯示同一 checkout 共用的執行狀態。另一個 CLI 或操作台的工作也會阻擋派工；不以目前頁面的 job 清單為唯一依據。
+
+| 狀態 | 頁面行為 |
+| --- | --- |
+| `available` | 可以查看計畫並明確啟動；實際執行仍重新取得全局鎖。 |
+| `busy` | 已有程序持鎖，禁止啟動新工作；回原入口查看。此頁不接管其他入口的 runner。 |
+| `cleanup_unconfirmed` | 鎖已釋放但仍有中斷紀錄，禁止派工；不假設 PID 消失就代表所有子程序已清理。 |
+| `unavailable` | 狀態檔損壞、符號連結、非私有權限或讀取錯誤，保守阻擋；不回傳 PID、路徑或原始錯誤。 |
+
+狀態檢查只開啟既有目錄與檔案，不建立 lock／journal，不改寫中斷紀錄。它短暫嘗試 shared lock 以判斷另一個程序是否持有 exclusive lock；快照不是執行保證，dispatcher 的最終互斥仍保留。API 在啟動 runner 前重查狀態，因此舊頁面或直接 HTTP 請求也不能略過已發現的阻擋。被共用狀態拒絕的計畫需重新取得，不會排入自動重試。
+
+唯讀 CLI：
+
+```sh
+python3 scripts/office_dispatch.py status
+```
+
+此命令不探測 provider、不啟動模型、不停止程序，也不解除鎖。`unavailable` 回 exit 1；其他成功讀取的狀態回 exit 0，不能用 exit 0 判定可派工，應查看 `shared_execution.status`。
+
+若為 `cleanup_unconfirmed`，先依原 run 的私有紀錄核對所有所屬程序已退出；只有完成這個核對後，才使用既有 CLI：
+
+```sh
+python3 scripts/office_dispatch.py acknowledge-interruption --confirm-all-owned-processes-stopped
+```
+
+確認會歸檔原紀錄；它不會替你停止程序。頁面沒有解除鎖的 API 或按鈕。不要直接刪除狀態檔，或僅靠重開分頁、重啟操作台來處理中斷。作業系統仍持鎖時，確認命令也不會繞過它。
+
+[重啟與共用狀態證據](evidence/console-restart-2026-11-02.json) 使用隔離測試目錄、真實 helper 程序與 Chrome；驗證持鎖、SIGKILL 後中斷、兩次操作台啟動、刷新不改 journal、明確確認後恢復及損壞狀態阻擋。沒有執行 provider 或模型，不能代替各原生 provider 的 host crash／session 恢復驗收。
+
 ## 歷史結果與驗證
 
 可用 `--runs-root` 加入其他明確指定、唯讀的歷史目錄。派工與重試仍只作用於本 checkout；額外歷史不會被執行。請保留私人 runs／state，不提交至 Git。

@@ -68,6 +68,46 @@ def _read(directory):
     return value
 
 
+def inspect_slot(lab=LAB):
+    """Advisory snapshot only: never creates, acknowledges or changes a journal.
+
+    An absent journal is not enough: a launcher can own the lock before writing it.
+    A free lock is not enough either: unconfirmed cleanup must stay blocking.
+    The dispatcher still acquires its exclusive lock at actual execution time.
+    """
+    directory = lock = None
+    try:
+        directory = os.open(lab, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW)
+        for part in ('state', 'dispatch'):
+            try:
+                child = os.open(part, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW, dir_fd=directory)
+            except FileNotFoundError:
+                return {'status':'available'}
+            os.close(directory); directory = child
+            info = os.fstat(directory)
+            if info.st_uid != os.getuid() or info.st_mode & 0o077:
+                raise SlotError('unsafe_slot_directory')
+        try:
+            lock = os.open('execution.lock', os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK, dir_fd=directory)
+        except FileNotFoundError:
+            return {'status':'cleanup_unconfirmed' if _read(directory) is not None else 'available'}
+        info = _private_file(lock)
+        try:
+            fcntl.flock(lock, fcntl.LOCK_SH | fcntl.LOCK_NB)
+        except BlockingIOError:
+            return {'status':'busy'}
+        current = os.stat('execution.lock', dir_fd=directory, follow_symlinks=False)
+        if not os.path.samestat(info, current):
+            raise SlotError('slot_changed_during_read')
+        return {'status':'cleanup_unconfirmed' if _read(directory) is not None else 'available'}
+    except (OSError, ValueError, TypeError, RecursionError):
+        # Fixed whitelist: do not expose PID, journal, private paths or OS errors.
+        return {'status':'unavailable'}
+    finally:
+        if lock is not None: os.close(lock)
+        if directory is not None: os.close(directory)
+
+
 class Slot:
     def __init__(self, directory, fd):
         self.directory, self.fd = directory, fd

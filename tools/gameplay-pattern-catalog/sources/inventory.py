@@ -151,29 +151,29 @@ def build_manifest(cache: Path, observed_at: str) -> dict:
             'homepage_reported': {
                 'mechanics': 280,
                 'groups': 28,
-                'evidence': 'Homepage visible text says 280 mechanics and 28 mechanic groups; og:image:alt says 280 mechanics across 28 systems. The non-JavaScript homepage only renders a featured sample, so it is not the denominator.',
+                'evidence': '首頁可見文字寫 280 mechanics 與 28 mechanic groups；og:image:alt 寫 280 mechanics across 28 systems。沒有 JavaScript 的首頁只渲染精選範例，所以它不是分母。',
             },
             'id_sets_equal': ['sitemap', 'index-json', 'catalog-json', 'page-embedded-json', 'mechanic-json'],
             'differences': [
                 {
                     'kind': 'projection',
                     'id': 'index-json-cases',
-                    'summary': f'index.json cases omit implementation, source, rights and observation fields present in catalog.json. All {len(case_only)} indexed mechanics differ there; identity fields match.',
+                    'summary': f'index.json 的 cases 省略 catalog.json 才有的實作、來源、權利與觀察欄位。{len(case_only)} 條索引都只差在這裡；識別欄位一致。',
                 },
                 {
                     'kind': 'projection',
                     'id': 'index-json-prototype',
-                    'summary': f'index.json prototype keeps scope and interaction only. catalog.json also carries editorial firstStep, pitfall and test text for all {len(prototype_only)} mechanics. Those editorial strings are not copied into the notes.',
+                    'summary': f'index.json 的 prototype 只留 scope 與 interaction。catalog.json 另外有編輯用的 firstStep、pitfall 與 test，{len(prototype_only)} 條都是這樣。這些編輯文字沒有抄進筆記。',
                 },
                 {
                     'kind': 'entrance',
                     'id': 'homepage-noscript-sample',
-                    'summary': 'The homepage without JavaScript exposes featured mechanics, not the full public list. The denominator comes from the reconciled sitemap, index, catalog and per-mechanic documents.',
+                    'summary': '沒有 JavaScript 的首頁只露出精選機制，不是完整公開清單。分母來自對帳後的 sitemap、index、catalog 與逐條機制文件。',
                 },
                 {
                     'kind': 'slug-prefix',
                     'id': 'prefix-differs-from-system',
-                    'summary': 'These source ids keep a historical slug prefix that is not their system id: ' + ', '.join(prefix_gaps) + '.',
+                    'summary': '這些來源 ID 的 slug 前綴不是 system id：' + '、'.join(prefix_gaps) + '。',
                 },
             ],
         },

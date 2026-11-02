@@ -20,12 +20,12 @@
 
 ## 入口差異
 
-首頁觀察為 280 個機制、28 個分類。Homepage visible text says 280 mechanics and 28 mechanic groups; og:image:alt says 280 mechanics across 28 systems. The non-JavaScript homepage only renders a featured sample, so it is not the denominator.
+首頁觀察為 280 個機制、28 個分類。首頁可見文字寫 280 mechanics 與 28 mechanic groups；og:image:alt 寫 280 mechanics across 28 systems。沒有 JavaScript 的首頁只渲染精選範例，所以它不是分母。
 
-- `projection` index-json-cases：index.json cases omit implementation, source, rights and observation fields present in catalog.json. All 280 indexed mechanics differ there; identity fields match.
-- `projection` index-json-prototype：index.json prototype keeps scope and interaction only. catalog.json also carries editorial firstStep, pitfall and test text for all 280 mechanics. Those editorial strings are not copied into the notes.
-- `entrance` homepage-noscript-sample：The homepage without JavaScript exposes featured mechanics, not the full public list. The denominator comes from the reconciled sitemap, index, catalog and per-mechanic documents.
-- `slug-prefix` prefix-differs-from-system：These source ids keep a historical slug prefix that is not their system id: allocation-savings-interest, allocation-shop-reservation, exploration-air-action-refill, exploration-climbing-rest-route, exploration-gliding-descent, exploration-grapple-swing, exploration-stealth-awareness, exploration-wall-jump.
+- `projection` index-json-cases：index.json 的 cases 省略 catalog.json 才有的實作、來源、權利與觀察欄位。280 條索引都只差在這裡；識別欄位一致。
+- `projection` index-json-prototype：index.json 的 prototype 只留 scope 與 interaction。catalog.json 另外有編輯用的 firstStep、pitfall 與 test，280 條都是這樣。這些編輯文字沒有抄進筆記。
+- `entrance` homepage-noscript-sample：沒有 JavaScript 的首頁只露出精選機制，不是完整公開清單。分母來自對帳後的 sitemap、index、catalog 與逐條機制文件。
+- `slug-prefix` prefix-differs-from-system：這些來源 ID 的 slug 前綴不是 system id：allocation-savings-interest、allocation-shop-reservation、exploration-air-action-refill、exploration-climbing-rest-route、exploration-gliding-descent、exploration-grapple-swing、exploration-stealth-awareness、exploration-wall-jump。
 
 ## 原站分類數量
 

@@ -17,8 +17,8 @@
     "groups": 28,
     "count_source": "https://gameplayatlas.loopyhop.com/"
   },
-  "selection": "Every mechanic in the reconciled public snapshot, including the earlier 14-note subset.",
-  "verification_boundary": "Author reconciliation against each public mechanic page and its embedded entry for this snapshot. Not an independent review, not gameplay execution, and not a claim that the upstream site stays unchanged.",
-  "reuse_boundary": "Independent short paraphrases and original design analysis; no upstream images, full text, code or assets copied. Upstream rights are not relicensed.",
+  "selection": "對帳後公開快照中的每一個機制，包含先前 14 篇精選筆記。",
+  "verification_boundary": "作者對照本次快照的每個公開機制頁與內嵌條目。不是獨立審查，不是實玩，也不表示原站之後不會變。",
+  "reuse_boundary": "只保留短篇改寫與獨立設計分析；不複製原站圖片、全文、程式或素材。上游權利不因引用而改成 MIT。",
   "policy_source": "https://gameplayatlas.loopyhop.com/about/"
 }

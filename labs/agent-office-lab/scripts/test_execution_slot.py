@@ -28,6 +28,64 @@ class ExecutionSlotTest(unittest.TestCase):
     def code(self, body):
         return f'from pathlib import Path\nfrom execution_slot import *\nlab=Path({str(self.lab)!r})\n{body}'
 
+    def test_inspection_does_not_create_state_or_mutate_journal(self):
+        self.assertEqual(slots.inspect_slot(self.lab),{'status':'available'})
+        self.assertFalse((self.lab/'state').exists())
+        with slots.execution_slot(self.lab):slots.mark_started()
+        journal=self.lab/'state/dispatch/active.json'
+        before=(journal.read_bytes(),journal.stat().st_mtime_ns,journal.stat().st_ino)
+        for _ in range(3):self.assertEqual(slots.inspect_slot(self.lab),{'status':'cleanup_unconfirmed'})
+        self.assertEqual((journal.read_bytes(),journal.stat().st_mtime_ns,journal.stat().st_ino),before)
+        slots.acknowledge_stopped(self.lab)
+        self.assertEqual(slots.inspect_slot(self.lab),{'status':'available'})
+
+    def test_inspection_sees_lock_before_journal_and_does_not_release_owner(self):
+        with slots.execution_slot(self.lab):
+            (self.lab/'state/dispatch/active.json').unlink()
+            for _ in range(3):self.assertEqual(slots.inspect_slot(self.lab),{'status':'busy'})
+            child=self.child(self.code('with execution_slot(lab): pass'))
+            self.assertIn('execution_busy',child.stderr)
+            # Restore the journal via its actual owner before normal release.
+            slots._active.write('guarded')
+        self.assertEqual(slots.inspect_slot(self.lab),{'status':'available'})
+
+    def test_inspection_after_real_process_crash_preserves_running_journal(self):
+        code=self.code('import time\nwith execution_slot(lab):\n mark_started()\n print("ready",flush=True)\n time.sleep(30)')
+        child=subprocess.Popen([sys.executable,'-c',code],env=self.env,stdout=subprocess.PIPE,stderr=subprocess.PIPE,text=True)
+        try:
+            self.assertTrue(select.select([child.stdout],[],[],5)[0]);self.assertEqual(child.stdout.readline().strip(),'ready')
+            self.assertEqual(slots.inspect_slot(self.lab),{'status':'busy'})
+            child.kill();child.communicate(timeout=5)
+            journal=self.lab/'state/dispatch/active.json';before=journal.read_bytes()
+            self.assertEqual(slots.inspect_slot(self.lab),{'status':'cleanup_unconfirmed'})
+            self.assertEqual(journal.read_bytes(),before)
+            self.assertEqual(json.loads(before)['phase'],'running')
+        finally:
+            if child.poll() is None:child.kill();child.communicate(timeout=5)
+
+    def test_inspection_blocks_unsafe_or_malformed_state_without_exposure(self):
+        with slots.execution_slot(self.lab):pass
+        journal=self.lab/'state/dispatch/active.json'
+        for content in ('PRIVATE_SECRET', '{}', '[]', '{"schema":1,"pid":123,"phase":"unknown"}'):
+            journal.write_text(content);journal.chmod(0o600)
+            self.assertEqual(slots.inspect_slot(self.lab),{'status':'unavailable'})
+            self.assertEqual(journal.read_text(),content)
+        journal.unlink();outside=self.lab/'private';outside.write_text('PRIVATE_SECRET');journal.symlink_to(outside)
+        self.assertEqual(slots.inspect_slot(self.lab),{'status':'unavailable'})
+        journal.unlink();lock=self.lab/'state/dispatch/execution.lock';lock.chmod(0o644)
+        self.assertEqual(slots.inspect_slot(self.lab),{'status':'unavailable'})
+        lock.unlink();os.mkfifo(lock,0o600)
+        self.assertEqual(slots.inspect_slot(self.lab),{'status':'unavailable'})
+
+    def test_inspection_blocks_directory_links_and_retained_journal_without_lock(self):
+        state=self.lab/'state';state.symlink_to(self.lab,target_is_directory=True)
+        self.assertEqual(slots.inspect_slot(self.lab),{'status':'unavailable'});state.unlink()
+        with slots.execution_slot(self.lab):slots.mark_started()
+        (self.lab/'state/dispatch/execution.lock').unlink()
+        self.assertEqual(slots.inspect_slot(self.lab),{'status':'cleanup_unconfirmed'})
+        (self.lab/'state/dispatch').chmod(0o755)
+        self.assertEqual(slots.inspect_slot(self.lab),{'status':'unavailable'})
+
     def test_clean_exit_releases_for_next_task(self):
         for _ in range(2):
             with slots.execution_slot(self.lab):

@@ -13,6 +13,7 @@ from unittest.mock import patch
 
 import office_console as console
 import office_dispatch as dispatch
+import execution_slot as slots
 
 
 class ConsoleTests(unittest.TestCase):
@@ -127,6 +128,38 @@ class ConsoleTests(unittest.TestCase):
             self.assertIsNone(console.terminal_link(bad))
         good='http://127.0.0.1:123/login#key='+'a'*32
         self.assertEqual(console.terminal_link(good),good)
+
+    def test_external_slot_blocks_stale_plan_before_spawn_and_preserves_journal(self):
+        key=self.app.plan({'provider':'pi','mode':'cancel'})['plan_id']
+        with slots.execution_slot(self.lab):
+            slots.mark_started()
+            before=(self.lab/'state/dispatch/active.json').read_bytes()
+            snapshot=json.loads(self.request('/api/state')[1])
+            self.assertEqual(snapshot['shared_execution'],{'status':'busy'})
+            self.assertIsNone(snapshot['active_job']);self.assertEqual(snapshot['jobs'],[])
+            with patch('office_console.subprocess.Popen') as spawn:
+                self.assertEqual(self.request('/api/execute',{'plan_id':key})[0],409);spawn.assert_not_called()
+            self.assertEqual((self.lab/'state/dispatch/active.json').read_bytes(),before)
+        with self.assertRaisesRegex(console.ConsoleError,'expired_or_used'):self.app.execute(key)
+        key=self.app.plan({'provider':'pi','mode':'cancel'})['plan_id']
+        with patch('office_console.subprocess.Popen') as spawn:
+            self.assertEqual(self.request('/api/execute',{'plan_id':key})[0],409);spawn.assert_not_called()
+        self.assertEqual(self.request('/api/acknowledge',{})[0],404)
+
+    def test_recreated_console_reads_uncertain_state_without_adoption_or_unlock(self):
+        with slots.execution_slot(self.lab):slots.mark_started()
+        journal=self.lab/'state/dispatch/active.json';before=journal.read_bytes()
+        restarted=console.Console(self.lab);self.addCleanup(restarted.close)
+        snapshot=restarted.snapshot()
+        self.assertEqual(snapshot['shared_execution'],{'status':'cleanup_unconfirmed'})
+        self.assertEqual(snapshot['jobs'],[]);self.assertIsNone(snapshot['active_job'])
+        restarted.close();self.assertEqual(journal.read_bytes(),before)
+        journal.write_text('broken')
+        key=self.app.plan({'provider':'pi','mode':'cancel'})['plan_id']
+        with patch('office_console.subprocess.Popen') as spawn:
+            with self.assertRaisesRegex(console.ConsoleError,'execution_state_unavailable'):self.app.execute(key)
+            spawn.assert_not_called()
+        self.assertEqual(journal.read_text(),'broken')
 
     def test_pi_cancel_console_plan_is_fixed_local_and_single_use(self):
         code, raw, _ = self.request('/api/plan', {'provider':'pi','mode':'cancel'})

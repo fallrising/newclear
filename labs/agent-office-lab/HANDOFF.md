@@ -1,5 +1,7 @@
 # 開發交接
 
+T-0019：完成[操作台跨入口與重啟狀態](docs/CONSOLE.md)。同一 checkout 的共用鎖區分 available／busy／cleanup_unconfirmed／unavailable；頁面提示阻擋原因，API 在啟動 runner 前重查，dispatcher 保留最終互斥。新增唯讀 `office_dispatch.py status`。171 tests 與 Chrome／真實 helper 程序驗收通過：另一入口持鎖、SIGKILL 後中斷、兩次操作台啟動、刷新與舊計畫拒絕、journal 位元組／修改時間不變、明確核對後歸檔及損壞狀態阻擋。所有 helper 全退出；沒有執行 provider、模型或付費請求。[證據](docs/evidence/console-restart-2026-11-02.json)，交付見[任務板](docs/tasks/BOARD.md)。這是控制層 AC-08／11 子集，不代表原生 provider crash／session 恢復通過；不接管、不自動解鎖或重跑。
+
 T-0018：完成 [Pi 原生取消與操作台驗收](docs/CANCEL.md)。真實 Pi 的第一個請求留在本機，確認 working／同 session 後走原生 worker.kill；worker.remove／原生 PID 退出 102 ms，整體取消清理 3.521 秒。最終外層追蹤 29 個程序全退出、執行鎖釋放；163 tests、55 筆結果及操作台／唯讀頁的取消分類、刷新、防重複與拒絕重試通過。任務為 cancelled，零本地／遠端模型推論或付費呼叫。首輪清理約 20.09 秒、第二輪背景子程序殘留均保留；修正後只對本次已追蹤且身分相符的後代送 SIGTERM，完整清理才解鎖。[證據](docs/evidence/pi-cancel-2026-11-02.json)，交付見[任務板](docs/tasks/BOARD.md)。Grok／Cursor 取消、Pi 權限／恢復、遠端端到端與完整安全驗收仍待完成。
 
 T-0017：完成[本機操作台](docs/CONSOLE.md)，接通四 provider 偵測／計畫、本地明確派工、原生終端與結果；遠端付費執行保持 CLI 流程。Chrome 實測 Pi 本機 429（任務仍 failed）及本地 OpenCode／Strata，終端開啟／刷新／再次開啟、重複提交拒絕、停止與產物 hash 通過。最終本地 runner 50.75 秒，外層追蹤 107 個程序全部退出、執行鎖釋放；159 tests、52 筆結果回讀通過，零遠端模型請求。首輪瀏覽器表單等待失敗、第二輪 swap guard 停止均保留；原限制未調整，最終重驗通過。[證據](docs/evidence/console-2026-11-02.json)，交付狀態見[任務板](docs/tasks/BOARD.md)。一般任務、完整四 provider UI／生命週期與安全驗收仍 pending，沒有 usable tag。

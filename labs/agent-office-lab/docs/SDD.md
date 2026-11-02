@@ -146,6 +146,8 @@ T-0017 的 [本機操作台](CONSOLE.md) 連接四工位偵測／計畫、本地
 
 T-0018 加入 [Pi 原生取消檢查](CANCEL.md)，以真實 CLI、本機 held request、Office worker.kill／worker.remove 及程序樹清理驗證 AC-06／08／09／11 子集。結果為 cancelled，不推論、不發付費請求；其他 provider 及真實遠端取消仍待驗。
 
+T-0019 補 [操作台跨入口／重啟狀態](CONSOLE.md)：共用鎖與中斷紀錄的唯讀檢查、明確阻擋、啟動前重查；不接管未知工作、不自動解鎖或重跑。真實 helper 程序驗證這個控制層子集，不能替代原生 provider 恢復。
+
 ## 9. 實作順序與退出條件
 
 1. **P0：基底驗證。** 固定上游 checkout、保留授權，啟動 lite/office；記錄 package lock 與 CLI 版本。核對四種 provider，特別是 Grok 版別與 Pi + DeepSeek。若現有 adapter 失效，先小範圍修 adapter；只有 host 無法支援生命週期才另寫輕量 host。

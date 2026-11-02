@@ -63,6 +63,18 @@ class DispatchTest(unittest.TestCase):
                 self.assertNotIn('--keep-open', argv)
                 self.assertNotIn('--budget-multiplier', argv)
 
+    def test_status_is_read_only_and_does_not_probe_or_launch(self):
+        with patch.object(dispatch,'LAB',self.lab), patch.object(dispatch,'detect') as detect, patch.object(os,'execve') as execute:
+            with contextlib.redirect_stdout(io.StringIO()) as output:
+                self.assertEqual(dispatch.main(['status']),0)
+            self.assertEqual(json.loads(output.getvalue()),{'shared_execution':{'status':'available'},'model_task_started':False})
+            self.assertFalse((self.lab/'state').exists())
+            with execution_slot(self.lab):
+                with contextlib.redirect_stdout(io.StringIO()) as output:
+                    self.assertEqual(dispatch.main(['status']),0)
+                self.assertEqual(json.loads(output.getvalue())['shared_execution']['status'],'busy')
+            detect.assert_not_called();execute.assert_not_called()
+
     def test_cancel_check_is_explicit_local_only_and_plan_stays_inert(self):
         with patch.object(dispatch, 'detect') as probe, patch.object(os, 'execve') as execute:
             with contextlib.redirect_stdout(io.StringIO()) as output:

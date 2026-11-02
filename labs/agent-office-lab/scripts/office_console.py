@@ -17,7 +17,7 @@ from urllib.parse import urlsplit
 
 import office_dispatch as dispatch
 import office_results as results
-from execution_slot import SlotError
+from execution_slot import SlotError, inspect_slot
 from remote_cli import private_directory
 
 LAB = Path(__file__).resolve().parents[1]
@@ -102,6 +102,9 @@ class Console:
             preview = selection_plan(chosen['selection'], self.lab)  # Recheck stale retry state.
             if preview != chosen['preview']: raise ConsoleError('plan_changed')
             if preview['remote']: raise ConsoleError('remote_execution_requires_cli')
+            shared = inspect_slot(self.lab)['status']
+            if shared != 'available':
+                raise ConsoleError({'busy':'execution_busy','cleanup_unconfirmed':'cleanup_unconfirmed'}.get(shared,'execution_state_unavailable'))
             # All argv originate in the fixed dispatcher, never in arbitrary browser text.
             command = [sys.executable, str(self.lab / 'scripts/office_dispatch.py'), *preview['command'][2:]]
             if '--allow-remote' in command: raise ConsoleError('remote_execution_requires_cli')
@@ -165,6 +168,7 @@ class Console:
                 except (OSError, ValueError):
                     jobs.append({k:job[k] for k in ('id','provider','phase','exit_code','run_id')})
             return {'active_job':self.active, 'jobs':jobs, 'checks':dict(self.checks),
+                    'shared_execution':inspect_slot(self.lab),
                     'results':results.catalog(self.roots)}
 
     def detect(self, provider):

@@ -772,10 +772,14 @@ PR[994](https://github.com/fallrising/newclear/pull/994)於2026-11-02T14:27:34Z�
 
 | ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| T-0044-1 | CF部署資源對應用途／入口／觸發／來源 | CA-01 | in_progress | 2026-11-02T15:26:05Z | — | 2026-11-02T16:24:23Z |
-| T-0044-2 | active repo agent設計與現有runner查核 | CA-02 | in_progress | 2026-11-02T15:26:05Z | — | 2026-11-02T16:24:23Z |
-| T-0044-3 | 最小多VPS接入設計、審查與交付 | CA-03 | in_progress | 2026-11-02T15:26:05Z | — | 2026-11-02T16:24:23Z |
+| T-0044-1 | CF部署資源對應用途／入口／觸發／來源 | CA-01 | done | 2026-11-02T15:26:05Z | 2026-11-02T16:27:28Z | 2026-11-02T16:28:33Z |
+| T-0044-2 | active repo agent設計與現有runner查核 | CA-02 | done | 2026-11-02T15:26:05Z | 2026-11-02T16:27:28Z | 2026-11-02T16:28:33Z |
+| T-0044-3 | 最小多VPS接入設計、審查與交付 | CA-03 | done | 2026-11-02T15:26:05Z | 2026-11-02T16:27:28Z | 2026-11-02T16:28:33Z |
 
 Lead唯一文件writer；一個唯讀來源研究助手及一次限縮獨立review，不委派子代理。來源查核／文件<=60分鐘，review<=6分鐘，CI<=30分鐘；私人repo／主機／資源名稱保留私人證據。沒有安裝／重啟、續權、live修改、付費或封存。
 
-CA-01～03來源查核及文件完成：4Worker實際映射／私人用途目錄、11active候選、原runner active/running；公開Fleet／EdgeOps與私人host/workload實作分開，最小5分鐘push設計不重做controller。T871初審提出時鐘偏差缺口，補未來時間／回退拒絕與驗收後ACCEPT。55contracts／9indexes／12changed Markdown連結、task/report／diff與公開邊界通過；多機程式／安裝／新scope未執行，PR合併前保持in_progress。
+CA-01～03來源查核及文件完成：4Worker實際映射／私人用途目錄、11active候選、原runner active/running；公開Fleet／EdgeOps與私人host/workload實作分開，最小5分鐘push設計不重做controller。T871初審提出時鐘偏差缺口，補未來時間／回退拒絕與驗收後ACCEPT。55contracts／9indexes／12changed Markdown連結、task/report／diff與公開邊界通過；多機程式／安裝／新scope未執行，按實際feature PR合併時間結案。
+
+PR[1006](https://github.com/fallrising/newclear/pull/1006)於2026-11-02T16:27:28Z合併，head `d59da7c13bbdcd34c94036272fd896688dd64810`、merge `86e330de4cc71344b06bc8058ee21afb5d6bcad6`。必要CI CloudLab41481371003／project41481371184／llms41481370945全過；lead回讀fulltree相同、clean、featurehead為main祖先，並行變更保留。
+
+本輪完成來源查核與設計交付，沒有修改runtime、host服務、授權、方案或CF資源。私人目錄保存精確入口／來源，公開文件只列角色；4個登記主機仍是候選範圍，沒有推定全部VPS或安裝批准。下一個程式切片為兩節點隔離的唯讀telemetry與看板；不是本輪已完成的能力。本PR只改任務板。

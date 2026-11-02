@@ -120,6 +120,21 @@ def _normalize(run_fd, run_id):
     if type(elapsed) in (int, float) and 0 <= elapsed < 10**7 and math.isfinite(elapsed):
         row['elapsed_seconds'] = round(elapsed, 2)
     row['artifact'] = artifact(run_fd, office.get('artifact_sha256'))
+    if 'resume_check' in report:
+        if (provider != 'pi' or report['resume_check'] != {'source':'loopback','http_status':429}
+                or any(k in report for k in ('cancellation_check','fault_injection','crash_injection'))):
+            return dict(row, status='invalid', reason='invalid_resume_test_metadata')
+        row['test_scenario'] = 'native_pi_resume'
+        row['resume_check_passed'] = (report.get('resume_check_passed') is True
+            and report.get('status') == 'stopped' and office.get('status') == 'stopped'
+            and row['cleanup_verified'] and model_matches and report.get('model_inference_verified') is False
+            and report.get('resume_target_verified') is True
+            and all(office.get(k) is True for k in ('native_resume_verified','session_history_preserved','native_token_rotated','new_process_same_session'))
+            and type(report.get('client_requests')) is int and report['client_requests'] == 1
+            and type(report.get('external_requests')) is int and report['external_requests'] == 0
+            and type(report.get('remaining_owned_processes')) is int and report['remaining_owned_processes'] == 0
+            and row['artifact']['status'] == 'unavailable')
+        return dict(row, status='stopped' if row['resume_check_passed'] else 'failed' if report.get('status') == 'failed' else 'unverified', reason='native_resume_check')
     if 'cancellation_check' in report:
         if (provider != 'pi' or report['cancellation_check'] != {'source':'held_loopback','method':'worker.kill'}
                 or 'fault_injection' in report or 'crash_injection' in report):

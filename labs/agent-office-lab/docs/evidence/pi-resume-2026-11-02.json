@@ -1,0 +1,124 @@
+{
+  "schema": 1,
+  "milestone": "T-0020",
+  "date": "2026-11-02",
+  "baseline": "19fdeb4fa588b213d1a00ef6e45e7f79676a24cf",
+  "scope": "Explicit one-use reconnect of a persisted Pi session within the same Office host after local HTTP 429 and owned CLI exit; no prompt replay or model inference.",
+  "native_versions": {
+    "pi": "1.4.0",
+    "office_commit": "852e2ab28c4f3f31bffdf4b20353bd119c9d3270"
+  },
+  "offline_tests": {
+    "python": 139,
+    "node": 38,
+    "total": 177,
+    "passed": true
+  },
+  "native": {
+    "states": [
+      "starting",
+      "idle",
+      "working",
+      "needs_input",
+      "exited",
+      "starting",
+      "idle"
+    ],
+    "native_resume_verified": true,
+    "session_history_preserved": true,
+    "native_token_rotated": true,
+    "new_process_same_session": true,
+    "history_prefix_sha256": "2e4ce018dff56784613d16384ed22a64c6deacd082fe7ea9b30a66f4616beaf3",
+    "history_entries_before": 6,
+    "history_entries_after": 6,
+    "no_automatic_replay_observation_ms": 3000
+  },
+  "runner": {
+    "status": "stopped",
+    "reason": "native_resume_check",
+    "resume_check_passed": true,
+    "resume_target_verified": true,
+    "model_inference_verified": false,
+    "client_requests": 1,
+    "external_requests": 0,
+    "remaining_owned_processes": 0,
+    "owned_processes_seen": 12,
+    "cleanup_errors": [],
+    "elapsed_s": 17.722365415887907,
+    "resume_background_processes_signalled": 1
+  },
+  "browser": {
+    "status": "passed",
+    "model_inference": false,
+    "remote_model_calls": 0,
+    "duplicate_execute_blocked": true,
+    "refresh_without_rerun": true,
+    "retry_rejected": true,
+    "runner_elapsed_seconds": 17.722365415887907,
+    "same_session_new_process": true,
+    "history_preserved": true,
+    "hook_token_rotated": true,
+    "no_automatic_requests": true,
+    "cleanup_verified": true,
+    "external_browser_requests": 0,
+    "browser_errors": 0,
+    "result_detail_verified": true,
+    "runs": 57
+  },
+  "outer_cleanup": {
+    "exit_code": 0,
+    "owned_processes_seen": 30,
+    "remaining_owned_processes": 0,
+    "active_journal_present": false,
+    "elapsed_seconds": 34.16
+  },
+  "results_browser": {
+    "status": "passed",
+    "providers_checked": [
+      "opencode",
+      "grok",
+      "pi",
+      "cursor"
+    ],
+    "runs": 57,
+    "detail_content_and_hash": true,
+    "filters": true,
+    "refresh": true,
+    "external_requests": 0,
+    "browser_errors": 0
+  },
+  "prior_attempts": [
+    {
+      "native_resume_check_passed": true,
+      "browser_status": "failed",
+      "reason": "Browser assertion read a misspelled observation field; corrected before final full rerun. Original native and browser reports preserved privately.",
+      "outer_cleanup": {
+        "exit_code": 0,
+        "owned_processes_seen": 27,
+        "remaining_owned_processes": 0,
+        "active_journal_present": false,
+        "elapsed_seconds": 32.09
+      }
+    }
+  ],
+  "source_sha256": {
+    "scripts/run_pi_work.py": "fe29005836afb49bdcea689e0fcf10ebc05d91a38f87ed6423d212241e8a3eda",
+    "scripts/office_pi.mjs": "07dafc120a3b16bf32eb6f4c70b847962ceb938c90d734be006f03028455ef58",
+    "scripts/pi_office_policy.mjs": "c91e630046526247f737e4b69c647b128ab6f29bbcfa28affa95a84cb57b7f87",
+    "scripts/pi_session_evidence.mjs": "4e1354990c3c2cab224f8c04bfcde00460f68b20998717da11f7f50ae43ac2ce",
+    "scripts/pi_retry.py": "193a4c4ead2dba0dcff7238444d9432c341a21680ca79c19b07751f41cd7330e",
+    "scripts/office_dispatch.py": "915ef1a73df32786babb6342c2453fa98619f685d49b2bc8ce74a998810e8126",
+    "scripts/office_console.py": "f40052bfa739019c8a86dbfdbbde09495725941ce0c85927cdc702fc5cda87ca",
+    "scripts/office_console.js": "df15a14e55b184beaef4dcbceddbd46e5db798c632e99eec93051831e6b3459e",
+    "scripts/office_results.py": "af5043b64e4202a3128211d9ce30f5a6766dfd8c0c229afa06633016ae750bb6",
+    "scripts/office_results.html": "f9cbaf098938888c7b48717ffa066f35aaec876365a04821506f8ceab81d916a",
+    "scripts/check_pi_resume_browser.mjs": "e30aa3355f6903ec34f655b3b87c06d59b281ce947ae9092e72d01e2494d569b",
+    "scripts/check_office_results_browser.mjs": "cdb4ec70c9d1a7b7a05775a8683ee7d4e776189b9d965d390890105570e4b157"
+  },
+  "limitations": [
+    "CLI reconnect within one Office host is not host-crash recovery or completion of the interrupted task.",
+    "Synthetic fixed scenario only; no arbitrary session selection, extra prompt or persistent console job adoption.",
+    "No model inference, owner key loading, paid calls, release, deployment or usable tag.",
+    "Full AC-08/09/11 and other providers remain pending."
+  ]
+}

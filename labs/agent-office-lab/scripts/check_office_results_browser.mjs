@@ -50,7 +50,7 @@ try {
   }
   await page.selectOption('#provider', 'pi');
   await page.selectOption('#status', 'failed');
-  for (const run of data.runs.filter(r => r.test_scenario && r.test_scenario !== 'native_pi_cancel' && r.status === 'failed')) {
+  for (const run of data.runs.filter(r => r.test_scenario && !['native_pi_cancel','native_pi_resume'].includes(r.test_scenario) && r.status === 'failed')) {
     await page.locator('#runs tr').filter({hasText:run.id}).getByRole('button').click();
     const detail = await page.locator('#detail').innerText();
     assert(detail.includes(run.test_scenario === 'injected_cli_crash' ? '本機注入 CLI crash' : `本機注入 HTTP ${run.test_scenario.slice(-3)}`));
@@ -62,6 +62,12 @@ try {
     const detail=await page.locator('#detail').innerText();
     assert(detail.includes('Pi 原生取消檢查'));
     assert(detail.includes(run.cancel_check_passed?'取消驗收通過；任務已取消。':'取消驗收未通過。'));
+  }
+  for (const run of data.runs.filter(r => r.test_scenario === 'native_pi_resume')) {
+    await page.selectOption('#status',run.status);
+    await page.locator('#runs tr').filter({hasText:run.id}).getByRole('button').click();
+    const detail=await page.locator('#detail').innerText();
+    assert(detail.includes(run.resume_check_passed?'重新連接驗收通過；原任務未完成。':'重新連接驗收未通過。'));
   }
   await page.selectOption('#status', 'startup_only');
   const startup = data.runs.filter(r => r.provider === 'pi' && r.status === 'startup_only');

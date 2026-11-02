@@ -13,7 +13,7 @@ python3 scripts/office_console.py
 - 四 provider 的固定 CLI／環境偵測與計畫。
 - 本地 OpenCode／Strata 合成檔案任務。
 - 本地任務完成後保留原生 Office 終端，從操作台開啟／再次開啟，並停止所屬 runner 與模型。
-- Pi [原生取消檢查](CANCEL.md)、本機 401／429／CLI crash 檢查，以及已有有效 lineage 的本機故障重試。
+- Pi [同 session 重新連接檢查](PI-RESUME.md)、[原生取消檢查](CANCEL.md)、本機 401／429／CLI crash 檢查，以及已有有效 lineage 的本機故障重試。
 - 執行狀態、四 provider 歷史結果、已核對產物與 SHA-256。
 
 Grok、Pi 正常任務與 Cursor 的遠端計畫可查看，但 HTTP API 不接受任何付費執行；仍使用 [DISPATCH](DISPATCH.md) 的 CLI 及當次授權流程。這不是任意 prompt 或私人工作目錄的任務介面。

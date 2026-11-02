@@ -8,12 +8,12 @@ Owner：repository owner。執行：ChatGPT。基準：`244c7f7b416508aedd8f5f8d
 
 | ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| T-0001-01 | 架構抽象、範圍與既有元件邊界 | AC-001 | in_progress | 2026-11-02T09:08:59Z | — | 2026-11-02T09:31:15Z |
-| T-0001-02 | Transport／adapter／security／recovery 契約 | AC-002 | in_progress | 2026-11-02T09:08:59Z | — | 2026-11-02T09:31:15Z |
-| T-0001-03 | ntfy／Bark 通知與 iOS 限制 | AC-003 | in_progress | 2026-11-02T09:08:59Z | — | 2026-11-02T09:31:15Z |
-| T-0001-04 | 可追溯來源、里程碑與 runtime 驗收計畫 | AC-004 | in_progress | 2026-11-02T09:08:59Z | — | 2026-11-02T09:31:15Z |
-| T-0001-05 | SUCCESS、inventory、導航、驗證及 Draft PR | AC-005 | in_progress | 2026-11-02T09:08:59Z | — | 2026-11-02T09:31:15Z |
+| T-0001-01 | 架構抽象、範圍與既有元件邊界 | AC-001 | in_progress | 2026-11-02T09:08:59Z | — | 2026-11-02T09:33:50Z |
+| T-0001-02 | Transport／adapter／security／recovery 契約 | AC-002 | in_progress | 2026-11-02T09:08:59Z | — | 2026-11-02T09:33:50Z |
+| T-0001-03 | ntfy／Bark 通知與 iOS 限制 | AC-003 | in_progress | 2026-11-02T09:08:59Z | — | 2026-11-02T09:33:50Z |
+| T-0001-04 | 可追溯來源、里程碑與 runtime 驗收計畫 | AC-004 | in_progress | 2026-11-02T09:08:59Z | — | 2026-11-02T09:33:50Z |
+| T-0001-05 | SUCCESS、inventory、導航、驗證及 Draft PR | AC-005 | in_progress | 2026-11-02T09:08:59Z | — | 2026-11-02T09:33:50Z |
 
-文件 AC-001–004 已寫入並自查。首次 CI 已通過 20 項腳本測試與 53 項 success contracts，但根 llms 缺新元件連結；本次補齊後重驗，AC-005 尚未提前標 passed。實際驗證見 PR 與 [驗證紀錄](../validation.md)。認領先於規格實作；runtime AC-006–014 未實作／未跑，不以文件驗證冒充。
+文件 AC-001–004 已寫入並自查；AC-005 的完整候選 `528a1a6` 已通過 Project success contracts 與 llms.txt CI，並回讀成功。後續證據-only 提交仍重驗。實際驗證見 PR 與 [驗證紀錄](../validation.md)。認領先於規格實作；runtime AC-006–014 未實作／未跑，不以文件驗證冒充。
 
 任務在 Draft PR 合併前保持 in_progress，end 留空；下一步等 owner 審閱 SDD／授權合併。後續 runtime 里程碑須另有授權及每個 AC 的任務列。

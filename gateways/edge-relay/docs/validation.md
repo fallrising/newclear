@@ -27,3 +27,13 @@
 ## 未驗證／停止條件
 
 AC-006–014 全部 NOT RUN。E2EE profile、真 CF hibernation／buffer 邊界、真 ntfy/Bark iOS delivery、安全 reviewer 均未驗。這是 Draft SDD，不標 mainline complete，不建立 usable tag，不合併／部署。
+
+## 遠端 CI 與回讀
+
+- 初次候選 `478935e8a031a0f48da6dfbecd8e83b0912b6c03`：20 項腳本測試及 53 項 success contracts 通過，但 root llms navigation 缺 `gateways/edge-relay` 連結。沒有跳過檢查；在下一提交補齊 README link，並修正本元件 AGENTS 的導航規則。
+- 修正候選 `528a1a62852e748ccd5aa9b09537587239dd7754`：[Project success contracts](https://github.com/fallrising/newclear/actions/runs/41421542609) success；job `125197995682` 的 unittest 與 `check_indexes.py` 均 success。
+- 同一候選：[llms.txt CI](https://github.com/fallrising/newclear/actions/runs/41421542635) success；job `125197995804` 的 `validate_llms_txt.py` success。
+- 原始 16 個文件 blob 與本機 manifest 完全一致；後續 compare 證明 llms 只增加一列，既有內容零刪除。PR 共 17 個檔案（13 項目文件＋4 共享導航）。
+- [Draft PR #958](https://github.com/fallrising/newclear/pull/958) 的 head、diff、draft／未合併狀態已回讀；main 仍為既定基準。
+
+本次證據-only 提交只更新 SUCCESS、任務活動與本紀錄。以上連結證明的是明列候選，不冒充後續 SHA 已跑過；後續 SHA 的 CI 仍重跑並回讀到 PR。AC-005 文件／索引門檻通過不代表 owner 已批准設計、合併或 runtime。

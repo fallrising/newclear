@@ -260,6 +260,6 @@ PR952 merged as `a69ff34ec173ee36284aceebcb417e560438569c` after finalhead967727
 
 | ID | Task | AC | Status | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| FN04-U | Exact authenticated read-only command evidence; owner approved deskPR395 | CU-M3-U01/U01–03 | in_progress | 2026-11-02T12:15:04Z | — | 2026-11-02T13:00:06Z |
+| FN04-U | Exact authenticated read-only command evidence; owner approved deskPR395 | CU-M3-U01/U01–03 | done | 2026-11-02T12:15:04Z | 2026-11-02T13:18:13Z | 2026-11-02T13:18:13Z |
 
-FN04-U native/current original-installation evidence accepted on86350871; PR983 delivery pending. No lifecycle/lease/schema change; full platform remains incomplete.
+FN04-U native/current original-installation evidence accepted on86350871; PR983 merged2026-11-02T13:18:13Z as `d0dfb3622bd4cf59793b79448c7b4be55c3b3e7d`; finalheadfcf5c3fe all5requiredCI passed and remote Fanzloud/AP bytes match. No lifecycle/lease/schema change; full platform remains incomplete.

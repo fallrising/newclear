@@ -102,10 +102,12 @@ PR952 merged as `a69ff34ec173ee36284aceebcb417e560438569c` after finalhead967727
 
 | ID | Task | AC | Status | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| M3-U | Original unknown recovery; [bounded proposal](../specs/PROPOSAL-M3-recovery.md), 原安裝恢復／自動journey已接受；等owner操作確認 | FN04/FN07, U01–07 | in_progress | 2026-11-02T11:16:02Z | — | 2026-11-02T13:00:06Z |
+| M3-U | Original unknown recovery; [bounded proposal](../specs/PROPOSAL-M3-recovery.md), 原安裝恢復／自動journey已接受；等owner操作確認 | FN04/FN07, U01–07 | in_progress | 2026-11-02T11:16:02Z | — | 2026-11-02T13:18:13Z |
 
 Original SQLite now positively confirmed; U01–06 and automated U07 independently
 accepted on86350871/PR983. Same-Web Claude→Codex first-roundaccept, exact restart
 archives;2CLI/41.06s, zeroVM/claims/cgroups/reservations and services stopped.
 Owner operation confirmation still pending, so M3-U/fullM3/FN07 stays in_progress.
 [Actual evidence](../acceptance/M3-reconciliation.md); no window reset or oldM2 rerun.
+
+PR983 merged2026-11-02T13:18:13Z as `d0dfb3622bd4cf59793b79448c7b4be55c3b3e7d`; finalheadfcf5c3fe Fanz41450718479/AP41450718688/contracts41450718458 allpassed, remote component bytes equal. M3-U stays in_progress for owner confirmation; bounded AP FN04-U dependency done.

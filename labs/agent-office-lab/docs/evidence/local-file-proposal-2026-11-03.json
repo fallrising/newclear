@@ -1,0 +1,132 @@
+{
+  "schema": 1,
+  "milestone": "T-0022",
+  "date": "2026-11-03",
+  "baseline": "0c5177fd6f4dd24e0ead584f494944fd864eca4f",
+  "scope": "Local single-file replacement proposal from a registered project: explicit target selection, snapshot-bound prompt, recomputed diff and download. No source writeback or generated-code execution.",
+  "offline_tests": {
+    "python": 150,
+    "node": 40,
+    "total": 190,
+    "passed": true
+  },
+  "browser": {
+    "status": "passed",
+    "model_inference": true,
+    "remote_model_calls": 0,
+    "custom_prompt_and_source_plan": true,
+    "duplicate_execute_blocked": true,
+    "refresh_without_rerun": true,
+    "browser_closed_during_inference": true,
+    "browser_reopened_without_rerun": true,
+    "download_matches_artifact": true,
+    "runner_elapsed_seconds": 42.918792167212814,
+    "artifact_sha256": "ba1a531f581d2e6094e978ed6f7aca7a8d92eeb62c6e7ad73ee692f7f18bc772",
+    "source_snapshot_unchanged": true,
+    "diff_and_original_verified": true,
+    "cleanup_verified": true,
+    "external_browser_requests": 0,
+    "browser_errors": 0,
+    "result_detail_verified": true,
+    "runs": 62
+  },
+  "outer_cleanup": {
+    "exit_code": 0,
+    "owned_processes_seen": 73,
+    "remaining_owned_processes": 0,
+    "active_journal_present": false,
+    "elapsed_seconds": 49.59
+  },
+  "independent_checks": {
+    "syntax_and_expected_addition_ast": true,
+    "generated_code_executed": false,
+    "original_source_unchanged": true,
+    "download_matches": true
+  },
+  "results_browser": {
+    "status": "passed",
+    "providers_checked": [
+      "opencode",
+      "grok",
+      "pi",
+      "cursor"
+    ],
+    "runs": 62,
+    "detail_content_and_hash": true,
+    "filters": true,
+    "refresh": true,
+    "external_requests": 0,
+    "browser_errors": 0
+  },
+  "native": {
+    "provider": "opencode",
+    "cli_version": "1.19.5",
+    "model": "strata/qwen3.8-flash-next-q2_0",
+    "states": [
+      "idle",
+      "working",
+      "done"
+    ],
+    "session_present": true,
+    "usage": {
+      "input": 3706,
+      "output": 179,
+      "calls": 3
+    },
+    "revision": {
+      "target": "calc.py",
+      "before_sha256": "e1a894022d1a082987b87adecb623438c9e386d86b2b621cff4a5fe7fdf7edc8",
+      "after_sha256": "ba1a531f581d2e6094e978ed6f7aca7a8d92eeb62c6e7ad73ee692f7f18bc772",
+      "changed": true
+    },
+    "text_tools": [
+      {
+        "phase": "allowed",
+        "tool": "read"
+      },
+      {
+        "phase": "finished",
+        "tool": "read"
+      },
+      {
+        "phase": "allowed",
+        "tool": "write"
+      },
+      {
+        "phase": "finished",
+        "tool": "write"
+      }
+    ],
+    "source_snapshot_unchanged": true,
+    "elapsed_seconds": 42.918792167212814,
+    "cleanup_errors": [],
+    "cleanup_completed": true,
+    "max_swap_delta_mib": 44.19,
+    "resource_guard_triggered": false
+  },
+  "source_sha256": {
+    "scripts/local_text_task.py": "41b481ff6adcde1ddeab15562b11c0e1c653c8a28001e5a0f9cdba584158464a",
+    "scripts/local_text_policy.mjs": "fe8681d15fe1e334d934ffc02a9d8ca6743601c8c480ab711fef2efdd8381b8d",
+    "scripts/local_text_boundary.mjs": "d16eadb7af302a9ec7027fa29a15d2f12d7594214e0ffa22c619458858de77a4",
+    "scripts/run_local_work.py": "df9a03652c7251463f8e57dadd4897c1d1a69cf754ae89f5fff6336e09bf9c92",
+    "scripts/office_console.py": "6e156852b8a6d296dac7b02099c8b41597b922f4f039340db568957e99f82776",
+    "scripts/office_console.js": "a272efc4384b7edae89f380009f3d1c011913b09b06d25d26d6c36446175f565",
+    "scripts/office_console.html": "6259ab0be7bcabe6348eaa1951fd171630261cca42314512b88bae85cb0365b5",
+    "scripts/office_console.css": "c78a69471d8f6a59047e6ece50874f4c831c18768dd72c134c24792329b3c97d",
+    "scripts/office_results.py": "54c721e8184c2774bcb4a357e08876a08808cd4d603d205dcd7e5044a4897978",
+    "scripts/office_results.html": "1b68d6e6ee0de6f621f18373e35879127a7ed8692d24ef325fdfb0c707fbb7db",
+    "scripts/check_local_revision_browser.mjs": "75352248defb845bf218aec552f28c81b8bfcdedd36874f3a4f33f4fd742a83a",
+    "scripts/check_office_results_browser.mjs": "c3bece726b9a30a65516002d3399739d0b5b6c7e1ece6b52ec6b7b971c4f0ebd"
+  },
+  "development_regressions": [
+    "Offline regression caught a local variable shadowing the legacy artifact reader; renamed before native acceptance.",
+    "HTTP project-list test initially used macOS temporary-directory alias; test switched to its physical path, retaining no-follow validation."
+  ],
+  "limitations": [
+    "One existing bounded text file per proposal, no empty replacement, multi-file edits, automatic tests, apply-back or patch download.",
+    "Native completion and hashes establish execution/artifact integrity, not general code correctness. The synthetic addition proposal was checked by AST without executing generated code.",
+    "Diff baseline is the confirmed snapshot, not the current original project after unrelated later edits.",
+    "Browser was closed during inference and reopened for results; resource limits, Q2_0 and 32K unchanged.",
+    "No remote model calls, release, deployment or usable tag; full MVP and security boundaries remain pending."
+  ]
+}

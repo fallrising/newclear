@@ -2,6 +2,7 @@
 
 本地優先的 Agent Office 實驗：OpenCode + Strata、Grok、Pi + DeepSeek、Cursor 的原生合成任務均已實測通過。提供四 provider 的唯讀結果查詢與離線頁面；統一 CLI 的本地 OpenCode 端到端任務與取消已實測，遠端新入口及跨 provider 生命週期仍待完成。先讀 [SUCCESS](SUCCESS.md)；目前沒有 usable tag。
 
+- [本地單檔修改提案：選檔、審閱差異與下載](docs/LOCAL-FILE-PROPOSAL.md)
 - [本地文字任務：選目錄、輸入要求與下載文件](docs/LOCAL-TEXT-TASK.md)
 - [本機操作台：派工、原生終端與結果](docs/CONSOLE.md)
 - [Pi 明確重試與次數限制](docs/RETRY.md)

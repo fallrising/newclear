@@ -11,6 +11,7 @@ python3 scripts/office_console.py
 ## 本輪可操作範圍
 
 - 四 provider 的固定 CLI／環境偵測與計畫。
+- [單檔修改提案](LOCAL-FILE-PROPOSAL.md)：選擇目標、自訂修改、查看差異並下載替代檔案，原檔不套用。
 - [本地文字任務](LOCAL-TEXT-TASK.md)：登記目錄、自訂要求、查看及下載 output.md，原目錄不變。
 - 本地 OpenCode／Strata 合成檔案任務。
 - 本地任務完成後保留原生 Office 終端，從操作台開啟／再次開啟，並停止所屬 runner 與模型。

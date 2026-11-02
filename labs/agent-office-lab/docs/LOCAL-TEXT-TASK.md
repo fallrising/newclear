@@ -28,4 +28,4 @@ python3 scripts/office_console.py --project /absolute/path/to/notes
 
 工作副本、任務內容及結果包含你選擇的資料，留在本機私人 runs／state；不要將這些目錄或離線結果快照提交、分享。登記目錄只在本次操作台程序有效，重啟時需再次指定。
 
-本輪完成的是本地文字輸入到產物的流程。一般程式修改、直接寫回專案、原生終端互動、遠端工位及完整安全驗收仍待接入。見[本輪證據](evidence/local-text-task-2026-11-02.json)。
+本輪完成的是本地文字輸入到產物的流程。已新增[單檔修改提案](LOCAL-FILE-PROPOSAL.md)，可選檔並下載替代內容。多檔修改、自動測試、直接寫回專案、原生終端互動、遠端工位及完整安全驗收仍待接入。見[本輪證據](evidence/local-text-task-2026-11-02.json)。

@@ -243,3 +243,13 @@ reason), explicit redispatch from Developing when every Run is settled, and the 
 current Candidate, so Candidate B cannot use Candidate A's material. RWK-AC-01..04 map to real SQLite/Fake/HTTP
 oracles in [evidence](docs/evidence/rework-loop-20261101.md); RWK-AC-05 is review, gates and delivery in BOARD HRWK.
 No completion UI, full M2 or product AC-02..04 claim; no migration, dependency, provider, release or deploy.
+
+## WorkItem detail — 2026-11-02
+
+Owner approved D1 of the [reviewed proposal](docs/plans/work-item-detail-20261102.md). The
+[normative contract](docs/sdd/work-item-detail.md) serves `GET work-items/{id}` as `work_item_detail/v1`:
+board summary, material index and stored blockers/reviews/evidence/approvals/completion records/audit.
+Never-stored fields are omitted; Review/Evidence/Approval rows are attributed through the immutable audit
+chain and an unattributable row is `storage_corruption`. DTL-AC-01..05 map to real SQLite/Fake/HTTP oracles
+in [evidence](docs/evidence/work-item-detail-20261102.md); DTL-AC-06 is review, gates and delivery in BOARD HDTL.
+No completion UI, Done validity, whole-M2 or product AC-02..04 claim; no migration, dependency, provider, release or deploy.

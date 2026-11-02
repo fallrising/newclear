@@ -1,7 +1,8 @@
 # Proposed truthful WorkItem detail
 
-Status: **Proposal; awaiting owner D1**. T-0339 / BOARD HDTLP. Proposal source `a502addb`.
-Nothing here is accepted or implemented; IDX, policy, coverage and rework contracts are unchanged.
+Status: **Owner approved D1, 2026-11-02**. T-0339 / BOARD HDTL. Proposal source `a502addb`.
+The [normative entry](../sdd/work-item-detail.md) governs implementation; this reviewed proposal is retained.
+Implementation embeds the material index verbatim as `material` and removes the four schemas only the old shape used.
 Claude review dispositions: [plan evidence](../evidence/work-item-detail-plan-20261102.md).
 
 ## Why this is the next bounded slice

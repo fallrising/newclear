@@ -454,8 +454,14 @@ shape with audit-derived attribution and no migration; implementation waits for 
 
 | ID | Task | AC | Status | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| HDTLP | Propose and review truthful WorkItem detail and subject-attribution contract | DTL-PLAN-01..03 | in_progress | 2026-11-02T10:54:03Z |  | 2026-11-02T10:54:03Z |
+| HDTLP | Propose and review truthful WorkItem detail contract | DTL-PLAN-01..03 | done | 2026-11-02T10:54:03Z | 2026-11-02T11:14:38Z | 2026-11-02T11:14:38Z |
+| HDTL | Implement truthful WorkItem detail with audit-derived attribution | DTL-AC-01..06; H02/H03 support | in_progress | 2026-11-02T11:09:20Z |  | 2026-11-02T11:09:20Z |
 
 DTL-PLAN-01 maps the remaining M2 detail gap to source. DTL-PLAN-02 fixes DTL-01..05, DTL-AC-01..06 and the minimal
 owner decisions. DTL-PLAN-03 disposes Claude review, passes document checks and completes Git/CI/readback/ledger delivery.
 [Proposal](../plans/work-item-detail-20261102.md); [review evidence](../evidence/work-item-detail-plan-20261102.md).
+
+2026-11-02T11:09Z: owner replied 「好，繼續。」 to the D1 request after the reviewed proposal; recorded as D1 approval.
+HDTLP closed with [#963](https://github.com/fallrising/newclear/pull/963) (merge time is its end; remote HAI equals the reviewed head).
+[Normative contract](../sdd/work-item-detail.md) governs HDTL. Root-only implementation, no worker; no migration,
+dependency, UI, provider, release or deploy.

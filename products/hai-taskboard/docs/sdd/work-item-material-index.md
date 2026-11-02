@@ -13,7 +13,7 @@ GET `/api/v1/projects/{project_id}/work-items/{work_item_id}/material-index` dis
 WorkItem metadata, exact legacy or accepted AC requirements, scoped Runs and Candidates.
 The closed `work_item_material_index/v1` response includes its snapshot cursor and restore generation.
 It contains no inferred coverage, current/default Candidate, artifact bytes or completion authority.
-The existing full WorkItemDetail endpoint/schema remains outstanding and unchanged.
+The [WorkItem detail](work-item-detail.md) read embeds this object unchanged as its `material`.
 
 ## Invariants
 
@@ -41,4 +41,4 @@ Root owns HTTP/OpenAPI and real SQLite/Fake discovery-to-completion integration.
 worker owns only the new SQLite implementation/tests; root owns the application DTO/reader. Named HTTP404
 Red precedes production implementation. Fixed IDX-AC-01..06 require source-bound normal/race,
 vet/build, web, OpenAPI/doc gates, Claude code review and normal Git delivery. Current observed results are mapped in [implementation evidence](../evidence/work-item-material-index-20261101.md).
-Full M2, full historical detail and completion UI remain incomplete.
+Stored history is served by the [WorkItem detail](work-item-detail.md) contract; completion UI remains incomplete.

@@ -12,7 +12,19 @@
 - `python3 -m unittest discover -s tests -v`：23 項通過。負向案例包含 pending、blocked、缺筆記、重複來源 ID、首頁觀察漂移、搜尋索引摘錄不能 reviewed。
 - `node --check app.js`：通過。
 - 瀏覽器 smoke：本機 `/usr/bin/google-chrome` 與 Playwright 1.57.0，完整 HTTP 模式通過。路徑是 `/nested/catalog/`。測過搜尋、inventory 分類交集、空結果、重設、NFKC、狀態 pending 的空結果、完整度頁、形狀背包詳情與來源連結、相鄰模式、metadata、390px 無水平溢出、無 JavaScript。沒有 pageerror，也沒有頁面外的請求。
-- `python3 scripts/check_project_success.py --write-index` 與 `python3 scripts/check_indexes.py`：本機通過，55 個契約，llms 0 error。GitHub CI 尚未回讀。
+- `python3 scripts/check_project_success.py --write-index` 與 `python3 scripts/check_indexes.py`：本機通過，55 個契約，llms 0 error。
+
+## GitHub CI 回讀
+
+回讀 commit：`16ca12fc0aebef7347ab4acbb6f356e60993299d`。三項因路徑觸發的 workflow 都是 completed / success。沒有改 workflow 檔，所以 Workflow static validation 這次沒有跑。
+
+| Workflow | 結果 | 來源 |
+| --- | --- | --- |
+| Gameplay pattern catalog | success | [run 41467066827](https://github.com/fallrising/newclear/actions/runs/41467066827) |
+| Project success contracts | success | [run 41467066361](https://github.com/fallrising/newclear/actions/runs/41467066361) |
+| llms.txt CI | success | [run 41467066578](https://github.com/fallrising/newclear/actions/runs/41467066578) |
+
+Catalog job 在 Ubuntu、Python 3.11.17 實跑：`build.py --check` 為 280 篇對 280 個來源、23 項單元測試 OK、靜態建置通過、55 個專案契約通過、llms 0 error。2026-11-02T14:59:39Z 完整瀏覽器測試成功，日誌有 `PASS: full browser HTTP navigation`，涵蓋搜尋、分類、空結果、重設、NFKC、詳情、來源、390px 與無 JavaScript。這次沒有把未跑項目改成通過。
 
 # T-0001 驗證紀錄
 

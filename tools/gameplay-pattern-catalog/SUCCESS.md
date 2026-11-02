@@ -30,11 +30,11 @@ source_commit 是本機驗證通過、且完整度文字已改為繁中的 commi
 | AC-08 | Given schema 2，When 驗證關聯與分類，Then 沒有懸空或自我引用，既有 ID 仍指向原檔。此列即 AC-F04 | passed | 23 項單元測試；`allocation-shop-reservation` 仍用本地 allocation、原站 commerce |
 | AC-09 | Given 全量靜態站，When 用真實瀏覽器操作，Then 搜尋、分類、詳情、相關模式、來源、空結果、重設、手機寬度、子路徑與無 JavaScript 導航可用。此列即 AC-F05 | passed | 本機 Chrome 完整 HTTP smoke：子路徑 `/nested/catalog/`、搜尋、分類、空結果、重設、NFKC、詳情、相關模式、來源連結、390px、無 JavaScript。見 [驗證紀錄](docs/verification.md) |
 | AC-10 | Given 離線建置，When 重複輸出並餵負向案例，Then 跳脫、危險 URL、輸出目錄保護與狀態轉移檢查會擋下錯誤。此列即 AC-F06 | passed | 單元測試的確定性建置、跳脫、symlink、pending、blocked、search-index |
-| AC-11 | Given 本次工作樹，When 執行元件測試與 repo 索引檢查，Then 結果如實保留。此列即 AC-F07 | passed | 23 項單元測試、`check_project_success.py --write-index` 與 `check_indexes.py` 本機通過。GitHub CI 於 PR 重跑，未在此列提前寫成遠端通過 |
+| AC-11 | Given 本次工作樹，When 執行元件測試與 repo 索引檢查，Then 結果如實保留。此列即 AC-F07 | passed | 本機 23 項測試與索引檢查；CI head `16ca12fc0aebef7347ab4acbb6f356e60993299d` 的 [catalog](https://github.com/fallrising/newclear/actions/runs/41467066827)、[project success](https://github.com/fallrising/newclear/actions/runs/41467066361)、[llms](https://github.com/fallrising/newclear/actions/runs/41467066578) 均 success |
 
 ## 現況與缺口
 
-筆記與 manifest 已實作，不是 spec-only。完整度以 manifest 為分母，數字見 [coverage](docs/coverage.md)。本機瀏覽器 HTTP smoke 與 repo 索引檢查已通過。GitHub CI 要等 PR 重跑後才算遠端證據。尚未合併、部署或打 tag。
+筆記與 manifest 已實作，不是 spec-only。完整度以 manifest 為分母，數字見 [coverage](docs/coverage.md)。本機瀏覽器 HTTP smoke、repo 索引檢查，以及 PR head 上三項路徑觸發的 GitHub CI 已通過。尚未合併、部署或打 tag。
 
 ## 啟動與驗證
 

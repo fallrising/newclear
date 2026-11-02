@@ -1,5 +1,17 @@
 # Pokercase 技術任務
 
+## T-0426 — Renewed dynamic Claude trial
+
+Demand:T-0426, claim409 merged. [RD-1–RD-3](T-0426-dynamic-renewed.md).
+
+| ID | Task | AC | Status | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| RD-01 | Pinned unchanged runner and fresh preflight | RD-1 | in_progress | 2026-11-02T16:12:51.403789+00:00 | — | 2026-11-02T16:16:58.611503+00:00 |
+| RD-02 | One renewed dynamic text/native reuse attempt | RD-2 | in_progress | 2026-11-02T16:12:51.403789+00:00 | — | 2026-11-02T16:16:58.611503+00:00 |
+| RD-03 | Actual evidence and complete delivery | RD-3 | in_progress | 2026-11-02T16:12:51.403789+00:00 | — | 2026-11-02T16:16:58.611503+00:00 |
+
+Actualrenewed3/3HTTP200 in7.673s: distinctdynamicmarkers, sameprocess/nativeSIDrestart andusagehistory/cleanup passed. All3admissionsconsumed/closed,no retries; independentresultreview anddelivery remain. Previous429 evidence unchanged.
+
 ## T-0426 — Dynamic Claude live acceptance
 
 Demand:T-0426, claim402 merged. [LD-1–LD-3](T-0426-dynamic-live.md).

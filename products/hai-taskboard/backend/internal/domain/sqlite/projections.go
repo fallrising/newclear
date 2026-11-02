@@ -67,20 +67,8 @@ func (store *Store) ReadBoard(ctx context.Context, projectID domain.ProjectID) (
 			return normalizeError(err)
 		}
 		for index := range result.Items {
-			value := &result.Items[index]
-			value.Item, err = store.loadWorkItem(ctx, conn, projectID, value.ID)
-			if err != nil {
+			if err := store.boardItem(ctx, conn, projectID, &result.Items[index]); err != nil {
 				return err
-			}
-			if err := conn.QueryRowContext(ctx, `SELECT COUNT(*) FROM work_item_ac_requirements WHERE project_id=? AND work_item_id=?`, projectID, value.ID).Scan(&value.RequiredACCount); err != nil {
-				return normalizeError(err)
-			}
-			var run port.BoardRun
-			err = conn.QueryRowContext(ctx, `SELECT run_id,desired_action,dispatch_state,observed_state,reconciliation_state,side_effect_outcome FROM runs WHERE project_id=? AND work_item_id=? ORDER BY created_at_ns DESC,run_id DESC LIMIT 1`, projectID, value.ID).Scan(&run.ID, &run.DesiredAction, &run.DispatchState, &run.ObservedState, &run.ReconciliationState, &run.SideEffectOutcome)
-			if err == nil {
-				value.CurrentRun = &run
-			} else if !errors.Is(err, sql.ErrNoRows) {
-				return normalizeError(err)
 			}
 		}
 		return nil
@@ -89,6 +77,27 @@ func (store *Store) ReadBoard(ctx context.Context, projectID domain.ProjectID) (
 		return port.PersistedBoard{}, err
 	}
 	return result, nil
+}
+
+// boardItem completes one board row whose ID, title and owner are loaded; the
+// WorkItem detail summary reuses it so both surfaces share one projection.
+func (store *Store) boardItem(ctx context.Context, conn *sql.Conn, projectID domain.ProjectID, value *port.BoardWorkItem) error {
+	var err error
+	value.Item, err = store.loadWorkItem(ctx, conn, projectID, value.ID)
+	if err != nil {
+		return err
+	}
+	if err := conn.QueryRowContext(ctx, `SELECT COUNT(*) FROM work_item_ac_requirements WHERE project_id=? AND work_item_id=?`, projectID, value.ID).Scan(&value.RequiredACCount); err != nil {
+		return normalizeError(err)
+	}
+	var run port.BoardRun
+	err = conn.QueryRowContext(ctx, `SELECT run_id,desired_action,dispatch_state,observed_state,reconciliation_state,side_effect_outcome FROM runs WHERE project_id=? AND work_item_id=? ORDER BY created_at_ns DESC,run_id DESC LIMIT 1`, projectID, value.ID).Scan(&run.ID, &run.DesiredAction, &run.DispatchState, &run.ObservedState, &run.ReconciliationState, &run.SideEffectOutcome)
+	if err == nil {
+		value.CurrentRun = &run
+	} else if !errors.Is(err, sql.ErrNoRows) {
+		return normalizeError(err)
+	}
+	return nil
 }
 
 // ReadProjectionEvents respects the global allocator. A foreign-project gap

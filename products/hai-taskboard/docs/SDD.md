@@ -258,7 +258,8 @@ P0-A provides four connected surfaces:
 1. **Project/Board** — Draft, Ready, Developing, Review, QA and Done phase columns, plus a
    deterministic Blocked condition projection; work cards expose current execution/evidence state.
 2. **WorkItem detail** — ACs and bindings, dependency impact, Runs, Candidate, Review, Evidence,
-   approvals and audit history.
+   approvals and audit history. The read contract is [work-item-detail](sdd/work-item-detail.md); dependency
+   impact belongs to the Impact Preview surface.
 3. **Attention** — actionable conflicts, blockers, unknown outcomes, stale plans/evidence and
    disconnected/reset-required states; no vanity activity feed.
 4. **Impact Preview** — old/new revision, directly changed and transitively affected items, reasons,

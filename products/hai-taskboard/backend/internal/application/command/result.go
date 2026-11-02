@@ -193,6 +193,29 @@ func DecodeCanonicalResult(payload []byte, commandID string, operation Operation
 	return NewError(failure.Error.Code, failure.Error.Message, failure.Error.Retryable, reasons, nil), nil
 }
 
+// DecodeResultOwner is the read-side counterpart of DecodeCanonicalResult for
+// audit attribution: the same canonical checks, but the operation is taken
+// from the stored result because runtime audit labels are not operations.
+// Only successes carry audit groups, so a stored failure is corruption here.
+func DecodeResultOwner(payload []byte, commandID string) (port.ResultOwner, error) {
+	var success successEnvelope
+	if err := json.Unmarshal(payload, &success, json.RejectUnknownMembers(true)); err != nil || !success.OK || !validOperation(success.Command.Operation) {
+		return port.ResultOwner{}, errors.New("invalid canonical command success")
+	}
+	if failure, err := DecodeCanonicalResult(payload, commandID, success.Command.Operation); err != nil || failure != nil {
+		return port.ResultOwner{}, errors.New("invalid canonical command success")
+	}
+	owner := port.ResultOwner{Operation: string(success.Command.Operation), WorkItemID: success.Result.WorkItemID, RunID: success.Result.RunID}
+	if success.Result.AcceptedRevisionDigest != "" {
+		digest, err := domain.ParseDigest(strings.TrimPrefix(success.Result.AcceptedRevisionDigest, "sha256:"))
+		if err != nil {
+			return port.ResultOwner{}, errors.New("invalid canonical command success")
+		}
+		owner.AcceptedRevisionDigest = digest
+	}
+	return owner, nil
+}
+
 func canonicalBytes(payload []byte, value any) bool {
 	encoded, err := json.Marshal(value)
 	return err == nil && bytes.Equal(payload, encoded)

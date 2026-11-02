@@ -314,4 +314,15 @@ current policy do not hide historical metadata. Each collection is limited to102
 response to4MiB; excess fails503 projection_unavailable with reason=material_index_capacity_exceeded,
 without truncation. There is no pagination in this version. Storage corruption fails503; missing or
 unauthorized scope is masked404. See the [approved contract](sdd/work-item-material-index.md).
-Full WorkItemDetail/history and the connected completion UI remain future work.
+
+### WorkItem detail
+
+`GET /api/v1/projects/{project_id}/work-items/{work_item_id}` returns `work_item_detail/v1`: the board
+row as `summary`, the material index above as `material`, and stored blockers, reviews, evidence,
+approvals, completion records and audit. Only stored fields appear; `null` is a stored NULL such as an
+unresolved blocker or unconsumed approval. Reviews, evidence and approvals are attributed to the
+WorkItem through the immutable audit and command result chain; a row that cannot be attributed makes
+the read fail 503 `storage_corruption` rather than return an inexact list. Same precedence, limits
+(1024 per collection, 4 MiB, reason `work_item_detail_capacity_exceeded`) and no-write snapshot as the
+material index. It claims no coverage or Done validity. See the [contract](sdd/work-item-detail.md).
+The connected completion UI remains future work.

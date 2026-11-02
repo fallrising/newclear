@@ -1,0 +1,14 @@
+{
+  "runId": "c190a53892af479ab1b2892d5157954b",
+  "root": "/home/ckc/test/codex/wt/newclear/cms-pp1c-b-20261101/apps/cms-scaffold/local/pp1/c190a53892af479ab1b2892d5157954b",
+  "project": "cms-pp1-local-c190a53892af479ab1b2892d5157954b",
+  "apiImage": "sha256:79dcdf9ebb900de3d7ce2226334aa76bb0b87ce500930ea5cf1117a648e5682a",
+  "scope": "B source capture fresh isolated runtime only",
+  "prepared": true,
+  "healthy": true,
+  "ownedContainers": [
+    "06981ccb9ebc03601ac99dddaff93fadc4a4b73d1b58cb64b5ff7b13a1ca2989",
+    "b43df3331f247ed952491f0ed232d137c6ca47114568cbfdbad54adf1d31e996",
+    "111027716fd210ce532fceffdfb3420e34df80688ab345b8fe486f06d1f5bcfe"
+  ]
+}

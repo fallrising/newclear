@@ -1,0 +1,31 @@
+--- maintenance-helper.mjs.before
++++ scripts/local/maintenance-helper.mjs
+@@ -123,8 +123,17 @@
+     }
+     const networks=Object.entries(n.Networks??{});
+     if(policy.networkId) {
+-      requirePolicy(networks.length===1 && networks[0][1].NetworkID===policy.networkId);
+-      if(expected.state==='running') requirePolicy(isIP(networks[0][1].IPAddress)!==0);
++      requirePolicy(typeof expected.dataNetworkName==='string'&&networks.length===1&&networks[0][0]===expected.dataNetworkName);
++      const endpoint=networks[0][1];
++      if(expected.state==='running') {
++        const [a,b]=String(endpoint.IPAddress).split('.').map(Number);
++        requirePolicy(endpoint.NetworkID===policy.networkId&&isIP(endpoint.IPAddress)===4
++          &&(a===10||a===172&&b>=16&&b<=31||a===192&&b===168));
++      }else {
++        requirePolicy(endpoint.NetworkID===''||endpoint.NetworkID===policy.networkId);
++        for(const key of ['IPAddress','EndpointID','Gateway','MacAddress','IPv6Gateway','GlobalIPv6Address'])requirePolicy((endpoint[key]??'')==='');
++        for(const key of ['IPPrefixLen','GlobalIPv6PrefixLen'])requirePolicy((endpoint[key]??0)===0);
++      }
+     } else requirePolicy(networks.every(([name,v])=>name==='none' && !v.IPAddress && !v.GlobalIPv6Address && !v.EndpointID));
+     requirePolicy(['created','running','exited'].includes(expected.state) && p.State.Status===expected.state && p.State.Running===(expected.state==='running'));
+     return container;
+@@ -524,7 +533,7 @@
+     requirePolicy(volumes.length===1&&volumes[0].Name===c.target.volumeNames['media-data']);
+     const expected={name:`cms-pp1c-${c.operationId}-${c.seq}`,labels:{...(images[0].Config.Labels??{}),
+       'org.cms.pp1c.operation':c.operationId,'org.cms.pp1c.seq':c.seq,'org.cms.pp1c.kind':kind,'org.cms.pp1c.policy':policySha256},
+-      volumeMountpoints:{[volumes[0].Name]:volumes[0].Mountpoint}};
++      volumeMountpoints:{[volumes[0].Name]:volumes[0].Mountpoint},dataNetworkName:`${c.target.project}_data`};
+     const request={version:1,mode:'INVENTORY',operationId:c.operationId,side,targetId:c.target.targetId,releaseId:c.target.images.api,
+       jdbcUrl:c.lease.sourceConnection.jdbcUrl,dbUser:'cms_local',passwordFile:'/run/secrets/spring.datasource.password',
+       mediaRoot:'/media',outputFile:'/run/pp1/output/inventory.json',backupId:null,rawProofSha256:null};

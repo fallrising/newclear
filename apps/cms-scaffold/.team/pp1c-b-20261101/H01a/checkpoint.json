@@ -1,0 +1,10 @@
+{
+  "scope": "H01a fixed policy/inspection",
+  "red": "red-native.log named behavior failures; sandbox red.log wrapper not accepted as Red",
+  "green": "43/43 native tests,0fail/skip",
+  "handwrittenLines": 174,
+  "sha256": {
+    "scripts/local/maintenance-helper.mjs": "7f4e6efd9ff23a9d7fc38a0dcc2d5e5f62c285f71f44a9464cc7b40e5abb3b55",
+    "scripts/local/maintenance-helper.test.mjs": "7143e3e0ef0effb3c03b2efd8b49d12a4972abd6b735395d6b9e4c53b1981e88"
+  }
+}

@@ -1,0 +1,28 @@
+--- maintenance-helper-integration.test.mjs.before
++++ scripts/local/maintenance-helper-integration.test.mjs
+@@ -25,6 +25,7 @@
+       if((pg&&fault==='pg-volume-extra')||(!pg&&fault==='other-volume'))volumes['/unexpected']={};
+       return{stdout:JSON.stringify([{Id:a[2],Os:'linux',Config:{Env:[],Labels:{},User:'',Volumes:volumes}}])};
+     }
++    if(a[0]==='network')return{stdout:JSON.stringify([{Id:'9'.repeat(64),Name:'none',Driver:fault==='none-driver'?'bridge':'null',Scope:'local'}])};
+     if(a[0]==='volume')return{stdout:JSON.stringify([{Name:'owned_media',Mountpoint:'/var/lib/docker/volumes/owned_media/_data'}])};
+     if(a[0]==='exec')return{stdout:a.at(-1)==='SHOW server_version_num;'?(fault==='server-number'?'170001\n':'160015\n'):fault==='server'?'17.2\n':'16.15\n'};
+     if(a[0]==='create') {
+@@ -39,7 +40,7 @@
+         Config:{Labels:labels,Env:[],User:value('--user'),Entrypoint:[value('--entrypoint')],Cmd:a.slice(entry+2),OpenStdin:true,Tty:false},
+         HostConfig:{NetworkMode:'none',ReadonlyRootfs:true,Privileged:false,CapDrop:['ALL'],SecurityOpt:['no-new-privileges'],
+           RestartPolicy:{Name:'no'},LogConfig:{Type:'none'},PortBindings:{},PidMode:'',IpcMode:'private',Tmpfs:Object.fromEntries(a.filter(x=>x.startsWith('--tmpfs=')).map(x=>x.slice(8).split(':')))},
+-        Mounts:mounts,NetworkSettings:{Ports:{},Networks:{none:{IPAddress:''}}}});return{stdout:full+'\n'};
++        Mounts:mounts,NetworkSettings:{Ports:{},Networks:{none:{NetworkID:'9'.repeat(64),EndpointID:'',IPAddress:''}}}});return{stdout:full+'\n'};
+     }
+     if(a[0]==='inspect') {
+       const c=containers.get(a[1]);return c?{stdout:JSON.stringify([c])}:{code:1,stderr:`${fault==='lowercase-missing'?'error: no such object:':'Error: No such object:'} ${a[1]}\n`};
+@@ -92,3 +93,8 @@
+   const f=await profileFixture(t,fault);await assert.rejects(probeHelperProfile(f.context,f.deps),/ADAPTER_UNSEALED/);
+   assert.ok(f.calls.filter(a=>a[2]==='create').every(a=>fault==='pg-volume-extra'&&!a.includes(f.context.target.images.postgres)));
+ });
++
++test('T126_none_profile_rejects_non_builtin_driver_before_create',async t=>{
++  const f=await profileFixture(t,'none-driver');await assert.rejects(probeHelperProfile(f.context,f.deps),/ADAPTER_UNSEALED/);
++  assert.equal(f.calls.filter(a=>a[2]==='create').length,0);
++});

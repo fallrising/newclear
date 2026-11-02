@@ -1,0 +1,29 @@
+✔ PP1FM04_targetProvenanceMustMatch (41.842783ms)
+✔ PP1FM04 artifact drift and malformed source fail closed (73.173489ms)
+✔ PP1FM04 target never publishes DB ports or changes topology (91.090487ms)
+✔ PP1FM04 private metadata/ancestor safety rejects before Docker (39.363374ms)
+✔ PP1FM04 persistent metadata exact schema/generation and mode (55.416079ms)
+✔ PP1FM04 derives fresh PG IP and verifies stopped API plus unknown writers (25.049559ms)
+✔ PP1FM04 malformed output/env/dist and all service ports fail closed (72.111713ms)
+✔ PP1FM04 media probe uses exact owned no-network readonly pinned tuple (16.681694ms)
+✔ PP1FM04 owner UID and dependency errors use fixed rejection (8.410137ms)
+✔ PP1FM04 full mounts reject Source mismatch and overlapping foreign sources (116.418035ms)
+✔ PP1FM04 media tree permits empty directories and rejects file/symlink/read errors (43.376407ms)
+✔ PP1FM04 internal endpoints without default routes bind only the verified IPAM gateway (33.989194ms)
+✔ PP1C_L03a_forged_or_serialized_tokens_have_no_authority (95.791487ms)
+✔ PP1C_L03a_lock_inode_swap_and_source_drift_rejected (86.060007ms)
+✔ PP1C_L03a_backup_restores_only_original_running_state (603.821524ms)
+✔ PP1C_L03a_writer_failure_retains_lock_and_never_restarts (91.465746ms)
+✔ PP1C_L03a_source_identity_drift_is_not_token_authority (57.71637ms)
+✔ PP1C_L03b_single_restore_child_marker_cannot_be_adopted (235.005823ms)
+✔ PP1C_L03b_helper_reservation_is_unique_and_uses_approved_path (138.405758ms)
+✔ PP1C_L03b_only_exact_registered_helper_passes_fresh_inspection (185.062032ms)
+✔ PP1C_L03b_helper_clear_requires_verified_absence (186.177008ms)
+ℹ tests 21
+ℹ suites 0
+ℹ pass 21
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1753.414712

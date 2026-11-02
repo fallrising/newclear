@@ -45,6 +45,7 @@
 | `services/cms-api/src/test/java/com/fallrising/cms/ops/RecoveryInventoryTests.java` | 新；TempDir、decode/unsafe path/byte drift cases | C03/C04a/C04b/C04c/C04d |
 | `services/cms-api/src/test/java/com/fallrising/cms/ops/RecoveryInventoryMainTests.java` | 新；輸入、mode、secret、no-Spring/no-write契約 | C05/C06 |
 | `services/cms-api/src/integrationTest/java/com/fallrising/cms/contract/RecoveryInventoryIntegrationTests.java` | 新；真PG16 read-only snapshot；不重用作 restore target | C04a/C04d |
+| `services/cms-api/src/integrationTest/java/com/fallrising/cms/ops/RecoveryInventoryMainIntegrationTests.java` | B接線回歸；真PG16 runner Ready與獨立observer一致、同connection Permit/Result/private artifact（root 2026-11-02批准test-only路徑） | C06/H02b整合 |
 | `scripts/ops/local-bundle.mjs` | 新；沿 PP1b existing lease運行本地停寫、dump/copy、重驗；不提供新 lock | C07/C08 |
 | `scripts/ops/local-bundle.test.mjs` | 新；fake command/adapter Red-Green及staging保留 | C07/C08 |
 | `scripts/ops/local-restore.mjs` | 新；fresh target restore/raw compare/session-revoke/API lifecycle orchestrator | C11–C16 |

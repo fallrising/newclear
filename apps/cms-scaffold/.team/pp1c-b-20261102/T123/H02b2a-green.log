@@ -1,0 +1,26 @@
+✖ PP1C_H02b2a_same_image_private_profile_returns_observed_versions (81.114133ms)
+✔ PP1C_H02b2a_profile_rejects_pg-version (25.541621ms)
+✔ PP1C_H02b2a_profile_rejects_server (23.41021ms)
+✔ PP1C_H02b2a_profile_rejects_policy (12.640926ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 3
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 183.802093
+
+✖ failing tests:
+
+test at scripts/local/maintenance-helper-integration.test.mjs:53:1
+✖ PP1C_H02b2a_same_image_private_profile_returns_observed_versions (81.114133ms)
+  OpsError: ADAPTER_UNSEALED
+      at probeHelperProfile (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-integration-20261102/apps/cms-scaffold/scripts/local/maintenance-helper.mjs:435:16)
+      at async TestContext.<anonymous> (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-integration-20261102/apps/cms-scaffold/scripts/local/maintenance-helper-integration.test.mjs:54:43)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:385:3) {
+    code: 'ADAPTER_UNSEALED',
+    phase: null,
+    operationId: null
+  }

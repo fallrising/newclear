@@ -1,0 +1,21 @@
+--- maintenance-helper-integration.test.mjs.before
++++ maintenance-helper-integration.test.mjs
+@@ -37,7 +37,7 @@
+         Mounts:mounts,NetworkSettings:{Ports:{},Networks:{none:{IPAddress:''}}}});return{stdout:full+'\n'};
+     }
+     if(a[0]==='inspect') {
+-      const c=containers.get(a[1]);return c?{stdout:JSON.stringify([c])}:{code:1,stderr:`Error: No such object: ${a[1]}`};
++      const c=containers.get(a[1]);return c?{stdout:JSON.stringify([c])}:{code:1,stderr:`${fault==='lowercase-missing'?'error: no such object:':'Error: No such object:'} ${a[1]}\n`};
+     }
+     if(a[0]==='start') {
+       const c=containers.get(a.at(-1));c.State={Status:'exited',Running:false,ExitCode:0};
+@@ -62,3 +62,9 @@
+ for(const fault of ['pg-version','server','server-number','compiler','policy'])test(`PP1C_H02b2a_profile_rejects_${fault}`,async t=>{
+   const f=await profileFixture(t,fault);await assert.rejects(probeHelperProfile(f.context,f.deps),/ADAPTER_UNSEALED/);
+ });
++
++test('PP1C_H02b2d_profile_accepts_actual_Docker_lowercase_exact_missing_ID',async t=>{
++  const f=await profileFixture(t,'lowercase-missing');
++  assert.equal((await probeHelperProfile(f.context,f.deps)).pgDumpVersion,'16.15');
++  assert.equal(f.containers.size,0);
++});

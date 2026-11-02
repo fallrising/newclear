@@ -1,0 +1,41 @@
+[
+  {
+    "command": [
+      "git",
+      "diff",
+      "--check"
+    ],
+    "exitCode": 0,
+    "stdout": "",
+    "stderr": "",
+    "meaning": "passed"
+  },
+  {
+    "command": [
+      "git",
+      "diff",
+      "--no-index",
+      "--check",
+      "/dev/null",
+      "scripts/ops/local-media.mjs"
+    ],
+    "exitCode": 1,
+    "stdout": "",
+    "stderr": "",
+    "meaning": "no whitespace diagnostics; no-index exit1 is expected new-file difference"
+  },
+  {
+    "command": [
+      "git",
+      "diff",
+      "--no-index",
+      "--check",
+      "/dev/null",
+      "scripts/ops/local-media.test.mjs"
+    ],
+    "exitCode": 1,
+    "stdout": "",
+    "stderr": "",
+    "meaning": "no whitespace diagnostics; no-index exit1 is expected new-file difference"
+  }
+]

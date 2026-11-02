@@ -1,0 +1,33 @@
+--- maintenance-workflow.test.mjs.before
++++ maintenance-workflow.test.mjs
+@@ -385,7 +385,7 @@
+       if(policy.networkId)setState(c,'created');f.state.containers.push(c);return{stdout:c.Id+'\n'};
+     }
+     if(a[0]==='inspect'&&a.length===2&&a[1]!=='--format') {
+-      const c=f.state.containers.find(x=>x.Id===a[1]);return c?{stdout:JSON.stringify([c])}:{code:1,stderr:`Error: No such object: ${a[1]}`};
++      const c=f.state.containers.find(x=>x.Id===a[1]);return c?{stdout:JSON.stringify([c])}:{code:1,stderr:`${fault==='lowercase-missing'?'error: no such object:':'Error: No such object:'} ${a[1]}\n`};
+     }
+     if(a[0]==='start'&&a.includes('--attach')) {
+       const c=helperList().find(x=>x.Id===a.at(-1));setState(c,'exited');
+@@ -486,3 +486,21 @@
+   await writeFile(join(f.cwd,'scripts/ops/local-media.mjs'),'changed');
+   await assert.rejects(runOwnedHelper(f.token,{side:'source',kind:'MEDIA_PACK'},f.deps));
+ });
++
++test('PP1C_H02b2e_real_token_wrapper_clears_lowercase_missing_helper_and_reservation',async t=>{
++  const f=await ownedFixture(t,'lowercase-missing');
++  const first=await runOwnedHelper(f.token,{side:'source',kind:'INVENTORY'},f.deps);
++  assert.equal((await workflow.assertWorkflow(f.token,{},f.deps)).lease.helper,null);
++  const second=await runOwnedHelper(f.token,{side:'source',kind:'INVENTORY'},f.deps);
++  assert.equal((await workflow.assertWorkflow(f.token,{},f.deps)).lease.helper,null);
++  assert.equal(f.permits,2);assert.equal(first.inventorySha256,second.inventorySha256);assert.notEqual(first.path,second.path);
++});
++
++for(const fault of ['wrong-ID','extra-text','wrong-code'])test(`PP1C_H02b2e_real_registry_rejects_missing_${fault}`,async t=>{
++  const f=await helperFixture(t);await workflow.registerOwnedHelper(f.token,f.helper,f.policy,f.expected,f.deps);
++  f.state.containers.pop();const run=f.deps.command;
++  f.deps.command=async(file,args,options)=>args[2]==='inspect'&&args[3]===f.helper.fullContainerId?{
++    code:fault==='wrong-code'?2:1,stderr:`error: no such object: ${fault==='wrong-ID'?'0'.repeat(64):f.helper.fullContainerId}${fault==='extra-text'?' extra':''}\n`}:run(file,args,options);
++  await assert.rejects(workflow.clearOwnedHelper(f.token,f.deps));
++  assert.equal(JSON.parse(await readFile(join(f.root,'maintenance/lease.json'))).helper.fullContainerId,f.helper.fullContainerId);
++});

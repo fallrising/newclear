@@ -1,0 +1,25 @@
+✔ PP1FM04_targetProvenanceMustMatch (42.724033ms)
+✔ PP1FM04 artifact drift and malformed source fail closed (76.526062ms)
+✔ PP1FM04 target never publishes DB ports or changes topology (105.964767ms)
+✔ PP1FM04 private metadata/ancestor safety rejects before Docker (37.635223ms)
+✔ PP1FM04 persistent metadata exact schema/generation and mode (55.327654ms)
+✔ PP1FM04 derives fresh PG IP and verifies stopped API plus unknown writers (24.551455ms)
+✔ PP1FM04 malformed output/env/dist and all service ports fail closed (66.572991ms)
+✔ PP1FM04 media probe uses exact owned no-network readonly pinned tuple (19.755353ms)
+✔ PP1FM04 owner UID and dependency errors use fixed rejection (8.758706ms)
+✔ PP1FM04 full mounts reject Source mismatch and overlapping foreign sources (105.09218ms)
+✔ PP1FM04 media tree permits empty directories and rejects file/symlink/read errors (46.931786ms)
+✔ PP1FM04 internal endpoints without default routes bind only the verified IPAM gateway (32.597063ms)
+✔ PP1C_L03a_forged_or_serialized_tokens_have_no_authority (90.825426ms)
+✔ PP1C_L03a_lock_inode_swap_and_source_drift_rejected (76.550511ms)
+✔ PP1C_L03a_backup_restores_only_original_running_state (538.86007ms)
+✔ PP1C_L03a_writer_failure_retains_lock_and_never_restarts (80.299877ms)
+✔ PP1C_L03a_source_identity_drift_is_not_token_authority (53.031354ms)
+ℹ tests 17
+ℹ suites 0
+ℹ pass 17
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 903.635398

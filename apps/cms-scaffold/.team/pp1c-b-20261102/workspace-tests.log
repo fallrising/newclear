@@ -1,0 +1,531 @@
+
+> @cms/api@0.2.0 test
+> vitest run
+
+
+ RUN  v5.0.0 /home/ckc/test/codex/wt/newclear/cms-pp1c-b-20261101/apps/cms-scaffold/packages/api
+
+
+ Test Files  4 passed (4)
+      Tests  45 passed (45)
+   Start at  11:36:03
+   Duration  1.34s (import 43%, transform 29%, tests 27%, worker 2%)
+
+
+> @cms/auth@0.1.0 test
+> vitest run
+
+
+ RUN  v5.0.0 /home/ckc/test/codex/wt/newclear/cms-pp1c-b-20261101/apps/cms-scaffold/packages/auth
+
+
+ Test Files  4 passed (4)
+      Tests  43 passed (43)
+   Start at  11:36:04
+   Duration  10.26s (import 45%, tests 22%, environment 18%, transform 11%, setup 4%)
+
+
+> @cms/fields@0.2.0 test
+> vitest run
+
+
+ RUN  v5.0.0 /home/ckc/test/codex/wt/newclear/cms-pp1c-b-20261101/apps/cms-scaffold/packages/fields
+
+
+ Test Files  11 passed (11)
+      Tests  61 passed (61)
+   Start at  19:36:15
+   Duration  19.28s (import 64%, environment 14%, tests 11%, transform 7%, setup 4%)
+
+     Import  106 modules were evaluated 491 times · 33.44s total, 64% of tracked time
+             ~4.95s faster with isolate: false — shared modules are evaluated once per worker instead of once per file
+             learn more: https://vitest.dev/guide/improving-performance#test-isolation
+
+
+> @cms/mocks@0.1.0 test
+> vitest run
+
+
+ RUN  v5.0.0 /home/ckc/test/codex/wt/newclear/cms-pp1c-b-20261101/apps/cms-scaffold/packages/mocks
+
+
+ Test Files  4 passed (4)
+      Tests  130 passed (130)
+   Start at  11:36:35
+   Duration  2.49s (tests 45%, transform 32%, import 22%)
+
+
+> @cms/ui@0.2.0 test
+> vitest run
+
+
+ RUN  v5.0.0 /home/ckc/test/codex/wt/newclear/cms-pp1c-b-20261101/apps/cms-scaffold/packages/ui
+
+
+ Test Files  8 passed (8)
+      Tests  23 passed (23)
+   Start at  11:36:37
+   Duration  14.86s (import 42%, tests 29%, environment 20%, setup 4%, transform 4%)
+
+     Import  60 modules were evaluated 189 times · 14.83s total, 42% of tracked time
+             ~994ms faster with isolate: false — shared modules are evaluated once per worker instead of once per file
+             learn more: https://vitest.dev/guide/improving-performance#test-isolation
+
+
+> test
+> vitest run
+
+
+ RUN  v5.0.0 /home/ckc/test/codex/wt/newclear/cms-pp1c-b-20261101/apps/cms-scaffold/apps/web-admin
+
+
+ Test Files  11 passed (11)
+      Tests  85 passed (85)
+   Start at  11:36:53
+   Duration  32.52s (import 50%, tests 31%, environment 11%, setup 4%, transform 4%)
+
+     Import  120 modules were evaluated 788 times · 44.46s total, 50% of tracked time
+             ~8.63s faster with isolate: false — shared modules are evaluated once per worker instead of once per file
+             learn more: https://vitest.dev/guide/improving-performance#test-isolation
+
+
+> test
+> vitest run
+
+
+ RUN  v5.0.0 /home/ckc/test/codex/wt/newclear/cms-pp1c-b-20261101/apps/cms-scaffold/apps/web-back
+
+
+ Test Files  13 passed (13)
+      Tests  138 passed (138)
+   Start at  11:37:26
+   Duration  61.81s (setup 44%, tests 39%, environment 10%, transform 4%, import 2%)
+
+    Isolate  13 workers spawned · ~1.57s startup each (spawn + environment, per file)
+             at least ~5.22s faster with isolate: false — reuses workers across files instead of one per file
+
+
+> test
+> vitest run
+
+
+ RUN  v5.0.0 /home/ckc/test/codex/wt/newclear/cms-pp1c-b-20261101/apps/cms-scaffold/apps/web-front
+
+Not implemented: navigation to another Document
+ ❯ src/album.test.tsx (19 tests | 1 failed) 4533ms
+   ❯ album site (F-S1, F-S2, F-S3) (19)
+     × AC-02 anonymous album flow → photo wall → lightbox only calls /api/v1/public and never sends draft parameters 1328ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/album.test.tsx > album site (F-S1, F-S2, F-S3) > AC-02 anonymous album flow → photo wall → lightbox only calls /api/v1/public and never sends draft parameters
+TestingLibraryElementError: Unable to find role="link" and name `/Coast Light 2026/`
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<div[39m
+      [33mclass[39m=[32m"flex min-h-screen flex-col bg-page text-foreground text-front-body"[39m
+      [33mdata-scheme[39m=[32m"gallery-dark"[39m
+      [33mdata-site[39m=[32m"album"[39m
+    [36m>[39m
+      [36m<a[39m
+        [33mclass[39m=[32m"sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 focus:rounded-md focus:bg-surface focus:px-3 focus:py-2"[39m
+        [33mhref[39m=[32m"#main"[39m
+      [36m>[39m
+        [0m跳到主要內容[0m
+      [36m</a>[39m
+      [36m<header[39m
+        [33mclass[39m=[32m"border-b"[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"mx-auto flex max-w-[1200px] items-center justify-between gap-4 px-4 py-4"[39m
+        [36m>[39m
+          [36m<a[39m
+            [33mclass[39m=[32m"font-display text-front-heading"[39m
+            [33mdata-discover[39m=[32m"true"[39m
+            [33mdata-testid[39m=[32m"site-brand"[39m
+            [33mhref[39m=[32m"/album"[39m
+          [36m>[39m
+            [0m相簿[0m
+          [36m</a>[39m
+          [36m<nav[39m
+            [33maria-label[39m=[32m"網站導覽"[39m
+            [33mclass[39m=[32m"hidden md:block"[39m
+            [33mdata-testid[39m=[32m"site-nav"[39m
+          [36m>[39m
+            [36m<ul[39m
+              [33mclass[39m=[32m"flex gap-6"[39m
+            [36m>[39m
+              [36m<li>[39m
+                [36m<a[39m
+                  [33maria-current[39m=[32m"page"[39m
+                  [33mclass[39m=[32m"hover:underline font-semibold underline underline-offset-4"[39m
+                  [33mdata-discover[39m=[32m"true"[39m
+                  [33mhref[39m=[32m"/album"[39m
+                [36m>[39m
+                  [0m首頁[0m
+                [36m</a>[39m
+              [36m</li>[39m
+              [36m<li>[39m
+                [36m<a[39m
+                  [33mclass[39m=[32m"hover:underline"[39m
+                  [33mdata-discover[39m=[32m"true"[39m
+                  [33mhref[39m=[32m"/album/albums"[39m
+                [36m>[39m
+                  [0m相簿[0m
+                [36m</a>[39m
+              [36m</li>[39m
+            [36m</ul>[39m
+          [36m</nav>[39m
+          [36m<button[39m
+            [33maria-controls[39m=[32m"site-nav-dialog"[39m
+            [33maria-expanded[39m=[32m"false"[39m
+            [33maria-haspopup[39m=[32m"dialog"[39m
+            [33maria-label[39m=[32m"開啟選單"[39m
+            [33mclass[39m=[32m"inline-flex shrink-0 items-center justify-center gap-2 rounded-md text-sm font-medium whitespace-nowrap transition-all outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:border-input dark:bg-input/30 dark:hover:bg-input/50 h-9 px-4 py-2 has-[>svg]:px-3 md:hidden"[39m
+            [33mdata-size[39m=[32m"default"[39m
+            [33mdata-slot[39m=[32m"button"[39m
+            [33mdata-testid[39m=[32m"site-nav-open"[39m
+            [33mdata-variant[39m=[32m"outline"[39m
+          [36m>[39m
+            [0m選單[0m
+          [36m</button>[39m
+        [36m</div>[39m
+      [36m</header>[39m
+      [36m<main[39m
+        [33mclass[39m=[32m"mx-auto w-full max-w-[1200px] flex-1 px-4 py-8 outline-none"[39m
+        [33mid[39m=[32m"main"[39m
+        [33mtabindex[39m=[32m"-1"[39m
+      [36m>[39m
+        [36m<div[39m
+          [33maria-busy[39m=[32m"true"[39m
+          [33maria-label[39m=[32m"載入中"[39m
+          [33mdata-testid[39m=[32m"query-loading"[39m
+        [36m>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"mb-10 flex flex-col gap-3"[39m
+          [36m>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"animate-pulse rounded-md bg-accent h-10 w-1/2"[39m
+              [33mdata-slot[39m=[32m"skeleton"[39m
+            [36m/>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"animate-pulse rounded-md bg-accent h-4 w-2/3"[39m
+              [33mdata-slot[39m=[32m"skeleton"[39m
+            [36m/>[39m
+          [36m</div>[39m
+        [36m</div>[39m
+        [36m<section[39m
+          [33mclass[39m=[32m"mb-10"[39m
+          [33mdata-testid[39m=[32m"grid-album"[39m
+        [36m>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"mb-4 flex flex-wrap items-baseline justify-between gap-4"[39m
+          [36m>[39m
+            [36m<h2[39m
+              [33mclass[39m=[32m"font-display text-front-heading"[39m
+            [36m>[39m
+              [0m相簿[0m
+            [36m</h2>[39m
+            [36m<a[39m
+              [33mclass[39m=[32m"underline"[39m
+              [33mdata-discover[39m=[32m"true"[39m
+              [33mhref[39m=[32m"/album/albums"[39m
+            [36m>[39m
+              [0m全部相簿[0m
+            [36m</a>[39m
+          [36m</div>[39m
+          [36m<div[39m
+            [33maria-busy[39m=[32m"true"[39m
+            [33maria-label[39m=[32m"載入中"[39m
+            [33mdata-testid[39m=[32m"query-loading"[39m
+          [36m>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3"[39m
+            [36m>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"flex flex-col gap-3"[39m
+              [36m>[39m
+                [36m<div[39m
+                  [33mclass[39m=[32m"animate-pulse rounded-md bg-accent aspect-[4/3] w-full"[39m
+                  [33mdata-slot[39m=[32m"skeleton"[39m
+                [36m/>[39m
+                [36m<div[39m
+                  [33mclass[39m=[32m"animate-pulse rounded-md bg-accent h-6 w-2/3"[39m
+                  [33mdata-slot[39m=[32m"skeleton"[39m
+                [36m/>[39m
+              [36m</div>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"flex flex-col gap-3"[39m
+              [36m>[39m
+                [36m<div[39m
+                  [33mclass[39m=[32m"animate-pulse rounded-md bg-accent aspect-[4/3] w-full"[39m
+                  [33mdata-slot[39m=[32m"skeleton"[39m
+                [36m/>[39m
+                [36m<div[39m
+                  [33mclass[39m=[32m"animate-pulse rounded-md bg-accent h-6 w-2/3"[39m
+                  [33mdata-slot[39m=[32m"skeleton"[39m
+                [36m/>[39m
+              [36m</div>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"flex flex-col gap-3"[39m
+              [36m>[39m
+                [36m<div[39m
+                  [33mclass[39m=[32m"animate-pulse rounded-md bg-accent aspect-[4/3] w-full"[39m
+                  [33mdata-slot[39m=[32m"skeleton"[39m
+                [36m/>[39m
+                [36m<div[39m
+                  [33mclass[39m=[32m"animate-pulse rounded-md bg-accent h-6 w-2/3"[39m
+                  [33mdata-slot[39m=[32m"skeleton"[39m
+                [36m/>[39m
+              [36m</div>[39m
+            [36m</div>[39m
+          [36m</div>[39m
+        [36m</section>[39m
+      [36m</main>[39m
+      [36m<footer[39m
+        [33mclass[39m=[32m"border-t"[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"mx-auto flex max-w-[1200px] flex-wrap gap-2 px-4 py-6 text-subdued"[39m
+        [36m>[39m
+          [36m<span>[39m
+            [0mCMS Scaffold[0m
+          [36m</span>[39m
+          [36m<span[39m
+            [33maria-hidden[39m=[32m"true"[39m
+          [36m>[39m
+            [0m·[0m
+          [36m</span>[39m
+          [36m<a[39m
+            [33mclass[39m=[32m"hover:underline"[39m
+            [33mdata-discover[39m=[32m"true"[39m
+            [33mhref[39m=[32m"/"[39m
+          [36m>[39m
+            [0m回到選擇器[0m
+          [36m</a>[39m
+        [36m</div>[39m
+      [36m</footer>[39m
+    [36m</div>[39m
+  [36m</div>[39m
+[36m</body>[39m
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<div[39m
+      [33mclass[39m=[32m"flex min-h-screen flex-col bg-page text-foreground text-front-body"[39m
+      [33mdata-scheme[39m=[32m"gallery-dark"[39m
+      [33mdata-site[39m=[32m"album"[39m
+    [36m>[39m
+      [36m<a[39m
+        [33mclass[39m=[32m"sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 focus:rounded-md focus:bg-surface focus:px-3 focus:py-2"[39m
+        [33mhref[39m=[32m"#main"[39m
+      [36m>[39m
+        [0m跳到主要內容[0m
+      [36m</a>[39m
+      [36m<header[39m
+        [33mclass[39m=[32m"border-b"[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"mx-auto flex max-w-[1200px] items-center justify-between gap-4 px-4 py-4"[39m
+        [36m>[39m
+          [36m<a[39m
+            [33mclass[39m=[32m"font-display text-front-heading"[39m
+            [33mdata-discover[39m=[32m"true"[39m
+            [33mdata-testid[39m=[32m"site-brand"[39m
+            [33mhref[39m=[32m"/album"[39m
+          [36m>[39m
+            [0m相簿[0m
+          [36m</a>[39m
+          [36m<nav[39m
+            [33maria-label[39m=[32m"網站導覽"[39m
+            [33mclass[39m=[32m"hidden md:block"[39m
+            [33mdata-testid[39m=[32m"site-nav"[39m
+          [36m>[39m
+            [36m<ul[39m
+              [33mclass[39m=[32m"flex gap-6"[39m
+            [36m>[39m
+              [36m<li>[39m
+                [36m<a[39m
+                  [33maria-current[39m=[32m"page"[39m
+                  [33mclass[39m=[32m"hover:underline font-semibold underline underline-offset-4"[39m
+                  [33mdata-discover[39m=[32m"true"[39m
+                  [33mhref[39m=[32m"/album"[39m
+                [36m>[39m
+                  [0m首頁[0m
+                [36m</a>[39m
+              [36m</li>[39m
+              [36m<li>[39m
+                [36m<a[39m
+                  [33mclass[39m=[32m"hover:underline"[39m
+                  [33mdata-discover[39m=[32m"true"[39m
+                  [33mhref[39m=[32m"/album/albums"[39m
+                [36m>[39m
+                  [0m相簿[0m
+                [36m</a>[39m
+              [36m</li>[39m
+            [36m</ul>[39m
+          [36m</nav>[39m
+          [36m<button[39m
+            [33maria-controls[39m=[32m"site-nav-dialog"[39m
+            [33maria-expanded[39m=[32m"false"[39m
+            [33maria-haspopup[39m=[32m"dialog"[39m
+            [33maria-label[39m=[32m"開啟選單"[39m
+            [33mclass[39m=[32m"inline-flex shrink-0 items-center justify-center gap-2 rounded-md text-sm font-medium whitespace-nowrap transition-all outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:border-input dark:bg-input/30 dark:hover:bg-input/50 h-9 px-4 py-2 has-[>svg]:px-3 md:hidden"[39m
+            [33mdata-size[39m=[32m"default"[39m
+            [33mdata-slot[39m=[32m"button"[39m
+            [33mdata-testid[39m=[32m"site-nav-open"[39m
+            [33mdata-variant[39m=[32m"outline"[39m
+          [36m>[39m
+            [0m選單[0m
+          [36m</button>[39m
+        [36m</div>[39m
+      [36m</header>[39m
+      [36m<main[39m
+        [33mclass[39m=[32m"mx-auto w-full max-w-[1200px] flex-1 px-4 py-8 outline-none"[39m
+        [33mid[39m=[32m"main"[39m
+        [33mtabindex[39m=[32m"-1"[39m
+      [36m>[39m
+        [36m<div[39m
+          [33maria-busy[39m=[32m"true"[39m
+          [33maria-label[39m=[32m"載入中"[39m
+          [33mdata-testid[39m=[32m"query-loading"[39m
+        [36m>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"mb-10 flex flex-col gap-3"[39m
+          [36m>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"animate-pulse rounded-md bg-accent h-10 w-1/2"[39m
+              [33mdata-slot[39m=[32m"skeleton"[39m
+            [36m/>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"animate-pulse rounded-md bg-accent h-4 w-2/3"[39m
+              [33mdata-slot[39m=[32m"skeleton"[39m
+            [36m/>[39m
+          [36m</div>[39m
+        [36m</div>[39m
+        [36m<section[39m
+          [33mclass[39m=[32m"mb-10"[39m
+          [33mdata-testid[39m=[32m"grid-album"[39m
+        [36m>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"mb-4 flex flex-wrap items-baseline justify-between gap-4"[39m
+          [36m>[39m
+            [36m<h2[39m
+              [33mclass[39m=[32m"font-display text-front-heading"[39m
+            [36m>[39m
+              [0m相簿[0m
+            [36m</h2>[39m
+            [36m<a[39m
+              [33mclass[39m=[32m"underline"[39m
+              [33mdata-discover[39m=[32m"true"[39m
+              [33mhref[39m=[32m"/album/albums"[39m
+            [36m>[39m
+              [0m全部相簿[0m
+            [36m</a>[39m
+          [36m</div>[39m
+          [36m<div[39m
+            [33maria-busy[39m=[32m"true"[39m
+            [33maria-label[39m=[32m"載入中"[39m
+            [33mdata-testid[39m=[32m"query-loading"[39m
+          [36m>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3"[39m
+            [36m>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"flex flex-col gap-3"[39m
+              [36m>[39m
+                [36m<div[39m
+                  [33mclass[39m=[32m"animate-pulse rounded-md bg-accent aspect-[4/3] w-full"[39m
+                  [33mdata-slot[39m=[32m"skeleton"[39m
+                [36m/>[39m
+                [36m<div[39m
+                  [33mclass[39m=[32m"animate-pulse rounded-md bg-accent h-6 w-2/3"[39m
+                  [33mdata-slot[39m=[32m"skeleton"[39m
+                [36m/>[39m
+              [36m</div>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"flex flex-col gap-3"[39m
+              [36m>[39m
+                [36m<div[39m
+                  [33mclass[39m=[32m"animate-pulse rounded-md bg-accent aspect-[4/3] w-full"[39m
+                  [33mdata-slot[39m=[32m"skeleton"[39m
+                [36m/>[39m
+                [36m<div[39m
+                  [33mclass[39m=[32m"animate-pulse rounded-md bg-accent h-6 w-2/3"[39m
+                  [33mdata-slot[39m=[32m"skeleton"[39m
+                [36m/>[39m
+              [36m</div>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"flex flex-col gap-3"[39m
+              [36m>[39m
+                [36m<div[39m
+                  [33mclass[39m=[32m"animate-pulse rounded-md bg-accent aspect-[4/3] w-full"[39m
+                  [33mdata-slot[39m=[32m"skeleton"[39m
+                [36m/>[39m
+                [36m<div[39m
+                  [33mclass[39m=[32m"animate-pulse rounded-md bg-accent h-6 w-2/3"[39m
+                  [33mdata-slot[39m=[32m"skeleton"[39m
+                [36m/>[39m
+              [36m</div>[39m
+            [36m</div>[39m
+          [36m</div>[39m
+        [36m</section>[39m
+      [36m</main>[39m
+      [36m<footer[39m
+        [33mclass[39m=[32m"border-t"[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"mx-auto flex max-w-[1200px] flex-wrap gap-2 px-4 py-6 text-subdued"[39m
+        [36m>[39m
+          [36m<span>[39m
+            [0mCMS Scaffold[0m
+          [36m</span>[39m
+          [36m<span[39m
+            [33maria-hidden[39m=[32m"true"[39m
+          [36m>[39m
+            [0m·[0m
+          [36m</span>[39m
+          [36m<a[39m
+            [33mclass[39m=[32m"hover:underline"[39m
+            [33mdata-discover[39m=[32m"true"[39m
+            [33mhref[39m=[32m"/"[39m
+          [36m>[39m
+            [0m回到選擇器[0m
+          [36m</a>[39m
+        [36m</div>[39m
+      [36m</footer>[39m
+    [36m</div>[39m
+  [36m</div>[39m
+[36m</body>[39m
+ ❯ waitForWrapper ../../node_modules/@testing-library/dom/dist/wait-for.js:163:27
+ ❯ ../../node_modules/@testing-library/dom/dist/query-helpers.js:86:33
+ ❯ src/album.test.tsx:12:34
+     10|     const requests = recordRequests();
+     11|     renderRoute("/album");
+     12|     fireEvent.click(await screen.findByRole("link", { name: /Coast Lig…
+       |                                  ^
+     13|     expect(await screen.findByRole("heading", { level: 1, name: "Coast…
+     14|     const tiles = await screen.findAllByTestId("photo-tile");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 15 passed (16)
+      Tests  1 failed | 146 passed (147)
+   Start at  11:38:28
+   Duration  48.23s (import 53%, tests 23%, environment 13%, transform 6%, setup 5%)
+
+     Import  134 modules were evaluated 1127 times · 73.36s total, 53% of tracked time
+             ~16.56s faster with isolate: false — shared modules are evaluated once per worker instead of once per file
+             learn more: https://vitest.dev/guide/improving-performance#test-isolation
+
+npm error Lifecycle script `test` failed with error:
+npm error code 1
+npm error path /home/ckc/test/codex/wt/newclear/cms-pp1c-b-20261101/apps/cms-scaffold/apps/web-front
+npm error workspace @cms/web-front
+npm error location /home/ckc/test/codex/wt/newclear/cms-pp1c-b-20261101/apps/cms-scaffold/apps/web-front
+npm error command failed
+npm error command sh -c vitest run

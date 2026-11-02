@@ -1,0 +1,41 @@
+--- maintenance-helper.test.mjs.before
++++ scripts/local/maintenance-helper.test.mjs
+@@ -15,7 +15,7 @@
+ }
+ function fixture(kind = 'INVENTORY', side = 'source') {
+   const c = context(kind,side), p = buildHelperPolicy(c), id=full('f');
+-  const expected={fullContainerId:id,name:`cms-pp1c-${operationId}-1`,state:'created',dataNetworkName:'owned_data',
++  const expected={fullContainerId:id,name:`cms-pp1c-${operationId}-1`,state:'created',dataNetworkName:'owned_data',noneNetworkId:full('9'),
+     labels:{source:'reviewed','org.cms.pp1c.operation':operationId,'org.cms.pp1c.seq':'1',
+       'org.cms.pp1c.kind':kind,'org.cms.pp1c.policy':sha256(canonicalBytes(p))},volumeMountpoints:{owned_media:'/volumes/media'}};
+   const container={Id:id,Name:`/${expected.name}`,Image:p.imageId,
+@@ -181,7 +181,7 @@
+     Object.assign(p,{kind:role,entrypoint:`/usr/local/bin/${tool}`,args:['--version'],networkId:null});
+     expected.pgProfileImageId=c.target.images.postgres;
+     container.Config.Entrypoint=[p.entrypoint];container.Config.Cmd=p.args;
+-    container.HostConfig.NetworkMode='none';container.NetworkSettings.Networks={none:{IPAddress:''}};
++    container.HostConfig.NetworkMode='none';container.NetworkSettings.Networks={none:{NetworkID:'',EndpointID:'',IPAddress:''}};
+     assertHelperPolicy(container,p,expected);
+     assert.ok(helperCreateArgs(p,expected).includes(`--tmpfs=${pgData}:${pgMask}`));
+     for(const mutate of [v=>v.imageId=`sha256:${full('0')}`,v=>v.entrypoint='/bin/sh',v=>v.args=['--version','extra'],v=>v.networkId=full('d')]) {
+@@ -203,3 +203,20 @@
+   const {p,expected,container}=fixture();expected.state='running';container.State={Status:'running',Running:true};
+   container.NetworkSettings.Networks.owned_data.IPAddress=address;assert.throws(()=>assertHelperPolicy(container,p,expected));
+ });
++
++for(const [fault,mutate] of Object.entries({
++  identity:(c,e)=>e.noneNetworkId=full('7'),network:c=>c.NetworkSettings.Networks.none.NetworkID=full('7'),
++  extra:c=>c.NetworkSettings.Networks.bridge={},name:c=>c.NetworkSettings.Networks={host:c.NetworkSettings.Networks.none},
++  host:c=>c.HostConfig.NetworkMode='host',endpoint:c=>c.NetworkSettings.Networks.none.EndpointID='short',
++  address:c=>c.NetworkSettings.Networks.none.IPAddress='172.31.0.1',gateway:c=>c.NetworkSettings.Networks.none.Gateway='172.31.0.1',
++  ipv6:c=>c.NetworkSettings.Networks.none.GlobalIPv6Address='::1',mac:c=>c.NetworkSettings.Networks.none.MacAddress='aa:bb:cc:dd:ee:ff',
++  prefix:c=>c.NetworkSettings.Networks.none.IPPrefixLen=24
++}))test(`T126_none_running_rejects_${fault}`,()=>{
++  const {p,expected,container}=fixture('MEDIA_PACK');expected.state='running';container.State={Status:'running',Running:true};
++  Object.assign(container.NetworkSettings.Networks.none,{NetworkID:expected.noneNetworkId,EndpointID:full('8')});
++  mutate(container,expected);assert.throws(()=>assertHelperPolicy(container,p,expected));
++});
++for(const state of ['created','exited'])test(`T126_none_${state}_rejects_internal_endpoint`,()=>{
++  const {p,expected,container}=fixture('MEDIA_PACK');expected.state=state;container.State={Status:state,Running:false};
++  container.NetworkSettings.Networks.none.EndpointID=full('8');assert.throws(()=>assertHelperPolicy(container,p,expected));
++});

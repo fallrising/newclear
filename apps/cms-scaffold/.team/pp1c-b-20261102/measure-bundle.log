@@ -1,0 +1,25 @@
+
+> measure:bundle
+> node --test scripts/measure-bundles.test.mjs && node scripts/measure-bundles.mjs
+
+✔ W5 bundle single entry (1.233344ms)
+✔ W5 bundle follows transitive static imports (0.118429ms)
+✔ W5 bundle deduplicates shared imports (0.08894ms)
+✔ W5 bundle handles cycles (0.095469ms)
+✔ W5 bundle excludes dynamicImports (0.1072ms)
+✔ W5 bundle includes manual chunks (0.07256ms)
+✔ W5 bundle rejects missing import key and missing entry (0.435358ms)
+✔ W5 bundle accepts exact limits (653.407791ms)
+✔ W5 bundle rejects one byte over and still writes complete JSON (244.643515ms)
+✔ W5 bundle rejects missing or stale build with exit 2 (78.034794ms)
+ℹ tests 10
+ℹ suites 0
+ℹ pass 10
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1047.83585
+| W5-BUNDLE-20261102-19 | 2026-11-02T11:45:25.987Z | b0bf709fb687f4a23df868a8d123e5fa447959a3 | yes | front | 85206 | 92160 | -6954 | measure:bundle | bundle.json | passed |  |
+| W5-BUNDLE-20261102-20 | 2026-11-02T11:45:25.987Z | b0bf709fb687f4a23df868a8d123e5fa447959a3 | yes | back | 130912 | 163840 | -32928 | measure:bundle | bundle.json | passed |  |
+| W5-BUNDLE-20261102-21 | 2026-11-02T11:45:25.987Z | b0bf709fb687f4a23df868a8d123e5fa447959a3 | yes | admin | 136666 | 163840 | -27174 | measure:bundle | bundle.json | passed |  |

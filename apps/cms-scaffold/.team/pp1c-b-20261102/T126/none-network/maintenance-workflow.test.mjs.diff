@@ -1,0 +1,87 @@
+--- maintenance-workflow.test.mjs.before
++++ scripts/local/maintenance-workflow.test.mjs
+@@ -174,7 +174,7 @@
+     HostConfig:{ReadonlyRootfs:true,Privileged:false,CapDrop:['ALL'],CapAdd:[],SecurityOpt:['no-new-privileges'],
+       RestartPolicy:{Name:'no'},LogConfig:{Type:'none'},PortBindings:{},Devices:[],DeviceRequests:[],ExtraHosts:[],
+       PidMode:'',IpcMode:'private',AutoRemove:false,Tmpfs:{'/tmp':'rw,nosuid,nodev,size=67108864',...(policy.entrypoint==='/usr/local/bin/pg_dump'||policy.entrypoint==='/usr/local/bin/pg_restore'?{'/var/lib/postgresql/data':'ro,nosuid,nodev,noexec,size=1048576'}:{})},NetworkMode:policy.networkId??'none'},
+-    NetworkSettings:{Ports:{},Networks:{}},Mounts:policy.mounts.map(m=>({Type:m.type,Name:m.type==='volume'?m.source:undefined,
++    NetworkSettings:{Ports:{},Networks:policy.networkId?{}:{none:{NetworkID:'',EndpointID:'',IPAddress:''}}},Mounts:policy.mounts.map(m=>({Type:m.type,Name:m.type==='volume'?m.source:undefined,
+       Source:m.type==='volume'?volumeMountpoints[m.source]:m.source,Destination:m.destination,RW:!m.readOnly}))};
+ }
+ async function helperFixture(t,kind='MEDIA_PACK') {
+@@ -182,6 +182,7 @@
+   f.deps.command=async(file,args,options)=>{
+     const a=args.slice(2);
+     if(a[0]==='image') {const result=await original(file,args,options);const rows=JSON.parse(result.stdout);rows.forEach(x=>Object.assign(x.Config,{Env:[],User:'',Volumes:x.Id===f.receipt.images.postgres?{'/var/lib/postgresql/data':{}}:null}));return{stdout:JSON.stringify(rows)};}
++    if(a[0]==='network'&&a[2]==='none')return{stdout:JSON.stringify([{Id:'9'.repeat(64),Name:'none',Driver:'null',Scope:'local'}])};
+     if(a[0]==='volume')return{stdout:JSON.stringify(f.state.volumes.filter(v=>a.slice(2).includes(v.Name)))};
+     if(a[0]==='inspect'&&a.length===2) {
+       const rows=f.state.containers.filter(c=>c.Id===a[1]);
+@@ -194,7 +195,7 @@
+   const policy=buildHelperPolicy({...context,image,kind,side:'source'}),policySha256=sha256(canonicalBytes(policy));
+   const expected={fullContainerId:'f'.repeat(64),name:`cms-pp1c-${operationId}-1`,labels:{...image.Config.Labels,'org.cms.pp1c.operation':operationId,
+     'org.cms.pp1c.seq':'1','org.cms.pp1c.kind':kind,'org.cms.pp1c.policy':policySha256},
+-    volumeMountpoints:Object.fromEntries(f.state.volumes.map(v=>[v.Name,v.Mountpoint])),state:'created',dataNetworkName:`${project}_data`};
++    volumeMountpoints:Object.fromEntries(f.state.volumes.map(v=>[v.Name,v.Mountpoint])),state:'created',dataNetworkName:`${project}_data`,noneNetworkId:'9'.repeat(64)};
+   const helper={kind,side:'source',fullContainerId:expected.fullContainerId,policySha256,state:'CREATED',endpoint:null,backend:null,startedAt:new Date().toISOString()};
+   const container=helperContainer(policy,expected,expected.volumeMountpoints);
+   if(policy.networkId) container.NetworkSettings.Networks[`${project}_data`]={NetworkID:policy.networkId,IPAddress:''};
+@@ -222,10 +223,11 @@
+ test('PP1C_L03b_helper_state_and_identity_cannot_be_replayed',async t=>{
+   const f=await helperFixture(t);await workflow.registerOwnedHelper(f.token,f.helper,f.policy,f.expected,f.deps);
+   f.container.State={Status:'running',Running:true};
++  Object.assign(f.container.NetworkSettings.Networks.none,{NetworkID:'9'.repeat(64),EndpointID:'8'.repeat(64)});
+   await workflow.updateOwnedHelper(f.token,{...f.helper,state:'RUNNING'},f.deps);
+   await assert.rejects(workflow.updateOwnedHelper(f.token,{...f.helper,state:'RUNNING'},f.deps));
+   await assert.rejects(workflow.updateOwnedHelper(f.token,{...f.helper,state:'EXITED',fullContainerId:'e'.repeat(64)},f.deps));
+-  f.container.State={Status:'exited',Running:false};
++  f.container.State={Status:'exited',Running:false};f.container.NetworkSettings.Networks.none.EndpointID='';
+   await workflow.updateOwnedHelper(f.token,{...f.helper,state:'EXITED'},f.deps);
+   await assert.rejects(workflow.endPhase(f.token,{},f.deps));
+ });
+@@ -363,7 +365,7 @@
+       const network=f.state.networks.find(n=>n.Id===c.HostConfig.NetworkMode);
+       c.NetworkSettings.Networks[network.Name]={NetworkID:state==='running'?network.Id:'',IPAddress:state==='running'?'172.31.0.9':'',EndpointID:''};
+       if(state==='running')network.Containers[c.Id]={IPv4Address:'172.31.0.9/16'};else delete network.Containers[c.Id];
+-    }
++    }else c.NetworkSettings.Networks={none:{NetworkID:state==='created'?'':'9'.repeat(64),EndpointID:state==='running'?'8'.repeat(64):'',IPAddress:''}};
+   };
+   f.deps.command=async(file,args,options)=>{
+     if(file==='javac'||file.endsWith('/javac')) {
+@@ -372,6 +374,7 @@
+     }
+     const a=args.slice(2),find=key=>a.find(v=>v.startsWith(key+'='))?.slice(key.length+1);f.calls.push(args);
+     if(a[0]==='image') {const r=await original(file,args,options),images=JSON.parse(r.stdout);images.forEach(x=>Object.assign(x.Config,{Env:[],User:'',Volumes:x.Id===f.receipt.images.postgres?{'/var/lib/postgresql/data':{}}:null}));return{stdout:JSON.stringify(images)};}
++    if(a[0]==='network'&&a[2]==='none')return{stdout:JSON.stringify([{Id:'9'.repeat(64),Name:'none',Driver:'null',Scope:'local'}])};
+     if(a[0]==='volume')return{stdout:JSON.stringify(f.state.volumes.filter(v=>a.slice(2).includes(v.Name)))};
+     if(a[0]==='create') {
+       const labels=a.includes(f.receipt.images.api)?{...f.state.apiLabels}:{};for(let i=0;i<a.length;i++)if(a[i]==='--label'){const text=a[++i],n=text.indexOf('=');labels[text.slice(0,n)]=text.slice(n+1);}
+@@ -563,3 +566,28 @@
+     await assert.rejects(runOwnedHelper(f.token,{side:'source',kind:'PG_DUMP'},f.deps));
+   });
+ }
++
++test('T126_none_real_registry_accepts_internal_running_endpoint_without_logical_endpoint',async t=>{
++  const f=await helperFixture(t);f.expected.noneNetworkId='9'.repeat(64);
++  f.container.NetworkSettings.Networks={none:inactiveEndpoint()};
++  await workflow.registerOwnedHelper(f.token,f.helper,f.policy,f.expected,f.deps);
++  f.container.State={Status:'running',Running:true,ExitCode:0};
++  Object.assign(f.container.NetworkSettings.Networks.none,{NetworkID:f.expected.noneNetworkId,EndpointID:'8'.repeat(64)});
++  f.helper={...f.helper,state:'RUNNING'};await workflow.updateOwnedHelper(f.token,f.helper,f.deps);
++  assert.equal((await workflow.assertWorkflow(f.token,{},f.deps)).lease.helper.endpoint,null);
++  f.container.State={Status:'exited',Running:false,ExitCode:0};f.container.NetworkSettings.Networks.none.EndpointID='';
++  await workflow.updateOwnedHelper(f.token,{...f.helper,state:'EXITED'},f.deps);
++  assert.equal((await workflow.assertWorkflow(f.token,{},f.deps)).lease.helper.endpoint,null);
++});
++
++for(const fault of ['id','name','driver','scope','forged-expected'])test(`T126_none_real_registry_rejects_${fault}`,async t=>{
++  const f=await helperFixture(t),original=f.deps.command;
++  const network={Id:'9'.repeat(64),Name:'none',Driver:'null',Scope:'local'};
++  if(fault==='id')network.Id='7'.repeat(64);
++  if(fault==='name')network.Name='bridge';
++  if(fault==='driver')network.Driver='bridge';
++  if(fault==='scope')network.Scope='swarm';
++  if(fault==='forged-expected')f.expected.noneNetworkId='7'.repeat(64);
++  f.deps.command=async(file,args,options)=>args[2]==='network'&&args[4]==='none'?{stdout:JSON.stringify([network])}:original(file,args,options);
++  await assert.rejects(workflow.registerOwnedHelper(f.token,f.helper,f.policy,f.expected,f.deps));
++});

@@ -1,0 +1,355 @@
+✔ PP1C_L01_v1_insertion_order_bytes_and_atomic_update (10.372914ms)
+✔ PP1C_L01_duplicate_reservation_preserves_existing_bytes (1.775654ms)
+✔ PP1C_L01_symlink_hardlink_and_mode_rejected (2.370692ms)
+✖ PP1C_L02_version (0.711997ms)
+✖ PP1C_L02_unknown (0.162789ms)
+✖ PP1C_L02_missing (0.13246ms)
+✖ PP1C_L02_source_identity (0.137349ms)
+✖ PP1C_L02_source_unknown (0.162789ms)
+✖ PP1C_L02_source_connection (0.155639ms)
+✖ PP1C_L02_operation (3.42482ms)
+✖ PP1C_L02_phase (0.16734ms)
+✖ PP1C_L02_source_release (0.17278ms)
+✖ PP1C_L02_policy (0.148759ms)
+✖ PP1C_L02_time (0.10091ms)
+✖ PP1C_L02_target_for_backup (0.090689ms)
+✖ PP1C_L02_proof_for_backup (0.08121ms)
+✖ PP1C_L02_account_for_backup (0.095969ms)
+✖ PP1C_L02_helper_empty (0.07103ms)
+✖ PP1C_L02_restore_missing_target (0.074401ms)
+✖ PP1C_L02_recover_running (0.074269ms)
+✖ PP1C_L02_valid_backup_phases_and_nested_required (0.196909ms)
+ℹ tests 21
+ℹ suites 0
+ℹ pass 3
+ℹ fail 18
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 37.872494
+
+✖ failing tests:
+
+test at scripts/local/maintenance-store.test.mjs:70:45
+✖ PP1C_L02_version (0.711997ms)
+  AssertionError [ERR_ASSERTION]: Missing expected exception.
+      at TestContext.<anonymous> (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-registry-20261101/apps/cms-scaffold/scripts/local/maintenance-store.test.mjs:71:48)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+      at Test.postRun (node:internal/test_runner/test:1465:19)
+      at Test.run (node:internal/test_runner/test:1390:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: /INPUT_INVALID/,
+    operator: 'throws',
+    diff: 'simple'
+  }
+
+test at scripts/local/maintenance-store.test.mjs:70:45
+✖ PP1C_L02_unknown (0.162789ms)
+  AssertionError [ERR_ASSERTION]: Missing expected exception.
+      at TestContext.<anonymous> (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-registry-20261101/apps/cms-scaffold/scripts/local/maintenance-store.test.mjs:71:48)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+      at Test.postRun (node:internal/test_runner/test:1465:19)
+      at Test.run (node:internal/test_runner/test:1390:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: /INPUT_INVALID/,
+    operator: 'throws',
+    diff: 'simple'
+  }
+
+test at scripts/local/maintenance-store.test.mjs:70:45
+✖ PP1C_L02_missing (0.13246ms)
+  AssertionError [ERR_ASSERTION]: Missing expected exception.
+      at TestContext.<anonymous> (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-registry-20261101/apps/cms-scaffold/scripts/local/maintenance-store.test.mjs:71:48)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+      at Test.postRun (node:internal/test_runner/test:1465:19)
+      at Test.run (node:internal/test_runner/test:1390:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: /INPUT_INVALID/,
+    operator: 'throws',
+    diff: 'simple'
+  }
+
+test at scripts/local/maintenance-store.test.mjs:70:45
+✖ PP1C_L02_source_identity (0.137349ms)
+  AssertionError [ERR_ASSERTION]: Missing expected exception.
+      at TestContext.<anonymous> (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-registry-20261101/apps/cms-scaffold/scripts/local/maintenance-store.test.mjs:71:48)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+      at Test.postRun (node:internal/test_runner/test:1465:19)
+      at Test.run (node:internal/test_runner/test:1390:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: /INPUT_INVALID/,
+    operator: 'throws',
+    diff: 'simple'
+  }
+
+test at scripts/local/maintenance-store.test.mjs:70:45
+✖ PP1C_L02_source_unknown (0.162789ms)
+  AssertionError [ERR_ASSERTION]: Missing expected exception.
+      at TestContext.<anonymous> (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-registry-20261101/apps/cms-scaffold/scripts/local/maintenance-store.test.mjs:71:48)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+      at Test.postRun (node:internal/test_runner/test:1465:19)
+      at Test.run (node:internal/test_runner/test:1390:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: /INPUT_INVALID/,
+    operator: 'throws',
+    diff: 'simple'
+  }
+
+test at scripts/local/maintenance-store.test.mjs:70:45
+✖ PP1C_L02_source_connection (0.155639ms)
+  AssertionError [ERR_ASSERTION]: Missing expected exception.
+      at TestContext.<anonymous> (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-registry-20261101/apps/cms-scaffold/scripts/local/maintenance-store.test.mjs:71:48)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+      at Test.postRun (node:internal/test_runner/test:1465:19)
+      at Test.run (node:internal/test_runner/test:1390:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: /INPUT_INVALID/,
+    operator: 'throws',
+    diff: 'simple'
+  }
+
+test at scripts/local/maintenance-store.test.mjs:70:45
+✖ PP1C_L02_operation (3.42482ms)
+  AssertionError [ERR_ASSERTION]: Missing expected exception.
+      at TestContext.<anonymous> (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-registry-20261101/apps/cms-scaffold/scripts/local/maintenance-store.test.mjs:71:48)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+      at Test.postRun (node:internal/test_runner/test:1465:19)
+      at Test.run (node:internal/test_runner/test:1390:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: /INPUT_INVALID/,
+    operator: 'throws',
+    diff: 'simple'
+  }
+
+test at scripts/local/maintenance-store.test.mjs:70:45
+✖ PP1C_L02_phase (0.16734ms)
+  AssertionError [ERR_ASSERTION]: Missing expected exception.
+      at TestContext.<anonymous> (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-registry-20261101/apps/cms-scaffold/scripts/local/maintenance-store.test.mjs:71:48)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+      at Test.postRun (node:internal/test_runner/test:1465:19)
+      at Test.run (node:internal/test_runner/test:1390:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: /INPUT_INVALID/,
+    operator: 'throws',
+    diff: 'simple'
+  }
+
+test at scripts/local/maintenance-store.test.mjs:70:45
+✖ PP1C_L02_source_release (0.17278ms)
+  AssertionError [ERR_ASSERTION]: Missing expected exception.
+      at TestContext.<anonymous> (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-registry-20261101/apps/cms-scaffold/scripts/local/maintenance-store.test.mjs:71:48)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+      at Test.postRun (node:internal/test_runner/test:1465:19)
+      at Test.run (node:internal/test_runner/test:1390:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: /INPUT_INVALID/,
+    operator: 'throws',
+    diff: 'simple'
+  }
+
+test at scripts/local/maintenance-store.test.mjs:70:45
+✖ PP1C_L02_policy (0.148759ms)
+  AssertionError [ERR_ASSERTION]: Missing expected exception.
+      at TestContext.<anonymous> (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-registry-20261101/apps/cms-scaffold/scripts/local/maintenance-store.test.mjs:71:48)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+      at Test.postRun (node:internal/test_runner/test:1465:19)
+      at Test.run (node:internal/test_runner/test:1390:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: /INPUT_INVALID/,
+    operator: 'throws',
+    diff: 'simple'
+  }
+
+test at scripts/local/maintenance-store.test.mjs:70:45
+✖ PP1C_L02_time (0.10091ms)
+  AssertionError [ERR_ASSERTION]: Missing expected exception.
+      at TestContext.<anonymous> (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-registry-20261101/apps/cms-scaffold/scripts/local/maintenance-store.test.mjs:71:48)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+      at Test.postRun (node:internal/test_runner/test:1465:19)
+      at Test.run (node:internal/test_runner/test:1390:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: /INPUT_INVALID/,
+    operator: 'throws',
+    diff: 'simple'
+  }
+
+test at scripts/local/maintenance-store.test.mjs:70:45
+✖ PP1C_L02_target_for_backup (0.090689ms)
+  AssertionError [ERR_ASSERTION]: Missing expected exception.
+      at TestContext.<anonymous> (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-registry-20261101/apps/cms-scaffold/scripts/local/maintenance-store.test.mjs:71:48)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+      at Test.postRun (node:internal/test_runner/test:1465:19)
+      at Test.run (node:internal/test_runner/test:1390:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: /INPUT_INVALID/,
+    operator: 'throws',
+    diff: 'simple'
+  }
+
+test at scripts/local/maintenance-store.test.mjs:70:45
+✖ PP1C_L02_proof_for_backup (0.08121ms)
+  AssertionError [ERR_ASSERTION]: Missing expected exception.
+      at TestContext.<anonymous> (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-registry-20261101/apps/cms-scaffold/scripts/local/maintenance-store.test.mjs:71:48)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+      at Test.postRun (node:internal/test_runner/test:1465:19)
+      at Test.run (node:internal/test_runner/test:1390:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: /INPUT_INVALID/,
+    operator: 'throws',
+    diff: 'simple'
+  }
+
+test at scripts/local/maintenance-store.test.mjs:70:45
+✖ PP1C_L02_account_for_backup (0.095969ms)
+  AssertionError [ERR_ASSERTION]: Missing expected exception.
+      at TestContext.<anonymous> (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-registry-20261101/apps/cms-scaffold/scripts/local/maintenance-store.test.mjs:71:48)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+      at Test.postRun (node:internal/test_runner/test:1465:19)
+      at Test.run (node:internal/test_runner/test:1390:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: /INPUT_INVALID/,
+    operator: 'throws',
+    diff: 'simple'
+  }
+
+test at scripts/local/maintenance-store.test.mjs:70:45
+✖ PP1C_L02_helper_empty (0.07103ms)
+  AssertionError [ERR_ASSERTION]: Missing expected exception.
+      at TestContext.<anonymous> (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-registry-20261101/apps/cms-scaffold/scripts/local/maintenance-store.test.mjs:71:48)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+      at Test.postRun (node:internal/test_runner/test:1465:19)
+      at Test.run (node:internal/test_runner/test:1390:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: /INPUT_INVALID/,
+    operator: 'throws',
+    diff: 'simple'
+  }
+
+test at scripts/local/maintenance-store.test.mjs:70:45
+✖ PP1C_L02_restore_missing_target (0.074401ms)
+  AssertionError [ERR_ASSERTION]: Missing expected exception.
+      at TestContext.<anonymous> (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-registry-20261101/apps/cms-scaffold/scripts/local/maintenance-store.test.mjs:71:48)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+      at Test.postRun (node:internal/test_runner/test:1465:19)
+      at Test.run (node:internal/test_runner/test:1390:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: /INPUT_INVALID/,
+    operator: 'throws',
+    diff: 'simple'
+  }
+
+test at scripts/local/maintenance-store.test.mjs:70:45
+✖ PP1C_L02_recover_running (0.074269ms)
+  AssertionError [ERR_ASSERTION]: Missing expected exception.
+      at TestContext.<anonymous> (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-registry-20261101/apps/cms-scaffold/scripts/local/maintenance-store.test.mjs:71:48)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+      at Test.postRun (node:internal/test_runner/test:1465:19)
+      at Test.run (node:internal/test_runner/test:1390:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: /INPUT_INVALID/,
+    operator: 'throws',
+    diff: 'simple'
+  }
+
+test at scripts/local/maintenance-store.test.mjs:73:1
+✖ PP1C_L02_valid_backup_phases_and_nested_required (0.196909ms)
+  AssertionError [ERR_ASSERTION]: Missing expected exception.
+      at TestContext.<anonymous> (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-registry-20261101/apps/cms-scaffold/scripts/local/maintenance-store.test.mjs:81:12)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+      at Test.postRun (node:internal/test_runner/test:1465:19)
+      at Test.run (node:internal/test_runner/test:1390:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: /INPUT_INVALID/,
+    operator: 'throws',
+    diff: 'simple'
+  }

@@ -1,0 +1,140 @@
+{
+  "runId": "bfe98fc8cd8d474880c9f92f1ce6367c",
+  "operationId": "7e301694-fa4e-46ef-a6db-3bd0e90f40b6",
+  "backupId": "pp1-20261102T135329831Z-3591d54e2c26ea081f1436dfb7dcfd80",
+  "manifestSha256": "87ec627ee82599084e62c17275d60301eb54b50db26c4986d072e4e1f87ed772",
+  "scope": "actual B local capture only; no restore/offsite claim",
+  "sourceCommit": "b0bf709fb687f4a23df868a8d123e5fa447959a3",
+  "worktreeDirty": true,
+  "apiImage": "sha256:79dcdf9ebb900de3d7ce2226334aa76bb0b87ce500930ea5cf1117a648e5682a",
+  "postgresImage": "sha256:6a2e324ebe59af6031c4c1cd96c1d5072c2ebc36563d2196365e43b8297c062d",
+  "artifacts": [
+    {
+      "path": "db.dump",
+      "sha256": "18bd3d7754debd308eddcf0d27c3bfc0b650c7796e883a68be049d9ff3cccff1",
+      "byteSize": "77263979",
+      "mode": "0600",
+      "nlink": 1
+    },
+    {
+      "path": "inventory.json",
+      "sha256": "c775538e78e4b8505526d3d38cdf4c58da723f09c0fde1dc4b8cc4b38204e2b6",
+      "byteSize": "135522998",
+      "mode": "0600",
+      "nlink": 1
+    },
+    {
+      "path": "media.package",
+      "sha256": "76209e72afee854a0a3992d371d1033f940b48d74491afeb3a78d390f2e33c9c",
+      "byteSize": "44",
+      "mode": "0600",
+      "nlink": 1
+    }
+  ],
+  "tableCount": 20,
+  "tableCounts": [
+    {
+      "name": "cms_audit_event",
+      "rowCount": "4096"
+    },
+    {
+      "name": "cms_audit_settings",
+      "rowCount": "1"
+    },
+    {
+      "name": "cms_content_type",
+      "rowCount": "12"
+    },
+    {
+      "name": "cms_credential",
+      "rowCount": "0"
+    },
+    {
+      "name": "cms_entry",
+      "rowCount": "0"
+    },
+    {
+      "name": "cms_entry_index",
+      "rowCount": "0"
+    },
+    {
+      "name": "cms_entry_ref",
+      "rowCount": "0"
+    },
+    {
+      "name": "cms_entry_revision",
+      "rowCount": "0"
+    },
+    {
+      "name": "cms_field",
+      "rowCount": "71"
+    },
+    {
+      "name": "cms_media",
+      "rowCount": "0"
+    },
+    {
+      "name": "cms_media_attachment",
+      "rowCount": "0"
+    },
+    {
+      "name": "cms_media_settings",
+      "rowCount": "1"
+    },
+    {
+      "name": "cms_media_variant",
+      "rowCount": "0"
+    },
+    {
+      "name": "cms_navigation_menu",
+      "rowCount": "0"
+    },
+    {
+      "name": "cms_permission",
+      "rowCount": "0"
+    },
+    {
+      "name": "cms_principal",
+      "rowCount": "0"
+    },
+    {
+      "name": "cms_principal_role",
+      "rowCount": "0"
+    },
+    {
+      "name": "cms_role",
+      "rowCount": "5"
+    },
+    {
+      "name": "cms_session",
+      "rowCount": "0"
+    },
+    {
+      "name": "flyway_schema_history",
+      "rowCount": "10"
+    }
+  ],
+  "dbSnapshotSha256": "8769ce37aa3883b7eac4fbf8105b16c3398e7039e53c71affe64cfb3c5e0c6cd",
+  "media": {
+    "assetCount": "0",
+    "dbSnapshotSha256": "8769ce37aa3883b7eac4fbf8105b16c3398e7039e53c71affe64cfb3c5e0c6cd",
+    "fileBytes": "0",
+    "fileCount": "0",
+    "orphanFileCount": "0",
+    "referencedFileCount": "0",
+    "sha256": "c775538e78e4b8505526d3d38cdf4c58da723f09c0fde1dc4b8cc4b38204e2b6"
+  },
+  "prePostInventoryEqual": true,
+  "completeMarkerValidated": true,
+  "journalComplete": true,
+  "lockReleased": true,
+  "sourceRestoredBeforeDriverStop": true,
+  "ownedContainersStopped": [
+    "d1bf9dd461a1d2e1a9da701f13a3f12adaa77912a82025d213de3c2594ab1917",
+    "f0321b8af13f16d0327bded5007621f758e1cd823c9f5a6d7ebc484b5ffb5cdd",
+    "343ddb10d2c92ace77f66ebfd123ab1716d1de6e468bb5b9d69b583df9f88262"
+  ],
+  "sourceFileCount": 22,
+  "sourceManifestSha256": "964e889011d37f83899eb7b61968f729cca1b7ee2cf5251342290baabe0d3192",
+  "observedAt": "2026-11-02T13:57:23.939Z"
+}

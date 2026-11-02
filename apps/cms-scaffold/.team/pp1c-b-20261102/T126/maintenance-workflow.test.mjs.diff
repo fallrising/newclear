@@ -1,0 +1,29 @@
+--- maintenance-workflow.test.mjs.before
++++ scripts/local/maintenance-workflow.test.mjs
+@@ -173,7 +173,7 @@
+       Entrypoint:[policy.entrypoint],Cmd:policy.args,OpenStdin:true,Tty:false},
+     HostConfig:{ReadonlyRootfs:true,Privileged:false,CapDrop:['ALL'],CapAdd:[],SecurityOpt:['no-new-privileges'],
+       RestartPolicy:{Name:'no'},LogConfig:{Type:'none'},PortBindings:{},Devices:[],DeviceRequests:[],ExtraHosts:[],
+-      PidMode:'',IpcMode:'private',AutoRemove:false,Tmpfs:{'/tmp':'rw,nosuid,nodev,size=67108864'},NetworkMode:policy.networkId??'none'},
++      PidMode:'',IpcMode:'private',AutoRemove:false,Tmpfs:{'/tmp':'rw,nosuid,nodev,size=67108864',...(policy.entrypoint==='/usr/local/bin/pg_dump'||policy.entrypoint==='/usr/local/bin/pg_restore'?{'/var/lib/postgresql/data':'ro,nosuid,nodev,noexec,size=1048576'}:{})},NetworkMode:policy.networkId??'none'},
+     NetworkSettings:{Ports:{},Networks:{}},Mounts:policy.mounts.map(m=>({Type:m.type,Name:m.type==='volume'?m.source:undefined,
+       Source:m.type==='volume'?volumeMountpoints[m.source]:m.source,Destination:m.destination,RW:!m.readOnly}))};
+ }
+@@ -181,7 +181,7 @@
+   const f=await capturePhase(t),original=f.deps.command;
+   f.deps.command=async(file,args,options)=>{
+     const a=args.slice(2);
+-    if(a[0]==='image') {const result=await original(file,args,options);const rows=JSON.parse(result.stdout);rows.forEach(x=>Object.assign(x.Config,{Env:[],User:''}));return{stdout:JSON.stringify(rows)};}
++    if(a[0]==='image') {const result=await original(file,args,options);const rows=JSON.parse(result.stdout);rows.forEach(x=>Object.assign(x.Config,{Env:[],User:'',Volumes:x.Id===f.receipt.images.postgres?{'/var/lib/postgresql/data':{}}:null}));return{stdout:JSON.stringify(rows)};}
+     if(a[0]==='volume')return{stdout:JSON.stringify(f.state.volumes.filter(v=>a.slice(2).includes(v.Name)))};
+     if(a[0]==='inspect'&&a.length===2) {
+       const rows=f.state.containers.filter(c=>c.Id===a[1]);
+@@ -371,7 +371,7 @@
+       await writeFile(join(args[args.indexOf('-d')+1],'Profile.class'),'synthetic-class');return{stdout:''};
+     }
+     const a=args.slice(2),find=key=>a.find(v=>v.startsWith(key+'='))?.slice(key.length+1);f.calls.push(args);
+-    if(a[0]==='image') {const r=await original(file,args,options),images=JSON.parse(r.stdout);images.forEach(x=>Object.assign(x.Config,{Env:[],User:''}));return{stdout:JSON.stringify(images)};}
++    if(a[0]==='image') {const r=await original(file,args,options),images=JSON.parse(r.stdout);images.forEach(x=>Object.assign(x.Config,{Env:[],User:'',Volumes:x.Id===f.receipt.images.postgres?{'/var/lib/postgresql/data':{}}:null}));return{stdout:JSON.stringify(images)};}
+     if(a[0]==='volume')return{stdout:JSON.stringify(f.state.volumes.filter(v=>a.slice(2).includes(v.Name)))};
+     if(a[0]==='create') {
+       const labels=a.includes(f.receipt.images.api)?{...f.state.apiLabels}:{};for(let i=0;i<a.length;i++)if(a[i]==='--label'){const text=a[++i],n=text.indexOf('=');labels[text.slice(0,n)]=text.slice(n+1);}

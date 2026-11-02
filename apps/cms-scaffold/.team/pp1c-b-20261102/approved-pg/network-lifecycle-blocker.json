@@ -1,0 +1,39 @@
+{
+  "id": "1d9d2c5a8a5e3928d43b41542b32ae6ba18ba86e1daf9b9c28b748fdffd94443",
+  "state": {
+    "Status": "created",
+    "Running": false,
+    "Paused": false,
+    "Restarting": false,
+    "OOMKilled": false,
+    "Dead": false,
+    "Pid": 0,
+    "ExitCode": 0,
+    "Error": "",
+    "StartedAt": "0001-01-01T00:00:00Z",
+    "FinishedAt": "0001-01-01T00:00:00Z"
+  },
+  "networkMode": "06db54128c3f476d014fcbdeb5a6a5c28a362f464b848727f1d5c41a3820fa59",
+  "networks": {
+    "cms-pp1-local-4422008970804730bed698cc679d4eac_data": {
+      "IPAMConfig": null,
+      "Links": null,
+      "Aliases": null,
+      "DriverOpts": null,
+      "GwPriority": 0,
+      "NetworkID": "",
+      "EndpointID": "",
+      "Gateway": "",
+      "IPAddress": "",
+      "MacAddress": "",
+      "IPPrefixLen": 0,
+      "IPv6Gateway": "",
+      "GlobalIPv6Address": "",
+      "GlobalIPv6PrefixLen": 0,
+      "DNSNames": null
+    }
+  },
+  "cause": "created network has exact planned full ID in HostConfig but no allocated live NetworkID/IP/EndpointID; current helper assertion incorrectly requires live identity before start",
+  "policy": "PR956 approved endpoint lifecycle; no new vector or permission requested",
+  "retained": true
+}

@@ -1,0 +1,14 @@
+--- maintenance-helper.test.mjs.before
++++ maintenance-helper.test.mjs
+@@ -137,3 +137,11 @@
+   await assert.rejects(()=>executeHelperLifecycle(f.p,f.expected,f.consume,f.deps),e=>e.code==='INTERRUPTED');
+   assert.equal(f.wasRemoved(),true);
+ });
++
++for(const fault of ['actual','wrong-ID','extra-text','wrong-code'])test(`H02b2d_main_Docker_missing_${fault}`,async()=>{
++  const f=lifecycleFixture(),run=f.deps.command;
++  f.deps.command=async(...args)=>f.wasRemoved()?{code:fault==='wrong-code'?2:1,
++    stderr:`error: no such object: ${fault==='wrong-ID'?'0'.repeat(64):f.expected.fullContainerId}${fault==='extra-text'?' extra':''}\n`}:run(...args);
++  if(fault==='actual'){assert.deepEqual(await executeHelperLifecycle(f.p,f.expected,f.consume,f.deps),{verified:true});assert.equal(f.calls.at(-1)[0],'removed');}
++  else {await assert.rejects(()=>executeHelperLifecycle(f.p,f.expected,f.consume,f.deps));assert.ok(!f.calls.some(x=>x[0]==='removed'));}
++});

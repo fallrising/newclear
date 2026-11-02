@@ -1,0 +1,16 @@
+{
+  "handwrittenChangedLines": 164,
+  "files": {
+    "services/cms-api/src/main/java/com/fallrising/cms/ops/RecoveryInventoryMain.java": 2,
+    "services/cms-api/src/integrationTest/java/com/fallrising/cms/ops/RecoveryInventoryMainIntegrationTests.java": 162
+  },
+  "sha256": {
+    "services/cms-api/src/main/java/com/fallrising/cms/ops/RecoveryInventoryMain.java": "76082316e3e4ec4fee12e3d47dbaa423b40b6b3d11e10b39d418a85ecce280f8",
+    "services/cms-api/src/integrationTest/java/com/fallrising/cms/ops/RecoveryInventoryMainIntegrationTests.java": "d7b3c8d52f8a4bf1c0b6bb22accf9cf7eb0df3a512c9688c0f483d7b49773fac"
+  },
+  "startedAt": "2026-11-02T12:49:43Z",
+  "frozenAt": "2026-11-02T12:53:25Z",
+  "elapsedWallSeconds": 222,
+  "activeMinutesEstimate": 4,
+  "budgetMinutes": 25
+}

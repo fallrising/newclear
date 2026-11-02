@@ -1,0 +1,39 @@
+✖ PP1C_H02b1_real_token_JDBC_closed_running_before_result_and_EOF (451.47147ms)
+✖ PP1C_H02b1_real_token_JDBC_closed_EXITED_before_result_and_EOF (380.764236ms)
+ℹ tests 2
+ℹ suites 0
+ℹ pass 0
+ℹ fail 2
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 853.608358
+
+✖ failing tests:
+
+test at scripts/local/maintenance-workflow.test.mjs:278:35
+✖ PP1C_H02b1_real_token_JDBC_closed_running_before_result_and_EOF (451.47147ms)
+  OpsError: WRITER_NOT_QUIESCED
+      at ensure (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-integration-20261102/apps/cms-scaffold/scripts/local/maintenance-workflow.mjs:9:64)
+      at noWriters (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-integration-20261102/apps/cms-scaffold/scripts/local/maintenance-workflow.mjs:38:24)
+      at async Module.assertWorkflow (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-integration-20261102/apps/cms-scaffold/scripts/local/maintenance-workflow.mjs:68:27)
+      at async runJdbcHandshake (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-integration-20261102/apps/cms-scaffold/scripts/local/maintenance-helper.mjs:254:9)
+      at async TestContext.<anonymous> (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-integration-20261102/apps/cms-scaffold/scripts/local/maintenance-workflow.test.mjs:298:20)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:385:3) {
+    code: 'WRITER_NOT_QUIESCED',
+    phase: null,
+    operationId: null
+  }
+
+test at scripts/local/maintenance-workflow.test.mjs:278:35
+✖ PP1C_H02b1_real_token_JDBC_closed_EXITED_before_result_and_EOF (380.764236ms)
+  OpsError: CAPTURE_FAILED
+      at runJdbcHandshake (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-integration-20261102/apps/cms-scaffold/scripts/local/maintenance-helper.mjs:283:11)
+      at async TestContext.<anonymous> (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-integration-20261102/apps/cms-scaffold/scripts/local/maintenance-workflow.test.mjs:298:20)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    code: 'CAPTURE_FAILED',
+    phase: null,
+    operationId: null
+  }

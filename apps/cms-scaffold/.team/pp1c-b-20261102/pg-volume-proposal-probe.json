@@ -1,0 +1,32 @@
+[
+  {
+    "tool": "pg_dump",
+    "id": "ae0887ac1d5152f952c8646c9b3e73205ddcfbb67fdb7878ff8e2acf699977b3",
+    "image": "sha256:6a2e324ebe59af6031c4c1cd96c1d5072c2ebc36563d2196365e43b8297c062d",
+    "mounts": [],
+    "tmpfs": {
+      "/tmp": "rw,nosuid,nodev,size=67108864",
+      "/var/lib/postgresql/data": "ro,nosuid,nodev,noexec,size=1048576"
+    },
+    "network": "none",
+    "output": "pg_dump (PostgreSQL) 16.15",
+    "exit": 0,
+    "status": "exited",
+    "proposalOnly": true
+  },
+  {
+    "tool": "pg_restore",
+    "id": "86259cdc3455a7b11e839e7c8424178f7ed780145e3b1b96b06053aac185de33",
+    "image": "sha256:6a2e324ebe59af6031c4c1cd96c1d5072c2ebc36563d2196365e43b8297c062d",
+    "mounts": [],
+    "tmpfs": {
+      "/tmp": "rw,nosuid,nodev,size=67108864",
+      "/var/lib/postgresql/data": "ro,nosuid,nodev,noexec,size=1048576"
+    },
+    "network": "none",
+    "output": "pg_restore (PostgreSQL) 16.15",
+    "exit": 0,
+    "status": "exited",
+    "proposalOnly": true
+  }
+]

@@ -1,0 +1,7 @@
+{
+  "encoding": "utf-8",
+  "originalPath": ".team/pp1c-b-20261102/approved-pg/ordinal-bootjar.log",
+  "byteSize": 1146,
+  "sha256": "91b4119e056a6f602717fba1692e26d819c303748167ed6755e5a32b4a20a7b7",
+  "text": "To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/9.7.1/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.\nDaemon will be stopped at the end of the build \n> Task :services:cms-api:compileJava FROM-CACHE\n> Task :services:cms-api:processResources UP-TO-DATE\n> Task :services:cms-api:classes UP-TO-DATE\n> Task :services:cms-api:resolveMainClassName\n> Task :services:cms-api:bootJar\n\n[Incubating] Problems report is available at: file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-20261101/apps/cms-scaffold/build/reports/problems/problems-report.html\n\nDeprecated Gradle features were used in this build, making it incompatible with Gradle 10.\n\nYou can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.\n\nFor more on this, please refer to https://docs.gradle.org/9.7.1/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.\n\nBUILD SUCCESSFUL in 6s\n4 actionable tasks: 2 executed, 1 from cache, 1 up-to-date\n"
+}

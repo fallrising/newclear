@@ -131,3 +131,8 @@ results; it cannot alone pass the SDD's owner submit/progress/handoff actions. T
 alternative15min/two-CLI owner journey also awaits explicit availability/window choice.
 Neither proposal resets or reuses a consumed intent. Private connection details stay
 in the trusted operator entry; no service starts from this document.
+
+The private read-only gate now has pre-live independent acceptance: see the latest
+[checkpoint](acceptance/M3-owner-operation.md). Original services are still stopped
+and the600s window has not started; owner private tunnel, original login and TLS trust
+readiness must be confirmed first. This is readback only, not new coding/review.

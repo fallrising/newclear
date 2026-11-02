@@ -102,7 +102,7 @@ PR952 merged as `a69ff34ec173ee36284aceebcb417e560438569c` after finalhead967727
 
 | ID | Task | AC | Status | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| M3-U | Original unknown recovery; [bounded proposal](../specs/PROPOSAL-M3-recovery.md), 原安裝恢復／自動journey已接受；等owner操作確認 | FN04/FN07, U01–07 | in_progress | 2026-11-02T11:16:02Z | — | 2026-11-02T14:24:34Z |
+| M3-U | Original recovery/automated journey accepted; readonly gate pre-live accepted; 等owner私人連線／操作 | FN04/FN07, U01–07 | in_progress | 2026-11-02T11:16:02Z | — | 2026-11-02T15:38:40Z |
 
 Original SQLite now positively confirmed; U01–06 and automated U07 independently
 accepted on86350871/PR983. Same-Web Claude→Codex first-roundaccept, exact restart
@@ -117,3 +117,5 @@ M3-U remains in_progress（等owner在場／窗口選擇與本人操作；不算
 Offline4confirmed/0unknown and226hashes verified. Zero services/CLI/VM starts;
 proposed10min read-only access is partial human confirmation only; proposed15min
 owner submit/review alternative still needs explicit authorization. No new milestone.
+
+2026-11-02 owner現在可操作；M3-U續作10分鐘／零新CLI/VM只讀確認入口，私人有限gate先離線驗證與獨立審查；等私人連線／TLS就緒再開始，未開窗口、不改完整FN07條款。

@@ -127,3 +127,30 @@ T-0442/T-0447/T-0449 仍 in_progress；本人確認與完整 M3/FN07/platform �
 舊 Cloud AC-04 不變。Provider requests/tokens/cost 與完整工具總量 unknown；
 外層編排／巢狀 calls、agent 啟動與實際產品 CLI 不混算。不新增 API 計費、服務、
 runtime dependency、公開部署、release 或可用 tag。
+
+## 本人只讀入口實作 checkpoint — 2026-11-02
+
+Owner已表示現在可操作並要求指引／繼續；本輪先按優先10分鐘／零新CLI/VM方案。
+前文「新launcher未建／未驗」為PR993當時的提案狀態；**只讀方案現在已完成私人有限
+launcher/proxy與獨立pre-live審查**，完整15分鐘coding方案仍未實作／啟動。
+這不改SDD、不增加產品里程碑或公開API；private acceptance gate維持原實測
+production source86350871與固定binary/runtime，沒有新DB／store／credential。
+
+- 路由2項：登入/讀原run/archive/diff可達；執行mutation、未知run及非canonical URL拒絕。
+  保留先允許POSTtasks的明確RED，再通過GREEN，未將缺module組裝錯誤當行為RED。
+- Supervisor9項：未備私人連線不消耗intent、consumed intent不重設、480秒cutoff、
+  獨立guard在主程序消失或截止後停止dummy群組；慢startup讀取不擋guard、晚到child
+  在parent死後不可exec、group leader退出仍清descendant、listener殘留不得宣稱STOPPED。
+- 可信原TLS本機假上游fixture：session登入pass-through，5種執行POST在上游前拒絕，
+  proxy截止自閉。這是傳輸fixture，未啟原AP/Rust/DB或自動代替owner操作。
+- 初審3個啟停blocker已一次修正／覆核；獨立結論ACCEPT_READONLY_GATE_PRELIVE。
+  Source manifest6檔SHA一致；offline-check核原binary、118個runtime/entry來源檔、
+  原SQLite4confirmed/0unknown、TLS覆蓋600秒與磁碟≥15GiB。
+  初次sandbox socket/fixture EPERM失敗與初審finding保留；核准的dummy/fixture測試通過。
+
+Owner雖已表示在場，**原私人SSH/tunnel、operator登入資料與TLS trust是否備妥仍待確認**。
+尚無live intent消耗／原服務啟動，窗口沒有開始；不因等待或已過時間當作確認。
+就緒後才做當下精確stopped-installation/source/store前置，啟一個新600秒intent，
+第480秒停止互動、最後120秒清理，實測前後AP執行表與SQLite引用／下載hash／owned
+process/listeners/DB狀態；未確認停止明列unknown。不重用maintenance/U06/U07。
+完整FN07仍缺本人新提交／進度／交接；只讀成功也不改成完整M3/FN07/platform通過。

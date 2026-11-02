@@ -236,5 +236,7 @@ Owner 指示繼續；使用真實 Pi、本機 429，不載入 owner key 或呼�
 
 | ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| T-0020-01 | 原生 CLI 退出後同 session 明確重新連接、歷史保留與不重跑 | AC-08 子集 | in_progress | 2026-11-02T14:04:20Z | — | 2026-11-02T14:17:56Z |
-| T-0020-02 | 一次性恢復 gate、派工／結果整合與程序清理 | AC-09／11 子集 | in_progress | 2026-11-02T14:04:20Z | — | 2026-11-02T14:17:56Z |
+| T-0020-01 | 原生 CLI 退出後同 session 明確重新連接、歷史保留與不重跑 | AC-08 子集 | done | 2026-11-02T14:04:20Z | 2026-11-02T14:20:43Z | 2026-11-02T14:21:23Z |
+| T-0020-02 | 一次性恢復 gate、派工／結果整合與程序清理 | AC-09／11 子集 | done | 2026-11-02T14:04:20Z | 2026-11-02T14:20:43Z | 2026-11-02T14:21:23Z |
+
+T-0020 結案：[PR #990](https://github.com/fallrising/newclear/pull/990) 已合併，commit `ff1ac79b08d2c4253353256917205a32f893bb69`，offline／validate 兩項 CI success。已回讀主線證據：177 tests、真實 Pi 1.4.0 及 Chrome 驗收通過。原生 CLI 退出後，一次性無 prompt resume 以新 PID 接回相同 session、更新 hook token、保留六筆歷史，無自動重送；結果保持 stopped、原任務未完成。最終 runner 17.72 秒、外層 30 個程序全退出、鎖釋放；57 筆結果頁回歸通過。首輪瀏覽器欄位名稱筆誤保留，修正後完整重驗通過；兩輪原生檢查皆通過、零模型推論與付費呼叫。完成 AC-08／09／11 子集；Office host crash、任務續做、其他 provider 與完整 MVP 仍待驗，沒有 release／deploy／usable tag。

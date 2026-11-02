@@ -1,6 +1,13 @@
 # Private isolated-task entry
 
-The verified route is [M1 isolated acceptance](acceptance/M1-isolated.md). Operator
+Current status (2026-11-02): no standing operator URL or running acceptance service.
+Both formal Codex and Claude routes have [accepted M2 evidence](acceptance/M2-two-vendors.md).
+Durable restart readback and [candidate-only review](acceptance/M3-readonly-review.md)
+are accepted bounded slices. The original installation still has an unknown intent
+and cannot submit; the separate reviewer acceptance store is not its recovery.
+The retained runtime must only be started under a new approved finite window.
+
+The initial verified route is [M1 isolated acceptance](acceptance/M1-isolated.md). Operator
 workflow: open the configured private HTTPS origin, log in, select the registered
 project/base and Claude Code profile, enter the repair, submit once, observe states,
 then download the final diff and inspect checks. Cancellation is a request; only
@@ -61,12 +68,12 @@ real authentication plus a labelled intercepted lost-response test, with no AP t
 `--faults` validates denials/queued cancellation and reads the prior live result without
 calling a provider. Keep their receipts distinct. The accepted live run is not restarted.
 
-M1 does not provide deployment automation, arbitrary project onboarding, a second
-vendor or durable Fanzloud recovery. Those limits are visible in SUCCESS/SDD; installed
-libraries, a passing CLI or a merged PR alone do not establish owner readiness.
+Deployment automation and arbitrary project onboarding remain unavailable. M2 adds
+the second vendor; M3 adds durable intent/readback and fixed-candidate review. Whole
+M3/FN07 is incomplete; a merged slice alone does not establish owner readiness.
 
 
-## M2 Codex configuration (live acceptance pending)
+## M2 Codex configuration (accepted bounded live evidence)
 
 The same Web catalog now admits `codex-subscription` as well as Claude. Register a
 Codex profile with the same bounded verification/deadline contract; the exact model
@@ -80,5 +87,30 @@ no credentials or built-in host execution environment are exposed to repository 
 Once AP returns a confirmed run ID, the operator may explicitly submit another task
 and select either recent task. An unknown submission remains locked; a late response
 for A cannot replace selected B. Resource admission remains AP's responsibility and
-currently stays at one VM. Code availability does not establish simultaneous isolation
-or second-vendor live acceptance; see the M2 acceptance record when available.
+currently stays at one VM. The prior two-VM M2 acceptance window is consumed; its
+accepted isolation evidence does not authorize another parallel run.
+
+## Fixed candidate and review
+
+On an authorized running installation, select a completed writer and inspect/download
+its immutable candidate (original task, fixed base, diff and recorded checks). Select
+the other vendor's review profile and explicitly request review. The reviewer receives
+only that candidate, not a full checkout; its hash-bound verdict and reasons do not
+automatically mark the task Done. A rework verdict permits at most one explicit writer
+rework and second review in the product contract, but any live use still needs a
+window that covers it. The accepted actual review returned accept on the first round;
+rework/second-review branches have native evidence only. Reopen/download compares the
+same immutable bytes after Rust/AP restart. Credentials stay on the trusted side.
+
+## Unknown recovery and final journey
+
+There is currently no supported Web command to reconcile the original unknown intent.
+AP's internal command row can identify the receipt, but task-list/title matching is
+insufficient and repeating a task POST is forbidden. Do not manually bind a guessed
+run, discard the SQLite file, reset a key or use a fresh store to claim recovery.
+
+The [recovery proposal](specs/PROPOSAL-M3-recovery.md) is not implemented or approved.
+It proposes authenticated exact-key AP evidence plus explicit local confirmation,
+then a same-installation/current-source journey with owner confirmation. Until those
+checks pass, this document describes accepted capabilities and their startup preconditions,
+not an available installation that the owner can log into now.

@@ -486,3 +486,21 @@ Historical candidate-only checkpoint: proposal was then unapproved; superseded b
 ## T-0449 approved FN05 readonly dependency
 
 Owner approval2026-11-01; [contract](../fanzloud/docs/specs/SPEC-M3-readonly-review.md) CU-M3-R01–04 and R01–05 govern this bounded extension. AP lifecycle/lease remains unique; candidate-only readonly review and explicit one-rework/two-review ceiling. Actual source865ed05e: one Codex review of retained Claude candidate accepted; exact archive reopened after Rust/AP restart, readonly OS/Connector boundaries and cleanup proven. Independent ACCEPT_READONLY_ACTUAL_AND_NATIVE; PR952 merged as `a69ff34ec173ee36284aceebcb417e560438569c` after finalhead967727b2 passed AP41330719757/Fanz41330719768/contracts41330719829; remote Fanzloud/AP bytes read back equal.; no full platform acceptance. Max1VM4CPU/4GiB,20min window, no new API spend/deploy/release.
+
+## T-0442 M3 recovery readiness — 2026-11-02
+
+Owner requested continuation within the existing M3/FN04/FN07 scope. Goal: identify
+trustworthy original-installation reconciliation and the remaining final journey.
+Scope this round: source/retained-state inspection and corrected operator guidance;
+no production/AP contract change, DB start, live coding, VM or credential mutation.
+[Readiness evidence](docs/acceptance/M3-recovery-readiness.md) confirms the original
+unknown row remains locked and byte-identical. The accepted reviewer installation
+was separate. [Bounded proposal](docs/specs/PROPOSAL-M3-recovery.md) fixes U01–07,
+positive-only command matching, one-role credential maintenance and finite new windows.
+AP extension/live/credential phases await explicit approval under SDD§3/current owner
+boundaries; U01–07 NOT_RUN. No new milestone or reduced acceptance bar.
+
+Readiness acceptance: verify source-backed statements, exact read-only evidence, links,
+project-success contract, whitespace, independent fresh-context review and required CI;
+then normal PR delivery/readback. Runtime tests are not replayed for prose-only edits.
+FullM3/FN07, original installation recovery and oldCloudAC04 remain incomplete.

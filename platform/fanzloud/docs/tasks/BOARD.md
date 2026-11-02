@@ -97,3 +97,13 @@ Historical candidate-only checkpoint: T-0449 then awaited approval; approved act
 | FN05-R | AP readonly admission/tools/result and same-Web explicit handoff | R01–05 / CU-M3-R01–04 | done | 2026-11-01T16:44:02Z | 2026-11-01T17:25:32.944657+00:00 | 2026-11-01T17:25:32.944657+00:00 |
 
 PR952 merged as `a69ff34ec173ee36284aceebcb417e560438569c` after finalhead967727b2 passed AP41330719757/Fanz41330719768/contracts41330719829; remote Fanzloud/AP bytes read back equal. Bounded FN05-R done; completeM3/FN07 remains open.
+
+## T-0442 M3 original-installation recovery
+
+| ID | Task | AC | Status | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| M3-U | Original unknown recovery; [bounded proposal](../specs/PROPOSAL-M3-recovery.md), readiness recorded separately; 等 owner AP／認證／新窗口批准 | FN04/FN07, U01–07 | in_progress | 2026-11-02T11:16:02Z | — | 2026-11-02T11:20:00Z |
+
+Original SQLite remains unchanged and locked; historical AP evidence identifies the
+command but no public key lookup/confirmation exists. No live or credential change.
+U01–07 NOT_RUN; this row is not marked done by a readiness documentation PR.

@@ -285,7 +285,7 @@ func TestReopen_SecondCompletionUsesOnlyNewCandidate(t *testing.T) {
 	expectRefusal(t, f, true, func() (int, reworkFailure) {
 		out, err := f.svc.RequestQA(t.Context(), operator, command.RequestQA{Metadata: f.meta(), ProjectID: projectID, WorkItemID: workItemID, CandidateID: "candidate-a", SubjectDigest: sA.Digest()})
 		return 0, outcomeCode(t, out, err)
-	}, 422, "lifecycle_rejected")
+	}, 409, "stale_subject", "subject_stale")
 	if _, err := f.svc.MarkReady(t.Context(), operator, command.MarkReady{Metadata: f.meta(), ProjectID: projectID, WorkItemID: workItemID}); err != nil {
 		t.Fatal(err)
 	}

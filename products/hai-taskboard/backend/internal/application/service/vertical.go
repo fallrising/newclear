@@ -771,6 +771,43 @@ func (service *Service) RequestRework(ctx context.Context, principal domain.Acto
 		})
 }
 
+// ReopenWorkItem returns a Done WorkItem to Draft or Ready. Only the WorkItem
+// changes; the CompletionRecord and all material stay as history.
+func (service *Service) ReopenWorkItem(ctx context.Context, principal domain.ActorID, value command.ReopenWorkItem) (command.Outcome, error) {
+	request, digest, err := command.CanonicalReopenWorkItem(value)
+	if err != nil {
+		return failureOutcome(value.Metadata, invalidRequest(err))
+	}
+	return service.execute(ctx, principal, value.Metadata, command.ReopenWorkItemOperation, value.ProjectID, request, digest,
+		func(ctx context.Context, tx port.Transaction, _ time.Time) (mutation, error) {
+			item, err := tx.LoadWorkItem(ctx, value.ProjectID, value.WorkItemID)
+			if err != nil {
+				return mutation{}, err
+			}
+			if item.Version() != value.ExpectedVersion {
+				return mutation{}, domain.Rejection{Code: domain.CodeVersionConflict}
+			}
+			if item.Phase() != domain.PhaseDone {
+				return mutation{}, domain.Rejection{Code: domain.CodeInvalidTransition}
+			}
+			// Ready means dispatchable: the current inputs must resolve as for MarkReady.
+			if value.TargetPhase == domain.PhaseReady {
+				if _, err := service.currentRunInput(ctx, tx, item, service.executorDeclaration.Scenarios[0]); err != nil {
+					return mutation{}, err
+				}
+			}
+			next, err := item.Transition(value.TargetPhase, domain.TransitionGuards{ExpectedVersion: value.ExpectedVersion, ReopenReason: value.Reason})
+			if err != nil {
+				return mutation{}, err
+			}
+			if err := tx.UpdateWorkItem(ctx, next, value.ExpectedVersion); err != nil {
+				return mutation{}, rollbackMutationError{err}
+			}
+			result := command.Result{Type: "WorkItemReopened", ProjectID: value.ProjectID, WorkItemID: value.WorkItemID, Version: next.Version(), Phase: next.Phase(), Reason: value.Reason}
+			return changeMutation(value.ProjectID, "work_item", string(value.WorkItemID), next.Version(), result, digest), nil
+		})
+}
+
 func (service *Service) RequestCancellation(ctx context.Context, principal domain.ActorID, value command.RequestCancellation) (command.Outcome, error) {
 	request, digest, err := command.CanonicalRequestCancellation(value)
 	if err != nil {

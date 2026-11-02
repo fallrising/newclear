@@ -76,3 +76,5 @@ Current T0351 PP1c D01–D03 seal work is routed in [pp1c-seal-20261101/PLAN.md]
 Current approved PP1c implementation routes through [pp1c-implementation-20261101/PLAN.md](pp1c-implementation-20261101/PLAN.md); prior seal work remains historical.
 
 PP1c-B routing and acceptance: [.team/pp1c-b-20261101/PLAN.md](pp1c-b-20261101/PLAN.md), approved continuation after A PR955 merge/readback.
+
+Current narrow B CLI repair routing/acceptance: [pp1c-b-cli-20261102/PLAN.md](pp1c-b-cli-20261102/PLAN.md); T136 implementation, T137 independent review; actual default CLI and537Node pass, publication gates pending. C continues separately after B988/989 delivery.

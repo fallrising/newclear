@@ -39,3 +39,5 @@ CMS-R5/PR333 has explicit owner approval; required CI passed on28886f9d and norm
 | CMS-C-D | recovery proof／session/browser/restart／real drill (14cards) | AC-04/05 / PP1-AC03 FM08–12 | todo | — | — | 2026-11-01T16:49:21Z |
 
 B delivered via PR988/05dc0a28 after required CI and complete remote readback. PR956 endpoint/hash and PR975 PG-only read-only mask amendments are approved, merged and remotely verified (1bf6c506 and33a5498f). Current512Node/564Java/212actualPG and prior93mock/native frontend gates pass. Exact helper compatibility regressions are included; full actual capture and T129 independent acceptance now pass; publication is complete. Short-lived-tool and transient-backend refusals remain explicit. C/D are not started. [Evidence and retained failures](../../.team/pp1c-b-20261102/EVIDENCE.md); [bounded plan](../../.team/pp1c-b-20261101/PLAN.md).
+
+2026-11-02 B CLI correction: T136 fixed approved backup dispatch; T137 scoped independent review,45focused/537completeNode and actual native CLI capture pass. [Evidence](../../.team/pp1c-b-cli-20261102/EVIDENCE.md); required PR CI/normalmerge/readback pending. C in_progress in isolated branch; D pending.

@@ -241,19 +241,39 @@ paths:
       - $ref: "#/components/parameters/ProjectID"
       - $ref: "#/components/parameters/WorkItemID"
     get:
-      summary: Read a WorkItem detail projection
+      summary: Read the truthful WorkItem detail projection
       operationId: getWorkItem
       x-hai-permission: project.read
+      description: >-
+        Observation only, one SQLite snapshot, no writes or artifact IO; see docs/sdd/work-item-detail.md.
+        Same precedence and no-store/nosniff handling as the material index. Fields storage never recorded
+        are omitted. Review/Evidence/Approval rows are attributed through the immutable audit and command
+        result chain; an unattributable row is storage_corruption. No coverage, eligibility or Done claim.
       responses:
         "200":
-          description: WorkItem detail projection.
+          description: Closed snapshot, at most 4 MiB encoded JSON.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/WorkItemDetail" }
+        "400": { $ref: "#/components/responses/Error" }
+        "401": { $ref: "#/components/responses/Error" }
+        "404": { $ref: "#/components/responses/Error" }
+        "405":
+          description: Only GET is accepted, including explicit rejection of HEAD.
+          headers:
+            Allow:
+              schema: { type: string, const: GET }
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/APIError" }
+        "503":
+          description: Capacity/unavailable or malformed stored data; no private cause.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/WorkItemDetail"
-        default:
-          $ref: "#/components/responses/Error"
-        "401": { $ref: "#/components/responses/Error" }
+                anyOf:
+                  - $ref: "#/components/schemas/MaterialIndexReadError"
+                  - $ref: "#/components/schemas/WorkItemDetailCapacityError"
   /projects/{project_id}/work-items/{work_item_id}/candidates/{candidate_id}/completion-preparation:
     parameters:
       - $ref: "#/components/parameters/ProjectID"
@@ -1070,42 +1090,125 @@ components:
     WorkItemDetail:
       type: object
       additionalProperties: false
-      required:
-        [summary, goal, accepted_ac_revisions, dependencies, blockers, runs, candidates, reviews,
-         evidence, approvals, completion_records, audit]
+      required: [api_version, kind, observation_only, summary, material, blockers, reviews, evidence, approvals, completion_records, audit]
       properties:
+        api_version: { type: string, const: v1 }
+        kind: { type: string, const: work_item_detail/v1 }
+        observation_only: { type: boolean, const: true }
         summary: { $ref: "#/components/schemas/WorkItemSummary" }
-        goal: { type: string, minLength: 1, maxLength: 8000 }
-        accepted_ac_revisions:
-          type: array
-          items: { $ref: "#/components/schemas/InitialACRevisionRef" }
-        dependencies:
-          type: array
-          items: { $ref: "#/components/schemas/DependencyRef" }
-        blockers:
-          type: array
-          items: { $ref: "#/components/schemas/Blocker" }
-        runs:
-          type: array
-          items: { $ref: "#/components/schemas/RunSummary" }
-        candidates:
-          type: array
-          items: { $ref: "#/components/schemas/Candidate" }
-        reviews:
-          type: array
-          items: { $ref: "#/components/schemas/Review" }
-        evidence:
-          type: array
-          items: { $ref: "#/components/schemas/Evidence" }
-        approvals:
-          type: array
-          items: { $ref: "#/components/schemas/Approval" }
-        completion_records:
-          type: array
-          items: { $ref: "#/components/schemas/CompletionRecord" }
-        audit:
-          type: array
-          items: { $ref: "#/components/schemas/AuditEntry" }
+        material: { $ref: "#/components/schemas/WorkItemMaterialIndex" }
+        blockers: { type: array, maxItems: 1024, items: { $ref: "#/components/schemas/WorkItemDetailBlocker" } }
+        reviews: { type: array, maxItems: 1024, items: { $ref: "#/components/schemas/WorkItemDetailReview" } }
+        evidence: { type: array, maxItems: 1024, items: { $ref: "#/components/schemas/WorkItemDetailEvidence" } }
+        approvals: { type: array, maxItems: 1024, items: { $ref: "#/components/schemas/WorkItemDetailApproval" } }
+        completion_records: { type: array, maxItems: 1024, items: { $ref: "#/components/schemas/WorkItemDetailCompletionRecord" } }
+        audit: { type: array, maxItems: 1024, items: { $ref: "#/components/schemas/WorkItemDetailAuditEntry" } }
+      description: >-
+        summary is the board row from the same snapshot; material is the work_item_material_index/v1 object,
+        whose cursor and restore_generation identify the snapshot. Ordering: blockers and approvals by ID,
+        reviews by created_at then ID, evidence by ID, completion records by completed_at then ID, audit by
+        sequence; IDs in binary order.
+    WorkItemDetailBlocker:
+      type: object
+      additionalProperties: false
+      required: [blocker_id, reason, resolved_at]
+      properties:
+        blocker_id: { type: string, minLength: 1, maxLength: 80 }
+        reason: { type: string, minLength: 1, maxLength: 2000 }
+        resolved_at: { oneOf: [{ $ref: "#/components/schemas/MaterialIndexTimestamp" }, { type: "null" }] }
+    WorkItemDetailReview:
+      type: object
+      additionalProperties: false
+      required: [review_id, completion_subject_digest, reviewer_id, independent, verdict, created_at, human_report_id]
+      properties:
+        review_id: { type: string, minLength: 1, maxLength: 80 }
+        completion_subject_digest: { $ref: "#/components/schemas/MaterialIndexDigest" }
+        reviewer_id: { type: string, minLength: 1, maxLength: 120 }
+        independent: { type: boolean }
+        verdict: { type: string, enum: [Approved, Rejected] }
+        created_at: { $ref: "#/components/schemas/MaterialIndexTimestamp" }
+        human_report_id: { oneOf: [{ type: string, minLength: 1, maxLength: 33 }, { type: "null" }] }
+    WorkItemDetailEvidence:
+      type: object
+      additionalProperties: false
+      required: [evidence_id, completion_subject_digest, ac_id, ac_revision_digest, verdict, applicability, availability, verifier_class, verifier_actor, verifier_role, recipe_digest, environment_digest, report_artifact_digest, human_report_id]
+      properties:
+        evidence_id: { type: string, minLength: 1, maxLength: 80 }
+        completion_subject_digest: { $ref: "#/components/schemas/MaterialIndexDigest" }
+        ac_id: { type: string, minLength: 1, maxLength: 120 }
+        ac_revision_digest: { $ref: "#/components/schemas/MaterialIndexDigest" }
+        verdict: { type: string, enum: [Passed, Failed, Skipped, NotRun, Unknown, Error, Inconclusive] }
+        applicability: { type: string, enum: [Current, Stale, Superseded] }
+        availability: { type: string, enum: [Present, Unavailable] }
+        verifier_class: { type: string, minLength: 1, maxLength: 120 }
+        verifier_actor: { type: string, minLength: 1, maxLength: 120 }
+        verifier_role: { type: string, minLength: 1, maxLength: 120 }
+        recipe_digest: { $ref: "#/components/schemas/MaterialIndexDigest" }
+        environment_digest: { $ref: "#/components/schemas/MaterialIndexDigest" }
+        report_artifact_digest: { oneOf: [{ $ref: "#/components/schemas/MaterialIndexDigest" }, { type: "null" }] }
+        human_report_id: { oneOf: [{ type: string, minLength: 1, maxLength: 33 }, { type: "null" }] }
+    WorkItemDetailApproval:
+      type: object
+      additionalProperties: false
+      required: [approval_id, subject_digest, decision, actor_id, expires_at, consumed_at, completion_record_id]
+      properties:
+        approval_id: { type: string, minLength: 1, maxLength: 80 }
+        subject_digest: { $ref: "#/components/schemas/MaterialIndexDigest" }
+        decision: { type: string, const: Approved, description: "Rejected decisions are refused, never stored." }
+        actor_id: { type: string, minLength: 1, maxLength: 120 }
+        expires_at: { $ref: "#/components/schemas/MaterialIndexTimestamp" }
+        consumed_at: { oneOf: [{ $ref: "#/components/schemas/MaterialIndexTimestamp" }, { type: "null" }] }
+        completion_record_id: { oneOf: [{ type: string, minLength: 1, maxLength: 80 }, { type: "null" }] }
+    WorkItemDetailCompletionRecord:
+      type: object
+      additionalProperties: false
+      required: [completion_record_id, completion_subject_digest, result_work_item_version, completed_by, completed_at, evidence_ids, review_ids, approval_ids]
+      properties:
+        completion_record_id: { type: string, minLength: 1, maxLength: 80 }
+        completion_subject_digest: { $ref: "#/components/schemas/MaterialIndexDigest" }
+        result_work_item_version: { type: integer, minimum: 1, maximum: 9223372036854775807 }
+        completed_by: { type: string, minLength: 1, maxLength: 120 }
+        completed_at: { $ref: "#/components/schemas/MaterialIndexTimestamp" }
+        evidence_ids: { type: array, minItems: 1, maxItems: 1024, items: { type: string, minLength: 1, maxLength: 80 } }
+        review_ids: { type: array, minItems: 1, maxItems: 1024, items: { type: string, minLength: 1, maxLength: 80 } }
+        approval_ids: { type: array, maxItems: 1024, items: { type: string, minLength: 1, maxLength: 80 } }
+    WorkItemDetailAuditEntry:
+      type: object
+      additionalProperties: false
+      required: [sequence, group_id, command_id, actor_id, operation, subject_digest, before_digest, after_digest, occurred_at, run_id]
+      properties:
+        sequence: { type: integer, minimum: 1, maximum: 9223372036854775807 }
+        group_id: { type: string, minLength: 1, maxLength: 80 }
+        command_id: { type: string, minLength: 1, maxLength: 80 }
+        actor_id: { type: string, minLength: 1, maxLength: 120 }
+        operation: { type: string, minLength: 1, maxLength: 120 }
+        subject_digest: { $ref: "#/components/schemas/MaterialIndexDigest" }
+        before_digest: { oneOf: [{ $ref: "#/components/schemas/MaterialIndexDigest" }, { type: "null" }] }
+        after_digest: { oneOf: [{ $ref: "#/components/schemas/MaterialIndexDigest" }, { type: "null" }] }
+        occurred_at: { $ref: "#/components/schemas/MaterialIndexTimestamp" }
+        run_id: { oneOf: [{ $ref: "#/components/schemas/RunID" }, { type: "null" }] }
+    WorkItemDetailCapacityError:
+      type: object
+      additionalProperties: false
+      required: [api_version, ok, error, correlation_id]
+      properties:
+        api_version: { type: string, const: v1 }
+        ok: { type: boolean, const: false }
+        correlation_id: { type: string }
+        error:
+          type: object
+          additionalProperties: false
+          required: [code, message, retryable, details]
+          properties:
+            code: { type: string, const: projection_unavailable }
+            message: { type: string }
+            retryable: { type: boolean, const: false }
+            details:
+              type: object
+              additionalProperties: false
+              required: [reason]
+              properties:
+                reason: { type: string, const: work_item_detail_capacity_exceeded }
     ACRevisionRef:
       type: object
       additionalProperties: false
@@ -1113,14 +1216,6 @@ components:
       properties:
         ac_id: { type: string, pattern: "^[A-Za-z0-9][A-Za-z0-9_.-]{0,79}$" }
         revision_digest: { $ref: "#/components/schemas/SHA256" }
-    DependencyRef:
-      type: object
-      additionalProperties: false
-      required: [edge_kind, prerequisite_id, graph_revision_digest]
-      properties:
-        edge_kind: { type: string, enum: [specifies, depends_on, verifies, produces] }
-        prerequisite_id: { type: string, minLength: 1, maxLength: 120 }
-        graph_revision_digest: { $ref: "#/components/schemas/SHA256" }
     Blocker:
       type: object
       additionalProperties: false
@@ -1229,57 +1324,6 @@ components:
         environment_digest: { $ref: "#/components/schemas/SHA256" }
         observed_at: { $ref: "#/components/schemas/Timestamp" }
         report: { $ref: "#/components/schemas/ArtifactLocator" }
-    Approval:
-      type: object
-      additionalProperties: false
-      required: [approval_id, request_id, subject_digest, decision, human_id, decided_at]
-      properties:
-        approval_id: { type: string, minLength: 1, maxLength: 80 }
-        request_id: { type: string, minLength: 1, maxLength: 80 }
-        subject_digest: { $ref: "#/components/schemas/SHA256" }
-        decision: { type: string, enum: [Approved, Rejected] }
-        human_id: { type: string, minLength: 1, maxLength: 120 }
-        decided_at: { $ref: "#/components/schemas/Timestamp" }
-        expires_at:
-          oneOf: [{ $ref: "#/components/schemas/Timestamp" }, { type: "null" }]
-        consumed_at:
-          oneOf: [{ $ref: "#/components/schemas/Timestamp" }, { type: "null" }]
-    CompletionRecord:
-      type: object
-      additionalProperties: false
-      required:
-        [completion_record_id, completion_subject_digest, evidence_ids, review_ids, approval_ids,
-         accepted_graph_revision_digest, policy_revision_digest, completed_by, completed_at,
-         effective_satisfied]
-      properties:
-        completion_record_id: { type: string, minLength: 1, maxLength: 80 }
-        completion_subject_digest: { $ref: "#/components/schemas/SHA256" }
-        evidence_ids:
-          type: array
-          items: { type: string, minLength: 1, maxLength: 80 }
-        review_ids:
-          type: array
-          items: { type: string, minLength: 1, maxLength: 80 }
-        approval_ids:
-          type: array
-          items: { type: string, minLength: 1, maxLength: 80 }
-        accepted_graph_revision_digest: { $ref: "#/components/schemas/SHA256" }
-        policy_revision_digest: { $ref: "#/components/schemas/SHA256" }
-        completed_by: { type: string, minLength: 1, maxLength: 120 }
-        completed_at: { $ref: "#/components/schemas/Timestamp" }
-        effective_satisfied: { type: boolean }
-    AuditEntry:
-      type: object
-      additionalProperties: false
-      required: [sequence, group_id, actor_id, operation, subject_kind, subject_id, occurred_at]
-      properties:
-        sequence: { type: integer, minimum: 1 }
-        group_id: { type: string, minLength: 1, maxLength: 80 }
-        actor_id: { type: string, minLength: 1, maxLength: 120 }
-        operation: { type: string, minLength: 1, maxLength: 120 }
-        subject_kind: { type: string, minLength: 1, maxLength: 80 }
-        subject_id: { type: string, minLength: 1, maxLength: 120 }
-        occurred_at: { $ref: "#/components/schemas/Timestamp" }
     ProjectionEvent:
       type: object
       additionalProperties: false

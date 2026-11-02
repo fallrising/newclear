@@ -50,14 +50,21 @@ var reworkRecipe = domain.HashString("initial recipe")
 
 func newReworkFixture(t *testing.T) *reworkFixture {
 	t.Helper()
+	return newReworkFixtureWith(t, false)
+}
+
+// newReworkFixtureWith optionally requires Approval and binds extra Draft
+// WorkItems in the same initial acceptance; only workItemID is driven here.
+func newReworkFixtureWith(t *testing.T, approval bool, extra ...domain.WorkItemID) *reworkFixture {
+	t.Helper()
 	acs := []domain.ACID{"AC-A", "AC-B"}
-	svc, store, db, accept := initialFixtureContentACs(t, initialContent, acs)
+	svc, store, db, accept := initialFixtureContentACs(t, initialContent, acs, extra...)
 	f := &reworkFixture{svc: svc, store: store, db: db, acs: acs, env: domain.HashString("rework environment"), next: 100}
 	rules := []port.RunInputVerificationRule{}
 	for _, ac := range acs {
 		rules = append(rules, port.RunInputVerificationRule{ACID: ac, VerifierClass: "human", Independent: true, ProhibitedVerifierRunRole: "producer", EnvironmentDigest: f.env.String()})
 	}
-	profile, err := port.NewPolicyProfile(port.PolicyProfileMaterial{Schema: 1, ProjectID: projectID, RecipeDigest: reworkRecipe.String(), IntegrationBase: port.RunInputIntegrationBase{Applicability: "absent"}, Rules: rules})
+	profile, err := port.NewPolicyProfile(port.PolicyProfileMaterial{Schema: 1, ProjectID: projectID, RecipeDigest: reworkRecipe.String(), ApprovalRequired: approval, IntegrationBase: port.RunInputIntegrationBase{Applicability: "absent"}, Rules: rules})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -102,7 +109,7 @@ func (f *reworkFixture) meta() command.Metadata {
 
 func (f *reworkFixture) version(t *testing.T) uint64 {
 	var v uint64
-	if err := f.db.QueryRow("SELECT version FROM work_items").Scan(&v); err != nil && t != nil {
+	if err := f.db.QueryRow("SELECT version FROM work_items WHERE work_item_id=?", workItemID).Scan(&v); err != nil && t != nil {
 		t.Fatal(err)
 	}
 	return v
@@ -111,7 +118,7 @@ func (f *reworkFixture) version(t *testing.T) uint64 {
 func (f *reworkFixture) phase(t *testing.T) string {
 	t.Helper()
 	var p string
-	if err := f.db.QueryRow("SELECT phase FROM work_items").Scan(&p); err != nil {
+	if err := f.db.QueryRow("SELECT phase FROM work_items WHERE work_item_id=?", workItemID).Scan(&p); err != nil {
 		t.Fatal(err)
 	}
 	return p

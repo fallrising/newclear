@@ -739,8 +739,14 @@ IR-01～04由PR[972](https://github.com/fallrising/newclear/pull/972)於2026-11-
 
 | ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| T-0042-1 | 原producer離線capture與MCP固定GET | MC-01 | in_progress | 2026-11-02T12:20:36Z | — | 2026-11-02T12:20:36Z |
-| T-0042-2 | 真實報告與隔離consumer閉環 | MC-02 | in_progress | 2026-11-02T12:20:36Z | — | 2026-11-02T12:20:36Z |
-| T-0042-3 | 原部署preflight與具體上線提案 | MC-03 | in_progress | 2026-11-02T12:20:36Z | — | 2026-11-02T12:20:36Z |
+| T-0042-1 | 原producer離線capture與MCP固定GET | MC-01 | done | 2026-11-02T12:20:36Z | 2026-11-02T12:42:52Z | 2026-11-02T12:43:46Z |
+| T-0042-2 | 真實報告與隔離consumer閉環 | MC-02 | done | 2026-11-02T12:20:36Z | 2026-11-02T12:42:52Z | 2026-11-02T12:43:46Z |
+| T-0042-3 | 原部署preflight與具體上線提案 | MC-03 | done | 2026-11-02T12:20:36Z | 2026-11-02T12:42:52Z | 2026-11-02T12:43:46Z |
 
 Owner繼續開發；一個producer worker在獨立來源工作樹，gpt-6.1-sol/high、15分鐘／一個修正上限；Lead唯一公開文件writer並負責live唯讀、整合、獨立review及Git交付。沒有token複製、新排程或付費服務。具體發布／權限變更另待批准。
+
+MC-01～03由PR[979](https://github.com/fallrising/newclear/pull/979)於2026-11-02T12:42:52Z合併，head `18385be6545c02522649dbf5a4ce176d6b255ba9`、merge `e1b1c4aa1cc55d1fe1dc05b09106f5f86e003824`。必要CI全過：Cloud Lab41446532785／project41446532814／llms41446532908。私人producer另完成獨立PR與三項CI，原script hash `1bcb0c3acf194966418ca00da9aff3353356cd6c4fdbbf67a9e0bc165fa6f753`已回讀一致。兩端正常merge保留並行main，fulltree相同、clean、feature head為main祖先。
+
+48Python＋8Node producer、471consumer測試、5項真報告本機workerd／D1閉環及T868修正後ACCEPT通過；55contracts／9indexes／161相對連結、32workflow jobs零diagnostics、task/report／diff及公開邊界通過。真實MCP四區段有資料；Pages/Tunnels403保持unknown；capture時間未因轉換刷新，原desired差異不自動修改。
+
+候選9個source files與目前來源逐byte相同，metadata-template、原human revision2→3的scope/expiry CAS提案、原settings／Access／grants已私下保存；下載原Worker為multipart，首次誤當JSON解析失敗後保留原件、按multipart解出3modules，與盤點接入前source逐byte相同。這是回退備份格式修正，不是發布。完整候選與回退見[上線提案](../inventory-activation.md)。人類30天讀取／盤點上傳仍是未批准草案；沒有改線上schema、report、Worker、Access、secrets、權限期限或排程，也沒有付費。下一步僅等待owner批准該具體上線範圍；完整Cloud Lab mainline仍incomplete。本PR只改任務板。

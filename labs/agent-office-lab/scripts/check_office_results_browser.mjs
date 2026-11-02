@@ -50,11 +50,18 @@ try {
   }
   await page.selectOption('#provider', 'pi');
   await page.selectOption('#status', 'failed');
-  for (const run of data.runs.filter(r => r.test_scenario && r.status === 'failed')) {
+  for (const run of data.runs.filter(r => r.test_scenario && r.test_scenario !== 'native_pi_cancel' && r.status === 'failed')) {
     await page.locator('#runs tr').filter({hasText:run.id}).getByRole('button').click();
     const detail = await page.locator('#detail').innerText();
     assert(detail.includes(run.test_scenario === 'injected_cli_crash' ? '本機注入 CLI crash' : `本機注入 HTTP ${run.test_scenario.slice(-3)}`));
     assert(detail.includes(run.failure_check_passed ? '故障測試通過；任務仍為失敗。' : '故障測試未通過。'));
+  }
+  for (const run of data.runs.filter(r => r.test_scenario === 'native_pi_cancel')) {
+    await page.selectOption('#status',run.status);
+    await page.locator('#runs tr').filter({hasText:run.id}).getByRole('button').click();
+    const detail=await page.locator('#detail').innerText();
+    assert(detail.includes('Pi 原生取消檢查'));
+    assert(detail.includes(run.cancel_check_passed?'取消驗收通過；任務已取消。':'取消驗收未通過。'));
   }
   await page.selectOption('#status', 'startup_only');
   const startup = data.runs.filter(r => r.provider === 'pi' && r.status === 'startup_only');

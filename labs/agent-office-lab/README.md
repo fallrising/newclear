@@ -29,3 +29,5 @@
 本 repo 收錄腳本、設定、fixtures、依賴鎖檔及公開摘要；模型權重、上游 checkout、快取、登入資訊及原始 runs 不提交。原始本機成果以歷史摘要呈現，公開匯入未重跑模型；後續已完成[生命週期實測](docs/evidence/lifecycle.md)與[host 重啟實測](docs/evidence/restart.md)，未重跑未變更的 614 項上游測試。
 
 OpenCode 子程序的非本機網路與區外寫入限制已做 probe；區外讀取及 Office／Strata 整棵程序樹的 egress 隔離尚未驗收。僅使用合成資料，模型不可用直接失敗，沒有雲端 fallback。
+
+[Pi 原生取消與驗收](docs/CANCEL.md)：本機 held request、原生工位移除、程序清理及操作台結果。

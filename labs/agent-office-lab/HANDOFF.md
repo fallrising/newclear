@@ -1,5 +1,7 @@
 # 開發交接
 
+T-0018：完成 [Pi 原生取消與操作台驗收](docs/CANCEL.md)。真實 Pi 的第一個請求留在本機，確認 working／同 session 後走原生 worker.kill；worker.remove／原生 PID 退出 102 ms，整體取消清理 3.521 秒。最終外層追蹤 29 個程序全退出、執行鎖釋放；163 tests、55 筆結果及操作台／唯讀頁的取消分類、刷新、防重複與拒絕重試通過。任務為 cancelled，零本地／遠端模型推論或付費呼叫。首輪清理約 20.09 秒、第二輪背景子程序殘留均保留；修正後只對本次已追蹤且身分相符的後代送 SIGTERM，完整清理才解鎖。[證據](docs/evidence/pi-cancel-2026-11-02.json)，交付見[任務板](docs/tasks/BOARD.md)。Grok／Cursor 取消、Pi 權限／恢復、遠端端到端與完整安全驗收仍待完成。
+
 T-0017：完成[本機操作台](docs/CONSOLE.md)，接通四 provider 偵測／計畫、本地明確派工、原生終端與結果；遠端付費執行保持 CLI 流程。Chrome 實測 Pi 本機 429（任務仍 failed）及本地 OpenCode／Strata，終端開啟／刷新／再次開啟、重複提交拒絕、停止與產物 hash 通過。最終本地 runner 50.75 秒，外層追蹤 107 個程序全部退出、執行鎖釋放；159 tests、52 筆結果回讀通過，零遠端模型請求。首輪瀏覽器表單等待失敗、第二輪 swap guard 停止均保留；原限制未調整，最終重驗通過。[證據](docs/evidence/console-2026-11-02.json)，交付狀態見[任務板](docs/tasks/BOARD.md)。一般任務、完整四 provider UI／生命週期與安全驗收仍 pending，沒有 usable tag。
 
 T-0016：完成 [Pi 有界明確重試](docs/RETRY.md)。統一入口 retry 預設只顯示計畫；執行時重新核對最新失敗、完整清理、固定模式／fixture 與來源，同一任務最多兩次重試。真實 Pi 本機 429 的初次＋兩次重試通過：三個獨立 session 使用相同 input，原報告／事件不變，第三次及舊 parent 的六項請求全部拒絕且不新增 run。三次分別追蹤 41／35／46 個程序，全部退出、鎖釋放；各一次本機請求、零模型推論或外部請求。152 tests 與 46 筆結果瀏覽器關聯／分類／刷新通過。[證據](docs/evidence/pi-retry-2026-11-02.json)，交付狀態見[任務板](docs/tasks/BOARD.md)。其他 provider、原 session 恢復、UI 派工與完整 MVP 仍待驗。
@@ -8,7 +10,7 @@ T-0015：完成 [Pi CLI crash 與明確重新啟動](docs/CRASH.md)。真實 Pi 
 
 T-0014：完成[Pi 原生 401／429 故障驗收](docs/FAILURES.md)。本機注入錯誤，真實 Pi 呈現 needs_input／error 且從未 done；各一次本機請求、零外部模型請求、無產物或推論成功。發現並修正 Pi 過早判定清理：最終兩次 runner 與外層觀察均確認所屬程序全退出、鎖釋放；原兩次清理證據不足紀錄保留。結果頁標示注入來源，任務仍為失敗。135 tests 與 40 筆結果的瀏覽器核對通過。[證據](docs/evidence/pi-failures-2026-11-01.json)，交付狀態見[任務板](docs/tasks/BOARD.md)。完整 AC-07、其他 provider 及 MVP 仍 pending。
 
-模型使用說明：T-0013／17 執行本地 OpenCode／Strata；T-0014／15／16 僅執行原生 Pi CLI 與本機故障，未載入 Strata 或進行任何模型推論。MVP 必要 AC 共 11 項，四種 provider 的原受測合成任務 4 項通過，另外 7 項已有子集但保持 pending；不能以測試數換算產品完成率。本地 UI 派工／終端／結果子集已通過；下一階段補遠端入口整合、跨 provider 生命週期與完整安全驗收。
+模型使用說明：T-0013／17 執行本地 OpenCode／Strata；T-0014／15／16／18 僅執行原生 Pi CLI 與本機故障，未載入 Strata 或進行任何模型推論。MVP 必要 AC 共 11 項，四種 provider 的原受測合成任務 4 項通過，另外 7 項已有子集但保持 pending；不能以測試數換算產品完成率。本地 UI 派工／終端／結果子集已通過；下一階段補遠端入口整合、跨 provider 生命週期與完整安全驗收。
 
 目前剩餘主線：遠端新入口真實任務；跨 provider 權限、取消與恢復；其他 provider 的 CLI crash／故障與有界重試流程；遠端 UI 派工到結果；完整安全邊界驗收。Strata GitHub tool-loop 為獨立非 MVP 阻塞研究。
 

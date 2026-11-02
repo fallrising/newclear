@@ -144,6 +144,8 @@ T-0016 加入 [Pi 有界明確重試](RETRY.md)：同任務初次加最多兩次
 
 T-0017 的 [本機操作台](CONSOLE.md) 連接四工位偵測／計畫、本地明確派工、原生終端與白名單結果。一次性計畫、同來源寫入與所屬 runner 停止沿用既有全局執行鎖；頁面不啟動遠端付費任務。這是 AC-01／06／08／09／11 子集；一般任務輸入、四 provider 整體生命週期及安全驗收仍 pending。
 
+T-0018 加入 [Pi 原生取消檢查](CANCEL.md)，以真實 CLI、本機 held request、Office worker.kill／worker.remove 及程序樹清理驗證 AC-06／08／09／11 子集。結果為 cancelled，不推論、不發付費請求；其他 provider 及真實遠端取消仍待驗。
+
 ## 9. 實作順序與退出條件
 
 1. **P0：基底驗證。** 固定上游 checkout、保留授權，啟動 lite/office；記錄 package lock 與 CLI 版本。核對四種 provider，特別是 Grok 版別與 Pi + DeepSeek。若現有 adapter 失效，先小範圍修 adapter；只有 host 無法支援生命週期才另寫輕量 host。

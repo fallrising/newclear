@@ -120,6 +120,25 @@ def _normalize(run_fd, run_id):
     if type(elapsed) in (int, float) and 0 <= elapsed < 10**7 and math.isfinite(elapsed):
         row['elapsed_seconds'] = round(elapsed, 2)
     row['artifact'] = artifact(run_fd, office.get('artifact_sha256'))
+    if 'cancellation_check' in report:
+        if (provider != 'pi' or report['cancellation_check'] != {'source':'held_loopback','method':'worker.kill'}
+                or 'fault_injection' in report or 'crash_injection' in report):
+            return dict(row, status='invalid', reason='invalid_cancel_test_metadata')
+        row['test_scenario'] = 'native_pi_cancel'
+        duration = office.get('cancel_processes_exit_duration_ms')
+        cleanup_duration = report.get('cancel_cleanup_duration_ms')
+        row['cancel_check_passed'] = (report.get('cancel_check_passed') is True
+            and report.get('status') == 'cancelled' and office.get('status') == 'cancelled'
+            and row['cleanup_verified'] and model_matches and report.get('model_inference_verified') is False
+            and office.get('native_cancel_verified') is True and office.get('cancelled_processes_exited') is True
+            and type(duration) in (int, float) and 0 <= duration <= 10000
+            and type(cleanup_duration) in (int, float) and 0 <= cleanup_duration <= 10000
+            and type(report.get('client_requests')) is int and report['client_requests'] == 1
+            and type(report.get('external_requests')) is int and report['external_requests'] == 0
+            and type(report.get('remaining_owned_processes')) is int and report['remaining_owned_processes'] == 0
+            and row['artifact']['status'] == 'unavailable')
+        return dict(row, status='cancelled' if row['cancel_check_passed'] else 'failed' if report.get('status') == 'failed' else 'unverified',
+                    reason='native_cancel_check')
     if 'crash_injection' in report:
         if (provider != 'pi' or report['crash_injection'] != {'source': 'owned_cli', 'signal': 'SIGKILL'}
                 or 'fault_injection' in report):

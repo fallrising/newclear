@@ -46,3 +46,19 @@ def crash_owned(pid, owned):
     if type(pid) is not int or pid <= 1 or pid == os.getpid() or pid not in alive_owned(process_table(), owned):
         raise ValueError('crash_target_not_owned')
     os.kill(pid, signal.SIGKILL)
+
+
+def terminate_owned(owned):
+    """Stop only still-matching descendants retained after the native host exits."""
+    signalled = 0
+    for pid in owned:
+        if type(pid) is not int or pid <= 1 or pid == os.getpid():
+            continue
+        if pid not in alive_owned(process_table(), owned):
+            continue
+        try:
+            os.kill(pid, signal.SIGTERM)
+            signalled += 1
+        except ProcessLookupError:
+            pass  # Exited between the identity check and signal.
+    return signalled

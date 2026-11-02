@@ -20,3 +20,5 @@ Root evidence gate —2026-11-02T16:04Z: T137 independent source review DONE, in
 Initial staged whitespace check rejected a context-only blank line in generated local-bundle.test.mjs.diff. Raw original retained locally; exact bytes published losslessly as .diff.encoded.json with SHA256, no source/test/log alteration. Corrected staged whitespace and native project checks must pass before commit.
 
 Final local project contracts checker passed1project; both task and both report validators passed; corrected staged whitespace passed. Aggregate tool/provider/token/cost/active-wait unknown/null.
+
+Publication packaging: five ignored raw test logs are preserved locally and published losslessly as .log.encoded.json with index log-encoding.json; no failure or skip removed. Native `python3 -m unittest discover -s scripts/tests -p test_project_success.py` passed15/15.

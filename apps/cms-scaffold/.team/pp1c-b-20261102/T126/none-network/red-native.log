@@ -1,0 +1,25 @@
+✖ T126_none_real_registry_accepts_internal_running_endpoint_without_logical_endpoint (299.513111ms)
+ℹ tests 1
+ℹ suites 0
+ℹ pass 0
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 381.957362
+
+✖ failing tests:
+
+test at scripts/local/maintenance-workflow.test.mjs:567:1
+✖ T126_none_real_registry_accepts_internal_running_endpoint_without_logical_endpoint (299.513111ms)
+  Error: ADAPTER_UNSEALED
+      at assertHelperPolicy (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-integration-20261102/apps/cms-scaffold/scripts/local/maintenance-helper.mjs:140:19)
+      at helperSnapshot (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-integration-20261102/apps/cms-scaffold/scripts/local/maintenance-workflow.mjs:160:10)
+      at async Module.updateOwnedHelper (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-integration-20261102/apps/cms-scaffold/scripts/local/maintenance-workflow.mjs:195:18)
+      at async TestContext.<anonymous> (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-integration-20261102/apps/cms-scaffold/scripts/local/maintenance-workflow.test.mjs:573:42)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:385:3) {
+    code: 'ADAPTER_UNSEALED',
+    phase: null,
+    operationId: null
+  }

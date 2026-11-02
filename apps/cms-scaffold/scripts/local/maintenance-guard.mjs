@@ -1,9 +1,8 @@
+import { rootFor, directory, read, writeNew, syncDirectory, update, loadRegistry, loadWorkflow, assertPriorReleased } from './maintenance-store.mjs';
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
-import { constants } from 'node:fs';
-import { lstat, open, mkdir, readdir, rename, rmdir } from 'node:fs/promises';
-import { randomBytes } from 'node:crypto';
-import { resolve, join, parse } from 'node:path';
+import { mkdir, readdir, rmdir } from 'node:fs/promises';
+import { resolve, join } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { isIPv4 } from 'node:net';
 import { inspectTarget, mediaProbeCommand } from './maintenance-target.mjs';
@@ -50,39 +49,6 @@ function validateLease(lease) {
   requireSafe(typeof lease.createdAt === 'string' && new Date(lease.createdAt).toISOString() === lease.createdAt);
   requireSafe(['RESERVED','PRE_CONNECTION'].includes(lease.phase) ? lease.boundBackend === null : lease.phase === 'FAILED_OR_UNKNOWN' && lease.boundBackend === null || validBackend(lease.boundBackend, lease));
   return lease;
-}
-function rootFor(runId, deps) {
-  requireSafe(typeof runId === 'string' && /^[a-f0-9]{32}$/.test(runId));
-  return join(resolve(deps.cwd ?? process.cwd()), 'local/pp1', runId);
-}
-async function pathSafe(path) {
-  let current = parse(path).root;
-  for (const part of path.slice(current.length).split('/')) { current = join(current, part); requireSafe(!(await lstat(current)).isSymbolicLink()); }
-}
-async function directory(path) {
-  await pathSafe(path); const info = await lstat(path);
-  requireSafe(info.isDirectory() && info.uid === process.getuid() && (info.mode & 0o7777) === 0o700); return info;
-}
-async function read(path) {
-  await directory(parse(path).dir); await pathSafe(path);
-  const handle = await open(path, constants.O_RDONLY | constants.O_NOFOLLOW | constants.O_NONBLOCK);
-  try {
-    const info = await handle.stat(); requireSafe(info.isFile() && info.nlink === 1 && info.uid === process.getuid() && (info.mode & 0o7777) === 0o600 && info.size <= 1048576);
-    return JSON.parse(await handle.readFile('utf8'));
-  } finally { await handle.close(); }
-}
-async function writeNew(path, value) {
-  await directory(parse(path).dir); const handle = await open(path, 'wx', 0o600);
-  try { await handle.writeFile(JSON.stringify(value) + '\n'); await handle.sync(); } finally { await handle.close(); }
-  await syncDirectory(parse(path).dir);
-}
-async function syncDirectory(path) {
-  const handle = await open(path,constants.O_RDONLY|constants.O_DIRECTORY);
-  try { await handle.sync(); } finally { await handle.close(); }
-}
-async function update(path, value) {
-  await read(path); const temp = `${path}.tmp-${randomBytes(16).toString('hex')}`;
-  await writeNew(temp, value); await rename(temp, path); await syncDirectory(parse(path).dir);
 }
 function runtime(deps, signal, deadline) {
   const env = { ...(deps.environment ?? process.env) };
@@ -143,6 +109,9 @@ export async function acquire(inspection, operation, deps = {}) {
     try { existingTarget = await read(targetPath); } catch (e) { if (e.code !== 'ENOENT') throw e; }
     if (existingTarget) { requireSafe(same(existingTarget,inspection.target)); await directory(operations); }
     else { try { await mkdir(operations,{mode:0o700}); } catch (e) { if (e.code !== 'EEXIST') throw e; } await directory(operations); }
+    let priorV2 = null;
+    try { if ((await read(join(base,'lease.json'))).version === 2) priorV2 = await assertPriorReleased(inspection.target.runId,deps); }
+    catch (error) { if (error.code !== 'ENOENT') throw error; }
     const lock = join(base,'operation.lock');
     try { await mkdir(lock,{mode:0o700}); } catch (e) { if (e.code === 'EEXIST') code('MAINTENANCE_BUSY'); throw e; }
     await syncDirectory(base);
@@ -161,7 +130,14 @@ export async function acquire(inspection, operation, deps = {}) {
     try {
       if (!existingTarget) await writeNew(targetPath,inspection.target);
       const path = join(base,'lease.json');
-      try { const prior = validateLease(await read(path)); requireSafe(prior.phase === 'COMPLETE'); await storedLease(prior,deps); await update(path,lease); }
+      try {
+        const prior = await read(path);
+        if (prior.version === 2) {
+          const current = await loadWorkflow(inspection.target.runId,deps);
+          requireSafe(priorV2 && prior.phase === 'COMPLETE' && same(prior,priorV2.lease) && same(current.journal,priorV2.journal));
+        } else { validateLease(prior); requireSafe(prior.phase === 'COMPLETE'); await storedLease(prior,deps); }
+        await update(path,lease);
+      }
       catch (e) { if (e.code !== 'ENOENT' || existingTarget) throw e; await writeNew(path,lease); }
       await runtime(deps)(['stop','--time','30',lease.containerIds['cms-api']]);
       await phase(record,'PRE_CONNECTION',null,deps); await assertQuiesced(lease,deps);
@@ -246,17 +222,31 @@ export async function finish(input,exitCode,deps = {}) {
     code(committed ? 'COMMITTED_HOST_RESTORE_FAILED' : 'QUIESCENCE_NOT_PROVEN');
   }
 }
-async function helper(argv) {
+export async function dispatchGuard(argv, deps = {}) {
   const [verb, ...rest] = argv, fields = {};
   requireSafe(['assert','bind-backend','inspect'].includes(verb) && rest.length % 2 === 0);
   for (let i = 0; i < rest.length; i += 2) { requireSafe(rest[i].startsWith('--') && !Object.hasOwn(fields, rest[i]) && rest[i+1]); fields[rest[i]] = rest[i+1]; }
   const expected = verb === 'inspect' ? ['--run-id'] : verb === 'assert' ? ['--run-id','--operation-id','--phase'] : ['--run-id','--operation-id','--pid','--backend-start-epoch'];
-  requireSafe(exact(fields, expected)); const root = rootFor(fields['--run-id'], {}); const lease = await read(join(root, 'maintenance/lease.json'));
-  if (verb === 'inspect') { await storedLease(lease, {}); process.stdout.write(JSON.stringify({ operationId: lease.operationId, phase: lease.phase }) + '\n'); return; }
-  requireSafe(uuid(fields['--operation-id']) && fields['--operation-id'] === lease.operationId);
-  if (verb === 'assert') { requireSafe(['pre-connection','bound'].includes(fields['--phase']) && lease.phase === { 'pre-connection':'PRE_CONNECTION',bound:'BOUND' }[fields['--phase']]); await assertQuiesced(lease); }
-  else { requireSafe(/^[1-9][0-9]*$/.test(fields['--pid'])); await bindBackend(lease, Number(fields['--pid']), fields['--backend-start-epoch']); }
+  requireSafe(exact(fields, expected));
+  if (verb !== 'inspect') requireSafe(uuid(fields['--operation-id']));
+  const raw = await read(join(rootFor(fields['--run-id'], deps),'maintenance/lease.json'));
+  if (raw?.version === 1) requireSafe(raw.runId === fields['--run-id']);
+  const record = raw?.version === 1 ? await storedLease(raw,deps)
+    : await loadRegistry(fields['--run-id'], deps, { allowPending: verb !== 'inspect' });
+  const lease = record.lease;
+  if (verb === 'inspect') return { operationId: lease.operationId, phase: lease.phase };
+  requireSafe(fields['--operation-id'] === lease.operationId);
+  if (lease.version === 2) {
+    const { OpsError } = await import('../ops/recovery-protocol.mjs');
+    // R01/R03 own actual account attachment and backend authority, beyond L05.
+    throw new OpsError('ADAPTER_UNSEALED', lease.phase, lease.operationId);
+  }
+  if (verb === 'assert') { requireSafe(['pre-connection','bound'].includes(fields['--phase']) && lease.phase === { 'pre-connection':'PRE_CONNECTION',bound:'BOUND' }[fields['--phase']]); await assertQuiesced(lease,deps); }
+  else { requireSafe(/^[1-9][0-9]*$/.test(fields['--pid'])); await bindBackend(lease, Number(fields['--pid']), fields['--backend-start-epoch'],deps); }
+  return { operationId: lease.operationId, phase: lease.phase };
 }
 if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1])).href) {
-  try { await helper(process.argv.slice(2)); } catch { process.stderr.write('QUIESCENCE_NOT_PROVEN\n'); process.exitCode = 6; }
+  try { const result = await dispatchGuard(process.argv.slice(2)); if (process.argv[2] === 'inspect') process.stdout.write(JSON.stringify(result) + '\n'); } catch { process.stderr.write('QUIESCENCE_NOT_PROVEN\n'); process.exitCode = 6; }
 }
+
+export const loadLegacyRegistry = (input,deps = {}) => storedLease(input,deps);

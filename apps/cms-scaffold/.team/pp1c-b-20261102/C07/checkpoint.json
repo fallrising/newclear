@@ -1,0 +1,8 @@
+{
+  "card": "C07",
+  "handwritten_added": 122,
+  "handwritten_removed": 0,
+  "red": "red-native.log",
+  "sandbox_attempt": "red.log",
+  "reason": "import-safe behavior Red: captureLocal ADAPTER_UNSEALED instead of complete private capture"
+}

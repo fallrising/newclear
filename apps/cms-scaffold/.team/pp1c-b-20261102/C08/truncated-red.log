@@ -1,0 +1,24 @@
+✖ PP1c_C08_zero_exit_truncated_dump_with_matching_size_and_hash_is_refused (294.71528ms)
+ℹ tests 1
+ℹ suites 0
+ℹ pass 0
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 424.876821
+
+✖ failing tests:
+
+test at scripts/ops/local-bundle.test.mjs:147:1
+✖ PP1c_C08_zero_exit_truncated_dump_with_matching_size_and_hash_is_refused (294.71528ms)
+  AssertionError [ERR_ASSERTION]: Missing expected rejection.
+      at async TestContext.<anonymous> (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-20261101/apps/cms-scaffold/scripts/ops/local-bundle.test.mjs:149:3)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:385:3) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    operator: 'rejects',
+    diff: 'simple'
+  }

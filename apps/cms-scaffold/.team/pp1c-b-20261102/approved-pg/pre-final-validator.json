@@ -1,0 +1,92 @@
+[
+  {
+    "path": ".team/tasks/T-119.md",
+    "exit": 0,
+    "output": "validate-task validation passed: /home/ckc/test/codex/wt/newclear/cms-pp1c-b-20261101/apps/cms-scaffold/.team/tasks/T-119.md\n"
+  },
+  {
+    "path": ".team/reports/T-119.md",
+    "exit": 0,
+    "output": "validate-report validation passed: /home/ckc/test/codex/wt/newclear/cms-pp1c-b-20261101/apps/cms-scaffold/.team/reports/T-119.md\n"
+  },
+  {
+    "path": ".team/tasks/T-120.md",
+    "exit": 0,
+    "output": "validate-task validation passed: /home/ckc/test/codex/wt/newclear/cms-pp1c-b-20261101/apps/cms-scaffold/.team/tasks/T-120.md\n"
+  },
+  {
+    "path": ".team/reports/T-120.md",
+    "exit": 0,
+    "output": "validate-report validation passed: /home/ckc/test/codex/wt/newclear/cms-pp1c-b-20261101/apps/cms-scaffold/.team/reports/T-120.md\n"
+  },
+  {
+    "path": ".team/tasks/T-121.md",
+    "exit": 0,
+    "output": "validate-task validation passed: /home/ckc/test/codex/wt/newclear/cms-pp1c-b-20261101/apps/cms-scaffold/.team/tasks/T-121.md\n"
+  },
+  {
+    "path": ".team/reports/T-121.md",
+    "exit": 0,
+    "output": "validate-report validation passed: /home/ckc/test/codex/wt/newclear/cms-pp1c-b-20261101/apps/cms-scaffold/.team/reports/T-121.md\n"
+  },
+  {
+    "path": ".team/tasks/T-123.md",
+    "exit": 0,
+    "output": "validate-task validation passed: /home/ckc/test/codex/wt/newclear/cms-pp1c-b-20261101/apps/cms-scaffold/.team/tasks/T-123.md\n"
+  },
+  {
+    "path": ".team/reports/T-123.md",
+    "exit": 0,
+    "output": "validate-report validation passed: /home/ckc/test/codex/wt/newclear/cms-pp1c-b-20261101/apps/cms-scaffold/.team/reports/T-123.md\n"
+  },
+  {
+    "path": ".team/tasks/T-124.md",
+    "exit": 0,
+    "output": "validate-task validation passed: /home/ckc/test/codex/wt/newclear/cms-pp1c-b-20261101/apps/cms-scaffold/.team/tasks/T-124.md\n"
+  },
+  {
+    "path": ".team/reports/T-124.md",
+    "exit": 0,
+    "output": "validate-report validation passed: /home/ckc/test/codex/wt/newclear/cms-pp1c-b-20261101/apps/cms-scaffold/.team/reports/T-124.md\n"
+  },
+  {
+    "path": ".team/tasks/T-125.md",
+    "exit": 0,
+    "output": "validate-task validation passed: /home/ckc/test/codex/wt/newclear/cms-pp1c-b-20261101/apps/cms-scaffold/.team/tasks/T-125.md\n"
+  },
+  {
+    "path": ".team/reports/T-125.md",
+    "exit": 0,
+    "output": "validate-report validation passed: /home/ckc/test/codex/wt/newclear/cms-pp1c-b-20261101/apps/cms-scaffold/.team/reports/T-125.md\n"
+  },
+  {
+    "path": ".team/tasks/T-126.md",
+    "exit": 0,
+    "output": "validate-task validation passed: /home/ckc/test/codex/wt/newclear/cms-pp1c-b-20261101/apps/cms-scaffold/.team/tasks/T-126.md\n"
+  },
+  {
+    "path": ".team/reports/T-126.md",
+    "exit": 0,
+    "output": "validate-report validation passed: /home/ckc/test/codex/wt/newclear/cms-pp1c-b-20261101/apps/cms-scaffold/.team/reports/T-126.md\n"
+  },
+  {
+    "path": ".team/tasks/T-127.md",
+    "exit": 0,
+    "output": "validate-task validation passed: /home/ckc/test/codex/wt/newclear/cms-pp1c-b-20261101/apps/cms-scaffold/.team/tasks/T-127.md\n"
+  },
+  {
+    "path": ".team/reports/T-127.md",
+    "exit": 0,
+    "output": "validate-report validation passed: /home/ckc/test/codex/wt/newclear/cms-pp1c-b-20261101/apps/cms-scaffold/.team/reports/T-127.md\n"
+  },
+  {
+    "path": ".team/tasks/T-128.md",
+    "exit": 0,
+    "output": "validate-task validation passed: /home/ckc/test/codex/wt/newclear/cms-pp1c-b-20261101/apps/cms-scaffold/.team/tasks/T-128.md\n"
+  },
+  {
+    "path": ".team/reports/T-128.md",
+    "exit": 0,
+    "output": "validate-report validation passed: /home/ckc/test/codex/wt/newclear/cms-pp1c-b-20261101/apps/cms-scaffold/.team/reports/T-128.md\n"
+  }
+]

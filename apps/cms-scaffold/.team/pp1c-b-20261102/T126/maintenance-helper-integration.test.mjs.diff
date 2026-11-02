@@ -1,0 +1,48 @@
+--- maintenance-helper-integration.test.mjs.before
++++ scripts/local/maintenance-helper-integration.test.mjs
+@@ -19,7 +19,12 @@
+     }
+     assert.equal(file,'docker');assert.deepEqual(args.slice(0,2),['--host','unix:///var/run/docker.sock']);assert.equal(options.shell,false);
+     calls.push(args);const a=args.slice(2),value=key=>a.find(x=>x.startsWith(key+'='))?.slice(key.length+1);
+-    if(a[0]==='image')return{stdout:JSON.stringify([{Id:a[2],Os:'linux',Config:{Env:[],Labels:{},User:''}}])};
++    if(a[0]==='image') {
++      const pg=a[2]===context.target.images.postgres;
++      const volumes=pg?{'/var/lib/postgresql/data':{}}:{};
++      if((pg&&fault==='pg-volume-extra')||(!pg&&fault==='other-volume'))volumes['/unexpected']={};
++      return{stdout:JSON.stringify([{Id:a[2],Os:'linux',Config:{Env:[],Labels:{},User:'',Volumes:volumes}}])};
++    }
+     if(a[0]==='volume')return{stdout:JSON.stringify([{Name:'owned_media',Mountpoint:'/var/lib/docker/volumes/owned_media/_data'}])};
+     if(a[0]==='exec')return{stdout:a.at(-1)==='SHOW server_version_num;'?(fault==='server-number'?'170001\n':'160015\n'):fault==='server'?'17.2\n':'16.15\n'};
+     if(a[0]==='create') {
+@@ -33,7 +38,7 @@
+       containers.set(full,{Id:full,Name:`/${a[a.indexOf('--name')+1]}`,Image:a[entry+1],State:{Status:'created',Running:false,ExitCode:0},
+         Config:{Labels:labels,Env:[],User:value('--user'),Entrypoint:[value('--entrypoint')],Cmd:a.slice(entry+2),OpenStdin:true,Tty:false},
+         HostConfig:{NetworkMode:'none',ReadonlyRootfs:true,Privileged:false,CapDrop:['ALL'],SecurityOpt:['no-new-privileges'],
+-          RestartPolicy:{Name:'no'},LogConfig:{Type:'none'},PortBindings:{},PidMode:'',IpcMode:'private',Tmpfs:{'/tmp':'rw,nosuid,nodev,size=67108864'}},
++          RestartPolicy:{Name:'no'},LogConfig:{Type:'none'},PortBindings:{},PidMode:'',IpcMode:'private',Tmpfs:Object.fromEntries(a.filter(x=>x.startsWith('--tmpfs=')).map(x=>x.slice(8).split(':')))},
+         Mounts:mounts,NetworkSettings:{Ports:{},Networks:{none:{IPAddress:''}}}});return{stdout:full+'\n'};
+     }
+     if(a[0]==='inspect') {
+@@ -68,3 +73,22 @@
+   assert.equal((await probeHelperProfile(f.context,f.deps)).pgDumpVersion,'16.15');
+   assert.equal(f.containers.size,0);
+ });
++
++test('T126_profile_only_fixed_PG_version_roles_receive_exact_mask',async t=>{
++  const f=await profileFixture(t);await probeHelperProfile(f.context,f.deps);
++  const creates=f.calls.filter(a=>a[2]==='create');let count=0;
++  for(const args of creates) {
++    const masked=args.includes('--tmpfs=/var/lib/postgresql/data:ro,nosuid,nodev,noexec,size=1048576');
++    const role=args.find(x=>x.startsWith('org.cms.pp1c.kind='));
++    if(args.includes(f.context.target.images.postgres)) {
++      count++;assert.equal(masked,true);assert.equal(args.at(-1),'--version');
++      assert.ok(['org.cms.pp1c.kind=PG_DUMP_VERSION','org.cms.pp1c.kind=PG_RESTORE_VERSION'].includes(role));
++      assert.ok(args.includes(role.endsWith('PG_DUMP_VERSION')?'--entrypoint=/usr/local/bin/pg_dump':'--entrypoint=/usr/local/bin/pg_restore'));
++    }else assert.equal(masked,false);
++  }
++  assert.equal(count,2);assert.equal(f.containers.size,0);
++});
++for(const fault of ['pg-volume-extra','other-volume'])test(`T126_profile_rejects_${fault}_before_create`,async t=>{
++  const f=await profileFixture(t,fault);await assert.rejects(probeHelperProfile(f.context,f.deps),/ADAPTER_UNSEALED/);
++  assert.ok(f.calls.filter(a=>a[2]==='create').every(a=>fault==='pg-volume-extra'&&!a.includes(f.context.target.images.postgres)));
++});

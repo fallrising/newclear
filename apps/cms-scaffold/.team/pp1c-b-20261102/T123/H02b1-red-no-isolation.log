@@ -1,0 +1,40 @@
+✖ PP1C_H02b1_real_token_JDBC_closed_running_before_result_and_EOF (188.762986ms)
+✖ PP1C_H02b1_real_token_JDBC_closed_EXITED_before_result_and_EOF (160.686244ms)
+ℹ tests 2
+ℹ suites 0
+ℹ pass 0
+ℹ fail 2
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 372.106286
+
+✖ failing tests:
+
+test at scripts/local/maintenance-workflow.test.mjs:278:35
+✖ PP1C_H02b1_real_token_JDBC_closed_running_before_result_and_EOF (188.762986ms)
+  OpsError: TARGET_NOT_OWNED
+      at ensure (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-integration-20261102/apps/cms-scaffold/scripts/local/maintenance-workflow.mjs:9:64)
+      at Module.registerOwnedHelper (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-integration-20261102/apps/cms-scaffold/scripts/local/maintenance-workflow.mjs:170:3)
+      at async jdbcFixture (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-integration-20261102/apps/cms-scaffold/scripts/local/maintenance-workflow.test.mjs:271:3)
+      at async TestContext.<anonymous> (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-integration-20261102/apps/cms-scaffold/scripts/local/maintenance-workflow.test.mjs:279:11)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:385:3) {
+    code: 'TARGET_NOT_OWNED',
+    phase: null,
+    operationId: null
+  }
+
+test at scripts/local/maintenance-workflow.test.mjs:278:35
+✖ PP1C_H02b1_real_token_JDBC_closed_EXITED_before_result_and_EOF (160.686244ms)
+  OpsError: TARGET_NOT_OWNED
+      at ensure (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-integration-20261102/apps/cms-scaffold/scripts/local/maintenance-workflow.mjs:9:64)
+      at Module.registerOwnedHelper (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-integration-20261102/apps/cms-scaffold/scripts/local/maintenance-workflow.mjs:170:3)
+      at async jdbcFixture (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-integration-20261102/apps/cms-scaffold/scripts/local/maintenance-workflow.test.mjs:271:3)
+      at async TestContext.<anonymous> (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-integration-20261102/apps/cms-scaffold/scripts/local/maintenance-workflow.test.mjs:279:11)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    code: 'TARGET_NOT_OWNED',
+    phase: null,
+    operationId: null
+  }

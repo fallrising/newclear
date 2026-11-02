@@ -1,0 +1,13 @@
+✔ PP1C_H02b2c_media_stream_rejects_transient_writer_before_EOF (1409.459999ms)
+✔ PP1C_H02b2c_owned_PG_and_media_streams_are_private_and_bound_to_prior_inventory (2095.35244ms)
+✔ PP1C_H02b2c_owned_inventory_rejects_output-mode_and_retains_lock (1006.559547ms)
+✔ PP1C_H02b2c_owned_inventory_rejects_receipt-hash_and_retains_lock (729.96779ms)
+✔ PP1C_H02b2c_media_rejects_changed_prior_inventory_and_forged_token (780.994651ms)
+ℹ tests 5
+ℹ suites 0
+ℹ pass 5
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 6050.094917

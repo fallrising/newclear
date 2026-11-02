@@ -1,0 +1,173 @@
+[
+  {
+    "log": "H03a1-final-green.log",
+    "tests": "15",
+    "pass": "15",
+    "fail": "0",
+    "skipped": "0",
+    "duration_ms": "253.654824",
+    "artifact": "H03a1-final-green.log"
+  },
+  {
+    "log": "H03a1-green.log",
+    "tests": "1",
+    "pass": "1",
+    "fail": "0",
+    "skipped": "0",
+    "duration_ms": "182.921101",
+    "artifact": "H03a1-green.log"
+  },
+  {
+    "log": "H03a1-named-green.log",
+    "tests": "13",
+    "pass": "13",
+    "fail": "0",
+    "skipped": "0",
+    "duration_ms": "143.189024",
+    "artifact": "H03a1-named-green.log"
+  },
+  {
+    "log": "H03a1-red.log",
+    "tests": "1",
+    "pass": "0",
+    "fail": "1",
+    "skipped": "0",
+    "duration_ms": "133.529343",
+    "artifact": "H03a1-red.log"
+  },
+  {
+    "log": "H03a1-scaffold-named-red.log",
+    "tests": "15",
+    "pass": "1",
+    "fail": "14",
+    "skipped": "0",
+    "duration_ms": "113.275547",
+    "artifact": "H03a1-scaffold-named-red.log.json"
+  },
+  {
+    "log": "H03a2-corrected-green.log",
+    "tests": "20",
+    "pass": "19",
+    "fail": "1",
+    "skipped": "0",
+    "duration_ms": "455.065139",
+    "artifact": "H03a2-corrected-green.log.json"
+  },
+  {
+    "log": "H03a2-final-green.log",
+    "tests": "22",
+    "pass": "22",
+    "fail": "0",
+    "skipped": "0",
+    "duration_ms": "570.128206",
+    "artifact": "H03a2-final-green.log"
+  },
+  {
+    "log": "H03a2-green.log",
+    "tests": "20",
+    "pass": "18",
+    "fail": "2",
+    "skipped": "0",
+    "duration_ms": "444.011002",
+    "artifact": "H03a2-green.log.json"
+  },
+  {
+    "log": "H03a2-host-green.log",
+    "tests": "20",
+    "pass": "20",
+    "fail": "0",
+    "skipped": "0",
+    "duration_ms": "497.227785",
+    "artifact": "H03a2-host-green.log"
+  },
+  {
+    "log": "H03a2-red.log",
+    "tests": "5",
+    "pass": "0",
+    "fail": "5",
+    "skipped": "0",
+    "duration_ms": "72.928391",
+    "artifact": "H03a2-red.log.json"
+  },
+  {
+    "log": "H03b-diagnostic-red.log",
+    "tests": "2",
+    "pass": "1",
+    "fail": "1",
+    "skipped": "0",
+    "duration_ms": "61.812984",
+    "artifact": "H03b-diagnostic-red.log"
+  },
+  {
+    "log": "H03b-final-green.log",
+    "tests": "31",
+    "pass": "31",
+    "fail": "0",
+    "skipped": "0",
+    "duration_ms": "614.069021",
+    "artifact": "H03b-final-green.log"
+  },
+  {
+    "log": "H03b-fixture-syntax-failure.log",
+    "tests": "1",
+    "pass": "0",
+    "fail": "1",
+    "skipped": "0",
+    "duration_ms": "38.842474",
+    "artifact": "H03b-fixture-syntax-failure.log"
+  },
+  {
+    "log": "H03b-green.log",
+    "tests": "28",
+    "pass": "28",
+    "fail": "0",
+    "skipped": "0",
+    "duration_ms": "602.193861",
+    "artifact": "H03b-green.log"
+  },
+  {
+    "log": "H03b-mode-red.log",
+    "tests": "1",
+    "pass": "0",
+    "fail": "1",
+    "skipped": "0",
+    "duration_ms": "71.643955",
+    "artifact": "H03b-mode-red.log"
+  },
+  {
+    "log": "H03b-output-red.log",
+    "tests": "1",
+    "pass": "0",
+    "fail": "1",
+    "skipped": "0",
+    "duration_ms": "67.243396",
+    "artifact": "H03b-output-red.log"
+  },
+  {
+    "log": "H03b-red.log",
+    "tests": "6",
+    "pass": "0",
+    "fail": "6",
+    "skipped": "0",
+    "duration_ms": "108.137556",
+    "artifact": "H03b-red.log.json"
+  },
+  {
+    "log": "final-regressions-verified.log",
+    "tests": "171",
+    "pass": "171",
+    "fail": "0",
+    "skipped": "0",
+    "duration_ms": "3840.062625",
+    "artifact": "final-regressions-verified.log"
+  },
+  {
+    "log": "final-regressions.log",
+    "tests": "170",
+    "pass": "170",
+    "fail": "0",
+    "skipped": "0",
+    "duration_ms": "3994.682093",
+    "artifact": "final-regressions.log"
+  }
+]

@@ -1,0 +1,34 @@
+{
+  "checkedAt": "2026-11-02T13:48:11.610926+00:00",
+  "finalJavaGate": {
+    "command": [
+      "./gradlew",
+      "test",
+      "integrationTest",
+      ":services:cms-api:bootJar",
+      "--no-daemon",
+      "--no-parallel"
+    ],
+    "startedAt": "2026-11-02T13:40:56.655177+00:00",
+    "exit": 0,
+    "elapsedSeconds": 367.99772829399444,
+    "endedAt": "2026-11-02T13:47:04.652903+00:00",
+    "counts": {
+      "test": {
+        "tests": 564,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "integrationTest": {
+        "tests": 212,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      }
+    }
+  },
+  "jarSha256": "7948311615bf45f1c87ab68db08a8b28d0ef9ffe4b08915de10ccddb04555e15",
+  "actualImage": "sha256:79dcdf9ebb900de3d7ce2226334aa76bb0b87ce500930ea5cf1117a648e5682a",
+  "imageJarSha256": "7948311615bf45f1c87ab68db08a8b28d0ef9ffe4b08915de10ccddb04555e15"
+}

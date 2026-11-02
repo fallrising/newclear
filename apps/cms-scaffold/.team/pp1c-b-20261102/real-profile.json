@@ -1,0 +1,42 @@
+{
+  "scope": "real same-image synthetic private-file/JDBC-load/ImageIO/Node/PG profile; no application backup/restore claim",
+  "context": {
+    "cwd": "/home/ckc/test/codex/wt/newclear/cms-pp1c-b-20261101/apps/cms-scaffold",
+    "runRoot": "/home/ckc/test/codex/wt/newclear/cms-pp1c-b-20261101/apps/cms-scaffold/local/pp1c-real-profile-2",
+    "helperRoot": "/home/ckc/test/codex/wt/newclear/cms-pp1c-b-20261101/apps/cms-scaffold/local/pp1c-real-profile-2/helper",
+    "nodeBinary": "/home/ckc/.local/node-v24.18.0/bin/node",
+    "uid": 1000,
+    "gid": 1000,
+    "operationId": "b72220f7-e6a1-485e-9ea3-08f83f94fa40",
+    "seq": "1",
+    "target": {
+      "images": {
+        "api": "sha256:dc6e6b5d9f323e8f771fd1066d7becc98bf819739f67c880739b4d481f451255",
+        "node": "sha256:6a8ca4b22705adf7134d2220ab8aadff634a6b76c816dba55e0409f8e5c180dc",
+        "postgres": "sha256:6a2e324ebe59af6031c4c1cd96c1d5072c2ebc36563d2196365e43b8297c062d"
+      },
+      "containerIds": {
+        "postgres": "f521d86647ff246fbbdc142ee25a15627e0e73991fa03b4a0fb141d2eef27ef5"
+      },
+      "volumeNames": {
+        "media-data": "cms-pp1c-profile-b8a7b57b-0932-4ede-93de-80f0101995fc"
+      }
+    }
+  },
+  "success": false,
+  "code": "ADAPTER_UNSEALED",
+  "pgStopped": true,
+  "lastNonzeroCommand": {
+    "file": "docker",
+    "args": [
+      "--host",
+      "unix:///var/run/docker.sock",
+      "inspect",
+      "5362690c027348c0804099329daabffa39204a3d20511da4861fb738a3f78c10"
+    ],
+    "code": 1,
+    "stderr": "error: no such object: 5362690c027348c0804099329daabffa39204a3d20511da4861fb738a3f78c10\n"
+  },
+  "causalEvidence": "pg-volume-blocker.json",
+  "cause": "exact helper mount policy rejects automatically created anonymous RW PGDATA volume before start"
+}

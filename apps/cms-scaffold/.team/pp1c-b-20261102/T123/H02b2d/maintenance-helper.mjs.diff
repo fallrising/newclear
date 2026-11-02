@@ -1,0 +1,20 @@
+--- maintenance-helper.mjs.before
++++ maintenance-helper.mjs
+@@ -136,7 +136,7 @@
+     if(value.code!==undefined && value.code!==0) {
+       const missing=String(value.stderr??'').trim();
+       if(allowMissing && value.code===1 && [
+-        `Error: No such object: ${id}`,`Error response from daemon: No such container: ${id}`
++        `Error: No such object: ${id}`,`error: no such object: ${id}`,`Error response from daemon: No such container: ${id}`
+       ].includes(missing)) return null;
+       throw new OpsError('CAPTURE_FAILED');
+     }
+@@ -430,7 +430,7 @@
+         const output=await docker(['start','--attach','--interactive',id]);const stopped=await inspect('exited');requirePolicy(stopped.State.ExitCode===0);
+         await docker(['rm',id]);owned=false;
+         let missing;try{missing=await command('docker',['--host','unix:///var/run/docker.sock','inspect',id],{env,shell:false,timeout:30000,maxBuffer:16384});}catch(error){missing=error;}
+-        requirePolicy(missing.code===1&&[`Error: No such object: ${id}`,`Error response from daemon: No such container: ${id}`].includes(String(missing.stderr??'').trim()));
++        requirePolicy(missing.code===1&&[`Error: No such object: ${id}`,`error: no such object: ${id}`,`Error response from daemon: No such container: ${id}`].includes(String(missing.stderr??'').trim()));
+         return String(output);
+       }catch(error){
+         if(owned)try{const rows=JSON.parse(await docker(['inspect',id]));requirePolicy(rows.length===1);

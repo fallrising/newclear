@@ -1,0 +1,25 @@
+✖ H03b_restore_receipt_pipe_failure_is_sanitized (8.495017ms)
+ℹ tests 1
+ℹ suites 0
+ℹ pass 0
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 67.243396
+
+✖ failing tests:
+
+test at scripts/ops/local-media.test.mjs:272:1
+✖ H03b_restore_receipt_pipe_failure_is_sanitized (8.495017ms)
+  Error: CANARY-output-secret
+      at Writable.write [as _write] (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-media-20261101/apps/cms-scaffold/scripts/ops/local-media.test.mjs:274:69)
+      at writeOrBuffer (node:internal/streams/writable:570:12)
+      at _write (node:internal/streams/writable:499:10)
+      at Writable.write (node:internal/streams/writable:508:10)
+      at file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-media-20261101/apps/cms-scaffold/scripts/ops/local-media.mjs:370:50
+      at new Promise (<anonymous>)
+      at run (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-media-20261101/apps/cms-scaffold/scripts/ops/local-media.mjs:370:13)
+      at async TestContext.<anonymous> (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-media-20261101/apps/cms-scaffold/scripts/ops/local-media.test.mjs:275:16)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:385:3)

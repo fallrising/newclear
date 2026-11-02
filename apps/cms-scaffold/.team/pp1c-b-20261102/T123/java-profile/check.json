@@ -1,0 +1,7 @@
+{
+  "command": "/home/ckc/.cache/devbox/toolchains/jdk-25.0.5+8/bin/javac --release 25 -d .team/pp1c-b-20261102/T123/java-profile .team/pp1c-b-20261102/T123/java-profile/Profile.java",
+  "exitCode": 0,
+  "sourceSha256": "cd5529be82fb7419d53d350e5f7c7edecb907ea7535f66ded3732a6ed229f98d",
+  "classSha256": "90cdee6749fba714a788aafa01bc4dc80a5e158bcbebf467212d05b44469b642",
+  "scope": "host syntax/class compilation only; no Docker/JRE/JDBC execution"
+}

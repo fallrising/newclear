@@ -143,7 +143,7 @@ public final class RecoveryInventoryMain {
         try (Statement statement = connection.createStatement()) {
             statement.setQueryTimeout(15);
             try (ResultSet row = statement.executeQuery("SELECT pid, extract(epoch FROM backend_start)::text AS \"backendStartEpoch\", "
-                    + "datname AS db, usename AS role, client_addr::text AS \"clientAddr\", application_name AS \"applicationName\" "
+                    + "datname AS db, usename AS role, host(client_addr) AS \"clientAddr\", application_name AS \"applicationName\" "
                     + "FROM pg_stat_activity WHERE pid=pg_backend_pid()")) {
                 require(row.next());
                 Map<String, Object> result = new TreeMap<>(); int pid = row.getInt("pid"); require(pid > 0); result.put("pid", pid);

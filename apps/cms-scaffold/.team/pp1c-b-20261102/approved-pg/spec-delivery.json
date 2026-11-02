@@ -1,0 +1,12 @@
+{
+  "recordedAt": "2026-11-02T12:53:15.928292+00:00",
+  "pr": 975,
+  "head": "26d375141e8f1127357d207ec55295abe031a5f3",
+  "merge": "33a5498fbfa5f1a9f7d055bde07459bde62ada84",
+  "mergedAt": "2026-11-02T12:29:05Z",
+  "cmsCi": 41444514347,
+  "contractsCi": 41444514350,
+  "remoteChangedPaths": "exactly equal",
+  "desk398": "d5f7bbccad6bab4be0fbfe8a9b4c9ac05dd8b109",
+  "journal237": "5511e96566c78db8c51dd0e646bc402aeb308614"
+}

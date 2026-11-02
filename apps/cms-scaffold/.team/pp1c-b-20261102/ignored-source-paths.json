@@ -1,0 +1,10 @@
+[
+  "scripts/local/maintenance-helper-integration.test.mjs",
+  "scripts/local/maintenance-helper-session.test.mjs",
+  "scripts/local/maintenance-helper.mjs",
+  "scripts/local/maintenance-helper.test.mjs",
+  "scripts/local/maintenance-store.mjs",
+  "scripts/local/maintenance-store.test.mjs",
+  "scripts/local/maintenance-workflow.mjs",
+  "scripts/local/maintenance-workflow.test.mjs"
+]

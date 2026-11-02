@@ -343,3 +343,31 @@ test('health shared deadline rejects delayed start or healthy inspect without ex
     assert.equal(f.calls.filter(a=>a[2]==='inspect'&&a[3]==='--format').length,stage==='start'?0:1);
   }
 });
+import { dispatchGuard } from './maintenance-guard.mjs';
+test('PP1C_L05_fixed_entrypoint_dispatch_preserves_v1_assert', async t => {
+  const f=await owned(t),inspection=await inspectTarget(f.root,f.deps,{apiState:'running'});
+  const lease=await acquire(inspection,{operationId:firstOp,operation:'FRESH_INIT'},f.deps);
+  const result=await dispatchGuard(['assert','--run-id',runId,'--operation-id',firstOp,'--phase','pre-connection'],f.deps);
+  assert.equal(result.operationId,lease.operationId);
+});
+test('PP1C_L05_fixed_entrypoint_rejects_unknown_version_or_wrong_run', async t => {
+  const f=await owned(t),inspection=await inspectTarget(f.root,f.deps,{apiState:'running'});
+  await acquire(inspection,{operationId:firstOp,operation:'FRESH_INIT'},f.deps);
+  const path=join(f.root,'maintenance/lease.json'),lease=JSON.parse(await readFile(path));lease.version=3;
+  await writeFile(path,JSON.stringify(lease)+'\n');
+  await assert.rejects(dispatchGuard(['inspect','--run-id',runId],f.deps));
+  await assert.rejects(dispatchGuard(['inspect','--run-id',runId.toUpperCase()],f.deps));
+});
+import { reserveWorkflow, persistWorkflow, releaseWorkflow, WORKFLOW_PHASES } from './maintenance-store.mjs';
+test('PP1C_L05_v1_acquire_accepts_only_released_complete_v2_prior',async t=>{
+  const f=await owned(t),inspection=await inspectTarget(f.root,f.deps,{apiState:'running'});
+  const prior=await reserveWorkflow(inspection,{operationId:firstOp,purpose:'BACKUP_LOCAL',completionPolicy:'RESTORE_ORIGINAL',targetRunId:null,incidentStartedAt:null},
+    {...f.deps,originalApiState:'running'});
+  for(const phase of WORKFLOW_PHASES.BACKUP_LOCAL) {
+    await persistWorkflow(prior,'BEGIN',phase,{},f.deps);await persistWorkflow(prior,'END',phase,{},f.deps);
+  }
+  await releaseWorkflow(prior,f.deps);
+  const lease=await acquire(inspection,{operationId:secondOp,operation:'FRESH_INIT'},f.deps);
+  assert.equal(lease.version,1);assert.equal(lease.phase,'PRE_CONNECTION');
+  assert.equal(await readFile(join(f.root,'maintenance/lease.json'),'utf8'),JSON.stringify(lease)+'\n');
+});

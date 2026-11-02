@@ -1,0 +1,17 @@
+✔ H03b_diagnostic_pipe_failure_preserves_primary_exit (1.598724ms)
+ℹ Error: Test "H03b_diagnostic_pipe_failure_preserves_primary_exit" at scripts/ops/local-media.test.mjs:308:1 generated asynchronous activity after the test ended. This activity created the error "Error: CANARY-diagnostic-secret" and would have caused the test to fail, but instead triggered an uncaughtException event.
+✖ scripts/ops/local-media.test.mjs (55.289002ms)
+ℹ tests 2
+ℹ suites 0
+ℹ pass 1
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 61.812984
+
+✖ failing tests:
+
+test at scripts/ops/local-media.test.mjs:1:1
+✖ scripts/ops/local-media.test.mjs (55.289002ms)
+  'test failed'

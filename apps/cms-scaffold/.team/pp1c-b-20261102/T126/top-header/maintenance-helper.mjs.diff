@@ -1,0 +1,12 @@
+--- maintenance-helper.mjs.before
++++ scripts/local/maintenance-helper.mjs
+@@ -575,7 +575,8 @@
+             output:bound,diagnostic:fileSink(diagnosticHandle),observe,
+             assertCurrent:()=>registered.backend?assertDraining():assertCurrent(),onBackend:backend=>update({backend}),
+             inspectProcess:async()=>{
+-              const lines=String(await docker(['top',live.id,'-eo','pid,args'])).trim().split('\n');requireHandshake(lines.shift()?.trim()==='PID COMMAND');
++              const lines=String(await docker(['top',live.id,'-eo','pid,args'])).trimEnd().split('\n');
++              requireHandshake(/^[ \t]*PID[ \t]+COMMAND[ \t]*$/.test(lines.shift()??''));
+               return lines.map(line=>{const match=/^\s*([1-9][0-9]*)\s+(.+)$/.exec(line);requireHandshake(match);return{pid:Number(match[1]),args:match[2].split(/\s+/)};});
+             }});
+           await sink;return value;

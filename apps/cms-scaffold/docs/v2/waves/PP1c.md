@@ -45,6 +45,7 @@
 | `services/cms-api/src/test/java/com/fallrising/cms/ops/RecoveryInventoryTests.java` | 新；TempDir、decode/unsafe path/byte drift cases | C03/C04a/C04b/C04c/C04d |
 | `services/cms-api/src/test/java/com/fallrising/cms/ops/RecoveryInventoryMainTests.java` | 新；輸入、mode、secret、no-Spring/no-write契約 | C05/C06 |
 | `services/cms-api/src/integrationTest/java/com/fallrising/cms/contract/RecoveryInventoryIntegrationTests.java` | 新；真PG16 read-only snapshot；不重用作 restore target | C04a/C04d |
+| `services/cms-api/src/integrationTest/java/com/fallrising/cms/ops/RecoveryInventoryMainIntegrationTests.java` | B接線回歸；真PG16 runner Ready與獨立observer一致、同connection Permit/Result/private artifact（root 2026-11-02批准test-only路徑） | C06/H02b整合 |
 | `scripts/ops/local-bundle.mjs` | 新；沿 PP1b existing lease運行本地停寫、dump/copy、重驗；不提供新 lock | C07/C08 |
 | `scripts/ops/local-bundle.test.mjs` | 新；fake command/adapter Red-Green及staging保留 | C07/C08 |
 | `scripts/ops/local-restore.mjs` | 新；fresh target restore/raw compare/session-revoke/API lifecycle orchestrator | C11–C16 |
@@ -181,11 +182,13 @@ Offline request/ready/permit/result均strict UTF-8 canonical JSON、LF、require
 | phase | RESTORE_VERIFY_LOCAL：§4.4 序列；BACKUP_LOCAL：PRECHECK→SOURCE_QUIESCED→LOCAL_CAPTURED→LOCAL_VERIFIED→COMPLETE；RECOVER_ADMIN：PRECHECK→SOURCE_QUIESCED→PROOF_REVALIDATED→ACCOUNT_PRE_CONNECTION→ACCOUNT_BOUND→ACCOUNT_COMMITTED→COMPLETE；任何階段可進 FAILED_OR_UNKNOWN，無 outgoing mutation |
 | target | BACKUP_LOCAL/RECOVER_ADMIN 恆 null；restore 在 TARGET_RESERVED 前 null，之後恰 RestoreTargetV1；只允一個 child，失敗不可替換 |
 | RestoreTargetV1 | version=1；creationPhase=RESERVED\|CREATED\|BLANK_VERIFIED；RESERVED 時 identity/connection/preparationSha256/createdResourceSetSha256 為 null；CREATED 起四者皆 non-null，identity=child 完整 TargetV1、connection 同 sourceConnection 型別。sourceOperationId 必等 lease.operationId；其餘 ID 與 child runId 對應；BLANK_VERIFIED 才能進 DB_RESTORED |
-| helper | 沒有在途 helper 時 null；kind=INVENTORY\|REVOKE_SESSIONS\|PG_DUMP\|PG_RESTORE\|MEDIA_PACK\|MEDIA_RESTORE\|BROWSER；side=source\|target；state=CREATED\|RUNNING\|READY\|PERMITTED\|EXITED。fullContainerId/policySha256/startedAt 必填；endpoint 無 network 時 null，否則恰 `{networkId,address}`，address 為 inspect 的非空 IP；backend 在 JDBC READY 前 null、READY/PERMITTED 必 BackendV1；工具只於觀測到 backend 時 non-null，不能偽造 ready |
+| helper | 沒有在途 helper 時 null；kind=INVENTORY\|REVOKE_SESSIONS\|PG_DUMP\|PG_RESTORE\|MEDIA_PACK\|MEDIA_RESTORE\|BROWSER；side=source\|target；state=CREATED\|RUNNING\|READY\|PERMITTED\|EXITED。fullContainerId/policySha256/startedAt 必填；endpoint 依下述生命週期規則；backend 在 JDBC READY 前 null、READY/PERMITTED 必 BackendV1；工具只於觀測到 backend 時 non-null，不能偽造 ready |
 | BackendV1 | pid=positive integer；backendStartEpoch 逐字 PG `extract(epoch FROM backend_start)::text`，沿 PP1b regex，不轉 Number/ISO；db/role/clientAddr/applicationName 非空且逐字匹配 actual backend/network tuple |
 | helper allowed pair | source：INVENTORY、PG_DUMP、MEDIA_PACK；target：INVENTORY、PG_RESTORE、MEDIA_RESTORE、REVOKE_SESSIONS、BROWSER。revoke 只在 RAW_VERIFIED 後、browser 只在 INGRESS_STARTED 後；其餘固定 orchestration 順序依 §4.4，不接受 CLI 任選 kind |
 | proof | 在完整 target smoke+stop 結束前 null；RESTART_VERIFIED→COMPLETE 間才可填完整 ProofV1；RECOVER_ADMIN 在 PROOF_REVALIDATED 起使用 prior complete ProofV1；BACKUP_LOCAL 恆 null；不持久化半份 proof |
 | account | 非 RECOVER_ADMIN 恆 null；該 purpose 在 ACCOUNT_PRE_CONNECTION 前 null，之後恰 `{operation:'RECOVER_ADMIN',phase,boundBackend}`；phase=PRE_CONNECTION\|BOUND\|COMMITTED，PRE_CONNECTION backend=null，其餘必 BackendV1；六欄 Result 仍獨立原格式 |
+
+**2026-11-02 窄幅修訂（owner 已批准；PR956 正常合併及遠端核對後生效，不追溯改寫歷史驗證）：** network=none 的 helper，其 endpoint 恆為 null。networked helper 在 CREATED 時 endpoint 必為 null，不能宣稱已有 backend 或 permit；首次完整 inspect 證明 RUNNING 時才寫入恰 `{networkId,address}`，networkId 必為該 side 已釘住的網路、address 必為實際非空 private IP。RUNNING/READY/PERMITTED 均必保留這個相同 tuple；IP 或網路更換立即拒絕。EXITED 保存最後已核對的 endpoint 作歷史證據；只有從未被觀察為 RUNNING 的 helper 才能保留 null。退出後另以完整 ID 的 stopped inspect 與零 matching DB backend 證明結束，不把歷史 endpoint 當仍有連線。create 前後完整政策、same PID/epoch、原 lock／capability 與清理限制皆不變。來源與具體差異見 [修訂提案](../../../.team/pp1c-clarifications-20261101/DECISIONS.md)。
 
 metadata mutation 的實際 lease hash、source identity hash 都對完整 canonical bytes（包含尾 LF）做 SHA-256。state 並不能豁免 live inspect；持有 lease file 也不能重建 WeakMap capability。
 
@@ -217,6 +220,8 @@ stdout 是最多兩個 canonical JSON lines（各單一尾 LF）：第一筆 Rea
 inventory 從 ready 到結束保持同一 read-only REPEATABLE_READ transaction，最後 rollback/close。revoker ready 用同 connection 的唯讀準備 transaction；取得匹配 permit 後先 rollback 該唯讀 transaction，再 setReadOnly(false)、autoCommit=false，核 PID/epoch 不變，在同 connection 的新寫 transaction 依父 §5.4 SQL+AUTH commit；任何換 connection／額外 backend 皆拒絕。不能把唯讀 prepared transaction 直接 UPDATE。commit 前錯誤 rollback；commit 回應未知／commit 後 receipt failure 只保持隔離，不宣稱 rollback。
 
 **實體 adapter提案**：完整Java/Node/PG向量、UID/secret/output/media邊界與raw/smoke schema已固定於附約§1–4；TOOL-PROBES提供舊批准映像的工具能力證據。新offline entrypoints尚未實作，新API build仍必逐run驗證；設計審查/批准前不派工，實際profile不合一律ADAPTER_UNSEALED。
+
+**2026-11-02 PG helper 固定掛載修訂：** owner 已批准 PR975 的 PGDATA-only 唯讀 1MiB tmpfs，待正常合併及遠端核對後生效。PG_DUMP／PG_RESTORE 與其固定 same-image 版本探針必須遮住指定 PG image 自帶的 PGDATA VOLUME，保留同 image 與全部隔離政策，拒絕額外 anonymous volume；其他 kind 不得套用。精確 argv、image volume 宣告、policy role 與 create/running/exited inspect 規則以[附約§1](../contracts/PP1c-local-adapters.md#1-d01已觀察工具與固定參數)為準；測試及真實 capture 驗收未因本修訂省略。
 
 ### 4.2d Host CLI 候選語法
 

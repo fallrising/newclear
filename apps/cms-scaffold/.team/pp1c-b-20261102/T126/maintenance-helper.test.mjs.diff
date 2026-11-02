@@ -1,0 +1,77 @@
+--- maintenance-helper.test.mjs.before
++++ scripts/local/maintenance-helper.test.mjs
+@@ -11,7 +11,7 @@
+   return {kind,side,operationId,seq:'1',target,helperRoot:'/private/helper/1',runRoot:'/private/source',
+     cwd:'/source',nodeBinary:'/verified/node',uid:1000,gid:1000,mediaUser:'0:0',
+     image:{Id:target.images[kind.startsWith('PG_')?'postgres':kind.startsWith('MEDIA_')?'node':'api'],
+-      Os:'linux',Config:{Env:['PATH=/usr/bin'],Labels:{'source':'reviewed'}}}};
++      Os:'linux',Config:{Env:['PATH=/usr/bin'],Labels:{'source':'reviewed'},Volumes:kind.startsWith('PG_')?{'/var/lib/postgresql/data':{}}:null}}};
+ }
+ function fixture(kind = 'INVENTORY', side = 'source') {
+   const c = context(kind,side), p = buildHelperPolicy(c), id=full('f');
+@@ -24,7 +24,7 @@
+     HostConfig:{NetworkMode:p.networkId??'none',ReadonlyRootfs:true,Privileged:false,CapDrop:['ALL'],CapAdd:null,
+       SecurityOpt:['no-new-privileges'],RestartPolicy:{Name:'no'},LogConfig:{Type:'none'},PortBindings:{},
+       Devices:[],DeviceRequests:null,PidMode:'',IpcMode:'private',ExtraHosts:null,
+-      Tmpfs:{'/tmp':'rw,nosuid,nodev,size=67108864'}},
++      Tmpfs:{'/tmp':'rw,nosuid,nodev,size=67108864',...(kind.startsWith('PG_')?{'/var/lib/postgresql/data':'ro,nosuid,nodev,noexec,size=1048576'}:{})}},
+     Mounts:p.mounts.map(m=>({Type:m.type,Source:m.type==='volume'?'/volumes/media':m.source,
+       ...(m.type==='volume'?{Name:m.source}:{}),Destination:m.destination,RW:!m.readOnly})),
+     NetworkSettings:{Ports:{},Networks:p.networkId?{owned_data:{NetworkID:p.networkId,IPAddress:'',EndpointID:''}}:{none:{NetworkID:'',IPAddress:'',EndpointID:''}}}};
+@@ -145,3 +145,56 @@
+   if(fault==='actual'){assert.deepEqual(await executeHelperLifecycle(f.p,f.expected,f.consume,f.deps),{verified:true});assert.equal(f.calls.at(-1)[0],'removed');}
+   else {await assert.rejects(()=>executeHelperLifecycle(f.p,f.expected,f.consume,f.deps));assert.ok(!f.calls.some(x=>x[0]==='removed'));}
+ });
++
++const pgData='/var/lib/postgresql/data', pgMask='ro,nosuid,nodev,noexec,size=1048576';
++for(const [kind,side] of [['PG_DUMP','source'],['PG_RESTORE','target']]) {
++  test(`T126_${kind}_exact_mask_and_unchanged_policy_keys`,()=>{
++    const {p,expected,container}=fixture(kind,side);
++    const args=helperCreateArgs(p,expected), at=args.indexOf('--tmpfs=/tmp:rw,nosuid,nodev,size=67108864');
++    assert.equal(args[at+1],`--tmpfs=${pgData}:${pgMask}`);
++    assert.deepEqual(Object.keys(p).sort(),['version','kind','side','imageId','user','entrypoint','args','env','mounts','networkId','readOnlyRootfs','capDrop','noNewPrivileges','restart','logDriver'].sort());
++    container.HostConfig.Tmpfs[pgData]=pgMask;
++    for(const state of ['created','running','exited']) {
++      container.State={Status:state,Running:state==='running'};expected.state=state;
++      container.NetworkSettings.Networks.owned_data.IPAddress=state==='running'?'172.30.0.8':'';
++      assertHelperPolicy(container,p,expected);
++    }
++  });
++}
++for(const [fault,change] of Object.entries({missing:c=>delete c.HostConfig.Tmpfs[pgData],
++  writable:c=>c.HostConfig.Tmpfs[pgData]=pgMask.replace('ro,','rw,'),oversized:c=>c.HostConfig.Tmpfs[pgData]=pgMask.replace('1048576','2097152'),
++  extra:c=>c.HostConfig.Tmpfs['/other']='ro',anonymous:c=>c.Mounts.push({Type:'volume',Name:'unknown',Source:'/unknown',Destination:pgData,RW:true})})) {
++  test(`T126_PG_mask_rejects_${fault}`,()=>{const {p,expected,container}=fixture('PG_DUMP');container.HostConfig.Tmpfs[pgData]=pgMask;change(container);assert.throws(()=>assertHelperPolicy(container,p,expected));});
++}
++for(const [fault,volumes] of [['missing',null],['extra',{[pgData]:{},'/extra':{}}],['wrong',{[pgData]:{extra:true}}]]) {
++  test(`T126_PG_image_rejects_${fault}_declaration`,()=>{const c=context('PG_DUMP');c.image.Config.Volumes=volumes;assert.throws(()=>buildHelperPolicy(c));});
++}
++for(const kind of ['INVENTORY','MEDIA_PACK'])test(`T126_nonPG_${kind}_rejects_volume_and_mask`,()=>{
++  const c=context(kind);c.image.Config.Volumes={[pgData]:{}};assert.throws(()=>buildHelperPolicy(c));
++  const {p,expected,container}=fixture(kind);assert.ok(!helperCreateArgs(p,expected).some(x=>x.includes(pgData)));
++  container.HostConfig.Tmpfs[pgData]=pgMask;assert.throws(()=>assertHelperPolicy(container,p,expected));
++});
++
++for(const [role,tool] of [['PG_DUMP_VERSION','pg_dump'],['PG_RESTORE_VERSION','pg_restore']]) {
++  test(`T126_${role}_binds_verified_image_executable_and_exact_args`,()=>{
++    const {p,expected,container,c}=fixture('PG_DUMP');
++    Object.assign(p,{kind:role,entrypoint:`/usr/local/bin/${tool}`,args:['--version'],networkId:null});
++    expected.pgProfileImageId=c.target.images.postgres;
++    container.Config.Entrypoint=[p.entrypoint];container.Config.Cmd=p.args;
++    container.HostConfig.NetworkMode='none';container.NetworkSettings.Networks={none:{IPAddress:''}};
++    assertHelperPolicy(container,p,expected);
++    assert.ok(helperCreateArgs(p,expected).includes(`--tmpfs=${pgData}:${pgMask}`));
++    for(const mutate of [v=>v.imageId=`sha256:${full('0')}`,v=>v.entrypoint='/bin/sh',v=>v.args=['--version','extra'],v=>v.networkId=full('d')]) {
++      const altered=structuredClone(p);mutate(altered);assert.throws(()=>helperCreateArgs(altered,expected));
++    }
++    assert.throws(()=>helperCreateArgs(p,{...expected,pgProfileImageId:undefined}));
++    assert.throws(()=>assertHelperPolicy(container,{...p,kind:'PROFILE'},expected));
++  });
++}
++
++test('T126_nonPG_declared_volumes_must_be_existing_exact_mount_destinations',()=>{
++  const c=context('INVENTORY');c.image.Config.Volumes={'/media':{},'/run/pp1/request.json':{}};
++  const p=buildHelperPolicy(c);assert.equal(p.mounts.length,4);
++  c.image.Config.Volumes={'/media':{unexpected:true}};assert.throws(()=>buildHelperPolicy(c));
++  c.image.Config.Volumes={'/tmp':{}};assert.throws(()=>buildHelperPolicy(c));
++});

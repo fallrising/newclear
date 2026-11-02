@@ -1,0 +1,27 @@
+{
+  "handwrittenChangedLines": 156,
+  "files": {
+    "maintenance-store.mjs": 0,
+    "maintenance-workflow.mjs": 0,
+    "maintenance-store.test.mjs": 0,
+    "maintenance-helper.test.mjs": 0,
+    "maintenance-workflow.test.mjs": 0,
+    "maintenance-target.test.mjs": 0,
+    "maintenance-helper-session.test.mjs": 0,
+    "maintenance-helper.mjs": 96,
+    "maintenance-target.mjs": 0,
+    "maintenance-helper-integration.test.mjs": 60
+  },
+  "sha256": {
+    "scripts/local/maintenance-store.mjs": "bc5f4d9ae1d58902b63c7f93761ed26755d9c80732f7ec00ffce8361908ce4ed",
+    "scripts/local/maintenance-workflow.mjs": "3a1a1665ebb7e2ecb8a4b2038df695e3cf2c027974f104c35dc433b2d4625eb5",
+    "scripts/local/maintenance-store.test.mjs": "756110873cf06bf63d53cadae5a89e1c4b7bf3e0336aca1ce10704de5d8a31ea",
+    "scripts/local/maintenance-helper.test.mjs": "205e5f6bc77e29a5cd9405a011507277ce67865c8067777b830257bad2c8ae75",
+    "scripts/local/maintenance-workflow.test.mjs": "0e0adb0f7651d618d6c6c35f41a094fa06b2b36237638f56ca24907acaa43927",
+    "scripts/local/maintenance-target.test.mjs": "6e5d78963c192c4bab44d26ec59cab67e6e6fba7b1851c9cfc8eb23ea450cdaa",
+    "scripts/local/maintenance-helper-session.test.mjs": "d93cfcacfdf0915b10bbfc273e02823ef7c04d7b670a9cfefca41c5025c0f185",
+    "scripts/local/maintenance-helper.mjs": "996c86112c735bd9c190a4411b3a43b5348d91ef14b0e52b4efb0b4d8350d927",
+    "scripts/local/maintenance-target.mjs": "1080a2c8341469b726f75df908c1965b0a18c501bd9f13006813185ed5f65a73",
+    "scripts/local/maintenance-helper-integration.test.mjs": "ac685f1417edf7212dde8920cca2f0c98de140d50ad449f242efbc4bd92d3275"
+  }
+}

@@ -1,0 +1,236 @@
+✔ PP1FM04_lockAndReservationAreExclusive (76.291568ms)
+✔ PP1FM04_recoverRequiresVerifiedRollbackBeforeStop (11.841977ms)
+✔ PP1FM04_acquireBackendPinIsExact (113.036813ms)
+✔ PP1FM04_writerRestartAndIdleBackendReject (162.85849ms)
+✔ PP1FM04_unknownFailureNeverRestartsOrReleases (56.673551ms)
+✔ PP1FM04_concurrentReservationNeverStopsSecondOperation (47.316175ms)
+✔ metadata live and backend primitive core (114.488348ms)
+✔ metadata private input and live destination are immutable (78.221051ms)
+✖ helper CLI has fixed readonly inspect and rejects unknown inputs (57.580427ms)
+✔ PP1FM04_existingRegistryNeverReplaysOrStops (18.473833ms)
+✔ PP1FM04_privateLeaseMetadataFailsClosed (334.662584ms)
+✔ PP1FM04_pgTargetAndEpochDriftNeverRebind (68.164568ms)
+✔ probe exact inherited image labels and ownership reject before start (365.834079ms)
+✔ probe bounded failures clean only verified ID and preserve API lock (218.572862ms)
+
+Interrupted while running:
+
+⚠ probe signals abort own wait cleanup and restore listener counts (scripts/local/maintenance-guard.test.mjs:277:1)
+✖ probe signals abort own wait cleanup and restore listener counts (32.206612ms)
+✖ commit receipt plus zero alone restarts same API and readonly COMPLETE survives release
+✖ commit nonzero invalid receipt and health failures never release or replay
+✖ missing registry and corrupt journal never repair or unlock
+✖ probe execution deadline aborts before extra command and cleanup remains bounded
+✖ health shared deadline rejects delayed start or healthy inspect without extra command
+✖ PP1C_L05_fixed_entrypoint_dispatch_preserves_v1_assert
+✖ PP1C_L05_fixed_entrypoint_rejects_unknown_version_or_wrong_run
+✖ PP1C_L01_v1_insertion_order_bytes_and_atomic_update
+✖ PP1C_L01_duplicate_reservation_preserves_existing_bytes
+✖ PP1C_L01_symlink_hardlink_and_mode_rejected
+✖ PP1C_L02_version
+✖ PP1C_L02_unknown
+✖ PP1C_L02_missing
+✖ PP1C_L02_source_identity
+✖ PP1C_L02_source_unknown
+✖ PP1C_L02_source_connection
+✖ PP1C_L02_operation
+✖ PP1C_L02_phase
+✖ PP1C_L02_source_release
+✖ PP1C_L02_policy
+✖ PP1C_L02_time
+✖ PP1C_L02_target_for_backup
+✖ PP1C_L02_proof_for_backup
+✖ PP1C_L02_account_for_backup
+✖ PP1C_L02_helper_empty
+✖ PP1C_L02_restore_missing_target
+✖ PP1C_L02_recover_running
+✖ PP1C_L02_valid_backup_phases_and_nested_required
+✖ PP1C_L02_restore_reserved_created_blank_and_no_second_source
+✖ PP1C_L02_helper_handshake_state_network_and_backend_bindings
+✖ PP1C_L02_recover_proof_self_hash_and_account_phase
+✖ PP1C_L04_BEGIN_without_END_is_incomplete_and_lock_retained
+✖ PP1C_L04_partial_bytes_and_unknown_sequence_fail_closed
+✖ PP1C_L04_rename_or_sync_failure_never_releases_lock
+✖ PP1C_L04_FAIL_retains_original_phase_and_primary_failure
+✖ PP1C_L04_complete_requires_all_pairs_and_releases_only_owned_lock
+✖ PP1C_L04_inflight_metadata_requires_open_phase_and_final_hash
+✖ PP1C_L05_only_complete_END_and_absent_lock_is_released
+✖ PP1C_L05_unknown_version_and_noncanonical_v2_never_fall_back
+ℹ tests 54
+ℹ suites 0
+ℹ pass 13
+ℹ fail 1
+ℹ cancelled 40
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1782.514968
+
+✖ failing tests:
+
+test at scripts/local/maintenance-guard.test.mjs:216:1
+✖ helper CLI has fixed readonly inspect and rejects unknown inputs (57.580427ms)
+  SyntaxError: Unexpected end of JSON input
+      at JSON.parse (<anonymous>)
+      at TestContext.<anonymous> (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-registry-20261101/apps/cms-scaffold/scripts/local/maintenance-guard.test.mjs:219:56)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7)
+
+test at scripts/local/maintenance-guard.test.mjs:277:1
+✖ probe signals abort own wait cleanup and restore listener counts (32.206612ms)
+  'Promise resolution is still pending but the event loop has already resolved'
+
+test at scripts/local/maintenance-guard.test.mjs:296:1
+✖ commit receipt plus zero alone restarts same API and readonly COMPLETE survives release
+  'Promise resolution is still pending but the event loop has already resolved'
+
+test at scripts/local/maintenance-guard.test.mjs:304:1
+✖ commit nonzero invalid receipt and health failures never release or replay
+  'Promise resolution is still pending but the event loop has already resolved'
+
+test at scripts/local/maintenance-guard.test.mjs:318:1
+✖ missing registry and corrupt journal never repair or unlock
+  'Promise resolution is still pending but the event loop has already resolved'
+
+test at scripts/local/maintenance-guard.test.mjs:326:1
+✖ probe execution deadline aborts before extra command and cleanup remains bounded
+  'Promise resolution is still pending but the event loop has already resolved'
+
+test at scripts/local/maintenance-guard.test.mjs:333:1
+✖ health shared deadline rejects delayed start or healthy inspect without extra command
+  'Promise resolution is still pending but the event loop has already resolved'
+
+test at scripts/local/maintenance-guard.test.mjs:347:1
+✖ PP1C_L05_fixed_entrypoint_dispatch_preserves_v1_assert
+  'Promise resolution is still pending but the event loop has already resolved'
+
+test at scripts/local/maintenance-guard.test.mjs:353:1
+✖ PP1C_L05_fixed_entrypoint_rejects_unknown_version_or_wrong_run
+  'Promise resolution is still pending but the event loop has already resolved'
+
+test at scripts/local/maintenance-store.test.mjs:12:1
+✖ PP1C_L01_v1_insertion_order_bytes_and_atomic_update
+  'Promise resolution is still pending but the event loop has already resolved'
+
+test at scripts/local/maintenance-store.test.mjs:21:1
+✖ PP1C_L01_duplicate_reservation_preserves_existing_bytes
+  'Promise resolution is still pending but the event loop has already resolved'
+
+test at scripts/local/maintenance-store.test.mjs:27:1
+✖ PP1C_L01_symlink_hardlink_and_mode_rejected
+  'Promise resolution is still pending but the event loop has already resolved'
+
+test at scripts/local/maintenance-store.test.mjs:70:45
+✖ PP1C_L02_version
+  'Promise resolution is still pending but the event loop has already resolved'
+
+test at scripts/local/maintenance-store.test.mjs:70:45
+✖ PP1C_L02_unknown
+  'Promise resolution is still pending but the event loop has already resolved'
+
+test at scripts/local/maintenance-store.test.mjs:70:45
+✖ PP1C_L02_missing
+  'Promise resolution is still pending but the event loop has already resolved'
+
+test at scripts/local/maintenance-store.test.mjs:70:45
+✖ PP1C_L02_source_identity
+  'Promise resolution is still pending but the event loop has already resolved'
+
+test at scripts/local/maintenance-store.test.mjs:70:45
+✖ PP1C_L02_source_unknown
+  'Promise resolution is still pending but the event loop has already resolved'
+
+test at scripts/local/maintenance-store.test.mjs:70:45
+✖ PP1C_L02_source_connection
+  'Promise resolution is still pending but the event loop has already resolved'
+
+test at scripts/local/maintenance-store.test.mjs:70:45
+✖ PP1C_L02_operation
+  'Promise resolution is still pending but the event loop has already resolved'
+
+test at scripts/local/maintenance-store.test.mjs:70:45
+✖ PP1C_L02_phase
+  'Promise resolution is still pending but the event loop has already resolved'
+
+test at scripts/local/maintenance-store.test.mjs:70:45
+✖ PP1C_L02_source_release
+  'Promise resolution is still pending but the event loop has already resolved'
+
+test at scripts/local/maintenance-store.test.mjs:70:45
+✖ PP1C_L02_policy
+  'Promise resolution is still pending but the event loop has already resolved'
+
+test at scripts/local/maintenance-store.test.mjs:70:45
+✖ PP1C_L02_time
+  'Promise resolution is still pending but the event loop has already resolved'
+
+test at scripts/local/maintenance-store.test.mjs:70:45
+✖ PP1C_L02_target_for_backup
+  'Promise resolution is still pending but the event loop has already resolved'
+
+test at scripts/local/maintenance-store.test.mjs:70:45
+✖ PP1C_L02_proof_for_backup
+  'Promise resolution is still pending but the event loop has already resolved'
+
+test at scripts/local/maintenance-store.test.mjs:70:45
+✖ PP1C_L02_account_for_backup
+  'Promise resolution is still pending but the event loop has already resolved'
+
+test at scripts/local/maintenance-store.test.mjs:70:45
+✖ PP1C_L02_helper_empty
+  'Promise resolution is still pending but the event loop has already resolved'
+
+test at scripts/local/maintenance-store.test.mjs:70:45
+✖ PP1C_L02_restore_missing_target
+  'Promise resolution is still pending but the event loop has already resolved'
+
+test at scripts/local/maintenance-store.test.mjs:70:45
+✖ PP1C_L02_recover_running
+  'Promise resolution is still pending but the event loop has already resolved'
+
+test at scripts/local/maintenance-store.test.mjs:73:1
+✖ PP1C_L02_valid_backup_phases_and_nested_required
+  'Promise resolution is still pending but the event loop has already resolved'
+
+test at scripts/local/maintenance-store.test.mjs:93:1
+✖ PP1C_L02_restore_reserved_created_blank_and_no_second_source
+  'Promise resolution is still pending but the event loop has already resolved'
+
+test at scripts/local/maintenance-store.test.mjs:107:1
+✖ PP1C_L02_helper_handshake_state_network_and_backend_bindings
+  'Promise resolution is still pending but the event loop has already resolved'
+
+test at scripts/local/maintenance-store.test.mjs:125:1
+✖ PP1C_L02_recover_proof_self_hash_and_account_phase
+  'Promise resolution is still pending but the event loop has already resolved'
+
+test at scripts/local/maintenance-store.test.mjs:145:1
+✖ PP1C_L04_BEGIN_without_END_is_incomplete_and_lock_retained
+  'Promise resolution is still pending but the event loop has already resolved'
+
+test at scripts/local/maintenance-store.test.mjs:153:1
+✖ PP1C_L04_partial_bytes_and_unknown_sequence_fail_closed
+  'Promise resolution is still pending but the event loop has already resolved'
+
+test at scripts/local/maintenance-store.test.mjs:162:1
+✖ PP1C_L04_rename_or_sync_failure_never_releases_lock
+  'Promise resolution is still pending but the event loop has already resolved'
+
+test at scripts/local/maintenance-store.test.mjs:170:1
+✖ PP1C_L04_FAIL_retains_original_phase_and_primary_failure
+  'Promise resolution is still pending but the event loop has already resolved'
+
+test at scripts/local/maintenance-store.test.mjs:178:1
+✖ PP1C_L04_complete_requires_all_pairs_and_releases_only_owned_lock
+  'Promise resolution is still pending but the event loop has already resolved'
+
+test at scripts/local/maintenance-store.test.mjs:187:1
+✖ PP1C_L04_inflight_metadata_requires_open_phase_and_final_hash
+  'Promise resolution is still pending but the event loop has already resolved'
+
+test at scripts/local/maintenance-store.test.mjs:199:1
+✖ PP1C_L05_only_complete_END_and_absent_lock_is_released
+  'Promise resolution is still pending but the event loop has already resolved'
+
+test at scripts/local/maintenance-store.test.mjs:211:1
+✖ PP1C_L05_unknown_version_and_noncanonical_v2_never_fall_back
+  'Promise resolution is still pending but the event loop has already resolved'

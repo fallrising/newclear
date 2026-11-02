@@ -21,6 +21,7 @@ Boundaries between components are recorded in [PORTFOLIO.md](https://github.com/
 
 ## Gateways and systems software
 
+- [systems/agent-secrets](https://github.com/fallrising/newclear/blob/main/systems/agent-secrets/README.md): **ungraded — spec-only** — encrypted Secrets Store and proposed Agent Credential Broker, based on a pinned meathill/hsm revision. SDD only; no runtime, callable MCP tools, deployment or real credentials. Agent use-without-reveal, policy, approval, revocation and audit are proposed, not implemented.
 - [systems/mkfk](https://github.com/fallrising/newclear/blob/main/systems/mkfk/README.md): **B** — Kafka-inspired distributed log: partition WAL, Raft, ISR, idempotent producer, consumer groups. Specification and contracts, not implemented. Schemas in [api/schemas/](https://github.com/fallrising/newclear/blob/main/systems/mkfk/api/schemas/).
 - [systems/clarkq](https://github.com/fallrising/newclear/blob/main/systems/clarkq/llms.txt): **C** — HTTP FIFO message queue in Go with durability, auth, encryption, metrics and three client SDKs. Released v1.5.1, dormant, no new cluster features. Has a capability file.
 - [systems/snail](https://github.com/fallrising/newclear/blob/main/systems/snail/llms.txt): **C** — RESP2-compatible in-memory data server in Rust, focused on connection scale. Command subset works, upper limits unproven, kept for its benchmark history. Has a capability file.

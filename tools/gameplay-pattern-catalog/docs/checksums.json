@@ -1,0 +1,28 @@
+{
+  "algorithm": "sha256",
+  "scope": "Locally validated candidate code, data and tests; excludes this manifest and mutable delivery documents.",
+  "files": {
+    "build.py": "e31006b3b6ba88067b854a6449bcfcae2dd71f1998bb717b7cc7dc46bf13cbed",
+    "app.js": "d859114eb76b056b42f2221627c61c95349b8cdea7f7a557ef6b17132e855a88",
+    "style.css": "299127326b7e6cd9e76ab6ada4161875e3f4da19ae93167d40b0387099363216",
+    "site.json": "cdbb8f098b803981aa3628d491a1d9e55e6f2f5f18092aae7d557359d199b74e",
+    "pattern.schema.json": "66a7dae8b64a47e3ca8f6111d38bcd9deb6d30a2555f0ba3963394f9d5c9a14f",
+    "patterns/README.md": "2eb770db1afc18ef7b258fc1cc804f8e0b8bf9d1af91b88c150bc624debf32c7",
+    "patterns/allocation-shop-reservation.md": "8ee2561ff5356d7f0c0cdd03b270260b6e015084a663ff4d139eb19cb0c6eb76",
+    "patterns/automation-belt-routing.md": "d0b94833b1f1893f7df422475945e97217c669b2f18178afc2d59d13b91c2fcb",
+    "patterns/building-structural-support.md": "7d176699feeee611da8c4bfa4bfcdc6c9c24ec32fa6843d712f41b30f50f2dee",
+    "patterns/combat-stamina-budget.md": "78fa06fa36d0ac0b1751bd936228fa2caafc189a3cb04db5c5770d4e4c664b97",
+    "patterns/commerce-price-discovery.md": "dddb58d7ed5dd494706cea7f8df931707c781be1af7acdd33381a42d9911beae",
+    "patterns/cooking-recipe-learning.md": "e62f651b32551a0164ee1e2881bbde002aee1c61692419e35d84f94bcf455945",
+    "patterns/exploration-ability-gates.md": "df62e6eb8b62f022d29cffe2d48ac9329e794f61e2db5438bef0d75937ea48ba",
+    "patterns/farming-growth-care.md": "9e3e5b79ebb858e93537b860dfa065c5ad49deac6b0683f1b77b8c293417caa3",
+    "patterns/fishing-bite-window.md": "7c3a411dddfd897f9e008925b7835c3620f615e316c281602197113999943a34",
+    "patterns/gathering-tool-hardness.md": "68d26966a60d1625ef5a6104bc4dbe23f2d286ead29af6e67c4f0208e2666f22",
+    "patterns/inventory-adjacency.md": "3569a9558c54cf6747ace2a2cedacae7b780d4cf6021e3b765888e9ee615ce88",
+    "patterns/inventory-shape-packing.md": "4217ff9098650ba086ead4fa1f353b61c25b3f121412c55c82e81f0745359567",
+    "patterns/puzzles-box-pushing.md": "350dd69bee921c124cd5c4e7c4199787bb38315841cab8ec2b66492bb2093ed5",
+    "patterns/relationships-gift-allocation.md": "4dbf1365f39674de5ac9bb7aaadecd944d836532e6ffe2b500c5702a32f6f394",
+    "tests/browser_smoke.py": "91dab0c6478133bfb21551be0290b42413159e582117fc8f2c42e7d544efe4c2",
+    "tests/test_catalog.py": "b0a1ad01d0420f3bf44d681420f6039508f7863d6d005c09381821671e5514e1"
+  }
+}

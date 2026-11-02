@@ -444,3 +444,18 @@ Project success 41324340413; remote HAI files match the reviewed head. The first
 measured base→head race cost +26 s (436→463 s locally) and the re-run took 377.5 s, so the failure was retained and
 re-run once without code change. That package sits near the default timeout independent of this slice. HRWK end uses
 the merge time. RWK-AC-01..05 accepted for this backend slice; full M2, completion UI and SUCCESS AC-02..04 remain open.
+
+## T-0339 — truthful WorkItem detail contract
+
+Owner said 「繼續」 after HRWK. Source a502addb; no open HAI PR at intake. The remaining M2 row is detail/coverage
+authoritative interpretation: `GET work-items/{id}`/`WorkItemDetail` is declared without handler or consumer, its shape
+requires never-stored fields, and Reviews/Evidence/Approvals carry their WorkItem only through the immutable audit/result chain. HDTLP proposes a truthful
+shape with audit-derived attribution and no migration; implementation waits for owner D1. UI, Impact, providers and release stay out of scope.
+
+| ID | Task | AC | Status | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| HDTLP | Propose and review truthful WorkItem detail and subject-attribution contract | DTL-PLAN-01..03 | in_progress | 2026-11-02T10:54:03Z |  | 2026-11-02T10:54:03Z |
+
+DTL-PLAN-01 maps the remaining M2 detail gap to source. DTL-PLAN-02 fixes DTL-01..05, DTL-AC-01..06 and the minimal
+owner decisions. DTL-PLAN-03 disposes Claude review, passes document checks and completes Git/CI/readback/ledger delivery.
+[Proposal](../plans/work-item-detail-20261102.md); [review evidence](../evidence/work-item-detail-plan-20261102.md).

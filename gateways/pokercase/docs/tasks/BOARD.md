@@ -6,11 +6,19 @@ Demand:T-0426, claim402 merged. [LD-1–LD-3](T-0426-dynamic-live.md).
 
 | ID | Task | AC | Status | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| LD-01 | Guarded runner and independent preflight | LD-1 | in_progress | 2026-11-02T14:09:52.136373+00:00 | — | 2026-11-02T14:20:30.265903+00:00 |
-| LD-02 | One three-request real dynamic continuation attempt | LD-2 | in_progress | 2026-11-02T14:09:52.136373+00:00 | — | 2026-11-02T14:20:30.265903+00:00 |
-| LD-03 | Actual evidence and complete delivery | LD-3 | in_progress | 2026-11-02T14:09:52.136373+00:00 | — | 2026-11-02T14:20:30.265903+00:00 |
+| LD-01 | Guarded runner and independent preflight | LD-1 | done | 2026-11-02T14:09:52.136373+00:00 | 2026-11-02T14:27:54Z | 2026-11-02T14:30:27.901171+00:00 |
+| LD-02 | One three-request real dynamic continuation attempt | LD-2 | done | 2026-11-02T14:09:52.136373+00:00 | 2026-11-02T14:27:54Z | 2026-11-02T14:30:27.901171+00:00 |
+| LD-03 | Actual evidence and complete delivery | LD-3 | done | 2026-11-02T14:09:52.136373+00:00 | 2026-11-02T14:29:40.994576+00:00 | 2026-11-02T14:30:27.901171+00:00 |
 
-Actual first live request stoppedHTTP429 (1of3admissions,total2.811s); dynamic sameprocess/restart notrun, no retry, unusedbudgetclosed, ownedruntimecleanup passed. LD02 records execution of the bounded attempt, not acceptance of the unrun cases. Independent result/ledger review and full delivery remain gates.
+Actual first live request stoppedHTTP429 (1of3admissions,total2.811s); dynamic sameprocess/restart notrun, no retry, unusedbudgetclosed, ownedruntimecleanup passed. LD02 records execution of the bounded attempt, not acceptance of the unrun cases. Independent result/ledger review and primary delivery completed below; final board gates follow.
+
+Product [PR991](https://github.com/fallrising/newclear/pull/991), source `4b6c3142bba80b824d0e3636db339efd58d98cdf`, merged `8c9d6dde52734499df3ca617951fc14abb13d2a5` at 2026-11-02T14:27:54Z. Required component check (4m56s) and validate (18s) passed. All3changed documents across both source commits match source/merge/origin, with ancestry and Desk-Task trailers verified. LD01 accepts reviewed frozen3/300/60 preflight and isolateddry3synthetic/0real with ordered suffixes/sameprocess/native resume/usagehistory/cleanup. Runtime44fb50a, retainedCLI2.1.312, original17AC and older board history remain unchanged; initial launcher/runner-assertion failures remain explicit.
+
+LD02 closes only the bounded execution attempt: firstHTTP429 after1of3admissions,1.685s request/2.811s total; no successfulreply, no dynamic sameprocess/restart execution, no retry and2unusedadmissionsclosed. Pro/defaultofficialauth status passed, one failedownedusage row with unknownreportedusage was saved, ownedruntimecleanup andpriorpins verified. No quota-restoration/rootcause/account/cache/billing/internalmodelcount claim. Do not interpret this task's done as passed live dynamic acceptance.
+
+Independent T001 preflight/T002 result-ledger reviews accepted. Journal [PR243](https://github.com/fallrising/journal/pull/243) and desk [PR405](https://github.com/fallrising/desk/pull/405) passed CI (39s/15s), normalmerge and exactreadback. Local55contracts/9indexes/20repository tests, journal169runs/30tests anddesk449documents passed; unchanged runtime's prior444Rust/199Python/nativechecks retained without unnecessary localrerun. LD03 records primary closure at 2026-11-02T14:29:40.994576+00:00: separate completebackup verified123payloadfiles/188012446bytes andmodes, followed by normalremoval of4cleanmergedowned worktrees. Branches, sharedcaches, otherworktrees andalloldpackets/backups remain.
+
+Final board review/CI/normalmerge/readback, backupappend and soleclosureworktree removal occur after this checkpoint and are recorded in private finalhandoff, not preclaimed here. Mainlineincomplete/usable_tagnone/desk in_progress; next realattempt requires ownercapacityconfirmation andnewboundedallowance. No automatic quota probe/retry/runtimefix/nextmilestone. Cursor migration and other live acceptance remain separate.
 
 ## T-0426 — Ordered dynamic instruction continuation
 

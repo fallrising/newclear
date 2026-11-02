@@ -1,0 +1,132 @@
+{
+  "schema": 1,
+  "milestone": "T-0017",
+  "date": "2026-11-02",
+  "baseline": "a502addb2a81cb0f2bd516c00478b9236eaf2a4b",
+  "scope": "Authenticated loopback console: four-provider detect/plan; fixed local dispatch, native terminal, result and owned stop. Remote execution remains blocked.",
+  "offline_tests": {
+    "python": 124,
+    "node": 35,
+    "total": 159,
+    "passed": true
+  },
+  "browser": {
+    "status": "passed",
+    "remote_model_calls": 0,
+    "local_model_inference": true,
+    "external_browser_requests": 0,
+    "browser_errors": 0,
+    "four_provider_detect": true,
+    "remote_execution_blocked": true,
+    "pi_run": "pi-work-20261102T112113118869Z",
+    "refresh_without_rerun": true,
+    "duplicate_execute_blocked": true,
+    "local_run": "local-work-20261102T112144991742Z",
+    "native_terminal_opened": true,
+    "native_refresh_preserved_artifact": true,
+    "native_terminal_reopened": true,
+    "local_status": "stopped",
+    "artifact_sha256": "ce43bfb646f1c85756a55807def4543b3930ce9b7877117a32adf0716d7067e8",
+    "local_runner_elapsed_seconds": 50.75429345900193,
+    "stop_and_cleanup_verified": true,
+    "result_detail_verified": true,
+    "jobs": 2,
+    "runs": 52
+  },
+  "cleanup": {
+    "exit_code": 0,
+    "owned_processes_seen": 107,
+    "remaining_owned_processes": 0,
+    "active_journal_present": false,
+    "elapsed_seconds": 107.78
+  },
+  "pi_fault": {
+    "run": "pi-work-20261102T112113118869Z",
+    "status": "failed",
+    "failure_check_passed": true,
+    "model_inference_verified": false,
+    "client_requests": 1,
+    "external_requests": 0,
+    "cleanup_completed": true
+  },
+  "attempts": [
+    {
+      "attempt": "initial",
+      "run": "local-work-20261102T111012339228Z",
+      "browser_status": "failed",
+      "runner_status": "stopped",
+      "model_inference_verified": true,
+      "elapsed_seconds": 85.77160799992271,
+      "cleanup_errors": [],
+      "max_swap_delta_mib": 0.0,
+      "guard_triggered": false,
+      "process_cleanup": {
+        "exit_code": 0,
+        "owned_processes_seen": 136,
+        "remaining_owned_processes": 0,
+        "active_journal_present": false,
+        "elapsed_seconds": 266.64
+      },
+      "note": "Browser check raced the native name form; local artifact verified, browser acceptance failed."
+    },
+    {
+      "attempt": "resource_guard",
+      "run": "local-work-20261102T111407632251Z",
+      "browser_status": "failed",
+      "runner_status": "failed",
+      "model_inference_verified": false,
+      "elapsed_seconds": 26.745075833052397,
+      "cleanup_errors": [],
+      "max_swap_delta_mib": 1082.5,
+      "guard_triggered": true,
+      "process_cleanup": {
+        "exit_code": 0,
+        "owned_processes_seen": 87,
+        "remaining_owned_processes": 0,
+        "active_journal_present": false,
+        "elapsed_seconds": 346.26
+      },
+      "note": "Existing guard stopped the run when swap delta exceeded 1024 MiB; no artifact or verified inference."
+    },
+    {
+      "attempt": "final",
+      "run": "local-work-20261102T112144991742Z",
+      "browser_status": "passed",
+      "runner_status": "stopped",
+      "model_inference_verified": true,
+      "elapsed_seconds": 50.75429345900193,
+      "cleanup_errors": [],
+      "max_swap_delta_mib": 707.31,
+      "guard_triggered": false,
+      "process_cleanup": {
+        "exit_code": 0,
+        "owned_processes_seen": 107,
+        "remaining_owned_processes": 0,
+        "active_journal_present": false,
+        "elapsed_seconds": 107.78
+      },
+      "note": "Passed after explicitly waiting for the native name form; resource limits unchanged."
+    }
+  ],
+  "source_sha256": {
+    "scripts/office_console.py": "a9ef10276c4db01904e3851606a2d7a5919b32c80bb9e208c045e2d90cabd442",
+    "scripts/office_console.js": "d7a2ca52064e7cdc6601712fbe91c838405871b2052be534fa4a693f1f902809",
+    "scripts/office_console.html": "e329b395a5f8e0d5ba56ad5a90af5b33aca3573a27b6309ea513a29e9a545c35",
+    "scripts/office_console.css": "39cc437095c071063af460d815ed46dd8f5383cf37ba5ba9aa785b3bdf551b55",
+    "scripts/office_dispatch.py": "0af4d19acd2a04bae2fe3f7c3850defe08bc0bc6d24f65e53fac7a9ce39ddc6b",
+    "scripts/check_office_console_browser.mjs": "7bab431871eab72626cb9e95c1320cb5ea46f8739dc540104a9ea9ebd31cf657",
+    "scripts/test_office_console.py": "bc366bb9c8ac2344c8e5d3fa5cbb93faa15ef1a9000537975be8b1a659709d52"
+  },
+  "screenshots": {
+    "console-live.png": "b1155c70f118e106580a89d536d3ed0ebba711042af382b199a1f9a89b0804ef",
+    "console-result.png": "999a2b97e53841a0720fe8f85975f1bd2154609ac7ed7406ce10eecdd0f81e35"
+  },
+  "limitations": [
+    "Only fixed synthetic tasks; no arbitrary project/prompt UI.",
+    "Remote plan/detect does not authorize billing or verify login.",
+    "Full cross-provider AC-01/06/08/09/11 remain pending; host crash does not adopt old jobs.",
+    "Native Office/Strata egress and full file boundary audit remain pending; strict_network_isolation_verified=false.",
+    "Native terminal interaction test opened xterm, refreshed and reopened without sending additional model prompts.",
+    "Screenshots and raw runs remain private; published evidence is whitelisted."
+  ]
+}

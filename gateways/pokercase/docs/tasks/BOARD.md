@@ -1,5 +1,17 @@
 # Pokercase 技術任務
 
+## T-0426 — Dynamic Claude live acceptance
+
+Demand:T-0426, claim402 merged. [LD-1–LD-3](T-0426-dynamic-live.md).
+
+| ID | Task | AC | Status | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| LD-01 | Guarded runner and independent preflight | LD-1 | in_progress | 2026-11-02T14:09:52.136373+00:00 | — | 2026-11-02T14:09:52.136373+00:00 |
+| LD-02 | One three-request real dynamic continuation attempt | LD-2 | in_progress | 2026-11-02T14:09:52.136373+00:00 | — | 2026-11-02T14:09:52.136373+00:00 |
+| LD-03 | Actual evidence and complete delivery | LD-3 | in_progress | 2026-11-02T14:09:52.136373+00:00 | — | 2026-11-02T14:09:52.136373+00:00 |
+
+Actual first live request stoppedHTTP429 (1of3admissions,total2.811s); dynamic sameprocess/restart notrun, no retry, unusedbudgetclosed, ownedruntimecleanup passed. LD02 records execution of the bounded attempt, not acceptance of the unrun cases. Independent result/ledger review and full delivery remain gates.
+
 ## T-0426 — Ordered dynamic instruction continuation
 
 Demand:T-0426, claim397 merged. [DC-1–DC-4](T-0426-dynamic-context.md).

@@ -57,3 +57,11 @@ Actual media package here is the empty-media case; nonempty media framing/restor
 Final capture invocation provenance: `approved-pg/capture-invocation.json` records the exact executed `capture-observed.mjs` command, observed exit0, times and readback driver/result hashes. The earlier `capture-live.mjs` is retained for attempts1–3; finaltrace camefrom observeddriver (attempts4–8), whosecommandwrapper records safe metadata after realexecFile and doesnot substitute outcomes. Hashrecordedatreviewreadback, notmisrepresented aspre-executionattestation.
 
 Root evidence-gate acceptance: T129 DONE has been read against the frozen source, actual artifacts and requiredchecks; root accepts B implementation/localcapture within its stated limits. Source/card counts, tests and actualcapturehavevisible evidence. RequiredpublicationCI/normalmerge/remote readback remain pending and are not inferred from localchecks. Rootstaged whitespacecheck passed afterlosslessencodingof8generatedlogformatfindings; allrawoutput retained. Localprojectcontract52pass and18task/reportvalidatorspass (T129finalreportseparatelyvalidatedbyreviewer,rootrecheckatpublication).
+
+## Delivered B receipt
+
+PR988 head9d5ac43650467200244a1f1b7de9864622e82acd，CMS41458903416（Java／PostgreSQL／web）與contracts41458903407全部成功，T129獨立審查DONE。2026-11-02T14:14:41Z正常合併05dc0a28117d56ad7f9f2d7f0b5b441d8ca56885；HTTPS fetch及完整CMS component逐byte diff為空。
+
+本機512Node、564Java unit、212真PG及93mock／前端native gates通過。真實隔離capture完成20表前後一致、三份artifact雜湊／私有權限、完成標記與COMPLETE journal核對、操作鎖釋放，原API恢復後driver停止本次三個容器且保留資料。媒體實機案例為空package；非空媒體restore、sessions、browser/restart與C/D仍待後續。未觀察到backend的短命PG工具拒絕與一次未定位瞬時額外backend拒絕均保留。
+
+Earlier pendingpublication wording is historical and closed by this receipt. C/D remain unstarted.

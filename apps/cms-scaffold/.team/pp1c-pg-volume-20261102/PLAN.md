@@ -1,0 +1,3 @@
+# T-0351 PG helper volume proposal
+
+Docs-only scoped proposal, pending owner. Root owns DECISION.md and probe evidence; existing T124 independently reviews exact delta within reserved review scope. Product source and approved contract remain unchanged. Check project contracts, whitespace, source absence; normal draft PR/CI/readback authorized. No merge before explicit owner decision. Probe resources are synthetic network-none and retained. Required source correction for Docker lowercase exact-ID absence is separate existing-policy compatibility work. Aggregate tool/provider/time counts unknown/null.

@@ -12,8 +12,18 @@ var ErrWorkItemDetailCapacity = errors.New("work item detail capacity exceeded")
 // WorkItemDetailReader is an optional snapshot projection of stored history,
 // never completion authority. Unrecorded fields have no representation here.
 type WorkItemDetailReader interface {
-	ReadWorkItemDetail(context.Context, domain.ProjectID, domain.WorkItemID) (WorkItemDetail, error)
+	ReadWorkItemDetail(context.Context, domain.ProjectID, domain.WorkItemID, ResultOwnerDecoder) (WorkItemDetail, error)
 }
+
+// ResultOwner names what a stored command success is addressed to. Decoding
+// canonical results is application-owned; storage receives the decoder.
+type ResultOwner struct {
+	Operation              string
+	WorkItemID             domain.WorkItemID
+	RunID                  domain.RunID
+	AcceptedRevisionDigest domain.Digest
+}
+type ResultOwnerDecoder func(payload []byte, commandID string) (ResultOwner, error)
 type WorkItemDetail struct {
 	Summary           BoardWorkItem
 	Material          WorkItemMaterialIndex

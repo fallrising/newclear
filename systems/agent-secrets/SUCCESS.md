@@ -25,8 +25,8 @@ ID 與 [SDD §12](docs/SDD.md#12-驗收與可追溯性) 一致。passed 只指�
 | AC-001 | Given 固定上游 SHA；When 對照來源；Then 模組、HTTP、密文及安全差異可追溯且不混稱實作 | passed | [來源](docs/SOURCES.md)、[SDD](docs/SDD.md) 靜態檢視 |
 | AC-002 | Given 本輪 docs-only；When 接手閱讀；Then 範圍、資料流、介面、錯誤、恢復及非目標明確 | passed | [SDD](docs/SDD.md) §1–12 |
 | AC-003 | Given Agent 憑證使用構想；When 檢視設計；Then 模型不作授權權威且 raw export 非預設，擴充標 Proposed | passed | [ADR](docs/ADR.md)、SDD §7–10；runtime 未實作 |
-| AC-004 | Given 新專案；When 從索引進入；Then inventory、PROJECTS、README、SUCCESS、AGENTS、任務板可導航且標 spec-only | pending | 本機與 PR checkout 檢查結果見 [交接](docs/HANDOFF.md) |
-| AC-005 | Given 文件候選 commit；When 交付 Draft PR；Then 實際檢查與未跑項、head 回讀、無 merge／deploy 均有紀錄 | pending | 等實際 PR／CI／回讀；見 [交接](docs/HANDOFF.md) |
+| AC-004 | Given 新專案；When 從索引進入；Then inventory、PROJECTS、README、SUCCESS、AGENTS、任務板可導航且標 spec-only | passed | 完整 CI 已核對 53 項契約；根 llms 導航修補與回歸結果見 [交接](docs/HANDOFF.md)／PR checks |
+| AC-005 | Given 文件候選 commit；When 交付 Draft PR；Then 實際檢查與未跑項、head 回讀、無 merge／deploy 均有紀錄 | passed | [Draft PR #961](https://github.com/fallrising/newclear/pull/961)、固定 commit／目錄 hash 回讀及初次 CI 失敗已記錄於 [交接](docs/HANDOFF.md) |
 | AC-101 | Given 合成 value／Part A／B；When PUT／GET／overwrite／DELETE；Then 成功與 400／403／404、8192 邊界、Unicode 符合批准契約 | pending | M1 未授權、未實作、未跑 |
 | AC-102 | Given 正確 envelope；When 換 A／B／AAD、改密文或未知 v；Then 拒絕解密且不回傳秘密 | pending | M1 crypto／兼容測試未跑 |
 | AC-103 | Given 固定 MCP 版本與真宿主；When initialize／list／call／分段輸入；Then framing 相容、stdout 只有協定資料、Agent 不見 raw 工具 | pending | MCP 未實作、真宿主未跑 |

@@ -1,7 +1,7 @@
 # Proposed ReopenWorkItem: leaving Done without losing history
 
-Status: **Proposed, awaiting owner D1**. T-0339 / BOARD HROPP. Proposal source `973f2e2a`.
-No behavior changes until D1 is approved and a normative entry is added. Claude plan review REWORK (1 major, 4 minor)
+Status: **Owner approved D1, 2026-11-02**. T-0339 / BOARD HROP. Proposal source `973f2e2a`.
+The [normative entry](../sdd/reopen-work-item.md) governs implementation; this reviewed proposal is retained. Claude plan review REWORK (1 major, 4 minor)
 is disposed in this revision; see [plan review evidence](../evidence/reopen-work-item-plan-20261102.md).
 
 ## Why this is the next bounded slice

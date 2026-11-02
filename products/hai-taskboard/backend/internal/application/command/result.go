@@ -225,7 +225,7 @@ func validOperation(operation Operation) bool {
 	switch operation {
 	case SubmitHumanReportOperation, AcceptInitialSpecificationOperation, ProposeSpecificationOperation, CreateProjectOperation, CreateWorkItemOperation, MarkReadyOperation, DispatchRunOperation,
 		SubmitCandidateOperation, PublishReviewOperation, PublishEvidenceOperation, ApproveSubjectOperation,
-		RequestQAOperation, RequestCancelOperation, RequestReworkOperation, CompleteWorkItemOperation:
+		RequestQAOperation, RequestCancelOperation, RequestReworkOperation, CompleteWorkItemOperation, ReopenWorkItemOperation:
 		return true
 	default:
 		return false
@@ -242,7 +242,8 @@ func validSuccessResult(operation Operation, result successResult) bool {
 	if operation != ProposeSpecificationOperation && operation != AcceptInitialSpecificationOperation && (result.ProposalDigest != "" || result.GraphDigest != "" || result.ObjectFormat != "" || result.CommitOID != "") {
 		return false
 	}
-	if operation != RequestReworkOperation && (result.Reason != "" || result.SubjectDigest != "") {
+	reasonAllowed := operation == RequestReworkOperation || operation == ReopenWorkItemOperation
+	if (operation != RequestReworkOperation && result.SubjectDigest != "") || (!reasonAllowed && result.Reason != "") {
 		return false
 	}
 	projectValid := projectIDPattern.MatchString(string(result.ProjectID))
@@ -295,6 +296,9 @@ func validSuccessResult(operation Operation, result successResult) bool {
 		subject, err := domain.ParseDigest(strings.TrimPrefix(result.SubjectDigest, "sha256:"))
 		return result.Type == "ReworkRequested" && projectValid && workItemValid && result.RunID == "" && result.Version > 0 &&
 			result.Phase == domain.PhaseDeveloping && ValidReworkReason(result.Reason) && err == nil && !subject.IsZero() && canonicalSHA256(subject) == result.SubjectDigest
+	case ReopenWorkItemOperation:
+		return result.Type == "WorkItemReopened" && projectValid && workItemValid && result.RunID == "" && result.Version > 0 &&
+			(result.Phase == domain.PhaseDraft || result.Phase == domain.PhaseReady) && ValidReworkReason(result.Reason)
 	case CompleteWorkItemOperation:
 		return result.Type == "WorkItemCompleted" && projectValid && workItemValid && result.RunID == "" &&
 			result.Version > 0 && result.Phase == domain.PhaseDone

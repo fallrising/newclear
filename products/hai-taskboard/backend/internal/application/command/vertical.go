@@ -87,6 +87,13 @@ type canonicalQACommand struct {
 	SubjectDigest string `json:"completion_subject_digest"`
 }
 
+type canonicalReopenCommand struct {
+	canonicalMetadata
+	WorkItemID  string `json:"work_item_id"`
+	TargetPhase string `json:"target_phase"`
+	Reason      string `json:"reason"`
+}
+
 type canonicalReworkCommand struct {
 	canonicalMetadata
 	WorkItemID    string `json:"work_item_id"`
@@ -216,6 +223,15 @@ func CanonicalRequestRework(value RequestRework) ([]byte, domain.Digest, error) 
 		return nil, domain.Digest{}, ErrInvalidCommand
 	}
 	return marshalCanonical(canonicalReworkCommand{canonicalMetadata: metadata, WorkItemID: string(value.WorkItemID), SubjectDigest: canonicalSHA256(value.SubjectDigest), Reason: value.Reason})
+}
+
+func CanonicalReopenWorkItem(value ReopenWorkItem) ([]byte, domain.Digest, error) {
+	metadata, err := canonicalizeMetadata(value.Metadata, ReopenWorkItemOperation, value.ProjectID)
+	if err != nil || value.ExpectedVersion == 0 || value.ExpectedVersion >= math.MaxInt64 || !workItemIDPattern.MatchString(string(value.WorkItemID)) ||
+		(value.TargetPhase != domain.PhaseDraft && value.TargetPhase != domain.PhaseReady) || !ValidReworkReason(value.Reason) {
+		return nil, domain.Digest{}, ErrInvalidCommand
+	}
+	return marshalCanonical(canonicalReopenCommand{canonicalMetadata: metadata, WorkItemID: string(value.WorkItemID), TargetPhase: string(value.TargetPhase), Reason: value.Reason})
 }
 
 // ValidReworkReason accepts 1..2000 code points of UTF-8 text; tab and newline

@@ -149,6 +149,9 @@ whose current accepted inputs differ from its CompletionRecord; its stored histo
   non-current Candidate), never stored.
 - **HAI-STATE-007** — Developing → Developing (redispatch) starts a new Run only by explicit operator command when
   the WorkItem already has Runs and every Run is settled; it never retries automatically ([rework loop](sdd/rework-loop.md)).
+- **HAI-STATE-008** — Done → Draft or Ready happens only through the human `ReopenWorkItem` command with a recorded
+  reason; it increments the version and retains the CompletionRecord and all history. A later dispatch from Ready
+  with existing Runs obeys the HAI-STATE-007 settled and strict-order guards ([reopen](sdd/reopen-work-item.md)).
 - **HAI-STATE-006** — Drag, keyboard movement and button transitions MUST call the same server
   command and guards; the client MUST NOT optimistically persist an illegal phase.
 

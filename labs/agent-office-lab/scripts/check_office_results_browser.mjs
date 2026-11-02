@@ -28,15 +28,22 @@ try {
   for (const provider of data.providers) {
     await page.selectOption('#provider', provider);
     await page.selectOption('#status', 'completed');
-    const matching = data.runs.filter(r => r.provider === provider && r.status === 'completed');
+    const matching = data.runs.filter(r => r.provider === provider && r.status === 'completed' && r.task_kind !== 'local_text');
     assert(matching.length > 0, `Snapshot must include a completed ${provider} run`);
-    assert.equal(await page.locator('#runs tr').count(), matching.length);
-    await page.locator('#runs button').first().click();
+    assert.equal(await page.locator('#runs tr').count(), data.runs.filter(r=>r.provider===provider&&r.status==='completed').length);
+    await page.locator('#runs tr').filter({hasText:matching[0].id}).getByRole('button').click();
     assert(await page.locator('#detail').isVisible());
     assert((await page.locator('#detail').innerText()).includes(matching[0].artifact.sha256));
     assert.deepEqual(JSON.parse(await page.locator('#detail pre').innerText()), matching[0].artifact.content);
     await page.getByRole('button', {name:'關閉詳細結果'}).click();
     assert(await page.locator('#detail').isHidden());
+  }
+  await page.selectOption('#provider','opencode');
+  for(const run of data.runs.filter(r=>r.task_kind==='local_text')){
+    await page.selectOption('#status',run.status);
+    await page.locator('#runs tr').filter({hasText:run.id}).getByRole('button').click();
+    assert((await page.locator('#detail').innerText()).includes('內容仍需確認'));
+    if(run.artifact.status==='verified')assert.equal(await page.locator('#detail pre').textContent(),run.artifact.text);
   }
   await page.selectOption('#provider', 'all');
   for (const status of ['failed', 'cancelled']) {

@@ -172,25 +172,31 @@ def message(text, tool=False, gate=False):
 
 buf = b""
 pasted = None
+paste_parts = 0
 turn = 0
 while True:
     part = os.read(0, 4096)
     if not part:
         break
     buf += part
-    if pasted is None and b"\x1b[201~" in buf:
+    # The real helper pastes every text block before sending Enter. A stable
+    # instruction block and conversation block are distinct acknowledgements.
+    while b"\x1b[201~" in buf:
         start = buf.index(b"\x1b[200~") + len(b"\x1b[200~")
         end = buf.index(b"\x1b[201~")
-        pasted = buf[start:end].decode()
+        piece = buf[start:end].decode()
+        pasted = (pasted or "") + piece
+        paste_parts += 1
         buf = buf[end + len(b"\x1b[201~"):]
-        os.write(1, ("[Pasted text] " + pasted[-160:]).encode())
+        os.write(1, ("[Pasted text] " + piece[-160:]).encode())
     if pasted is None or b"\r" not in buf:
         continue
     buf = buf[buf.index(b"\r") + 1:]
     turn += 1
     row({"type": "user", "message": {"role": "user", "content": pasted}})
-    record("turns.jsonl", {"turn": turn, "pid": os.getpid(), "prompt": pasted})
+    record("turns.jsonl", {"turn": turn, "pid": os.getpid(), "prompt": pasted, "pieces": paste_parts})
     pasted = None
+    paste_parts = 0
     if scenario == "delayedtap":
         row({"type": "system", "subtype": "turn_duration", "durationMs": 1})
         time.sleep(0.2)

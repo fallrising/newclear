@@ -59,8 +59,12 @@ client (chat / messages / responses)
 ## 跨轮保留进程
 
 - 回答以 `end_turn` 结束后，run 不结束而是闲置，记住它已有的对话（正规化后的讯息与刚才的回答）
-  以及 model、system、工具清单。下一个请求若是同一组 model/system/工具、前面的讯息与它记住的完全
-  一致、后面只多了使用者讯息，就只提交新讯息到同一进程（不加 `Human:` 标签）；实际 cache 命中与订阅额度由服务端决定。
+  以及 model、稳定指令与工具清单。设定和既有正规化历史一致时，只提交新增的使用者回合。
+- `/v1/messages` 转给 Claude 时，顶层 `system` 保持稳定；`messages` 内的 system/developer 保留来源与顺序，
+  可以随新的使用者讯息续接闲置进程或保存的 session。只送新后缀，不重送旧指令；纯指令后缀不会单独续接。
+  内联指令使用带 System/Developer 标注的 `<external_system_instructions>` 文本边界，不是动态修改官方 system prompt。
+  Direct Chat/Responses 与 HTTP fallback 的既有指令规则保持不变。详见 [DC-1–DC-4](tasks/T-0426-dynamic-context.md)。
+  实际 cache 命中与订阅额度由服务端决定。
 - 闲置同样受 `--claude-idle-secs` 限制；名额不够时最早闲置或等待的 run 先被结束。
 - 新进程的第一则讯息里，历史每 20 则一个区块，最后一个完整区块加 `cache_control`
   （`ephemeral`、1h）；没有完整区块时标在呼叫方的 instructions 上。之后同一段对话即使开新进程，
@@ -73,7 +77,7 @@ client (chat / messages / responses)
   （thinrouter 不再传 `--no-session-persistence`），session_id 取自它的 `system`/`init` 行。
 - 闲置中的 run 被结束（闲置逾时、名额被让出、gateway 关闭）时，它的 session 登记到资料库的
   `claude_shelf`：只存 session_id、设定签章的 hash 与每则已知讯息的 hash，不存对话内容。
-- 新请求若续不上闲置进程，就查 shelf：设定相同、历史是已知讯息的前缀、后面只多了使用者讯息，
+- 新请求若续不上闲置进程，就查 shelf：设定相同、已知历史是请求的前缀、后缀符合上述使用者回合规则，
   就以所选 transport 的 `claude ... --resume <session_id>` 开新进程、只提交新讯息；实际 cache 使用仍须实测。
   session 档不在，或 Claude Code 载入失败（例如 `No conversation found`），自动改开新进程整段重送。
 - shelf 最多 64 笔、保留 6 小时，过期或被挤出时连 session 档一起删除；其他结束的 run（等工具结果
@@ -99,8 +103,10 @@ thinrouter serve --claude-mode print --claude-bin /path/to/claude
 
 ## 目前限制
 
-- 只有「对话完全一致、只多了使用者讯息」才续用闲置进程；客户端改写或截短历史、换了
-  system/工具/模型，都会开新进程重送整段对话；缓存和计费效果须实际验证。
+- 续用要求既有正规化历史一致、稳定指令/工具/模型一致，并且至少有一则新使用者讯息；Messages 可以在新后缀中保留内联指令。
+  改写或截短既有历史、改变稳定设定仍会开新进程。正规化仍比较文字、角色、工具 ID 与图片数量，不是所有内容的逐字节比较。
+- 待工具结果时若加入新的内联指令，会保留完整顺序开新进程；尚未实现把新指令可靠送入原工具等待进程的机制。
+  已听过的内联历史不变且工具结果精确对应时仍可续接。以上离线验证不等于真实客户端兼容、cache 节省或订阅计费验收。
 - 闲置进程被结束后，靠存下的 session 续接（见下节）；但对话被改写时一样整段重送。
 - thinking 区块不回传；`temperature`、`max_tokens` 等取样参数不传给 Claude Code。
 - 旧版存过的 Claude token 会在开启资料库时清掉（不再使用）。

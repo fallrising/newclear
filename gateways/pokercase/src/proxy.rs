@@ -123,6 +123,7 @@ async fn cli_attempt(
     public_model: &str,
     stream: bool,
     proto: ClientProto,
+    anthropic_body: Option<&Bytes>,
     request_id: &str,
     cancel: &CancellationToken,
 ) -> Result<ClaudeOutcome, UpstreamAttemptError> {
@@ -150,6 +151,13 @@ async fn cli_attempt(
             (run, attempt.map(BodyAccounting::Cursor))
         }
         _ => {
+            let chat = claude::prepare_claude_code_chat(chat, anthropic_body).map_err(|e| {
+                UpstreamAttemptError {
+                    status: e.status_code().as_u16(),
+                    body: e.to_string(),
+                    retryable: false,
+                }
+            })?;
             let usage = crate::claude_usage::RequestContext::new(
                 &state.store,
                 request_id,
@@ -853,6 +861,7 @@ pub async fn handle_chat_with_fallback(
                 public_model,
                 stream,
                 ClientProto::Chat,
+                None,
                 &request_id,
                 &cancel,
             )
@@ -1121,6 +1130,7 @@ pub async fn handle_anthropic_messages(
                 public_model,
                 stream,
                 ClientProto::Anthropic,
+                Some(&body),
                 &request_id,
                 &cancel,
             )
@@ -1321,6 +1331,7 @@ pub async fn handle_responses(
                 public_model,
                 stream,
                 ClientProto::Responses,
+                None,
                 &request_id,
                 &cancel,
             )

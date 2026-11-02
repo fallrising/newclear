@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Agent Office · 操作台</title><link rel="stylesheet" href="/console.css"><script src="/console.js" defer></script></head>
+<body>
+<header><div><span class="eyebrow">AGENT OFFICE LAB</span><h1>你的本機工作台</h1><p>選擇工位，確認計畫，再開始一項工作。</p></div><span class="badge">● 僅在本機連線</span></header>
+<main>
+<div id="message" role="status" aria-live="polite"></div>
+<section aria-label="四個工位" id="providers" class="providers"></section>
+<div class="workspace">
+<section class="panel"><span class="eyebrow">01 / 準備工作</span><h2 id="selected">OpenCode</h2><p id="model"></p>
+<label for="mode">本次操作</label><select id="mode"></select><p id="mode-note" class="muted"></p>
+<div class="actions"><button id="detect" class="secondary">檢查環境</button><button id="plan">查看執行計畫</button></div><p id="check" class="muted">尚未檢查環境。</p>
+<div id="plan-card" hidden><h3>執行前確認</h3><dl id="plan-fields"></dl><p id="plan-note"></p><button id="execute">確認並啟動</button></div>
+</section>
+<section class="panel"><span class="eyebrow">02 / 目前執行</span><div class="section-heading"><h2>工作進度</h2><button id="refresh" class="quiet">更新狀態</button></div><div id="jobs"><p class="empty">目前沒有從此操作台啟動的工作。</p></div></section>
+</div>
+<section class="panel history"><span class="eyebrow">03 / 執行紀錄</span><div class="section-heading"><h2>結果與產物</h2><label>工位 <select id="filter"><option value="all">全部</option><option value="opencode">OpenCode</option><option value="grok">Grok</option><option value="pi">Pi</option><option value="cursor">Cursor</option></select></label></div>
+<p id="count" class="muted"></p><div class="table-wrap"><table><thead><tr><th>工位 / 來源</th><th>執行紀錄</th><th>結果</th><th>操作</th></tr></thead><tbody id="runs"></tbody></table></div>
+<section id="detail" hidden tabindex="-1" aria-label="結果詳細內容"></section>
+</section>
+</main>
+<footer>目前支援固定合成任務。遠端工位可檢查環境與查看計畫；付費執行仍由已授權的 CLI 流程處理。關閉分頁不會停止工作，請使用「停止執行」。</footer>
+</body></html>

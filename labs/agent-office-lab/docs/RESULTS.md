@@ -51,3 +51,5 @@ node scripts/check_office_results_browser.mjs runs/combined-results.html
 Pi crash 注入紀錄明示來源「本機注入 CLI crash」，僅在原生崩潰、所屬 PID 核對、零外部請求及完整清理均通過時顯示故障測試通過；任務仍是失敗。後續無 prompt 的新 session 仍為啟動檢查，不算任務成功。
 
 新 Pi run 的 attempt 紀錄以白名單顯示首次執行／明確重試次數、原始及前次 run。來源 metadata 損壞時標為無效，不把不可靠關聯顯示為成功；此頁只顯示，不執行重試。完整 eligibility 與 ledger 一致性由 [retry 命令](RETRY.md) 在執行鎖內再檢查。
+
+[本機操作台](CONSOLE.md) 可即時查詢同一套白名單結果，並接上本地派工與原生終端入口。原離線快照仍維持唯讀；job 的程序退出狀態與 run 的任務／產物驗證狀態分開。

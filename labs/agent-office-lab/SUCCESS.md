@@ -6,7 +6,7 @@ kind: lab
 mainline: incomplete
 usable_tag: none
 reviewed: 2026-11-02
-source_commit: 053e2bcd63cedb36e463c9b8f640fd2831101f23
+source_commit: a502addb2a81cb0f2bd516c00478b9236eaf2a4b
 ---
 
 # Agent Office Lab 驗收
@@ -14,6 +14,10 @@ source_commit: 053e2bcd63cedb36e463c9b8f640fd2831101f23
 四個 provider 的合成任務已實測通過：OpenCode、Grok、Pi + DeepSeek、Cursor。各次獨立付費授權已使用，沒有自動重跑；歷史失敗及修正見 [HANDOFF](HANDOFF.md) 和 [任務板](docs/tasks/BOARD.md)。完整 MVP 保持 incomplete。
 
 ## 主線與範圍
+
+T-0017：本機操作台接通偵測、計畫、明確執行、狀態與產物。四 provider 可偵測／計畫；頁面可執行本地 OpenCode 合成任務（含保留原生終端）及 Pi 本機故障／重試，遠端付費執行保持 CLI 明確授權流程。loopback＋隨機登入 token、同 origin 寫入、一次性計畫、防重複提交、既有全局執行鎖；只顯示白名單結果。瀏覽器刷新不重跑，停止只送給本操作台擁有的 runner。
+
+驗證計畫：離線 HTTP／授權／Host／Origin／body 邊界、固定命令與一次性計畫、併發互斥、退出碼與任務結果區分；真實 Chrome 點擊 Pi 故障及本地 OpenCode／Strata 任務，驗證原生終端、產物、刷新、重複拒絕、停止與完整清理。零付費呼叫；完整四工位產品及 AC-01／06／08／09／11 仍 pending。
 
 T-0016：Pi 固定任務與本機故障模式的有界顯式重試。新 run 保存 root／parent／attempt，同一任務最多兩次重試；只接受最新且已失敗、完整清理的 run，使用原 fixture、新 workspace／session，保留所有失敗。預設只顯示計畫；遠端每次均需明示授權，不沿用額度。跨 provider 重試仍待接入。
 
@@ -61,7 +65,9 @@ T-0011：整合四 provider 的唯讀結果入口，列出來源、模型、任�
 | AC-12 | Given 公開匯入來源，When 執行 publication、policy 與 repo gates，Then 無 runtime 私人資料、導航正確且檢查通過。 | passed | [匯入驗證](docs/evidence/publication.md)；CI／交付另見任務板。 |
 | AC-13 | Given 官方 Cursor Agent 與明確登入，When 執行同等合成任務，Then 原生 session、模型來源、完成事件與產物 hash 可核對。 | passed | [Cursor 真實任務](docs/evidence/cursor-completed-2026-11-01.json)：同 session／模型、三次工具、completed stop、用量、產物 hash 與清理全部通過。 |
 
-本輪結果：T-0011：新增[統一結果入口](docs/RESULTS.md)，以白名單回讀四 provider 原生紀錄、重新核對合成產物內容與 SHA-256，提供離線篩選與詳細頁。96 項離線測試通過，既有 33 筆 run 回讀保留成功／失敗／啟動檢查／未完成區別，四 provider 各有成功產物通過重驗；Chrome 篩選、詳細內容、刷新通過，零外部請求。沒有新增模型呼叫或重啟 Strata。[本輪證據](docs/evidence/results-console-2026-11-01.json)。完整 AC-09／AC-11 保持 pending；下一步仍是統一偵測／派工與跨 provider 生命週期。交付狀態見[任務板](docs/tasks/BOARD.md)。
+本輪結果：T-0017：完成[本機操作台](docs/CONSOLE.md)，接通四 provider 偵測／計畫、本地明確派工、原生終端與結果；遠端付費執行保持 CLI 流程。Chrome 實測 Pi 本機 429（任務仍 failed）及本地 OpenCode／Strata，終端開啟／刷新／再次開啟、重複提交拒絕、停止與產物 hash 通過。最終本地 runner 50.75 秒，外層追蹤 107 個程序全部退出、執行鎖釋放；159 tests、52 筆結果回讀通過，零遠端模型請求。首輪瀏覽器表單等待失敗、第二輪 swap guard 停止均保留；原限制未調整，最終重驗通過。[證據](docs/evidence/console-2026-11-02.json)，交付狀態見[任務板](docs/tasks/BOARD.md)。一般任務、完整四 provider UI／生命週期與安全驗收仍 pending，沒有 usable tag。
+
+歷史結果：T-0011：新增[統一結果入口](docs/RESULTS.md)，以白名單回讀四 provider 原生紀錄、重新核對合成產物內容與 SHA-256，提供離線篩選與詳細頁。96 項離線測試通過，既有 33 筆 run 回讀保留成功／失敗／啟動檢查／未完成區別，四 provider 各有成功產物通過重驗；Chrome 篩選、詳細內容、刷新通過，零外部請求。沒有新增模型呼叫或重啟 Strata。[本輪證據](docs/evidence/results-console-2026-11-01.json)。完整 AC-09／AC-11 保持 pending；下一步仍是統一偵測／派工與跨 provider 生命週期。交付狀態見[任務板](docs/tasks/BOARD.md)。
 
 T-0012：新增[統一偵測與派工入口](docs/DISPATCH.md)。四個固定 CLI 的實際斷網版本／help 檢查通過；run 預設只顯示計畫，遠端執行須明示 execute 與 allow-remote。四個直接 runner 共用執行鎖，跨 exec 保留，清理未確認或強制中斷會阻擋下一次派工；不自動重試。117 項離線測試通過。本輪沒有新模型呼叫或啟動 Strata，完整派工到產物與跨 provider 生命週期尚未重驗。[證據](docs/evidence/dispatch-2026-11-01.json)，交付狀態見[任務板](docs/tasks/BOARD.md)。
 
@@ -75,7 +81,7 @@ T-0016：完成 [Pi 有界明確重試](docs/RETRY.md)。統一入口 retry 預�
 
 ## 現況與缺口
 
-MVP 的 11 項必要 AC（01–09、11、13）中，02／03／04／13 的四 provider 合成任務已有原受測版本成功證據；其餘 7 項仍 pending，已有多項子集通過。這不是工時百分比，也不表示最新版完整流程已驗收。主要剩餘工作為 UI 派工／原生終端／結果整合、跨 provider 權限／取消／session 恢復與重試、遠端新入口端到端實測，以及完整路徑／hooks／憑證／網路邊界。現有固定合成任務 runner 尚不能代表任意日常任務的產品可用性。
+MVP 的 11 項必要 AC（01–09、11、13）中，02／03／04／13 的四 provider 合成任務已有原受測版本成功證據；其餘 7 項仍 pending，已有多項子集通過。這不是工時百分比，也不表示最新版完整流程已驗收。主要剩餘工作為遠端 UI 派工／原生終端／結果整合、跨 provider 權限／取消／session 恢復與重試、遠端新入口端到端實測，以及完整路徑／hooks／憑證／網路邊界。現有固定合成任務 runner 尚不能代表任意日常任務的產品可用性。
 
 四種原生 runner 各有原受測版本的真實成功證據；已提供統一 CLI，預設 plan；OpenCode 新入口真實任務與取消已重驗，遠端仍待驗。AC-01 的統一偵測／派工、AC-05–AC-08 的跨 provider 權限／取消／錯誤／恢復、AC-09 完整四工位流程仍待驗。OpenCode 的生命週期與 host 重啟子集已通過，不能代替其他 provider。
 

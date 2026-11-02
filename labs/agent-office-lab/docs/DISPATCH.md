@@ -54,6 +54,10 @@ Grok／Cursor 沒有可保證的 request／token／金額硬上限；工具 hook
 
 `retry pi-work-...` 只顯示計畫；`--execute` 只啟動一次。必須指定最新且完整清理的失敗紀錄，同一 Pi 任務最多兩次重試；新 workspace／session 沿用原 fixture。遠端仍需當次付費授權及 `--allow-remote`，本機故障模式不接受此旗標。詳細限制與中斷處理見 [RETRY](RETRY.md)。
 
+## 本機操作台
+
+[操作台](CONSOLE.md) 將偵測、計畫、本地執行與結果整合。`run opencode --execute --keep-open` 可在合成任務完成後保留原生終端，直到中斷；此選項只適用於本地任務，不可混用取消／故障驗收。頁面執行仍走同一個 dispatcher 與執行鎖，不接受遠端付費執行。
+
 ## 單一執行與中斷
 
 四個 `run_*_work.py` 的直接命令及統一入口共用本 lab 的 `state/dispatch/execution.lock`。第二次執行會立即回報 `execution_busy`；沒有背景等待佇列。鎖跨 dispatcher 的 `exec` 保留，同一 PID 的 runner 接手後持有到清理完成；不增加中間父程序攔截 Ctrl+C，仍由各 runner 處理原生清理。

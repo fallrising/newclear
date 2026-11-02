@@ -5,7 +5,7 @@ kind: tool
 mainline: incomplete
 usable_tag: none
 reviewed: 2026-11-02
-source_commit: 90191b1b81c86c5f044d6caf2511f635ffd4b715
+source_commit: 662726849ec899db8190cfd44114cbab1a83eff5
 ---
 
 # Gameplay Pattern Catalog — 驗收入口
@@ -14,7 +14,7 @@ source_commit: 90191b1b81c86c5f044d6caf2511f635ffd4b715
 
 第一階段 AC-01 至 AC-04 是 14 篇精選筆記，已合併，不再代表目前範圍。本次主線是快照 `atlas-public-2026-11-02`：來源 manifest 為分母，每條公開機制都有實質筆記。主線仍是 incomplete，因為 Draft PR 尚未合併，也還沒有可用版本標記。
 
-source_commit 會在實作 commit 產生後改成該 SHA。下面先記錄接手時的 main。
+source_commit 是本機驗證通過的實作 commit `662726849ec899db8190cfd44114cbab1a83eff5`。接手時的 main 是 `90191b1b81c86c5f044d6caf2511f635ffd4b715`。只補 SHA 的後續 commit 不改變 runtime。
 
 ## 驗收條件
 

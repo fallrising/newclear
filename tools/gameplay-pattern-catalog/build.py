@@ -169,6 +169,7 @@ def coverage_facts(site: dict, manifest: dict, notes: list[dict]):
         'gaps': rows,
         'extra_notes': extra,
         'claim': site['coverage']['claim'],
+        'boundary': site['verification_boundary'],
         'homepage': manifest['reconciliation']['homepage_reported'],
         'differences': manifest['reconciliation']['differences'],
         'categories': manifest['categories'],
@@ -209,6 +210,8 @@ def coverage_markdown(facts: dict) -> str:
 | 缺漏 | {len(facts['gaps']) + len(facts['extra_notes'])} |
 
 宣告：`{facts['claim']}`。`reviewed` 只表示作者已對照本次快照的公開頁面與內嵌條目，不是獨立審查，也不是實玩驗證。pending、draft、blocked 與模板占位不計入完成。
+
+內容邊界：{facts['boundary']}
 
 ## 缺漏 ID
 

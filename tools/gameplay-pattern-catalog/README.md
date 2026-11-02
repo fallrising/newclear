@@ -44,4 +44,4 @@ python3 tests/browser_smoke.py
 
 Markdown frontmatter 是筆記權威，manifest 是來源權威。沒有帳號、分析追蹤、遠端字型、外部圖片、背景更新或自動發布。`python3 sources/inventory.py --fetch` 只報告後續來源差異。
 
-reviewed 表示作者對過本次快照的公開頁面，不是獨立審查，也不是實玩原遊戲。未發行 usable tag。
+reviewed 表示作者對過本次快照的公開頁面，不是獨立審查，也不是實玩原遊戲。目前各篇的本地分析是模型依來源摘要起草的 draft，尚未經人工審閱，所以完整度宣告是 partial。未發行 usable tag。

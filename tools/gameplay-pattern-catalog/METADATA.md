@@ -27,7 +27,7 @@ Manifest 是來源盤點的唯一權威。每條至少包含來源 ID、英文�
 每篇 `patterns/<id>.md` 是筆記內容的唯一權威。檔案以 `---` 包圍 JSON。契約版本是整數 2。既有 ID 與檔名維持不變；`allocation-shop-reservation` 的本地分類仍是 `allocation`，原站分類是 `commerce`。
 
 - `category`：本地 pattern 分類。`source_category`：原站 system id。兩者都必填，允許不同。
-- `note_status`：`pending` 是缺內容或占位；`draft` 是有實質內文但尚未完成直接來源對照，或取得方式仍是搜尋索引摘錄；`reviewed` 是作者已用本次快照的公開頁面文字與內嵌條目對過來源摘要、文末網址與狀態。reviewed 不是獨立審查。
+- `note_status`：`pending` 是缺內容或占位；`draft` 是有實質內文但尚未完成直接來源對照、取得方式仍是搜尋索引摘錄，或本地分析由模型起草而尚未經人工逐篇審閱；`reviewed` 是作者已用本次快照的公開頁面文字與內嵌條目對過來源摘要、文末網址與狀態。reviewed 不是獨立審查。模型起草的分析只能是 draft，`sources/write_notes.py` 不會寫出 reviewed；改成 reviewed 必須由人逐篇對照來源摘要讀過分析。
 - `title` 是繁中設計名稱，`title_en` 必須與 manifest 的英文原名一致。
 - `sources`：每項必須有 `title`、canonical `url`、`accessed`、`access_method`。`page-text` 表示讀到公開頁面及其內嵌條目，不表示操作了全部互動控制。`search-index-excerpt` 不能標成 reviewed。
 - `related`：0–6 個已收錄 ID。不得自連、重複或懸空。相關節必須逐條寫出關聯理由。

@@ -1,5 +1,15 @@
 # T-0002 驗證紀錄
 
+## 2026-11-03 分析重寫
+
+- 原因：抽查發現新增筆記的分析由 `write_notes.py` 的固定句型產生，`reviewed` 也是寫死的。
+- 作法：新增筆記的分析各節逐篇由模型（pi，OpenCode `deepseek-v4.1-flash`）依該篇來源摘要重寫；舊 14 篇只換掉模板插入的「核心循環」。全部改為 `draft`。
+- 重複句型：把「」內文字遮蔽後，統計出現在 3 篇以上筆記的同一句。分析各節從 109 種、10,493 次降到 5 種、826 次；剩下的 5 種都是刻意保留的標示句（模型起草聲明、原型未實玩聲明）。
+- 自動檢查：簡體字、占位字、無結尾的截斷行、JSON 殘留。被拒的模型輸出重新產生。
+- 人工抽讀 10 篇並對照來源摘要：relationships-secrets-leverage、puzzles-visual-rule-learning、incremental-farm-or-push、gathering-gathering-quota、deckbuilding-reward-choice、movement-moving-platform、defense-tower-upgrade-budget、movement-ledge-catch、defense-trap-sequence、combat-friendly-fire。修正了三篇原型數字矛盾與一條相關模式理由。其餘筆記未經人工審閱。
+- 另修正：三個重複字標題、來源摘要中的 OpenCC 誤轉（「還是隻」「透過」應為「只」「通過」）。
+
+
 日期：2026-11-02。快照：`atlas-public-2026-11-02`，觀察時間 `2026-11-02T14:47:12Z`。未 merge、deploy 或 release。
 
 以下 T-0001 各節是精選里程碑的歷史紀錄。那次的 14 篇與 CI 不計入本次全量。

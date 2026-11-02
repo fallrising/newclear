@@ -3,6 +3,12 @@
 This maintainer tool is not part of the offline build. It does not copy upstream
 images, case studies, or full pages. Source summary is a short paraphrase;
 the remaining sections are local analysis or an unverified prototype.
+
+The analysis sentences below are fixed templates. They are only a scaffold for a
+source entry that has no note yet, so a generated note is marked `pending`.
+Existing notes are never overwritten: their analysis sections are rewritten one
+note at a time and stay `draft` until a person checks them. This tool never
+writes `reviewed`.
 """
 from __future__ import annotations
 
@@ -300,7 +306,7 @@ def render_new_with(entry: dict, titles: dict[str, str], by_id: dict[str, dict])
         'source_category': entry['system'],
         'tags': list(entry['tags']),
         'summary': card_summary(entry, title),
-        'note_status': 'reviewed',
+        'note_status': 'pending',
         'related': list(entry['related']),
         'sources': [{
             'title': f'{entry["name"]["en"]} — Gameplay Atlas',
@@ -375,7 +381,8 @@ def patch_preserved(path: Path, entry: dict, titles: dict[str, str]) -> None:
     meta = json.loads(front)
     meta['schema_version'] = 2
     meta['source_category'] = entry['system']
-    meta['note_status'] = 'reviewed'
+    if meta.get('note_status') == 'reviewed':
+        meta['note_status'] = 'draft'
     ordered = {
         'schema_version': meta['schema_version'], 'id': meta['id'], 'title': meta['title'],
         'title_en': meta['title_en'], 'category': meta['category'], 'source_category': meta['source_category'],
@@ -447,7 +454,7 @@ def write_all(entries: list[dict]) -> None:
         path = PATTERNS / f'{entry["id"]}.md'
         if entry['id'] in PRESERVE:
             patch_preserved(path, entry, titles)
-        else:
+        elif not path.exists():
             path.write_text(render_new_with(entry, titles, by_id), encoding='utf-8')
     missing = [token for entry in entries if entry['id'] not in PRESERVE for token in entry['id'].split('-')[1:] if token not in GLOSSARY and entry['id'] not in TITLE_OVERRIDES]
     if missing:

@@ -34,6 +34,23 @@ class CatalogTests(unittest.TestCase):
         shutil.copytree(ROOT, self.root, ignore=shutil.ignore_patterns('dist', '__pycache__'))
         self.path = self.root / 'patterns' / 'inventory-shape-packing.md'
 
+    def set_claim(self, claim):
+        path = self.root / 'site.json'
+        site = json.loads(path.read_text(encoding='utf-8'))
+        site['coverage']['claim'] = claim
+        path.write_text(json.dumps(site, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
+
+    def promote_all_reviewed(self):
+        """Simulate a fully reviewed snapshot so negative cases hit one named gap."""
+        for path in sorted((self.root / 'patterns').glob('*.md')):
+            if path.name == 'README.md':
+                continue
+            front, body = path.read_text(encoding='utf-8')[4:].split('\n---\n', 1)
+            meta = json.loads(front)
+            meta['note_status'] = 'reviewed'
+            path.write_text('---\n' + json.dumps(meta, ensure_ascii=False, indent=2) + '\n---\n' + body, encoding='utf-8')
+        self.set_claim('complete')
+
     def mutate(self, operation):
         text = self.path.read_text(encoding='utf-8')
         front, body = text[4:].split('\n---\n', 1)
@@ -45,12 +62,14 @@ class CatalogTests(unittest.TestCase):
         site, notes, manifest = build.load_catalog(self.root)
         self.assertEqual(len(notes), len(manifest['entries']))
         self.assertEqual(site['coverage']['basis'], 'source-snapshot')
-        self.assertEqual(site['coverage']['claim'], 'complete')
+        statuses = {note['meta']['note_status'] for note in notes}
+        self.assertTrue(statuses <= {'draft', 'reviewed'}, statuses)
+        expected = 'complete' if statuses == {'reviewed'} else 'partial'
+        self.assertEqual(site['coverage']['claim'], expected)
         self.assertEqual(site['coverage']['denominator'], 'sources/manifest.json')
         self.assertEqual(manifest['reconciliation']['enumerated_mechanics'], len(manifest['entries']))
         self.assertEqual(manifest['reconciliation']['enumerated_groups'], len({entry['source_category'] for entry in manifest['entries']}))
         self.assertTrue(all(entry['fetch_status'] == 'fetched' for entry in manifest['entries']))
-        self.assertTrue(all(note['meta']['note_status'] == 'reviewed' for note in notes))
         self.assertTrue(all(source['access_method'] == 'page-text' for note in notes for source in note['meta']['sources']))
         reserved = next(note for note in notes if note['meta']['id'] == 'allocation-shop-reservation')
         self.assertEqual(reserved['meta']['category'], 'allocation')
@@ -115,12 +134,28 @@ class CatalogTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, 'references last'):
             build.load_catalog(self.root)
 
+    def test_complete_claim_rejects_draft_notes(self):
+        self.set_claim('complete')
+        drafts = [path.stem for path in sorted((self.root / 'patterns').glob('*.md'))
+                  if path.name != 'README.md' and '"note_status": "draft"' in path.read_text(encoding='utf-8')]
+        if not drafts:
+            self.skipTest('no draft notes in the current catalog')
+        with self.assertRaisesRegex(ValueError, 'complete claim has gaps: ' + drafts[0]):
+            build.load_catalog(self.root)
+
+    def test_note_generator_never_writes_reviewed(self):
+        source = (ROOT / 'sources' / 'write_notes.py').read_text(encoding='utf-8')
+        self.assertNotIn("'note_status': 'reviewed'", source)
+        self.assertNotIn("['note_status'] = 'reviewed'", source)
+
     def test_complete_claim_rejects_pending_note(self):
+        self.promote_all_reviewed()
         self.mutate(lambda meta: meta.update(note_status='pending'))
         with self.assertRaisesRegex(ValueError, 'complete claim has gaps: inventory-shape-packing'):
             build.load_catalog(self.root)
 
     def test_reviewed_requires_direct_page_text(self):
+        self.mutate(lambda meta: meta.update(note_status='reviewed'))
         text = self.path.read_text(encoding='utf-8')
         text = text.replace('"access_method": "page-text"', '"access_method": "search-index-excerpt"')
         self.path.write_text(text, encoding='utf-8')
@@ -128,6 +163,7 @@ class CatalogTests(unittest.TestCase):
             build.load_catalog(self.root)
 
     def test_blocked_source_is_a_named_gap(self):
+        self.promote_all_reviewed()
         path = self.root / 'sources' / 'manifest.json'
         manifest = json.loads(path.read_text(encoding='utf-8'))
         entry = next(item for item in manifest['entries'] if item['source_id'] == 'fishing-bite-window')
@@ -193,7 +229,10 @@ class CatalogTests(unittest.TestCase):
         manifest = json.loads((self.root / 'sources' / 'manifest.json').read_text(encoding='utf-8'))
         self.assertEqual(len(exported['patterns']), len(manifest['entries']))
         self.assertEqual(exported['coverage']['denominator'], len(manifest['entries']))
-        self.assertEqual(exported['coverage']['gaps'], [])
+        status = {note['id']: note['note_status'] for note in exported['patterns']}
+        expected_gaps = [{'id': entry['source_id'], 'reasons': [status[entry['source_id']]]}
+                         for entry in manifest['entries'] if status[entry['source_id']] != 'reviewed']
+        self.assertEqual(exported['coverage']['gaps'], expected_gaps)
         for note in exported['patterns']:
             detail = (output / note['page']).read_text()
             self.assertIn('id="references"', detail)

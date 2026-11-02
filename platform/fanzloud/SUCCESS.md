@@ -518,3 +518,15 @@ stopped, zeroVM/claims/cgroups/reservations. Owner operation confirmation pendin
 fullM3/FN07/platform and oldCloudAC04 incomplete. See
 [M3 evidence](../fanzloud/docs/acceptance/M3-reconciliation.md). Earlier readiness
 statements are historical and superseded by this approved actual checkpoint.
+
+## T-0442 M3-U 本人操作準備 — 2026-11-02
+
+本次只做已批准M3/FN07的離線承接與操作準備，詳見
+[短步驟／精確缺口及一次窗口選擇](docs/acceptance/M3-owner-operation.md)。
+SDD FN07明寫owner本人提交、看進度與明示交接；10分鐘零新CLI/VM只讀既有成果
+只能補本人可讀回確認，不能單獨通過FN07。另列15分鐘單VM／最多2CLI各180秒的
+完整本人操作替代案；兩案均未批准／未啟動，先確認owner在場及選擇，不連續自動執行。
+本輪原SQLite仍4confirmed/0unknown、226份備份hash一致、固定binary及production
+bytes未變；原DB與本機listeners停妥，遠端零資源沿用先前接受證據。
+M1/M2不重做，consumed intents不重設；完整M3/FN07/platform與本人確認仍pending。
+驗證採文件／來源／精確安全欄位與必要CI／獨立審查，不重跑原綠native/live。

@@ -3,9 +3,11 @@
 Current status (2026-11-02): no standing operator URL or running acceptance service.
 Both formal Codex and Claude routes have [accepted M2 evidence](acceptance/M2-two-vendors.md).
 Durable restart readback and [candidate-only review](acceptance/M3-readonly-review.md)
-are accepted bounded slices. The original installation still has an unknown intent
-and cannot submit; the separate reviewer acceptance store is not its recovery.
-The retained runtime must only be started under a new approved finite window.
+are accepted bounded slices. The original installation has now been positively
+reconciled and completed the [automated current-source journey](acceptance/M3-reconciliation.md);
+the separate prior reviewer store is not used as its recovery. Owner operation
+confirmation remains pending. All approved windows are consumed; starting retained
+services again requires a new finite window.
 
 The initial verified route is [M1 isolated acceptance](acceptance/M1-isolated.md). Operator
 workflow: open the configured private HTTPS origin, log in, select the registered
@@ -112,8 +114,9 @@ insufficient and repeating a task POST is forbidden. Do not manually bind a gues
 run, discard the SQLite file, reset a key or use a fresh store to claim recovery.
 
 The owner approved the [bounded recovery scope](specs/PROPOSAL-M3-recovery.md).
-The [wire contract](specs/SPEC-M3-recovery.md) is implemented with native checks;
-[actual recovery and journey evidence](acceptance/M3-reconciliation.md) remains separate.
+The [wire contract](specs/SPEC-M3-recovery.md), original-installation recovery and
+automated journey have [independently accepted evidence](acceptance/M3-reconciliation.md).
+Owner operation confirmation remains separate and pending.
 A successful confirmation means the submission is known, even if the run was cancelled;
 it does not mean coding succeeded. Until those
 checks pass, this document describes accepted capabilities and their startup preconditions,

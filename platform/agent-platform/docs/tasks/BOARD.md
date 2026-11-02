@@ -260,4 +260,6 @@ PR952 merged as `a69ff34ec173ee36284aceebcb417e560438569c` after finalhead967727
 
 | ID | Task | AC | Status | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| FN04-U | Exact authenticated read-only command evidence; owner approved deskPR395 | CU-M3-U01/U01–03 | in_progress | 2026-11-02T12:15:04Z | — | 2026-11-02T12:15:04Z |
+| FN04-U | Exact authenticated read-only command evidence; owner approved deskPR395 | CU-M3-U01/U01–03 | in_progress | 2026-11-02T12:15:04Z | — | 2026-11-02T13:00:06Z |
+
+FN04-U native/current original-installation evidence accepted on86350871; PR983 delivery pending. No lifecycle/lease/schema change; full platform remains incomplete.

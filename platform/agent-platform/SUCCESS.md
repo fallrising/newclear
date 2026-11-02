@@ -255,5 +255,10 @@ Owner approved U01–07 via deskPR395. Scope: authenticated read-only AP command
 and explicit Fanzloud confirmation using the original store; no new execution authority,
 schema or dependency. [Wire contract](../fanzloud/docs/specs/SPEC-M3-recovery.md) and
 [approved limits](../fanzloud/docs/specs/PROPOSAL-M3-recovery.md) fix tests and windows.
-Native U01–05 first, independent review, then bounded DB rotation/U06/U07. No windows
-have started; original store remains unknown. All U01–07 NOT_RUN at this checkpoint.
+U01–06 and automated U07 independently accepted on86350871/PR983. Original SQLite
+positively reconciled; one-role rotation verified; same-Web Claude writer→Codex accept
+review and exact restart downloads passed.2CLI,41.06s live including cleanup; services
+stopped, zeroVM/claims/cgroups/reservations. Owner operation confirmation pending;
+fullM3/FN07/platform and oldCloudAC04 incomplete. See
+[M3 evidence](../fanzloud/docs/acceptance/M3-reconciliation.md). Earlier readiness
+statements are historical and superseded by this approved actual checkpoint.

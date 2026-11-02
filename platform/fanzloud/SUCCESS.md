@@ -530,3 +530,19 @@ SDD FN07明寫owner本人提交、看進度與明示交接；10分鐘零新CLI/V
 bytes未變；原DB與本機listeners停妥，遠端零資源沿用先前接受證據。
 M1/M2不重做，consumed intents不重設；完整M3/FN07/platform與本人確認仍pending。
 驗證採文件／來源／精確安全欄位與必要CI／獨立審查，不重跑原綠native/live。
+
+## T-0442 本人只讀窗口準備 — 2026-11-02
+
+Owner表示現在可操作並要求操作指引／繼續；本輪優先10分鐘既有成果方案，
+零新coding/review CLI／VM，最後2分鐘只收束。私人有限launcher/proxy固定原binary/runtime、
+原SQLite/AP DB，deny-default執行mutation，單次intent與獨立guard/cutoff；
+先以dummy及本機假上游測試並fresh-context審查，再確認原私人連線／登入／TLS信任才開始。
+目標只補本人登入／辨識兩家agent／既有diff/checks/candidate/review／重新開啟；
+不是完整FN07本人提交／進度／交接證據，不啟新里程碑、不重做M1/M2。
+現行[操作文件](docs/acceptance/M3-owner-operation.md)的驗收條款與限制不變。
+實際窗口、本人回報與清理結果待觀測後追加；準備完成不代表窗口已開始。
+
+Pre-live checkpoint：private readonly gate已完成／獨立ACCEPT_READONLY_GATE_PRELIVE，
+9supervisor+2policy+可信TLS假上游fixture通過，3初審finding修正後覆核接受。
+沒有原服務啟動或intent消耗；owner私人連線／登入／TLS readiness待確認。
+詳見[checkpoint](docs/acceptance/M3-owner-operation.md)，非live／本人FN07完成。

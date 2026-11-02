@@ -117,3 +117,5 @@ M3-U remains in_progress（等owner在場／窗口選擇與本人操作；不算
 Offline4confirmed/0unknown and226hashes verified. Zero services/CLI/VM starts;
 proposed10min read-only access is partial human confirmation only; proposed15min
 owner submit/review alternative still needs explicit authorization. No new milestone.
+
+2026-11-02 owner現在可操作；M3-U續作10分鐘／零新CLI/VM只讀確認入口，私人有限gate先離線驗證與獨立審查；等私人連線／TLS就緒再開始，未開窗口、不改完整FN07條款。

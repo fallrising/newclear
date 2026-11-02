@@ -29,6 +29,13 @@ def prepare(out, workspace, office=False):
             if parsed.scheme != 'file' or not source.is_relative_to(workspace / '.agent-office'):
                 raise ValueError('Only the workspace Office status plugin may be loaded')
         settings['plugin'] = plugins
+    # Receipt exists only in the dedicated local text-task workspace.
+    text_run = workspace.parent
+    text_mode = (text_run / 'text-task.json').is_file()
+    if text_mode:
+        settings['permission'] = {'*':'deny', 'read':'allow', 'edit':'allow'}
+        settings['plugin'] = [*settings.get('plugin', []), (LAB / 'scripts/local_text_boundary.mjs').as_uri()]
+        settings['compaction']['auto'] = False
     config = out / 'opencode.json'
     config.write_text(json.dumps(settings, indent=2) + '\n')
     env = {k: os.environ[k] for k in ('PATH', 'HOME', 'USER', 'LOGNAME', 'LANG', 'LC_ALL', 'SHELL', 'TERM') if k in os.environ}
@@ -38,6 +45,12 @@ def prepare(out, workspace, office=False):
                OPENCODE_DISABLE_AUTOUPDATE='true', OPENCODE_DISABLE_DEFAULT_PLUGINS='true',
                OPENCODE_DISABLE_MODELS_FETCH='true', OPENCODE_DISABLE_CLAUDE_CODE='true',
                OPENCODE_DISABLE_LSP_DOWNLOAD='true', OPENCODE_DISABLE_PRUNE='true')
+    if text_mode:
+        home = out / 'home'; home.mkdir(exist_ok=True)
+        env['HOME'] = str(home)
+        env['LAB_TEXT_LOG'] = str(out / 'text-tools.jsonl')
+        env['LAB_TEXT_WORKSPACE'] = str(workspace)
+        env['LAB_TEXT_RECEIPT'] = str(text_run / 'text-task.json')
     if office:
         for key in ('AGENT_OFFICE_HOOK_URL', 'AGENT_OFFICE_HOOK_TOKEN', 'AGENT_OFFICE_WORKER_ID',
                     'AGENT_OFFICE_SESSION_ID', 'AGENT_OFFICE_EFFORT', 'AGENT_OFFICE_MODEL'):
@@ -66,6 +79,8 @@ def prepare(out, workspace, office=False):
                f'(allow file-write* (subpath {json.dumps(str(out))}))'
                f'(allow file-write* (subpath {json.dumps(str(workspace))}))'
                '(allow file-write* (regex #"^/dev/"))')
+    if text_mode:
+        profile += f'(deny file-write* (subpath {json.dumps(str(workspace / "source"))}))'
     profile_path = out / 'opencode.sb'
     profile_path.write_text(profile + '\n')
     return ['/usr/bin/sandbox-exec', '-f', str(profile_path), str(BINARY)], env

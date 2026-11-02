@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """One explicit entry for pinned synthetic Office tasks. Default: plan only."""
 import pi_retry
+import local_text_task
 import argparse
 import json
 import os
@@ -282,6 +283,16 @@ def retry_plan(run_id, lab=LAB):
     return result, options
 
 
+def launch_text_task(request_path, request_sha256, lab=LAB):
+    local_text_task.load_request(lab, Path(request_path), request_sha256)
+    with execution_slot(lab) as slot:
+        if not detect('opencode', lab)['launch_prerequisites_present']:
+            raise SlotError('preflight_failed')
+        command = [str(strata_home(lab) / 'source/.venv/bin/python'), str(lab / 'scripts/run_local_work.py'),
+                   '--harness','office-opencode','--text-request',str(request_path),'--request-sha256',request_sha256]
+        os.execve(command[0], command, slot.exec_env(os.environ))
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     commands = parser.add_subparsers(dest='action', required=True)
@@ -295,12 +306,14 @@ def main(argv=None):
     run.add_argument('--check-resume', action='store_true', help='Pi only: reconnect one saved session after an injected local 429 and owned CLI exit; no model calls')
     run.add_argument('--check-crash', action='store_true', help='Pi only: kill the owned native CLI during a held loopback request; no remote calls')
     run.add_argument('--keep-open', action='store_true', help='OpenCode only: keep the verified native terminal and local model open until stopped')
+    text = commands.add_parser('local-text'); text.add_argument('--request',required=True); text.add_argument('--sha256',required=True); text.add_argument('--execute',action='store_true',required=True)
     retry = commands.add_parser('retry'); retry.add_argument('run_id')
     retry.add_argument('--execute', action='store_true'); retry.add_argument('--allow-remote', action='store_true')
     ack = commands.add_parser('acknowledge-interruption')
     ack.add_argument('--confirm-all-owned-processes-stopped', action='store_true', required=True)
     args = parser.parse_args(argv)
     try:
+        if args.action == 'local-text': return launch_text_task(args.request,args.sha256)
         if args.action == 'status':
             state = inspect_slot(LAB)
             print(json.dumps({'shared_execution':state,'model_task_started':False}))

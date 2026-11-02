@@ -1,0 +1,201 @@
+{
+  "schema": 1,
+  "milestone": "T-0021",
+  "date": "2026-11-02",
+  "baseline": "fdf662c07b565e81c874eb2a158f611815f28b2b",
+  "scope": "Registered text project + custom prompt -> explicit local OpenCode/Strata execution -> bounded output.md preview and download. Original project remains unchanged.",
+  "offline_tests": {
+    "python": 145,
+    "node": 39,
+    "total": 184,
+    "passed": true
+  },
+  "browser": {
+    "status": "passed",
+    "model_inference": true,
+    "remote_model_calls": 0,
+    "custom_prompt_and_source_plan": true,
+    "duplicate_execute_blocked": true,
+    "refresh_without_rerun": true,
+    "browser_closed_during_inference": true,
+    "browser_reopened_without_rerun": true,
+    "download_matches_artifact": true,
+    "runner_elapsed_seconds": 43.1182994581759,
+    "artifact_sha256": "eb9440589f52ef9f343e685347cdc4a1270958bcba00401f5218742fc53da1f5",
+    "source_snapshot_unchanged": true,
+    "content_facts_verified": true,
+    "cleanup_verified": true,
+    "external_browser_requests": 0,
+    "browser_errors": 0,
+    "result_detail_verified": true,
+    "runs": 61
+  },
+  "outer_cleanup": {
+    "exit_code": 0,
+    "owned_processes_seen": 71,
+    "remaining_owned_processes": 0,
+    "active_journal_present": false,
+    "elapsed_seconds": 49.05
+  },
+  "results_browser": {
+    "status": "passed",
+    "providers_checked": [
+      "opencode",
+      "grok",
+      "pi",
+      "cursor"
+    ],
+    "runs": 61,
+    "detail_content_and_hash": true,
+    "filters": true,
+    "refresh": true,
+    "external_requests": 0,
+    "browser_errors": 0
+  },
+  "native": {
+    "provider": "opencode",
+    "cli_version": "1.19.5",
+    "model": "strata/qwen3.8-flash-next-q2_0",
+    "states": [
+      "idle",
+      "working",
+      "done"
+    ],
+    "session_present": true,
+    "usage": {
+      "input": 3662,
+      "output": 187,
+      "calls": 3
+    },
+    "text_tools": [
+      {
+        "phase": "allowed",
+        "tool": "read"
+      },
+      {
+        "phase": "finished",
+        "tool": "read"
+      },
+      {
+        "phase": "allowed",
+        "tool": "write"
+      },
+      {
+        "phase": "finished",
+        "tool": "write"
+      }
+    ],
+    "source_snapshot_unchanged": true,
+    "original_source_unchanged": true,
+    "text_output": {
+      "name": "output.md",
+      "sha256": "eb9440589f52ef9f343e685347cdc4a1270958bcba00401f5218742fc53da1f5",
+      "bytes": 76
+    },
+    "independent_home": true,
+    "native_sandbox_source_write_denied": true,
+    "cleanup_completed": true,
+    "cleanup_errors": [],
+    "elapsed_seconds": 43.1182994581759
+  },
+  "attempts": [
+    {
+      "kind": "initial_workflow",
+      "browser_status": "passed",
+      "runner_status": "completed",
+      "model_inference_verified": true,
+      "elapsed_seconds": 43.15760304196738,
+      "max_swap_delta_mib": 366.94,
+      "guard_triggered": false,
+      "outer_cleanup": {
+        "exit_code": 0,
+        "owned_processes_seen": 71,
+        "remaining_owned_processes": 0,
+        "active_journal_present": false,
+        "elapsed_seconds": 70.61
+      }
+    },
+    {
+      "kind": "resource_guard_1",
+      "browser_status": "failed",
+      "runner_status": "failed",
+      "model_inference_verified": false,
+      "elapsed_seconds": 27.745868582976982,
+      "max_swap_delta_mib": 1526.31,
+      "guard_triggered": true,
+      "outer_cleanup": {
+        "exit_code": 0,
+        "owned_processes_seen": 52,
+        "remaining_owned_processes": 0,
+        "active_journal_present": false,
+        "elapsed_seconds": 33.42
+      }
+    },
+    {
+      "kind": "resource_guard_2",
+      "browser_status": "failed",
+      "runner_status": "failed",
+      "model_inference_verified": false,
+      "elapsed_seconds": 29.511236832942814,
+      "max_swap_delta_mib": 1686.38,
+      "guard_triggered": true,
+      "outer_cleanup": {
+        "exit_code": 0,
+        "owned_processes_seen": 43,
+        "remaining_owned_processes": 0,
+        "active_journal_present": false,
+        "elapsed_seconds": 34.98
+      }
+    },
+    {
+      "kind": "final_reopen",
+      "browser_status": "passed",
+      "runner_status": "completed",
+      "model_inference_verified": true,
+      "elapsed_seconds": 43.1182994581759,
+      "max_swap_delta_mib": 0.0,
+      "guard_triggered": false,
+      "outer_cleanup": {
+        "exit_code": 0,
+        "owned_processes_seen": 71,
+        "remaining_owned_processes": 0,
+        "active_journal_present": false,
+        "elapsed_seconds": 49.05
+      }
+    }
+  ],
+  "source_sha256": {
+    "scripts/local_text_task.py": "f599bbcc0e2e9694b0ac5e6d7d7ed4376343d016c30438a1ce0ba7a7d941054d",
+    "scripts/local_text_policy.mjs": "2643b607ad659f226fda315c2eeab0244ec593d16b7d89d456d76815e7cd96e6",
+    "scripts/local_text_boundary.mjs": "886e84c23ff424655dca1c942a2a4020eb1171bf3d7fb29fe7945c37592b3d00",
+    "scripts/local_opencode.py": "94e16d9d3d5b6e2ddba7bb047971c60c17caa3f3b270da903fedd56f71708891",
+    "scripts/run_local_work.py": "31259d0f5bf992dd4e67a661db7882323e28d8f6ea60171431f41f580788c944",
+    "scripts/office_opencode.mjs": "c6050243ff7cf317af5d90f89751065ad4143ac2ea1ba8d4e431b2c0c99e744b",
+    "scripts/office_dispatch.py": "77d984ca1a69605cd8f97720e7016c1f1a5b49399d65c6a27bd5ef3457dacc2c",
+    "scripts/office_console.py": "298eb552925c3b0970158d48729454d722f3c1d7a73447e24579e9c9aa4e474b",
+    "scripts/office_console.js": "71b75e254fcab4748245023005369cb97e411165e423426884ea6cc4e7b8addb",
+    "scripts/office_console.html": "0218c245b1101d669d767dc6cf6a52aced5298707711ffde7ebbb247df461003",
+    "scripts/office_results.py": "f177fda4305c6273457670e3876165d167ddc6facc1b9c6e8c0e5ba58e6b5780",
+    "scripts/office_results.html": "882daf896d334b8522e0c13e40ceb1e9170719d976efa8da3bcc2ef05973bcc5",
+    "scripts/check_local_text_browser.mjs": "950f747cfed1de3fc726fc29b2717c8a9cca84751dbaf2eb580447058a2cdd2b",
+    "scripts/check_office_results_browser.mjs": "146bb92829463741afb85c64448fa1355c32287e156c885cfcd941ce5d3d8862"
+  },
+  "limitations": [
+    "Only bounded local text tasks; no arbitrary code execution, shell, source edits or automatic apply-back.",
+    "Native completion and artifact hash do not prove semantic correctness; output requires user review.",
+    "First full workflow passed with Chrome open. Final isolated-HOME acceptance closed its Chrome during inference, then reopened to verify the same job and download; this does not prove open-browser operation at every resource pressure.",
+    "Two intermediate resource-guard stops are preserved; Q2_0, 32K and 1024 MiB swap-delta guard remain unchanged.",
+    "No Claude use, remote model calls, release, deployment or usable tag; full MVP and isolation audit remain pending."
+  ],
+  "prelaunch_failures": [
+    {
+      "reason": "Test supervisor initially supplied macOS /tmp symlink; correctly rejected before runner start. Used physical /private/tmp path.",
+      "model_started": false
+    },
+    {
+      "reason": "Browser acceptance waited for a native option to be visible; corrected to wait for attachment.",
+      "model_started": false
+    }
+  ],
+  "readonly_browser_test_correction": "Initial text comparison used innerText and trimmed expected trailing newlines. Corrected to compare exact textContent; all 61 results passed without another model run."
+}

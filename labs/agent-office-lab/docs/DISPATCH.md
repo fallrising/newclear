@@ -85,3 +85,5 @@ Pi 亦支援 `run pi --check-cancel` 計畫，加上 `--execute` 以真實 CLI �
 `python3 scripts/office_dispatch.py status` 唯讀檢查共用執行狀態，回傳 available／busy／cleanup_unconfirmed／unavailable，不啟動 CLI 或模型。操作台使用相同檢查，跨入口與重啟後仍會阻擋未清理狀態；[狀態與中斷處理](CONSOLE.md)。
 
 `run pi --check-resume` 預設只顯示計畫，加上 `--execute` 執行本機 429 後同 session 的一次性重新連接檢查。零模型推論、不可混用其他模式或遠端授權；[操作與限制](PI-RESUME.md)。
+
+操作台的[本地文字任務](LOCAL-TEXT-TASK.md)使用有 hash 的私人快照 request，經 `local-text` 子命令重新檢查後取得同一執行鎖，再交給固定 OpenCode／Strata runner。請從操作台建立計畫，不手寫內部 request；此模式不接受遠端模型、保留終端或生命週期檢查參數。

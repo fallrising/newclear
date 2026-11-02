@@ -26,6 +26,8 @@
 2. 依[CF工具盤點](docs/tool-catalog.md)保留原工具責任；node-health維持日常健康入口，Edge Ops先作參考。
 3. [CF資源盤點報告](docs/inventory-report.md)已上線：沿用原GET-only工具，手動JSON→最新D1快照→看板。首報以已批准的management import保存，Pages／Tunnels仍403；後續先核對原desired與可見範圍，再手動更新，不新增盤點排程。
 
+最新[部署用途目錄](docs/service-catalog.md)已對應4個Worker：兩個主要工具與各自恢復環境；沒有搬遷或封存。Owner新增多VPS需求後，[agent設計](docs/host-agent-design.md)選擇沿用Python非root collector／Cloud Lab入口，參考Edge Ops指標語義，先做獨立多機唯讀上報；實作／多機安裝仍未完成。
+
 具體停止條件見[方向調整](docs/direction-review.md)。provider用量API、更多授權工具層、Event／seq、active failover與模板生成暫緩；既有安全性質、測試及歷史保留。
 
 ## 文件入口

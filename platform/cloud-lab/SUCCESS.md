@@ -68,3 +68,7 @@ MC-01：現有MCP固定GET收集，原producer重用既有比較與分頁驗證�
 ## 本輪盤點上線（ML）
 
 Owner已明確「批准上線」：ML-01核對已審候選與原部署、保留bindings/Access/secrets/Cron；ML-02原D1新增快照表並匯入重新收集的真實報告；ML-03發布原Worker／資產並CAS設定human讀取／盤點上傳至2026-12-02T12:00:00Z；ML-04回讀與公開／私人證據收尾。其他grants與期限不變，不新增付費方案。ML-01～04操作與回讀通過，見[上線證據](docs/evidence/inventory-live.md)及[T869報告](../../.team/reports/T-869.md)；獨立證據審查ACCEPT、文件檢查通過；Git交付見任務板。歷史MC／IR未部署敘述只描述各自里程碑。
+
+## 本輪工具目錄與多VPS agent設計（CA）
+
+Owner要求繼續把已盤點CF資源對應用途／入口／觸發／來源，並查核active repo中可沿用的主機agent設計。CA-01保存部署資源與來源對照及未確認項，私人細節不進公開Git；CA-02以連線可見未封存repo為active候選，核對真實runner存活與候選實作／設計成熟度；CA-03提出多VPS最小接入方案、權責與可驗收切片。CA-01完成[部署用途對照](docs/service-catalog.md)與私人精確入口清單；CA-02確認原runner運行並查核11個active候選及具名agent程式；CA-03交付[多VPS設計](docs/host-agent-design.md)。此輪只有來源查核與文件設計，不批量安裝、改權限／live schema、開付費服務或搬遷／封存；獨立審查修正時鐘邊界後ACCEPT、文件檢查通過，證據見[T871](../../.team/reports/T-871.md)，Git交付見任務板。

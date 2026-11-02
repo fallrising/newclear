@@ -60,3 +60,7 @@ Owner繼續開發第二種能力：既有CF inventory JSON→有界D1快照→�
 ## 可用版本
 
 `mainline: incomplete`、`usable_tag: none`保持。技術閉環證據、目前授權可用、原始整合目標與owner整體驗收分開記錄；不因多次merge或更多測試自動升級為完整平台。
+
+## 本輪真實盤點接入（MC）
+
+MC-01：現有MCP固定GET收集，原producer重用既有比較與分頁驗證，保留收集時間與unknown。MC-02：真實報告通過既有consumer驗證與本機隔離保存／讀回，不公開私人資源明細。MC-03：查核原部署及授權，準備可審查的live變更／回退與日常授權提案。來源接入與本機驗證完成，見[T868報告](../../.team/reports/T-868.md)；live發布、schema或grant變更尚未執行。[上線提案](docs/inventory-activation.md)已列出候選與人類scope／期限。

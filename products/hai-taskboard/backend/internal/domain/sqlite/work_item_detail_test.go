@@ -131,6 +131,7 @@ func TestWorkItemDetail_SnapshotCapacityCorruption(t *testing.T) {
 		subject := domain.HashString("subject-1")
 		d.audit(projectionWork, subject)
 		d.review("review-1", subject)
+		mustExec(t, d.store, `INSERT INTO work_item_blockers VALUES('prj_0000000001','wi_0000000001','blocker-open','waiting',NULL)`)
 		var sequence int
 		var name, path string
 		if err := d.store.db.QueryRowContext(t.Context(), `PRAGMA database_list`).Scan(&sequence, &name, &path); err != nil {
@@ -173,7 +174,7 @@ func TestWorkItemDetail_SnapshotCapacityCorruption(t *testing.T) {
 			t.Fatal(err)
 		}
 		after := d.must(projectionWork)
-		if after.Summary.Title != "new title" || !slices.Equal(detailReviewIDs(after), []string{"review-1", "review-new"}) || len(after.Blockers) != 1 || after.Blockers[0].ResolvedAtNS == nil || *after.Blockers[0].ResolvedAtNS != 7 {
+		if after.Summary.Title != "new title" || !slices.Equal(detailReviewIDs(after), []string{"review-1", "review-new"}) || len(after.Blockers) != 2 || after.Blockers[0].ID != "blocker-new" || after.Blockers[0].ResolvedAtNS == nil || *after.Blockers[0].ResolvedAtNS != 7 || after.Blockers[1].ResolvedAtNS != nil {
 			t.Fatalf("fresh read missed writer: %+v", after)
 		}
 		durable := acceptanceSnapshot(t, d.store.db)

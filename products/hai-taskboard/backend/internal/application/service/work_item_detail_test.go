@@ -1,6 +1,7 @@
 package service
 
 import (
+	"database/sql"
 	json "encoding/json/v2"
 	"fmt"
 	"net/http"
@@ -36,6 +37,12 @@ type detailWire struct {
 	Evidence []struct {
 		ID            string  `json:"evidence_id"`
 		Subject       string  `json:"completion_subject_digest"`
+		ACRevision    string  `json:"ac_revision_digest"`
+		Recipe        string  `json:"recipe_digest"`
+		Environment   string  `json:"environment_digest"`
+		Report        *string `json:"report_artifact_digest"`
+		VerifierClass string  `json:"verifier_class"`
+		VerifierActor string  `json:"verifier_actor"`
 		HumanReportID *string `json:"human_report_id"`
 	} `json:"evidence"`
 	Approvals []struct {
@@ -51,9 +58,14 @@ type detailWire struct {
 		ApprovalIDs []string `json:"approval_ids"`
 	} `json:"completion_records"`
 	Audit []struct {
-		CommandID string  `json:"command_id"`
-		Operation string  `json:"operation"`
-		RunID     *string `json:"run_id"`
+		Sequence   uint64  `json:"sequence"`
+		CommandID  string  `json:"command_id"`
+		Operation  string  `json:"operation"`
+		Subject    string  `json:"subject_digest"`
+		Before     *string `json:"before_digest"`
+		After      *string `json:"after_digest"`
+		OccurredAt string  `json:"occurred_at"`
+		RunID      *string `json:"run_id"`
 	} `json:"audit"`
 }
 
@@ -216,6 +228,30 @@ func TestWorkItemDetail_TruthfulShape(t *testing.T) {
 	slices.Sort(verdicts)
 	if !slices.Equal(verdicts, []string{"Approved", "Approved", "Rejected"}) || len(humanReviews) != 2 {
 		t.Fatalf("reviews %v human %v", verdicts, humanReviews)
+	}
+	for _, e := range w.Evidence {
+		var subject, revision, recipe, environment, class, actor string
+		var report sql.NullString
+		if err := f.db.QueryRow("SELECT completion_subject_digest,ac_revision_digest,recipe_digest,environment_digest,verifier_class,verifier_actor,artifact_digest FROM evidence WHERE evidence_id=?", e.ID).Scan(&subject, &revision, &recipe, &environment, &class, &actor, &report); err != nil {
+			t.Fatal(err)
+		}
+		if e.Subject != "sha256:"+subject || e.ACRevision != "sha256:"+revision || e.Recipe != "sha256:"+recipe || e.Environment != "sha256:"+environment || e.VerifierClass != class || e.VerifierActor != actor || e.Report == nil || *e.Report != "sha256:"+report.String || e.HumanReportID == nil {
+			t.Fatalf("evidence %s wire %+v", e.ID, e)
+		}
+	}
+	for _, a := range w.Audit {
+		var command, operation, subject string
+		var before, after sql.NullString
+		var at int64
+		if err := f.db.QueryRow("SELECT g.command_id,e.operation,e.subject_digest,e.before_digest,e.after_digest,g.created_at_ns FROM audit_entries e JOIN audit_groups g ON g.project_id=e.project_id AND g.audit_group_id=e.audit_group_id WHERE e.audit_sequence=?", a.Sequence).Scan(&command, &operation, &subject, &before, &after, &at); err != nil {
+			t.Fatal(err)
+		}
+		optional := func(wire *string, stored sql.NullString) bool {
+			return (wire == nil) == !stored.Valid && (wire == nil || *wire == "sha256:"+stored.String)
+		}
+		if a.CommandID != command || a.Operation != operation || a.Subject != "sha256:"+subject || !optional(a.Before, before) || !optional(a.After, after) || a.OccurredAt != time.Unix(0, at).UTC().Format(time.RFC3339Nano) {
+			t.Fatalf("audit %d wire %+v", a.Sequence, a)
+		}
 	}
 	if len(w.Approvals) != 1 || w.Approvals[0].ID != "approval-b" || w.Approvals[0].ConsumedAt == nil || w.Approvals[0].CompletionRecordID == nil {
 		t.Fatalf("approvals %+v", w.Approvals)

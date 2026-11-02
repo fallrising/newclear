@@ -291,7 +291,14 @@ func validateWorkItemDetailWire(data []byte, project domain.ProjectID, item doma
 			return ErrProjectionCorrupt
 		}
 	}
-	for _, c := range w.CompletionRecords {
+	for i, c := range w.CompletionRecords {
+		if i > 0 {
+			previous, _ := materialIndexTime(w.CompletionRecords[i-1].CompletedAt)
+			current, _ := materialIndexTime(c.CompletedAt)
+			if previous > current || previous == current && w.CompletionRecords[i-1].ID >= c.ID {
+				return ErrProjectionCorrupt
+			}
+		}
 		if !materialIndexText(c.ID, 80) || !materialIndexDigest(c.Subject) || !materialIndexVersion(c.ResultVersion) || !materialIndexText(c.CompletedBy, 120) || !detailTimeValid(c.CompletedAt) || !detailIDs(c.EvidenceIDs, 1) || !detailIDs(c.ReviewIDs, 1) || !detailIDs(c.ApprovalIDs, 0) {
 			return ErrProjectionCorrupt
 		}

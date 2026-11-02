@@ -330,10 +330,14 @@ FROM evidence e LEFT JOIN human_reports h ON h.project_id=e.project_id AND h.evi
 			}
 			continue
 		}
-		for target, text := range map[*domain.Digest]string{&value.ACRevisionDigest: revision, &value.RecipeDigest: recipe, &value.EnvironmentDigest: environment} {
-			if *target, err = detailDigest(text); err != nil {
-				return nil, err
-			}
+		if value.ACRevisionDigest, err = detailDigest(revision); err != nil {
+			return nil, err
+		}
+		if value.RecipeDigest, err = detailDigest(recipe); err != nil {
+			return nil, err
+		}
+		if value.EnvironmentDigest, err = detailDigest(environment); err != nil {
+			return nil, err
 		}
 		if value.ReportArtifactDigest, err = detailOptionalDigest(artifact); err != nil {
 			return nil, err

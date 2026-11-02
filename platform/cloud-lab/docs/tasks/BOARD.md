@@ -734,3 +734,13 @@ IR-01～04由PR[972](https://github.com/fallrising/newclear/pull/972)於2026-11-
 37producer＋471consumer測試、7組實際本機workerd／D1／Chromium閉環與9組原runtime檢查通過；T867兩項REWORK修正後ACCEPT。55contracts／9indexes／188changed-document相對連結、task/report與diff檢查通過。Lead檢視最終中文截圖、公開邊界及兩端diff；正常merge保留並行main，兩端fulltree相同、工作樹乾淨、remote feature head為main祖先。
 
 本地原CLI憑證GET於11:39:31Z回403，六區段unknown；隨後另以現有Cloudflare MCP確認帳號及網域GET成功（各1頁，無私人明細公開），因此不能將CLI的403推論為MCP失效或要求重新登入。MCP讀取尚未連到原producer報告流程，也沒有可讀真帳號報告的完整live驗收。下一步沿用可用連線處理真實盤點接入，再以具體principal／scope／期限方案批准live啟用。沒有部署、續權、付費、Cron、來源搬遷或封存；完整mainline仍incomplete。本PR只改任務板。
+
+## T-0042 — MCP真實盤點接入與上線準備
+
+| ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| T-0042-1 | 原producer離線capture與MCP固定GET | MC-01 | in_progress | 2026-11-02T12:20:36Z | — | 2026-11-02T12:20:36Z |
+| T-0042-2 | 真實報告與隔離consumer閉環 | MC-02 | in_progress | 2026-11-02T12:20:36Z | — | 2026-11-02T12:20:36Z |
+| T-0042-3 | 原部署preflight與具體上線提案 | MC-03 | in_progress | 2026-11-02T12:20:36Z | — | 2026-11-02T12:20:36Z |
+
+Owner繼續開發；一個producer worker在獨立來源工作樹，gpt-6.1-sol/high、15分鐘／一個修正上限；Lead唯一公開文件writer並負責live唯讀、整合、獨立review及Git交付。沒有token複製、新排程或付費服務。具體發布／權限變更另待批准。

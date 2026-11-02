@@ -2,7 +2,7 @@
 
 本樹是 Cloud Lab 的產品知識導航。它描述責任與關係，不保存私人知識庫或覆寫來源元件的主線狀態。M0表保留來源映射；下方M1對照已按具名live證據更新。live_verified只表示曾完成該子集驗證，不保證當前授權仍有效；近期方向見[重排計畫](direction-review.md)。
 
-[CF工具目錄](tool-catalog.md)補上2026-11-01來源盤點與Edge Ops比較；這是導航文件，未新增執行介面。RS-01已實作既有inventory的[唯讀報告介面](inventory-report.md)，目前完成本機驗證；EX-01維持Cloud Lab日常健康入口，Edge Ops只作參考。
+[CF工具目錄](tool-catalog.md)補上2026-11-01來源盤點與Edge Ops比較；這是導航文件，未新增執行介面。RS-01已實作既有inventory的[唯讀報告介面](inventory-report.md)，已接真實MCP資料並完成本機驗證，live啟用仍待批准；EX-01維持Cloud Lab日常健康入口，Edge Ops只作參考。
 
 ## 知識樹
 

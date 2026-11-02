@@ -51,7 +51,7 @@ export function inventoryView(snapshot, now, confirmed=true) {
  }catch{return {state:'unknown',label:'報告或時間無法確認',driftCount:0,unreadableCount:0};}
 }
 const TITLES={zones:'網域',workers:'Workers',worker_domains:'Worker入口',pages:'Pages',tunnels:'Tunnel',access_apps:'Access應用'};
-const DRIFT={unexpected:'未登記',missing:'資源不存在',inactive:'網域未active',invalid_status:'期望狀態無效'};
+const DRIFT={unexpected:'未登記',missing:'期望項未觀測到',inactive:'網域未active',invalid_status:'期望狀態無效'};
 export function renderInventory(document,snapshot,now,confirmed=true){
  const make=(tag,text)=>{const e=document.createElement(tag);e.textContent=text;return e;};
  const root=document.createElement('div'),v=inventoryView(snapshot,now,confirmed);
@@ -60,7 +60,7 @@ export function renderInventory(document,snapshot,now,confirmed=true){
  for(const s of v.report.sections){const section=document.createElement('section');section.append(make('h3',TITLES[s.kind]));
   if(s.state==='unreadable')section.append(make('p',`未知：無法讀取（${s.error}）`));
   else if(!s.resources.length)section.append(make('p','已讀取，沒有資源或期望項目'));
-  else {const list=document.createElement('ul');for(const r of s.resources)list.append(make('li',`${r.name} — ${r.use||'用途未填'} · ${r.present?'存在':'不存在'}${r.status?' · provider狀態 '+r.status:''} · ${r.drift.map(x=>DRIFT[x]).join('、')||'與清單一致'}`));section.append(list);}
+  else {const list=document.createElement('ul');for(const r of s.resources)list.append(make('li',`${r.name} — ${r.use||'用途未填'} · ${r.present?'已觀測到':'此次盤點未列出'}${r.status?' · provider狀態 '+r.status:''} · ${r.drift.map(x=>DRIFT[x]).join('、')||'與清單一致'}`));section.append(list);}
   root.append(section);
  }
  return root;

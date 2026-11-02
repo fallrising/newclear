@@ -35,4 +35,16 @@ sections依序恰為zones、workers、worker_domains、pages、tunnels、access_
 
 候選部署差異：原Worker更新index與新增worker/inventory、public/inventory模組，靜態資產更新；原D1新增0003.sql的inventory_snapshots表，不修改原兩份migration或既有命令資料。原Access、secrets、runner、Cron及期限保持。回退可恢復原Worker／資產，保留新表中的報告；不要刪表。啟用inventory權限及任何續期必須另列principal／workspace／期限後批准；本次沒有續權。
 
-目前驗證：37producer＋471consumer測試、本機workerd／D1與Chromium七組閉環成功；實際provider GET在2026-11-02T11:39:31Z回HTTP_403，各區段為unknown。這不能判定token過期或缺scope的具體原因，亦不是可讀帳號盤點驗收。下一步先恢復既有工具的唯讀存取，再提出具體live啟用差異；不新增付費方案或自動排程。
+目前驗證：37producer＋471consumer測試、本機workerd／D1與Chromium七組閉環成功；實際provider GET在2026-11-02T11:39:31Z回HTTP_403，各區段為unknown。該403來自獨立CLI憑證，不能推論MCP失效。後續沿用既有MCP，見下方收集流程及真實接入證據，再提出具體live啟用差異；不新增付費方案或自動排程。
+
+## MCP收集與離線轉換（MC）
+
+原producer另提供固定GET capture expression，由現有Cloudflare MCP執行。它只取得選定帳號的zones、Workers、Worker domains、Pages、tunnels、Access apps摘要及原分頁metadata，不複製token。capture存放私人檔案，由原工具`--json --capture <private-capture>`離線轉換；使用原desired清單、原分頁檢查與同一wire contract。轉換不讀憑證、不fallback網路、不自動發布。
+
+報告時間保留MCP實際收集開始／結束，重跑轉換不會把舊觀測變成新資料。capture有20頁／2000rows每區段、1MiB每投影頁、8MiB總量與300秒request-start budget；不是強制中止in-flight request。捕捉403或不完整分頁的區段明示unknown。輸入capture是operator提供的資料，不是provider簽章或完整帳號可見性的證明。
+
+`present`只代表在這次已驗證的可讀清單中觀測到該名稱；missing表示期望項未列出，可能需要核對帳號、token可見範圍或過時desired，不能據此斷言資源已刪除。看板文案依此改為「此次盤點未列出」，原desired與資源都不自動修改。
+
+可重複執行的本機驗證：使用common launcher執行`node platform/cloud-lab/tools/qualify_inventory.mjs <installed-miniflare-directory> <private-report.json>`。使用現有工具鏈、合成HMAC身分與隔離D1，阻止外部fetch；驗證保存／讀回、重送、衝突、workspace及撤權。report不得提交公開repo，保留原capture與report hash作為私人證據。這不是live Access登入或線上發布。
+
+本輪真實接入與待批准的部署／人類權限差異見[上線提案](inventory-activation.md)。

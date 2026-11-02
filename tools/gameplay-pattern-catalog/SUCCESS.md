@@ -5,7 +5,7 @@ kind: tool
 mainline: incomplete
 usable_tag: none
 reviewed: 2026-11-03
-source_commit: cd02ede9355eada6773bd9587fb6d7b46317f58f
+source_commit: 29254932be9e6b11be1dde54e7e273bc30677fe7
 ---
 
 # Gameplay Pattern Catalog — 驗收入口
@@ -14,7 +14,7 @@ source_commit: cd02ede9355eada6773bd9587fb6d7b46317f58f
 
 第一階段 AC-01 至 AC-04 是 14 篇精選筆記，已合併，不再代表目前範圍。本次主線是快照 `atlas-public-2026-11-02`：來源 manifest 為分母，每條公開機制都有實質筆記。主線仍是 incomplete：Draft PR 尚未合併，也還沒有可用版本標記；而且目前每篇筆記都是 draft，完整度宣告為 `partial`。
 
-source_commit 是本機驗證通過、且完整度文字已改為繁中的 commit `cd02ede9355eada6773bd9587fb6d7b46317f58f`。接手時的 main 是 `90191b1b81c86c5f044d6caf2511f635ffd4b715`。只補 SHA 的後續 commit 不改變 runtime 或筆記。
+source_commit 是撤下模板分析、全部改為 draft 的重寫 commit `29254932be9e6b11be1dde54e7e273bc30677fe7`。接手時的 main 是 `90191b1b81c86c5f044d6caf2511f635ffd4b715`。只補 SHA 的後續 commit 不改變 runtime 或筆記。
 
 ## 驗收條件
 
@@ -30,7 +30,7 @@ source_commit 是本機驗證通過、且完整度文字已改為繁中的 commi
 | AC-08 | Given schema 2，When 驗證關聯與分類，Then 沒有懸空或自我引用，既有 ID 仍指向原檔。此列即 AC-F04 | passed | 23 項單元測試；`allocation-shop-reservation` 仍用本地 allocation、原站 commerce |
 | AC-09 | Given 全量靜態站，When 用真實瀏覽器操作，Then 搜尋、分類、詳情、相關模式、來源、空結果、重設、手機寬度、子路徑與無 JavaScript 導航可用。此列即 AC-F05 | passed | 本機 Chrome 完整 HTTP smoke：子路徑 `/nested/catalog/`、搜尋、分類、空結果、重設、NFKC、詳情、相關模式、來源連結、390px、無 JavaScript。見 [驗證紀錄](docs/verification.md) |
 | AC-10 | Given 離線建置，When 重複輸出並餵負向案例，Then 跳脫、危險 URL、輸出目錄保護與狀態轉移檢查會擋下錯誤。此列即 AC-F06 | passed | 單元測試的確定性建置、跳脫、symlink、pending、blocked、search-index |
-| AC-11 | Given 本次工作樹，When 執行元件測試與 repo 索引檢查，Then 結果如實保留。此列即 AC-F07 | passed | 本機 23 項測試與索引檢查；CI head `16ca12fc0aebef7347ab4acbb6f356e60993299d` 的 [catalog](https://github.com/fallrising/newclear/actions/runs/41467066827)、[project success](https://github.com/fallrising/newclear/actions/runs/41467066361)、[llms](https://github.com/fallrising/newclear/actions/runs/41467066578) 均 success |
+| AC-11 | Given 本次工作樹，When 執行元件測試與 repo 索引檢查，Then 結果如實保留。此列即 AC-F07 | passed | 本機 25 項測試、browser smoke 與索引檢查；CI head `29254932be9e6b11be1dde54e7e273bc30677fe7` 的 [catalog](https://github.com/fallrising/newclear/actions/runs/41492374618)（25 項測試、建置、完整 browser smoke）、[project success](https://github.com/fallrising/newclear/actions/runs/41492374947)、[llms](https://github.com/fallrising/newclear/actions/runs/41492375549) 皆通過。這只證明檢查通過，不代表筆記已審閱 |
 
 ## 現況與缺口
 

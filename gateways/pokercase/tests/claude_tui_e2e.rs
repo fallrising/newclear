@@ -418,6 +418,66 @@ async fn mcp_tool_result_returns_to_same_interactive_child() {
 }
 
 #[tokio::test]
+async fn changed_tool_history_starts_fresh_without_delivering_to_old_callback() {
+    let mut env = Env::start("tool", None).await;
+    let tools = json!([{"type":"function", "function":{"name":"get_weather", "parameters":{"type":"object", "properties":{"city":{"type":"string"}}}}}]);
+    let first = env
+        .post(
+            "/v1/chat/completions",
+            json!({"model":"cc", "tools":tools,
+        "messages":[{"role":"user", "content":"original question"}]}),
+        )
+        .await;
+    assert_eq!(first.status(), 200);
+    let first: Value = first.json().await.unwrap();
+    let call = first["choices"][0]["message"]["tool_calls"][0].clone();
+    // Only a newly started fake child reads this scenario. The original remains
+    // blocked on its real MCP callback, so an accidental continuation is visible.
+    std::fs::write(env.peer.path().join("scenario"), "delayedtap").unwrap();
+    let changed = env
+        .post(
+            "/v1/chat/completions",
+            json!({"model":"cc", "tools":tools,
+        "messages":[{"role":"user", "content":"rewritten question"},
+            {"role":"assistant", "content":null, "tool_calls":[call]},
+            {"role":"tool", "tool_call_id":"toolu_tui", "content":"wrong-context-result"}]}),
+        )
+        .await;
+    assert_eq!(changed.status(), 200);
+    let changed: Value = changed.json().await.unwrap();
+    assert_eq!(changed["choices"][0]["message"]["content"], "turn-1");
+    assert_eq!(env.records("starts.jsonl").len(), 2);
+    let turns = env.records("turns.jsonl");
+    assert_eq!(turns.len(), 2);
+    assert_ne!(turns[0]["pid"], turns[1]["pid"]);
+    let prompt = turns[1]["prompt"].as_str().unwrap();
+    assert!(prompt.contains("rewritten question"));
+    assert!(prompt.contains("wrong-context-result"));
+    assert!(env.records("mcp-result.jsonl").is_empty());
+    let valid = env
+        .post(
+            "/v1/chat/completions",
+            json!({"model":"cc", "tools":tools,
+        "messages":[{"role":"user", "content":"original question"},
+            {"role":"assistant", "content":null, "tool_calls":[call]},
+            {"role":"tool", "tool_call_id":"toolu_tui", "content":"correct-result"}]}),
+        )
+        .await;
+    assert_eq!(valid.status(), 200);
+    let valid: Value = valid.json().await.unwrap();
+    assert_eq!(
+        valid["choices"][0]["message"]["content"],
+        "Result: correct-result"
+    );
+    assert_eq!(env.records("starts.jsonl").len(), 2);
+    assert_eq!(env.records("turns.jsonl").len(), 2);
+    let results = env.records("mcp-result.jsonl");
+    assert_eq!(results.len(), 1);
+    assert_eq!(results[0]["result"]["content"][0]["text"], "correct-result");
+    env.stop().await;
+}
+
+#[tokio::test]
 async fn continuation_and_gateway_restart_use_owned_saved_session() {
     let mut env = Env::start("delayedtap", None).await;
     let first: Value = env

@@ -1,5 +1,16 @@
 # Pokercase 技術任務
 
+## T-0426 — Cursor Agent CLI documentation and Claude client continuation
+
+Demand: T-0426, claim PR390 merged. [NC-1–NC-3](T-0426-claude-client.md).
+
+| ID | Task | AC | Status | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| NC-01 | Record cursor-agent identity and approved no-Docker decision | NC-1 | in_progress | 2026-11-02T11:24:50.125013+00:00 | — | 2026-11-02T11:41:53.403445+00:00 |
+| NC-02 | Pinned Magpie comparison and faithful Claude continuation correction | NC-2 | in_progress | 2026-11-02T11:24:50.125013+00:00 | — | 2026-11-02T11:41:53.403445+00:00 |
+| NC-03 | Independent evidence review and complete delivery | NC-3 | in_progress | 2026-11-02T11:24:50.125013+00:00 | — | 2026-11-02T11:41:53.403445+00:00 |
+
+
 ## T-0426 — Renewed TUI tool trial after owner quota report
 
 Demand:deskT0426;claim383merged. [TR-1–TR-3](T-0426-tui-tools-renewed.md).

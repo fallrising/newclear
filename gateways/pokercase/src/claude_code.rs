@@ -624,18 +624,20 @@ impl ClaudeCode {
     /// and return a new sink's receiver for that run's next message.
     #[cfg(test)]
     fn continue_run(&self, chat: &Value) -> Option<(Arc<LiveRun>, ReplyReceiver)> {
-        self.continue_run_observed(chat, None).unwrap()
+        self.continue_run_observed("sonnet", chat, None).unwrap()
     }
 
     fn continue_run_observed(
         &self,
+        model: &str,
         chat: &Value,
         context: Option<&RequestContext>,
     ) -> Result<Option<(Arc<LiveRun>, ReplyReceiver)>, UpstreamAttemptError> {
         let Some(results) = trailing_tool_results(chat) else {
             return Ok(None);
         };
-        let known = convo(chat).iter().map(norm).collect();
+        let conversation = convo(chat);
+        let known: Vec<Value> = conversation.iter().map(norm).collect();
         let mut live = self.live.lock().unwrap();
         let Some(run) = live.waiting.get(&results[0].0).cloned() else {
             return Ok(None);
@@ -652,9 +654,38 @@ impl ClaudeCode {
         let mut got: Vec<&String> = results.iter().map(|(id, _)| id).collect();
         want.sort();
         got.sort();
-        if want != got {
+        if want != got || want.windows(2).any(|ids| ids[0] == ids[1]) {
             return Ok(None);
         }
+        // IDs locate a candidate; they do not authorize delivery into its old
+        // context. Check before reserving usage or consuming any waiting state.
+        if run.signature != signature(model, chat) {
+            return Ok(None);
+        }
+        let previous = run.known.lock().unwrap();
+        if known.len() != previous.len() + 1 + results.len() || !known.starts_with(&previous) {
+            return Ok(None);
+        }
+        let assistant = &conversation[previous.len()];
+        let mut announced: Vec<&String> = known[previous.len()]["calls"]
+            .as_array()
+            .into_iter()
+            .flatten()
+            .filter_map(Value::as_str)
+            .filter_map(|id| pending.iter().find(|pending_id| pending_id.as_str() == id))
+            .collect();
+        announced.sort();
+        if assistant.get("role").and_then(Value::as_str) != Some("assistant")
+            || assistant
+                .get("tool_calls")
+                .and_then(Value::as_array)
+                .map(Vec::len)
+                != Some(want.len())
+            || announced != want
+        {
+            return Ok(None);
+        }
+        drop(previous);
         let accounting = context.map(RequestContext::begin).transpose()?;
         for id in &pending {
             live.waiting.remove(id);
@@ -1413,7 +1444,7 @@ pub async fn start_observed(
             retryable: false,
         });
     }
-    if let Some((run, rx)) = cc.continue_run_observed(chat, context)? {
+    if let Some((run, rx)) = cc.continue_run_observed(model, chat, context)? {
         debug!("tool results go on in the waiting Claude Code run");
         return first_reply(run, rx, cancel).await;
     }
@@ -2245,7 +2276,7 @@ mod tests {
         let retiring = cc.finish_turn(&run, &mut filter).unwrap();
         let next_context = usage_context(&store, "next-request");
         let (_, next_reply) = cc
-            .continue_run_observed(&synthetic_tool_result(), Some(&next_context))
+            .continue_run_observed("sonnet", &synthetic_tool_result(), Some(&next_context))
             .unwrap()
             .unwrap();
         retiring
@@ -2368,7 +2399,7 @@ mod tests {
             interrupted_input: std::sync::atomic::AtomicBool::new(false),
             waiting_since: Mutex::new(None),
             stdin: tokio::sync::Mutex::new(None),
-            signature: String::new(),
+            signature: signature("sonnet", &synthetic_tool_result()),
             known: Mutex::new(Vec::new()),
             session_id: Mutex::new(None),
             idle_now: std::sync::atomic::AtomicBool::new(false),
@@ -2386,6 +2417,99 @@ mod tests {
             {"role":"assistant","tool_calls":[{"id":"tool_1","type":"function","function":{"name":"probe","arguments":"{}"}}]},
             {"role":"tool","tool_call_id":"tool_1","content":"synthetic-result"}
         ]})
+    }
+
+    #[tokio::test]
+    async fn nc2_tool_continuation_rejects_changed_context_without_consuming_wait() {
+        use super::*;
+        let (dir, cc, run) = continuation_fixture();
+        let store = crate::store::Store::open(&dir.path().join("usage.db"), None).unwrap();
+        let context = usage_context(&store, "rejected-continuation");
+        let prefix = json!({"role":"user", "content":"original question"});
+        run.known.lock().unwrap().push(norm(&prefix));
+        run.pending.lock().unwrap().push("tool_1".into());
+        cc.live
+            .lock()
+            .unwrap()
+            .waiting
+            .insert("tool_1".into(), run.clone());
+        cc.live.lock().unwrap().order.push_back(run.clone());
+        let (callback, mut result) = tokio::sync::oneshot::channel();
+        run.calls.lock().unwrap().insert("tool_1".into(), callback);
+        let mut valid = synthetic_tool_result();
+        valid["messages"].as_array_mut().unwrap().insert(0, prefix);
+        let before = run.known.lock().unwrap().clone();
+        let mut cases = Vec::new();
+        let mut changed = valid.clone();
+        changed["messages"][0]["content"] = json!("rewritten question");
+        cases.push(("history", changed));
+        let mut changed = valid.clone();
+        changed["messages"]
+            .as_array_mut()
+            .unwrap()
+            .insert(0, json!({"role":"system","content":"new instruction"}));
+        cases.push(("instruction", changed));
+        let mut changed = valid.clone();
+        changed["tools"] = json!([{"type":"function","function":{"name":"another_tool"}}]);
+        cases.push(("tools", changed));
+        let mut changed = valid.clone();
+        changed["messages"][1]["tool_calls"][0]["id"] = json!("different");
+        cases.push(("assistant ID", changed));
+        let mut changed = valid.clone();
+        let call = changed["messages"][1]["tool_calls"][0].clone();
+        changed["messages"][1]["tool_calls"]
+            .as_array_mut()
+            .unwrap()
+            .push(call);
+        cases.push(("duplicate assistant ID", changed));
+        let mut changed = valid.clone();
+        changed["messages"].as_array_mut().unwrap().remove(1);
+        cases.push(("missing assistant", changed));
+        let mut changed = valid.clone();
+        changed["messages"]
+            .as_array_mut()
+            .unwrap()
+            .insert(1, json!({"role":"user","content":"extra turn"}));
+        cases.push(("extra turn", changed));
+        let mut changed = valid.clone();
+        let duplicate = changed["messages"][2].clone();
+        changed["messages"].as_array_mut().unwrap().push(duplicate);
+        cases.push(("duplicate result", changed));
+        let mut changed = valid.clone();
+        changed["messages"][2]["tool_call_id"] = json!("different");
+        cases.push(("result ID", changed));
+        // Resolved model is supplied by routing, not taken from the JSON alias.
+        assert!(cc
+            .continue_run_observed("opus", &valid, Some(&context))
+            .unwrap()
+            .is_none());
+        for (label, chat) in cases {
+            assert!(
+                cc.continue_run_observed("sonnet", &chat, Some(&context))
+                    .unwrap()
+                    .is_none(),
+                "accepted {label}"
+            );
+            assert_eq!(*run.known.lock().unwrap(), before, "{label}");
+            assert_eq!(*run.pending.lock().unwrap(), ["tool_1"], "{label}");
+            assert!(cc.live.lock().unwrap().waiting.contains_key("tool_1"));
+            assert_eq!(cc.live.lock().unwrap().order.len(), 1);
+            assert!(run.sink.lock().unwrap().is_none());
+            assert!(run.accounting.lock().unwrap().is_none());
+            assert!(run.results.lock().unwrap().is_empty());
+            assert_eq!(run.calls.lock().unwrap().len(), 1);
+            assert!(matches!(
+                result.try_recv(),
+                Err(tokio::sync::oneshot::error::TryRecvError::Empty)
+            ));
+            assert!(store.recent_usage(10).unwrap().is_empty());
+            assert!(!run.stop.is_cancelled());
+        }
+        let (continued, _reply) = cc.continue_run(&valid).unwrap();
+        assert!(Arc::ptr_eq(&run, &continued));
+        assert_eq!(result.await.unwrap().text, "synthetic-result");
+        assert!(run.pending.lock().unwrap().is_empty());
+        assert!(cc.live.lock().unwrap().waiting.is_empty());
     }
 
     #[tokio::test]

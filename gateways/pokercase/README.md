@@ -26,7 +26,7 @@ A **thin** OpenAI-compatible LLM API proxy in Rust, inspired by [9router](https:
 **In scope:** `/v1/chat/completions`, `/v1/messages`, `/v1/responses`, routes + fallback/RR, **OAuth/session token import** (personal subscriptions), optional token-saver, web admin, TUI, SQLite.
 
 **Architecture:** Layer A = this gateway; Layer B = your multi-agent “team” apps calling only Layer A. See [docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md).  
-**Providers:** siwc (OpenAI models) · claude · cursor · grok · opencode · agy — [docs/PROVIDERS.md](./docs/PROVIDERS.md)  
+**Providers:** siwc (OpenAI models) · claude · cursor-agent CLI (`cursor` ID) · grok · opencode · agy — [docs/PROVIDERS.md](./docs/PROVIDERS.md)
 **Claude 订阅原理：** [docs/CLAUDE_SUBSCRIPTION.md](./docs/CLAUDE_SUBSCRIPTION.md)
 
 Inline system/developer text blocks preserve the same instruction role as strings. Equivalent representations no longer change the Claude reuse signature or conversation prefix; genuinely changed instructions still require a new run. See [the bounded correction and remaining live-reuse limits](docs/tasks/T-0426-instruction-roles.md).
@@ -39,13 +39,9 @@ Inline system/developer text blocks preserve the same instruction role as string
 > Claude Code's. Automated use of a subscription is still subject to Anthropic's terms —
 > see [docs/CLAUDE_SUBSCRIPTION.md](./docs/CLAUDE_SUBSCRIPTION.md).
 
-> [!WARNING]
-> **`cursor` provider is off by default.** `cursor-agent` can use your Cursor account's
-> plugins (for example Gmail) even in ask mode, and the CLI cannot turn them off,
-> so any client holding a gateway key could make it read that data. Enable it only with
-> `--cursor-accept-account-plugins` after disconnecting plugins you do not want exposed.
-> A pinned local container image and dedicated profile volume are also required; see
-> [Cursor isolation and setup](docs/cursor-isolation.md). Ask mode is not a security boundary.
+**Cursor Agent CLI (`cursor-agent`), not the IDE.** The owner removed Docker as a product requirement on 2026-11-02. The `cursor` provider ID remains for existing configurations. The current adapter still uses its older container runner; Docker-free CLI execution is pending, so it is not yet a usable no-Docker route. See the [current decision and historical isolation evidence](docs/cursor-isolation.md). The existing account-plugin opt-in remains; the prior selected-version probe found plugins callable in ask mode.
+
+Claude tool-result continuation checks the resolved model, instructions, tool definitions and known normalized history before delivering results to a waiting process. Changed context takes the existing fresh-run path; see [correlation correction and remaining client limits](docs/tasks/T-0426-claude-client.md).
 
 ## Process interruption and recovery evidence
 
@@ -94,7 +90,7 @@ python3 scripts/claude_walkthrough.py --check --binary "$CARGO_TARGET_DIR/debug/
 This retained walkthrough explicitly tests print compatibility. The new synthetic `claude_tui_e2e` suite exercises the actual PTY/helper with a fake interactive child. Neither establishes real CLI compatibility or quota savings. The script defaults to check mode and accepts `--serve` for a disposable local demo. It runs a Python fake Claude plus the real gateway/MCP helper, verifies all three client streams/tools, fallback/failure/cancel/stall, usage and process/session reuse after restart, and preserves sanitized diagnostics plus source/binary hashes. It never invokes an installed Claude CLI or real provider. `--expected-binary-sha256` rejects a changed binary before launch; the delivered local helper also pins preserved script hashes. All reported tokens are synthetic fixture observations; all CLI costs remain unknown. The original generic HTTP walkthrough remains available.
 
 
-Cursor text-only streams also retain per-dispatch raw `result.usage` counters with source `cursor_cli_result_v1`. `reported_usage` preserves input/output/cache values independently; absent fields stay unknown. Cursor's cache relationship is unverified, so normalized `prompt_tokens` and cost remain null, while observed output counts are retained. JSON/HTML/CSV use the same durable attempt, outcome and CLI timing. Existing opt-in, container isolation and tools/images refusal remain. Actual CLI version/account behavior is not established by the fake-runtime evidence. See [Cursor scope and acceptance](docs/tasks/T-0432-cursor-settlement.md).
+Cursor text-only streams also retain per-dispatch raw `result.usage` counters with source `cursor_cli_result_v1`. `reported_usage` preserves input/output/cache values independently; absent fields stay unknown. Cursor's cache relationship is unverified, so normalized `prompt_tokens` and cost remain null, while observed output counts are retained. JSON/HTML/CSV use the same durable attempt, outcome and CLI timing. Existing opt-in and tools/images refusal remain; these observations use the legacy container adapter described in the [migration status](docs/cursor-isolation.md). Actual CLI version/account behavior is not established by the fake-runtime evidence. See [Cursor scope and acceptance](docs/tasks/T-0432-cursor-settlement.md).
 
 For the isolated terminal walkthrough after a locked build:
 
@@ -251,6 +247,6 @@ Set `THINROUTER_ADMIN_TOKEN` through your environment or secret configuration be
 
 MIT. Inspired by upstream MIT projects; not affiliated with 9Router.
 
-Cursor container settings: `--cursor-image` / `THINROUTER_CURSOR_IMAGE` (pinned local digest), `--cursor-profile-volume` / `THINROUTER_CURSOR_PROFILE_VOLUME` (dedicated `thinrouter-cursor-*` named volume), and `--cursor-runtime-bin` / `THINROUTER_CURSOR_RUNTIME_BIN` (Docker executable, default `docker`). Missing settings return 503; there is no host CLI fallback.
+Legacy Cursor Agent CLI runtime settings (migration pending; not the current product requirement): `--cursor-image` / `THINROUTER_CURSOR_IMAGE` (pinned local digest), `--cursor-profile-volume` / `THINROUTER_CURSOR_PROFILE_VOLUME` (dedicated `thinrouter-cursor-*` named volume), and `--cursor-runtime-bin` / `THINROUTER_CURSOR_RUNTIME_BIN` (Docker executable, default `docker`). Missing settings return 503; there is no host CLI fallback.
 
 Bounded fixture reliability checks: [fixture startup ownership and safe diagnostics](docs/tasks/T-0445-fixture-startup.md). Historical startup/auth causes remain unknown; test-only ownership evidence does not establish real-provider acceptance.

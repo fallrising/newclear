@@ -171,6 +171,6 @@ Java tests用@TempDir与explicitrecords；ImageIO生成32×16 PNG original，既
 
 2026-11-01追加批准：owner本session原話「批准。」接受PR333於131ed63f的PP1c整份施工圖與local-adapters附約，包含44卡四子波，接續正常合併與實作。上節「待批准」是歷史狀態；父既有政策不改，PP1d/正式offsite仍未授權執行或驗收。
 
-## 11 §4.2 restore receipt hash preimage 修訂提案
+## 11 §4.2 restore receipt hash preimage 修訂
 
-**2026-11-01 hash preimage 明訂提案（DRAFT，待 owner 批准）：** `rawSnapshotSha256` 是 RAW_VERIFIED 時由完整 20-table rows/schema 重新計算並確認來源與 target 相等的 `Inventory.dbSnapshotSha256`；它不是整份 inventory artifact hash，也不是 raw-comparison receipt hash。`mediaInventorySha256` 是相同 RAW_VERIFIED 時點的 `SHA256(canonicalBytes({version:1,files:Inventory.files}))`，即重新核對實體檔案後的 `Inventory.mediaHeaderSha256`；files 按 objectKey 排序，包含全部 referenced/orphan/deleted 檔案的 objectKey、byteSize、sha256、classification。兩欄各自綁 DB 與媒體，只有完整比較已通過才可輸出。canonical bytes 含尾 LF；既有欄位/schema、manifest binding、session 撤銷、smoke、RTO 起算與 offsite 政策不變。此提案不把只驗 hash 形狀的 A validator 宣稱為已驗還原證明。
+**2026-11-02 hash preimage 明訂（owner 已批准；PR956 正常合併及遠端核對後生效）：** `rawSnapshotSha256` 是 RAW_VERIFIED 時由完整 20-table rows/schema 重新計算並確認來源與 target 相等的 `Inventory.dbSnapshotSha256`；它不是整份 inventory artifact hash，也不是 raw-comparison receipt hash。`mediaInventorySha256` 是相同 RAW_VERIFIED 時點的 `SHA256(canonicalBytes({version:1,files:Inventory.files}))`，即重新核對實體檔案後的 `Inventory.mediaHeaderSha256`；files 按 objectKey 排序，包含全部 referenced/orphan/deleted 檔案的 objectKey、byteSize、sha256、classification。兩欄各自綁 DB 與媒體，只有完整比較已通過才可輸出。canonical bytes 含尾 LF；既有欄位/schema、manifest binding、session 撤銷、smoke、RTO 起算與 offsite 政策不變。此提案不把只驗 hash 形狀的 A validator 宣稱為已驗還原證明。

@@ -455,7 +455,7 @@ shape with audit-derived attribution and no migration; implementation waits for 
 | ID | Task | AC | Status | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
 | HDTLP | Propose and review truthful WorkItem detail contract | DTL-PLAN-01..03 | done | 2026-11-02T10:54:03Z | 2026-11-02T11:14:38Z | 2026-11-02T11:14:38Z |
-| HDTL | Implement truthful WorkItem detail with audit-derived attribution | DTL-AC-01..06; H02/H03 support | in_progress | 2026-11-02T11:09:20Z |  | 2026-11-02T11:09:20Z |
+| HDTL | Implement truthful WorkItem detail with audit-derived attribution | DTL-AC-01..06; H02/H03 support | in_progress | 2026-11-02T11:09:20Z |  | 2026-11-02T11:41:24Z |
 
 DTL-PLAN-01 maps the remaining M2 detail gap to source. DTL-PLAN-02 fixes DTL-01..05, DTL-AC-01..06 and the minimal
 owner decisions. DTL-PLAN-03 disposes Claude review, passes document checks and completes Git/CI/readback/ledger delivery.

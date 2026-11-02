@@ -481,8 +481,13 @@ migration; implementation waits for owner D1. UI, Done validity, Impact, provide
 
 | ID | Task | AC | Status | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| HROPP | Propose and review ReopenWorkItem and Ready-with-history dispatch contract | ROP-PLAN-01..03 | in_progress | 2026-11-02T12:16:09Z |  | 2026-11-02T12:20:33Z |
+| HROPP | Propose and review ReopenWorkItem and Ready-with-history dispatch contract | ROP-PLAN-01..03 | done | 2026-11-02T12:16:09Z | 2026-11-02T14:02:35Z | 2026-11-02T14:02:35Z |
 
 ROP-PLAN-01 maps the Done dead end to source. ROP-PLAN-02 fixes ROP-01..04, ROP-AC-01..04 and the minimal owner
 decision. ROP-PLAN-03 disposes Claude review, passes document checks and completes Git/CI/readback/ledger delivery.
 [Proposal](../plans/reopen-work-item-20261102.md); [review evidence](../evidence/reopen-work-item-plan-20261102.md).
+
+2026-11-02T14:02:35Z: proposal [#976](https://github.com/fallrising/newclear/pull/976) merged normally as `19fdeb4fa588b213d1a00ef6e45e7f79676a24cf`.
+Reviewed head `f4489a75` passed HAI CI 41443961362 (backend 13m16s, web) and Project success 41443961645; remote HAI files
+match the reviewed head. HROPP end uses the merge time. Merging does not approve the contract: implementation (HROP)
+waits for owner D1, including the public `WorkItemReopenedResult` OpenAPI amendment. T-0339 stays in_progress.

@@ -47,4 +47,4 @@ sections依序恰為zones、workers、worker_domains、pages、tunnels、access_
 
 可重複執行的本機驗證：使用common launcher執行`node platform/cloud-lab/tools/qualify_inventory.mjs <installed-miniflare-directory> <private-report.json>`。使用現有工具鏈、合成HMAC身分與隔離D1，阻止外部fetch；驗證保存／讀回、重送、衝突、workspace及撤權。report不得提交公開repo，保留原capture與report hash作為私人證據。這不是live Access登入或線上發布。
 
-本輪真實接入與待批准的部署／人類權限差異見[上線提案](inventory-activation.md)。
+MC來源接入已完成；後續ML按[批准方案](inventory-activation.md)上線，首報為明示management import，human授權與限制見[上線證據](evidence/inventory-live.md)。

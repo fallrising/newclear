@@ -1,6 +1,6 @@
 # 盤點看板上線提案（MC）
 
-狀態：候選準備中／待owner批准，尚未發布或改權限。沿用原受Access保護的Cloud Lab Worker、D1與Workers Free，不新增服務、token、Cron或付費方案。
+狀態：owner已批准；2026-11-02T14:16:59Z完成原Worker上線、首報management import及human revision3回讀。詳見[上線證據](evidence/inventory-live.md)。以下保留原批准方案與回退方式。沿用原受Access保護的Cloud Lab Worker、D1與Workers Free，不新增服務、token、Cron或付費方案。
 
 ## 唯讀查核與候選
 
@@ -13,7 +13,7 @@ MCP在2026-11-02T12:31:45Z～12:31:50Z取得2zones／4Workers／4Worker domains�
 | Worker／資產 | 更新5個ES modules及4個靜態資產，main_module為worker/index.mjs，加入盤點介面及觀測文案 | 原DB／ASSETS／plaintext bindings與2個secret_text沿用；keep_bindings保留secrets，不讀值、不輪替。原compatibility date、Access、hostname、workers.dev及preview政策不改。回退至保存的原版本100%。 |
 | D1 | 只套用0003.sql新增inventory_snapshots表；保存同workspace最新報告，最多24576bytes | 不改前兩份migration／命令／firings／原grants（除下列human提案）。回退保留新表及報告，不刪資料。 |
 | 首份報告 | 批准後重新跑固定MCP GET，原工具轉換、驗證及canonical digest；由operator以參數化D1語句匯入一份 | 這是明示的management import，不冒充人類API登入。保留真實observed_at；received_at為實際保存時間。已有更新或衝突報告就停止，不覆寫。 |
-| 人類看板 | 原human grant revision2→3；保留原principal／workspace／resource／recipe／限制，只改capabilities為commands:read、artifact:read、inventory:read、inventory:publish，期限到2026-12-02T12:00:00Z | 暫採30天日常草案，待批准。不是人工測試窗口。沒有節點命令提交／取消權；原已到期權限不直接全部續期。Access每次登入的1小時session不延長。撤銷可revoke human grant；回退用新revision恢復原policy，不倒退revision。 |
+| 人類看板 | 原human grant revision2→3；保留原principal／workspace／resource／recipe／限制，只改capabilities為commands:read、artifact:read、inventory:read、inventory:publish，期限到2026-12-02T12:00:00Z | 已按批准設定30天日常授權。不是人工測試窗口。沒有節點命令提交／取消權；原已到期權限不直接全部續期。Access每次登入的1小時session不延長。撤銷可revoke human grant；回退用新revision恢復原policy，不倒退revision。 |
 | bot／runner／scheduler | 不變 | 不續期、不更換HMAC／service token、不重啟runner、不改15分鐘Cron。 |
 
 ## 執行與驗證順序

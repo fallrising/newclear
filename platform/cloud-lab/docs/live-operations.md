@@ -66,3 +66,11 @@ Import依官方init回應的signed URL PUT原始SQL，校驗ETag與原檔MD5，�
 ## 看板資產更新的計數
 
 [PSL](evidence/m1-snapshot-rollout.md)沿用direct upload：manifest條目不等於實際上傳份數，已存在hash會重用。保存session buckets與每個upload intent／response，最終分列manifest_entries與actual_uploaded_assets；勿由舊helper欄位名稱推論上傳數量。發布後驗active100%與原modules/settings及資料保全，secret繼承不等於逐值讀回。
+
+## 盤點上線的可重用步驟
+
+[ML上線證據](evidence/inventory-live.md)沿用已批准的候選：fresh比對原版本、settings、Access、grants、schema；9檔逐byte比對已合併來源；固定MCP capture→原producer離線轉換→既有validator canonical body／digest。原D1只新增0003快照表，首報以參數化INSERT且workspace不存在條件匯入，received_at取實際D1保存時間，不把management import寫成人類API登入。
+
+四份資產manifest實際上傳四份；completion JWT只留私人receipt，經stdin傳curl，不放argv或公開文件。五個modules保留相對路徑，main_module=worker/index.mjs；原plaintext／D1 bindings沿用，keep_bindings保留secret_text。發布成功並回讀100%與exact modules後才CAS human revision2→3；其他grants不變。
+
+MCP下載Worker回傳raw multipart，即使包在回傳物件的source欄位也不是{result:...}；按boundary解析。首次驗證器型別假設錯誤只修解析器、重讀既有receipt，不重播發布。最後比對Access／Cron／其他grants、資產先經Worker與匿名302。回退保留快照表／報告，恢復保存的舊版本；human回復須新revision，不倒退。私人intent、response、查核、原版本及rollback皆保留於當次launcher evidence。

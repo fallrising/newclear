@@ -13,6 +13,7 @@
 | [apps/flowshot](apps/flowshot/SUCCESS.md) | apps | 建立不修改原 Markdown 的本機閱讀與持久註記桌面工作區 | 未完成／待驗收 | 尚無已核准標記 | 2026-09-27 |
 | [apps/loom](apps/loom/SUCCESS.md) | apps | 整合畫布、原生終端、Markdown 與 AI 的本機桌面工作區 | 未完成／待驗收 | 尚無已核准標記 | 2026-10-04 |
 | [examples/bite-pi](examples/bite-pi/SUCCESS.md) | examples | 保留 Pi 驅動基礎平台產生器與 9router 接線示範 | 參考／封存 | 尚無已核准標記 | 2026-09-24 |
+| [gateways/edge-relay](gateways/edge-relay/SUCCESS.md) | gateways | 以可替換的反向通道與通知 adapters 安全連接受授權的本機服務 | 未完成／待驗收 | 尚無已核准標記 | 2026-11-02 |
 | [gateways/pokercase](gateways/pokercase/SUCCESS.md) | gateways | 以 thinrouter 提供個人訂閱憑證的多協定 LLM gateway | 未完成／待驗收 | 尚無已核准標記 | 2026-10-11 |
 | [labs/agent-office-lab](labs/agent-office-lab/SUCCESS.md) | labs | 驗證本地優先的 OpenCode、Grok、Pi、Cursor 四工位 Agent Office | 未完成／待驗收 | 尚無已核准標記 | 2026-11-02 |
 | [labs/aweshore](labs/aweshore/SUCCESS.md) | labs | 保存個人筆記與 avatar LLM 的早期 PKM 實驗 | 參考／封存 | 尚無已核准標記 | 2026-09-27 |

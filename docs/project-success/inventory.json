@@ -29,6 +29,11 @@
       "source_commit": "65d41ca3fbe59d324fe2369cf0816a50cac0e647"
     },
     {
+      "path": "gateways/edge-relay",
+      "last_source_update": "2026-11-02T09:08:59Z",
+      "source_commit": "244c7f7b416508aedd8f5f8d4a082ae2bb17d022"
+    },
+    {
       "path": "gateways/pokercase",
       "last_source_update": "2026-10-11T15:26:36+08:00",
       "source_commit": "9d23bd72850af83d32dcd1081b44d09bc4fc7b8d"

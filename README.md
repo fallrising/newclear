@@ -39,6 +39,7 @@
 
 | 路徑 | 說明 | 技術 | 文檔檔 |
 | --- | --- | --- | --- |
+| [`gateways/edge-relay`](gateways/edge-relay/) | 通用反向應用通道與可插拔 ntfy/Bark 通知（SDD-only，未實作） | TypeScript、Workers、Durable Objects（規劃） | 未分級 |
 | [`gateways/pokercase`](gateways/pokercase/) | Multi-provider LLM gateway（thinrouter） | Rust, SQLite | C |
 | [`systems/agent-secrets`](systems/agent-secrets/) | HSM 概念的加密秘密 Store 與 Agent 受控憑證 Broker SDD；未實作 | Workers, KV, TypeScript（規劃） | 未分級 |
 | [`systems/clarkq`](systems/clarkq/) | HTTP FIFO queue | Go | C |

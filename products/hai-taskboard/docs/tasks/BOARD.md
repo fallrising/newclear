@@ -509,12 +509,12 @@ remain open. T-0339 stays in_progress.
 Owner asked to continue after HROP. Source 0c5177fd; no open HAI PR at intake. Blockers are enforced on dispatch and on
 the Done predicate and projected on board/detail, but the declared `AddBlocker` / `ResolveBlocker` operations have no
 command, service, transaction or HTTP branch, so blockers exist only through raw SQL in tests. HBLKP proposes the
-contract with no migration; implementation waits for owner D1. UI, Question/Decision, Attention, providers and release
+contract with no migration; implementation waits for owner D1/D2. UI, Question/Decision, Attention, providers and release
 stay out of scope.
 
 | ID | Task | AC | Status | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| HBLKP | Propose and review AddBlocker / ResolveBlocker command contract | BLK-PLAN-01..03 | in_progress | 2026-11-02T16:16:24Z |  | 2026-11-02T16:16:24Z |
+| HBLKP | Propose and review AddBlocker / ResolveBlocker command contract | BLK-PLAN-01..03 | in_progress | 2026-11-02T16:16:24Z |  | 2026-11-02T16:22:43Z |
 
 BLK-PLAN-01 maps the unreachable blocker lifecycle to source. BLK-PLAN-02 fixes BLK-01..04, BLK-AC-01..04 and the
 minimal owner decision. BLK-PLAN-03 disposes Claude review, passes document checks and completes Git/CI/readback/ledger

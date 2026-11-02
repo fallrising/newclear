@@ -89,4 +89,6 @@ The owner-approved [WorkItem material index](docs/sdd/work-item-material-index.m
 metadata, exact AC requirements and stored Run/Candidate identities for downstream reads.
 [Usage](docs/local-development.md#workitem-material-index) and
 [implementation evidence](docs/evidence/work-item-material-index-20261101.md) describe its boundaries;
-BOARD HMDTL owns delivery status. Full detail/history, completion UI and M2 remain incomplete.
+BOARD HMDTL owns delivery status. The owner-approved [WorkItem detail](docs/sdd/work-item-detail.md) adds
+stored history (blockers, reviews, evidence, approvals, completion records, audit) with audit-derived
+attribution; BOARD HDTL owns its delivery. The completion UI and whole-M2 acceptance remain incomplete.

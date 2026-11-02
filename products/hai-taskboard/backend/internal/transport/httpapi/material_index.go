@@ -83,6 +83,22 @@ func (server *Server) interceptMaterialIndexRead(w http.ResponseWriter, r *http.
 	return true
 }
 func (server *Server) getWorkItemMaterialIndex(w http.ResponseWriter, r *http.Request) {
+	server.serveWorkItemObservation(w, r, "material index", writeMaterialIndexError, func(ctx context.Context, project domain.ProjectID, item domain.WorkItemID) ([]byte, error) {
+		source, ok := server.projections.(MaterialIndexSource)
+		if !ok {
+			return nil, errors.New("missing material index capability")
+		}
+		data, err := source.DescribeWorkItemMaterialIndex(ctx, project, item)
+		if err == nil {
+			err = validateMaterialIndexWire(data, project, item)
+		}
+		return data, err
+	})
+}
+
+// serveWorkItemObservation applies IDX-01 precedence for a WorkItem-scoped
+// observation read; describe runs only after authorization and framing checks.
+func (server *Server) serveWorkItemObservation(w http.ResponseWriter, r *http.Request, name string, writeError func(http.ResponseWriter, error), describe func(context.Context, domain.ProjectID, domain.WorkItemID) ([]byte, error)) {
 	session, ok := server.authenticate(w, r)
 	if !ok {
 		return
@@ -101,24 +117,16 @@ func (server *Server) getWorkItemMaterialIndex(w http.ResponseWriter, r *http.Re
 		return
 	}
 	if r.URL.RawQuery != "" || r.URL.ForceQuery || r.ContentLength != 0 || len(r.TransferEncoding) != 0 {
-		writeAPIError(w, 400, command.CodeInvalidRequest, "material index accepts no query or body")
+		writeAPIError(w, 400, command.CodeInvalidRequest, name+" accepts no query or body")
 		return
 	}
-	source, ok := server.projections.(MaterialIndexSource)
-	if !ok {
-		writeMaterialIndexError(w, errors.New("missing material index capability"))
-		return
-	}
-	data, err := source.DescribeWorkItemMaterialIndex(r.Context(), project, item)
-	if err == nil {
-		err = validateMaterialIndexWire(data, project, item)
-	}
+	data, err := describe(r.Context(), project, item)
 	if err != nil {
-		writeMaterialIndexError(w, err)
+		writeError(w, err)
 		return
 	}
 	if r.Context().Err() != nil {
-		writeMaterialIndexError(w, r.Context().Err())
+		writeError(w, r.Context().Err())
 		return
 	}
 	if sessionRevoked(server.authority, session) {
@@ -182,11 +190,28 @@ func (source PersistedProjections) DescribeWorkItemMaterialIndex(ctx context.Con
 	if err != nil {
 		return nil, err
 	}
+	wire, err := materialIndexWireOf(value)
+	if err != nil {
+		return nil, err
+	}
+	data, err := json.Marshal(wire)
+	if err != nil {
+		return nil, ErrProjectionCorrupt
+	}
+	if err = validateMaterialIndexWire(data, project, item); err != nil {
+		return nil, err
+	}
+	return data, nil
+}
+
+// materialIndexWireOf encodes the port DTO; callers validate the marshaled
+// bytes because the detail response embeds this object unchanged.
+func materialIndexWireOf(value port.WorkItemMaterialIndex) (materialIndexWire, error) {
 	if len(value.RequiredACRevisions) > port.MaterialIndexRowLimit || len(value.Runs) > port.MaterialIndexRowLimit || len(value.Candidates) > port.MaterialIndexRowLimit {
-		return nil, port.ErrMaterialIndexCapacity
+		return materialIndexWire{}, port.ErrMaterialIndexCapacity
 	}
 	if value.Cursor.Epoch > 1<<63-1 || value.Cursor.Sequence > 1<<63-1 {
-		return nil, ErrProjectionCorrupt
+		return materialIndexWire{}, ErrProjectionCorrupt
 	}
 	wire := materialIndexWire{APIVersion: "v1", Kind: "work_item_material_index/v1", ObservationOnly: true, ProjectID: string(value.ProjectID), WorkItemID: string(value.WorkItemID), Title: value.Title, Goal: value.Goal, OwnerID: string(value.OwnerID), Phase: string(value.Phase), Version: value.Version, RestoreGeneration: value.RestoreGeneration, Cursor: coverageCursorWire{Epoch: int64(value.Cursor.Epoch), Sequence: int64(value.Cursor.Sequence)}, ACs: []acRevisionWire{}, Runs: []materialIndexRunWire{}, Candidates: []materialIndexCandidateWire{}}
 	if a := value.Accepted; a != nil {
@@ -197,7 +222,7 @@ func (source PersistedProjections) DescribeWorkItemMaterialIndex(ctx context.Con
 	}
 	for _, r := range value.Runs {
 		if r.CreatedAtNS <= 0 {
-			return nil, ErrProjectionCorrupt
+			return materialIndexWire{}, ErrProjectionCorrupt
 		}
 		state := r.ReconciliationState
 		if state == "Reconciled" {
@@ -207,18 +232,11 @@ func (source PersistedProjections) DescribeWorkItemMaterialIndex(ctx context.Con
 	}
 	for _, c := range value.Candidates {
 		if c.CreatedAtNS <= 0 {
-			return nil, ErrProjectionCorrupt
+			return materialIndexWire{}, ErrProjectionCorrupt
 		}
 		wire.Candidates = append(wire.Candidates, materialIndexCandidateWire{CandidateID: string(c.CandidateID), RunID: string(c.RunID), Digest: "sha256:" + c.CandidateDigest.String(), Input: "sha256:" + c.InputSubjectDigest.String(), CreatedAt: time.Unix(0, c.CreatedAtNS).UTC().Format(time.RFC3339Nano)})
 	}
-	data, err := json.Marshal(wire)
-	if err != nil {
-		return nil, ErrProjectionCorrupt
-	}
-	if err = validateMaterialIndexWire(data, project, item); err != nil {
-		return nil, err
-	}
-	return data, nil
+	return wire, nil
 }
 
 func materialIndexShape(data []byte, typ reflect.Type) error {

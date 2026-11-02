@@ -444,3 +444,45 @@ Project success 41324340413; remote HAI files match the reviewed head. The first
 measured base→head race cost +26 s (436→463 s locally) and the re-run took 377.5 s, so the failure was retained and
 re-run once without code change. That package sits near the default timeout independent of this slice. HRWK end uses
 the merge time. RWK-AC-01..05 accepted for this backend slice; full M2, completion UI and SUCCESS AC-02..04 remain open.
+
+## T-0339 — truthful WorkItem detail contract
+
+Owner said 「繼續」 after HRWK. Source a502addb; no open HAI PR at intake. The remaining M2 row is detail/coverage
+authoritative interpretation: `GET work-items/{id}`/`WorkItemDetail` is declared without handler or consumer, its shape
+requires never-stored fields, and Reviews/Evidence/Approvals carry their WorkItem only through the immutable audit/result chain. HDTLP proposes a truthful
+shape with audit-derived attribution and no migration; implementation waits for owner D1. UI, Impact, providers and release stay out of scope.
+
+| ID | Task | AC | Status | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| HDTLP | Propose and review truthful WorkItem detail contract | DTL-PLAN-01..03 | done | 2026-11-02T10:54:03Z | 2026-11-02T11:14:38Z | 2026-11-02T11:14:38Z |
+| HDTL | Implement truthful WorkItem detail with audit-derived attribution | DTL-AC-01..06; H02/H03 support | done | 2026-11-02T11:09:20Z | 2026-11-02T11:53:28Z | 2026-11-02T11:53:28Z |
+
+DTL-PLAN-01 maps the remaining M2 detail gap to source. DTL-PLAN-02 fixes DTL-01..05, DTL-AC-01..06 and the minimal
+owner decisions. DTL-PLAN-03 disposes Claude review, passes document checks and completes Git/CI/readback/ledger delivery.
+[Proposal](../plans/work-item-detail-20261102.md); [review evidence](../evidence/work-item-detail-plan-20261102.md).
+
+2026-11-02T11:09Z: owner replied 「好，繼續。」 to the D1 request after the reviewed proposal; recorded as D1 approval.
+HDTLP closed with [#963](https://github.com/fallrising/newclear/pull/963) (merge time is its end; remote HAI equals the reviewed head).
+[Normative contract](../sdd/work-item-detail.md) governs HDTL. Root-only implementation, no worker; no migration,
+dependency, UI, provider, release or deploy.
+
+2026-11-02T11:53:28Z: [#969](https://github.com/fallrising/newclear/pull/969) merged normally as `f066b0d19795685da4d8efe1da07ca4eead0926c`.
+Reviewed head `c0a979c8093a08a2c9ce4bf4505575fcdcbc7d9b` passed HAI CI 41438800854 (backend 11m11s, web) and Project success
+41438800758; remote HAI files match the reviewed head. HDTL end uses the merge time. DTL-AC-01..06 accepted for this
+backend read slice ([evidence](../evidence/work-item-detail-20261102.md)); completion UI, Done validity, whole-M2 and SUCCESS
+AC-02..04 remain open. T-0339 stays in_progress.
+
+## T-0339 — ReopenWorkItem contract
+
+Owner asked to continue after HDTL. Source 973f2e2a; no open HAI PR at intake. Accepted `ReopenWorkItem` (domain-and-gates,
+OpenAPI payload, pure domain transition) has no command, service or HTTP branch, so Done is a dead end; Ready dispatch also
+skips the settled/strict-clock guards that a reopened item with Run history needs. HROPP proposes the contract with no
+migration; implementation waits for owner D1. UI, Done validity, Impact, providers and release stay out of scope.
+
+| ID | Task | AC | Status | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| HROPP | Propose and review ReopenWorkItem and Ready-with-history dispatch contract | ROP-PLAN-01..03 | in_progress | 2026-11-02T12:16:09Z |  | 2026-11-02T12:20:33Z |
+
+ROP-PLAN-01 maps the Done dead end to source. ROP-PLAN-02 fixes ROP-01..04, ROP-AC-01..04 and the minimal owner
+decision. ROP-PLAN-03 disposes Claude review, passes document checks and completes Git/CI/readback/ledger delivery.
+[Proposal](../plans/reopen-work-item-20261102.md); [review evidence](../evidence/reopen-work-item-plan-20261102.md).

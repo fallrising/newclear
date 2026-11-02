@@ -1,0 +1,64 @@
+---
+{
+  "schema_version": 1,
+  "id": "inventory-shape-packing",
+  "title": "形狀式背包配置",
+  "title_en": "Shape-based packing",
+  "category": "inventory",
+  "tags": [
+    "spatial-budget",
+    "packing",
+    "opportunity-cost"
+  ],
+  "summary": "用幾何形狀而不只是重量，讓攜帶選擇同時包含重排與取捨。",
+  "related": [
+    "inventory-adjacency",
+    "allocation-shop-reservation"
+  ],
+  "sources": [
+    {
+      "title": "Shape-based packing — Gameplay Atlas",
+      "url": "https://gameplayatlas.loopyhop.com/mechanic/inventory-shape-packing/",
+      "accessed": "2026-11-02",
+      "access_method": "page-text"
+    }
+  ]
+}
+---
+
+## 來源摘要
+
+原站描述在有限格子內旋轉與移動不同形狀的物品，避免重疊；留白也會影響後續戰利品。核心循環：看物品形狀 → 重排 → 決定取捨 → 確認攜帶配置。
+
+## 問題與情境（本地分析）
+
+適用於希望整理本身就是決策的戰利品系統。問題不是把背包填滿，而是讓玩家在幾何效率、戰術用途與未來空間間選擇。
+
+## 解法與取捨（本地分析）
+
+- 將幾何合法性與物品效益分開：放得下不等於值得留。
+- 拖曳時預覽碰撞、旋轉與放置結果；整理應可撤銷，避免操作失誤冒充策略代價。
+
+## 可調參數（本地分析）
+
+- 格子尺寸、是否允許旋轉、異形邊界、丟棄或暫存成本。
+- 物品形狀與功能的相關性；不要讓最大長方形永遠是最佳解。
+
+## 失敗模式（本地分析）
+
+- 只需每次按自動整理即可得到同一最優解，選擇會失去意義。
+- 觸控拖曳沒有足夠回饋，會把空間謎題變成操作困難。
+
+## 最小原型與驗收（本地提案）
+
+- 本地提案：5×4 背包、四種形狀、六件功能不同的物品；不做戰鬥或隨機掉落。
+- 驗收：Given 已佔用格子，When 旋轉或移動物品，Then 重疊與越界放置被拒絕且原配置不變；觀察玩家是否主動為下一件物品留空。
+
+## 相關模式
+
+- [相鄰關係驅動的組合加成](inventory-adjacency.md)
+- [商店保留與選項成本](allocation-shop-reservation.md)
+
+## 參考來源
+
+- [Shape-based packing — Gameplay Atlas](https://gameplayatlas.loopyhop.com/mechanic/inventory-shape-packing/) — 查閱：2026-11-02；取得方式：page-text。

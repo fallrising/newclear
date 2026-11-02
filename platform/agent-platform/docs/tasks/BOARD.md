@@ -255,3 +255,11 @@ No AP production code changes or M3. Earlier pending-resource snapshot supersede
 | FN05-R | AP readonly admission/tools/result and same-Web explicit handoff | R01–05 / CU-M3-R01–04 | done | 2026-11-01T16:44:02Z | 2026-11-01T17:25:32.944657+00:00 | 2026-11-01T17:25:32.944657+00:00 |
 
 PR952 merged as `a69ff34ec173ee36284aceebcb417e560438569c` after finalhead967727b2 passed AP41330719757/Fanz41330719768/contracts41330719829; remote Fanzloud/AP bytes read back equal. Bounded FN05-R done; completeM3/FN07 remains open.
+
+## T-0442 approved reconciliation dependency
+
+| ID | Task | AC | Status | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| FN04-U | Exact authenticated read-only command evidence; owner approved deskPR395 | CU-M3-U01/U01–03 | done | 2026-11-02T12:15:04Z | 2026-11-02T13:18:13Z | 2026-11-02T13:18:13Z |
+
+FN04-U native/current original-installation evidence accepted on86350871; PR983 merged2026-11-02T13:18:13Z as `d0dfb3622bd4cf59793b79448c7b4be55c3b3e7d`; finalheadfcf5c3fe all5requiredCI passed and remote Fanzloud/AP bytes match. No lifecycle/lease/schema change; full platform remains incomplete.

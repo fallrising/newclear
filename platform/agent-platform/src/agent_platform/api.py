@@ -17,6 +17,7 @@ from psycopg_pool import PoolTimeout
 from starlette.concurrency import run_in_threadpool
 
 from .auth import Auth
+from .command_lookup import lookup as lookup_command
 from .config import Settings
 from .db import Database
 from .domain import (
@@ -195,6 +196,14 @@ def create_app(settings=None, db=None, web_dist=None):
                 lambda conn, command_id: store.create_task(conn, operator, data, command_id),
             )
         )
+
+    @app.get("/api/v1/commands/{key}/tasks")
+    def task_command(key: str, session=authenticated):
+        return lookup_command(db, session["operator_id"], key)
+
+    @app.get("/api/v1/commands/{key}/runs/{source}/{action}")
+    def handoff_command(key: str, source: str, action: str, session=authenticated):
+        return lookup_command(db, session["operator_id"], key, source, action)
 
     @app.get("/api/v1/tasks/{task_id}")
     def task_detail(task_id: UUID, session=authenticated):

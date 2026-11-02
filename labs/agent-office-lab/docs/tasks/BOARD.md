@@ -196,3 +196,36 @@ Owner 指示繼續下一項；本輪使用本機故障，不新增模型呼叫�
 | T-0016-02 | 保留 fixture／失敗來源、結果關聯與真實故障重試驗收 | AC-09／11 子集 | done | 2026-11-01T16:44:12Z | 2026-11-01T16:54:06Z | 2026-11-01T16:54:34Z |
 
 T-0016 結案：[PR #947](https://github.com/fallrising/newclear/pull/947) 已合併，commit `adbc2dda0ac037a947201a1320e0591745fbcc93`，offline／validate 兩項 CI success。已回讀主線證據：152 tests；真實 Pi 本機 429 初次＋兩次明確重試，三個獨立 session、相同 fixture、原報告／事件不變；第三次及過期 parent 的 plan／execute 六項全部拒絕，不新增 run。三次追蹤 41／35／46 個程序全部退出，執行鎖釋放，46 筆結果的瀏覽器關聯／分類／刷新通過。零本地或遠端模型推論、未載入 owner key 或 Strata。完成 AC-07／08／09／11 的 Pi 子集；其他 provider 重試／生命週期、UI 派工、安全整合及完整 MVP 仍 pending，沒有 release／deploy／usable tag。
+
+## T-0017：本機操作台與原生終端入口
+
+Owner 指示繼續開發；整合 UI 到已驗證的本地流程，不新增付費呼叫。
+
+| ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| T-0017-01 | 四工位偵測／計畫、本地派工與產物整合 | AC-01／09 子集 | done | 2026-11-02T10:58:58Z | 2026-11-02T11:26:51Z | 2026-11-02T11:27:15Z |
+| T-0017-02 | 一次性執行、同來源授權、刷新及所屬 runner 停止 | AC-06／08／11 子集 | done | 2026-11-02T10:58:58Z | 2026-11-02T11:26:51Z | 2026-11-02T11:27:15Z |
+
+T-0017 結案：[PR #965](https://github.com/fallrising/newclear/pull/965) 已合併，commit `9f384a6d3c4f9d27e522ef860fff815b063b3623`，offline／validate 兩項 CI success。已回讀主線白名單證據：159 tests，Chrome 四工位偵測／計畫、Pi 本機 429、本地 OpenCode／Strata 派工、原生終端開啟／刷新／再次開啟、重複提交拒絕、產物詳細頁與停止通過。最終 107 個追蹤程序全退出、鎖釋放，52 筆結果回讀；零付費呼叫。首輪表單等待失敗及第二輪 swap guard 停止均保留，未放寬資源限制，最終重驗通過。完成 AC-01／06／08／09／11 子集；一般任務、完整四工位 UI／生命週期與安全驗收仍 pending，沒有 release／deploy／usable tag。
+
+## T-0018：Pi 原生取消與操作台驗收
+
+Owner 指示繼續開發；本輪使用真實 Pi 與本機 held request，不載入 owner key 或模型。
+
+| ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| T-0018-01 | 原生 working 取消、所屬程序清理與無自動重跑 | AC-06／08 子集 | done | 2026-11-02T12:15:30Z | 2026-11-02T12:30:18Z | 2026-11-02T12:30:55Z |
+| T-0018-02 | 取消入口授權互斥、頁面結果與重試拒絕 | AC-09／11 子集 | done | 2026-11-02T12:15:30Z | 2026-11-02T12:30:18Z | 2026-11-02T12:30:55Z |
+
+T-0018 結案：[PR #977](https://github.com/fallrising/newclear/pull/977) 已合併，commit `127e3fe1749e7c56cd1831c6cbe819f08b9e7bf0`，offline／validate 兩項 CI success。已回讀主線證據：163 tests；真實 Pi held request／原生 worker.kill，工位移除及 PID 退出 102 ms、整體清理 3.521 秒，最終外層追蹤 29 個程序全退出、執行鎖釋放。Chrome 操作台及 55 筆唯讀結果回歸通過，取消保持 cancelled、不重跑、不可重試；零模型推論與付費呼叫。首輪約 20.09 秒清理延遲及第二輪背景子程序殘留保留，第二輪鎖在事後逐一核對程序全退出後明確歸檔；最終只對本次已觀察且身分相符的後代送 SIGTERM。完成 AC-06／08／09／11 子集；其他 provider、原 session 恢復、遠端取消及完整安全驗收仍 pending，沒有 release／deploy／usable tag。
+
+## T-0019：操作台重啟與共用執行狀態
+
+Owner 指示繼續開發；本輪使用真實程序與瀏覽器，不執行模型。
+
+| ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| T-0019-01 | 跨入口持鎖與中斷狀態、重啟不重跑 | AC-08 子集 | done | 2026-11-02T12:36:43Z | 2026-11-02T12:47:03Z | 2026-11-02T12:47:29Z |
+| T-0019-02 | 唯讀邊界、派工重新檢查與頁面阻擋提示 | AC-11 子集 | done | 2026-11-02T12:36:43Z | 2026-11-02T12:47:03Z | 2026-11-02T12:47:29Z |
+
+T-0019 結案：[PR #982](https://github.com/fallrising/newclear/pull/982) 已合併，commit `e0cdbfba39927aad33d5088c78fe84c7f3bc0952`，offline／validate 兩項 CI success。已回讀主線證據：171 tests、真實 helper 程序與 Chrome 持鎖／SIGKILL／兩次操作台啟動／刷新驗收；中斷 journal 內容與修改時間不變，舊計畫被阻擋，明確核對退出後歸檔保留原紀錄，損壞狀態不洩漏且不放行。新增唯讀 status CLI；不建立狀態檔、不接管程序、不自動解鎖或重跑。所有測試程序退出，零 provider／模型啟動與付費呼叫。完成控制層 AC-08／11 子集，原生 provider host restart／session 恢復、遠端整合及完整安全驗收仍 pending，沒有 release／deploy／usable tag。

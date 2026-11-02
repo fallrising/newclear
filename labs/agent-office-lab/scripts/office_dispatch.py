@@ -18,7 +18,7 @@ import tempfile
 import time
 
 import cursor_cli
-from execution_slot import SlotError, acknowledge_stopped, execution_slot
+from execution_slot import SlotError, acknowledge_stopped, execution_slot, inspect_slot
 import remote_cli
 
 LAB = Path(__file__).resolve().parents[1]
@@ -191,10 +191,16 @@ def validate_crash(provider, check_crash, check_cancel=False, check_failure=None
         raise SlotError('crash_check_requires_pi_no_remote_or_other_checks')
 
 
-def plan(provider, check_cancel=False, check_failure=None, check_crash=False):
+def validate_keep_open(provider, keep_open, check_cancel=False, check_failure=None, check_crash=False):
+    if keep_open and (provider != 'opencode' or check_cancel or check_failure is not None or check_crash):
+        raise SlotError('keep_open_requires_local_task_only')
+
+
+def plan(provider, check_cancel=False, check_failure=None, check_crash=False, keep_open=False):
+    validate_keep_open(provider, keep_open, check_cancel, check_failure, check_crash)
     validate_crash(provider, check_crash, check_cancel, check_failure)
     validate_failure(provider, check_failure, check_cancel)
-    if check_cancel and provider != 'opencode':
+    if check_cancel and provider not in ('opencode', 'pi'):
         raise SlotError('local_cancel_check_only')
     spec = SPECS[provider]
     limits = {'timeout_seconds': spec['timeout_seconds'], 'host_retries': 0,
@@ -207,27 +213,29 @@ def plan(provider, check_cancel=False, check_failure=None, check_crash=False):
         limits.update(native_max_turns=6, hook_failure_behavior='fail_open')
     if check_failure is not None:
         limits.update(provider_request_cap=0, output_tokens_per_request_cap=0, injected_error_responses=1)
-    if check_crash:
+    if check_crash or (check_cancel and provider == 'pi'):
         limits.update(provider_request_cap=0, output_tokens_per_request_cap=0, held_loopback_requests=1)
     return {'mode': 'plan', 'provider': provider, 'model': spec['model'], 'pinned_version': spec['version'],
-            'task': 'synthetic_file', 'remote': spec['remote'] and check_failure is None and not check_crash, 'limits': limits,
+            'task': 'synthetic_file', 'remote': spec['remote'] and check_failure is None and not check_crash and not check_cancel, 'limits': limits,
             'command': ['python3', 'scripts/office_dispatch.py', 'run', provider, '--execute']
-                       + (['--allow-remote'] if spec['remote'] and check_failure is None and not check_crash else [])
+                       + (['--allow-remote'] if spec['remote'] and check_failure is None and not check_crash and not check_cancel else [])
                        + (['--check-failure', str(check_failure)] if check_failure is not None else [])
                        + (['--check-crash'] if check_crash else [])
-                       + (['--check-cancel'] if check_cancel else []),
+                       + (['--check-cancel'] if check_cancel else [])
+                       + (['--keep-open'] if keep_open else []),
             'injected_http_failure': check_failure,
-            'native_cancel_check': check_cancel, 'native_crash_check': check_crash,
+            'keep_open': keep_open, 'native_cancel_check': check_cancel, 'native_crash_check': check_crash,
             'model_task_started': False, 'automatic_fallback': False}
 
 
-def launch(provider, allow_remote, lab=LAB, check_cancel=False, check_failure=None, check_crash=False, retry_parent=None):
+def launch(provider, allow_remote, lab=LAB, check_cancel=False, check_failure=None, check_crash=False, retry_parent=None, keep_open=False):
+    validate_keep_open(provider, keep_open, check_cancel, check_failure, check_crash)
     validate_crash(provider, check_crash, check_cancel, check_failure, allow_remote)
     spec = SPECS[provider]
     validate_failure(provider, check_failure, check_cancel, allow_remote)
-    if check_cancel and provider != 'opencode':
+    if check_cancel and provider not in ('opencode', 'pi'):
         raise SlotError('local_cancel_check_only')
-    if (spec['remote'] and check_failure is None and not check_crash) != allow_remote:
+    if (spec['remote'] and check_failure is None and not check_crash and not check_cancel) != allow_remote:
         raise SlotError('explicit_remote_authorization_required' if spec['remote'] else 'local_remote_flag_forbidden')
     # Lock before preflight, then replace this process; the runner adopts the same lock/PID.
     with execution_slot(lab) as slot:
@@ -237,16 +245,18 @@ def launch(provider, allow_remote, lab=LAB, check_cancel=False, check_failure=No
             if provider != 'pi' or check_cancel or mode != meta['mode']:
                 raise SlotError('retry_mode_mismatch')
         check = detect(provider, lab)
-        ready = (check['cli_compatible'] and all(check['runtime'].values())) if check_failure is not None or check_crash else check['launch_prerequisites_present']
+        ready = (check['cli_compatible'] and all(check['runtime'].values())) if check_failure is not None or check_crash or (check_cancel and provider == 'pi') else check['launch_prerequisites_present']
         if not ready:
             print(json.dumps({'status': 'blocked', 'reason': 'preflight_failed', 'check': check}))
             return 1
         python = strata_home(lab) / 'source/.venv/bin/python' if provider == 'opencode' else Path(sys.executable)
         runner_args = ['--check-failure', str(check_failure)] if check_failure is not None else spec['args']
         if check_crash: runner_args = ['--check-crash']
+        if check_cancel and provider == 'pi': runner_args = []
         command = [str(python), str(lab / 'scripts' / spec['runner']), *runner_args]
         if check_cancel:
             command.append('--check-cancel')
+        if keep_open: command.append('--keep-open')
         if retry_parent is not None: slot.select_retry(retry_parent)
         os.execve(str(python), command, slot.exec_env(os.environ))
         raise RuntimeError('exec_returned_without_replacing_process')
@@ -266,19 +276,25 @@ def retry_plan(run_id, lab=LAB):
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     commands = parser.add_subparsers(dest='action', required=True)
+    commands.add_parser('status', help='Read the shared execution state without launching or acknowledging anything')
     check = commands.add_parser('detect'); check.add_argument('--provider', choices=[*SPECS, 'all'], default='all')
     preview = commands.add_parser('plan'); preview.add_argument('provider', choices=SPECS)
     run = commands.add_parser('run'); run.add_argument('provider', choices=SPECS)
     run.add_argument('--execute', action='store_true'); run.add_argument('--allow-remote', action='store_true')
-    run.add_argument('--check-cancel', action='store_true', help='OpenCode only: verify a second fixed native cancellation task')
+    run.add_argument('--check-cancel', action='store_true', help='OpenCode: local task cancellation; Pi: cancel a held loopback request without model calls')
     run.add_argument('--check-failure', type=int, choices=(401, 429), help='Pi only: injected loopback HTTP failure; no remote calls')
     run.add_argument('--check-crash', action='store_true', help='Pi only: kill the owned native CLI during a held loopback request; no remote calls')
+    run.add_argument('--keep-open', action='store_true', help='OpenCode only: keep the verified native terminal and local model open until stopped')
     retry = commands.add_parser('retry'); retry.add_argument('run_id')
     retry.add_argument('--execute', action='store_true'); retry.add_argument('--allow-remote', action='store_true')
     ack = commands.add_parser('acknowledge-interruption')
     ack.add_argument('--confirm-all-owned-processes-stopped', action='store_true', required=True)
     args = parser.parse_args(argv)
     try:
+        if args.action == 'status':
+            state = inspect_slot(LAB)
+            print(json.dumps({'shared_execution':state,'model_task_started':False}))
+            return 1 if state['status'] == 'unavailable' else 0
         if args.action == 'retry':
             preview, options = retry_plan(args.run_id)
             if not args.execute:
@@ -296,8 +312,8 @@ def main(argv=None):
         if args.action == 'plan' or not args.execute:
             if args.action == 'run' and args.allow_remote:
                 parser.error('--allow-remote requires --execute')
-            print(json.dumps(plan(args.provider, getattr(args, 'check_cancel', False), getattr(args, 'check_failure', None), getattr(args, 'check_crash', False)), indent=2)); return 0
-        return launch(args.provider, args.allow_remote, check_cancel=args.check_cancel, check_failure=args.check_failure, check_crash=args.check_crash)
+            print(json.dumps(plan(args.provider, getattr(args, 'check_cancel', False), getattr(args, 'check_failure', None), getattr(args, 'check_crash', False), getattr(args, 'keep_open', False)), indent=2)); return 0
+        return launch(args.provider, args.allow_remote, check_cancel=args.check_cancel, check_failure=args.check_failure, check_crash=args.check_crash, keep_open=args.keep_open)
     except SlotError as error:
         print(json.dumps({'status': 'blocked', 'reason': str(error)}), file=sys.stderr)
         return 1

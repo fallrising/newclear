@@ -29,14 +29,19 @@
       "source_commit": "65d41ca3fbe59d324fe2369cf0816a50cac0e647"
     },
     {
+      "path": "gateways/edge-relay",
+      "last_source_update": "2026-11-02T09:08:59Z",
+      "source_commit": "244c7f7b416508aedd8f5f8d4a082ae2bb17d022"
+    },
+    {
       "path": "gateways/pokercase",
       "last_source_update": "2026-10-11T15:26:36+08:00",
       "source_commit": "9d23bd72850af83d32dcd1081b44d09bc4fc7b8d"
     },
     {
       "path": "labs/agent-office-lab",
-      "last_source_update": "2026-11-01T16:52:27Z",
-      "source_commit": "053e2bcd63cedb36e463c9b8f640fd2831101f23"
+      "last_source_update": "2026-11-02T12:44:43Z",
+      "source_commit": "ef238c7ea95eb3d6d20ad0fc66f56513a185ec4d"
     },
     {
       "path": "labs/aweshore",
@@ -219,6 +224,11 @@
       "source_commit": "ff6459a8fbc9db69d43ba41b9ac5e7d41df3465b"
     },
     {
+      "path": "systems/agent-secrets",
+      "last_source_update": "2026-11-02T09:52:31Z",
+      "source_commit": "244c7f7b416508aedd8f5f8d4a082ae2bb17d022"
+    },
+    {
       "path": "systems/clarkq",
       "last_source_update": "2026-10-10T14:36:19+00:00",
       "source_commit": "79109d62d5d8f47cfe3e673d7467e901e41467eb"
@@ -252,6 +262,11 @@
       "path": "tools/codex-usage",
       "last_source_update": "2026-10-18T16:12:15+08:00",
       "source_commit": "63e2f3b3a47776e35865fcb28d368e8f4d32be22"
+    },
+    {
+      "path": "tools/gameplay-pattern-catalog",
+      "last_source_update": "2026-11-02T09:37:46Z",
+      "source_commit": "fffc1c84ff94f4d8bdf94e9ecf1705c09e759f32"
     },
     {
       "path": "tools/motion-prompt",

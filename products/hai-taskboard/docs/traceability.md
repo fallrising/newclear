@@ -541,3 +541,14 @@ Developing redispatch and defines the current Candidate for Done predicate term 
 ([evidence](evidence/rework-loop-20261101.md)). They cover lawful command history only; v0.2 AC-05 nonpassing
 Evidence stays domain-only, AC-03/29/30/47/48 need M4 Impact, AC-06 needs M6. Completion UI and SUCCESS
 AC-02..04 remain pending.
+
+## 2026-11-02 Truthful WorkItem detail (HDTL)
+
+[Accepted DTL-01..04](sdd/work-item-detail.md) implements HAI SDD §UX surface 2's read and the M2
+"detail/coverage authoritative interpretation" row for reads. Fixed DTL-AC-01..06 map to
+`TestWorkItemDetailHTTP_ScopeAndPrecedence` (AC-01), `TestWorkItemDetail_TruthfulShape` and the schema
+fixtures (AC-02), `TestWorkItemDetail_AttributionAcrossItemsAndRework` (AC-03, real SQLite/Fake/HTTP:
+rework A→B, consumed Approval, fixture-only rows on a second item, acceptance and runtime audit),
+`TestWorkItemDetail_AttributionCorruption` (AC-04) and `TestWorkItemDetail_SnapshotCapacityCorruption`
+(AC-05, real WAL concurrent writer). [Evidence](evidence/work-item-detail-20261102.md) records Red,
+mutation, gates and review. No coverage, Done validity, completion UI or whole-M2 acceptance is inferred.

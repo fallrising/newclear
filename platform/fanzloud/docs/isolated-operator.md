@@ -1,6 +1,15 @@
 # Private isolated-task entry
 
-The verified route is [M1 isolated acceptance](acceptance/M1-isolated.md). Operator
+Current status (2026-11-02): no standing operator URL or running acceptance service.
+Both formal Codex and Claude routes have [accepted M2 evidence](acceptance/M2-two-vendors.md).
+Durable restart readback and [candidate-only review](acceptance/M3-readonly-review.md)
+are accepted bounded slices. The original installation has now been positively
+reconciled and completed the [automated current-source journey](acceptance/M3-reconciliation.md);
+the separate prior reviewer store is not used as its recovery. Owner operation
+confirmation remains pending. All approved windows are consumed; starting retained
+services again requires a new finite window.
+
+The initial verified route is [M1 isolated acceptance](acceptance/M1-isolated.md). Operator
 workflow: open the configured private HTTPS origin, log in, select the registered
 project/base and Claude Code profile, enter the repair, submit once, observe states,
 then download the final diff and inspect checks. Cancellation is a request; only
@@ -48,9 +57,11 @@ After login, the page reads durable submission history before enabling new work.
 tasks can be reopened from that history; observed statuses retain a cursor across restart.
 The history is a bounded record of observed AP snapshots, not every AP tool/event message.
 An unknown submission remains blocked across fresh browser sessions. Refresh is GET-only;
-it can recover a saved confirmation but never resend a task. AP currently has no public
-client-key query, so an unresolved gateway-to-AP uncertainty requires trusted investigation;
-do not delete the database or clear browser storage to bypass it. This slice provides no
+it can recover a saved confirmation but never resend a task. Use the explicit 「核對提交結果」 action beside a saved unknown intent. The server reads
+only the exact operator/key/operation evidence from AP and atomically confirms a matching
+original receipt. Missing, inconsistent or unavailable evidence stays locked; a later
+explicit action may repeat the lookup only. Do not delete the database or clear browser
+storage to bypass it. This slice provides no
 automatic abandon/retry or offline authentication. AP must be reachable for authorization.
 
 The checked-in `acceptance/m1-browser.mjs` is an explicit acceptance launcher, not a
@@ -61,12 +72,12 @@ real authentication plus a labelled intercepted lost-response test, with no AP t
 `--faults` validates denials/queued cancellation and reads the prior live result without
 calling a provider. Keep their receipts distinct. The accepted live run is not restarted.
 
-M1 does not provide deployment automation, arbitrary project onboarding, a second
-vendor or durable Fanzloud recovery. Those limits are visible in SUCCESS/SDD; installed
-libraries, a passing CLI or a merged PR alone do not establish owner readiness.
+Deployment automation and arbitrary project onboarding remain unavailable. M2 adds
+the second vendor; M3 adds durable intent/readback and fixed-candidate review. Whole
+M3/FN07 is incomplete; a merged slice alone does not establish owner readiness.
 
 
-## M2 Codex configuration (live acceptance pending)
+## M2 Codex configuration (accepted bounded live evidence)
 
 The same Web catalog now admits `codex-subscription` as well as Claude. Register a
 Codex profile with the same bounded verification/deadline contract; the exact model
@@ -80,5 +91,33 @@ no credentials or built-in host execution environment are exposed to repository 
 Once AP returns a confirmed run ID, the operator may explicitly submit another task
 and select either recent task. An unknown submission remains locked; a late response
 for A cannot replace selected B. Resource admission remains AP's responsibility and
-currently stays at one VM. Code availability does not establish simultaneous isolation
-or second-vendor live acceptance; see the M2 acceptance record when available.
+currently stays at one VM. The prior two-VM M2 acceptance window is consumed; its
+accepted isolation evidence does not authorize another parallel run.
+
+## Fixed candidate and review
+
+On an authorized running installation, select a completed writer and inspect/download
+its immutable candidate (original task, fixed base, diff and recorded checks). Select
+the other vendor's review profile and explicitly request review. The reviewer receives
+only that candidate, not a full checkout; its hash-bound verdict and reasons do not
+automatically mark the task Done. A rework verdict permits at most one explicit writer
+rework and second review in the product contract, but any live use still needs a
+window that covers it. The accepted actual review returned accept on the first round;
+rework/second-review branches have native evidence only. Reopen/download compares the
+same immutable bytes after Rust/AP restart. Credentials stay on the trusted side.
+
+## Unknown recovery and final journey
+
+The explicit Web reconciliation command uses the original immutable AP command receipt.
+Task-list/title matching is
+insufficient and repeating a task POST is forbidden. Do not manually bind a guessed
+run, discard the SQLite file, reset a key or use a fresh store to claim recovery.
+
+The owner approved the [bounded recovery scope](specs/PROPOSAL-M3-recovery.md).
+The [wire contract](specs/SPEC-M3-recovery.md), original-installation recovery and
+automated journey have [independently accepted evidence](acceptance/M3-reconciliation.md).
+Owner operation confirmation remains separate and pending.
+A successful confirmation means the submission is known, even if the run was cancelled;
+it does not mean coding succeeded. Until those
+checks pass, this document describes accepted capabilities and their startup preconditions,
+not an available installation that the owner can log into now.

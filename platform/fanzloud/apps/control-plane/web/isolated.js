@@ -34,6 +34,8 @@ let durableBlocked = false;
 let recoveryRequest = 0;
 let submissionGeneration = 0;
 let fallbackRunId = '';
+let reconciling = false;
+let reconcileButtons = [];
 element('submit-task').disabled = true;
 let recentRequest = 0;
 function reasonText(reason) {
@@ -81,8 +83,9 @@ async function catalog() {
   await recent();
 }
 function updateSubmitLock() {
+  for (const button of reconcileButtons) button.disabled = reconciling || !authenticated;
   const localUnknown = Boolean(pendingSubmission && (pendingSubmission.unknown || typeof pendingSubmission.runId !== 'string' || !pendingSubmission.runId));
-  lockedSubmission = !durableReady || durableBlocked || localUnknown;
+  lockedSubmission = reconciling || !durableReady || durableBlocked || localUnknown;
   element('submit-task').disabled = lockedSubmission || !selected.length || !element('agent').options.length;
   updateHandoff();
 }
@@ -100,12 +103,17 @@ async function recoverSubmissions() {
   } else if (matching?.state === 'rejected') {
     pendingSubmission = null; sessionStorage.removeItem('fanz-submission');
   }
+  reconcileButtons = [];
   element('submission-history').replaceChildren(...saved.items.map(item => {
     const entry = document.createElement('li');
     const label = `${item.request?.title || (item.request?.route?.endsWith('/reviews') ? '審查' : item.request?.route?.endsWith('/rework') ? '返工' : '提交')} · ${item.state === 'confirmed' ? '已受理' : item.state === 'rejected' ? '已拒絕' : '待對帳，不會重送'}`;
     if (item.state === 'confirmed' && item.receipt?.run?.id) {
       const button = document.createElement('button'); button.type = 'button'; button.className = 'quiet'; button.textContent = label;
       button.addEventListener('click', () => observe(item.receipt.run.id)); entry.append(button);
+    } else if (item.state === 'unknown' && typeof item.key === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.test(item.key)) {
+      const button = document.createElement('button'); button.type = 'button'; button.className = 'quiet';
+      button.textContent = `${label} · 核對提交結果`; button.disabled = reconciling; reconcileButtons.push(button);
+      button.addEventListener('click', () => reconcileSubmission(item.key, button)); entry.append(button);
     } else { entry.textContent = label; }
     return entry;
   }));
@@ -114,6 +122,24 @@ async function recoverSubmissions() {
   else if (matching?.state === 'confirmed') element('submit-status').textContent = '任務已受理（從持久紀錄恢復）';
   fallbackRunId = saved.items.find(item => item.state === 'confirmed' && item.receipt?.run?.id)?.receipt.run.id || '';
   if (!runId && fallbackRunId) { runId = fallbackRunId; sessionStorage.setItem('fanz-current-run', runId); }
+}
+async function reconcileSubmission(key, button) {
+  if (!authenticated || reconciling) return;
+  reconciling = true; button.disabled = true; durableReady = false; updateSubmitLock();
+  let generation = ++recoveryRequest;
+  element('submit-status').textContent = '正在核對原提交；不會建立新任務…';
+  try {
+    await api(`/submissions/${key}/reconcile`, {method: 'POST', body: {}});
+    if (!authenticated || generation !== recoveryRequest) return;
+    const readback = recoverSubmissions(); generation = recoveryRequest; await readback;
+    if (authenticated && generation === recoveryRequest && durableReady) element('submit-status').textContent = durableBlocked ? '仍有其他提交待對帳。' : '原提交已核對；沒有重送任務。';
+  } catch (error) {
+    if (authenticated && generation === recoveryRequest) {
+      element('submit-status').textContent = '尚無法確認原提交，仍保持鎖定；不會重送。'; fail(error);
+    }
+  } finally {
+    reconciling = false; button.disabled = false; updateSubmitLock();
+  }
 }
 async function recent() {
   const requested = ++recentRequest;

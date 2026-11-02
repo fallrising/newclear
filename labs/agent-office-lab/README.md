@@ -2,6 +2,7 @@
 
 本地優先的 Agent Office 實驗：OpenCode + Strata、Grok、Pi + DeepSeek、Cursor 的原生合成任務均已實測通過。提供四 provider 的唯讀結果查詢與離線頁面；統一 CLI 的本地 OpenCode 端到端任務與取消已實測，遠端新入口及跨 provider 生命週期仍待完成。先讀 [SUCCESS](SUCCESS.md)；目前沒有 usable tag。
 
+- [本機操作台：派工、原生終端與結果](docs/CONSOLE.md)
 - [Pi 明確重試與次數限制](docs/RETRY.md)
 - [Pi CLI crash 與明確重新啟動](docs/CRASH.md)
 - [Pi 故障驗收](docs/FAILURES.md)：本機注入 401／429、原生錯誤與清理核對，不呼叫模型。
@@ -28,3 +29,5 @@
 本 repo 收錄腳本、設定、fixtures、依賴鎖檔及公開摘要；模型權重、上游 checkout、快取、登入資訊及原始 runs 不提交。原始本機成果以歷史摘要呈現，公開匯入未重跑模型；後續已完成[生命週期實測](docs/evidence/lifecycle.md)與[host 重啟實測](docs/evidence/restart.md)，未重跑未變更的 614 項上游測試。
 
 OpenCode 子程序的非本機網路與區外寫入限制已做 probe；區外讀取及 Office／Strata 整棵程序樹的 egress 隔離尚未驗收。僅使用合成資料，模型不可用直接失敗，沒有雲端 fallback。
+
+[Pi 原生取消與驗收](docs/CANCEL.md)：本機 held request、原生工位移除、程序清理及操作台結果。

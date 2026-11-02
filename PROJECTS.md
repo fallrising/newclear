@@ -13,8 +13,9 @@
 | [apps/flowshot](apps/flowshot/SUCCESS.md) | apps | 建立不修改原 Markdown 的本機閱讀與持久註記桌面工作區 | 未完成／待驗收 | 尚無已核准標記 | 2026-09-27 |
 | [apps/loom](apps/loom/SUCCESS.md) | apps | 整合畫布、原生終端、Markdown 與 AI 的本機桌面工作區 | 未完成／待驗收 | 尚無已核准標記 | 2026-10-04 |
 | [examples/bite-pi](examples/bite-pi/SUCCESS.md) | examples | 保留 Pi 驅動基礎平台產生器與 9router 接線示範 | 參考／封存 | 尚無已核准標記 | 2026-09-24 |
+| [gateways/edge-relay](gateways/edge-relay/SUCCESS.md) | gateways | 以可替換的反向通道與通知 adapters 安全連接受授權的本機服務 | 未完成／待驗收 | 尚無已核准標記 | 2026-11-02 |
 | [gateways/pokercase](gateways/pokercase/SUCCESS.md) | gateways | 以 thinrouter 提供個人訂閱憑證的多協定 LLM gateway | 未完成／待驗收 | 尚無已核准標記 | 2026-10-11 |
-| [labs/agent-office-lab](labs/agent-office-lab/SUCCESS.md) | labs | 驗證本地優先的 OpenCode、Grok、Pi、Cursor 四工位 Agent Office | 未完成／待驗收 | 尚無已核准標記 | 2026-11-01 |
+| [labs/agent-office-lab](labs/agent-office-lab/SUCCESS.md) | labs | 驗證本地優先的 OpenCode、Grok、Pi、Cursor 四工位 Agent Office | 未完成／待驗收 | 尚無已核准標記 | 2026-11-02 |
 | [labs/aweshore](labs/aweshore/SUCCESS.md) | labs | 保存個人筆記與 avatar LLM 的早期 PKM 實驗 | 參考／封存 | 尚無已核准標記 | 2026-09-27 |
 | [labs/bee-swarm](labs/bee-swarm/SUCCESS.md) | labs | 保存以 GitHub 角色協作及 SimPy 探索流程的概念框架 | 參考／封存 | 尚無已核准標記 | 2026-09-24 |
 | [labs/browser-fingerprint](labs/browser-fingerprint/SUCCESS.md) | labs | 觀測瀏覽器設備訊號與任務操作事件以比較測試環境 | 完成 | 尚無已核准標記 | 2026-10-03 |
@@ -51,6 +52,7 @@
 | [products/kith](products/kith/SUCCESS.md) | products | 讓人類與受控代理在同一私有房間協作對話 | 未完成／待驗收 | 尚無已核准標記 | 2026-10-18 |
 | [products/phark](products/phark/SUCCESS.md) | products | 以同源網頁提供多欄時間線與基本社交互動 | 未完成／待驗收 | 尚無已核准標記 | 2026-09-27 |
 | [specs/fleet](specs/fleet/SUCCESS.md) | specs | 以期望狀態協調個人 VPS 的 Compose 工作負載與入口 | 未完成／待驗收 | 尚無已核准標記 | 2026-09-28 |
+| [systems/agent-secrets](systems/agent-secrets/SUCCESS.md) | systems | 提供可稽核的加密秘密儲存與 Agent 受控憑證使用 | 未完成／待驗收 | 尚無已核准標記 | 2026-11-02 |
 | [systems/clarkq](systems/clarkq/SUCCESS.md) | systems | 以簡單 HTTP 介面提供可持久化的單機訊息佇列 | 完成 | [usable/clarkq/v1.5.1](https://github.com/fallrising/newclear/tree/usable/clarkq/v1.5.1/systems/clarkq) | 2026-10-10 |
 | [systems/mkfk](systems/mkfk/SUCCESS.md) | systems | 以可重播故障驗證分區日誌、複製與生產消費語義 | 未完成／待驗收 | 尚無已核准標記 | 2026-10-19 |
 | [systems/ojbquay](systems/ojbquay/SUCCESS.md) | systems | 在 Kafka 與 PostgreSQL 上提供自助訊息發布、消費及故障處理 | 完成 | [usable/ojbquay/v1.0.0](https://github.com/fallrising/newclear/tree/usable/ojbquay/v1.0.0/systems/ojbquay) | 2026-09-27 |
@@ -58,5 +60,6 @@
 | [systems/wotar](systems/wotar/SUCCESS.md) | systems | 以自管金鑰在 MQTT 上提供端到端加密的發布與訂閱 | 完成 | [usable/wotar/v0.1.0](https://github.com/fallrising/newclear/tree/usable/wotar/v0.1.0/systems/wotar) | 2026-09-24 |
 | [tools/cc-quota](tools/cc-quota/SUCCESS.md) | tools | 保存已封存 Claude 額度採集與通知來源，後繼為 Agent Usage | 參考／封存 | 尚無已核准標記 | 2026-09-27 |
 | [tools/codex-usage](tools/codex-usage/SUCCESS.md) | tools | 統一唯讀查詢多工具額度與使用狀態並保留 Codex 採集相容性 | 未完成／待驗收 | 尚無已核准標記 | 2026-10-18 |
+| [tools/gameplay-pattern-catalog](tools/gameplay-pattern-catalog/SUCCESS.md) | tools | 以逐篇來源與結構化 metadata 整理可瀏覽的遊戲設計模式筆記 | 未完成／待驗收 | 尚無已核准標記 | 2026-11-02 |
 | [tools/motion-prompt](tools/motion-prompt/SUCCESS.md) | tools | 以繁中與英文動態示範辨認術語並複製 AI 提示詞 | 未完成／待驗收 | 尚無已核准標記 | 2026-10-28 |
 | [tools/streaming-converter](tools/streaming-converter/SUCCESS.md) | tools | 保留 FFmpeg 多畫質 HLS 轉檔與網頁播放的歷史工具 | 參考／封存 | 尚無已核准標記 | 2026-09-27 |

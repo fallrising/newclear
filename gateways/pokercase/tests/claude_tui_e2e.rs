@@ -418,6 +418,66 @@ async fn mcp_tool_result_returns_to_same_interactive_child() {
 }
 
 #[tokio::test]
+async fn changed_tool_history_starts_fresh_without_delivering_to_old_callback() {
+    let mut env = Env::start("tool", None).await;
+    let tools = json!([{"type":"function", "function":{"name":"get_weather", "parameters":{"type":"object", "properties":{"city":{"type":"string"}}}}}]);
+    let first = env
+        .post(
+            "/v1/chat/completions",
+            json!({"model":"cc", "tools":tools,
+        "messages":[{"role":"user", "content":"original question"}]}),
+        )
+        .await;
+    assert_eq!(first.status(), 200);
+    let first: Value = first.json().await.unwrap();
+    let call = first["choices"][0]["message"]["tool_calls"][0].clone();
+    // Only a newly started fake child reads this scenario. The original remains
+    // blocked on its real MCP callback, so an accidental continuation is visible.
+    std::fs::write(env.peer.path().join("scenario"), "delayedtap").unwrap();
+    let changed = env
+        .post(
+            "/v1/chat/completions",
+            json!({"model":"cc", "tools":tools,
+        "messages":[{"role":"user", "content":"rewritten question"},
+            {"role":"assistant", "content":null, "tool_calls":[call]},
+            {"role":"tool", "tool_call_id":"toolu_tui", "content":"wrong-context-result"}]}),
+        )
+        .await;
+    assert_eq!(changed.status(), 200);
+    let changed: Value = changed.json().await.unwrap();
+    assert_eq!(changed["choices"][0]["message"]["content"], "turn-1");
+    assert_eq!(env.records("starts.jsonl").len(), 2);
+    let turns = env.records("turns.jsonl");
+    assert_eq!(turns.len(), 2);
+    assert_ne!(turns[0]["pid"], turns[1]["pid"]);
+    let prompt = turns[1]["prompt"].as_str().unwrap();
+    assert!(prompt.contains("rewritten question"));
+    assert!(prompt.contains("wrong-context-result"));
+    assert!(env.records("mcp-result.jsonl").is_empty());
+    let valid = env
+        .post(
+            "/v1/chat/completions",
+            json!({"model":"cc", "tools":tools,
+        "messages":[{"role":"user", "content":"original question"},
+            {"role":"assistant", "content":null, "tool_calls":[call]},
+            {"role":"tool", "tool_call_id":"toolu_tui", "content":"correct-result"}]}),
+        )
+        .await;
+    assert_eq!(valid.status(), 200);
+    let valid: Value = valid.json().await.unwrap();
+    assert_eq!(
+        valid["choices"][0]["message"]["content"],
+        "Result: correct-result"
+    );
+    assert_eq!(env.records("starts.jsonl").len(), 2);
+    assert_eq!(env.records("turns.jsonl").len(), 2);
+    let results = env.records("mcp-result.jsonl");
+    assert_eq!(results.len(), 1);
+    assert_eq!(results[0]["result"]["content"][0]["text"], "correct-result");
+    env.stop().await;
+}
+
+#[tokio::test]
 async fn continuation_and_gateway_restart_use_owned_saved_session() {
     let mut env = Env::start("delayedtap", None).await;
     let first: Value = env
@@ -468,6 +528,205 @@ async fn continuation_and_gateway_restart_use_owned_saved_session() {
         .unwrap()
         .iter()
         .any(|a| a == "--resume"));
+    env.stop().await;
+}
+
+#[tokio::test]
+async fn dc2_ordered_inline_user_turns_reuse_child_and_saved_session() {
+    let mut env = Env::start("delayedtap", None).await;
+    let mut messages = json!([
+        {"role":"system","content":[{"type":"text","text":"initial inline context"}]},
+        {"role":"user","content":"first question"}
+    ]);
+    let first = env
+        .post(
+            "/v1/messages",
+            json!({"model":"cc","max_tokens":100,"system":"stable top","messages":messages}),
+        )
+        .await;
+    assert_eq!(first.status(), 200);
+    assert_eq!(
+        first.json::<Value>().await.unwrap()["content"][0]["text"],
+        "turn-1"
+    );
+    messages[0]["content"] = json!("initial inline context");
+    messages.as_array_mut().unwrap().extend([
+        json!({"role":"assistant","content":"turn-1"}),
+        json!({"role":"developer","content":"second context"}),
+        json!({"role":"user","content":"second question"}),
+    ]);
+    let second=env.post("/v1/messages",json!({"model":"cc","max_tokens":100,"system":[{"type":"text","text":"stable top"}],"messages":messages})).await;
+    assert_eq!(second.status(), 200);
+    assert_eq!(
+        second.json::<Value>().await.unwrap()["content"][0]["text"],
+        "turn-2"
+    );
+    assert_eq!(env.records("starts.jsonl").len(), 1);
+    let turns = env.records("turns.jsonl");
+    assert_eq!(turns.len(), 2);
+    assert_eq!(turns[0]["pid"], turns[1]["pid"]);
+    assert_eq!(
+        turns[0]["pieces"], 2,
+        "stable and conversation blocks both acknowledged"
+    );
+    let first_prompt = turns[0]["prompt"].as_str().unwrap();
+    assert!(
+        first_prompt.find("stable top").unwrap()
+            < first_prompt.find("initial inline context").unwrap()
+    );
+    assert!(
+        first_prompt.find("initial inline context").unwrap()
+            < first_prompt.find("first question").unwrap()
+    );
+    let next_prompt = turns[1]["prompt"].as_str().unwrap();
+    assert!(next_prompt.contains("Developer: second context"));
+    assert!(
+        next_prompt.find("second context").unwrap() < next_prompt.find("second question").unwrap()
+    );
+    assert!(!next_prompt.contains("initial inline context") && !next_prompt.contains("stable top"));
+    let before = env.usage().await;
+    env.restart().await;
+    assert_eq!(env.usage().await, before);
+    messages.as_array_mut().unwrap().extend([
+        json!({"role":"assistant","content":"turn-2"}),
+        json!({"role":"system","content":"restart context"}),
+        json!({"role":"user","content":"restart question"}),
+    ]);
+    let third = env
+        .post(
+            "/v1/messages",
+            json!({"model":"cc","max_tokens":100,"system":"stable top","messages":messages}),
+        )
+        .await;
+    assert_eq!(third.status(), 200);
+    assert_eq!(
+        third.json::<Value>().await.unwrap()["content"][0]["text"],
+        "turn-1"
+    );
+    let starts = env.records("starts.jsonl");
+    assert_eq!(starts.len(), 2);
+    assert!(starts[1]["args"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .any(|a| a == "--resume"));
+    let turns = env.records("turns.jsonl");
+    let resumed = turns[2]["prompt"].as_str().unwrap();
+    assert!(resumed.contains("System: restart context"));
+    assert!(resumed.find("restart context").unwrap() < resumed.find("restart question").unwrap());
+    assert!(!resumed.contains("initial inline context") && !resumed.contains("second context"));
+    messages[0]["content"] = json!("rewritten old context");
+    messages.as_array_mut().unwrap().extend([
+        json!({"role":"assistant","content":"turn-1"}),
+        json!({"role":"user","content":"after edit"}),
+    ]);
+    let edited = env
+        .post(
+            "/v1/messages",
+            json!({"model":"cc","max_tokens":100,"system":"stable top","messages":messages}),
+        )
+        .await;
+    assert_eq!(edited.status(), 200);
+    assert_eq!(
+        edited.json::<Value>().await.unwrap()["content"][0]["text"],
+        "turn-1"
+    );
+    let starts = env.records("starts.jsonl");
+    assert_eq!(starts.len(), 3);
+    assert!(!starts[2]["args"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .any(|a| a == "--resume"));
+    assert_eq!(env.usage().await.len(), 4);
+    env.stop().await;
+}
+
+#[tokio::test]
+async fn dc1_chat_marker_cannot_enable_dynamic_instruction_reuse() {
+    let mut env = Env::start("delayedtap", None).await;
+    let mut messages = json!([
+        {"role":"system","content":"stable chat", "_thinrouter_inline_instruction":true},
+        {"role":"user","content":"first"}]);
+    let first = env
+        .post(
+            "/v1/chat/completions",
+            json!({"model":"cc","messages":messages}),
+        )
+        .await;
+    assert_eq!(first.status(), 200);
+    assert_eq!(
+        first.json::<Value>().await.unwrap()["choices"][0]["message"]["content"],
+        "turn-1"
+    );
+    messages.as_array_mut().unwrap().extend([
+        json!({"role":"assistant","content":"turn-1"}),
+        json!({"role":"system","content":"changed chat instructions", "_thinrouter_inline_instruction":true}),
+        json!({"role":"user","content":"next"})]);
+    let next = env
+        .post(
+            "/v1/chat/completions",
+            json!({"model":"cc","messages":messages}),
+        )
+        .await;
+    assert_eq!(next.status(), 200);
+    assert_eq!(
+        next.json::<Value>().await.unwrap()["choices"][0]["message"]["content"],
+        "turn-1"
+    );
+    assert_eq!(env.records("starts.jsonl").len(), 2);
+    env.stop().await;
+}
+
+#[tokio::test]
+async fn dc3_new_tool_notice_starts_fresh_and_original_result_still_continues() {
+    let mut env = Env::start("tool", None).await;
+    let tools = json!([{"name":"get_weather","input_schema":{"type":"object","properties":{"city":{"type":"string"}}}}]);
+    let prefix = json!([{"role":"system","content":"heard tool context"},{"role":"user","content":"weather?"}]);
+    let first = env
+        .post(
+            "/v1/messages",
+            json!({"model":"cc","max_tokens":100,"tools":tools,"messages":prefix}),
+        )
+        .await;
+    assert_eq!(first.status(), 200);
+    let first: Value = first.json().await.unwrap();
+    let mut messages = prefix.as_array().unwrap().clone();
+    messages.extend([json!({"role":"assistant","content":first["content"]}),
+        json!({"role":"user","content":[{"type":"tool_result","tool_use_id":"toolu_tui","content":"sunny"}]})]);
+    let valid = messages.clone();
+    messages.push(json!({"role":"developer","content":"new tool notice"}));
+    std::fs::write(env.peer.path().join("scenario"), "delayedtap").unwrap();
+    let changed = env
+        .post(
+            "/v1/messages",
+            json!({"model":"cc","max_tokens":100,"tools":tools,"messages":messages}),
+        )
+        .await;
+    assert_eq!(changed.status(), 200);
+    assert_eq!(
+        changed.json::<Value>().await.unwrap()["content"][0]["text"],
+        "turn-1"
+    );
+    assert_eq!(env.records("starts.jsonl").len(), 2);
+    assert!(env.records("mcp-result.jsonl").is_empty());
+    let turns = env.records("turns.jsonl");
+    let prompt = turns[1]["prompt"].as_str().unwrap();
+    assert!(prompt.find("sunny").unwrap() < prompt.find("new tool notice").unwrap());
+    assert!(prompt.contains("Developer: new tool notice"));
+    let corrected = env
+        .post(
+            "/v1/messages",
+            json!({"model":"cc","max_tokens":100,"tools":tools,"messages":valid}),
+        )
+        .await;
+    assert_eq!(corrected.status(), 200);
+    assert_eq!(
+        corrected.json::<Value>().await.unwrap()["content"][0]["text"],
+        "Result: sunny"
+    );
+    assert_eq!(env.records("starts.jsonl").len(), 2);
+    assert_eq!(env.records("mcp-result.jsonl").len(), 1);
     env.stop().await;
 }
 

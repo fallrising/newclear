@@ -27,7 +27,7 @@ const secrets={bot:'ab'.repeat(32),runner:'cd'.repeat(32)};
 const keys=Object.fromEntries(Object.entries(secrets).map(([id,key])=>[id,{principal_id:id,grant_id:id,generation:1,secret_hex:key,expires_at:iso(now+3600000)}]));
 const mf=new Miniflare(convertV4MiniflareOptions({host:'127.0.0.1',cf:false,telemetry:{enabled:false},
  resourcePersistencePath:join(directory,'d1-state'),resourceTmpPath:join(build,'recovery-tmp'),workers:[{
- name:'recovery',modulesRoot:join(root,'apps/control/worker'),modules:['index.mjs','auth.mjs','protocol.mjs'].map(name=>({type:'ESModule',path:join(root,'apps/control/worker',name)})),
+ name:'recovery',modulesRoot:join(root,'apps/control'),modules:['worker/index.mjs','worker/auth.mjs','worker/protocol.mjs','worker/inventory.mjs','public/inventory.mjs'].map(name=>({type:'ESModule',path:join(root,'apps/control',name)})),
  compatibilityDate:'2026-10-26',d1Databases:{DB:'recovery'},outboundService:()=>new Response(null,{status:503}),
  bindings:{PUBLIC_ORIGIN:origin,AUDIENCE:audience,MACHINE_KEYS:JSON.stringify(keys),ACCESS_CONFIG:'{}'}}]}));
 const children=new Set(),checks=[],assignments=[],reports=[];

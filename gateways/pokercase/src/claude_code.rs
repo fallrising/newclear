@@ -202,23 +202,44 @@ fn norm(m: &Value) -> Value {
                 .count()
         })
         .unwrap_or(0);
-    json!({
+    let mut normalized = json!({
         "role": m.get("role").cloned().unwrap_or(json!("user")),
         "text": content_text(m.get("content").unwrap_or(&Value::Null)).trim(),
         "calls": calls,
         "call_id": m.get("tool_call_id").cloned().unwrap_or(Value::Null),
         "images": images,
-    })
+    });
+    // Keep old ordinary/shelf hashes byte-compatible; provenance is additional
+    // only for adapter-reconstructed inline instructions.
+    if is_inline_instruction(m) {
+        normalized["inline_instruction"] = json!(true);
+    }
+    normalized
+}
+
+fn is_inline_instruction(m: &Value) -> bool {
+    matches!(
+        m.get("role").and_then(Value::as_str),
+        Some("system" | "developer")
+    ) && m.get(crate::claude::INLINE_INSTRUCTION) == Some(&Value::Bool(true))
+}
+
+fn user_turn(msgs: &[Value]) -> bool {
+    msgs.iter()
+        .any(|m| m.get("role").and_then(Value::as_str) == Some("user"))
+        && msgs.iter().all(|m| {
+            m.get("role").and_then(Value::as_str) == Some("user") || is_inline_instruction(m)
+        })
 }
 
 fn is_system(m: &Value) -> bool {
     matches!(
         m.get("role").and_then(|r| r.as_str()),
         Some("system" | "developer")
-    )
+    ) && !is_inline_instruction(m)
 }
 
-/// The conversation part of a chat request (system/developer messages excluded).
+/// Conversation including adapter-proven inline instructions, excluding stable instructions.
 fn convo(chat: &Value) -> Vec<Value> {
     chat.get("messages")
         .and_then(|m| m.as_array())
@@ -348,14 +369,20 @@ impl ClaudeCode {
     fn unshelve(&self, model: &str, chat: &Value) -> Option<(String, usize)> {
         let store = self.store.as_ref()?;
         let msgs = convo(chat);
+        // shelf_take consumes the row. An instruction-only suffix must not take
+        // a healthy saved session away from a later actual user turn.
+        let after_assistant = msgs
+            .iter()
+            .rposition(|m| m.get("role").and_then(Value::as_str) == Some("assistant"))
+            .map_or(0, |i| i + 1);
+        if !user_turn(&msgs[after_assistant..]) {
+            return None;
+        }
         let hashes: Vec<String> = msgs.iter().map(|m| sha(&norm(m).to_string())).collect();
         let (sid, n) = store
             .shelf_take(&sha(&signature(model, chat)), &hashes)
             .ok()??;
-        let only_user = msgs[n..]
-            .iter()
-            .all(|m| m.get("role").and_then(|r| r.as_str()) == Some("user"));
-        if !only_user || !self.session_saved(&sid) {
+        if !user_turn(&msgs[n..]) || !self.session_saved(&sid) {
             self.remove_session(&sid);
             return None;
         }
@@ -461,9 +488,7 @@ impl ClaudeCode {
                     && r.signature == sig
                     && known.len() < normed.len()
                     && normed[..known.len()] == known[..]
-                    && msgs[known.len()..]
-                        .iter()
-                        .all(|m| m.get("role").and_then(|r| r.as_str()) == Some("user"))
+                    && user_turn(&msgs[known.len()..])
             }) else {
                 return Ok(None);
             };
@@ -624,18 +649,20 @@ impl ClaudeCode {
     /// and return a new sink's receiver for that run's next message.
     #[cfg(test)]
     fn continue_run(&self, chat: &Value) -> Option<(Arc<LiveRun>, ReplyReceiver)> {
-        self.continue_run_observed(chat, None).unwrap()
+        self.continue_run_observed("sonnet", chat, None).unwrap()
     }
 
     fn continue_run_observed(
         &self,
+        model: &str,
         chat: &Value,
         context: Option<&RequestContext>,
     ) -> Result<Option<(Arc<LiveRun>, ReplyReceiver)>, UpstreamAttemptError> {
         let Some(results) = trailing_tool_results(chat) else {
             return Ok(None);
         };
-        let known = convo(chat).iter().map(norm).collect();
+        let conversation = convo(chat);
+        let known: Vec<Value> = conversation.iter().map(norm).collect();
         let mut live = self.live.lock().unwrap();
         let Some(run) = live.waiting.get(&results[0].0).cloned() else {
             return Ok(None);
@@ -652,9 +679,38 @@ impl ClaudeCode {
         let mut got: Vec<&String> = results.iter().map(|(id, _)| id).collect();
         want.sort();
         got.sort();
-        if want != got {
+        if want != got || want.windows(2).any(|ids| ids[0] == ids[1]) {
             return Ok(None);
         }
+        // IDs locate a candidate; they do not authorize delivery into its old
+        // context. Check before reserving usage or consuming any waiting state.
+        if run.signature != signature(model, chat) {
+            return Ok(None);
+        }
+        let previous = run.known.lock().unwrap();
+        if known.len() != previous.len() + 1 + results.len() || !known.starts_with(&previous) {
+            return Ok(None);
+        }
+        let assistant = &conversation[previous.len()];
+        let mut announced: Vec<&String> = known[previous.len()]["calls"]
+            .as_array()
+            .into_iter()
+            .flatten()
+            .filter_map(Value::as_str)
+            .filter_map(|id| pending.iter().find(|pending_id| pending_id.as_str() == id))
+            .collect();
+        announced.sort();
+        if assistant.get("role").and_then(Value::as_str) != Some("assistant")
+            || assistant
+                .get("tool_calls")
+                .and_then(Value::as_array)
+                .map(Vec::len)
+                != Some(want.len())
+            || announced != want
+        {
+            return Ok(None);
+        }
+        drop(previous);
         let accounting = context.map(RequestContext::begin).transpose()?;
         for id in &pending {
             live.waiting.remove(id);
@@ -885,12 +941,7 @@ pub fn render_prompt(chat: &Value) -> Vec<Value> {
         .and_then(|m| m.as_array())
         .cloned()
         .unwrap_or_default();
-    let (system, convo): (Vec<&Value>, Vec<&Value>) = messages.iter().partition(|m| {
-        matches!(
-            m.get("role").and_then(|r| r.as_str()),
-            Some("system" | "developer")
-        )
-    });
+    let (system, convo): (Vec<&Value>, Vec<&Value>) = messages.iter().partition(|m| is_system(m));
     let mut blocks: Vec<Value> = Vec::new();
     let mut text = String::new();
 
@@ -940,11 +991,15 @@ pub fn render_prompt(chat: &Value) -> Vec<Value> {
             text.push_str(HISTORY_CLOSE);
         }
         let role = m.get("role").and_then(|r| r.as_str()).unwrap_or("user");
-        text.push_str(if role == "assistant" {
-            "Assistant: "
+        if is_inline_instruction(m) {
+            text.push_str(inline_instruction_open(role));
         } else {
-            "Human: "
-        });
+            text.push_str(if role == "assistant" {
+                "Assistant: "
+            } else {
+                "Human: "
+            });
+        }
         if role == "tool" {
             text.push_str(&format!(
                 "\n[tool result id={}]\n",
@@ -992,6 +1047,9 @@ pub fn render_prompt(chat: &Value) -> Vec<Value> {
                     .unwrap_or("{}"),
             ));
         }
+        if is_inline_instruction(m) {
+            text.push_str("\n</external_system_instructions>");
+        }
         text.push_str("\n\n");
         if split > 0 && i < split && (i + 1) % HISTORY_CHUNK == 0 {
             flush(&mut blocks, &mut text);
@@ -1013,14 +1071,24 @@ pub fn render_prompt(chat: &Value) -> Vec<Value> {
     blocks
 }
 
-/// New user messages for a run that already has the conversation: their own text and
-/// images, as Claude Code would be told them directly.
+fn inline_instruction_open(role: &str) -> &'static str {
+    if role == "developer" {
+        "<external_system_instructions>\nDeveloper: "
+    } else {
+        "<external_system_instructions>\nSystem: "
+    }
+}
+
+/// New user messages and ordered inline instructions for a known conversation.
 pub fn render_turn(msgs: &[Value]) -> Vec<Value> {
     let mut blocks: Vec<Value> = Vec::new();
     let mut text = String::new();
     for (i, m) in msgs.iter().enumerate() {
         if i > 0 {
             text.push_str("\n\n");
+        }
+        if is_inline_instruction(m) {
+            text.push_str(inline_instruction_open(m["role"].as_str().unwrap()));
         }
         match m.get("content") {
             Some(Value::Array(parts)) => {
@@ -1037,6 +1105,9 @@ pub fn render_turn(msgs: &[Value]) -> Vec<Value> {
             }
             Some(other) => text.push_str(&content_text(other)),
             None => {}
+        }
+        if is_inline_instruction(m) {
+            text.push_str("\n</external_system_instructions>");
         }
     }
     flush(&mut blocks, &mut text);
@@ -1413,7 +1484,7 @@ pub async fn start_observed(
             retryable: false,
         });
     }
-    if let Some((run, rx)) = cc.continue_run_observed(chat, context)? {
+    if let Some((run, rx)) = cc.continue_run_observed(model, chat, context)? {
         debug!("tool results go on in the waiting Claude Code run");
         return first_reply(run, rx, cancel).await;
     }
@@ -2140,6 +2211,190 @@ mod tests {
     }
 
     #[test]
+    fn dc1_inline_instruction_stays_in_conversation_order() {
+        let chat = json!({"messages":[
+            {"role":"user", "content":"first-before"},
+            {"role":"system", "content":"notice-after", "_thinrouter_inline_instruction":true},
+            {"role":"user", "content":"last-after"}
+        ]});
+        let text = render_prompt(&chat)
+            .iter()
+            .filter_map(|b| b["text"].as_str())
+            .collect::<Vec<_>>()
+            .join("\n");
+        assert!(
+            text.find("first-before").unwrap() < text.find("notice-after").unwrap(),
+            "inline instruction was hoisted before its preceding user message"
+        );
+        assert!(text.find("notice-after").unwrap() < text.find("last-after").unwrap());
+        assert!(
+            text.contains("System:"),
+            "inline instruction role must remain explicit"
+        );
+        assert_eq!(convo(&chat).len(), 3);
+    }
+
+    fn dc_chat(body: Value) -> Value {
+        crate::claude::prepare_claude_code_chat(Value::Null, Some(&Bytes::from(body.to_string())))
+            .unwrap()
+    }
+
+    #[test]
+    fn dc2_inline_identity_and_user_suffix_keep_strict_past_and_stable_settings() {
+        let base = json!({"model":"m", "system":"stable", "messages":[
+            {"role":"system","content":"initial context"},
+            {"role":"user","content":"first"}, {"role":"assistant","content":"reply"}
+        ]});
+        let original = dc_chat(base.clone());
+        let known: Vec<Value> = convo(&original).iter().map(norm).collect();
+        let mut next = base.clone();
+        next["messages"].as_array_mut().unwrap().extend([
+            json!({"role":"developer","content":[{"type":"text","text":"new context"}]}),
+            json!({"role":"user","content":"next question"}),
+        ]);
+        let chat = dc_chat(next.clone());
+        let msgs = convo(&chat);
+        assert_eq!(signature("m", &original), signature("m", &chat));
+        assert!(msgs
+            .iter()
+            .map(norm)
+            .collect::<Vec<_>>()
+            .starts_with(&known));
+        assert!(user_turn(&msgs[known.len()..]));
+        assert!(
+            !user_turn(&msgs[known.len()..known.len() + 1]),
+            "context alone is not a turn"
+        );
+        let text = render_turn(&msgs[known.len()..])
+            .iter()
+            .filter_map(|b| b["text"].as_str())
+            .collect::<Vec<_>>()
+            .join("\n");
+        assert!(text.contains("Developer: new context\n</external_system_instructions>"));
+        assert!(text.find("new context").unwrap() < text.find("next question").unwrap());
+        assert!(!text.contains("initial context") && !text.contains("first"));
+        next["messages"][3]["content"] = json!("new context");
+        assert_eq!(
+            chat,
+            dc_chat(next.clone()),
+            "text representations are equivalent"
+        );
+        next["messages"][0]["content"] = json!("rewritten context");
+        assert!(!convo(&dc_chat(next.clone()))
+            .iter()
+            .map(norm)
+            .collect::<Vec<_>>()
+            .starts_with(&known));
+        next["messages"][0]["content"] = json!("initial context");
+        next["messages"][0]["role"] = json!("developer");
+        assert!(!convo(&dc_chat(next))
+            .iter()
+            .map(norm)
+            .collect::<Vec<_>>()
+            .starts_with(&known));
+        let mut stable_changed = base.clone();
+        stable_changed["system"] = json!("different stable");
+        assert_ne!(
+            signature("m", &original),
+            signature("m", &dc_chat(stable_changed))
+        );
+        assert_ne!(signature("m", &original), signature("other", &original));
+        let mut tools_changed = original.clone();
+        tools_changed["tools"] = json!([{"function":{"name":"new"}}]);
+        assert_ne!(signature("m", &original), signature("m", &tools_changed));
+        assert_eq!(
+            norm(&json!({"role":"user","content":"ordinary"})),
+            json!({"role":"user","text":"ordinary","calls":[],"call_id":null,"images":0})
+        );
+    }
+
+    #[tokio::test]
+    async fn dc3_tool_results_retain_inline_history_but_reject_new_context() {
+        let (_dir, cc, run) = continuation_fixture();
+        let prefix = dc_chat(json!({"model":"m", "messages":[
+            {"role":"system","content":"heard context"}, {"role":"user","content":"question"}
+        ]}));
+        let mut valid = synthetic_tool_result();
+        let mut messages = convo(&prefix);
+        *run.known.lock().unwrap() = messages.iter().map(norm).collect();
+        messages.extend(valid["messages"].as_array().unwrap().clone());
+        valid["messages"] = json!(messages);
+        run.pending.lock().unwrap().push("tool_1".into());
+        cc.live
+            .lock()
+            .unwrap()
+            .waiting
+            .insert("tool_1".into(), run.clone());
+        let before = run.known.lock().unwrap().clone();
+        for index in [2, 3, 4] {
+            let mut changed = valid.clone();
+            changed["messages"].as_array_mut().unwrap().insert(index,json!({"role":"system","content":"new tool notice", "_thinrouter_inline_instruction":true}));
+            assert!(
+                cc.continue_run(&changed).is_none(),
+                "new context at {index}"
+            );
+            assert_eq!(*run.known.lock().unwrap(), before);
+            assert_eq!(*run.pending.lock().unwrap(), ["tool_1"]);
+            assert!(run.results.lock().unwrap().is_empty());
+            let prompt = render_prompt(&changed)
+                .iter()
+                .filter_map(|b| b["text"].as_str())
+                .collect::<Vec<_>>()
+                .join("\n");
+            assert!(prompt.contains("new tool notice") && prompt.contains("synthetic-result"));
+        }
+        let (continued, _reply) = cc.continue_run(&valid).unwrap();
+        assert!(Arc::ptr_eq(&run, &continued));
+        assert_eq!(
+            run.results.lock().unwrap()["tool_1"].text,
+            "synthetic-result"
+        );
+    }
+
+    #[test]
+    fn dc2_instruction_only_suffix_preserves_saved_session_for_valid_user() {
+        let dir = tempfile::tempdir().unwrap();
+        let mut cc = ClaudeCode::new(Some("unused-fake".into()), dir.path(), 1)
+            .with_store(crate::store::Store::open(&dir.path().join("shelf.db"), None).unwrap());
+        cc.config_dir = dir.path().join("synthetic-config");
+        let folder = cc.session_dirs().remove(0);
+        std::fs::create_dir_all(&folder).unwrap();
+        std::fs::write(folder.join("dc-saved.jsonl"), b"synthetic").unwrap();
+        let mut body = json!({"model":"m","messages":[
+            {"role":"system","content":"heard"}, {"role":"user","content":"first"}, {"role":"assistant","content":"reply"}
+        ]});
+        let original = dc_chat(body.clone());
+        let hashes: Vec<String> = convo(&original)
+            .iter()
+            .map(|m| sha(&norm(m).to_string()))
+            .collect();
+        let store = cc.store.as_ref().unwrap();
+        store
+            .shelf_put(
+                "dc-saved",
+                &sha(&signature("m", &original)),
+                &hashes,
+                SHELF_MOST,
+            )
+            .unwrap();
+        body["messages"]
+            .as_array_mut()
+            .unwrap()
+            .push(json!({"role":"system","content":"new context"}));
+        assert!(cc.unshelve("m", &dc_chat(body.clone())).is_none());
+        assert_eq!(store.shelf_ids().unwrap(), ["dc-saved"]);
+        assert!(folder.join("dc-saved.jsonl").is_file());
+        body["messages"]
+            .as_array_mut()
+            .unwrap()
+            .push(json!({"role":"user","content":"next"}));
+        assert_eq!(
+            cc.unshelve("m", &dc_chat(body)),
+            Some(("dc-saved".into(), 3))
+        );
+    }
+
+    #[test]
     fn nr2_instruction_representation_preserves_reuse_identity() {
         let convert = |instruction: Value| -> Value {
             let body = Bytes::from(
@@ -2245,7 +2500,7 @@ mod tests {
         let retiring = cc.finish_turn(&run, &mut filter).unwrap();
         let next_context = usage_context(&store, "next-request");
         let (_, next_reply) = cc
-            .continue_run_observed(&synthetic_tool_result(), Some(&next_context))
+            .continue_run_observed("sonnet", &synthetic_tool_result(), Some(&next_context))
             .unwrap()
             .unwrap();
         retiring
@@ -2368,7 +2623,7 @@ mod tests {
             interrupted_input: std::sync::atomic::AtomicBool::new(false),
             waiting_since: Mutex::new(None),
             stdin: tokio::sync::Mutex::new(None),
-            signature: String::new(),
+            signature: signature("sonnet", &synthetic_tool_result()),
             known: Mutex::new(Vec::new()),
             session_id: Mutex::new(None),
             idle_now: std::sync::atomic::AtomicBool::new(false),
@@ -2386,6 +2641,99 @@ mod tests {
             {"role":"assistant","tool_calls":[{"id":"tool_1","type":"function","function":{"name":"probe","arguments":"{}"}}]},
             {"role":"tool","tool_call_id":"tool_1","content":"synthetic-result"}
         ]})
+    }
+
+    #[tokio::test]
+    async fn nc2_tool_continuation_rejects_changed_context_without_consuming_wait() {
+        use super::*;
+        let (dir, cc, run) = continuation_fixture();
+        let store = crate::store::Store::open(&dir.path().join("usage.db"), None).unwrap();
+        let context = usage_context(&store, "rejected-continuation");
+        let prefix = json!({"role":"user", "content":"original question"});
+        run.known.lock().unwrap().push(norm(&prefix));
+        run.pending.lock().unwrap().push("tool_1".into());
+        cc.live
+            .lock()
+            .unwrap()
+            .waiting
+            .insert("tool_1".into(), run.clone());
+        cc.live.lock().unwrap().order.push_back(run.clone());
+        let (callback, mut result) = tokio::sync::oneshot::channel();
+        run.calls.lock().unwrap().insert("tool_1".into(), callback);
+        let mut valid = synthetic_tool_result();
+        valid["messages"].as_array_mut().unwrap().insert(0, prefix);
+        let before = run.known.lock().unwrap().clone();
+        let mut cases = Vec::new();
+        let mut changed = valid.clone();
+        changed["messages"][0]["content"] = json!("rewritten question");
+        cases.push(("history", changed));
+        let mut changed = valid.clone();
+        changed["messages"]
+            .as_array_mut()
+            .unwrap()
+            .insert(0, json!({"role":"system","content":"new instruction"}));
+        cases.push(("instruction", changed));
+        let mut changed = valid.clone();
+        changed["tools"] = json!([{"type":"function","function":{"name":"another_tool"}}]);
+        cases.push(("tools", changed));
+        let mut changed = valid.clone();
+        changed["messages"][1]["tool_calls"][0]["id"] = json!("different");
+        cases.push(("assistant ID", changed));
+        let mut changed = valid.clone();
+        let call = changed["messages"][1]["tool_calls"][0].clone();
+        changed["messages"][1]["tool_calls"]
+            .as_array_mut()
+            .unwrap()
+            .push(call);
+        cases.push(("duplicate assistant ID", changed));
+        let mut changed = valid.clone();
+        changed["messages"].as_array_mut().unwrap().remove(1);
+        cases.push(("missing assistant", changed));
+        let mut changed = valid.clone();
+        changed["messages"]
+            .as_array_mut()
+            .unwrap()
+            .insert(1, json!({"role":"user","content":"extra turn"}));
+        cases.push(("extra turn", changed));
+        let mut changed = valid.clone();
+        let duplicate = changed["messages"][2].clone();
+        changed["messages"].as_array_mut().unwrap().push(duplicate);
+        cases.push(("duplicate result", changed));
+        let mut changed = valid.clone();
+        changed["messages"][2]["tool_call_id"] = json!("different");
+        cases.push(("result ID", changed));
+        // Resolved model is supplied by routing, not taken from the JSON alias.
+        assert!(cc
+            .continue_run_observed("opus", &valid, Some(&context))
+            .unwrap()
+            .is_none());
+        for (label, chat) in cases {
+            assert!(
+                cc.continue_run_observed("sonnet", &chat, Some(&context))
+                    .unwrap()
+                    .is_none(),
+                "accepted {label}"
+            );
+            assert_eq!(*run.known.lock().unwrap(), before, "{label}");
+            assert_eq!(*run.pending.lock().unwrap(), ["tool_1"], "{label}");
+            assert!(cc.live.lock().unwrap().waiting.contains_key("tool_1"));
+            assert_eq!(cc.live.lock().unwrap().order.len(), 1);
+            assert!(run.sink.lock().unwrap().is_none());
+            assert!(run.accounting.lock().unwrap().is_none());
+            assert!(run.results.lock().unwrap().is_empty());
+            assert_eq!(run.calls.lock().unwrap().len(), 1);
+            assert!(matches!(
+                result.try_recv(),
+                Err(tokio::sync::oneshot::error::TryRecvError::Empty)
+            ));
+            assert!(store.recent_usage(10).unwrap().is_empty());
+            assert!(!run.stop.is_cancelled());
+        }
+        let (continued, _reply) = cc.continue_run(&valid).unwrap();
+        assert!(Arc::ptr_eq(&run, &continued));
+        assert_eq!(result.await.unwrap().text, "synthetic-result");
+        assert!(run.pending.lock().unwrap().is_empty());
+        assert!(cc.live.lock().unwrap().waiting.is_empty());
     }
 
     #[tokio::test]

@@ -2,13 +2,15 @@
 
 Personal subscription / free upstreams for **Layer A** (thinrouter).
 
+**Naming:** `cursor` is the compatibility provider ID for Cursor Agent CLI (`cursor-agent`), not the Cursor IDE. Owner decision 2026-11-02 removes the Docker product requirement. The current adapter has not yet migrated from its older container runner; see [implementation status](cursor-isolation.md).
+
 ## Active (implemented enough to use)
 
 | ID | Aliases | Status | Format | Default base |
 |----|---------|--------|--------|--------------|
 | `siwc` | `chatgpt_siwc`, `openai_siwc` | **active, recommended** | OpenAI Responses (official plan sharing) | `https://api.openai.com/v1` |
 | `claude` | `cc`, `anthropic`, `claude_code` | **active** (text, images, client tools via MCP) | local Claude Code interactive TUI (explicit print compatibility), see [CLAUDE_SUBSCRIPTION.md](./CLAUDE_SUBSCRIPTION.md) | `local://claude-code` |
-| `cursor` | `cu`, `cursor_agent` | **opt-in** (`--cursor-accept-account-plugins`; text only) | containerized Cursor Agent CLI (`cursor-agent -p`) | `local://cursor-agent` |
+| `cursor` | `cu`, `cursor_agent` | **opt-in** (`--cursor-accept-account-plugins`; text only) | Cursor Agent CLI (`cursor-agent -p`), legacy container adapter pending migration | `local://cursor-agent` |
 | `grok` | `xai`, `grok_cli` | **active** | OpenAI Responses | `https://cli-chat-proxy.grok.com/v1` |
 | `opencode` | `oc` | **active** | OpenAI Chat | `https://opencode.ai/zen/v1` |
 | `agy` | `ag`, `antigravity` | **active** | Antigravity generateContent | `https://cloudcode-pa.googleapis.com` |
@@ -212,4 +214,4 @@ Reads:
 
 Creates connections `local-*` and routes `rt-*`.
 
-Cursor requires a pinned local Docker image and dedicated profile volume. Ask/sandbox flags are not isolation guarantees. See [Cursor isolation](cursor-isolation.md) for setup and filesystem/process boundaries; network access and account plugins remain available.
+The legacy Cursor Agent CLI adapter still checks for a pinned Docker image and dedicated profile volume. This is an implementation gap against the owner’s no-Docker decision, not a current product prerequisite to adopt. See [decision and migration status](cursor-isolation.md). The historical container boundary did not isolate network access or account plugins.

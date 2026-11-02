@@ -39,6 +39,7 @@ struct Fixture {
     path: std::path::PathBuf,
     address: SocketAddr,
     posts: Arc<AtomicUsize>,
+    lookups: Arc<AtomicUsize>,
     stop: Arc<AtomicBool>,
     thread: Option<std::thread::JoinHandle<()>>,
 }
@@ -54,6 +55,8 @@ impl Fixture {
         listener.set_nonblocking(true).expect("nonblocking");
         let posts = Arc::new(AtomicUsize::new(0));
         let count = posts.clone();
+        let lookups = Arc::new(AtomicUsize::new(0));
+        let reads = lookups.clone();
         let stop = Arc::new(AtomicBool::new(false));
         let stopped = stop.clone();
         let thread = std::thread::spawn(move || {
@@ -90,6 +93,44 @@ impl Fixture {
                         200,
                         json!({"authenticated":head.contains("cookie: auth=ok\r\n"),"username":"operator","csrf_token":"csrf"}),
                     )
+                } else if head.starts_with("GET /api/v1/commands/") {
+                    reads.fetch_add(1, Ordering::SeqCst);
+                    if mode == "evidence-lost" {
+                        continue;
+                    }
+                    let mut evidence = json!({"version":"fanz-command-evidence-v1","key":KEY,"route":"tasks.create","payload_hash":"a".repeat(64),"request":task(),"receipt":receipt()});
+                    if mode.starts_with("evidence-review") {
+                        let body = json!({"artifact_id":TASK,"profile_revision":task()["profile_revision"],"candidate_sha256":"b".repeat(64)});
+                        evidence["route"] = json!(format!("runs/{TASK}/reviews"));
+                        evidence["request"] = body.clone();
+                        evidence["receipt"]["run"]["purpose"] = json!("review");
+                        evidence["receipt"]["run"]["review_context"] = json!({"root_writer_run_id":TASK,"writer_run_id":TASK,"artifact_id":TASK,"candidate_sha256":body["candidate_sha256"],"reviewer_profile_revision":body["profile_revision"],"review_round":1});
+                        if mode == "evidence-review-bad" {
+                            evidence["receipt"]["run"]["review_context"]["writer_run_id"] =
+                                json!(RUN);
+                        }
+                    } else if mode == "evidence-rework" {
+                        evidence["route"] = json!(format!("runs/{TASK}/rework"));
+                        evidence["request"] = json!({});
+                        evidence["receipt"]["run"]["purpose"] = json!("coding");
+                        evidence["receipt"]["run"]["rework_context"] = json!({"root_writer_run_id":TASK,"review_run_id":TASK,"candidate_sha256":"b".repeat(64)});
+                    }
+                    match mode {
+                        "evidence-key" => evidence["key"] = json!(TASK),
+                        "evidence-route" => evidence["route"] = json!("projects.create"),
+                        "evidence-request" => evidence["request"]["goal"] = json!("different"),
+                        "evidence-hash" => evidence["payload_hash"] = json!("invalid"),
+                        "evidence-receipt" => {
+                            evidence["receipt"]["run"]["base_sha"] = json!("b".repeat(40))
+                        }
+                        "evidence-version" => evidence["version"] = json!("unverified"),
+                        _ => {}
+                    }
+                    if mode == "evidence-missing" {
+                        (404, json!({"error":"command_not_found"}))
+                    } else {
+                        (200, evidence)
+                    }
                 } else if head.starts_with("POST /api/v1/tasks ") {
                     count.fetch_add(1, Ordering::SeqCst);
                     if mode == "lost" {
@@ -155,6 +196,7 @@ impl Fixture {
             path,
             address,
             posts,
+            lookups,
             stop,
             thread: Some(thread),
         }
@@ -588,5 +630,191 @@ async fn r04_handoff_lost_or_mismatched_reply_stays_unknown_and_auth_denies_befo
         "/api/v1/runs/../reviews".into(),
     ] {
         assert!(!allowed(&Method::POST, &bad));
+    }
+}
+
+// CU-M3-U04/U05: the explicit recovery route must exist before implementation.
+#[tokio::test]
+async fn u04_reconcile_authenticates_instead_of_missing_route() {
+    let f = Fixture::new("ok");
+    let response = f
+        .app()
+        .oneshot(request(
+            Method::POST,
+            &format!("/api/v1/submissions/{KEY}/reconcile"),
+            KEY,
+            Some(json!({})),
+            false,
+            "csrf",
+        ))
+        .await
+        .expect("response");
+    assert_eq!(response.status(), StatusCode::UNAUTHORIZED);
+    assert_eq!(f.posts.load(Ordering::SeqCst), 0);
+}
+
+#[tokio::test]
+async fn u04_explicit_confirmation_concurrent_and_reopened_never_posts() {
+    let f = Fixture::new("evidence");
+    let store = SubmissionStore::open(f.path.join("intents.sqlite")).unwrap();
+    store.begin("operator", KEY, &task()).unwrap();
+    let path = format!("/api/v1/submissions/{KEY}/reconcile");
+    let (a, b) = tokio::join!(
+        f.app().oneshot(request(
+            Method::POST,
+            &path,
+            KEY,
+            Some(json!({})),
+            true,
+            "csrf"
+        )),
+        f.app().oneshot(request(
+            Method::POST,
+            &path,
+            KEY,
+            Some(json!({})),
+            true,
+            "csrf"
+        ))
+    );
+    assert_eq!(a.unwrap().status(), StatusCode::OK);
+    assert_eq!(b.unwrap().status(), StatusCode::OK);
+    let before = f.lookups.load(Ordering::SeqCst);
+    let reopened = f
+        .app()
+        .oneshot(request(
+            Method::POST,
+            &path,
+            KEY,
+            Some(json!({})),
+            true,
+            "csrf",
+        ))
+        .await
+        .unwrap();
+    assert_eq!(value(reopened).await, receipt());
+    assert_eq!(f.lookups.load(Ordering::SeqCst), before);
+    assert_eq!(f.posts.load(Ordering::SeqCst), 0);
+    assert_eq!(store.list("operator").unwrap()["blocked"], false);
+    assert_eq!(
+        store.submission("operator", KEY).unwrap().unwrap()["request"],
+        task()
+    );
+}
+
+#[tokio::test]
+async fn u02_invalid_or_missing_evidence_keeps_unknown_across_reopen() {
+    for mode in [
+        "evidence-lost",
+        "evidence-missing",
+        "evidence-key",
+        "evidence-route",
+        "evidence-request",
+        "evidence-hash",
+        "evidence-receipt",
+        "evidence-version",
+    ] {
+        let f = Fixture::new(mode);
+        let store = SubmissionStore::open(f.path.join("intents.sqlite")).unwrap();
+        store.begin("operator", KEY, &task()).unwrap();
+        let path = format!("/api/v1/submissions/{KEY}/reconcile");
+        for _ in 0..2 {
+            let reply = f
+                .app()
+                .oneshot(request(
+                    Method::POST,
+                    &path,
+                    KEY,
+                    Some(json!({})),
+                    true,
+                    "csrf",
+                ))
+                .await
+                .unwrap();
+            assert_eq!(reply.status(), StatusCode::CONFLICT, "{mode}");
+            assert_eq!(store.list("operator").unwrap()["blocked"], true);
+            assert_eq!(
+                store.submission("operator", KEY).unwrap().unwrap()["run_id"],
+                Value::Null
+            );
+        }
+        assert_eq!(f.lookups.load(Ordering::SeqCst), 2);
+        assert_eq!(f.posts.load(Ordering::SeqCst), 0);
+    }
+}
+
+#[tokio::test]
+async fn u05_reconcile_requires_csrf_empty_body_and_owned_durable_key() {
+    let f = Fixture::new("evidence");
+    let store = SubmissionStore::open(f.path.join("intents.sqlite")).unwrap();
+    store.begin("other", KEY, &task()).unwrap();
+    let path = format!("/api/v1/submissions/{KEY}/reconcile");
+    for (body, csrf, status) in [
+        (json!({}), "bad", StatusCode::FORBIDDEN),
+        (
+            json!({"receipt":receipt()}),
+            "csrf",
+            StatusCode::BAD_REQUEST,
+        ),
+        (json!({}), "csrf", StatusCode::NOT_FOUND),
+    ] {
+        assert_eq!(
+            f.app()
+                .oneshot(request(Method::POST, &path, KEY, Some(body), true, csrf))
+                .await
+                .unwrap()
+                .status(),
+            status
+        );
+    }
+    assert_eq!(f.lookups.load(Ordering::SeqCst), 0);
+    assert_eq!(f.posts.load(Ordering::SeqCst), 0);
+    assert!(allowed(&Method::POST, &path));
+    assert!(!allowed(&Method::GET, &path));
+}
+
+#[tokio::test]
+async fn u03_handoff_reconciliation_binds_route_body_and_lineage() {
+    for mode in ["evidence-review", "evidence-rework", "evidence-review-bad"] {
+        let f = Fixture::new(mode);
+        let store = SubmissionStore::open(f.path.join("intents.sqlite")).unwrap();
+        let review = mode.starts_with("evidence-review");
+        let body = if review {
+            json!({"artifact_id":TASK,"profile_revision":task()["profile_revision"],"candidate_sha256":"b".repeat(64)})
+        } else {
+            json!({})
+        };
+        let action = if review { "reviews" } else { "rework" };
+        let original = json!({"route":format!("/api/v1/runs/{TASK}/{action}"),"body":body});
+        store.begin("operator", KEY, &original).unwrap();
+        let reply = f
+            .app()
+            .oneshot(request(
+                Method::POST,
+                &format!("/api/v1/submissions/{KEY}/reconcile"),
+                KEY,
+                Some(json!({})),
+                true,
+                "csrf",
+            ))
+            .await
+            .unwrap();
+        assert_eq!(
+            reply.status(),
+            if mode.ends_with("bad") {
+                StatusCode::CONFLICT
+            } else {
+                StatusCode::OK
+            }
+        );
+        assert_eq!(
+            store.list("operator").unwrap()["blocked"],
+            mode.ends_with("bad")
+        );
+        assert_eq!(
+            store.submission("operator", KEY).unwrap().unwrap()["request"],
+            original
+        );
+        assert_eq!(f.posts.load(Ordering::SeqCst), 0);
     }
 }

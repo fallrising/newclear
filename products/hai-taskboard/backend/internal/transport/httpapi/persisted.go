@@ -74,43 +74,15 @@ func (source PersistedProjections) Snapshot(ctx context.Context, projectID domai
 		wire.Projection.Lanes = append(wire.Projection.Lanes, persistedLane{Key: key, Items: []persistedItem{}})
 	}
 	for _, row := range board.Items {
-		if row.ID != row.Item.ID() || row.Item.ProjectID() != projectID || !workPattern.MatchString(string(row.ID)) || !validWireText(row.Title, 1, 240) || !validWireText(string(row.OwnerID), 1, 120) || row.RequiredACCount < 0 {
-			return ProjectionSnapshot{}, ErrProjectionCorrupt
-		}
-		item := persistedItem{ID: row.ID, Title: row.Title, Phase: row.Item.Phase(), Version: row.Item.Version(), OwnerID: row.OwnerID, RequiredACCount: row.RequiredACCount, ActiveBlockerCount: len(row.Item.Blockers()), Conditions: []string{}}
-		// Coverage requires policy and verified artifact material, not just SQL
-		// history. This bounded runtime does not assert effective completion.
-		lane := string(item.Phase)
-		if item.ActiveBlockerCount > 0 {
-			item.Conditions = append(item.Conditions, "Blocked")
-			lane = "Blocked"
-		}
-		if run := row.CurrentRun; run != nil {
-			if !runPattern.MatchString(string(run.ID)) ||
-				!slices.Contains([]string{"Pending", "Claimed", "Sent", "Acknowledged", "FailedToDispatch"}, run.DispatchState) ||
-				!slices.Contains([]string{"Unknown", "Starting", "Running", "Succeeded", "Failed", "Canceled"}, run.ObservedState) ||
-				!slices.Contains([]string{"None", "NeedsReconcile", "Reconciled"}, run.ReconciliationState) ||
-				!slices.Contains([]string{"None", "Dispatch", "CancelRequested"}, run.DesiredAction) ||
-				!slices.Contains([]string{"NotApplicable", "Confirmed", "OutcomeUnknown"}, run.SideEffectOutcome) {
-				return ProjectionSnapshot{}, ErrProjectionCorrupt
-			}
-			state := run.ReconciliationState
-			if state == "Reconciled" {
-				state = "Resolved"
-			}
-			item.CurrentRun = &persistedRun{ID: run.ID, DispatchState: run.DispatchState, ObservedState: run.ObservedState, ReconciliationState: state}
-			if run.SideEffectOutcome == "OutcomeUnknown" {
-				item.Conditions = append(item.Conditions, "OutcomeUnknown")
-			}
-			if run.DesiredAction == "CancelRequested" {
-				item.Conditions = append(item.Conditions, "CancelRequested")
-			}
+		item, lane, err := persistedSummary(row, projectID)
+		if err != nil {
+			return ProjectionSnapshot{}, err
 		}
 		if len(item.Conditions) > 0 {
 			wire.Projection.AttentionCount++
 		}
 		index, ok := lanes[lane]
-		if !ok || item.Version == 0 {
+		if !ok {
 			return ProjectionSnapshot{}, ErrProjectionCorrupt
 		}
 		wire.Projection.Lanes[index].Items = append(wire.Projection.Lanes[index].Items, item)
@@ -120,6 +92,47 @@ func (source PersistedProjections) Snapshot(ctx context.Context, projectID domai
 		return ProjectionSnapshot{}, err
 	}
 	return ProjectionSnapshot{ProjectID: projectID, Cursor: board.Cursor, MinimumSequence: board.MinimumSequence, Payload: payload}, nil
+}
+
+// persistedSummary is the board row for one WorkItem and its lane; the
+// WorkItem detail summary uses the same conversion.
+func persistedSummary(row port.BoardWorkItem, projectID domain.ProjectID) (persistedItem, string, error) {
+	if row.ID != row.Item.ID() || row.Item.ProjectID() != projectID || !workPattern.MatchString(string(row.ID)) || !validWireText(row.Title, 1, 240) || !validWireText(string(row.OwnerID), 1, 120) || row.RequiredACCount < 0 {
+		return persistedItem{}, "", ErrProjectionCorrupt
+	}
+	item := persistedItem{ID: row.ID, Title: row.Title, Phase: row.Item.Phase(), Version: row.Item.Version(), OwnerID: row.OwnerID, RequiredACCount: row.RequiredACCount, ActiveBlockerCount: len(row.Item.Blockers()), Conditions: []string{}}
+	// Coverage requires policy and verified artifact material, not just SQL
+	// history. This bounded runtime does not assert effective completion.
+	lane := string(item.Phase)
+	if item.ActiveBlockerCount > 0 {
+		item.Conditions = append(item.Conditions, "Blocked")
+		lane = "Blocked"
+	}
+	if run := row.CurrentRun; run != nil {
+		if !runPattern.MatchString(string(run.ID)) ||
+			!slices.Contains([]string{"Pending", "Claimed", "Sent", "Acknowledged", "FailedToDispatch"}, run.DispatchState) ||
+			!slices.Contains([]string{"Unknown", "Starting", "Running", "Succeeded", "Failed", "Canceled"}, run.ObservedState) ||
+			!slices.Contains([]string{"None", "NeedsReconcile", "Reconciled"}, run.ReconciliationState) ||
+			!slices.Contains([]string{"None", "Dispatch", "CancelRequested"}, run.DesiredAction) ||
+			!slices.Contains([]string{"NotApplicable", "Confirmed", "OutcomeUnknown"}, run.SideEffectOutcome) {
+			return persistedItem{}, "", ErrProjectionCorrupt
+		}
+		state := run.ReconciliationState
+		if state == "Reconciled" {
+			state = "Resolved"
+		}
+		item.CurrentRun = &persistedRun{ID: run.ID, DispatchState: run.DispatchState, ObservedState: run.ObservedState, ReconciliationState: state}
+		if run.SideEffectOutcome == "OutcomeUnknown" {
+			item.Conditions = append(item.Conditions, "OutcomeUnknown")
+		}
+		if run.DesiredAction == "CancelRequested" {
+			item.Conditions = append(item.Conditions, "CancelRequested")
+		}
+	}
+	if item.Version == 0 {
+		return persistedItem{}, "", ErrProjectionCorrupt
+	}
+	return item, lane, nil
 }
 
 func (source PersistedProjections) Replay(ctx context.Context, projectID domain.ProjectID, after port.Cursor) (ProjectionReplay, error) {

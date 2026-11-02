@@ -1,6 +1,6 @@
 import unittest
 from unittest.mock import patch
-from process_ownership import parse_processes, collect_owned, alive_owned, process_table, crash_owned
+from process_ownership import parse_processes, collect_owned, alive_owned, process_table, crash_owned, terminate_owned
 import signal
 
 
@@ -23,6 +23,14 @@ class OwnershipTests(unittest.TestCase):
         with patch('process_ownership.subprocess.check_output', return_value='invalid format'):
             with self.assertRaisesRegex(RuntimeError, 'process_snapshot_invalid'):
                 process_table()
+
+    def test_cancel_cleanup_only_terminates_still_matching_descendants(self):
+        rows={123:{'parent':1,'started':'same'},124:{'parent':1,'started':'reused'},125:{'parent':1,'started':'foreign'}}
+        with patch('process_ownership.process_table',return_value=rows), patch('process_ownership.os.getpid',return_value=999), patch('process_ownership.os.kill') as kill:
+            self.assertEqual(terminate_owned({123:'same',124:'old',126:'gone',999:'self',1:'init'}),1)
+            kill.assert_called_once_with(123,signal.SIGTERM)
+            kill.reset_mock();kill.side_effect=ProcessLookupError()
+            self.assertEqual(terminate_owned({123:'same'}),0)
 
     def test_crash_only_signals_a_matching_owned_identity(self):
         with patch('process_ownership.process_table', return_value={123: {'parent': 1, 'started': 'same'}}), \

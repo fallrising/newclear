@@ -54,6 +54,10 @@ Grok／Cursor 沒有可保證的 request／token／金額硬上限；工具 hook
 
 `retry pi-work-...` 只顯示計畫；`--execute` 只啟動一次。必須指定最新且完整清理的失敗紀錄，同一 Pi 任務最多兩次重試；新 workspace／session 沿用原 fixture。遠端仍需當次付費授權及 `--allow-remote`，本機故障模式不接受此旗標。詳細限制與中斷處理見 [RETRY](RETRY.md)。
 
+## 本機操作台
+
+[操作台](CONSOLE.md) 將偵測、計畫、本地執行與結果整合。`run opencode --execute --keep-open` 可在合成任務完成後保留原生終端，直到中斷；此選項只適用於本地任務，不可混用取消／故障驗收。頁面執行仍走同一個 dispatcher 與執行鎖，不接受遠端付費執行。
+
 ## 單一執行與中斷
 
 四個 `run_*_work.py` 的直接命令及統一入口共用本 lab 的 `state/dispatch/execution.lock`。第二次執行會立即回報 `execution_busy`；沒有背景等待佇列。鎖跨 dispatcher 的 `exec` 保留，同一 PID 的 runner 接手後持有到清理完成；不增加中間父程序攔截 Ctrl+C，仍由各 runner 處理原生清理。
@@ -75,3 +79,7 @@ python3 scripts/office_dispatch.py acknowledge-interruption --confirm-all-owned-
 上述為 T-0012 的前置驗證。T-0013 已完成[新入口本地實測](evidence/local-dispatch-2026-11-01.json)：最終 runner 整輪任務／取消驗收 54.95 秒、原生取消及程序退出 202 ms；Ctrl+C 的另一個 run 顯示 cancelled／exit 130，包含模型關閉的整體退出為 10.399 秒。所有追蹤程序退出、鎖釋放、重複派工拒絕及結果頁核對通過；122 tests 通過，沒有遠端模型呼叫。原生取消與整體 runner 中斷是不同測量，不宣稱所有中斷均在 202 ms 完成。
 
 完整 AC-01、AC-06、AC-08、AC-11 與 MVP 保持 pending，後續仍須驗證遠端新入口、跨 provider 權限／取消／恢復與 UI 派工。
+
+Pi 亦支援 `run pi --check-cancel` 計畫，加上 `--execute` 以真實 CLI 驗證本機請求等待中的原生取消。此模式沒有模型推論或遠端授權，不可混用其他檢查；[操作與限制](CANCEL.md)。
+
+`python3 scripts/office_dispatch.py status` 唯讀檢查共用執行狀態，回傳 available／busy／cleanup_unconfirmed／unavailable，不啟動 CLI 或模型。操作台使用相同檢查，跨入口與重啟後仍會阻擋未清理狀態；[狀態與中斷處理](CONSOLE.md)。

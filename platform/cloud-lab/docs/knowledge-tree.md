@@ -2,7 +2,7 @@
 
 本樹是 Cloud Lab 的產品知識導航。它描述責任與關係，不保存私人知識庫或覆寫來源元件的主線狀態。M0表保留來源映射；下方M1對照已按具名live證據更新。live_verified只表示曾完成該子集驗證，不保證當前授權仍有效；近期方向見[重排計畫](direction-review.md)。
 
-[CF工具目錄](tool-catalog.md)補上2026-11-01來源盤點與Edge Ops比較；這是導航文件，未新增執行介面。RS-01的下一個有界工作為沿用既有inventory的唯讀報告；EX-01維持Cloud Lab日常健康入口，Edge Ops只作參考。
+[CF工具目錄](tool-catalog.md)補上2026-11-01來源盤點與Edge Ops比較；這是導航文件，未新增執行介面。RS-01已實作既有inventory的[唯讀報告介面](inventory-report.md)，已接真實MCP資料並完成本機驗證，live啟用仍待批准；EX-01維持Cloud Lab日常健康入口，Edge Ops只作參考。
 
 ## 知識樹
 
@@ -29,7 +29,7 @@ CL Cloud Lab
 | --- | --- | --- | --- | --- |
 | ID-01 | 認證與 scoped caller；准入層決定 | [identity](../contracts/identity.md) | [Kith auth 邊界](../../../products/kith/SDD.md)僅供對照，不共用 session | M1 |
 | ID-02 | 私人入口與機器入口；部署政策擁有 | [架構](architecture.md) | [CF Access 來源](sources.md)；後續Access實證見下方M1對照 | M1 |
-| RS-01 | 雲資源盤點；inventory adapter 提供 observed | [架構](architecture.md) | 外部私人盤點器，公開僅保留介面需求 | M2 候選 |
+| RS-01 | 雲資源盤點；inventory adapter 提供 observed | [報告契約](inventory-report.md) | 原盤點器JSON→有界快照／看板；[本機證據](../../../.team/reports/T-867.md) | 候選完成，live未啟用 |
 | RS-02 | 服務與能力目錄；原服務 owner 保留 lifecycle | [遷移表](migration.md) | [Fleet SUCCESS](../../../specs/fleet/SUCCESS.md)；非 Cloud Lab catalog 實作 | M1 最小 reference |
 | AU-01 | 命令准入／去重；Cloud Lab command store | [commands/runs](../contracts/commands-runs.md) | [Edge Ops SDD](../../edge-ops/SDD.md)；跨產品契約尚未接線 | M1 |
 | AU-02 | 排程與事件觸發；trigger adapter 提交命令 | [recipes](../contracts/recipes.md) | [Kith Cron 設定](../../../products/kith/wrangler.toml)是產品內排程，非共用 scheduler | M1 固定 UTC schedule |
@@ -59,6 +59,6 @@ CL Cloud Lab
 | OB-01／OB-02 | [看板](../apps/control/public/index.html)、snapshot／artifact／應用用量 | live_verified子集：Safari手動用量與[新版看板](evidence/m1-snapshot-rollout.md)。完整Event/seq未實作，provider用量／帳單unknown。 |
 | AU-01 bot | [bot bridge](../tools/bot_bridge.py)、[MCP](mcp-stdio.md)、[獨立Grok工具接線](grok-connection.md) | [真實工具閉環](evidence/m1-bot-activation-live.md)已驗；沒有模型對話驗收，過期bot不會自動續權。 |
 | OP-01 | 配額／稽核／[隔離還原](evidence/m1-remote-restore.md) | 5應用表／42列與3journal恢復已驗；沒有活躍程序failover，Pages全域盤點缺讀取權限。 |
-| RS-01／RS-02、EX-02／EX-03、AP、OP-02 | 來源／adapter／遷移設計 | runtime仍proposed；已有[文件目錄與處置建議](tool-catalog.md)，沒有既有應用搬遷／封存或agent平台接入。下一項為inventory報告adapter。 |
+| RS-02、EX-02／EX-03、AP、OP-02 | 來源／adapter／遷移設計 | runtime仍proposed；已有[文件目錄與處置建議](tool-catalog.md)，沒有既有應用搬遷／封存或agent平台接入。RS-01候選已完成，live仍待啟用。 |
 
 歷史細項見[里程碑紀錄](milestone-history.md)及[任務板](tasks/BOARD.md)。本樹只投影證據，不產生新的執行或授權權威。

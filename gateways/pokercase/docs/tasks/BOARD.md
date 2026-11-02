@@ -6,10 +6,17 @@ Demand: T-0426, claim PR390 merged. [NC-1–NC-3](T-0426-claude-client.md).
 
 | ID | Task | AC | Status | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| NC-01 | Record cursor-agent identity and approved no-Docker decision | NC-1 | in_progress | 2026-11-02T11:24:50.125013+00:00 | — | 2026-11-02T11:41:53.403445+00:00 |
-| NC-02 | Pinned Magpie comparison and faithful Claude continuation correction | NC-2 | in_progress | 2026-11-02T11:24:50.125013+00:00 | — | 2026-11-02T11:41:53.403445+00:00 |
-| NC-03 | Independent evidence review and complete delivery | NC-3 | in_progress | 2026-11-02T11:24:50.125013+00:00 | — | 2026-11-02T11:41:53.403445+00:00 |
+| NC-01 | Record cursor-agent identity and approved no-Docker decision | NC-1 | done | 2026-11-02T11:24:50.125013+00:00 | 2026-11-02T11:49:57Z | 2026-11-02T11:56:43.585388+00:00 |
+| NC-02 | Pinned Magpie comparison and faithful Claude continuation correction | NC-2 | done | 2026-11-02T11:24:50.125013+00:00 | 2026-11-02T11:49:57Z | 2026-11-02T11:56:43.585388+00:00 |
+| NC-03 | Independent evidence review and complete delivery | NC-3 | done | 2026-11-02T11:24:50.125013+00:00 | 2026-11-02T11:52:36.663902+00:00 | 2026-11-02T11:56:43.585388+00:00 |
 
+Product [PR970](https://github.com/fallrising/newclear/pull/970), source `ec1521f6fe3841d2f76485b6518f3cd7f6fafbe0`, merged `22792041198ea3766f09818226c882cf0c64ae56` at 2026-11-02T11:49:57Z. Required component check (5m51s) and validate (12s) passed; all11changed files, ancestry and Desk-Task trailers matched source/merge/origin. NC01 records Cursor Agent CLI/cursor-agent and the approved no-Docker product direction, preserving compatibility IDs and historical evidence; the legacy container runtime migration remains pending.
+
+NC02 closes the demonstrated waiting-tool context omission: resolved model/instruction/tool signature, existing normalized history, exact assistant/result suffix and unique pending IDs are checked before accounting or callback state changes. A changed request starts fresh with its full context; a later valid result still reaches the original callback. Genuine pre-fix RED preceded53focusedClaude/11fakeTUI/436fullRust25groups, fmt/Clippy/build,199componentPython/twoofflinewalkthroughs and53contracts/9indexes/20repository tests passing. Independent T001 diagnosis/T002 source review/T003 evidence-ledger review accepted; compilation/environment/invocation failures remain retained separately. No real provider/profile/CLI use, new live allowance, dynamic inline-context completion, full tool/media identity or account/cache-saving claim. Original17AC and older board history unchanged.
+
+Journal [PR234](https://github.com/fallrising/journal/pull/234) and desk [PR393](https://github.com/fallrising/desk/pull/393) passed CI, normal merge and exact readback; local journal164runs/30tests anddesk449documents passed. NC03 records primary closure at 2026-11-02T11:52:36.663902+00:00: separate complete backup verified86payloadfiles/187868667bytes and modes, then four clean merged owned worktrees were normally removed. Branches, shared caches, other worktrees and old packets/backups remain preserved; prior accepted runtime and renewed-tool manifest pins still match.
+
+Final board review/CI/normal merge/readback, backup append and removal of this sole closure worktree follow this checkpoint and are recorded in the private final handoff after completion, not preclaimed here. No owner action is required for this selected delivery. Mainline incomplete/usable_tag none/desk in_progress remain; next dynamic-context compatibility or live acceptance is not automatically started.
 
 ## T-0426 — Renewed TUI tool trial after owner quota report
 

@@ -518,3 +518,31 @@ stopped, zeroVM/claims/cgroups/reservations. Owner operation confirmation pendin
 fullM3/FN07/platform and oldCloudAC04 incomplete. See
 [M3 evidence](../fanzloud/docs/acceptance/M3-reconciliation.md). Earlier readiness
 statements are historical and superseded by this approved actual checkpoint.
+
+## T-0442 M3-U 本人操作準備 — 2026-11-02
+
+本次只做已批准M3/FN07的離線承接與操作準備，詳見
+[短步驟／精確缺口及一次窗口選擇](docs/acceptance/M3-owner-operation.md)。
+SDD FN07明寫owner本人提交、看進度與明示交接；10分鐘零新CLI/VM只讀既有成果
+只能補本人可讀回確認，不能單獨通過FN07。另列15分鐘單VM／最多2CLI各180秒的
+完整本人操作替代案；兩案均未批准／未啟動，先確認owner在場及選擇，不連續自動執行。
+本輪原SQLite仍4confirmed/0unknown、226份備份hash一致、固定binary及production
+bytes未變；原DB與本機listeners停妥，遠端零資源沿用先前接受證據。
+M1/M2不重做，consumed intents不重設；完整M3/FN07/platform與本人確認仍pending。
+驗證採文件／來源／精確安全欄位與必要CI／獨立審查，不重跑原綠native/live。
+
+## T-0442 本人只讀窗口準備 — 2026-11-02
+
+Owner表示現在可操作並要求操作指引／繼續；本輪優先10分鐘既有成果方案，
+零新coding/review CLI／VM，最後2分鐘只收束。私人有限launcher/proxy固定原binary/runtime、
+原SQLite/AP DB，deny-default執行mutation，單次intent與獨立guard/cutoff；
+先以dummy及本機假上游測試並fresh-context審查，再確認原私人連線／登入／TLS信任才開始。
+目標只補本人登入／辨識兩家agent／既有diff/checks/candidate/review／重新開啟；
+不是完整FN07本人提交／進度／交接證據，不啟新里程碑、不重做M1/M2。
+現行[操作文件](docs/acceptance/M3-owner-operation.md)的驗收條款與限制不變。
+實際窗口、本人回報與清理結果待觀測後追加；準備完成不代表窗口已開始。
+
+Pre-live checkpoint：private readonly gate已完成／獨立ACCEPT_READONLY_GATE_PRELIVE，
+9supervisor+2policy+可信TLS假上游fixture通過，3初審finding修正後覆核接受。
+沒有原服務啟動或intent消耗；owner私人連線／登入／TLS readiness待確認。
+詳見[checkpoint](docs/acceptance/M3-owner-operation.md)，非live／本人FN07完成。

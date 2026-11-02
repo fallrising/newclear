@@ -229,3 +229,23 @@ Owner 指示繼續開發；本輪使用真實程序與瀏覽器，不執行模�
 | T-0019-02 | 唯讀邊界、派工重新檢查與頁面阻擋提示 | AC-11 子集 | done | 2026-11-02T12:36:43Z | 2026-11-02T12:47:03Z | 2026-11-02T12:47:29Z |
 
 T-0019 結案：[PR #982](https://github.com/fallrising/newclear/pull/982) 已合併，commit `e0cdbfba39927aad33d5088c78fe84c7f3bc0952`，offline／validate 兩項 CI success。已回讀主線證據：171 tests、真實 helper 程序與 Chrome 持鎖／SIGKILL／兩次操作台啟動／刷新驗收；中斷 journal 內容與修改時間不變，舊計畫被阻擋，明確核對退出後歸檔保留原紀錄，損壞狀態不洩漏且不放行。新增唯讀 status CLI；不建立狀態檔、不接管程序、不自動解鎖或重跑。所有測試程序退出，零 provider／模型啟動與付費呼叫。完成控制層 AC-08／11 子集，原生 provider host restart／session 恢復、遠端整合及完整安全驗收仍 pending，沒有 release／deploy／usable tag。
+
+## T-0020：Pi 原生同 session 明確重新連接
+
+Owner 指示繼續；使用真實 Pi、本機 429，不載入 owner key 或呼叫模型。
+
+| ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| T-0020-01 | 原生 CLI 退出後同 session 明確重新連接、歷史保留與不重跑 | AC-08 子集 | done | 2026-11-02T14:04:20Z | 2026-11-02T14:20:43Z | 2026-11-02T14:21:23Z |
+| T-0020-02 | 一次性恢復 gate、派工／結果整合與程序清理 | AC-09／11 子集 | done | 2026-11-02T14:04:20Z | 2026-11-02T14:20:43Z | 2026-11-02T14:21:23Z |
+
+T-0020 結案：[PR #990](https://github.com/fallrising/newclear/pull/990) 已合併，commit `ff1ac79b08d2c4253353256917205a32f893bb69`，offline／validate 兩項 CI success。已回讀主線證據：177 tests、真實 Pi 1.4.0 及 Chrome 驗收通過。原生 CLI 退出後，一次性無 prompt resume 以新 PID 接回相同 session、更新 hook token、保留六筆歷史，無自動重送；結果保持 stopped、原任務未完成。最終 runner 17.72 秒、外層 30 個程序全退出、鎖釋放；57 筆結果頁回歸通過。首輪瀏覽器欄位名稱筆誤保留，修正後完整重驗通過；兩輪原生檢查皆通過、零模型推論與付費呼叫。完成 AC-08／09／11 子集；Office host crash、任務續做、其他 provider 與完整 MVP 仍待驗，沒有 release／deploy／usable tag。
+
+## T-0021：本地文字任務與專案選擇
+
+Owner 指示繼續，Claude 額度 23:50 重置前先做其他工作；本輪只用本地 OpenCode／Strata。
+
+| ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| T-0021-01 | 登記工作目錄、自訂文字任務、產物查看與下載 | AC-01／09 子集 | in_progress | 2026-11-02T15:22:39Z | — | 2026-11-02T15:46:07Z |
+| T-0021-02 | 文字快照／工具邊界、一次性執行與來源不變驗收 | AC-11 子集 | in_progress | 2026-11-02T15:22:39Z | — | 2026-11-02T15:46:07Z |

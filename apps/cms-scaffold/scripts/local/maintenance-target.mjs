@@ -56,12 +56,14 @@ async function tree(root) {
   await walk(); ensure(files['index.html']); return files;
 }
 function freeze(value) { for (const child of Object.values(value)) if (object(child)) freeze(child); return Object.freeze(value); }
-export async function inspectTarget(runRoot, deps = {}, { apiState } = {}) {
+export async function inspectTarget(runRoot, deps = {}, { apiState, workflow } = {}) {
   try {
     ensure(apiState === 'running' || apiState === 'stopped'); ensure(typeof runRoot === 'string' && runRoot.length > 0);
     const root = resolve(runRoot), runId = root.split('/').at(-1), cwd = dirname(dirname(dirname(root)));
     ensure(hex(runId, 32) && root === join(cwd, 'local/pp1', runId)); await ancestors(root);
     const rootStat = await lstat(root); ensure(rootStat.isDirectory() && (rootStat.mode & 0o7777) === 0o700 && rootStat.uid === process.getuid());
+    try { await lstat(join(root,'restore-target.json')); fail(); } catch(error) { if(error.code!=='ENOENT')throw error; }
+    const workflowContext=workflow ? await (await import('./maintenance-workflow.mjs')).workflowInspectionContext(workflow,root,deps) : null;
     const receipt = JSON.parse(await regular(join(root, 'receipt.json'), true));
     const artifacts = JSON.parse(await regular(join(root, 'artifacts.json'), true));
     const project = `cms-pp1-local-${runId}`, build = receipt.apiBuild;
@@ -88,11 +90,24 @@ export async function inspectTarget(runRoot, deps = {}, { apiState } = {}) {
     ensure(ids.length >= 3 && new Set(ids).size === ids.length && ids.every(id => hex(id, 64)));
     const all = await list(['inspect', ...ids]); ensure(all.length === ids.length && new Set(all.map(c => c.Id)).size === ids.length && all.every(c => ids.includes(c.Id)));
     ensure(all.every(c => object(c.Config?.Labels) && object(c.NetworkSettings?.Networks) && Array.isArray(c.Mounts)));
-    const owned = all.filter(c => c.Config?.Labels?.['com.docker.compose.project'] === project);
+    let permitted=null;
+    if(workflowContext) {
+      const {helper,policy,expected}=workflowContext;permitted=all.find(c=>c.Id===helper.fullContainerId);ensure(permitted);
+      const state=workflowContext.allowExited&&permitted.State?.Status==='exited'?'exited':
+        {CREATED:'created',RUNNING:'running',READY:'running',PERMITTED:'running',EXITED:'exited'}[helper.state];
+      if(state==='exited'&&workflowContext.allowExited)ensure(permitted.State.ExitCode===0);
+      (await import('./maintenance-helper.mjs')).assertHelperPolicy(permitted,policy,{...expected,state});
+      if(state==='running'&&helper.endpoint) {
+        const endpoints=Object.values(permitted.NetworkSettings.Networks);
+        ensure(endpoints.length===1&&endpoints[0].NetworkID===helper.endpoint.networkId&&endpoints[0].IPAddress===helper.endpoint.address);
+      }
+    }
+    const owned = all.filter(c => c!==permitted && c.Config?.Labels?.['com.docker.compose.project'] === project);
+    const allowed=permitted?[...owned,permitted]:owned;
     const service = new Map(owned.map(c => [c.Config.Labels['com.docker.compose.service'], c]));
     ensure(owned.length === 3 && service.size === 3 && ['postgres', 'cms-api', 'ingress'].every(name => service.has(name)));
     const networkNames = ['web', 'data'].map(n => `${project}_${n}`), volumeNames = ['db-data', 'media-data'].map(n => `${project}_${n}`);
-    for (const c of all.filter(c => !owned.includes(c))) ensure(!Object.entries(c.NetworkSettings.Networks).some(([n, e]) => networkNames.includes(n) || networksOwnedId(e.NetworkID)) && !c.Mounts.some(m => volumeNames.includes(m.Name)));
+    for (const c of all.filter(c => !allowed.includes(c))) ensure(!Object.entries(c.NetworkSettings.Networks).some(([n, e]) => networkNames.includes(n) || networksOwnedId(e.NetworkID)) && !c.Mounts.some(m => volumeNames.includes(m.Name)));
     const networks = await list(['network', 'inspect', ...networkNames]); ensure(networks.length === 2 && new Set(networks.map(n => n.Name)).size === 2 && new Set(networks.map(n => n.Id)).size === 2);
     const networkMap = new Map();
     function networksOwnedId(id) { return owned.some(c => Object.values(c.NetworkSettings.Networks).some(e => e.NetworkID === id)); }
@@ -100,8 +115,8 @@ export async function inspectTarget(runRoot, deps = {}, { apiState } = {}) {
       const name = ['web', 'data'].find(k => n.Name === `${project}_${k}`);
       ensure(name && hex(n.Id, 64) && n.Internal === true && n.Driver === 'bridge' && n.Labels?.['com.docker.compose.project'] === project && n.Labels['com.docker.compose.network'] === name);
       ensure(n.IPAM?.Config?.length === 1 && privateIp(n.IPAM.Config[0].Gateway) && within(n.IPAM.Config[0].Gateway, n.IPAM.Config[0].Subnet));
-      ensure(object(n.Containers) && Object.keys(n.Containers).every(id => owned.some(c => c.Id === id)));
-      const members = owned.filter(c => c.State?.Running && Object.hasOwn(c.NetworkSettings?.Networks ?? {}, n.Name));
+      ensure(object(n.Containers) && Object.keys(n.Containers).every(id => allowed.some(c => c.Id === id)));
+      const members = allowed.filter(c => c.State?.Running && Object.hasOwn(c.NetworkSettings?.Networks ?? {}, n.Name));
       ensure(equal(Object.keys(n.Containers).sort(), members.map(c => c.Id).sort()));
       networkMap.set(name, n);
     }
@@ -157,7 +172,7 @@ export async function inspectTarget(runRoot, deps = {}, { apiState } = {}) {
       ensure(data.Source === v.Mountpoint);
     }
     ensure(!overlaps(volumes[0].Mountpoint, volumes[1].Mountpoint));
-    for (const c of all.filter(c => !owned.includes(c))) for (const mount of c.Mounts) {
+    for (const c of all.filter(c => !allowed.includes(c))) for (const mount of c.Mounts) {
       if (['bind', 'volume'].includes(mount.Type)) ensure(absolutePath(mount.Source));
       if (typeof mount.Source === 'string' && mount.Source) ensure(!volumes.some(v => overlaps(mount.Source, v.Mountpoint)));
     }
@@ -177,7 +192,7 @@ export async function inspectTarget(runRoot, deps = {}, { apiState } = {}) {
     catch (error) { if (error.code !== 'ENOENT') throw error; }
     const endpoint = service.get('postgres').NetworkSettings.Networks[`${project}_data`];
     const inspection = freeze({ target, jdbcUrl: `jdbc:postgresql://${endpoint.IPAddress}:5432/cms`, dataGateway: networkMap.get('data').IPAM.Config[0].Gateway });
-    capabilities.set(inspection, { nodeBinary, probe, env }); return inspection;
+    capabilities.set(inspection, { nodeBinary, probe, env, apiState, runRoot: root }); return inspection;
   } catch { fail(); }
 }
 export function mediaProbeCommand(inspection, operationId) {
@@ -190,4 +205,9 @@ export function mediaProbeCommand(inspection, operationId) {
     '--mount', `type=volume,src=${target.volumeNames['media-data']},dst=/media,readonly`,
     '--mount', `type=bind,src=${capability.nodeBinary},dst=/opt/pp1-node,readonly`, '--mount', `type=bind,src=${capability.probe},dst=/tool/probe.mjs,readonly`,
     '--entrypoint', '/opt/pp1-node', target.images.node, '/tool/probe.mjs'], options: { env: { ...capability.env }, shell: false, timeout: 30000, maxBuffer: 1024 } };
+}
+
+export function inspectionDetails(inspection) {
+  const details=capabilities.get(inspection);ensure(details);
+  return Object.freeze({nodeBinary:details.nodeBinary,apiState:details.apiState,runRoot:details.runRoot});
 }

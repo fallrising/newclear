@@ -1,0 +1,23 @@
+✖ H04_process_exit_can_precede_private_output_drain (305.997021ms)
+ℹ tests 1
+ℹ suites 0
+ℹ pass 0
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 630.449819
+
+✖ failing tests:
+
+test at scripts/local/maintenance-helper-session.test.mjs:108:1
+✖ H04_process_exit_can_precede_private_output_drain (305.997021ms)
+  Error: CAPTURE_FAILED
+      at runPgTool (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-20261101/apps/cms-scaffold/scripts/local/maintenance-helper.mjs:332:33)
+      at async TestContext.<anonymous> (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-20261101/apps/cms-scaffold/scripts/local/maintenance-helper-session.test.mjs:110:19)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:385:3) {
+    code: 'CAPTURE_FAILED',
+    phase: null,
+    operationId: null
+  }

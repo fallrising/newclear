@@ -193,7 +193,7 @@ public final class RecoveryInventory {
                   datetime_precision::text,column_default,is_identity,identity_generation,
                   is_generated,generation_expression
                 FROM information_schema.columns WHERE table_schema='public' AND table_name=?
-                ORDER BY ordinal_position
+                ORDER BY information_schema.columns.ordinal_position
                 """)) {
             statement.setString(1, table);
             try (var r = statement.executeQuery()) {

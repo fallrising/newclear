@@ -1,0 +1,25 @@
+✖ T126_nonPG_declared_volumes_must_be_existing_exact_mount_destinations (2.039702ms)
+ℹ tests 1
+ℹ suites 0
+ℹ pass 0
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 70.307755
+
+✖ failing tests:
+
+test at scripts/local/maintenance-helper.test.mjs:195:1
+✖ T126_nonPG_declared_volumes_must_be_existing_exact_mount_destinations (2.039702ms)
+  Error: ADAPTER_UNSEALED
+      at buildHelperPolicy (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-integration-20261102/apps/cms-scaffold/scripts/local/maintenance-helper.mjs:83:19)
+      at TestContext.<anonymous> (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-integration-20261102/apps/cms-scaffold/scripts/local/maintenance-helper.test.mjs:197:11)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.start (node:internal/test_runner/test:1191:17)
+      at startSubtestAfterBootstrap (node:internal/test_runner/harness:385:17) {
+    code: 'ADAPTER_UNSEALED',
+    phase: null,
+    operationId: null
+  }

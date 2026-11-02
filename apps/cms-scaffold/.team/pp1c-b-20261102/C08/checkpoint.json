@@ -1,0 +1,18 @@
+{
+  "card": "C08",
+  "changes": {
+    "local-bundle.mjs": {
+      "added": 190,
+      "removed": 3,
+      "sha256": "8e804432811f46c27c2f699ec33fa6175b54b57c158306544af1f3dff8f98abe"
+    },
+    "local-bundle.test.mjs": {
+      "added": 14,
+      "removed": 1,
+      "sha256": "7395ad44815f5d8b28fed1f6e013646d52c84b68532ee3fc5a4d9c620b9542af"
+    }
+  },
+  "total": 208,
+  "result": "12/12 focused pass",
+  "limitation": "injected helper/workflow filesystem contracts; actual integration and full native gates pending"
+}

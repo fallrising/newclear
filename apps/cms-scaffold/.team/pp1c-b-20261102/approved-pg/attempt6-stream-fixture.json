@@ -1,0 +1,14 @@
+{
+  "runId": "3253eeb3bae442f9b660b1e5c80ec033",
+  "postgresId": "a287a2968eb3388d727572a71891b9b42e6e755aafe8dc69f2d4b9e8cb5868d1",
+  "scope": "fresh synthetic fixture created before workflow; existing schema only",
+  "sqlSha256": "463c9d252d13ba41fd6ff6d14c13d7f62af2de10e47c58ce74cac47285df8de3",
+  "exit": 0,
+  "elapsedSeconds": 9.351755182957277,
+  "observedAt": "2026-11-02T13:26:37.930679+00:00",
+  "counts": {
+    "rows": 4096,
+    "syntheticPayloadBytes": 134217728,
+    "totalDetailBytes": 134287360
+  }
+}

@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.fallrising.cms.ops.RecoveryInventoryMainTests" tests="16" skipped="0" failures="0" errors="0" timestamp="2026-11-02T12:53:02.039Z" hostname="hrv" time="1.259">
+  <properties/>
+  <testcase name="pp1cSymlinkRequestRejectedBeforeConnection()" classname="com.fallrising.cms.ops.RecoveryInventoryMainTests" time="0.962"/>
+  <testcase name="pp1cReceiptIsNotEmittedWhenRollbackFails()" classname="com.fallrising.cms.ops.RecoveryInventoryMainTests" time="0.078"/>
+  <testcase name="pp1cDatabaseFailureNeverLeaksCauseOrPrintsSuccess()" classname="com.fallrising.cms.ops.RecoveryInventoryMainTests" time="0.009"/>
+  <testcase name="pp1cPermitMustEndAtEof()" classname="com.fallrising.cms.ops.RecoveryInventoryMainTests" time="0.01"/>
+  <testcase name="pp1cFixedArgumentsRejectCallerSelectedRequest()" classname="com.fallrising.cms.ops.RecoveryInventoryMainTests" time="0.007"/>
+  <testcase name="pp1cDuplicateAndNoncanonicalRequestRejected()" classname="com.fallrising.cms.ops.RecoveryInventoryMainTests" time="0.008"/>
+  <testcase name="pp1cPermitMismatchAndTrailingBytesNeverInspect()" classname="com.fallrising.cms.ops.RecoveryInventoryMainTests" time="0.01"/>
+  <testcase name="pp1cCanonicalBytesMatchNodeProtocolVector()" classname="com.fallrising.cms.ops.RecoveryInventoryMainTests" time="0.006"/>
+  <testcase name="pp1cOversizeRequestRejectedBeforeConnection()" classname="com.fallrising.cms.ops.RecoveryInventoryMainTests" time="0.006"/>
+  <testcase name="pp1cExistingOutputIsNeverOverwritten()" classname="com.fallrising.cms.ops.RecoveryInventoryMainTests" time="0.012"/>
+  <testcase name="pp1cUnsafeRequestAndSecretFailBeforeDatabase()" classname="com.fallrising.cms.ops.RecoveryInventoryMainTests" time="0.006"/>
+  <testcase name="pp1cSuccessBindsReadyPermitAndWritesPrivateArtifactBeforeResult()" classname="com.fallrising.cms.ops.RecoveryInventoryMainTests" time="0.021"/>
+  <testcase name="pp1cMalformedRequestRejectedBeforeConnection()" classname="com.fallrising.cms.ops.RecoveryInventoryMainTests" time="0.009"/>
+  <testcase name="pp1cEmptyPermitRollsBackAndClosesWithoutInspection()" classname="com.fallrising.cms.ops.RecoveryInventoryMainTests" time="0.008"/>
+  <testcase name="pp1cWrongBackendHashRejectsPermit()" classname="com.fallrising.cms.ops.RecoveryInventoryMainTests" time="0.01"/>
+  <testcase name="pp1cLinkedSecretRejectedBeforeConnection()" classname="com.fallrising.cms.ops.RecoveryInventoryMainTests" time="0.006"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[Mockito is currently self-attaching to enable the inline-mock-maker. This will no longer work in future releases of the JDK. Please add Mockito as an agent to your build as described in Mockito's documentation: https://javadoc.io/doc/org.mockito/mockito-core/latest/org.mockito/org/mockito/Mockito.html#0.3
+WARNING: A Java agent has been loaded dynamically (/home/ckc/.gradle/caches/modules-2/files-2.1/net.bytebuddy/byte-buddy-agent/1.17.8/f09415827a71be7ed621c7bd02550678f28bc81c/byte-buddy-agent-1.17.8.jar)
+WARNING: If a serviceability tool is in use, please run with -XX:+EnableDynamicAgentLoading to hide this warning
+WARNING: If a serviceability tool is not in use, please run with -Djdk.instrument.traceUsage for more information
+WARNING: Dynamic loading of agents will be disallowed by default in a future release
+INPUT_INVALID
+CAPTURE_FAILED
+CAPTURE_FAILED
+INPUT_INVALID
+INPUT_INVALID
+INPUT_INVALID
+INPUT_INVALID
+INPUT_INVALID
+INPUT_INVALID
+INPUT_INVALID
+INPUT_INVALID
+CAPTURE_FAILED
+INPUT_INVALID
+INPUT_INVALID
+INPUT_INVALID
+INPUT_INVALID
+INPUT_INVALID
+INPUT_INVALID
+INPUT_INVALID
+INPUT_INVALID
+]]></system-err>
+</testsuite>

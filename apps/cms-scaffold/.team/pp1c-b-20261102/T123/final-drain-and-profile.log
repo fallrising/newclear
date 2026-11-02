@@ -1,0 +1,12 @@
+✔ PP1C_H02b1_real_token_JDBC_closed_running_before_result_and_EOF (539.215793ms)
+✔ PP1C_H02b1_real_token_JDBC_closed_EXITED_before_result_and_EOF (487.07853ms)
+✔ PP1C_H02b1_real_token_JDBC_closed_reappearing_before_result_and_EOF (420.492834ms)
+✔ PP1C_H02b2b_owned_inventory_uses_private_request_profile_and_receipt_binding (805.857912ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 4
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 2279.803918

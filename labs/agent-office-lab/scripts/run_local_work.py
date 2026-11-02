@@ -23,6 +23,8 @@ import urllib.request
 import uuid
 
 import psutil
+import local_text_task as text_task
+from remote_cli import private_directory
 from local_opencode import prepare as prepare_opencode
 
 LAB = Path(__file__).resolve().parents[1]
@@ -76,7 +78,14 @@ def main():
     parser.add_argument('--check-cancel', action='store_true', help='Verify cancelling a second task through the native Office')
     parser.add_argument('--check-lifecycle', action='store_true', help='Verify synthetic permission replies, browser refresh and native session resume')
     parser.add_argument('--check-restart', action='store_true', help='Verify actual Office host crash, interrupted state and manual resume')
+    parser.add_argument('--text-request', type=Path)
+    parser.add_argument('--request-sha256')
     args = parser.parse_args()
+    custom = None
+    if args.text_request or args.request_sha256:
+        if not (args.text_request and args.request_sha256) or args.harness != 'office-opencode' or args.task != 'file' or any((args.keep_open,args.check_cancel,args.check_lifecycle,args.check_restart,args.prepare_only)):
+            parser.error('Text requests require one local Office task without lifecycle modes')
+        custom = text_task.load_request(LAB, args.text_request, args.request_sha256)
     if (args.keep_open or args.check_cancel or args.check_lifecycle or args.check_restart) and args.harness != 'office-opencode':
         parser.error('Office lifecycle options require --harness office-opencode')
     if args.check_lifecycle and (args.task != 'file' or args.check_cancel or args.keep_open):
@@ -87,7 +96,8 @@ def main():
     out = LAB / 'runs' / ('local-work-' + datetime.datetime.now(
         datetime.timezone.utc).strftime('%Y%m%dT%H%M%S%fZ'))
     workspace = out / 'workspace'
-    workspace.mkdir(parents=True)
+    private_directory(out)
+    workspace.mkdir(mode=0o700)
     (out / 'runner.py').write_text(Path(__file__).read_text())
     if args.harness != 'codex':
         for name in ('execution_slot.py', 'local_run_state.py', 'local_opencode.py', 'office_opencode.mjs', 'local_office_policy.mjs', 'permission_probe.mjs', 'manual_recovery.mjs',
@@ -97,7 +107,13 @@ def main():
     codex_home = out / 'codex-home'
     codex_home.mkdir()
     fixture = {'marker': uuid.uuid4().hex, 'values': [7, 11, 24]}
-    (workspace / 'input.json').write_text(json.dumps(fixture) + '\n')
+    if custom:
+        (out / 'text-task.json').write_bytes(text_task.encoded(custom))
+        custom_prompt = text_task.prepare(workspace, custom)
+        for name in ('local_text_task.py','local_text_boundary.mjs','local_text_policy.mjs'):
+            shutil.copy2(LAB / 'scripts' / name, out / name)
+    else:
+        (workspace / 'input.json').write_text(json.dumps(fixture) + '\n')
     if args.task == 'queue-repair':
         shutil.copytree(LAB / 'fixtures/queue-repair', workspace, dirs_exist_ok=True,
                         ignore=shutil.ignore_patterns('__pycache__'))
@@ -132,11 +148,12 @@ def main():
         command = opencode_command + ['run', '--dir', str(workspace), '--format', 'json',
                                      '--model', 'strata/' + settings['model'], '--title', 'Synthetic lab file task', command[-1]]
     elif args.harness == 'office-opencode':
-        (out / 'prompt.txt').write_text(command[-1])
+        (out / 'prompt.txt').write_text(custom_prompt if custom else command[-1])
         _, opencode_env = prepare_opencode(out, workspace)
         driver = 'office_restart.mjs' if args.check_restart else 'office_opencode.mjs'
         command = [shutil.which('node'), str(LAB / 'scripts' / driver), str(out),
                    str(workspace), str(out / 'prompt.txt')]
+        if custom: command.append('--text-task')
         if args.keep_open:
             command.append('--keep-open')
         if args.check_cancel:
@@ -148,6 +165,7 @@ def main():
     report = {'status': 'prepared', 'harness': args.harness, 'task': args.task, 'cloud_fallback': False, 'model': settings['model'],
               'context': 32768, 'model_inference_verified': False, 'file_task_passed': False,
               'strict_network_isolation_verified': False}
+    if custom: report.update(task='local_text', text_task={'source_snapshot_sha256':text_task.digest(text_task.encoded(custom['files']))})
     print(f'Artifacts: {out}', flush=True)
     server = guard = codex = awake = None
     handles = []
@@ -271,13 +289,23 @@ def main():
             office_result = json.loads((out / 'office-result.json').read_text())
             report['office_result'] = office_result
             report['model_inference_verified'] = office_result.get('model_inference_verified') is True
-        if not (workspace / 'result.json').is_file():
-            raise RuntimeError(f'{args.harness} did not create result.json; see its event and stderr logs')
-        result = json.loads((workspace / 'result.json').read_text())
-        report['file_task_passed'] = result == {'marker': fixture['marker'], 'total': sum(fixture['values'])}
-        if codex.returncode or not report['model_inference_verified'] or not report['file_task_passed']:
-            raise RuntimeError(report.get('office_result', {}).get('error') or
-                               f'Local {args.harness} did not complete the task correctly')
+        if custom:
+            tools = [json.loads(line) for line in (out / 'opencode-worker/text-tools.jsonl').read_text().splitlines()]
+            report['text_tools'] = tools
+            if not all(any(e == {'phase':'finished','tool':tool} for e in tools) for tool in ('read','write')):
+                raise RuntimeError('Text task tool boundary evidence missing')
+            report['text_output'] = text_task.output(workspace)
+            report['source_snapshot_unchanged'] = text_task.sources_unchanged(workspace, custom)
+            if codex.returncode or not report['model_inference_verified'] or not report['source_snapshot_unchanged'] or not report['office_result'].get('text_task_completed'):
+                raise RuntimeError('Local text task did not finish with intact sources')
+        else:
+            if not (workspace / 'result.json').is_file():
+                raise RuntimeError(f'{args.harness} did not create result.json; see its event and stderr logs')
+            result = json.loads((workspace / 'result.json').read_text())
+            report['file_task_passed'] = result == {'marker': fixture['marker'], 'total': sum(fixture['values'])}
+            if codex.returncode or not report['model_inference_verified'] or not report['file_task_passed']:
+                raise RuntimeError(report.get('office_result', {}).get('error') or
+                                   f'Local {args.harness} did not complete the task correctly')
         if args.task == 'queue-repair':
             report['fixture_integrity'] = all(
                 (workspace / name).read_bytes() == (LAB / 'fixtures/queue-repair' / name).read_bytes()

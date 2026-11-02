@@ -10,6 +10,7 @@
 <div class="workspace">
 <section class="panel"><span class="eyebrow">01 / 準備工作</span><h2 id="selected">OpenCode</h2><p id="model"></p>
 <label for="mode">本次操作</label><select id="mode"></select><p id="mode-note" class="muted"></p>
+<div id="text-fields" hidden><label for="project">來源工作目錄</label><select id="project"></select><p id="project-help" class="muted"></p><label for="prompt">這次要完成什麼？</label><textarea id="prompt" rows="5" maxlength="500" placeholder="例如：閱讀專案說明，整理安裝步驟與待確認事項。"></textarea><p class="muted">最多 500 字。讀取文字副本，產生 output.md；原目錄不會被修改。</p></div>
 <div class="actions"><button id="detect" class="secondary">檢查環境</button><button id="plan">查看執行計畫</button></div><p id="check" class="muted">尚未檢查環境。</p>
 <div id="plan-card" hidden><h3>執行前確認</h3><dl id="plan-fields"></dl><p id="plan-note"></p><button id="execute">確認並啟動</button></div>
 </section>
@@ -20,5 +21,5 @@
 <section id="detail" hidden tabindex="-1" aria-label="結果詳細內容"></section>
 </section>
 </main>
-<footer>目前支援固定合成任務。遠端工位可檢查環境與查看計畫；付費執行仍由已授權的 CLI 流程處理。關閉分頁不會停止工作，請使用「停止執行」。</footer>
+<footer>本地支援文字任務與合成驗收。遠端工位可檢查環境與查看計畫；付費執行仍由已授權的 CLI 流程處理。關閉分頁不會停止工作，請使用「停止執行」。</footer>
 </body></html>

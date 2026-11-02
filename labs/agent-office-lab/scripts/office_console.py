@@ -15,6 +15,7 @@ import threading
 import time
 from urllib.parse import urlsplit
 
+import local_text_task as text_task
 import office_dispatch as dispatch
 import office_results as results
 from execution_slot import SlotError, inspect_slot
@@ -40,6 +41,7 @@ def selection_plan(selection, lab=LAB):
     options = {}
     if mode == 'terminal' and provider == 'opencode': options['keep_open'] = True
     elif mode in ('http_401','http_429') and provider == 'pi': options['check_failure'] = int(mode[5:])
+    elif mode == 'resume' and provider == 'pi': options['check_resume'] = True
     elif mode == 'cancel' and provider == 'pi': options['check_cancel'] = True
     elif mode == 'crash' and provider == 'pi': options['check_crash'] = True
     elif mode != 'task': raise ConsoleError('invalid_selection')
@@ -73,8 +75,14 @@ def terminal_link(value):
 
 
 class Console:
-    def __init__(self, lab=LAB, roots=None):
+    def __init__(self, lab=LAB, roots=None, projects=None):
         self.lab = lab
+        self.projects = {}
+        for i, path in enumerate(projects or []):
+            path = Path(os.path.abspath(Path(path).expanduser()))
+            fd = text_task.directory(path); os.close(fd)
+            if path == Path(path.anchor) or len(path.parts) < 3: raise ConsoleError('project_root_too_broad')
+            self.projects[f'project-{i+1}'] = path
         private_directory(lab / 'runs', root=lab)
         self.roots = roots or [lab / 'runs']
         self.token = secrets.token_urlsafe(32)
@@ -84,8 +92,25 @@ class Console:
         self.closing = False
         self.directory = private_directory(lab / 'state/console' / secrets.token_hex(12), root=lab)
 
+    def preview(self, selection):
+        if isinstance(selection,dict) and selection.get('mode') == 'text':
+            if set(selection) != {'provider','mode','project','prompt'} or selection['provider'] != 'opencode':
+                raise ConsoleError('invalid_selection')
+            project = selection['project']
+            if not isinstance(project,str) or project not in self.projects: raise ConsoleError('unknown_project')
+            try:
+                path = self.projects[project]
+                data = text_task.request(path.name,selection['prompt'],text_task.snapshot(path))
+            except (OSError,ValueError,UnicodeError): raise ConsoleError('project_text_unavailable') from None
+            return {'provider':'opencode','model':dispatch.SPECS['opencode']['model'],'remote':False,
+                    'task':'local_text','project':data['project'],'prompt':data['prompt'],
+                    'source_files':list(data['files']),'source_bytes':sum(len(v.encode()) for v in data['files'].values()),
+                    'request_sha256':text_task.digest(text_task.encoded(data)), 'output':'output.md',
+                    'original_directory_modified':False}, data
+        return selection_plan(selection,self.lab), None
+
     def plan(self, selection):
-        preview = selection_plan(selection, self.lab)
+        preview, _ = self.preview(selection)
         with self.lock:
             self.plans = {k:v for k,v in self.plans.items() if v['expires'] > time.monotonic()}
             if len(self.plans) >= 32: raise ConsoleError('too_many_plans')
@@ -99,14 +124,21 @@ class Console:
             if self.active is not None: raise ConsoleError('execution_busy')
             chosen = self.plans.pop(key, None) if isinstance(key, str) else None
             if chosen is None or chosen['expires'] <= time.monotonic(): raise ConsoleError('plan_expired_or_used')
-            preview = selection_plan(chosen['selection'], self.lab)  # Recheck stale retry state.
+            preview, text_data = self.preview(chosen['selection'])  # Recheck source snapshot or stale retry state.
             if preview != chosen['preview']: raise ConsoleError('plan_changed')
             if preview['remote']: raise ConsoleError('remote_execution_requires_cli')
             shared = inspect_slot(self.lab)['status']
             if shared != 'available':
                 raise ConsoleError({'busy':'execution_busy','cleanup_unconfirmed':'cleanup_unconfirmed'}.get(shared,'execution_state_unavailable'))
             # All argv originate in the fixed dispatcher, never in arbitrary browser text.
-            command = [sys.executable, str(self.lab / 'scripts/office_dispatch.py'), *preview['command'][2:]]
+            if text_data:
+                request_path = self.directory / (secrets.token_hex(16)+'.task.json')
+                fd = os.open(request_path,os.O_WRONLY|os.O_CREAT|os.O_EXCL|os.O_NOFOLLOW,0o600)
+                with os.fdopen(fd,'wb') as stream: stream.write(text_task.encoded(text_data))
+                command = [sys.executable,str(self.lab/'scripts/office_dispatch.py'),'local-text',
+                           '--request',str(request_path),'--sha256',preview['request_sha256'],'--execute']
+            else:
+                command = [sys.executable, str(self.lab / 'scripts/office_dispatch.py'), *preview['command'][2:]]
             if '--allow-remote' in command: raise ConsoleError('remote_execution_requires_cli')
             key = secrets.token_hex(16)
             log = self.directory / (key + '.log')
@@ -168,6 +200,7 @@ class Console:
                 except (OSError, ValueError):
                     jobs.append({k:job[k] for k in ('id','provider','phase','exit_code','run_id')})
             return {'active_job':self.active, 'jobs':jobs, 'checks':dict(self.checks),
+                    'projects':[{'id':key,'name':path.name} for key,path in self.projects.items()],
                     'shared_execution':inspect_slot(self.lab),
                     'results':results.catalog(self.roots)}
 
@@ -263,8 +296,9 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--port',type=int,default=0)
     parser.add_argument('--runs-root',type=Path,action='append',help='Additional read-only run histories; only this checkout can execute')
+    parser.add_argument('--project',type=Path,action='append',help='Register an explicit text source directory; original files remain unchanged')
     args = parser.parse_args()
-    console = Console(roots=[LAB/'runs',*(args.runs_root or [])])
+    console = Console(roots=[LAB/'runs',*(args.runs_root or [])],projects=args.project)
     server = serve(console,args.port)
     print(f'http://127.0.0.1:{server.server_port}/#token={console.token}',flush=True)
     def stop(*_): raise KeyboardInterrupt()

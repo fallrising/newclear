@@ -1,0 +1,166 @@
+
+> build
+> npm run build --workspaces --if-present
+
+
+> build
+> vite build
+
+vite v7.3.6 building client environment for production...
+transforming...
+✓ 3077 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                                0.40 kB │ gzip:   0.27 kB
+dist/.vite/manifest.json                      11.31 kB │ gzip:   1.40 kB
+dist/assets/index-CPVzwT8d.css                62.32 kB │ gzip:  11.24 kB
+dist/assets/index-DDplqT5t.js                  0.09 kB │ gzip:   0.10 kB
+dist/assets/x-D6qFTlam.js                      0.19 kB │ gzip:   0.18 kB
+dist/assets/skeleton-CvUqYNLU.js               0.20 kB │ gzip:   0.17 kB
+dist/assets/deferred-toaster-ClnfqB6x.js       0.31 kB │ gzip:   0.23 kB
+dist/assets/resource-layout-BwhG4zeW.js        0.33 kB │ gzip:   0.23 kB
+dist/assets/errors-EXFGr4b3.js                 0.50 kB │ gzip:   0.29 kB
+dist/assets/format-BUR92nvP.js                 0.59 kB │ gzip:   0.40 kB
+dist/assets/label-CaxFr6Xi.js                  0.72 kB │ gzip:   0.46 kB
+dist/assets/document-title-DpdaYLak.js         0.78 kB │ gzip:   0.53 kB
+dist/assets/input-oo2Wp5Jr.js                  0.80 kB │ gzip:   0.44 kB
+dist/assets/empty-state-Cn1vrEzs.js            0.80 kB │ gzip:   0.50 kB
+dist/assets/status-D4NWEbPB.js                 0.86 kB │ gzip:   0.37 kB
+dist/assets/card-D2Xbul0q.js                   0.89 kB │ gzip:   0.39 kB
+dist/assets/labels-CebTdmfa.js                 0.99 kB │ gzip:   0.47 kB
+dist/assets/contextual-save-bar-l3u2Qc_7.js    1.62 kB │ gzip:   0.77 kB
+dist/assets/media-Dh593Q3x.js                  1.84 kB │ gzip:   0.75 kB
+dist/assets/settings-Ddqa_NtV.js               2.93 kB │ gzip:   1.25 kB
+dist/assets/index-table-vQ06RKJA.js            3.59 kB │ gzip:   1.42 kB
+dist/assets/login-CT59NGvd.js                  3.60 kB │ gzip:   1.71 kB
+dist/assets/tabs-DJUtjnka.js                   4.45 kB │ gzip:   1.65 kB
+dist/assets/index-DGWXRqJe.js                  4.74 kB │ gzip:   1.71 kB
+dist/assets/roles-Dx9MckWK.js                  5.84 kB │ gzip:   2.40 kB
+dist/assets/overview-C1Srk1og.js               6.32 kB │ gzip:   2.40 kB
+dist/assets/radio-group-K16Kt4CC.js            6.40 kB │ gzip:   2.58 kB
+dist/assets/shell-Cu2rPFmM.js                  6.72 kB │ gzip:   2.54 kB
+dist/assets/alert-dialog-BQqPAhdW.js           6.78 kB │ gzip:   2.24 kB
+dist/assets/types-B8iuUdOO.js                  6.98 kB │ gzip:   2.48 kB
+dist/assets/confirm-BnVIENuI.js                7.24 kB │ gzip:   2.83 kB
+dist/assets/audit-DANqU7ZO.js                  8.55 kB │ gzip:   3.00 kB
+dist/assets/principals-DjOlTpXt.js            14.81 kB │ gzip:   4.69 kB
+dist/assets/entries-DcX57rxY.js               15.52 kB │ gzip:   5.12 kB
+dist/assets/index-pagination-2t1LK5wg.js      24.06 kB │ gzip:   8.31 kB
+dist/assets/index-D52O_orf.js                 34.46 kB │ gzip:   9.78 kB
+dist/assets/page-header-ZaUI8Gom.js           87.96 kB │ gzip:  30.66 kB
+dist/assets/index-CTUnHf9Q.js                432.13 kB │ gzip: 136.85 kB
+✓ built in 3.37s
+
+> build
+> vite build
+
+vite v7.3.6 building client environment for production...
+transforming...
+../../node_modules/zod/v4/core/util.js (400:0): A comment
+
+"// Wrapped in a `@__PURE__` IIFE: esbuild never tree-shakes a top-level initializer that contains a member access on `Number`, so the bare object literal survived into every bundle."
+
+in "../../node_modules/zod/v4/core/util.js" contains an annotation that Rollup cannot interpret due to the position of the comment. The comment will be removed to avoid issues.
+../../node_modules/zod/v4/core/regexes.js (74:0): A comment
+
+"/** Anchors a pattern source. The interpolation lives here rather than at the call site because
+ * esbuild will not drop a `@__PURE__` call whose own argument interpolates a variable, but it
+ * will drop `anchor(dateSource)`. Keeping it inline pinned `date` into every bundle. */"
+
+in "../../node_modules/zod/v4/core/regexes.js" contains an annotation that Rollup cannot interpret due to the position of the comment. The comment will be removed to avoid issues.
+✓ 3353 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                             0.74 kB │ gzip:   0.46 kB
+dist/.vite/manifest.json                   14.32 kB │ gzip:   1.79 kB
+dist/assets/index-H2I13Hs6.css             62.91 kB │ gzip:  11.32 kB
+dist/assets/index-Bzbenmpm.js               0.09 kB │ gzip:   0.10 kB
+dist/assets/x-7cGzIrj0.js                   0.19 kB │ gzip:   0.18 kB
+dist/assets/entry-layout-DLEI_x0R.js        0.22 kB │ gzip:   0.19 kB
+dist/assets/context-BL6Wpk1v.js             0.27 kB │ gzip:   0.20 kB
+dist/assets/deferred-toaster-BMYPq8Qt.js    0.31 kB │ gzip:   0.23 kB
+dist/assets/type-gate-AzKZb30r.js           0.54 kB │ gzip:   0.33 kB
+dist/assets/label-Cr7YXsBT.js               0.71 kB │ gzip:   0.46 kB
+dist/assets/card-D_aNOveH.js                0.74 kB │ gzip:   0.35 kB
+dist/assets/input-CxIREA5Y.js               0.80 kB │ gzip:   0.44 kB
+dist/assets/empty-state-BgHPmqfo.js         0.80 kB │ gzip:   0.50 kB
+dist/assets/status-BUaBymrC.js              0.81 kB │ gzip:   0.36 kB
+dist/assets/status-badge-B2rA3Vsb.js        0.88 kB │ gzip:   0.42 kB
+dist/assets/labels-C4EsZiNj.js              0.97 kB │ gzip:   0.53 kB
+dist/assets/form-CDrgkK1U.js                1.12 kB │ gzip:   0.51 kB
+dist/assets/table-C9DaYG5X.js               1.21 kB │ gzip:   0.48 kB
+dist/assets/index-pagination-fYTqp8VB.js    1.27 kB │ gzip:   0.61 kB
+dist/assets/format-C-nBekRW.js              1.33 kB │ gzip:   0.67 kB
+dist/assets/nav-DOIQmEUh.js                 1.42 kB │ gzip:   0.66 kB
+dist/assets/view-common-Q6dWnleo.js         1.44 kB │ gzip:   0.78 kB
+dist/assets/useMutation-BbzhDQpY.js         2.30 kB │ gzip:   0.94 kB
+dist/assets/values-WISzc85g.js              2.38 kB │ gzip:   0.98 kB
+dist/assets/preview-D9_fq0D6.js             3.61 kB │ gzip:   1.61 kB
+dist/assets/sign-in-tSgCaoSN.js             3.62 kB │ gzip:   1.71 kB
+dist/assets/history-DP_nBGdj.js             3.89 kB │ gzip:   1.69 kB
+dist/assets/copy-Bh1AuOma.js                4.23 kB │ gzip:   1.88 kB
+dist/assets/schedule-BR3CSIOw.js            4.49 kB │ gzip:   1.85 kB
+dist/assets/switch-MYxT1d5N.js              4.50 kB │ gzip:   1.92 kB
+dist/assets/index-DJIKB86g.js               4.73 kB │ gzip:   1.71 kB
+dist/assets/tabs-C8DjsC1e.js                5.17 kB │ gzip:   1.89 kB
+dist/assets/home-CaIoyPAc.js                5.95 kB │ gzip:   2.39 kB
+dist/assets/media-BlovqP4F.js               6.62 kB │ gzip:   2.69 kB
+dist/assets/shell-BsnJ12Ma.js               6.83 kB │ gzip:   2.61 kB
+dist/assets/board-LQp41nKX.js               7.20 kB │ gzip:   3.00 kB
+dist/assets/resource-index-BWnH4brX.js      8.46 kB │ gzip:   3.55 kB
+dist/assets/copy-DLSVNLVv.js               10.52 kB │ gzip:   4.29 kB
+dist/assets/composer-jpFMNfhm.js           12.71 kB │ gzip:   5.07 kB
+dist/assets/pickers-z2uleS_T.js            17.98 kB │ gzip:   5.95 kB
+dist/assets/select-DmWzmV2P.js             22.95 kB │ gzip:   7.96 kB
+dist/assets/index-BmlcPhfG.js              34.46 kB │ gzip:   9.77 kB
+dist/assets/core.esm-DOUpZDPD.js           42.26 kB │ gzip:  14.15 kB
+dist/assets/entry-form-DkvBgGhf.js         87.69 kB │ gzip:  25.87 kB
+dist/assets/page-header-DUEOOLqL.js        93.59 kB │ gzip:  31.71 kB
+dist/assets/index-ButRiv0W.js             119.66 kB │ gzip:  36.96 kB
+dist/assets/resource-details-D7TRR38P.js  132.08 kB │ gzip:  41.92 kB
+dist/assets/index-DbmZjzfe.js             413.59 kB │ gzip: 131.10 kB
+✓ built in 4.40s
+
+> build
+> vite build
+
+vite v7.3.6 building client environment for production...
+transforming...
+✓ 3246 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                             0.69 kB │ gzip:  0.45 kB
+dist/.vite/manifest.json                   10.40 kB │ gzip:  1.30 kB
+dist/assets/index-CrgDJeAc.css             65.27 kB │ gzip: 11.75 kB
+dist/assets/session-fz5QM2tR.js             0.12 kB │ gzip:  0.13 kB
+dist/assets/root-route-DyFhJnmf.js          0.31 kB │ gzip:  0.24 kB
+dist/assets/member-route-NSiC77_S.js        0.87 kB │ gzip:  0.52 kB
+dist/assets/member-eqlxgohJ.js              0.94 kB │ gzip:  0.50 kB
+dist/assets/logout-D-lKU7XO.js              0.99 kB │ gzip:  0.57 kB
+dist/assets/alert-B7Z2qqsx.js               1.06 kB │ gzip:  0.52 kB
+dist/assets/seo-BpBVCkeZ.js                 1.07 kB │ gzip:  0.57 kB
+dist/assets/card-Brd7lVKR.js                1.07 kB │ gzip:  0.44 kB
+dist/assets/label-BnJHBDPA.js               1.46 kB │ gzip:  0.74 kB
+dist/assets/clinic-smozXE4E.js              1.67 kB │ gzip:  0.87 kB
+dist/assets/selector-z7MCYaDe.js            2.11 kB │ gzip:  0.84 kB
+dist/assets/mobile-nav-DQuQJAIL.js          2.81 kB │ gzip:  1.11 kB
+dist/assets/createLucideIcon-BM0UkQ0H.js    3.09 kB │ gzip:  1.50 kB
+dist/assets/parts-DS_3Yfs0.js               3.32 kB │ gzip:  1.34 kB
+dist/assets/mutation-lmkqu1DR.js            3.45 kB │ gzip:  1.15 kB
+dist/assets/projects-uCsMpv-f.js            3.64 kB │ gzip:  1.31 kB
+dist/assets/login-Ci0kVJsA.js               4.19 kB │ gzip:  1.98 kB
+dist/assets/x-B-aFBK_T.js                   4.34 kB │ gzip:  1.70 kB
+dist/assets/member-Z1ThtUqj.js              4.93 kB │ gzip:  1.59 kB
+dist/assets/home-Cxi3TXpG.js                5.06 kB │ gzip:  1.93 kB
+dist/assets/api-B3yLtS0S.js                 5.07 kB │ gzip:  2.15 kB
+dist/assets/states-qCqHOb9s.js              6.07 kB │ gzip:  2.16 kB
+dist/assets/api-route-CY8O0i2O.js           7.66 kB │ gzip:  2.47 kB
+dist/assets/album-DZ6N8Myq.js               9.31 kB │ gzip:  3.25 kB
+dist/assets/public-entry-Dgm3D7xJ.js       13.33 kB │ gzip:  4.89 kB
+dist/assets/query-tNt-9b_t.js              14.85 kB │ gzip:  5.12 kB
+dist/assets/appointment-new-D3xgtGv_.js    30.80 kB │ gzip: 10.58 kB
+dist/assets/button-BKXj1nad.js             33.83 kB │ gzip: 11.15 kB
+dist/assets/shell-DrNm1_yv.js              96.44 kB │ gzip: 33.39 kB
+dist/assets/markdown-ALggy3AZ.js          124.84 kB │ gzip: 38.66 kB
+dist/assets/index-DJrVIeb0.js             269.88 kB │ gzip: 85.36 kB
+✓ built in 3.52s

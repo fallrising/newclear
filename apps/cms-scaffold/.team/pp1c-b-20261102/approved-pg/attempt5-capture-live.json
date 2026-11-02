@@ -1,0 +1,2644 @@
+{
+  "runId": "52ec608cb3544120a0724856c688bd3c",
+  "operationId": "c5666585-f18b-4253-826b-a3460608a07b",
+  "startedAt": "2026-11-02T13:21:13.631Z",
+  "scope": "real B source capture only; no restore acceptance",
+  "calls": [
+    {
+      "action": "inspect",
+      "milliseconds": 20,
+      "helpers": []
+    },
+    {
+      "action": "inspect",
+      "milliseconds": 16,
+      "helpers": []
+    },
+    {
+      "action": "inspect",
+      "milliseconds": 17,
+      "helpers": []
+    },
+    {
+      "action": "start",
+      "milliseconds": 16
+    },
+    {
+      "action": "inspect",
+      "milliseconds": 21,
+      "helpers": []
+    },
+    {
+      "action": "ps",
+      "milliseconds": 26
+    },
+    {
+      "action": "inspect",
+      "milliseconds": 46,
+      "helpers": [
+        {
+          "kind": "INVENTORY",
+          "id": "1d9d2c5a8a5e3928d43b41542b32ae6ba18ba86e1daf9b9c28b748fdffd94443",
+          "state": "created",
+          "exit": 0
+        },
+        {
+          "kind": "PROFILE",
+          "id": "a5444793df46dedaba7674edb48518826ea467db09ab285784d758e96c11f2f1",
+          "state": "created",
+          "exit": 0
+        }
+      ]
+    },
+    {
+      "action": "network",
+      "milliseconds": 24
+    },
+    {
+      "action": "image",
+      "milliseconds": 22
+    },
+    {
+      "action": "image",
+      "milliseconds": 22
+    },
+    {
+      "action": "image",
+      "milliseconds": 21
+    },
+    {
+      "action": "image",
+      "milliseconds": 22
+    },
+    {
+      "action": "volume",
+      "milliseconds": 22
+    },
+    {
+      "action": "exec",
+      "milliseconds": 65
+    },
+    {
+      "action": "ps",
+      "milliseconds": 27
+    },
+    {
+      "action": "inspect",
+      "milliseconds": 44,
+      "helpers": [
+        {
+          "kind": "INVENTORY",
+          "id": "1d9d2c5a8a5e3928d43b41542b32ae6ba18ba86e1daf9b9c28b748fdffd94443",
+          "state": "created",
+          "exit": 0
+        },
+        {
+          "kind": "PROFILE",
+          "id": "a5444793df46dedaba7674edb48518826ea467db09ab285784d758e96c11f2f1",
+          "state": "created",
+          "exit": 0
+        }
+      ]
+    },
+    {
+      "action": "network",
+      "milliseconds": 24
+    },
+    {
+      "action": "image",
+      "milliseconds": 21
+    },
+    {
+      "action": "image",
+      "milliseconds": 20
+    },
+    {
+      "action": "image",
+      "milliseconds": 20
+    },
+    {
+      "action": "image",
+      "milliseconds": 20
+    },
+    {
+      "action": "volume",
+      "milliseconds": 20
+    },
+    {
+      "action": "exec",
+      "milliseconds": 67
+    },
+    {
+      "action": "ps",
+      "milliseconds": 26
+    },
+    {
+      "action": "inspect",
+      "milliseconds": 44,
+      "helpers": [
+        {
+          "kind": "INVENTORY",
+          "id": "1d9d2c5a8a5e3928d43b41542b32ae6ba18ba86e1daf9b9c28b748fdffd94443",
+          "state": "created",
+          "exit": 0
+        },
+        {
+          "kind": "PROFILE",
+          "id": "a5444793df46dedaba7674edb48518826ea467db09ab285784d758e96c11f2f1",
+          "state": "created",
+          "exit": 0
+        }
+      ]
+    },
+    {
+      "action": "network",
+      "milliseconds": 24
+    },
+    {
+      "action": "image",
+      "milliseconds": 21
+    },
+    {
+      "action": "image",
+      "milliseconds": 20
+    },
+    {
+      "action": "image",
+      "milliseconds": 20
+    },
+    {
+      "action": "image",
+      "milliseconds": 20
+    },
+    {
+      "action": "volume",
+      "milliseconds": 20
+    },
+    {
+      "action": "exec",
+      "milliseconds": 64
+    },
+    {
+      "action": "stop",
+      "milliseconds": 491
+    },
+    {
+      "action": "ps",
+      "milliseconds": 29
+    },
+    {
+      "action": "inspect",
+      "milliseconds": 43,
+      "helpers": [
+        {
+          "kind": "INVENTORY",
+          "id": "1d9d2c5a8a5e3928d43b41542b32ae6ba18ba86e1daf9b9c28b748fdffd94443",
+          "state": "created",
+          "exit": 0
+        },
+        {
+          "kind": "PROFILE",
+          "id": "a5444793df46dedaba7674edb48518826ea467db09ab285784d758e96c11f2f1",
+          "state": "created",
+          "exit": 0
+        }
+      ]
+    },
+    {
+      "action": "network",
+      "milliseconds": 24
+    },
+    {
+      "action": "image",
+      "milliseconds": 22
+    },
+    {
+      "action": "image",
+      "milliseconds": 23
+    },
+    {
+      "action": "image",
+      "milliseconds": 22
+    },
+    {
+      "action": "image",
+      "milliseconds": 22
+    },
+    {
+      "action": "volume",
+      "milliseconds": 22
+    },
+    {
+      "action": "exec",
+      "milliseconds": 63
+    },
+    {
+      "action": "exec",
+      "milliseconds": 69,
+      "backendCount": 0
+    },
+    {
+      "action": "ps",
+      "milliseconds": 28
+    },
+    {
+      "action": "inspect",
+      "milliseconds": 44,
+      "helpers": [
+        {
+          "kind": "INVENTORY",
+          "id": "1d9d2c5a8a5e3928d43b41542b32ae6ba18ba86e1daf9b9c28b748fdffd94443",
+          "state": "created",
+          "exit": 0
+        },
+        {
+          "kind": "PROFILE",
+          "id": "a5444793df46dedaba7674edb48518826ea467db09ab285784d758e96c11f2f1",
+          "state": "created",
+          "exit": 0
+        }
+      ]
+    },
+    {
+      "action": "network",
+      "milliseconds": 23
+    },
+    {
+      "action": "image",
+      "milliseconds": 22
+    },
+    {
+      "action": "image",
+      "milliseconds": 22
+    },
+    {
+      "action": "image",
+      "milliseconds": 22
+    },
+    {
+      "action": "image",
+      "milliseconds": 22
+    },
+    {
+      "action": "volume",
+      "milliseconds": 22
+    },
+    {
+      "action": "exec",
+      "milliseconds": 67
+    },
+    {
+      "action": "exec",
+      "milliseconds": 66,
+      "backendCount": 0
+    },
+    {
+      "action": "ps",
+      "milliseconds": 28
+    },
+    {
+      "action": "inspect",
+      "milliseconds": 43,
+      "helpers": [
+        {
+          "kind": "INVENTORY",
+          "id": "1d9d2c5a8a5e3928d43b41542b32ae6ba18ba86e1daf9b9c28b748fdffd94443",
+          "state": "created",
+          "exit": 0
+        },
+        {
+          "kind": "PROFILE",
+          "id": "a5444793df46dedaba7674edb48518826ea467db09ab285784d758e96c11f2f1",
+          "state": "created",
+          "exit": 0
+        }
+      ]
+    },
+    {
+      "action": "network",
+      "milliseconds": 24
+    },
+    {
+      "action": "image",
+      "milliseconds": 22
+    },
+    {
+      "action": "image",
+      "milliseconds": 23
+    },
+    {
+      "action": "image",
+      "milliseconds": 22
+    },
+    {
+      "action": "image",
+      "milliseconds": 22
+    },
+    {
+      "action": "volume",
+      "milliseconds": 24
+    },
+    {
+      "action": "exec",
+      "milliseconds": 70
+    },
+    {
+      "action": "exec",
+      "milliseconds": 67,
+      "backendCount": 0
+    },
+    {
+      "action": "ps",
+      "milliseconds": 28
+    },
+    {
+      "action": "inspect",
+      "milliseconds": 44,
+      "helpers": [
+        {
+          "kind": "INVENTORY",
+          "id": "1d9d2c5a8a5e3928d43b41542b32ae6ba18ba86e1daf9b9c28b748fdffd94443",
+          "state": "created",
+          "exit": 0
+        },
+        {
+          "kind": "PROFILE",
+          "id": "a5444793df46dedaba7674edb48518826ea467db09ab285784d758e96c11f2f1",
+          "state": "created",
+          "exit": 0
+        }
+      ]
+    },
+    {
+      "action": "network",
+      "milliseconds": 24
+    },
+    {
+      "action": "image",
+      "milliseconds": 22
+    },
+    {
+      "action": "image",
+      "milliseconds": 23
+    },
+    {
+      "action": "image",
+      "milliseconds": 23
+    },
+    {
+      "action": "image",
+      "milliseconds": 23
+    },
+    {
+      "action": "volume",
+      "milliseconds": 23
+    },
+    {
+      "action": "exec",
+      "milliseconds": 69
+    },
+    {
+      "action": "exec",
+      "milliseconds": 68,
+      "backendCount": 0
+    },
+    {
+      "action": "ps",
+      "milliseconds": 29
+    },
+    {
+      "action": "inspect",
+      "milliseconds": 51,
+      "helpers": [
+        {
+          "kind": "INVENTORY",
+          "id": "1d9d2c5a8a5e3928d43b41542b32ae6ba18ba86e1daf9b9c28b748fdffd94443",
+          "state": "created",
+          "exit": 0
+        },
+        {
+          "kind": "PROFILE",
+          "id": "a5444793df46dedaba7674edb48518826ea467db09ab285784d758e96c11f2f1",
+          "state": "created",
+          "exit": 0
+        }
+      ]
+    },
+    {
+      "action": "network",
+      "milliseconds": 27
+    },
+    {
+      "action": "image",
+      "milliseconds": 22
+    },
+    {
+      "action": "image",
+      "milliseconds": 23
+    },
+    {
+      "action": "image",
+      "milliseconds": 22
+    },
+    {
+      "action": "image",
+      "milliseconds": 22
+    },
+    {
+      "action": "volume",
+      "milliseconds": 21
+    },
+    {
+      "action": "exec",
+      "milliseconds": 67
+    },
+    {
+      "action": "exec",
+      "milliseconds": 70,
+      "backendCount": 0
+    },
+    {
+      "action": "ps",
+      "milliseconds": 28
+    },
+    {
+      "action": "inspect",
+      "milliseconds": 53,
+      "helpers": [
+        {
+          "kind": "INVENTORY",
+          "id": "1d9d2c5a8a5e3928d43b41542b32ae6ba18ba86e1daf9b9c28b748fdffd94443",
+          "state": "created",
+          "exit": 0
+        },
+        {
+          "kind": "PROFILE",
+          "id": "a5444793df46dedaba7674edb48518826ea467db09ab285784d758e96c11f2f1",
+          "state": "created",
+          "exit": 0
+        }
+      ]
+    },
+    {
+      "action": "network",
+      "milliseconds": 26
+    },
+    {
+      "action": "image",
+      "milliseconds": 24
+    },
+    {
+      "action": "image",
+      "milliseconds": 25
+    },
+    {
+      "action": "image",
+      "milliseconds": 24
+    },
+    {
+      "action": "image",
+      "milliseconds": 22
+    },
+    {
+      "action": "volume",
+      "milliseconds": 24
+    },
+    {
+      "action": "exec",
+      "milliseconds": 67
+    },
+    {
+      "action": "exec",
+      "milliseconds": 71,
+      "backendCount": 0
+    },
+    {
+      "action": "-version",
+      "milliseconds": 119
+    },
+    {
+      "action": "-d",
+      "milliseconds": 587
+    },
+    {
+      "action": "volume",
+      "milliseconds": 23
+    },
+    {
+      "action": "image",
+      "milliseconds": 22
+    },
+    {
+      "action": "create",
+      "milliseconds": 35
+    },
+    {
+      "action": "inspect",
+      "milliseconds": 22,
+      "helpers": [
+        {
+          "kind": "PROFILE",
+          "id": "0e8da69c367359cdf8ac801ba95322b15e55e0b4ab7f1a3dc467f92aab916a33",
+          "state": "created",
+          "exit": 0
+        }
+      ]
+    },
+    {
+      "action": "start",
+      "milliseconds": 243
+    },
+    {
+      "action": "inspect",
+      "milliseconds": 24,
+      "helpers": [
+        {
+          "kind": "PROFILE",
+          "id": "0e8da69c367359cdf8ac801ba95322b15e55e0b4ab7f1a3dc467f92aab916a33",
+          "state": "exited",
+          "exit": 0
+        }
+      ]
+    },
+    {
+      "action": "rm",
+      "milliseconds": 25
+    },
+    {
+      "action": "image",
+      "milliseconds": 21
+    },
+    {
+      "action": "create",
+      "milliseconds": 32
+    },
+    {
+      "action": "inspect",
+      "milliseconds": 24,
+      "helpers": [
+        {
+          "kind": "PROFILE",
+          "id": "66a52931af5ffb10f62bb3b40a0d06fd5d9ba727e09ccb74704982c84e329396",
+          "state": "created",
+          "exit": 0
+        }
+      ]
+    },
+    {
+      "action": "start",
+      "milliseconds": 166
+    },
+    {
+      "action": "inspect",
+      "milliseconds": 24,
+      "helpers": [
+        {
+          "kind": "PROFILE",
+          "id": "66a52931af5ffb10f62bb3b40a0d06fd5d9ba727e09ccb74704982c84e329396",
+          "state": "exited",
+          "exit": 0
+        }
+      ]
+    },
+    {
+      "action": "rm",
+      "milliseconds": 28
+    },
+    {
+      "action": "image",
+      "milliseconds": 26
+    },
+    {
+      "action": "create",
+      "milliseconds": 36
+    },
+    {
+      "action": "inspect",
+      "milliseconds": 24,
+      "helpers": [
+        {
+          "kind": "PG_DUMP_VERSION",
+          "id": "34dda9ae43b2b35e5418f13d49885ed8a0a9c878568902abace436726cede8d5",
+          "state": "created",
+          "exit": 0
+        }
+      ]
+    },
+    {
+      "action": "start",
+      "milliseconds": 146
+    },
+    {
+      "action": "inspect",
+      "milliseconds": 24,
+      "helpers": [
+        {
+          "kind": "PG_DUMP_VERSION",
+          "id": "34dda9ae43b2b35e5418f13d49885ed8a0a9c878568902abace436726cede8d5",
+          "state": "exited",
+          "exit": 0
+        }
+      ]
+    },
+    {
+      "action": "rm",
+      "milliseconds": 26
+    },
+    {
+      "action": "image",
+      "milliseconds": 22
+    },
+    {
+      "action": "create",
+      "milliseconds": 37
+    },
+    {
+      "action": "inspect",
+      "milliseconds": 28,
+      "helpers": [
+        {
+          "kind": "PG_RESTORE_VERSION",
+          "id": "261b12799c4b446a89fc549cabf61c79df0b1c66460acf947d7bc903865d9318",
+          "state": "created",
+          "exit": 0
+        }
+      ]
+    },
+    {
+      "action": "start",
+      "milliseconds": 135
+    },
+    {
+      "action": "inspect",
+      "milliseconds": 24,
+      "helpers": [
+        {
+          "kind": "PG_RESTORE_VERSION",
+          "id": "261b12799c4b446a89fc549cabf61c79df0b1c66460acf947d7bc903865d9318",
+          "state": "exited",
+          "exit": 0
+        }
+      ]
+    },
+    {
+      "action": "rm",
+      "milliseconds": 26
+    },
+    {
+      "action": "image",
+      "milliseconds": 22
+    },
+    {
+      "action": "create",
+      "milliseconds": 33
+    },
+    {
+      "action": "inspect",
+      "milliseconds": 24,
+      "helpers": [
+        {
+          "kind": "PROFILE",
+          "id": "d2239307d9e8b6fb0244e7327ce391fe64cd39c2333aeae33e1364e1b5606d71",
+          "state": "created",
+          "exit": 0
+        }
+      ]
+    },
+    {
+      "action": "start",
+      "milliseconds": 134
+    },
+    {
+      "action": "inspect",
+      "milliseconds": 23,
+      "helpers": [
+        {
+          "kind": "PROFILE",
+          "id": "d2239307d9e8b6fb0244e7327ce391fe64cd39c2333aeae33e1364e1b5606d71",
+          "state": "exited",
+          "exit": 0
+        }
+      ]
+    },
+    {
+      "action": "rm",
+      "milliseconds": 24
+    },
+    {
+      "action": "image",
+      "milliseconds": 23
+    },
+    {
+      "action": "create",
+      "milliseconds": 32
+    },
+    {
+      "action": "inspect",
+      "milliseconds": 23,
+      "helpers": [
+        {
+          "kind": "PROFILE",
+          "id": "81f17aff958e028185a625f9c67b865d56f5bb457826f8a1c574701fc8b785fc",
+          "state": "created",
+          "exit": 0
+        }
+      ]
+    },
+    {
+      "action": "start",
+      "milliseconds": 128
+    },
+    {
+      "action": "inspect",
+      "milliseconds": 23,
+      "helpers": [
+        {
+          "kind": "PROFILE",
+          "id": "81f17aff958e028185a625f9c67b865d56f5bb457826f8a1c574701fc8b785fc",
+          "state": "exited",
+          "exit": 0
+        }
+      ]
+    },
+    {
+      "action": "rm",
+      "milliseconds": 25
+    },
+    {
+      "action": "exec",
+      "milliseconds": 66
+    },
+    {
+      "action": "exec",
+      "milliseconds": 67
+    },
+    {
+      "action": "ps",
+      "milliseconds": 28
+    },
+    {
+      "action": "inspect",
+      "milliseconds": 49,
+      "helpers": [
+        {
+          "kind": "INVENTORY",
+          "id": "1d9d2c5a8a5e3928d43b41542b32ae6ba18ba86e1daf9b9c28b748fdffd94443",
+          "state": "created",
+          "exit": 0
+        },
+        {
+          "kind": "PROFILE",
+          "id": "a5444793df46dedaba7674edb48518826ea467db09ab285784d758e96c11f2f1",
+          "state": "created",
+          "exit": 0
+        }
+      ]
+    },
+    {
+      "action": "network",
+      "milliseconds": 24
+    },
+    {
+      "action": "image",
+      "milliseconds": 23
+    },
+    {
+      "action": "image",
+      "milliseconds": 23
+    },
+    {
+      "action": "image",
+      "milliseconds": 23
+    },
+    {
+      "action": "image",
+      "milliseconds": 23
+    },
+    {
+      "action": "volume",
+      "milliseconds": 23
+    },
+    {
+      "action": "exec",
+      "milliseconds": 79
+    },
+    {
+      "action": "exec",
+      "milliseconds": 66,
+      "backendCount": 0
+    },
+    {
+      "action": "image",
+      "milliseconds": 23
+    },
+    {
+      "action": "volume",
+      "milliseconds": 21
+    },
+    {
+      "action": "create",
+      "milliseconds": 33
+    },
+    {
+      "action": "inspect",
+      "milliseconds": 24,
+      "helpers": [
+        {
+          "kind": "INVENTORY",
+          "id": "caeeaa8db989ed4ea9ff525d2feb41be6702052d5df823325fb0050ec9dec296",
+          "state": "created",
+          "exit": 0
+        }
+      ]
+    },
+    {
+      "action": "image",
+      "milliseconds": 22
+    },
+    {
+      "action": "volume",
+      "milliseconds": 20
+    },
+    {
+      "action": "inspect",
+      "milliseconds": 22,
+      "helpers": [
+        {
+          "kind": "INVENTORY",
+          "id": "caeeaa8db989ed4ea9ff525d2feb41be6702052d5df823325fb0050ec9dec296",
+          "state": "created",
+          "exit": 0
+        }
+      ]
+    },
+    {
+      "action": "ps",
+      "milliseconds": 29
+    },
+    {
+      "action": "inspect",
+      "milliseconds": 47,
+      "helpers": [
+        {
+          "kind": "INVENTORY",
+          "id": "caeeaa8db989ed4ea9ff525d2feb41be6702052d5df823325fb0050ec9dec296",
+          "state": "created",
+          "exit": 0
+        },
+        {
+          "kind": "INVENTORY",
+          "id": "1d9d2c5a8a5e3928d43b41542b32ae6ba18ba86e1daf9b9c28b748fdffd94443",
+          "state": "created",
+          "exit": 0
+        },
+        {
+          "kind": "PROFILE",
+          "id": "a5444793df46dedaba7674edb48518826ea467db09ab285784d758e96c11f2f1",
+          "state": "created",
+          "exit": 0
+        }
+      ]
+    },
+    {
+      "action": "network",
+      "milliseconds": 25
+    },
+    {
+      "action": "image",
+      "milliseconds": 23
+    },
+    {
+      "action": "image",
+      "milliseconds": 23
+    },
+    {
+      "action": "image",
+      "milliseconds": 22
+    },
+    {
+      "action": "image",
+      "milliseconds": 22
+    },
+    {
+      "action": "volume",
+      "milliseconds": 22
+    },
+    {
+      "action": "exec",
+      "milliseconds": 68
+    },
+    {
+      "action": "exec",
+      "milliseconds": 71,
+      "backendCount": 0
+    },
+    {
+      "action": "inspect",
+      "milliseconds": 136,
+      "helpers": [
+        {
+          "kind": "INVENTORY",
+          "id": "caeeaa8db989ed4ea9ff525d2feb41be6702052d5df823325fb0050ec9dec296",
+          "state": "running",
+          "exit": 0
+        }
+      ]
+    },
+    {
+      "action": "inspect",
+      "milliseconds": 31,
+      "helpers": [
+        {
+          "kind": "INVENTORY",
+          "id": "caeeaa8db989ed4ea9ff525d2feb41be6702052d5df823325fb0050ec9dec296",
+          "state": "running",
+          "exit": 0
+        }
+      ]
+    },
+    {
+      "action": "ps",
+      "milliseconds": 49
+    },
+    {
+      "action": "inspect",
+      "milliseconds": 84,
+      "helpers": [
+        {
+          "kind": "INVENTORY",
+          "id": "caeeaa8db989ed4ea9ff525d2feb41be6702052d5df823325fb0050ec9dec296",
+          "state": "running",
+          "exit": 0
+        },
+        {
+          "kind": "INVENTORY",
+          "id": "1d9d2c5a8a5e3928d43b41542b32ae6ba18ba86e1daf9b9c28b748fdffd94443",
+          "state": "created",
+          "exit": 0
+        },
+        {
+          "kind": "PROFILE",
+          "id": "a5444793df46dedaba7674edb48518826ea467db09ab285784d758e96c11f2f1",
+          "state": "created",
+          "exit": 0
+        }
+      ]
+    },
+    {
+      "action": "network",
+      "milliseconds": 43
+    },
+    {
+      "action": "image",
+      "milliseconds": 36
+    },
+    {
+      "action": "image",
+      "milliseconds": 39
+    },
+    {
+      "action": "image",
+      "milliseconds": 46
+    },
+    {
+      "action": "image",
+      "milliseconds": 42
+    },
+    {
+      "action": "volume",
+      "milliseconds": 43
+    },
+    {
+      "action": "exec",
+      "milliseconds": 81
+    },
+    {
+      "action": "exec",
+      "milliseconds": 69,
+      "backendCount": 1,
+      "backends": [
+        {
+          "pid": 352,
+          "applicationName": "c5666585-f18b-4253-826b-a3460608a07b",
+          "clientAddr": "192.168.64.3",
+          "state": "idle in transaction"
+        }
+      ]
+    },
+    {
+      "action": "ps",
+      "milliseconds": 27
+    },
+    {
+      "action": "inspect",
+      "milliseconds": 43,
+      "helpers": [
+        {
+          "kind": "INVENTORY",
+          "id": "caeeaa8db989ed4ea9ff525d2feb41be6702052d5df823325fb0050ec9dec296",
+          "state": "running",
+          "exit": 0
+        },
+        {
+          "kind": "INVENTORY",
+          "id": "1d9d2c5a8a5e3928d43b41542b32ae6ba18ba86e1daf9b9c28b748fdffd94443",
+          "state": "created",
+          "exit": 0
+        },
+        {
+          "kind": "PROFILE",
+          "id": "a5444793df46dedaba7674edb48518826ea467db09ab285784d758e96c11f2f1",
+          "state": "created",
+          "exit": 0
+        }
+      ]
+    },
+    {
+      "action": "network",
+      "milliseconds": 23
+    },
+    {
+      "action": "image",
+      "milliseconds": 23
+    },
+    {
+      "action": "image",
+      "milliseconds": 22
+    },
+    {
+      "action": "image",
+      "milliseconds": 22
+    },
+    {
+      "action": "image",
+      "milliseconds": 21
+    },
+    {
+      "action": "volume",
+      "milliseconds": 22
+    },
+    {
+      "action": "exec",
+      "milliseconds": 66
+    },
+    {
+      "action": "exec",
+      "milliseconds": 69,
+      "backendCount": 1,
+      "backends": [
+        {
+          "pid": 352,
+          "applicationName": "c5666585-f18b-4253-826b-a3460608a07b",
+          "clientAddr": "192.168.64.3",
+          "state": "idle in transaction"
+        }
+      ]
+    },
+    {
+      "action": "exec",
+      "milliseconds": 68,
+      "backendCount": 1,
+      "backends": [
+        {
+          "pid": 352,
+          "applicationName": "c5666585-f18b-4253-826b-a3460608a07b",
+          "clientAddr": "192.168.64.3",
+          "state": "idle in transaction"
+        }
+      ]
+    },
+    {
+      "action": "inspect",
+      "milliseconds": 21,
+      "helpers": [
+        {
+          "kind": "INVENTORY",
+          "id": "caeeaa8db989ed4ea9ff525d2feb41be6702052d5df823325fb0050ec9dec296",
+          "state": "running",
+          "exit": 0
+        }
+      ]
+    },
+    {
+      "action": "ps",
+      "milliseconds": 34
+    },
+    {
+      "action": "inspect",
+      "milliseconds": 49,
+      "helpers": [
+        {
+          "kind": "INVENTORY",
+          "id": "caeeaa8db989ed4ea9ff525d2feb41be6702052d5df823325fb0050ec9dec296",
+          "state": "running",
+          "exit": 0
+        },
+        {
+          "kind": "INVENTORY",
+          "id": "1d9d2c5a8a5e3928d43b41542b32ae6ba18ba86e1daf9b9c28b748fdffd94443",
+          "state": "created",
+          "exit": 0
+        },
+        {
+          "kind": "PROFILE",
+          "id": "a5444793df46dedaba7674edb48518826ea467db09ab285784d758e96c11f2f1",
+          "state": "created",
+          "exit": 0
+        }
+      ]
+    },
+    {
+      "action": "network",
+      "milliseconds": 24
+    },
+    {
+      "action": "image",
+      "milliseconds": 21
+    },
+    {
+      "action": "image",
+      "milliseconds": 22
+    },
+    {
+      "action": "image",
+      "milliseconds": 25
+    },
+    {
+      "action": "image",
+      "milliseconds": 28
+    },
+    {
+      "action": "volume",
+      "milliseconds": 25
+    },
+    {
+      "action": "exec",
+      "milliseconds": 66
+    },
+    {
+      "action": "exec",
+      "milliseconds": 69,
+      "backendCount": 1,
+      "backends": [
+        {
+          "pid": 352,
+          "applicationName": "c5666585-f18b-4253-826b-a3460608a07b",
+          "clientAddr": "192.168.64.3",
+          "state": "idle in transaction"
+        }
+      ]
+    },
+    {
+      "action": "ps",
+      "milliseconds": 27
+    },
+    {
+      "action": "inspect",
+      "milliseconds": 44,
+      "helpers": [
+        {
+          "kind": "INVENTORY",
+          "id": "caeeaa8db989ed4ea9ff525d2feb41be6702052d5df823325fb0050ec9dec296",
+          "state": "running",
+          "exit": 0
+        },
+        {
+          "kind": "INVENTORY",
+          "id": "1d9d2c5a8a5e3928d43b41542b32ae6ba18ba86e1daf9b9c28b748fdffd94443",
+          "state": "created",
+          "exit": 0
+        },
+        {
+          "kind": "PROFILE",
+          "id": "a5444793df46dedaba7674edb48518826ea467db09ab285784d758e96c11f2f1",
+          "state": "created",
+          "exit": 0
+        }
+      ]
+    },
+    {
+      "action": "network",
+      "milliseconds": 23
+    },
+    {
+      "action": "image",
+      "milliseconds": 21
+    },
+    {
+      "action": "image",
+      "milliseconds": 21
+    },
+    {
+      "action": "image",
+      "milliseconds": 22
+    },
+    {
+      "action": "image",
+      "milliseconds": 21
+    },
+    {
+      "action": "volume",
+      "milliseconds": 21
+    },
+    {
+      "action": "exec",
+      "milliseconds": 67
+    },
+    {
+      "action": "exec",
+      "milliseconds": 69,
+      "backendCount": 1,
+      "backends": [
+        {
+          "pid": 352,
+          "applicationName": "c5666585-f18b-4253-826b-a3460608a07b",
+          "clientAddr": "192.168.64.3",
+          "state": "idle in transaction"
+        }
+      ]
+    },
+    {
+      "action": "inspect",
+      "milliseconds": 21,
+      "helpers": [
+        {
+          "kind": "INVENTORY",
+          "id": "caeeaa8db989ed4ea9ff525d2feb41be6702052d5df823325fb0050ec9dec296",
+          "state": "running",
+          "exit": 0
+        }
+      ]
+    },
+    {
+      "action": "ps",
+      "milliseconds": 27
+    },
+    {
+      "action": "inspect",
+      "milliseconds": 45,
+      "helpers": [
+        {
+          "kind": "INVENTORY",
+          "id": "caeeaa8db989ed4ea9ff525d2feb41be6702052d5df823325fb0050ec9dec296",
+          "state": "running",
+          "exit": 0
+        },
+        {
+          "kind": "INVENTORY",
+          "id": "1d9d2c5a8a5e3928d43b41542b32ae6ba18ba86e1daf9b9c28b748fdffd94443",
+          "state": "created",
+          "exit": 0
+        },
+        {
+          "kind": "PROFILE",
+          "id": "a5444793df46dedaba7674edb48518826ea467db09ab285784d758e96c11f2f1",
+          "state": "created",
+          "exit": 0
+        }
+      ]
+    },
+    {
+      "action": "network",
+      "milliseconds": 23
+    },
+    {
+      "action": "image",
+      "milliseconds": 22
+    },
+    {
+      "action": "image",
+      "milliseconds": 22
+    },
+    {
+      "action": "image",
+      "milliseconds": 23
+    },
+    {
+      "action": "image",
+      "milliseconds": 23
+    },
+    {
+      "action": "volume",
+      "milliseconds": 24
+    },
+    {
+      "action": "exec",
+      "milliseconds": 72
+    },
+    {
+      "action": "exec",
+      "milliseconds": 77,
+      "backendCount": 1,
+      "backends": [
+        {
+          "pid": 352,
+          "applicationName": "c5666585-f18b-4253-826b-a3460608a07b",
+          "clientAddr": "192.168.64.3",
+          "state": "idle in transaction"
+        }
+      ]
+    },
+    {
+      "action": "inspect",
+      "milliseconds": 40,
+      "helpers": [
+        {
+          "kind": "INVENTORY",
+          "id": "caeeaa8db989ed4ea9ff525d2feb41be6702052d5df823325fb0050ec9dec296",
+          "state": "running",
+          "exit": 0
+        }
+      ]
+    },
+    {
+      "action": "ps",
+      "milliseconds": 40
+    },
+    {
+      "action": "inspect",
+      "milliseconds": 93,
+      "helpers": [
+        {
+          "kind": "INVENTORY",
+          "id": "caeeaa8db989ed4ea9ff525d2feb41be6702052d5df823325fb0050ec9dec296",
+          "state": "running",
+          "exit": 0
+        },
+        {
+          "kind": "INVENTORY",
+          "id": "1d9d2c5a8a5e3928d43b41542b32ae6ba18ba86e1daf9b9c28b748fdffd94443",
+          "state": "created",
+          "exit": 0
+        },
+        {
+          "kind": "PROFILE",
+          "id": "a5444793df46dedaba7674edb48518826ea467db09ab285784d758e96c11f2f1",
+          "state": "created",
+          "exit": 0
+        }
+      ]
+    },
+    {
+      "action": "network",
+      "milliseconds": 32
+    },
+    {
+      "action": "image",
+      "milliseconds": 29
+    },
+    {
+      "action": "image",
+      "milliseconds": 29
+    },
+    {
+      "action": "image",
+      "milliseconds": 38
+    },
+    {
+      "action": "image",
+      "milliseconds": 28
+    },
+    {
+      "action": "volume",
+      "milliseconds": 25
+    },
+    {
+      "action": "exec",
+      "milliseconds": 67
+    },
+    {
+      "action": "exec",
+      "milliseconds": 66,
+      "backendCount": 0
+    },
+    {
+      "action": "ps",
+      "milliseconds": 28
+    },
+    {
+      "action": "inspect",
+      "milliseconds": 46,
+      "helpers": [
+        {
+          "kind": "INVENTORY",
+          "id": "caeeaa8db989ed4ea9ff525d2feb41be6702052d5df823325fb0050ec9dec296",
+          "state": "exited",
+          "exit": 0
+        },
+        {
+          "kind": "INVENTORY",
+          "id": "1d9d2c5a8a5e3928d43b41542b32ae6ba18ba86e1daf9b9c28b748fdffd94443",
+          "state": "created",
+          "exit": 0
+        },
+        {
+          "kind": "PROFILE",
+          "id": "a5444793df46dedaba7674edb48518826ea467db09ab285784d758e96c11f2f1",
+          "state": "created",
+          "exit": 0
+        }
+      ]
+    },
+    {
+      "action": "network",
+      "milliseconds": 24
+    },
+    {
+      "action": "image",
+      "milliseconds": 22
+    },
+    {
+      "action": "image",
+      "milliseconds": 23
+    },
+    {
+      "action": "image",
+      "milliseconds": 22
+    },
+    {
+      "action": "image",
+      "milliseconds": 22
+    },
+    {
+      "action": "volume",
+      "milliseconds": 23
+    },
+    {
+      "action": "exec",
+      "milliseconds": 69
+    },
+    {
+      "action": "exec",
+      "milliseconds": 72,
+      "backendCount": 0
+    },
+    {
+      "action": "exec",
+      "milliseconds": 70,
+      "backendCount": 0
+    },
+    {
+      "action": "inspect",
+      "milliseconds": 23,
+      "helpers": [
+        {
+          "kind": "INVENTORY",
+          "id": "caeeaa8db989ed4ea9ff525d2feb41be6702052d5df823325fb0050ec9dec296",
+          "state": "exited",
+          "exit": 0
+        }
+      ]
+    },
+    {
+      "action": "ps",
+      "milliseconds": 28
+    },
+    {
+      "action": "inspect",
+      "milliseconds": 45,
+      "helpers": [
+        {
+          "kind": "INVENTORY",
+          "id": "caeeaa8db989ed4ea9ff525d2feb41be6702052d5df823325fb0050ec9dec296",
+          "state": "exited",
+          "exit": 0
+        },
+        {
+          "kind": "INVENTORY",
+          "id": "1d9d2c5a8a5e3928d43b41542b32ae6ba18ba86e1daf9b9c28b748fdffd94443",
+          "state": "created",
+          "exit": 0
+        },
+        {
+          "kind": "PROFILE",
+          "id": "a5444793df46dedaba7674edb48518826ea467db09ab285784d758e96c11f2f1",
+          "state": "created",
+          "exit": 0
+        }
+      ]
+    },
+    {
+      "action": "network",
+      "milliseconds": 25
+    },
+    {
+      "action": "image",
+      "milliseconds": 23
+    },
+    {
+      "action": "image",
+      "milliseconds": 23
+    },
+    {
+      "action": "image",
+      "milliseconds": 22
+    },
+    {
+      "action": "image",
+      "milliseconds": 22
+    },
+    {
+      "action": "volume",
+      "milliseconds": 22
+    },
+    {
+      "action": "exec",
+      "milliseconds": 70
+    },
+    {
+      "action": "exec",
+      "milliseconds": 72,
+      "backendCount": 0
+    },
+    {
+      "action": "ps",
+      "milliseconds": 28
+    },
+    {
+      "action": "inspect",
+      "milliseconds": 44,
+      "helpers": [
+        {
+          "kind": "INVENTORY",
+          "id": "caeeaa8db989ed4ea9ff525d2feb41be6702052d5df823325fb0050ec9dec296",
+          "state": "exited",
+          "exit": 0
+        },
+        {
+          "kind": "INVENTORY",
+          "id": "1d9d2c5a8a5e3928d43b41542b32ae6ba18ba86e1daf9b9c28b748fdffd94443",
+          "state": "created",
+          "exit": 0
+        },
+        {
+          "kind": "PROFILE",
+          "id": "a5444793df46dedaba7674edb48518826ea467db09ab285784d758e96c11f2f1",
+          "state": "created",
+          "exit": 0
+        }
+      ]
+    },
+    {
+      "action": "network",
+      "milliseconds": 24
+    },
+    {
+      "action": "image",
+      "milliseconds": 22
+    },
+    {
+      "action": "image",
+      "milliseconds": 23
+    },
+    {
+      "action": "image",
+      "milliseconds": 22
+    },
+    {
+      "action": "image",
+      "milliseconds": 22
+    },
+    {
+      "action": "volume",
+      "milliseconds": 22
+    },
+    {
+      "action": "exec",
+      "milliseconds": 71
+    },
+    {
+      "action": "exec",
+      "milliseconds": 70,
+      "backendCount": 0
+    },
+    {
+      "action": "exec",
+      "milliseconds": 68,
+      "backendCount": 0
+    },
+    {
+      "action": "inspect",
+      "milliseconds": 22,
+      "helpers": [
+        {
+          "kind": "INVENTORY",
+          "id": "caeeaa8db989ed4ea9ff525d2feb41be6702052d5df823325fb0050ec9dec296",
+          "state": "exited",
+          "exit": 0
+        }
+      ]
+    },
+    {
+      "action": "ps",
+      "milliseconds": 28
+    },
+    {
+      "action": "inspect",
+      "milliseconds": 43,
+      "helpers": [
+        {
+          "kind": "INVENTORY",
+          "id": "caeeaa8db989ed4ea9ff525d2feb41be6702052d5df823325fb0050ec9dec296",
+          "state": "exited",
+          "exit": 0
+        },
+        {
+          "kind": "INVENTORY",
+          "id": "1d9d2c5a8a5e3928d43b41542b32ae6ba18ba86e1daf9b9c28b748fdffd94443",
+          "state": "created",
+          "exit": 0
+        },
+        {
+          "kind": "PROFILE",
+          "id": "a5444793df46dedaba7674edb48518826ea467db09ab285784d758e96c11f2f1",
+          "state": "created",
+          "exit": 0
+        }
+      ]
+    },
+    {
+      "action": "network",
+      "milliseconds": 24
+    },
+    {
+      "action": "image",
+      "milliseconds": 23
+    },
+    {
+      "action": "image",
+      "milliseconds": 22
+    },
+    {
+      "action": "image",
+      "milliseconds": 22
+    },
+    {
+      "action": "image",
+      "milliseconds": 22
+    },
+    {
+      "action": "volume",
+      "milliseconds": 22
+    },
+    {
+      "action": "exec",
+      "milliseconds": 69
+    },
+    {
+      "action": "exec",
+      "milliseconds": 70,
+      "backendCount": 0
+    },
+    {
+      "action": "ps",
+      "milliseconds": 28
+    },
+    {
+      "action": "inspect",
+      "milliseconds": 43,
+      "helpers": [
+        {
+          "kind": "INVENTORY",
+          "id": "caeeaa8db989ed4ea9ff525d2feb41be6702052d5df823325fb0050ec9dec296",
+          "state": "exited",
+          "exit": 0
+        },
+        {
+          "kind": "INVENTORY",
+          "id": "1d9d2c5a8a5e3928d43b41542b32ae6ba18ba86e1daf9b9c28b748fdffd94443",
+          "state": "created",
+          "exit": 0
+        },
+        {
+          "kind": "PROFILE",
+          "id": "a5444793df46dedaba7674edb48518826ea467db09ab285784d758e96c11f2f1",
+          "state": "created",
+          "exit": 0
+        }
+      ]
+    },
+    {
+      "action": "network",
+      "milliseconds": 24
+    },
+    {
+      "action": "image",
+      "milliseconds": 22
+    },
+    {
+      "action": "image",
+      "milliseconds": 24
+    },
+    {
+      "action": "image",
+      "milliseconds": 22
+    },
+    {
+      "action": "image",
+      "milliseconds": 22
+    },
+    {
+      "action": "volume",
+      "milliseconds": 22
+    },
+    {
+      "action": "exec",
+      "milliseconds": 66
+    },
+    {
+      "action": "exec",
+      "milliseconds": 68,
+      "backendCount": 0
+    },
+    {
+      "action": "exec",
+      "milliseconds": 65,
+      "backendCount": 0
+    },
+    {
+      "action": "inspect",
+      "milliseconds": 22,
+      "helpers": [
+        {
+          "kind": "INVENTORY",
+          "id": "caeeaa8db989ed4ea9ff525d2feb41be6702052d5df823325fb0050ec9dec296",
+          "state": "exited",
+          "exit": 0
+        }
+      ]
+    },
+    {
+      "action": "ps",
+      "milliseconds": 28
+    },
+    {
+      "action": "inspect",
+      "milliseconds": 46,
+      "helpers": [
+        {
+          "kind": "INVENTORY",
+          "id": "caeeaa8db989ed4ea9ff525d2feb41be6702052d5df823325fb0050ec9dec296",
+          "state": "exited",
+          "exit": 0
+        },
+        {
+          "kind": "INVENTORY",
+          "id": "1d9d2c5a8a5e3928d43b41542b32ae6ba18ba86e1daf9b9c28b748fdffd94443",
+          "state": "created",
+          "exit": 0
+        },
+        {
+          "kind": "PROFILE",
+          "id": "a5444793df46dedaba7674edb48518826ea467db09ab285784d758e96c11f2f1",
+          "state": "created",
+          "exit": 0
+        }
+      ]
+    },
+    {
+      "action": "network",
+      "milliseconds": 24
+    },
+    {
+      "action": "image",
+      "milliseconds": 21
+    },
+    {
+      "action": "image",
+      "milliseconds": 22
+    },
+    {
+      "action": "image",
+      "milliseconds": 23
+    },
+    {
+      "action": "image",
+      "milliseconds": 22
+    },
+    {
+      "action": "volume",
+      "milliseconds": 22
+    },
+    {
+      "action": "exec",
+      "milliseconds": 63
+    },
+    {
+      "action": "exec",
+      "milliseconds": 68,
+      "backendCount": 0
+    },
+    {
+      "action": "ps",
+      "milliseconds": 37
+    },
+    {
+      "action": "inspect",
+      "milliseconds": 45,
+      "helpers": [
+        {
+          "kind": "INVENTORY",
+          "id": "caeeaa8db989ed4ea9ff525d2feb41be6702052d5df823325fb0050ec9dec296",
+          "state": "exited",
+          "exit": 0
+        },
+        {
+          "kind": "INVENTORY",
+          "id": "1d9d2c5a8a5e3928d43b41542b32ae6ba18ba86e1daf9b9c28b748fdffd94443",
+          "state": "created",
+          "exit": 0
+        },
+        {
+          "kind": "PROFILE",
+          "id": "a5444793df46dedaba7674edb48518826ea467db09ab285784d758e96c11f2f1",
+          "state": "created",
+          "exit": 0
+        }
+      ]
+    },
+    {
+      "action": "network",
+      "milliseconds": 26
+    },
+    {
+      "action": "image",
+      "milliseconds": 24
+    },
+    {
+      "action": "image",
+      "milliseconds": 24
+    },
+    {
+      "action": "image",
+      "milliseconds": 25
+    },
+    {
+      "action": "image",
+      "milliseconds": 24
+    },
+    {
+      "action": "volume",
+      "milliseconds": 24
+    },
+    {
+      "action": "exec",
+      "milliseconds": 69
+    },
+    {
+      "action": "exec",
+      "milliseconds": 71,
+      "backendCount": 0
+    },
+    {
+      "action": "exec",
+      "milliseconds": 70,
+      "backendCount": 0
+    },
+    {
+      "action": "wait",
+      "milliseconds": 21
+    },
+    {
+      "action": "inspect",
+      "milliseconds": 21,
+      "helpers": [
+        {
+          "kind": "INVENTORY",
+          "id": "caeeaa8db989ed4ea9ff525d2feb41be6702052d5df823325fb0050ec9dec296",
+          "state": "exited",
+          "exit": 0
+        }
+      ]
+    },
+    {
+      "action": "ps",
+      "milliseconds": 27
+    },
+    {
+      "action": "inspect",
+      "milliseconds": 44,
+      "helpers": [
+        {
+          "kind": "INVENTORY",
+          "id": "caeeaa8db989ed4ea9ff525d2feb41be6702052d5df823325fb0050ec9dec296",
+          "state": "exited",
+          "exit": 0
+        },
+        {
+          "kind": "INVENTORY",
+          "id": "1d9d2c5a8a5e3928d43b41542b32ae6ba18ba86e1daf9b9c28b748fdffd94443",
+          "state": "created",
+          "exit": 0
+        },
+        {
+          "kind": "PROFILE",
+          "id": "a5444793df46dedaba7674edb48518826ea467db09ab285784d758e96c11f2f1",
+          "state": "created",
+          "exit": 0
+        }
+      ]
+    },
+    {
+      "action": "network",
+      "milliseconds": 26
+    },
+    {
+      "action": "image",
+      "milliseconds": 24
+    },
+    {
+      "action": "image",
+      "milliseconds": 23
+    },
+    {
+      "action": "image",
+      "milliseconds": 22
+    },
+    {
+      "action": "image",
+      "milliseconds": 22
+    },
+    {
+      "action": "volume",
+      "milliseconds": 21
+    },
+    {
+      "action": "exec",
+      "milliseconds": 66
+    },
+    {
+      "action": "exec",
+      "milliseconds": 71,
+      "backendCount": 0
+    },
+    {
+      "action": "inspect",
+      "milliseconds": 22,
+      "helpers": [
+        {
+          "kind": "INVENTORY",
+          "id": "caeeaa8db989ed4ea9ff525d2feb41be6702052d5df823325fb0050ec9dec296",
+          "state": "exited",
+          "exit": 0
+        }
+      ]
+    },
+    {
+      "action": "rm",
+      "milliseconds": 26
+    },
+    {
+      "action": "ps",
+      "milliseconds": 28
+    },
+    {
+      "action": "inspect",
+      "milliseconds": 47,
+      "helpers": [
+        {
+          "kind": "INVENTORY",
+          "id": "1d9d2c5a8a5e3928d43b41542b32ae6ba18ba86e1daf9b9c28b748fdffd94443",
+          "state": "created",
+          "exit": 0
+        },
+        {
+          "kind": "PROFILE",
+          "id": "a5444793df46dedaba7674edb48518826ea467db09ab285784d758e96c11f2f1",
+          "state": "created",
+          "exit": 0
+        }
+      ]
+    },
+    {
+      "action": "network",
+      "milliseconds": 24
+    },
+    {
+      "action": "image",
+      "milliseconds": 22
+    },
+    {
+      "action": "image",
+      "milliseconds": 23
+    },
+    {
+      "action": "image",
+      "milliseconds": 23
+    },
+    {
+      "action": "image",
+      "milliseconds": 22
+    },
+    {
+      "action": "volume",
+      "milliseconds": 22
+    },
+    {
+      "action": "exec",
+      "milliseconds": 68
+    },
+    {
+      "action": "exec",
+      "milliseconds": 69,
+      "backendCount": 0
+    },
+    {
+      "action": "ps",
+      "milliseconds": 27
+    },
+    {
+      "action": "inspect",
+      "milliseconds": 45,
+      "helpers": [
+        {
+          "kind": "INVENTORY",
+          "id": "1d9d2c5a8a5e3928d43b41542b32ae6ba18ba86e1daf9b9c28b748fdffd94443",
+          "state": "created",
+          "exit": 0
+        },
+        {
+          "kind": "PROFILE",
+          "id": "a5444793df46dedaba7674edb48518826ea467db09ab285784d758e96c11f2f1",
+          "state": "created",
+          "exit": 0
+        }
+      ]
+    },
+    {
+      "action": "network",
+      "milliseconds": 23
+    },
+    {
+      "action": "image",
+      "milliseconds": 23
+    },
+    {
+      "action": "image",
+      "milliseconds": 23
+    },
+    {
+      "action": "image",
+      "milliseconds": 23
+    },
+    {
+      "action": "image",
+      "milliseconds": 23
+    },
+    {
+      "action": "volume",
+      "milliseconds": 24
+    },
+    {
+      "action": "exec",
+      "milliseconds": 63
+    },
+    {
+      "action": "exec",
+      "milliseconds": 72,
+      "backendCount": 0
+    },
+    {
+      "action": "ps",
+      "milliseconds": 28
+    },
+    {
+      "action": "inspect",
+      "milliseconds": 44,
+      "helpers": [
+        {
+          "kind": "INVENTORY",
+          "id": "1d9d2c5a8a5e3928d43b41542b32ae6ba18ba86e1daf9b9c28b748fdffd94443",
+          "state": "created",
+          "exit": 0
+        },
+        {
+          "kind": "PROFILE",
+          "id": "a5444793df46dedaba7674edb48518826ea467db09ab285784d758e96c11f2f1",
+          "state": "created",
+          "exit": 0
+        }
+      ]
+    },
+    {
+      "action": "network",
+      "milliseconds": 26
+    },
+    {
+      "action": "image",
+      "milliseconds": 23
+    },
+    {
+      "action": "image",
+      "milliseconds": 23
+    },
+    {
+      "action": "image",
+      "milliseconds": 25
+    },
+    {
+      "action": "image",
+      "milliseconds": 27
+    },
+    {
+      "action": "volume",
+      "milliseconds": 21
+    },
+    {
+      "action": "exec",
+      "milliseconds": 67
+    },
+    {
+      "action": "exec",
+      "milliseconds": 68,
+      "backendCount": 0
+    },
+    {
+      "action": "ps",
+      "milliseconds": 28
+    },
+    {
+      "action": "inspect",
+      "milliseconds": 45,
+      "helpers": [
+        {
+          "kind": "INVENTORY",
+          "id": "1d9d2c5a8a5e3928d43b41542b32ae6ba18ba86e1daf9b9c28b748fdffd94443",
+          "state": "created",
+          "exit": 0
+        },
+        {
+          "kind": "PROFILE",
+          "id": "a5444793df46dedaba7674edb48518826ea467db09ab285784d758e96c11f2f1",
+          "state": "created",
+          "exit": 0
+        }
+      ]
+    },
+    {
+      "action": "network",
+      "milliseconds": 24
+    },
+    {
+      "action": "image",
+      "milliseconds": 24
+    },
+    {
+      "action": "image",
+      "milliseconds": 26
+    },
+    {
+      "action": "image",
+      "milliseconds": 21
+    },
+    {
+      "action": "image",
+      "milliseconds": 21
+    },
+    {
+      "action": "volume",
+      "milliseconds": 21
+    },
+    {
+      "action": "exec",
+      "milliseconds": 72
+    },
+    {
+      "action": "exec",
+      "milliseconds": 70,
+      "backendCount": 0
+    },
+    {
+      "action": "ps",
+      "milliseconds": 29
+    },
+    {
+      "action": "inspect",
+      "milliseconds": 44,
+      "helpers": [
+        {
+          "kind": "INVENTORY",
+          "id": "1d9d2c5a8a5e3928d43b41542b32ae6ba18ba86e1daf9b9c28b748fdffd94443",
+          "state": "created",
+          "exit": 0
+        },
+        {
+          "kind": "PROFILE",
+          "id": "a5444793df46dedaba7674edb48518826ea467db09ab285784d758e96c11f2f1",
+          "state": "created",
+          "exit": 0
+        }
+      ]
+    },
+    {
+      "action": "network",
+      "milliseconds": 25
+    },
+    {
+      "action": "image",
+      "milliseconds": 22
+    },
+    {
+      "action": "image",
+      "milliseconds": 22
+    },
+    {
+      "action": "image",
+      "milliseconds": 23
+    },
+    {
+      "action": "image",
+      "milliseconds": 22
+    },
+    {
+      "action": "volume",
+      "milliseconds": 22
+    },
+    {
+      "action": "exec",
+      "milliseconds": 77
+    },
+    {
+      "action": "exec",
+      "milliseconds": 69,
+      "backendCount": 0
+    },
+    {
+      "action": "ps",
+      "milliseconds": 28
+    },
+    {
+      "action": "inspect",
+      "milliseconds": 46,
+      "helpers": [
+        {
+          "kind": "INVENTORY",
+          "id": "1d9d2c5a8a5e3928d43b41542b32ae6ba18ba86e1daf9b9c28b748fdffd94443",
+          "state": "created",
+          "exit": 0
+        },
+        {
+          "kind": "PROFILE",
+          "id": "a5444793df46dedaba7674edb48518826ea467db09ab285784d758e96c11f2f1",
+          "state": "created",
+          "exit": 0
+        }
+      ]
+    },
+    {
+      "action": "network",
+      "milliseconds": 24
+    },
+    {
+      "action": "image",
+      "milliseconds": 22
+    },
+    {
+      "action": "image",
+      "milliseconds": 25
+    },
+    {
+      "action": "image",
+      "milliseconds": 24
+    },
+    {
+      "action": "image",
+      "milliseconds": 22
+    },
+    {
+      "action": "volume",
+      "milliseconds": 23
+    },
+    {
+      "action": "exec",
+      "milliseconds": 67
+    },
+    {
+      "action": "exec",
+      "milliseconds": 69,
+      "backendCount": 0
+    },
+    {
+      "action": "image",
+      "milliseconds": 22
+    },
+    {
+      "action": "volume",
+      "milliseconds": 21
+    },
+    {
+      "action": "create",
+      "milliseconds": 33
+    },
+    {
+      "action": "inspect",
+      "milliseconds": 22,
+      "helpers": [
+        {
+          "kind": "PG_DUMP",
+          "id": "477aa350f65fa6dc77789556c940057ca7f5ac44192a09e9b051bc607938f7a7",
+          "state": "created",
+          "exit": 0
+        }
+      ]
+    },
+    {
+      "action": "image",
+      "milliseconds": 21
+    },
+    {
+      "action": "inspect",
+      "milliseconds": 21,
+      "helpers": [
+        {
+          "kind": "PG_DUMP",
+          "id": "477aa350f65fa6dc77789556c940057ca7f5ac44192a09e9b051bc607938f7a7",
+          "state": "created",
+          "exit": 0
+        }
+      ]
+    },
+    {
+      "action": "ps",
+      "milliseconds": 28
+    },
+    {
+      "action": "inspect",
+      "milliseconds": 45,
+      "helpers": [
+        {
+          "kind": "PG_DUMP",
+          "id": "477aa350f65fa6dc77789556c940057ca7f5ac44192a09e9b051bc607938f7a7",
+          "state": "created",
+          "exit": 0
+        },
+        {
+          "kind": "INVENTORY",
+          "id": "1d9d2c5a8a5e3928d43b41542b32ae6ba18ba86e1daf9b9c28b748fdffd94443",
+          "state": "created",
+          "exit": 0
+        },
+        {
+          "kind": "PROFILE",
+          "id": "a5444793df46dedaba7674edb48518826ea467db09ab285784d758e96c11f2f1",
+          "state": "created",
+          "exit": 0
+        }
+      ]
+    },
+    {
+      "action": "network",
+      "milliseconds": 24
+    },
+    {
+      "action": "image",
+      "milliseconds": 24
+    },
+    {
+      "action": "image",
+      "milliseconds": 24
+    },
+    {
+      "action": "image",
+      "milliseconds": 22
+    },
+    {
+      "action": "image",
+      "milliseconds": 23
+    },
+    {
+      "action": "volume",
+      "milliseconds": 22
+    },
+    {
+      "action": "exec",
+      "milliseconds": 69
+    },
+    {
+      "action": "exec",
+      "milliseconds": 67,
+      "backendCount": 0
+    },
+    {
+      "action": "inspect",
+      "milliseconds": 134,
+      "helpers": [
+        {
+          "kind": "PG_DUMP",
+          "id": "477aa350f65fa6dc77789556c940057ca7f5ac44192a09e9b051bc607938f7a7",
+          "state": "running",
+          "exit": 0
+        }
+      ]
+    },
+    {
+      "action": "inspect",
+      "milliseconds": 24,
+      "helpers": [
+        {
+          "kind": "PG_DUMP",
+          "id": "477aa350f65fa6dc77789556c940057ca7f5ac44192a09e9b051bc607938f7a7",
+          "state": "running",
+          "exit": 0
+        }
+      ]
+    },
+    {
+      "action": "ps",
+      "milliseconds": 40
+    },
+    {
+      "action": "inspect",
+      "milliseconds": 67,
+      "helpers": [
+        {
+          "kind": "PG_DUMP",
+          "id": "477aa350f65fa6dc77789556c940057ca7f5ac44192a09e9b051bc607938f7a7",
+          "state": "exited",
+          "exit": 0
+        },
+        {
+          "kind": "INVENTORY",
+          "id": "1d9d2c5a8a5e3928d43b41542b32ae6ba18ba86e1daf9b9c28b748fdffd94443",
+          "state": "created",
+          "exit": 0
+        },
+        {
+          "kind": "PROFILE",
+          "id": "a5444793df46dedaba7674edb48518826ea467db09ab285784d758e96c11f2f1",
+          "state": "created",
+          "exit": 0
+        }
+      ]
+    },
+    {
+      "action": "inspect",
+      "milliseconds": 20,
+      "helpers": [
+        {
+          "kind": "PG_DUMP",
+          "id": "477aa350f65fa6dc77789556c940057ca7f5ac44192a09e9b051bc607938f7a7",
+          "state": "exited",
+          "exit": 0
+        }
+      ]
+    },
+    {
+      "action": "inspect",
+      "milliseconds": 19,
+      "helpers": [
+        {
+          "kind": "PG_DUMP",
+          "id": "477aa350f65fa6dc77789556c940057ca7f5ac44192a09e9b051bc607938f7a7",
+          "state": "exited",
+          "exit": 0
+        }
+      ]
+    },
+    {
+      "action": "ps",
+      "milliseconds": 24
+    },
+    {
+      "action": "inspect",
+      "milliseconds": 42,
+      "helpers": [
+        {
+          "kind": "PG_DUMP",
+          "id": "477aa350f65fa6dc77789556c940057ca7f5ac44192a09e9b051bc607938f7a7",
+          "state": "exited",
+          "exit": 0
+        },
+        {
+          "kind": "INVENTORY",
+          "id": "1d9d2c5a8a5e3928d43b41542b32ae6ba18ba86e1daf9b9c28b748fdffd94443",
+          "state": "created",
+          "exit": 0
+        },
+        {
+          "kind": "PROFILE",
+          "id": "a5444793df46dedaba7674edb48518826ea467db09ab285784d758e96c11f2f1",
+          "state": "created",
+          "exit": 0
+        }
+      ]
+    },
+    {
+      "action": "network",
+      "milliseconds": 21
+    },
+    {
+      "action": "image",
+      "milliseconds": 20
+    },
+    {
+      "action": "image",
+      "milliseconds": 19
+    },
+    {
+      "action": "image",
+      "milliseconds": 20
+    },
+    {
+      "action": "image",
+      "milliseconds": 22
+    },
+    {
+      "action": "volume",
+      "milliseconds": 24
+    },
+    {
+      "action": "exec",
+      "milliseconds": 67
+    },
+    {
+      "action": "exec",
+      "milliseconds": 74,
+      "backendCount": 0
+    },
+    {
+      "action": "inspect",
+      "milliseconds": 24,
+      "helpers": [
+        {
+          "kind": "PG_DUMP",
+          "id": "477aa350f65fa6dc77789556c940057ca7f5ac44192a09e9b051bc607938f7a7",
+          "state": "exited",
+          "exit": 0
+        }
+      ]
+    },
+    {
+      "action": "rm",
+      "milliseconds": 27
+    },
+    {
+      "action": "ps",
+      "milliseconds": 29
+    },
+    {
+      "action": "inspect",
+      "milliseconds": 46,
+      "helpers": [
+        {
+          "kind": "INVENTORY",
+          "id": "1d9d2c5a8a5e3928d43b41542b32ae6ba18ba86e1daf9b9c28b748fdffd94443",
+          "state": "created",
+          "exit": 0
+        },
+        {
+          "kind": "PROFILE",
+          "id": "a5444793df46dedaba7674edb48518826ea467db09ab285784d758e96c11f2f1",
+          "state": "created",
+          "exit": 0
+        }
+      ]
+    },
+    {
+      "action": "network",
+      "milliseconds": 26
+    },
+    {
+      "action": "image",
+      "milliseconds": 26
+    },
+    {
+      "action": "image",
+      "milliseconds": 24
+    },
+    {
+      "action": "image",
+      "milliseconds": 24
+    },
+    {
+      "action": "image",
+      "milliseconds": 24
+    },
+    {
+      "action": "volume",
+      "milliseconds": 23
+    },
+    {
+      "action": "exec",
+      "milliseconds": 65
+    },
+    {
+      "action": "exec",
+      "milliseconds": 69,
+      "backendCount": 0
+    },
+    {
+      "action": "stop",
+      "milliseconds": 30135
+    }
+  ],
+  "initialInspection": true,
+  "lastNonzero": {
+    "file": "docker",
+    "action": "inspect",
+    "code": 1
+  },
+  "success": false,
+  "code": "CAPTURE_FAILED",
+  "stopped": true,
+  "endedAt": "2026-11-02T13:22:11.833Z"
+}

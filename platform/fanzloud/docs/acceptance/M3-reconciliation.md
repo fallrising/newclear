@@ -108,3 +108,11 @@ artifacts. Source pin and cleanup readback remain authoritative over old dirty d
 Provider requests/tokens/cost, complete tool totals and precise active/wait time unknown.
 Native independent reviewers1, reviewturns2; product CLI invocations2, not request counts.
 T-0442/T-0447/T-0449 remain in_progress under their larger requirements.
+
+## Owner follow-up preparation — 2026-11-02
+
+[Owner operation preparation](M3-owner-operation.md) maps the exact FN07 When clause
+to remaining human actions. Offline original-store and226-file hash checks passed;
+no new live evidence. Read-only access alone does not prove owner submission/handoff.
+Finite alternative windows are proposals awaiting explicit owner availability/choice;
+services remain stopped and all previous consumed intents remain untouched.

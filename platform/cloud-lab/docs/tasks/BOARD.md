@@ -750,3 +750,20 @@ MC-01～03由PR[979](https://github.com/fallrising/newclear/pull/979)於2026-11-
 48Python＋8Node producer、471consumer測試、5項真報告本機workerd／D1閉環及T868修正後ACCEPT通過；55contracts／9indexes／161相對連結、32workflow jobs零diagnostics、task/report／diff及公開邊界通過。真實MCP四區段有資料；Pages/Tunnels403保持unknown；capture時間未因轉換刷新，原desired差異不自動修改。
 
 候選9個source files與目前來源逐byte相同，metadata-template、原human revision2→3的scope/expiry CAS提案、原settings／Access／grants已私下保存；下載原Worker為multipart，首次誤當JSON解析失敗後保留原件、按multipart解出3modules，與盤點接入前source逐byte相同。這是回退備份格式修正，不是發布。完整候選與回退見[上線提案](../inventory-activation.md)。人類30天讀取／盤點上傳仍是未批准草案；沒有改線上schema、report、Worker、Access、secrets、權限期限或排程，也沒有付費。下一步僅等待owner批准該具體上線範圍；完整Cloud Lab mainline仍incomplete。本PR只改任務板。
+
+## T-0043 — 已批准的盤點看板上線
+
+| ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| T-0043-1 | 候選及原部署preflight | ML-01 | done | 2026-11-02T14:07:32Z | 2026-11-02T14:27:34Z | 2026-11-02T14:28:17Z |
+| T-0043-2 | additive快照表及首報匯入 | ML-02 | done | 2026-11-02T14:07:32Z | 2026-11-02T14:27:34Z | 2026-11-02T14:28:17Z |
+| T-0043-3 | 原Worker／資產與human授權更新 | ML-03 | done | 2026-11-02T14:07:32Z | 2026-11-02T14:27:34Z | 2026-11-02T14:28:17Z |
+| T-0043-4 | 回讀、證據與交付 | ML-04 | done | 2026-11-02T14:07:32Z | 2026-11-02T14:27:34Z | 2026-11-02T14:28:17Z |
+
+Owner明確批准前一輪具體上線方案；已審T868來源與candidate不重做產品設計。Lead執行並保存mutation前intent／response／回讀；一次有界獨立證據review，無新增provider權限、付費、Cron或其他續權。
+
+ML-01～04已操作及回讀通過，獨立T869 review ACCEPT；55contracts／9indexes／12changed Markdown相對連結與task/report／diff通過。上線與回退見[ML證據](../evidence/inventory-live.md)，管理面匯入不冒充真人登入；完整mainline仍incomplete。已按實際PR合併時間結案。
+
+PR[994](https://github.com/fallrising/newclear/pull/994)於2026-11-02T14:27:34Z正常merge，head `07c74b0bfd1168b4774570a4abeee8aca8160a5c`、merge `5e43b70f17dc85ac0d6d7b14ba4cb64e580e51e6`；必要CI CloudLab41461756810／project41461756784／llms41461756790全過。Lead回讀完整tree與遠端main一致、clean、featurehead為main祖先，保留並行變更。
+
+已按批准更新原Worker／4assets、D1新增快照表及一份management import；human revision3讀取／上傳至2026-12-02T12:00:00Z。Access／secrets／原bindings／Cron／其他grants與截止不變，沒有付費升級或新服務。Pages／Tunnels403仍unknown，未重做真人登入或宣稱完整平台。部署回退與raw multipart驗證器修正已記錄；本PR只改任務板。

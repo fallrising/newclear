@@ -1,0 +1,7 @@
+{
+  "encoding": "utf-8",
+  "originalPath": ".team/pp1c-b-20261102/lint.log",
+  "byteSize": 306,
+  "sha256": "d27e126f456cfce28e422f37624e61458d17d7e7847ce327e35139c91968d692",
+  "text": "\n> lint\n> npm run lint --workspaces --if-present\n\n\n> @cms/api@0.2.0 lint\n> eslint src\n\n\n> @cms/auth@0.1.0 lint\n> eslint src\n\n\n> @cms/fields@0.2.0 lint\n> eslint src\n\n\n> @cms/mocks@0.1.0 lint\n> eslint src\n\n\n> @cms/ui@0.2.0 lint\n> eslint src\n\n\n> lint\n> eslint src\n\n\n> lint\n> eslint src\n\n\n> lint\n> eslint src\n\n"
+}

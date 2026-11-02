@@ -1,0 +1,17 @@
+{
+  "runId": "19da25a9ecbc4053aa093976ec291d51",
+  "operationId": "d1426749-87a1-4511-bb2a-aa61c6aadae7",
+  "startedAt": "2026-11-02T13:06:00.632Z",
+  "scope": "real B source capture only; no restore acceptance",
+  "calls": [],
+  "initialInspection": true,
+  "lastNonzero": {
+    "file": "docker",
+    "action": "inspect",
+    "code": 1
+  },
+  "success": false,
+  "code": "CAPTURE_FAILED",
+  "stopped": true,
+  "endedAt": "2026-11-02T13:06:55.585Z"
+}

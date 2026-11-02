@@ -9,22 +9,22 @@
 | 能力 | 已有結果 | 邊界 |
 | --- | --- | --- |
 | API／定時節點健康檢查 | Worker／D1→non-root runner→驗證結果；15分鐘Cron曾實際通過 | 只有一種load／disk recipe、一個節點；不是任意遠端shell |
-| Access看板 | 命令、結果、未知／過期與應用用量；Safari登入／手動用量有owner回報 | 部署存在不代表目前human授權有效 |
+| Access看板 | 命令、結果、未知／過期與應用用量；Safari登入／手動用量有owner回報 | human讀取／盤點上傳至2026-12-02T12:00:00Z；不含節點提交／取消 |
 | 獨立bot工具 | check／status、MCP與Grok工具接線曾完成真實閉環 | bot窗口已到期；沒有驗證Grok自然語言自主調度 |
 | 恢復與備份 | 故障對帳、unknown保留、官方D1隔離還原與三份journal備份通過 | 不宣稱活躍程序切換或跨系統原子快照 |
-| 既有CF工具／agent平台整合 | [CF工具目錄](docs/tool-catalog.md)已核對64個可見repo；含Edge Ops重複判定 | [盤點報告](docs/inventory-report.md)已實作並通過本機整合；尚未live啟用、遷入／封存應用或接agent平台 |
+| 既有CF工具／agent平台整合 | [CF工具目錄](docs/tool-catalog.md)已核對64個可見repo；含Edge Ops重複判定 | [盤點報告](docs/inventory-report.md)已上線並匯入真實部分盤點；尚未遷入／封存應用或接agent平台 |
 
 ## 使用與授權
 
 [本機啟動](docs/quickstart.md)提供不接真實帳號的demo；已部署環境使用既有私人入口與設定，公開repo不保存憑證或私人網址。[操作紀錄](docs/live-operations.md)及[無桌面OAuth](docs/headless-oauth.md)供接手使用。
 
-截至最後已保存的部署證據：human／bot短窗口已到期，resident政策截止 **2026-11-05T07:24:25Z**。這不是本次新做的live狀態查詢；不能保證現在仍在運行。到期不會刪除Worker、D1或歷史資料，但受限操作不能繼續。沒有自動續權；日常授權方案需明列scope、期限、限額與撤銷方式後批准。
+2026-11-02T14:16:59Z[上線回讀](docs/evidence/inventory-live.md)：human可讀命令／成果、讀取／上傳盤點至 **2026-12-02T12:00:00Z**，Access每次登入session仍1小時。bot仍過期；resident政策仍截止 **2026-11-05T07:24:25Z**，runner／scheduler grant期限不變。沒有自動續權，也不以配置回讀冒充程序存活或本次真人登入驗收。
 
 ## 接下來只做三件事
 
 1. 整理真實現況、可用入口與日常授權方案；不再用過時pending推動新一輪加固。
 2. 依[CF工具盤點](docs/tool-catalog.md)保留原工具責任；node-health維持日常健康入口，Edge Ops先作參考。
-3. [CF資源盤點報告](docs/inventory-report.md)候選已完成：沿用原GET-only工具，手動JSON→最新D1快照→看板。已沿用MCP取得部分真實資源並完成本機讀回；Pages／Tunnels仍403，[live啟用提案](docs/inventory-activation.md)待批准；不新增排程。
+3. [CF資源盤點報告](docs/inventory-report.md)已上線：沿用原GET-only工具，手動JSON→最新D1快照→看板。首報以已批准的management import保存，Pages／Tunnels仍403；後續先核對原desired與可見範圍，再手動更新，不新增盤點排程。
 
 具體停止條件見[方向調整](docs/direction-review.md)。provider用量API、更多授權工具層、Event／seq、active failover與模板生成暫緩；既有安全性質、測試及歷史保留。
 

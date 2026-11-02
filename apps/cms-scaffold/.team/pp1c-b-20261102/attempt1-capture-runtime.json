@@ -1,0 +1,8 @@
+{
+  "runId": "c70dc02dd74d4289967e509805f1495d",
+  "root": "/home/ckc/test/codex/wt/newclear/cms-pp1c-b-20261101/apps/cms-scaffold/local/pp1/c70dc02dd74d4289967e509805f1495d",
+  "project": "cms-pp1-local-c70dc02dd74d4289967e509805f1495d",
+  "apiImage": "sha256:27cb00b13e5fa8336392cb7bdd61729188b1f9fc5602db8f74447da20ced717a",
+  "scope": "B source capture fresh isolated runtime only",
+  "failure": "COMMAND_FAILED:/home/ckc/.local/node-v24.18.0/bin/node:3:PP1_LOCAL_ARTIFACT_INVALID\n"
+}

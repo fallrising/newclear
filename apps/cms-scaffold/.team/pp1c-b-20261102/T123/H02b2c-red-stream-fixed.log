@@ -1,0 +1,25 @@
+✖ PP1C_H02b2c_media_stream_rejects_transient_writer_before_EOF (1392.426605ms)
+ℹ tests 1
+ℹ suites 0
+ℹ pass 0
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1422.077638
+
+✖ failing tests:
+
+test at scripts/local/maintenance-workflow.test.mjs:440:1
+✖ PP1C_H02b2c_media_stream_rejects_transient_writer_before_EOF (1392.426605ms)
+  AssertionError [ERR_ASSERTION]: Missing expected rejection.
+      at async TestContext.<anonymous> (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-integration-20261102/apps/cms-scaffold/scripts/local/maintenance-workflow.test.mjs:442:3)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:385:3) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: undefined,
+    operator: 'rejects',
+    diff: 'simple'
+  }

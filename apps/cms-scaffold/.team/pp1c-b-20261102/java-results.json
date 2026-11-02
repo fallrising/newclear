@@ -1,0 +1,16 @@
+{
+  "test": {
+    "tests": 564,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "execution": "Gradle FROM-CACHE for unchanged Java source, not fresh DB execution"
+  },
+  "integrationTest": {
+    "tests": 211,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "execution": "Gradle FROM-CACHE for unchanged Java source, not fresh DB execution"
+  }
+}

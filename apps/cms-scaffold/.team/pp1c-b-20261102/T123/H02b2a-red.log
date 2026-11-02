@@ -1,0 +1,23 @@
+✖ PP1C_H02b2a_same_image_private_profile_returns_observed_versions (7.566127ms)
+ℹ tests 1
+ℹ suites 0
+ℹ pass 0
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 51.944888
+
+✖ failing tests:
+
+test at scripts/local/maintenance-helper-integration.test.mjs:53:1
+✖ PP1C_H02b2a_same_image_private_profile_returns_observed_versions (7.566127ms)
+  OpsError: ADAPTER_UNSEALED
+      at probeHelperProfile (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-integration-20261102/apps/cms-scaffold/scripts/local/maintenance-helper.mjs:343:9)
+      at TestContext.<anonymous> (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-integration-20261102/apps/cms-scaffold/scripts/local/maintenance-helper-integration.test.mjs:54:49)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:385:3) {
+    code: 'ADAPTER_UNSEALED',
+    phase: null,
+    operationId: null
+  }

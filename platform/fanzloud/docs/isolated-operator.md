@@ -121,3 +121,18 @@ A successful confirmation means the submission is known, even if the run was can
 it does not mean coding succeeded. Until those
 checks pass, this document describes accepted capabilities and their startup preconditions,
 not an available installation that the owner can log into now.
+
+## Owner operation preparation — 2026-11-02
+
+[Short steps and the exact remaining FN07 clauses](acceptance/M3-owner-operation.md)
+identify the original U07 writer/reviewer, downloads and checks inside candidate JSON.
+No service is running. A proposed10min zero-CLI/VM read-only window covers existing
+results; it cannot alone pass the SDD's owner submit/progress/handoff actions. The
+alternative15min/two-CLI owner journey also awaits explicit availability/window choice.
+Neither proposal resets or reuses a consumed intent. Private connection details stay
+in the trusted operator entry; no service starts from this document.
+
+The private read-only gate now has pre-live independent acceptance: see the latest
+[checkpoint](acceptance/M3-owner-operation.md). Original services are still stopped
+and the600s window has not started; owner private tunnel, original login and TLS trust
+readiness must be confirmed first. This is readback only, not new coding/review.

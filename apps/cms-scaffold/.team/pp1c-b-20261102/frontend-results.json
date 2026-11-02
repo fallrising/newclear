@@ -1,0 +1,14 @@
+[
+  {
+    "name": "workspace-tests",
+    "command": [
+      "npm",
+      "run",
+      "test",
+      "--workspaces",
+      "--if-present"
+    ],
+    "exit": 1,
+    "elapsed_seconds": 194.59014569199644
+  }
+]

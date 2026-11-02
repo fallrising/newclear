@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Read existing synthetic Office runs. Never launch a provider or load credentials."""
 import argparse
+import local_text_task
 import datetime
 import hashlib
 import json
@@ -119,7 +120,42 @@ def _normalize(run_fd, run_id):
     elapsed = report.get('elapsed_s')
     if type(elapsed) in (int, float) and 0 <= elapsed < 10**7 and math.isfinite(elapsed):
         row['elapsed_seconds'] = round(elapsed, 2)
+    if report.get('task') == 'local_text':
+        row['task_kind'] = 'local_text'
+        if provider != 'opencode': return dict(row,reason='invalid_text_provider')
+        try:
+            workspace_fd = os.open('workspace',os.O_RDONLY|os.O_DIRECTORY|os.O_NOFOLLOW,dir_fd=run_fd)
+            try: raw = local_text_task.read_regular(workspace_fd,'output.md',local_text_task.MAX_OUTPUT)
+            finally: os.close(workspace_fd)
+            digest = hashlib.sha256(raw).hexdigest()
+            recorded = report.get('text_output',{})
+            if (not raw.strip() or recorded != {'name':'output.md','sha256':digest,'bytes':len(raw)}
+                    or office.get('artifact_sha256') != digest): raise InvalidRun('text_hash_mismatch')
+            row['artifact'] = {'status':'verified','kind':'text','name':'output.md','sha256':digest,'text':raw.decode('utf8')}
+        except FileNotFoundError: pass
+        except (OSError,ValueError,UnicodeError): row['artifact'] = {'status':'unverified','reason':'text_output_invalid'}
+        verified = (report.get('status') == 'completed' and office.get('status') == 'completed'
+                    and report.get('model_inference_verified') is True and office.get('model_inference_verified') is True
+                    and office.get('text_task_completed') is True and report.get('source_snapshot_unchanged') is True
+                    and model_matches and row['cleanup_verified'] and row['artifact']['status'] == 'verified')
+        row['content_review_required'] = True
+        return dict(row,status='completed' if verified else report['status'] if report.get('status') in ('failed','cancelled') else 'unverified',reason='local_text_task')
     row['artifact'] = artifact(run_fd, office.get('artifact_sha256'))
+    if 'resume_check' in report:
+        if (provider != 'pi' or report['resume_check'] != {'source':'loopback','http_status':429}
+                or any(k in report for k in ('cancellation_check','fault_injection','crash_injection'))):
+            return dict(row, status='invalid', reason='invalid_resume_test_metadata')
+        row['test_scenario'] = 'native_pi_resume'
+        row['resume_check_passed'] = (report.get('resume_check_passed') is True
+            and report.get('status') == 'stopped' and office.get('status') == 'stopped'
+            and row['cleanup_verified'] and model_matches and report.get('model_inference_verified') is False
+            and report.get('resume_target_verified') is True
+            and all(office.get(k) is True for k in ('native_resume_verified','session_history_preserved','native_token_rotated','new_process_same_session'))
+            and type(report.get('client_requests')) is int and report['client_requests'] == 1
+            and type(report.get('external_requests')) is int and report['external_requests'] == 0
+            and type(report.get('remaining_owned_processes')) is int and report['remaining_owned_processes'] == 0
+            and row['artifact']['status'] == 'unavailable')
+        return dict(row, status='stopped' if row['resume_check_passed'] else 'failed' if report.get('status') == 'failed' else 'unverified', reason='native_resume_check')
     if 'cancellation_check' in report:
         if (provider != 'pi' or report['cancellation_check'] != {'source':'held_loopback','method':'worker.kill'}
                 or 'fault_injection' in report or 'crash_injection' in report):

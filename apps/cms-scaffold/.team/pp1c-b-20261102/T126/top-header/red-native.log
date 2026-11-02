@@ -1,0 +1,44 @@
+✖ T126_real_registry_PG_accepts_exact_columns_top-padded (449.426012ms)
+✖ T126_real_registry_PG_accepts_exact_columns_top-tabs (318.798917ms)
+✔ T126_real_registry_PG_rejects_top-unknown (300.595215ms)
+✔ T126_real_registry_PG_rejects_top-extra (281.188995ms)
+✔ T126_real_registry_PG_rejects_top-missing (283.518685ms)
+✔ T126_real_registry_PG_rejects_top-newline (265.274591ms)
+✔ T126_real_registry_PG_rejects_top-extra-process (244.905885ms)
+✔ T126_real_registry_PG_rejects_top-wrong-argv (234.941538ms)
+ℹ tests 8
+ℹ suites 0
+ℹ pass 6
+ℹ fail 2
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 2470.283175
+
+✖ failing tests:
+
+test at scripts/local/maintenance-workflow.test.mjs:554:46
+✖ T126_real_registry_PG_accepts_exact_columns_top-padded (449.426012ms)
+  Error: CAPTURE_FAILED
+      at runOwnedHelper (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-integration-20261102/apps/cms-scaffold/scripts/local/maintenance-helper.mjs:618:85)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async TestContext.<anonymous> (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-integration-20261102/apps/cms-scaffold/scripts/local/maintenance-workflow.test.mjs:556:16)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:385:3) {
+    code: 'CAPTURE_FAILED',
+    phase: null,
+    operationId: null
+  }
+
+test at scripts/local/maintenance-workflow.test.mjs:554:46
+✖ T126_real_registry_PG_accepts_exact_columns_top-tabs (318.798917ms)
+  Error: CAPTURE_FAILED
+      at runOwnedHelper (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-integration-20261102/apps/cms-scaffold/scripts/local/maintenance-helper.mjs:618:85)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async TestContext.<anonymous> (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-integration-20261102/apps/cms-scaffold/scripts/local/maintenance-workflow.test.mjs:556:16)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    code: 'CAPTURE_FAILED',
+    phase: null,
+    operationId: null
+  }

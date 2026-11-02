@@ -11,12 +11,13 @@ python3 scripts/office_console.py
 ## 本輪可操作範圍
 
 - 四 provider 的固定 CLI／環境偵測與計畫。
+- [本地文字任務](LOCAL-TEXT-TASK.md)：登記目錄、自訂要求、查看及下載 output.md，原目錄不變。
 - 本地 OpenCode／Strata 合成檔案任務。
 - 本地任務完成後保留原生 Office 終端，從操作台開啟／再次開啟，並停止所屬 runner 與模型。
-- Pi [原生取消檢查](CANCEL.md)、本機 401／429／CLI crash 檢查，以及已有有效 lineage 的本機故障重試。
+- Pi [同 session 重新連接檢查](PI-RESUME.md)、[原生取消檢查](CANCEL.md)、本機 401／429／CLI crash 檢查，以及已有有效 lineage 的本機故障重試。
 - 執行狀態、四 provider 歷史結果、已核對產物與 SHA-256。
 
-Grok、Pi 正常任務與 Cursor 的遠端計畫可查看，但 HTTP API 不接受任何付費執行；仍使用 [DISPATCH](DISPATCH.md) 的 CLI 及當次授權流程。這不是任意 prompt 或私人工作目錄的任務介面。
+Grok、Pi 正常任務與 Cursor 的遠端計畫可查看，但 HTTP API 不接受任何付費執行；仍使用 [DISPATCH](DISPATCH.md) 的 CLI 及當次授權流程。本地文字模式接受自訂要求與已登記來源；目前不支援直接修改任意專案或遠端付費派工。
 
 「合成任務＋保留原生終端」會持續載入本地模型，直到按「停止執行」。原生終端沿用固定 Office 的 lite 頁面與本地 provider 限制；首次開啟需填顯示名稱。操作台不代理終端 keystroke 或原始日誌；互動交由既有原生 Office。終端可繼續操作合成 workspace，仍不能據此宣稱任意檔案／網路邊界已完整驗收。
 
@@ -71,4 +72,4 @@ python3 scripts/office_dispatch.py acknowledge-interruption --confirm-all-owned-
 
 本輪 [真實驗收證據](evidence/console-2026-11-02.json)：159 項離線測試、Chrome 完整本地流程及 52 筆結果回讀通過；包含第一次表單等待失敗、第二次資源 guard 停止與最終成功紀錄。最終追蹤的 107 個程序全退出、鎖釋放，零付費呼叫。
 
-完整四 provider UI 派工、跨 provider 權限／取消／恢復、一般任務輸入及完整安全驗收仍待完成；本輪不建立 usable tag 或部署。
+完整四 provider UI 派工、跨 provider 權限／取消／恢復、一般程式修改及完整安全驗收仍待完成；本輪不建立 usable tag 或部署。

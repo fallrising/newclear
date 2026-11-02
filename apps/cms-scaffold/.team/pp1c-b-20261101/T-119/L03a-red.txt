@@ -1,0 +1,70 @@
+✖ PP1C_L03a_forged_or_serialized_tokens_have_no_authority (18.858786ms)
+✖ PP1C_L03a_lock_inode_swap_and_source_drift_rejected (10.122711ms)
+✖ PP1C_L03a_backup_restores_only_original_running_state (10.883298ms)
+✖ PP1C_L03a_writer_failure_retains_lock_and_never_restarts (10.905168ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 0
+ℹ fail 4
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 67.79101
+
+✖ failing tests:
+
+test at scripts/local/maintenance-workflow.test.mjs:106:1
+✖ PP1C_L03a_forged_or_serialized_tokens_have_no_authority (18.858786ms)
+  AssertionError [ERR_ASSERTION]: Missing expected rejection.
+      at async TestContext.<anonymous> (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-registry-20261101/apps/cms-scaffold/scripts/local/maintenance-workflow.test.mjs:108:3)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:385:3) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: undefined,
+    operator: 'rejects',
+    diff: 'simple'
+  }
+
+test at scripts/local/maintenance-workflow.test.mjs:113:1
+✖ PP1C_L03a_lock_inode_swap_and_source_drift_rejected (10.122711ms)
+  Error: ENOENT: no such file or directory, rename '/tmp/pp1-target-BGDO8O/local/pp1/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/maintenance/operation.lock' -> '/tmp/pp1-target-BGDO8O/local/pp1/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/maintenance/operation.lock.old'
+      at async rename (node:internal/fs/promises:785:10)
+      at async TestContext.<anonymous> (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-registry-20261101/apps/cms-scaffold/scripts/local/maintenance-workflow.test.mjs:116:3)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    errno: -2,
+    code: 'ENOENT',
+    syscall: 'rename',
+    path: '/tmp/pp1-target-BGDO8O/local/pp1/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/maintenance/operation.lock',
+    dest: '/tmp/pp1-target-BGDO8O/local/pp1/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/maintenance/operation.lock.old'
+  }
+
+test at scripts/local/maintenance-workflow.test.mjs:119:1
+✖ PP1C_L03a_backup_restores_only_original_running_state (10.883298ms)
+  AssertionError [ERR_ASSERTION]: Missing expected rejection.
+      at async TestContext.<anonymous> (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-registry-20261101/apps/cms-scaffold/scripts/local/maintenance-workflow.test.mjs:128:5)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: undefined,
+    operator: 'rejects',
+    diff: 'simple'
+  }
+
+test at scripts/local/maintenance-workflow.test.mjs:132:1
+✖ PP1C_L03a_writer_failure_retains_lock_and_never_restarts (10.905168ms)
+  AssertionError [ERR_ASSERTION]: Missing expected rejection.
+      at async TestContext.<anonymous> (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-registry-20261101/apps/cms-scaffold/scripts/local/maintenance-workflow.test.mjs:135:30)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: undefined,
+    operator: 'rejects',
+    diff: 'simple'
+  }

@@ -1,0 +1,6 @@
+{
+  "scripts/local/maintenance-workflow.test.mjs": "cf98bc1e13aa7d4350c6204bd191e7c433cb7898d8ca9a86b6349be2ae90ea90",
+  "scripts/local/maintenance-helper-integration.test.mjs": "64d854cbe3564f2d2de5f13233a162fc124847d9fafd1b0b318b2b022992ea85",
+  "scripts/local/maintenance-helper.test.mjs": "12e60247d35770f0c6d28a8fa4017c484bf733efb57120a8835bf1aa0aa39e74",
+  "scripts/local/maintenance-helper.mjs": "cfd7911a0194050bad91c95275fb0bedddaab5da71560e2c7091ee71d5086f37"
+}

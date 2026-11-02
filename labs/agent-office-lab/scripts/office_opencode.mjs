@@ -11,13 +11,15 @@ import { PermissionProbe, observePermissions } from './permission_probe.mjs';
 
 const lab = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const [out, workspace, promptFile] = process.argv.slice(2, 5).map(p => path.resolve(p));
+const textTask = process.argv.includes('--text-task');
 const keepOpen = process.argv.includes('--keep-open');
 const checkCancel = process.argv.includes('--check-cancel');
 const checkLifecycle = process.argv.includes('--check-lifecycle');
 const permissions = new PermissionProbe();
 let probeError;
 assert(out.startsWith(lab + '/runs/') && workspace.startsWith(out + '/'));
-const fixture = JSON.parse(readFileSync(path.join(workspace, 'input.json'), 'utf8'));
+const fixture = textTask ? null : JSON.parse(readFileSync(path.join(workspace, 'input.json'), 'utf8'));
+assert(!textTask || !(keepOpen || checkCancel || checkLifecycle));
 const prompt = readFileSync(promptFile, 'utf8');
 const report = { status: 'starting', provider: 'opencode', model: 'strata/qwen3.8-flash-next-q2_0', states: [], cloud_fallback: false };
 const save = () => writeFileSync(path.join(out, 'office-result.json'), JSON.stringify(report, null, 2) + '\n');
@@ -75,6 +77,11 @@ try {
   const password = randomBytes(24).toString('base64url');
   office = await startLocalOffice({ out, workspace, password, ask: checkLifecycle });
   for (const floor of office.floors()) {
+    if (textTask) {
+      const spawn=floor.workers.spawn.bind(floor.workers);let used=false;
+      floor.workers.spawn=(...args)=>{if(used)return 'Only one local text task';used=true;return spawn(...args);};
+      floor.workers.resume=()=> 'Text tasks do not resume';floor.workers.prompt=()=> 'No additional prompt';floor.workers.wakeAll=()=>{};
+    }
     if (checkLifecycle) {
       observePermissions(floor.workers, permissions, error => { probeError = error; });
     }
@@ -135,10 +142,11 @@ try {
   report.worker = lastWorker;
   assert(lastWorker.sessionId, 'Native OpenCode session ID missing');
   assert(report.states.includes('working'), 'No native working event');
-  const artifact = readFileSync(path.join(workspace, 'result.json'));
-  assert.deepEqual(JSON.parse(artifact), { marker: fixture.marker, total: fixture.values.reduce((a, b) => a + b, 0) });
+  const artifact = readFileSync(path.join(workspace, textTask ? 'output.md' : 'result.json'));
+  if (textTask) {assert(artifact.length>0&&artifact.length<=65536);report.text_task_completed=true;}
+  else assert.deepEqual(JSON.parse(artifact), { marker: fixture.marker, total: fixture.values.reduce((a, b) => a + b, 0) });
   report.artifact_sha256 = createHash('sha256').update(artifact).digest('hex');
-  report.file_task_passed = true;
+  report.file_task_passed = !textTask;
   report.model_inference_verified = true;
   report.office_native_status_verified = true;
   // Render the completed real worker, not a mock dashboard card.

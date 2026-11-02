@@ -1,0 +1,23 @@
+{
+  "runId": "53256881826545b4ba868b51cbe8f0dd",
+  "postgresId": "79dcc7e957b0edd88cde214db2ce1777d595b18e9a710a4434e56854de37e01d",
+  "scope": "read-only backend metadata observation after failed quiescence; no capture retry",
+  "healthcheck": {
+    "Test": [
+      "CMD",
+      "pg_isready",
+      "-U",
+      "cms_local",
+      "-d",
+      "cms"
+    ],
+    "Interval": 3000000000,
+    "Timeout": 5000000000,
+    "Retries": 30
+  },
+  "startedAt": "2026-11-02T13:18:56.065141+00:00",
+  "exit": 0,
+  "metadata": "",
+  "stdout": "",
+  "stopped": true
+}

@@ -1,0 +1,11 @@
+# PP1c CHECK deparse decision proposal — T-0351
+
+Goal: prepare one concrete owner decision after actual C attempt5 failed strict raw schema comparison. All C product changes remain uncommitted in the original C worktree; no product normalization or exception is authorized.
+
+Scope: docs/v2/waves/PP1c.md; docs/v2/contracts/PP1c-local-adapters.md; docs/v2/contracts/PP1-recovery.md; one new fixture docs/v2/contracts/fixtures/pp1c-check-definition-pairs-v1.json; this evidence directory; T148 task/report. Docs only, no migration/SQL/runtime code/dependency/host changes. Draft PR only until owner decides this new policy.
+
+Proposed exception: exactly nine directed (table/name/complete metadata/sourceDefinition/restoredDefinition) pairs, only pinned PG image6a2e and server/dump/restore16.15, with existing same-release/Flyway provenance. Inventory and all hashes retain raw complete metadata; all other fields/rows/files must compare exactly. RawComparisonV1 schemaEqual may accept only these fully enumerated pairs while retaining different actual schema/inventory hashes. Restore rawSnapshotSha256 binds the target RAW_VERIFIED complete20-table raw dbSnapshotSha256; source remains separately bound by manifest and comparison. This changes the prior source=target hash assumption and requires owner approval, not implied by old PR956/975 approvals.
+
+Verification: actual failed strict comparison/equal rows/files; offline proposal-only checker with exact-pair/metadata/version/literal/index/column negative cases; official PostgreSQL documentation/thread attribution; independent T148 proposal review; project/task/report/whitespace and required Draft-head CI. No test or proposal result is C RAW_VERIFIED success. Before every commit refresh desk and reread T0351; standing Git delivery covers concrete Draft proposal publication, not merge before owner decision.
+
+Budget: root estimate20–35active minutes plus CI observation bounded15min; T148 new10active-minute independent proposal review, C T143 remaining7–9active retained rather than reset. Prior all C/B usage retained; aggregate tools/provider/token/cost/active-wait unknown/null. Initialfailure+2 reasoned corrections per issue, <=400 handwritten lines per checkpoint. Actual C resources, locks, raw rows and credential boundaries unchanged; no release/deploy/cleanup.

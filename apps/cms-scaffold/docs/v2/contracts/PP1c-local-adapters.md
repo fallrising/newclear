@@ -73,6 +73,20 @@ tableName恰wave§4.1已列20names、升序、一名一次；bytes/count為十�
 
 成功例：20rows的schemaEqual/rowsEqual全true、兩count/hash對相同，files三差異count='0'且equal=true、assets/variants/flyway/equal全true。失敗例：cms_permission sourceRowsSha256與targetRowsSha256不同、rowCount相同，該rowsEqual=false及總equal=false，其他項仍列滿；只寫failure receipt並回RAW_MISMATCH，Java revoke starts=0、API starts=0。invalid inventory schema/hash先拒SCHEMA_UNSUPPORTED或BUNDLE_MISMATCH，不偽造一份「完成比較」receipt。
 
+### 2.1 待 owner 決定：PG16.15 九組 CHECK deparse 配對
+
+**PROPOSAL / NOT APPROVED（2026-11-02）：本節未獲批准及正常合併前不生效；現行原字串比較繼續 fail closed。** 實機 C attempt5 的20表 rows、columns、indexes、其餘 constraint metadata、Flyway、assets/variants與17個實體檔相等，但9個CHECK在dump/restore後由整個varchar陣列轉text[]，變成逐元素varchar轉text。現行 `schemaEqual` 必須false，不得先當成已通過。
+
+唯一建議是有限的**定向、逐字配對表** [pp1c-check-definition-pairs-v1.json](fixtures/pp1c-check-definition-pairs-v1.json)，不是通用SQL正規化。只有同一已驗來源／target release、完整Flyway lineage、PG image `sha256:6a2e324ebe59af6031c4c1cd96c1d5072c2ebc36563d2196365e43b8297c062d` 且server/pg_dump/pg_restore均恰16.15時適用。每筆恰綁tableName、constraintName、完整constraintMetadata與兩個完整definition字串；僅sourceDefinition→restoredDefinition方向可作此例外。原字串相等照常通過；反向配對、其他版本/image、未知pair、字串差一byte、literal/order/cast/type/name/flags或其他metadata不同均不能使用例外。
+
+原始Inventory、schema/rows/snapshot/db hashes都完全保留PG原字串，不改Java輸出、不改hash preimage、不重寫source/target schema、不加SQL或migration。比較器先照舊驗兩邊完整raw payload及其所有derived hashes，再逐項比較所有schema內容；只有上述9組恰當位置的definition差異可接受，其餘columns/default/type/nullability/constraints/indexes及全部20表rows仍逐byte／逐欄相等。source-before/source-after仍必與bundle inventory逐byte相同；source不變的要求沒有例外。
+
+RawComparisonV1鍵集合與raw hashes不變：該9組配對可以令 `schemaEqual:true`，但sourceSchemaSha256/targetSchemaSha256以及兩份inventory hash可能不同，必保留實測值，不可填同值、hash正規化結果或宣稱raw schema逐字相同。pure validator、live comparator、後續proof／recover重驗必使用同一固定配對政策並重新比完整payload，不能信任receipt boolean。只有完整比較及所有既有gate通過才可進revoke。
+
+因上述兩份完整raw DB snapshot hash會不同，restore receipt的 `rawSnapshotSha256` 建議明確綁定 **target在RAW_VERIFIED、revoke之前的完整原始 `Inventory.dbSnapshotSha256`**；source hash仍由manifest與RawComparison的sourceInventorySha256完整綁定。詳見父契約§12。本提案不把它改成整份inventory artifact hash，也不改mediaInventorySha256；media header仍需來源／target完全相等。
+
+必要驗收：9組正向與原字串相等；反向、PG版本/image、改literal/順序/型別/constraint flag/name/table、PK/FK/index/column/default、漏／多schema項、same-count row drift與receipt自報true皆拒絕；完整hash重算及source byte-equality保留。批准後先文件／審查／CI／正常merge／遠端核對，才做Node comparator與validator的namedRed→Green，再跑真實fresh target/raw/revoke與完整C gate。提案checker、既有失敗和rows/files相等都不等於C驗收。
+
 ## 3 Phase與獨立停寫檢查
 
 先決：C17只使用明確準備的合成source。一般BACKUP_LOCAL不需要／不得登入fixture帳號。RESTORE_VERIFY_LOCAL在任何stop/capture之前必須已取得§4的memory-only RecoverySecrets和SmokeFixtureInputV1；缺一即INPUT_INVALID，不能從credential/session hashes逆推，也不能reset密碼或重新login來偷偷修fixture。

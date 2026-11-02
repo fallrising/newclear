@@ -1,0 +1,128 @@
+{
+  "status": "PROPOSAL_NOT_APPROVED",
+  "scope": "only nine directed exact original->restored CHECK definition pairs; no generic SQL normalization",
+  "pairCount": 9,
+  "pairs": [
+    {
+      "tableName": "cms_content_type",
+      "constraintName": "cms_content_type_slug_policy_chk",
+      "constraintMetadata": {
+        "deferrable": false,
+        "initiallyDeferred": false,
+        "name": "cms_content_type_slug_policy_chk",
+        "type": "CHECK",
+        "validated": true
+      },
+      "sourceDefinition": "CHECK (((slug_policy)::text = ANY ((ARRAY['required'::character varying, 'optional'::character varying, 'none'::character varying])::text[])))",
+      "restoredDefinition": "CHECK (((slug_policy)::text = ANY (ARRAY[('required'::character varying)::text, ('optional'::character varying)::text, ('none'::character varying)::text])))"
+    },
+    {
+      "tableName": "cms_entry",
+      "constraintName": "cms_entry_state_chk",
+      "constraintMetadata": {
+        "deferrable": false,
+        "initiallyDeferred": false,
+        "name": "cms_entry_state_chk",
+        "type": "CHECK",
+        "validated": true
+      },
+      "sourceDefinition": "CHECK (((publication_state)::text = ANY ((ARRAY['draft'::character varying, 'published'::character varying, 'archived'::character varying])::text[])))",
+      "restoredDefinition": "CHECK (((publication_state)::text = ANY (ARRAY[('draft'::character varying)::text, ('published'::character varying)::text, ('archived'::character varying)::text])))"
+    },
+    {
+      "tableName": "cms_entry_index",
+      "constraintName": "cms_entry_index_kind_chk",
+      "constraintMetadata": {
+        "deferrable": false,
+        "initiallyDeferred": false,
+        "name": "cms_entry_index_kind_chk",
+        "type": "CHECK",
+        "validated": true
+      },
+      "sourceDefinition": "CHECK (((value_kind)::text = ANY ((ARRAY['string'::character varying, 'enum'::character varying, 'int'::character varying, 'bool'::character varying, 'datetime'::character varying, 'ref'::character varying])::text[])))",
+      "restoredDefinition": "CHECK (((value_kind)::text = ANY (ARRAY[('string'::character varying)::text, ('enum'::character varying)::text, ('int'::character varying)::text, ('bool'::character varying)::text, ('datetime'::character varying)::text, ('ref'::character varying)::text])))"
+    },
+    {
+      "tableName": "cms_entry_index",
+      "constraintName": "cms_entry_index_scope_chk",
+      "constraintMetadata": {
+        "deferrable": false,
+        "initiallyDeferred": false,
+        "name": "cms_entry_index_scope_chk",
+        "type": "CHECK",
+        "validated": true
+      },
+      "sourceDefinition": "CHECK (((scope)::text = ANY ((ARRAY['work'::character varying, 'published'::character varying])::text[])))",
+      "restoredDefinition": "CHECK (((scope)::text = ANY (ARRAY[('work'::character varying)::text, ('published'::character varying)::text])))"
+    },
+    {
+      "tableName": "cms_entry_ref",
+      "constraintName": "cms_entry_ref_kind_chk",
+      "constraintMetadata": {
+        "deferrable": false,
+        "initiallyDeferred": false,
+        "name": "cms_entry_ref_kind_chk",
+        "type": "CHECK",
+        "validated": true
+      },
+      "sourceDefinition": "CHECK (((to_kind)::text = ANY ((ARRAY['entry'::character varying, 'media'::character varying, 'principal'::character varying])::text[])))",
+      "restoredDefinition": "CHECK (((to_kind)::text = ANY (ARRAY[('entry'::character varying)::text, ('media'::character varying)::text, ('principal'::character varying)::text])))"
+    },
+    {
+      "tableName": "cms_field",
+      "constraintName": "cms_field_on_delete_chk",
+      "constraintMetadata": {
+        "deferrable": false,
+        "initiallyDeferred": false,
+        "name": "cms_field_on_delete_chk",
+        "type": "CHECK",
+        "validated": true
+      },
+      "sourceDefinition": "CHECK (((on_delete)::text = ANY ((ARRAY['restrict'::character varying, 'set_null'::character varying, 'cascade_soft'::character varying])::text[])))",
+      "restoredDefinition": "CHECK (((on_delete)::text = ANY (ARRAY[('restrict'::character varying)::text, ('set_null'::character varying)::text, ('cascade_soft'::character varying)::text])))"
+    },
+    {
+      "tableName": "cms_field",
+      "constraintName": "cms_field_visibility_chk",
+      "constraintMetadata": {
+        "deferrable": false,
+        "initiallyDeferred": false,
+        "name": "cms_field_visibility_chk",
+        "type": "CHECK",
+        "validated": true
+      },
+      "sourceDefinition": "CHECK (((visibility)::text = ANY ((ARRAY['public'::character varying, 'back'::character varying, 'internal'::character varying])::text[])))",
+      "restoredDefinition": "CHECK (((visibility)::text = ANY (ARRAY[('public'::character varying)::text, ('back'::character varying)::text, ('internal'::character varying)::text])))"
+    },
+    {
+      "tableName": "cms_navigation_menu",
+      "constraintName": "cms_navigation_menu_state_chk",
+      "constraintMetadata": {
+        "deferrable": false,
+        "initiallyDeferred": false,
+        "name": "cms_navigation_menu_state_chk",
+        "type": "CHECK",
+        "validated": true
+      },
+      "sourceDefinition": "CHECK (((publication_state)::text = ANY ((ARRAY['draft'::character varying, 'published'::character varying])::text[])))",
+      "restoredDefinition": "CHECK (((publication_state)::text = ANY (ARRAY[('draft'::character varying)::text, ('published'::character varying)::text])))"
+    },
+    {
+      "tableName": "cms_principal",
+      "constraintName": "cms_principal_status_chk",
+      "constraintMetadata": {
+        "deferrable": false,
+        "initiallyDeferred": false,
+        "name": "cms_principal_status_chk",
+        "type": "CHECK",
+        "validated": true
+      },
+      "sourceDefinition": "CHECK (((status)::text = ANY ((ARRAY['active'::character varying, 'disabled'::character varying, 'locked'::character varying])::text[])))",
+      "restoredDefinition": "CHECK (((status)::text = ANY (ARRAY[('active'::character varying)::text, ('disabled'::character varying)::text, ('locked'::character varying)::text])))"
+    }
+  ],
+  "postgresImageDigest": "sha256:6a2e324ebe59af6031c4c1cd96c1d5072c2ebc36563d2196365e43b8297c062d",
+  "postgresServerVersion": "16.15",
+  "pgDumpVersion": "16.15",
+  "pgRestoreVersion": "16.15"
+}

@@ -253,6 +253,8 @@ DB必須恰為以下20個relation，缺失/額外relation或column均`SCHEMA_UNS
 
 附約§1以bounded no-network probe驗證既有approved image的JRE/JDBC/ImageIO及numeric UID，明確區分U:G私有檔與M:Gm新media；不能由舊image推論未來新build可用。每次實作run重驗同一profile。unsupported UID/GID/PG text edge/host filesystem link identity即 `ADAPTER_UNSEALED`，不得加權限或動態放寬allowlist。
 
+**待決窄幅修訂（未生效）：** [local adapters§2.1](../contracts/PP1c-local-adapters.md#21-待-owner-決定pg1615-九組-check-deparse-配對)提出僅PG16.15固定映像、9組具名CHECK原始definition定向配對；Inventory仍完全保留原字串與原hash，其他schema/rows/files/source-before/after仍exact。RawComparison可保留不同的原始schema/inventory hashes而在此有限政策下判schemaEqual；restore receipt改明訂target RAW_VERIFIED完整raw DB snapshot hash（[父契約§12](../contracts/PP1-recovery.md#12-待決pg1615-check-配對與-target-raw-snapshot)）。這是新的owner決定，舊PR956／975批准不涵蓋；未批准及正常合併前仍按原嚴格schema/hash相等政策拒絕，不能繼續C revoke或D。
+
 ### 4.4 Local capture與restore phase
 
 Local proof由單次 `RESTORE_VERIFY_LOCAL` v2 lease串起：PRECHECK→SOURCE_QUIESCED→LOCAL_CAPTURED→LOCAL_VERIFIED→TARGET_RESERVED→TARGET_BLANK→DB_RESTORED→MEDIA_RESTORED→RAW_VERIFIED→SESSIONS_REVOKED→STARTUP_VERIFIED→API_HEALTHY→INGRESS_STARTED→BROWSER_VERIFIED→TARGET_STOPPED→RESTART_VERIFIED→COMPLETE。每個phase durable BEGIN/END均綁lease/proof hash；unknown/crash停在原phase、保留lock/target，不自動重試。source在capture、restore、browser期間一直stopped及identity/raw一致；local proof完成後保持stopped。普通backup若原始API為running，僅依 `RESTORE_ORIGINAL` 在原容器/同版可證明健康後恢復；若原本stopped則永不start。

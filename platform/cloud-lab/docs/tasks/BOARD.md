@@ -755,11 +755,15 @@ MC-01～03由PR[979](https://github.com/fallrising/newclear/pull/979)於2026-11-
 
 | ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| T-0043-1 | 候選及原部署preflight | ML-01 | in_progress | 2026-11-02T14:07:32Z | — | 2026-11-02T14:23:34Z |
-| T-0043-2 | additive快照表及首報匯入 | ML-02 | in_progress | 2026-11-02T14:07:32Z | — | 2026-11-02T14:23:34Z |
-| T-0043-3 | 原Worker／資產與human授權更新 | ML-03 | in_progress | 2026-11-02T14:07:32Z | — | 2026-11-02T14:23:34Z |
-| T-0043-4 | 回讀、證據與交付 | ML-04 | in_progress | 2026-11-02T14:07:32Z | — | 2026-11-02T14:23:34Z |
+| T-0043-1 | 候選及原部署preflight | ML-01 | done | 2026-11-02T14:07:32Z | 2026-11-02T14:27:34Z | 2026-11-02T14:28:17Z |
+| T-0043-2 | additive快照表及首報匯入 | ML-02 | done | 2026-11-02T14:07:32Z | 2026-11-02T14:27:34Z | 2026-11-02T14:28:17Z |
+| T-0043-3 | 原Worker／資產與human授權更新 | ML-03 | done | 2026-11-02T14:07:32Z | 2026-11-02T14:27:34Z | 2026-11-02T14:28:17Z |
+| T-0043-4 | 回讀、證據與交付 | ML-04 | done | 2026-11-02T14:07:32Z | 2026-11-02T14:27:34Z | 2026-11-02T14:28:17Z |
 
 Owner明確批准前一輪具體上線方案；已審T868來源與candidate不重做產品設計。Lead執行並保存mutation前intent／response／回讀；一次有界獨立證據review，無新增provider權限、付費、Cron或其他續權。
 
-ML-01～04已操作及回讀通過，獨立T869 review ACCEPT；55contracts／9indexes／12changed Markdown相對連結與task/report／diff通過。上線與回退見[ML證據](../evidence/inventory-live.md)，管理面匯入不冒充真人登入；完整mainline仍incomplete。PR合併前保持in_progress。
+ML-01～04已操作及回讀通過，獨立T869 review ACCEPT；55contracts／9indexes／12changed Markdown相對連結與task/report／diff通過。上線與回退見[ML證據](../evidence/inventory-live.md)，管理面匯入不冒充真人登入；完整mainline仍incomplete。已按實際PR合併時間結案。
+
+PR[994](https://github.com/fallrising/newclear/pull/994)於2026-11-02T14:27:34Z正常merge，head `07c74b0bfd1168b4774570a4abeee8aca8160a5c`、merge `5e43b70f17dc85ac0d6d7b14ba4cb64e580e51e6`；必要CI CloudLab41461756810／project41461756784／llms41461756790全過。Lead回讀完整tree與遠端main一致、clean、featurehead為main祖先，保留並行變更。
+
+已按批准更新原Worker／4assets、D1新增快照表及一份management import；human revision3讀取／上傳至2026-12-02T12:00:00Z。Access／secrets／原bindings／Cron／其他grants與截止不變，沒有付費升級或新服務。Pages／Tunnels403仍unknown，未重做真人登入或宣稱完整平台。部署回退與raw multipart驗證器修正已記錄；本PR只改任務板。

@@ -307,3 +307,27 @@ class ReviewAdmissionTests(SubscriptionFixture):
         self.assertEqual(observed["state"], "succeeded")
         self.assertEqual(observed["result"]["review"]["verdict"], "request_changes")
         self.assertEqual(observed["cleanup_state"], "confirmed")
+
+    def test_u03_review_rework_evidence_preserves_exact_lineage_and_empty_request(self):
+        key = str(uuid4())
+        original = self.review(key).json()
+        before = self.scalar("SELECT count(*) FROM commands")
+        url = f"/api/v1/commands/{key}/runs/{self.writer['id']}/reviews"
+        evidence = self.client.get(url)
+        self.assertEqual(evidence.status_code, 200, evidence.text)
+        self.assertEqual(evidence.json()["request"], self.candidate)
+        self.assertEqual(evidence.json()["receipt"], original)
+        self.assertEqual(
+            self.client.get(url.replace(self.writer["id"], str(uuid4()))).status_code, 404
+        )
+        self.assertEqual(self.scalar("SELECT count(*) FROM commands"), before)
+        self.complete_review(original["run"])
+        rework_key = str(uuid4())
+        rework = self.post(f"/runs/{original['run']['id']}/rework", {}, rework_key).json()
+        response = self.client.get(
+            f"/api/v1/commands/{rework_key}/runs/{original['run']['id']}/rework"
+        )
+        self.assertEqual(response.status_code, 200, response.text)
+        self.assertEqual(response.json()["request"], {})
+        self.assertEqual(response.json()["payload_hash"], hashlib.sha256(b"{}").hexdigest())
+        self.assertEqual(response.json()["receipt"], rework)

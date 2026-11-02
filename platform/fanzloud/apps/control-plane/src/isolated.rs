@@ -113,6 +113,9 @@ fn router(config: Config) -> Router {
 }
 
 fn allowed(method: &Method, path: &str) -> bool {
+    if reconciliation_key(path).is_some() {
+        return method == Method::POST;
+    }
     if path == "/api/v1/submissions" {
         return method == Method::GET;
     }
@@ -147,6 +150,12 @@ fn allowed(method: &Method, path: &str) -> bool {
 
 fn canonical_uuid(identifier: &str) -> bool {
     Uuid::parse_str(identifier).is_ok_and(|value| value.to_string() == identifier)
+}
+
+fn reconciliation_key(path: &str) -> Option<&str> {
+    path.strip_prefix("/api/v1/submissions/")
+        .and_then(|s| s.strip_suffix("/reconcile"))
+        .filter(|s| canonical_uuid(s))
 }
 
 fn handoff_target(path: &str) -> bool {
@@ -336,6 +345,7 @@ async fn handle(State(config): State<Arc<Config>>, request: Request) -> Response
         return error(StatusCode::BAD_REQUEST, "invalid_cancel_request");
     }
     if path == "/api/v1/submissions"
+        || reconciliation_key(&path).is_some()
         || (parts.method == Method::POST && (path == "/api/v1/tasks" || handoff_target(&path)))
         || (parts.method == Method::GET
             && path.starts_with("/api/v1/runs/")

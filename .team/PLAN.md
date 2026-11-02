@@ -2834,3 +2834,23 @@ Bounds:90–150min active+CI, same issue<=2 corrections, build25min/CI observati
 zero live/model CLI/VM/credential mutations. Provider metrics and full tool totals unknown.
 Reviewer inherits native model/effort; no external CLI route or model override.
 Acceptance is readiness documentation only, never recovered installation or whole M3.
+
+## T-0442 approved reconciliation — 2026-11-02T12:15:04Z
+
+Orchestrator owns implementation and integration; one independent read-only reviewer,
+one correction follow-up, no nested workers. Approval: owner “批准。”/deskPR395.
+1. Fixed U01–07/wire contract and test skeletons; RED then AP/Rust/Web implementation.
+2. Native focused/full checks, independent source review, exact source qualification.
+3. Finite one-role DB rotation20min; original installation U0615min zero worker.
+4. U0730min one4CPU4GiB/zero-warm/max2CLI<=600s, final5min cleanup, owner confirmation.
+5. Independent evidence gate, required CI/normalPR delivery, ledger/backup/cleanup.
+Stop on unknown, mismatch, schema/consumer drift, failed prerequisite or spent window.
+No new runtime dependency/API spend/deploy/release. Tool/provider totals unknown.
+
+Approved continuation evidence: source86350871/PR983 all5necessaryCIgreen. One native
+reviewer/two turns accepted U01–06 and automated U07 after bounded corrections.
+Maintenance1.21s,U066.71s,U0741.06s/2CLI; oldunknown positively confirmed, exactrestart
+archives, zeroVM/claim/cgroup/reservation and stoppedservices. Ownerconfirmationpending;
+M3-U/FN07 remainsopen. Original Rustlogout failure and pre-main launcherfailure retained,
+no thresholdchange/unknownresend/windowreset. Required delivery-headCI/merge/readback
+and desk/journal/backup next; no more live execution authorized by these consumedintents.

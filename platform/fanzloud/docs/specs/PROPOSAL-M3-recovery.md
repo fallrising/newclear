@@ -1,6 +1,9 @@
 # M3 original-installation recovery and final journey — T-0442
 
-Status: **proposal; implementation, credential change and new live windows are not approved**.
+Status: **approved by owner2026-11-02 (“批准。”), claim deskPR395 merged**.
+The original proposal wording below records the approved scope. Maintenance/U06 and
+automated U07 are now accepted; owner confirmation remains pending. The finite windows
+are consumed; see [actual evidence](../acceptance/M3-reconciliation.md).
 This is a bounded continuation of SDD §§3,5–6 / FN04,FN07, not a fourth milestone
 or a change to the accepted SDD. T-0447/T-0449 remain dependencies, not blanket
 authority to extend AP. Owner requested investigation and independent work on

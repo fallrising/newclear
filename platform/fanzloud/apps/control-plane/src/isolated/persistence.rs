@@ -156,6 +156,12 @@ pub(super) async fn handle(
             Err(_) => error(StatusCode::SERVICE_UNAVAILABLE, "durable_store_unavailable"),
         };
     }
+    if let Some(key) = reconciliation_key(&path) {
+        if serde_json::from_slice::<Value>(&body).ok() != Some(json!({})) {
+            return error(StatusCode::BAD_REQUEST, "invalid_reconciliation");
+        }
+        return reconcile(config, store, owner, key.to_owned(), headers).await;
+    }
     if method == Method::POST {
         let request = match serde_json::from_slice::<Value>(&body) {
             Ok(value) if path == "/api/v1/tasks" && valid_task(&value) => value,
@@ -246,6 +252,81 @@ pub(super) async fn handle(
             run["fanz_history"] = projection;
             json(StatusCode::OK, &run)
         }
+        Ok(Err(value)) => store_error(value),
+        Err(_) => error(StatusCode::SERVICE_UNAVAILABLE, "durable_store_unavailable"),
+    }
+}
+
+/// Explicit local confirmation uses only authenticated AP GET evidence. Never dispatch.
+async fn reconcile(
+    config: Arc<Config>,
+    store: SubmissionStore,
+    owner: String,
+    key: String,
+    headers: HeaderMap,
+) -> Response<Body> {
+    let (db, who, id) = (store.clone(), owner.clone(), key.clone());
+    let saved = match tokio::task::spawn_blocking(move || db.submission(&who, &id)).await {
+        Ok(Ok(Some(value))) => value,
+        Ok(Ok(None)) => return error(StatusCode::NOT_FOUND, "submission_not_found"),
+        Ok(Err(value)) => return store_error(value),
+        Err(_) => return error(StatusCode::SERVICE_UNAVAILABLE, "durable_store_unavailable"),
+    };
+    if saved["state"] == "confirmed" {
+        return json(StatusCode::OK, &saved["receipt"]);
+    }
+    if saved["state"] != "unknown" {
+        return error(StatusCode::CONFLICT, "submission_rejected");
+    }
+    let request = &saved["request"];
+    let (route, suffix, payload) = if let Some(path) = request["route"].as_str() {
+        if !handoff_target(path) {
+            return error(StatusCode::CONFLICT, "submission_evidence_invalid");
+        }
+        let route = path.trim_start_matches("/api/v1/");
+        (route, route, &request["body"])
+    } else {
+        ("tasks.create", "tasks", request)
+    };
+    let response = match send(
+        config,
+        Method::GET,
+        format!("/api/v1/commands/{key}/{suffix}"),
+        headers,
+        vec![],
+    )
+    .await
+    {
+        Ok(value) if value.status() == StatusCode::OK => value,
+        _ => return error(StatusCode::CONFLICT, "submission_still_unknown"),
+    };
+    let evidence = match to_bytes(response.into_body(), RESPONSE_LIMIT)
+        .await
+        .ok()
+        .and_then(|bytes| serde_json::from_slice::<Value>(&bytes).ok())
+    {
+        Some(value) => value,
+        None => return error(StatusCode::CONFLICT, "submission_evidence_invalid"),
+    };
+    // AP verifies the existing SHA256 over its normalized payload before this envelope.
+    // Compare parsed values exactly; unsupported historical normalization stays unknown.
+    if evidence["version"] != "fanz-command-evidence-v1"
+        || evidence["key"] != key
+        || evidence["route"] != route
+        || evidence["request"] != *payload
+        || !evidence["payload_hash"].as_str().is_some_and(|s| {
+            s.len() == 64
+                && s.bytes()
+                    .all(|b| b.is_ascii_digit() || (b'a'..=b'f').contains(&b))
+        })
+        || !valid_receipt(&evidence["receipt"], request)
+    {
+        return error(StatusCode::CONFLICT, "submission_evidence_invalid");
+    }
+    let receipt = evidence["receipt"].clone();
+    let confirmed = receipt.clone();
+    match tokio::task::spawn_blocking(move || store.confirm(&owner, &key, &confirmed)).await {
+        Ok(Ok(())) => json(StatusCode::OK, &receipt),
         Ok(Err(value)) => store_error(value),
         Err(_) => error(StatusCode::SERVICE_UNAVAILABLE, "durable_store_unavailable"),
     }

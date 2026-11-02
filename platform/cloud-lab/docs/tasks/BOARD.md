@@ -767,3 +767,15 @@ ML-01～04已操作及回讀通過，獨立T869 review ACCEPT；55contracts／9i
 PR[994](https://github.com/fallrising/newclear/pull/994)於2026-11-02T14:27:34Z正常merge，head `07c74b0bfd1168b4774570a4abeee8aca8160a5c`、merge `5e43b70f17dc85ac0d6d7b14ba4cb64e580e51e6`；必要CI CloudLab41461756810／project41461756784／llms41461756790全過。Lead回讀完整tree與遠端main一致、clean、featurehead為main祖先，保留並行變更。
 
 已按批准更新原Worker／4assets、D1新增快照表及一份management import；human revision3讀取／上傳至2026-12-02T12:00:00Z。Access／secrets／原bindings／Cron／其他grants與截止不變，沒有付費升級或新服務。Pages／Tunnels403仍unknown，未重做真人登入或宣稱完整平台。部署回退與raw multipart驗證器修正已記錄；本PR只改任務板。
+
+## T-0044 — 工具用途目錄與多VPS agent設計
+
+| ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| T-0044-1 | CF部署資源對應用途／入口／觸發／來源 | CA-01 | in_progress | 2026-11-02T15:26:05Z | — | 2026-11-02T16:24:23Z |
+| T-0044-2 | active repo agent設計與現有runner查核 | CA-02 | in_progress | 2026-11-02T15:26:05Z | — | 2026-11-02T16:24:23Z |
+| T-0044-3 | 最小多VPS接入設計、審查與交付 | CA-03 | in_progress | 2026-11-02T15:26:05Z | — | 2026-11-02T16:24:23Z |
+
+Lead唯一文件writer；一個唯讀來源研究助手及一次限縮獨立review，不委派子代理。來源查核／文件<=60分鐘，review<=6分鐘，CI<=30分鐘；私人repo／主機／資源名稱保留私人證據。沒有安裝／重啟、續權、live修改、付費或封存。
+
+CA-01～03來源查核及文件完成：4Worker實際映射／私人用途目錄、11active候選、原runner active/running；公開Fleet／EdgeOps與私人host/workload實作分開，最小5分鐘push設計不重做controller。T871初審提出時鐘偏差缺口，補未來時間／回退拒絕與驗收後ACCEPT。55contracts／9indexes／12changed Markdown連結、task/report／diff與公開邊界通過；多機程式／安裝／新scope未執行，PR合併前保持in_progress。

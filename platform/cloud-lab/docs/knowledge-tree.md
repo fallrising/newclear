@@ -4,6 +4,8 @@
 
 [CF工具目錄](tool-catalog.md)補上2026-11-01來源盤點與Edge Ops比較；這是導航文件，未新增執行介面。RS-01已實作既有inventory的[唯讀報告介面](inventory-report.md)，已接真實MCP資料並完成[上線回讀](evidence/inventory-live.md)；EX-01維持Cloud Lab日常健康入口，Edge Ops只作參考。
 
+[已觀測服務目錄](service-catalog.md)把4個Worker區分為兩個主要工具及各自恢復環境；[多VPS agent設計](host-agent-design.md)記錄active來源選擇、身分隔離與唯讀觀測切片，尚未安裝或開放新scope。
+
 ## 知識樹
 
 ```text

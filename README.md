@@ -57,7 +57,7 @@
 | [`platform/agent-workforce`](platform/agent-workforce/) | 跨產品數位工作者：M1 離線核心與有界 M2 原生 adapter；完整 M2／跨產品整合仍有缺口 | Python、SQLite；可替換 adapters | A |
 | [`platform/dim-gate`](platform/dim-gate/) | CMDB 核心企業運維自助平台前端（demo） | React, TypeScript | A |
 | [`platform/spring-pool`](platform/spring-pool/) | 單人版本化腳本庫與 runbook 編排；不執行腳本（開發中） | Hono, Rust/Wasm；Workers, D1 | A |
-| [`platform/cloud-lab`](platform/cloud-lab/) | 個人CF工具整合入口：固定node-health歷史閉環、Access看板與bot；既有工具盤點及重複判定已整理，inventory報告adapter已上線並保存部分真實盤點。主線未完成、當前授權另見元件SUCCESS | Workers Web APIs、D1、Python、原生網頁 | 未分級 |
+| [`platform/cloud-lab`](platform/cloud-lab/) | 個人CF工具整合入口：固定node-health歷史閉環、Access看板與bot；既有工具盤點及重複判定已整理，inventory報告adapter已上線，4個Worker用途已對照；多VPS唯讀agent來源與設計已整理。主線未完成、當前授權另見元件SUCCESS | Workers Web APIs、D1、Python、原生網頁 | 未分級 |
 | [`platform/edge-ops`](platform/edge-ops/) | Cloudflare 主機監控、受控作業與可選初始化（SDD + M0 契約層，無部署） | TypeScript, Go；Workers, D1, DO, R2, React（規劃） | A |
 | [`platform/signal-hub`](platform/signal-hub/) | 個人事件中樞／戰情室：CloudEvents 事件庫、規則生成指標看板、訂閱投遞（M3 runtime） | Go, SQLite, React | A |
 | [`platform/ice-maker`](platform/ice-maker/) | Local-first 個人工程知識編譯器 | Python | A |

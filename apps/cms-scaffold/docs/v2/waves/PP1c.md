@@ -220,6 +220,8 @@ inventory 從 ready 到結束保持同一 read-only REPEATABLE_READ transaction�
 
 **實體 adapter提案**：完整Java/Node/PG向量、UID/secret/output/media邊界與raw/smoke schema已固定於附約§1–4；TOOL-PROBES提供舊批准映像的工具能力證據。新offline entrypoints尚未實作，新API build仍必逐run驗證；設計審查/批准前不派工，實際profile不合一律ADAPTER_UNSEALED。
 
+**2026-11-02 PG helper 固定掛載修訂：** owner 已批准 PR975 的 PGDATA-only 唯讀 1MiB tmpfs，待正常合併及遠端核對後生效。PG_DUMP／PG_RESTORE 與其固定 same-image 版本探針必須遮住指定 PG image 自帶的 PGDATA VOLUME，保留同 image 與全部隔離政策，拒絕額外 anonymous volume；其他 kind 不得套用。精確 argv、image volume 宣告、policy role 與 create/running/exited inspect 規則以[附約§1](../contracts/PP1c-local-adapters.md#1-d01已觀察工具與固定參數)為準；測試及真實 capture 驗收未因本修訂省略。
+
 ### 4.2d Host CLI 候選語法
 
 host cwd 固定 component root，Node 為該 run 驗證的 Node 24 binary；以下只有單一模式，沒有任意 request path／adapter／completion-policy／shell／production flag。flags 一律唯一必填，unknown／重複／缺失在 filesystem mutation 前 exit2；ID／UTC 依本章。scripts 同時提供 module exports 與以下 CLI；import 不自動執行。

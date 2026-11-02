@@ -10,6 +10,10 @@ source_commit: 95fdf5f8ef4e548e6854f8838385913dff4877b2
 
 # pokercase 成功契約
 
+## T-0426 — Cursor Agent CLI decision and Claude client continuation
+
+Owner 2026-11-02 selected Cursor Agent CLI (`cursor-agent`), not the IDE, and removed the Docker product requirement. [Current decision](docs/cursor-isolation.md) supersedes the old AC-17 execution choice while preserving its historical text and evidence; the existing runtime migration remains pending. Claude is the selected development priority. [NC-1–NC-3](docs/tasks/T-0426-claude-client.md) pin Magpie comparison, faithful offline continuation work and bounded delivery. No fresh live allowance or whole-product acceptance is implied. The selected missing tool-result signature/history gate is corrected with a genuine pre-fix RED,53focused unit/11TUI/436full Rust tests,199Python fixtures and both offline walkthroughs passing; independent source review accepted. Delivery gates are recorded separately.
+
 ## T-0426 — Renewed TUI tool trial after owner quota report
 
 Owner explicitly approved [TR-1–TR-3](docs/tasks/T-0426-tui-tools-renewed.md): a fresh2/300/60 TUI tool call/result attempt, no retries, unchangedCLI/runtime/model/profile. Prior429 andalloldbudgetsclosed; restoredcapacity remainsowner tentative untilnewresult. Actual2/2passed in4.631s: expectedtool/result, samePID/nativeMCPcallback, exactmodel/marker, durableusage/history andownedcleanup. This isonlyfixedsingletoolHTTPMessages tuple; original17AC/mainlineincomplete remain.

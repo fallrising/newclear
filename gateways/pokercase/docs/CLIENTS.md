@@ -49,14 +49,9 @@ thinrouter translates to OpenAI-compatible upstreams and maps the response back.
 
 ---
 
-## Cursor
+## Cursor Agent CLI (`cursor-agent`)
 
-1. Settings → Models → OpenAI-compatible / custom base URL.
-2. **Base URL:** `http://127.0.0.1:20128/v1`
-3. **API Key:** your thinrouter gateway key. Clients that require a key cannot use keyless bootstrap.
-4. **Model:** your route name (e.g. `cheap`) or `connection/model`.
-
-If Cursor only supports OpenAI shape, use `/v1/chat/completions` (default).
+This project’s selected Cursor integration is the official terminal Agent CLI, not the Cursor IDE settings UI. It is an upstream provider under the compatibility ID `cursor`; do not use the IDE’s Settings → Models procedure to configure this CLI. See [provider configuration](PROVIDERS.md) and the [no-Docker decision / pending runtime migration](cursor-isolation.md). No direct-CLI setup is claimed to work until that migration is implemented and verified.
 
 ---
 

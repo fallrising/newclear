@@ -189,7 +189,7 @@ while True:
     buf = buf[buf.index(b"\r") + 1:]
     turn += 1
     row({"type": "user", "message": {"role": "user", "content": pasted}})
-    record("turns.jsonl", {"turn": turn, "pid": os.getpid()})
+    record("turns.jsonl", {"turn": turn, "pid": os.getpid(), "prompt": pasted})
     pasted = None
     if scenario == "delayedtap":
         row({"type": "system", "subtype": "turn_duration", "durationMs": 1})

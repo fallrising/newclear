@@ -482,7 +482,7 @@ migration; implementation waits for owner D1. UI, Done validity, Impact, provide
 | ID | Task | AC | Status | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
 | HROPP | Propose and review ReopenWorkItem and Ready-with-history dispatch contract | ROP-PLAN-01..03 | done | 2026-11-02T12:16:09Z | 2026-11-02T14:02:35Z | 2026-11-02T14:02:35Z |
-| HROP | Implement approved ReopenWorkItem and Ready-with-history dispatch guard | ROP-AC-01..04; H02 support | in_progress | 2026-11-02T14:05:38Z |  | 2026-11-02T14:05:38Z |
+| HROP | Implement approved ReopenWorkItem and Ready-with-history dispatch guard | ROP-AC-01..04; H02 support | in_progress | 2026-11-02T14:05:38Z |  | 2026-11-02T15:51:32Z |
 
 ROP-PLAN-01 maps the Done dead end to source. ROP-PLAN-02 fixes ROP-01..04, ROP-AC-01..04 and the minimal owner
 decision. ROP-PLAN-03 disposes Claude review, passes document checks and completes Git/CI/readback/ledger delivery.

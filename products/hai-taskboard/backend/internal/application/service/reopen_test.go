@@ -136,7 +136,7 @@ func TestReopenWorkItem_GuardsAndHistory(t *testing.T) {
 			t.Fatal(err)
 		}
 		expectRefusal(t, f, true, func() (int, reworkFailure) { return httpRefusal(t, f.reopen(t, "Draft", "in review", 311)) }, 422, "lifecycle_rejected", "invalid_transition")
-		for i, phase := range []string{"Ready", "Canceled"} {
+		for i, phase := range []string{"Ready", "QA", "Canceled"} {
 			// Schema-valid injected phases; the lawful paths to them are covered elsewhere.
 			if _, err := f.db.Exec("UPDATE work_items SET phase=? WHERE work_item_id=?", phase, workItemID); err != nil {
 				t.Fatal(err)
@@ -182,9 +182,15 @@ func TestReopenWorkItem_GuardsAndHistory(t *testing.T) {
 		expectRefusal(t, f, false, func() (int, reworkFailure) {
 			return httpRefusal(t, f.post(t, "ReopenWorkItem", f.version(t), missing, 351))
 		}, 404, "not_found")
-		if other := initialHTTPRequest(f.h, http.MethodPost, "/api/v1/projects/prj_01HABCDEFGJ/commands", []byte(`{}`), true, true); other.Code != 404 {
-			t.Fatalf("cross-project %d %s", other.Code, other.Body)
-		}
+		expectRefusal(t, f, false, func() (int, reworkFailure) {
+			m := initialMetadata(352, f.version(t))
+			body, err := json.Marshal(map[string]any{"command_id": m.CommandID, "idempotency_key": m.IdempotencyKey, "issued_at": m.IssuedAt.UTC().Format(time.RFC3339Nano), "expected_version": f.version(t), "operation": "ReopenWorkItem", "payload": valid()})
+			if err != nil {
+				t.Fatal(err)
+			}
+			r := initialHTTPRequest(f.h, http.MethodPost, "/api/v1/projects/prj_01HABCDEFGJ/commands", body, true, true)
+			return r.Code, reworkFailure{}
+		}, 404, "")
 		// A changed policy makes the current input unresolvable: Ready is
 		// refused without writes, Draft remains available.
 		original := f.svc.config.ProjectPolicies[projectID]

@@ -253,3 +253,13 @@ Never-stored fields are omitted; Review/Evidence/Approval rows are attributed th
 chain and an unattributable row is `storage_corruption`. DTL-AC-01..05 map to real SQLite/Fake/HTTP oracles
 in [evidence](docs/evidence/work-item-detail-20261102.md); DTL-AC-06 is review, gates and delivery in BOARD HDTL.
 No completion UI, Done validity, whole-M2 or product AC-02..04 claim; no migration, dependency, provider, release or deploy.
+
+## ReopenWorkItem — 2026-11-02
+
+Owner approved D1 of the [reviewed proposal](docs/plans/reopen-work-item-20261102.md). The
+[normative contract](docs/sdd/reopen-work-item.md) implements the accepted `ReopenWorkItem` command: Done → Draft or Ready
+with a byte-exact reason in the `WorkItemReopened` result, Ready only when the current inputs still resolve, and every
+CompletionRecord and history row retained. Ready dispatch with existing Runs now obeys the settled/strict-order guards,
+so a second Candidate and a second completion are lawful. ROP-AC-01..03 map to real SQLite/Fake/HTTP oracles in
+[evidence](docs/evidence/reopen-work-item-20261102.md); ROP-AC-04 is review, gates and delivery in BOARD HROP.
+No completion UI, Done validity, whole-M2 or product AC-02..04 claim; no migration, dependency, provider, release or deploy.

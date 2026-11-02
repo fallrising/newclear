@@ -1,5 +1,16 @@
 # Pokercase 技術任務
 
+## T-0426 — Ordered dynamic instruction continuation
+
+Demand:T-0426, claim397 merged. [DC-1–DC-4](T-0426-dynamic-context.md).
+
+| ID | Task | AC | Status | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| DC-01 | Preserve instruction provenance and ordered rendering | DC-1 | in_progress | 2026-11-02T12:19:29.947708+00:00 | — | 2026-11-02T12:38:43.485998+00:00 |
+| DC-02 | Continue idle/saved user turns with inline context | DC-2 | in_progress | 2026-11-02T12:19:29.947708+00:00 | — | 2026-11-02T12:38:43.485998+00:00 |
+| DC-03 | Retain strict tool correlation and regressions | DC-3 | in_progress | 2026-11-02T12:19:29.947708+00:00 | — | 2026-11-02T12:38:43.485998+00:00 |
+| DC-04 | Independent evidence and complete delivery | DC-4 | in_progress | 2026-11-02T12:19:29.947708+00:00 | — | 2026-11-02T12:38:43.485998+00:00 |
+
 ## T-0426 — Cursor Agent CLI documentation and Claude client continuation
 
 Demand: T-0426, claim PR390 merged. [NC-1–NC-3](T-0426-claude-client.md).

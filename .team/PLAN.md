@@ -2816,3 +2816,21 @@ T-0449 actual checkpoint 2026-11-01T17:11:52.045902+00:00: source865ed05e, one C
 T-0449 evidence gate: ACCEPT_READONLY_ACTUAL_AND_NATIVE from independent final review; R01/R04native, R02/R03actual, R05source+cleanup+sourceCI accepted. Source865ed05e all3requiredCI green. Finaldocshead CI/merge/readback/ledger remain delivery gates; no actual replay.
 
 T-0449 delivery gate: PR952 merged as `a69ff34ec173ee36284aceebcb417e560438569c` after finalhead967727b2 passed AP41330719757/Fanz41330719768/contracts41330719829; remote Fanzloud/AP bytes read back equal. R01–05 boundeddependency accepted; FN05-R closes, overallM3/FN07/T0442 remainopen. No live rerun.
+
+
+# T-0442 M3 recovery continuation
+
+Owner scope: investigate original unknown installation, complete independent work,
+prepare one bounded approval request when AP contract/live/credential changes are needed.
+Claim deskPR389 merged; source a502addb. No product implementation before AP scope approval.
+
+1. Inspect current governance/source and exact retained evidence — complete.
+2. Read-only original SQLite and credential impact checks — complete; no state changes.
+3. Correct operator guidance; propose U01–07 and finite maintenance/live phases — complete.
+4. One fresh-context reviewer, no private config access/delegation — ACCEPT_READINESS after one factual correction; report below.
+5. Scoped documentation checks, required CI, normal PR merge/readback; desk/journal/handoff — pending.
+
+Bounds:90–150min active+CI, same issue<=2 corrections, build25min/CI observation30min,
+zero live/model CLI/VM/credential mutations. Provider metrics and full tool totals unknown.
+Reviewer inherits native model/effort; no external CLI route or model override.
+Acceptance is readiness documentation only, never recovered installation or whole M3.

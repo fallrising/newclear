@@ -1695,7 +1695,7 @@ components:
         - if: { properties: { operation: { const: CompleteWorkItem } } }
           then: { properties: { payload: { $ref: "#/components/schemas/CompleteWorkItemPayload" } } }
         - if: { properties: { operation: { const: ReopenWorkItem } } }
-          then: { properties: { payload: { $ref: "#/components/schemas/ReopenWorkItemPayload" } } }
+          then: { properties: { expected_version: { type: integer, minimum: 1, maximum: 9223372036854775806 }, payload: { $ref: "#/components/schemas/ReopenWorkItemPayload" } } }
         - if: { properties: { operation: { const: RequestCancellation } } }
           then: { properties: { expected_version: { type: integer, minimum: 1, maximum: 9223372036854775806 }, payload: { $ref: "#/components/schemas/RequestCancellationPayload" } } }
         - if: { properties: { operation: { const: FinalizeCancellation } } }
@@ -1906,10 +1906,10 @@ components:
       type: object
       additionalProperties: false
       description: >-
-        Starts a Run from Ready, or from Developing when the WorkItem has Runs and every Run is settled
-        (Succeeded or Failed, reconciliation None, side effects Confirmed, not CancelRequested). A Developing
-        redispatch is refused with retryable lifecycle_rejected unless the server clock is strictly after every
-        existing Run. retry_of_run_id is not supported.
+        Starts a Run from Ready, or from Developing when the WorkItem has Runs. Whenever the WorkItem already has
+        Runs (Developing redispatch, or Ready after ReopenWorkItem), every Run must be settled (Succeeded or Failed,
+        reconciliation None, side effects Confirmed, not CancelRequested) and the dispatch is refused with retryable
+        lifecycle_rejected unless the server clock is strictly after every existing Run. retry_of_run_id is not supported.
       required: [work_item_id, adapter_id, scenario_id]
       properties:
         work_item_id: { $ref: "#/components/schemas/WorkItemID" }
@@ -1956,6 +1956,11 @@ components:
     ReopenWorkItemPayload:
       type: object
       additionalProperties: false
+      description: >-
+        Human-only Done to Draft or Ready. Ready additionally requires the current accepted inputs to resolve as for
+        MarkReady. The success result (type WorkItemReopened) records reason byte-exact. reason is 1..2000 code points
+        and at most 8000 UTF-8 bytes, without NUL or control characters except tab and newline. The prior
+        CompletionRecord and all Run, Candidate, Review, Evidence and Approval history are retained unchanged.
       required: [work_item_id, target_phase, reason]
       properties:
         work_item_id: { $ref: "#/components/schemas/WorkItemID" }
@@ -2117,9 +2122,17 @@ components:
             properties:
               result: { $ref: "#/components/schemas/ReworkRequestedResult" }
           else:
-            properties:
-              result:
-                properties: { reason: false, subject_digest: false }
+            if:
+              properties:
+                command:
+                  properties: { operation: { const: ReopenWorkItem } }
+            then:
+              properties:
+                result: { $ref: "#/components/schemas/WorkItemReopenedResult" }
+            else:
+              properties:
+                result:
+                  properties: { reason: false, subject_digest: false }
         - if:
             properties:
               command:
@@ -2157,6 +2170,17 @@ components:
         phase: { const: Developing }
         reason: { type: string, minLength: 1, maxLength: 2000, description: Byte-exact rework reason; at most 8000 UTF-8 bytes. }
         subject_digest: { $ref: "#/components/schemas/SHA256" }
+    WorkItemReopenedResult:
+      type: object
+      additionalProperties: false
+      required: [type, project_id, work_item_id, version, phase, reason]
+      properties:
+        type: { const: WorkItemReopened }
+        project_id: { $ref: "#/components/schemas/ProjectID" }
+        work_item_id: { $ref: "#/components/schemas/WorkItemID" }
+        version: { type: integer, minimum: 1 }
+        phase: { type: string, enum: [Draft, Ready] }
+        reason: { type: string, minLength: 1, maxLength: 2000, description: Byte-exact reopen reason; at most 8000 UTF-8 bytes. }
     CommandFailure:
       type: object
       additionalProperties: false

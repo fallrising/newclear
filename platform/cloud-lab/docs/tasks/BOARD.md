@@ -722,9 +722,15 @@ CAT-01–03由PR[949](https://github.com/fallrising/newclear/pull/949)於2026-11
 
 | ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| T-0041-1 | 原工具JSON輸出與完整性 | IR-01 | in_progress | 2026-11-02T11:15:56Z | — | 2026-11-02T11:52:28Z |
-| T-0041-2 | 有界保存與workspace隔離API | IR-02 | in_progress | 2026-11-02T11:15:56Z | — | 2026-11-02T11:52:28Z |
-| T-0041-3 | 看板報告讀取／上傳／過期及錯誤 | IR-03 | in_progress | 2026-11-02T11:15:56Z | — | 2026-11-02T11:52:28Z |
-| T-0041-4 | 兩端整合、必要驗證與獨立審查 | IR-04 | in_progress | 2026-11-02T11:15:56Z | — | 2026-11-02T11:52:28Z |
+| T-0041-1 | 原工具JSON輸出與完整性 | IR-01 | done | 2026-11-02T11:15:56Z | 2026-11-02T11:56:48Z | 2026-11-02T11:57:25Z |
+| T-0041-2 | 有界保存與workspace隔離API | IR-02 | done | 2026-11-02T11:15:56Z | 2026-11-02T11:56:48Z | 2026-11-02T11:57:25Z |
+| T-0041-3 | 看板報告讀取／上傳／過期及錯誤 | IR-03 | done | 2026-11-02T11:15:56Z | 2026-11-02T11:56:48Z | 2026-11-02T11:57:25Z |
+| T-0041-4 | 兩端整合、必要驗證與獨立審查 | IR-04 | done | 2026-11-02T11:15:56Z | 2026-11-02T11:56:48Z | 2026-11-02T11:57:25Z |
 
 範圍與wire contract見[inventory報告](../inventory-report.md)。Lead處理consumer與交付；一個獨立工作樹producer worker，gpt-6.1-sol/high、15分鐘監看、禁止delegation／commit／live；之後一次唯讀審查。無續權、付費或部署，live候選完成後才提出具體變更。
+
+IR-01～04由PR[972](https://github.com/fallrising/newclear/pull/972)於2026-11-02T11:56:48Z合併，head `cfe18624e720688792f4705463a2dd970de7a128`、merge `28f7eb3d117b6028908811e2033dad79a29762de`。必要CI通過：Cloud Lab41440515140／project41440514973／llms41440515097。私有producer來源亦已完成獨立PR／三項CI及正常merge；script SHA256 `0df7a9db2199e6eb31cd8d8feadd1d42b06b5d5549aeb68db4a79d75804fde2e`不變。
+
+37producer＋471consumer測試、7組實際本機workerd／D1／Chromium閉環與9組原runtime檢查通過；T867兩項REWORK修正後ACCEPT。55contracts／9indexes／188changed-document相對連結、task/report與diff檢查通過。Lead檢視最終中文截圖、公開邊界及兩端diff；正常merge保留並行main，兩端fulltree相同、工作樹乾淨、remote feature head為main祖先。
+
+本地原CLI憑證GET於11:39:31Z回403，六區段unknown；隨後另以現有Cloudflare MCP確認帳號及網域GET成功（各1頁，無私人明細公開），因此不能將CLI的403推論為MCP失效或要求重新登入。MCP讀取尚未連到原producer報告流程，也沒有可讀真帳號報告的完整live驗收。下一步沿用可用連線處理真實盤點接入，再以具體principal／scope／期限方案批准live啟用。沒有部署、續權、付費、Cron、來源搬遷或封存；完整mainline仍incomplete。本PR只改任務板。

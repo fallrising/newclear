@@ -58,7 +58,10 @@ Exceeding a limit is `503 projection_unavailable` with reason `work_item_detail_
 ### DTL-03 — Attribution from stored audit
 
 - **Reviews, Evidence, Approvals:** a row belongs to this WorkItem when an audit entry with the row's subject digest
-  belongs to a group whose command result (decoded with the existing `DecodeCanonicalResult`) names this WorkItem.
+  belongs to a group whose command result names this WorkItem. A new read-side decoder applies the same canonical
+  checks as `DecodeCanonicalResult` and returns the result's operation, `work_item_id` and `run_id`. It takes the operation
+  from the stored result, not from the audit entry: runtime entries such as `ClaimDispatch` and `PublishRunObservation`
+  are not command operations.
   Because the write path guarantees such an entry exists, a row with no attributing entry, or with entries naming
   different WorkItems, is `503 storage_corruption`. The lists are therefore exact, and no completeness flag is needed.
 - **Completion records, human reports:** their own `work_item_id`.
@@ -72,7 +75,8 @@ Exceeding a limit is `503 projection_unavailable` with reason `work_item_detail_
 
 Amend OpenAPI (`WorkItemDetail`, the new detail-only item schemas, the GET operation's responses), add
 `docs/sdd/work-item-detail.md` as the normative entry and reference it from SDD §UX surface 2.
-No migration, schema index, dependency or command change. Out of scope: UI, pagination, dependency-edge listing,
+No migration, schema index, dependency or command change. Attribution scans the project's audit (no audit index
+ exists); that cost is accepted for this slice, and an index may be proposed later only from measured latency. Out of scope: UI, pagination, dependency-edge listing,
 Done validity and `effective_satisfied` semantics, blocker commands and metadata, Impact, providers, release and deploy.
 The board's conservative summary and existing command guards are unchanged.
 
@@ -82,7 +86,7 @@ The board's conservative summary and existing command guards are unchanged.
 | --- | --- | --- |
 | DTL-AC-01 | Given the IDX-01 matrix on the new route, When requests vary method/HEAD/query/body/session/project/item, Then status and precedence match IDX-01, with no storage read before authorization | `TestWorkItemDetailHTTP_ScopeAndPrecedence` |
 | DTL-AC-02 | Given real SQLite with a blocker, a fixture review, a human review, evidence (one with null report), a consumed approval and a completion, When detail is read, Then the JSON validates against the closed OpenAPI schema and every value equals the stored row; command payload schemas are byte-unchanged | `TestWorkItemDetail_TruthfulShape` + schema fixtures |
-| DTL-AC-03 | Given two WorkItems in one project, a rework cycle A→B on one, and a fixture-only subject (review, evidence, approval with no completion, rework or human report), When each detail is read, Then each row appears only under its own WorkItem, both Candidates' rows and the fixture-only rows appear, completion joins are exact, and the audit includes the initial acceptance group for both bound items | `TestWorkItemDetail_AttributionAcrossItemsAndRework` |
+| DTL-AC-03 | Given two WorkItems in one project, a rework cycle A→B on one, and a fixture-only subject (review, evidence, approval with no completion, rework or human report), When each detail is read, Then each row appears only under its own WorkItem, both Candidates' rows and the fixture-only rows appear, completion joins are exact, and the audit includes the initial acceptance group for both bound items and the Run's `ClaimDispatch`/`PublishRunObservation` entries under that item only | `TestWorkItemDetail_AttributionAcrossItemsAndRework` |
 | DTL-AC-04 | Given an injected review/evidence/approval row with no attributing audit entry, or with entries naming two WorkItems, When detail is read, Then `503 storage_corruption` without leaking either WorkItem | `TestWorkItemDetail_AttributionCorruption` |
 | DTL-AC-05 | Given concurrent writers and 1025-row or corrupted fixtures, Then the read is one snapshot, row counts are unchanged afterwards, capacity returns 503 with the exact reason, and corruption returns 503 `storage_corruption` | `TestWorkItemDetail_SnapshotCapacityCorruption` |
 | DTL-AC-06 | Pinned backend full/race/vet/build, web regression, Redocly, docs/index checks; Claude plan and code review dispositions; exact-head CI, normal merge, readback, BOARD/desk/handoff | Delivery evidence |

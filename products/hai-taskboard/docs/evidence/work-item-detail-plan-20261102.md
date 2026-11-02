@@ -18,3 +18,14 @@ against its instructions; nothing was written. Every finding was re-checked in s
 | 6 | minor | Audit could expose result run_id | Adopted (`run_id` when present); `work_item_id` is the requested item, so not repeated |
 | 7 | minor | `AddBlocker`/`ResolveBlocker` have no command caller | Verified; noted in Why |
 | 8 | — | Right next M2 slice; only D1 remains after #1 | Adopted |
+
+## Follow-up review
+
+Same reviewer setup on the revision: **ACCEPT**, 64.8 s, USD 0.602 list price. All eight dispositions confirmed against source;
+every `work_item`/`run` mutation result carries `work_item_id`. Three minor findings, each verified and adopted:
+
+| # | Finding | Disposition |
+| --- | --- | --- |
+| 1 | `DecodeCanonicalResult` returns only `(*Error, error)` and needs the operation; runtime audit labels are not command operations | DTL-03 specifies a new read-side decoder with the same checks, operation taken from the stored result |
+| 2 | Runtime audit groups untested | DTL-AC-03 adds `ClaimDispatch`/`PublishRunObservation` under the Run's item only |
+| 3 | No audit index; attribution scans project audit | Cost accepted for this slice in DTL-04; index only from measured latency |

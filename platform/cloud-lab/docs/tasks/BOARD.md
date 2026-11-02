@@ -717,3 +717,14 @@ Owner批准近期計畫B。Lead為唯一writer；T866新context唯讀review，gp
 CAT文件驗證：52contracts、9indexes、631個相對連結、公開41／私人23快照一致與公開邊界檢查通過；69runtime路徑與來源pin相同。T866先REWORK tree_sha命名，改tree_query_ref並說明connector回傳差異後ACCEPT；Lead獨立核對私人來源。原缺report forward-link與report格式驗證失敗已修正；無本機runtime測試重跑。正常PR與CI交付中，合併後填end。
 
 CAT-01–03由PR[949](https://github.com/fallrising/newclear/pull/949)於2026-11-01T17:01:05Z合併，head `9d6e0912dc9e740322b824dad94a03cb3c080e24`、merge `36d53012c9714d513bb76f33f8ab2218cd93fcd2`。Exact-head CI全過：Cloud Lab41329130798／project41329130737／llms41329130681。T866修正後ACCEPT及Lead私人來源核對通過；正常merge保留並行main，fulltree相同、工作樹乾淨。這次只完成來源目錄、Edge Ops處置建議與下一項選擇，0搬遷／0封存／0live變更；第二種能力尚未實作。後續接原inventory唯讀報告，不新增provider client／排程／付費方案。本結案PR只改任務板。
+
+## T-0041 — 既有CF inventory報告接入
+
+| ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| T-0041-1 | 原工具JSON輸出與完整性 | IR-01 | in_progress | 2026-11-02T11:15:56Z | — | 2026-11-02T11:52:28Z |
+| T-0041-2 | 有界保存與workspace隔離API | IR-02 | in_progress | 2026-11-02T11:15:56Z | — | 2026-11-02T11:52:28Z |
+| T-0041-3 | 看板報告讀取／上傳／過期及錯誤 | IR-03 | in_progress | 2026-11-02T11:15:56Z | — | 2026-11-02T11:52:28Z |
+| T-0041-4 | 兩端整合、必要驗證與獨立審查 | IR-04 | in_progress | 2026-11-02T11:15:56Z | — | 2026-11-02T11:52:28Z |
+
+範圍與wire contract見[inventory報告](../inventory-report.md)。Lead處理consumer與交付；一個獨立工作樹producer worker，gpt-6.1-sol/high、15分鐘監看、禁止delegation／commit／live；之後一次唯讀審查。無續權、付費或部署，live候選完成後才提出具體變更。

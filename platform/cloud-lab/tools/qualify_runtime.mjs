@@ -25,7 +25,7 @@ const b64=x=>Buffer.from(x).toString('base64url');
 const prefix=b64(JSON.stringify({alg:'RS256',kid:'synthetic'}))+'.'+b64(JSON.stringify({iss:issuer,aud:['synthetic-audience'],sub:'synthetic-human',iat:Math.floor(now/1000),exp:Math.floor(now/1000)+3600}));
 const jwt=prefix+'.'+b64(await crypto.subtle.sign('RSASSA-PKCS1-v1_5',pair.privateKey,new TextEncoder().encode(prefix)));
 let jwksFetches=0,redirectJwks=false;
-const mf=new Miniflare(convertV4MiniflareOptions({host:"127.0.0.1",cf:false,telemetry:{enabled:false},resourcePersistencePath:join(process.env.AGENT_BUILD_DIR,"state"),resourceTmpPath:join(process.env.AGENT_BUILD_DIR,"tmp"),workers:[{name:"qualification",modulesRoot:join(root,'apps/control/worker'),modules:['index.mjs','auth.mjs','protocol.mjs'].map(name=>({type:'ESModule',path:join(root,'apps/control/worker',name)})),
+const mf=new Miniflare(convertV4MiniflareOptions({host:"127.0.0.1",cf:false,telemetry:{enabled:false},resourcePersistencePath:join(process.env.AGENT_BUILD_DIR,"state"),resourceTmpPath:join(process.env.AGENT_BUILD_DIR,"tmp"),workers:[{name:"qualification",modulesRoot:join(root,'apps/control'),modules:['worker/index.mjs','worker/auth.mjs','worker/protocol.mjs','worker/inventory.mjs','public/inventory.mjs'].map(name=>({type:'ESModule',path:join(root,'apps/control',name)})),
  compatibilityDate:'2026-10-26',d1Databases:{DB:'qualification'},
  assets:{directory:join(root,'apps/control/public'),binding:'ASSETS',run_worker_first:true,routerConfig:{has_user_worker:true}} ,
  outboundService:async request=>{assert.equal(request.url,issuer+'/cdn-cgi/access/certs');jwksFetches++;if(redirectJwks)return new Response(null,{status:302,headers:{Location:"https://untrusted.example/keys"}});return Response.json({keys:[jwk]});},

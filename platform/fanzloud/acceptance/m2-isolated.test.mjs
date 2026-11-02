@@ -6,7 +6,7 @@ import {readCandidate, readReview, reviewResult} from '../apps/control-plane/web
 import {webcrypto} from 'node:crypto';
 const source = (await readFile(new URL('../apps/control-plane/web/isolated.js', import.meta.url), 'utf8')).replace("import {readCandidate, readReview, reviewResult} from './candidate.js';", '');
 const run = id => ({id, state: 'running', state_version: 3, cleanup_state: 'pending'});
-async function page({stored, submit, action, getRun, tasks, submissions, artifacts, handoff} = {}) {
+async function page({stored, submit, action, getRun, tasks, submissions, artifacts, handoff, reconcile} = {}) {
   const elements = new Map(), storage = new Map(stored || []), requests = [], timers = [];
   const node = id => {
     if (!elements.has(id)) elements.set(id, {value: '0', textContent: '', disabled: false, options: [], listeners: {}, children: [],
@@ -22,6 +22,7 @@ async function page({stored, submit, action, getRun, tasks, submissions, artifac
       requests.push({url, ...options});
       let data;
       if (url.endsWith('/session')) data = {authenticated: true, csrf_token: 'csrf'};
+      else if (url.includes('/submissions/') && url.endsWith('/reconcile')) data = await reconcile(url, options);
       else if (url.endsWith('/submissions')) data = submissions ? await submissions() : {items: [], blocked: false};
       else if (url.endsWith('/projects')) data = {items: [{id: 'project', canonical_repo: 'repo', name: 'fixture'}]};
       else if (url.endsWith('/agent-profiles')) data = {items: ['claude', 'codex', 'fake'].map(name => ({id: name, name, backend: `${name}-subscription`}))};
@@ -32,7 +33,7 @@ async function page({stored, submit, action, getRun, tasks, submissions, artifac
       else if (options.method === 'POST' && (url.endsWith('/reviews') || url.endsWith('/rework'))) data = await handoff(url, options);
       else if (url.endsWith('/actions')) data = await action();
       else data = getRun ? await getRun(url.split('/').at(-1)) : run(url.split('/').at(-1));
-      return {ok: true, status: 200, json: async () => data, text: async () => data};
+      return {ok: !data?.__status, status: data?.__status || 200, json: async () => data, text: async () => data};
     }});
   await vm.runInContext(`(async () => {${source}\n})()`, context);
   const flush = async () => {for(let n = 0; n < 10; n++) await Promise.resolve();};
@@ -299,4 +300,67 @@ test('R03: late review download cannot survive selection or logout; expiry denie
   }
   const f=await reviewFixture();const p=await page({stored:[['fanz-current-run',f.run.id]],getRun:()=>f.run,artifacts:()=>{throw new Error('410');}});
   await p.node('download-review').listeners.click();assert.equal(p.node('download-review').disabled,true);assert.match(p.node('review-status').textContent,/未下載/);
+});
+
+test('U05: original unknown reconciles only on explicit click and fresh durable confirmation', async () => {
+  const key = '018ff3ab-1277-7000-8000-000000000010'; let confirmed = false;
+  const p = await page({stored: [['fanz-submission', JSON.stringify({key, unknown: true})]],
+    submissions: () => ({blocked: !confirmed, items: [{key, state: confirmed ? 'confirmed' : 'unknown', request: {title:'original'}, receipt: confirmed ? {run:run('A')} : null}]}),
+    reconcile: async (url, options) => {assert.equal(options.body, '{}'); confirmed = true; return {run:run('A')};}});
+  assert.equal(p.requests.filter(x => x.method === 'POST').length, 0);
+  assert.equal(p.node('submit-task').disabled, true);
+  const button = p.node('submission-history').children[0].children[0];
+  assert.ok(button, 'unknown must expose explicit reconciliation');
+  await button.listeners.click(); await p.flush();
+  assert.equal(p.node('submit-task').disabled, false);
+  assert.equal(p.requests.filter(x => x.method === 'POST').length, 1);
+  assert.equal(p.requests.find(x => x.method === 'POST').url, `/api/v1/submissions/${key}/reconcile`);
+});
+
+const unknownKey = '018ff3ab-1277-7000-8000-000000000010';
+const unknownHistory = () => ({blocked:true,items:[{key:unknownKey,state:'unknown',request:{title:'original'}}]});
+test('U05: failed or expired reconciliation never clears lock or retries', async () => {
+  for (const outcome of [() => {throw new Error('unavailable');}, () => ({__status:401}), () => ({run:run('A')})]) {
+    const p=await page({submissions:unknownHistory,reconcile:outcome});
+    await p.node('submission-history').children[0].children[0].listeners.click(); await p.flush();
+    assert.equal(p.node('submit-task').disabled,true);
+    assert.equal(p.requests.filter(x=>x.method==='POST').length,1);
+    assert.equal(p.requests.filter(x=>x.url.endsWith('/tasks')&&x.method==='POST').length,0);
+  }
+});
+test('U05: lost durable readback after confirmation remains locked with explicit failure', async () => {
+  let accepted=false;
+  const p=await page({submissions:()=>{if(accepted)throw new Error('readback unavailable');return unknownHistory();},reconcile:()=>{accepted=true;return {run:run('A')};}});
+  await p.node('submission-history').children[0].children[0].listeners.click();
+  assert.equal(p.node('submit-task').disabled,true);
+  assert.match(p.node('submit-status').textContent,/仍保持鎖定/);
+  assert.equal(p.requests.filter(x=>x.method==='POST').length,1);
+});
+test('U05: pending reconciliation is single-flight and late reply after logout cannot unlock', async () => {
+  let release;
+  const p=await page({submissions:unknownHistory,reconcile:()=>new Promise(resolve=>{release=resolve;})});
+  const button=p.node('submission-history').children[0].children[0];
+  const pending=button.listeners.click(); await p.flush();
+  await button.listeners.click();
+  assert.equal(p.requests.filter(x=>x.method==='POST').length,1);
+  await p.node('logout').listeners.click(); release({run:run('A')}); await pending;
+  assert.equal(p.node('task-panel').hidden,true);
+  assert.equal(p.node('submit-task').disabled,true);
+});
+
+
+test('U05: remaining unknown and refresh during reconcile retain a usable explicit action', async () => {
+  for (const refresh of [false,true]) {
+    let release;
+    const p=await page({submissions:unknownHistory,reconcile:()=>new Promise(resolve=>{release=resolve;})});
+    const old=p.node('submission-history').children[0].children[0];
+    const pending=old.listeners.click(); await p.flush();
+    if(refresh){await p.node('refresh').listeners.click();await p.flush();}
+    release({run:run('A')}); await pending; await p.flush();
+    const current=p.node('submission-history').children[0].children[0];
+    assert.notEqual(current,old);
+    assert.equal(current.disabled,false,'remaining unknown must permit a later explicit GET reconciliation');
+    assert.equal(p.node('submit-task').disabled,true);
+    assert.equal(p.requests.filter(x=>x.method==='POST').length,1);
+  }
 });

@@ -504,3 +504,12 @@ Readiness acceptance: verify source-backed statements, exact read-only evidence,
 project-success contract, whitespace, independent fresh-context review and required CI;
 then normal PR delivery/readback. Runtime tests are not replayed for prose-only edits.
 FullM3/FN07, original installation recovery and oldCloudAC04 remain incomplete.
+
+## T-0442 approved original-intent recovery — 2026-11-02
+
+Owner approved U01–07 via deskPR395. Scope: authenticated read-only AP command evidence
+and explicit Fanzloud confirmation using the original store; no new execution authority,
+schema or dependency. [Wire contract](../fanzloud/docs/specs/SPEC-M3-recovery.md) and
+[approved limits](../fanzloud/docs/specs/PROPOSAL-M3-recovery.md) fix tests and windows.
+Native U01–05 first, independent review, then bounded DB rotation/U06/U07. No windows
+have started; original store remains unknown. All U01–07 NOT_RUN at this checkpoint.

@@ -197,6 +197,13 @@ impl SubmissionStore {
         tx.commit().map_err(sql_error)
     }
 
+    /// Exact authenticated-owner lookup, independent of truncated history pages.
+    pub fn submission(&self, owner: &str, key: &str) -> Result<Option<Value>> {
+        validate_owner(owner)?;
+        validate_uuid(key)?;
+        read_submission(&self.connection()?, owner, key)
+    }
+
     /// At most 100 intents within 2 MiB, plus an unresolved flag over all history.
     pub fn list(&self, owner: &str) -> Result<Value> {
         validate_owner(owner)?;

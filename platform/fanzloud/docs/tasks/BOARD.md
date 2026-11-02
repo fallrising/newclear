@@ -102,7 +102,7 @@ PR952 merged as `a69ff34ec173ee36284aceebcb417e560438569c` after finalhead967727
 
 | ID | Task | AC | Status | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| M3-U | Original unknown recovery; [bounded proposal](../specs/PROPOSAL-M3-recovery.md), readiness recorded separately; 等 owner AP／認證／新窗口批准 | FN04/FN07, U01–07 | in_progress | 2026-11-02T11:16:02Z | — | 2026-11-02T11:20:00Z |
+| M3-U | Original unknown recovery; [bounded proposal](../specs/PROPOSAL-M3-recovery.md), owner批准deskPR395；實作CU-M3-U01–04 | FN04/FN07, U01–07 | in_progress | 2026-11-02T11:16:02Z | — | 2026-11-02T12:15:04Z |
 
 Original SQLite remains unchanged and locked; historical AP evidence identifies the
 command but no public key lookup/confirmation exists. No live or credential change.

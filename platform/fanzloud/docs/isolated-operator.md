@@ -55,9 +55,11 @@ After login, the page reads durable submission history before enabling new work.
 tasks can be reopened from that history; observed statuses retain a cursor across restart.
 The history is a bounded record of observed AP snapshots, not every AP tool/event message.
 An unknown submission remains blocked across fresh browser sessions. Refresh is GET-only;
-it can recover a saved confirmation but never resend a task. AP currently has no public
-client-key query, so an unresolved gateway-to-AP uncertainty requires trusted investigation;
-do not delete the database or clear browser storage to bypass it. This slice provides no
+it can recover a saved confirmation but never resend a task. Use the explicit 「核對提交結果」 action beside a saved unknown intent. The server reads
+only the exact operator/key/operation evidence from AP and atomically confirms a matching
+original receipt. Missing, inconsistent or unavailable evidence stays locked; a later
+explicit action may repeat the lookup only. Do not delete the database or clear browser
+storage to bypass it. This slice provides no
 automatic abandon/retry or offline authentication. AP must be reachable for authorization.
 
 The checked-in `acceptance/m1-browser.mjs` is an explicit acceptance launcher, not a
@@ -104,13 +106,15 @@ same immutable bytes after Rust/AP restart. Credentials stay on the trusted side
 
 ## Unknown recovery and final journey
 
-There is currently no supported Web command to reconcile the original unknown intent.
-AP's internal command row can identify the receipt, but task-list/title matching is
+The explicit Web reconciliation command uses the original immutable AP command receipt.
+Task-list/title matching is
 insufficient and repeating a task POST is forbidden. Do not manually bind a guessed
 run, discard the SQLite file, reset a key or use a fresh store to claim recovery.
 
-The [recovery proposal](specs/PROPOSAL-M3-recovery.md) is not implemented or approved.
-It proposes authenticated exact-key AP evidence plus explicit local confirmation,
-then a same-installation/current-source journey with owner confirmation. Until those
+The owner approved the [bounded recovery scope](specs/PROPOSAL-M3-recovery.md).
+The [wire contract](specs/SPEC-M3-recovery.md) is implemented with native checks;
+[actual recovery and journey evidence](acceptance/M3-reconciliation.md) remains separate.
+A successful confirmation means the submission is known, even if the run was cancelled;
+it does not mean coding succeeded. Until those
 checks pass, this document describes accepted capabilities and their startup preconditions,
 not an available installation that the owner can log into now.

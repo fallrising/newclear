@@ -455,7 +455,7 @@ shape with audit-derived attribution and no migration; implementation waits for 
 | ID | Task | AC | Status | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
 | HDTLP | Propose and review truthful WorkItem detail contract | DTL-PLAN-01..03 | done | 2026-11-02T10:54:03Z | 2026-11-02T11:14:38Z | 2026-11-02T11:14:38Z |
-| HDTL | Implement truthful WorkItem detail with audit-derived attribution | DTL-AC-01..06; H02/H03 support | in_progress | 2026-11-02T11:09:20Z |  | 2026-11-02T11:41:24Z |
+| HDTL | Implement truthful WorkItem detail with audit-derived attribution | DTL-AC-01..06; H02/H03 support | done | 2026-11-02T11:09:20Z | 2026-11-02T11:53:28Z | 2026-11-02T11:53:28Z |
 
 DTL-PLAN-01 maps the remaining M2 detail gap to source. DTL-PLAN-02 fixes DTL-01..05, DTL-AC-01..06 and the minimal
 owner decisions. DTL-PLAN-03 disposes Claude review, passes document checks and completes Git/CI/readback/ledger delivery.
@@ -465,3 +465,9 @@ owner decisions. DTL-PLAN-03 disposes Claude review, passes document checks and 
 HDTLP closed with [#963](https://github.com/fallrising/newclear/pull/963) (merge time is its end; remote HAI equals the reviewed head).
 [Normative contract](../sdd/work-item-detail.md) governs HDTL. Root-only implementation, no worker; no migration,
 dependency, UI, provider, release or deploy.
+
+2026-11-02T11:53:28Z: [#969](https://github.com/fallrising/newclear/pull/969) merged normally as `f066b0d19795685da4d8efe1da07ca4eead0926c`.
+Reviewed head `c0a979c8093a08a2c9ce4bf4505575fcdcbc7d9b` passed HAI CI 41438800854 (backend 11m11s, web) and Project success
+41438800758; remote HAI files match the reviewed head. HDTL end uses the merge time. DTL-AC-01..06 accepted for this
+backend read slice ([evidence](../evidence/work-item-detail-20261102.md)); completion UI, Done validity, whole-M2 and SUCCESS
+AC-02..04 remain open. T-0339 stays in_progress.

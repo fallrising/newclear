@@ -13,11 +13,12 @@ const [out] = process.argv.slice(2);
 assert(out?.startsWith(lab + '/runs/'));
 const workspace = path.join(out, 'workspace');
 const startup = process.argv.includes('--check-startup');
+const cancel = process.argv.includes('--check-cancel');
 const crash = process.argv.includes('--check-crash');
 const failureIndex = process.argv.indexOf('--check-failure');
 const failure = failureIndex >= 0 ? Number(process.argv[failureIndex + 1]) : undefined;
 assert(failure === undefined || [401, 429].includes(failure));
-assert(Number(startup) + Number(crash) + Number(failure !== undefined) <= 1);
+assert(Number(cancel) + Number(startup) + Number(crash) + Number(failure !== undefined) <= 1);
 const require = createRequire(path.join(lab, 'vendor/agent-office/package.json'));
 const WebSocket = require('ws');
 const report = { status: 'starting', provider: 'pi', model: 'deepseek/deepseek-flash',
@@ -79,9 +80,10 @@ try {
   const login = await fetch(base + '/api/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ password }) });
   assert.equal(login.status, 200);
   ws = new WebSocket(base.replace('http', 'ws') + '/ws?name=Lab&lite=1', { headers: { cookie: login.headers.get('set-cookie').split(';')[0], origin: base } });
-  let welcomed = false;
+  let welcomed = false; const removed = [];
   ws.on('message', raw => {
     const msg = JSON.parse(raw);
+    if (msg.t === 'worker.remove') removed.push(msg.workerId);
     if (msg.t === 'welcome') welcomed = true;
     if (msg.t === 'worker.update') {
       worker = msg.worker;
@@ -96,7 +98,34 @@ try {
   report.startup_verified = true;
   assert(worker.sessionId);
   report.session_id = worker.sessionId;
-  if (crash) {
+  if (cancel) {
+    await until(() => worker.status === 'working' && report.authenticated_hooks.some(e => e.status === 'working')
+      && fs.existsSync(path.join(out, 'cancel-ready.json')), 30000, 'Pi did not reach held request');
+    const session = worker.sessionId, workerId = worker.id;
+    const owners = office.floors().flatMap(f => f.workers.owners()).filter(o => o.workerId === workerId && o.agent && o.cwd === workspace);
+    assert.equal(owners.length, 1); assert(Number.isInteger(owners[0].pid) && owners[0].pid > 1);
+    const started = Date.now();
+    report.cancel_started_at = started; save();
+    ws.send(JSON.stringify({t:'worker.kill', workerId, cleanup:'keep'}));
+    await until(() => removed.includes(workerId), 10000, 'Native cancellation removal missing', true, true);
+    report.cancel_duration_ms = Date.now() - started;
+    const gone = pid => {try {process.kill(pid, 0);return false;}catch(e){return e.code === 'ESRCH';}};
+    await until(() => owners.every(o => gone(o.pid)), Math.max(1,10000-(Date.now()-started)), 'Cancelled Pi survived', true, true);
+    report.cancel_processes_exit_duration_ms = Date.now() - started;
+    assert(report.cancel_processes_exit_duration_ms <= 10000);
+    report.cancelled_processes_exited = true;
+    await sleep(3000);
+    const recorded = events();
+    assert.equal(recorded.filter(e => e.type === 'session_start').length, 1);
+    assert(recorded.every(e => e.session === session && e.provider === 'deepseek' && e.model === 'deepseek-flash'));
+    assert(report.authenticated_hooks.every(e => e.session === session));
+    assert(!report.states.includes('done') && !recorded.some(e => e.type === 'tool_call' || (e.type === 'assistant_end' && e.output > 0)));
+    assert(!office.floors().flatMap(f => f.workers.owners()).some(o => o.pid));
+    assert(!fs.existsSync(path.join(workspace, 'result.json')));
+    report.native_cancel_verified = true;
+    report.no_automatic_restart_observation_ms = 3000;
+    report.status = 'cancelled';
+  } else if (crash) {
     await until(() => worker.status === 'working' && report.authenticated_hooks.some(e => e.status === 'working'), 30000, 'Native Pi never started working');
     const owners = office.floors().flatMap(f => f.workers.owners()).filter(o => o.workerId === worker.id && o.agent && o.cwd === workspace);
     assert.equal(owners.length, 1);
@@ -153,10 +182,15 @@ try {
     report.artifact_sha256 = createHash('sha256').update(artifact).digest('hex');
     report.file_task_passed = true; report.agent_settled_verified = true;
   }
-  if (failure === undefined && !crash) report.status = 'completed';
+  if (failure === undefined && !crash && !cancel) report.status = 'completed';
 } catch (error) {
   report.status = 'failed'; report.error = String(error); process.exitCode = 1;
 } finally {
   try { await stop(); } catch { report.status = 'failed'; report.cleanup_completed = false; process.exitCode = 1; }
   save();
 }
+
+// All native shutdown checks and report writes have completed. Do not let unrelated
+// upstream timers keep this bounded cancellation harness alive; the parent still
+// verifies every observed descendant before releasing the execution slot.
+if (cancel) process.exit(process.exitCode || 0);

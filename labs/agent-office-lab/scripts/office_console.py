@@ -40,6 +40,7 @@ def selection_plan(selection, lab=LAB):
     options = {}
     if mode == 'terminal' and provider == 'opencode': options['keep_open'] = True
     elif mode in ('http_401','http_429') and provider == 'pi': options['check_failure'] = int(mode[5:])
+    elif mode == 'cancel' and provider == 'pi': options['check_cancel'] = True
     elif mode == 'crash' and provider == 'pi': options['check_crash'] = True
     elif mode != 'task': raise ConsoleError('invalid_selection')
     return dispatch.plan(provider, **options)

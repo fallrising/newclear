@@ -3,7 +3,7 @@ const $=id=>document.getElementById(id), el=(tag,text)=>{const n=document.create
 const titles={opencode:'OpenCode',grok:'Grok',pi:'Pi',cursor:'Cursor'};
 const models={opencode:'Strata · Qwen3.8 Flash Next Q2_0',grok:'grok-4.6',pi:'DeepSeek · deepseek-flash',cursor:'Composer 2.5'};
 const labels={completed:'完成且產物已核對',failed:'失敗',stopped:'已停止',cancelled:'已取消',startup_only:'僅啟動檢查',incomplete:'尚無最終報告',unverified:'證據不足',invalid:'無效紀錄'};
-const modes={task:'合成檔案任務',terminal:'合成任務＋保留原生終端',http_401:'本機 401 故障檢查',http_429:'本機 429 故障檢查',crash:'本機 CLI 崩潰檢查'};
+const modes={task:'合成檔案任務',terminal:'合成任務＋保留原生終端',http_401:'本機 401 故障檢查',http_429:'本機 429 故障檢查',crash:'本機 CLI 崩潰檢查',cancel:'本機原生取消檢查'};
 const errors={forbidden:'連線未授權。請使用啟動時顯示的登入網址。',execution_busy:'已有工作執行中。請等候清理完成。',plan_expired_or_used:'計畫已使用或逾時，請重新查看計畫。',remote_execution_requires_cli:'遠端付費執行需使用已授權的 CLI 流程。',retry_limit_reached:'此任務已用完兩次重試。',retry_requires_latest_attempt:'請選擇這個任務最新的失敗紀錄。',retry_source_changed:'執行程式已更新，此舊紀錄不能直接重試。',retry_history_unavailable_or_invalid:'這筆紀錄沒有可驗證的重試歷史。',retry_requires_clean_failed_run:'只有已失敗且清理完成的任務可以重試。'};
 const fragment=new URLSearchParams(location.hash.slice(1));
 if(fragment.get('token')){sessionStorage.setItem('office-token',fragment.get('token'));history.replaceState(null,'',location.pathname);}
@@ -18,11 +18,11 @@ function selectProvider(next){
  provider=next;invalidate();$('selected').textContent=titles[provider];$('model').textContent=models[provider];
  for(const button of $('providers').children)button.setAttribute('aria-pressed',String(button.dataset.provider===provider));
  $('mode').replaceChildren();
- const available=provider==='opencode'?['task','terminal']:provider==='pi'?['task','http_401','http_429','crash']:['task'];
+ const available=provider==='opencode'?['task','terminal']:provider==='pi'?['task','http_401','http_429','crash','cancel']:['task'];
  for(const mode of available){const option=el('option',modes[mode]);option.value=mode;$('mode').append(option);}
  updateNote();showCheck();
 }
-function updateNote(){invalidate();const mode=$('mode').value;$('mode-note').textContent=mode==='terminal'?'任務完成後保留本地模型與原生終端，直到你停止執行。':mode.startsWith('http_')||mode==='crash'?'使用真實 Pi CLI 與本機故障，不呼叫模型。':provider==='opencode'?'使用本機 Strata，讀取合成 input.json 並寫入 result.json。':'此工位目前可查看計畫，頁面不啟動付費任務。';}
+function updateNote(){invalidate();const mode=$('mode').value;$('mode-note').textContent=mode==='terminal'?'任務完成後保留本地模型與原生終端，直到你停止執行。':mode==='cancel'?'讓真實 Pi 等待本機請求，再驗證原生取消；不呼叫模型。':mode.startsWith('http_')||mode==='crash'?'使用真實 Pi CLI 與本機故障，不呼叫模型。':provider==='opencode'?'使用本機 Strata，讀取合成 input.json 並寫入 result.json。':'此工位目前可查看計畫，頁面不啟動付費任務。';}
 function showCheck(){const check=state?.checks[provider];$('check').textContent=!check?'尚未檢查環境。':!check.cli_compatible?'CLI 缺失或版本不相容。':!Object.values(check.runtime).every(Boolean)?'CLI 相容；執行環境尚未齊備。':check.credentials==='not_required'?'本地 CLI 與 Strata 環境已就緒，不需要遠端登入。':check.credentials==='missing'?'CLI 與環境就緒；尚無登入資料。Pi 本機故障檢查不需要登入。':check.credentials!=='present_unverified'?'CLI 與環境就緒；登入資料尚需處理。':'CLI 與環境就緒。登入資料存在不代表已驗證帳號或取得付費授權。';}
 async function makePlan(selection){
  const generation=++planGeneration;
@@ -33,7 +33,8 @@ async function makePlan(selection){
  }catch(e){message(e.message);}
 }
 function showDetail(run){const d=$('detail');d.replaceChildren(el('h3',`${titles[run.provider]||run.provider} · ${labels[run.status]}`),el('p',run.id),el('p',`模型：${run.model||'未記錄'}；清理：${run.cleanup_verified?'已確認':'尚未確認'}`));
- if(run.test_scenario)d.append(el('p','本機故障注入；沒有模型推論。'),el('p',run.failure_check_passed?'故障驗收通過，任務仍為失敗。':'故障驗收證據不足。'));
+ if(run.test_scenario==='native_pi_cancel')d.append(el('p',run.cancel_check_passed?'原生取消驗收通過，沒有模型推論。':'取消驗收尚未通過，沒有模型推論。'));
+ else if(run.test_scenario)d.append(el('p','本機故障注入；沒有模型推論。'),el('p',run.failure_check_passed?'故障驗收通過，任務仍為失敗。':'故障驗收證據不足。'));
  if(run.retry)d.append(el('p',`原始紀錄：${run.retry.root}；${run.retry.attempt===0?'首次執行':`明確重試 ${run.retry.attempt} / 2`}`));
  if(run.artifact.content)d.append(el('pre',JSON.stringify(run.artifact.content,null,2)),el('p',`SHA-256：${run.artifact.sha256}`));else d.append(el('p','沒有可顯示的已核對產物。'));
  const close=el('button','關閉詳細內容');close.className='quiet';close.onclick=()=>d.hidden=true;d.append(close);d.hidden=false;d.focus();

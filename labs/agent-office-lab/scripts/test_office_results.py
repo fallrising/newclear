@@ -44,6 +44,25 @@ class OfficeResultsTest(unittest.TestCase):
     def read(self):
         return results.catalog([self.root])['runs']
 
+    def test_pi_cancel_requires_native_cleanup_timing_and_no_inference(self):
+        run, report = self.make_run('pi')
+        (run/'workspace/result.json').unlink()
+        report.update(status='cancelled', model_inference_verified=False, cancellation_check={'source':'held_loopback','method':'worker.kill'},
+                      cancel_check_passed=True, cancel_cleanup_duration_ms=4000, client_requests=1, external_requests=0, remaining_owned_processes=0)
+        report['office'].update(status='cancelled', native_cancel_verified=True, cancelled_processes_exited=True, cancel_processes_exit_duration_ms=200)
+        baseline = json.loads(json.dumps(report))
+        for mutation in (lambda r: None, lambda r:r.update(external_requests=1), lambda r:r.update(model_inference_verified=True),
+                         lambda r:r.update(remaining_owned_processes=1), lambda r:r.update(cancel_cleanup_duration_ms=10001), lambda r:r.update(cleanup_errors=['survivor']),
+                         lambda r:r['office'].update(cancel_processes_exit_duration_ms=10001),
+                         lambda r:r['office'].update(native_cancel_verified=False)):
+            report=json.loads(json.dumps(baseline));mutation(report);(run/'result.json').write_text(json.dumps(report))
+            row=self.read()[0]
+            self.assertEqual(row['cancel_check_passed'], report==baseline)
+            self.assertEqual(row['status'], 'cancelled' if report==baseline else 'unverified')
+            self.assertNotIn('PRIVATE',json.dumps(row))
+        report=json.loads(json.dumps(baseline));report['crash_injection']={};(run/'result.json').write_text(json.dumps(report))
+        self.assertEqual(self.read()[0]['status'],'invalid')
+
     def test_four_provider_provenance_and_content(self):
         for provider in results.PROVIDERS:
             self.make_run(provider)

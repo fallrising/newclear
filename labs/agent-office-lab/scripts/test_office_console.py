@@ -128,6 +128,15 @@ class ConsoleTests(unittest.TestCase):
         good='http://127.0.0.1:123/login#key='+'a'*32
         self.assertEqual(console.terminal_link(good),good)
 
+    def test_pi_cancel_console_plan_is_fixed_local_and_single_use(self):
+        code, raw, _ = self.request('/api/plan', {'provider':'pi','mode':'cancel'})
+        self.assertEqual(code,200);plan=json.loads(raw)
+        self.assertTrue(plan['executable']);self.assertFalse(plan['plan']['remote'])
+        self.assertEqual(plan['plan']['command'][2:], ['run','pi','--execute','--check-cancel'])
+        key,job,commands=self.launch_helper({'provider':'pi','mode':'cancel'},'pass')
+        self.wait_job(job);self.assertEqual(commands[0][2:],['run','pi','--execute','--check-cancel'])
+        with self.assertRaises(console.ConsoleError):self.app.execute(key)
+
     def test_terminal_dispatch_only_local_and_cannot_mix_modes(self):
         with patch.object(dispatch,'detect') as detect:
             for provider,options in [('pi',{}),('grok',{}),('opencode',{'check_cancel':True}),('opencode',{'check_failure':401})]:

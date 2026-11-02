@@ -68,7 +68,7 @@ class DispatchTest(unittest.TestCase):
             with contextlib.redirect_stdout(io.StringIO()) as output:
                 self.assertEqual(dispatch.main(['run', 'opencode', '--check-cancel']), 0)
             self.assertTrue(json.loads(output.getvalue())['native_cancel_check'])
-            for provider in ('grok', 'pi', 'cursor'):
+            for provider in ('grok', 'cursor'):
                 with self.assertRaisesRegex(SlotError, 'local_cancel_check_only'):
                     dispatch.launch(provider, True, self.lab, check_cancel=True)
             probe.assert_not_called(); execute.assert_not_called()
@@ -77,6 +77,21 @@ class DispatchTest(unittest.TestCase):
             with self.assertRaises(OSError):
                 dispatch.launch('opencode', False, self.lab, check_cancel=True)
             self.assertEqual(execute.call_args.args[1][-1], '--check-cancel')
+
+    def test_pi_cancel_plan_and_launch_are_local_and_do_not_need_credentials(self):
+        plan = dispatch.plan('pi', check_cancel=True)
+        self.assertFalse(plan['remote']);self.assertNotIn('--allow-remote', plan['command'])
+        self.assertEqual(plan['limits']['provider_request_cap'], 0)
+        check = {'launch_prerequisites_present': False, 'cli_compatible': True, 'runtime': {'office_build': True}}
+        with patch.object(dispatch, 'detect', return_value=check) as detect, patch.object(os, 'execve', side_effect=OSError('no launch')) as execute:
+            with self.assertRaises(SlotError):dispatch.launch('pi', True, self.lab, check_cancel=True)
+            detect.assert_not_called()
+            with self.assertRaises(OSError):dispatch.launch('pi', False, self.lab, check_cancel=True)
+            self.assertEqual(execute.call_args.args[1][2:], ['--check-cancel'])
+            check['runtime']['office_build'] = False
+            with contextlib.redirect_stdout(io.StringIO()):
+                self.assertEqual(dispatch.launch('pi', False, self.lab, check_cancel=True), 1)
+            self.assertEqual(execute.call_count, 1)
 
     def test_failure_plan_never_executes_and_rejects_paid_or_other_provider_modes(self):
         with patch.object(dispatch, 'detect') as probe, patch.object(os, 'execve') as execute:
@@ -176,7 +191,8 @@ class DispatchTest(unittest.TestCase):
         cases = [(spec, spec['args']) for spec in dispatch.SPECS.values()]
         cases += [(dispatch.SPECS['pi'], ['--check-failure', '401']),
                   (dispatch.SPECS['pi'], ['--check-failure=429']),
-                  (dispatch.SPECS['pi'], ['--check-crash'])]
+                  (dispatch.SPECS['pi'], ['--check-crash']),
+                  (dispatch.SPECS['pi'], ['--check-cancel'])]
         for spec, args in cases:
             # Replace probes with a tripwire; even a broken gate cannot issue a model request.
             code = f'''import sys,runpy,types

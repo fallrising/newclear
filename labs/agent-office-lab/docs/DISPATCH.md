@@ -79,3 +79,5 @@ python3 scripts/office_dispatch.py acknowledge-interruption --confirm-all-owned-
 上述為 T-0012 的前置驗證。T-0013 已完成[新入口本地實測](evidence/local-dispatch-2026-11-01.json)：最終 runner 整輪任務／取消驗收 54.95 秒、原生取消及程序退出 202 ms；Ctrl+C 的另一個 run 顯示 cancelled／exit 130，包含模型關閉的整體退出為 10.399 秒。所有追蹤程序退出、鎖釋放、重複派工拒絕及結果頁核對通過；122 tests 通過，沒有遠端模型呼叫。原生取消與整體 runner 中斷是不同測量，不宣稱所有中斷均在 202 ms 完成。
 
 完整 AC-01、AC-06、AC-08、AC-11 與 MVP 保持 pending，後續仍須驗證遠端新入口、跨 provider 權限／取消／恢復與 UI 派工。
+
+Pi 亦支援 `run pi --check-cancel` 計畫，加上 `--execute` 以真實 CLI 驗證本機請求等待中的原生取消。此模式沒有模型推論或遠端授權，不可混用其他檢查；[操作與限制](CANCEL.md)。

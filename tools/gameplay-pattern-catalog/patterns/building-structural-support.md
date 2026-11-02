@@ -1,16 +1,18 @@
 ---
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "id": "building-structural-support",
   "title": "支撐約束與結構失效",
   "title_en": "Structural support and collapse",
   "category": "building",
+  "source_category": "building",
   "tags": [
     "constraint-graph",
     "stability",
     "spatial-planning"
   ],
   "summary": "讓建造自由受到可讀的承重關係約束，產生空間與安全的取捨。",
+  "note_status": "reviewed",
   "related": [
     "automation-belt-routing",
     "puzzles-box-pushing"
@@ -29,10 +31,17 @@
 ## 來源摘要
 
 原站描述牆、樑與樓板受支撐規則約束，跨度過大或支撐不足可能崩塌。核心循環：建立支撐 → 延伸結構 → 讀取穩定回饋 → 補強或改形。
+本次全量快照已用公開頁面內嵌條目複核。
 
 ## 問題與情境（本地分析）
 
 適用於希望建築形狀具有遊戲意義而非純裝飾的系統。規則需要可預測，否則失效只會被理解為隨機懲罰。
+
+## 核心循環（本地分析）
+
+- 玩家行動：進行「建立支撐、延伸結構」。這是玩家在看到後果前就付出去的承諾。
+- 系統回饋：讓「讀取穩定回饋」變成可區分的結果，而不是只告知成功或失敗。
+- 下一個決策：依據該結果選擇「補強或改形」，或改走成本不同的下一步。回饋若不能改變這個選擇，就不構成循環。
 
 ## 解法與取捨（本地分析）
 
@@ -51,13 +60,15 @@
 
 ## 最小原型與驗收（本地提案）
 
+此原型尚未實玩驗證。其中的數量是本地測試設定，不是來源遊戲參數。
+
 - 本地提案：地基、樑、樓板三種元件；二維網格與固定跨度上限。
 - 驗收：Given 接近跨度上限的樓板，When 再延伸一格，Then 預覽標出失效區；加入支柱後預覽與實際結果一致。
 
 ## 相關模式
 
-- [受限空間中的物流路由](automation-belt-routing.md)
-- [不可逆推動與位置可達性](puzzles-box-pushing.md)
+- [受限空間中的物流路由](automation-belt-routing.md)：支撐不足與物流堵塞都是延後才爆開的空間失敗，讀回饋的方式不同，不能互相取代。
+- [不可逆推動與位置可達性](puzzles-box-pushing.md)：延伸結構與推箱子都會讓下一步的可站位置變少；前者看的是承重，後者看的是格子是否被自己封死。
 
 ## 參考來源
 

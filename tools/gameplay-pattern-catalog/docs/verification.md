@@ -1,3 +1,19 @@
+# T-0002 驗證紀錄
+
+日期：2026-11-02。快照：`atlas-public-2026-11-02`，觀察時間 `2026-11-02T14:47:12Z`。未 merge、deploy 或 release。
+
+以下 T-0001 各節是精選里程碑的歷史紀錄。那次的 14 篇與 CI 不計入本次全量。
+
+## 本輪已跑
+
+- 來源入口：sitemap、`index.json`、`catalog.json`、280 個機制頁內嵌條目、280 個 `mechanics/<id>.json`。頁面與兩份 JSON 的文字投影雜湊全部一致，沒有重新導向。
+- `python3 sources/inventory.py --check`：通過。
+- `python3 build.py --check`：通過，筆記數等於 manifest 條目數。
+- `python3 -m unittest discover -s tests -v`：23 項通過。負向案例包含 pending、blocked、缺筆記、重複來源 ID、首頁觀察漂移、搜尋索引摘錄不能 reviewed。
+- `node --check app.js`：通過。
+- 瀏覽器 smoke：本機 `/usr/bin/google-chrome` 與 Playwright 1.57.0，完整 HTTP 模式通過。路徑是 `/nested/catalog/`。測過搜尋、inventory 分類交集、空結果、重設、NFKC、狀態 pending 的空結果、完整度頁、形狀背包詳情與來源連結、相鄰模式、metadata、390px 無水平溢出、無 JavaScript。沒有 pageerror，也沒有頁面外的請求。
+- `python3 scripts/check_project_success.py --write-index` 與 `python3 scripts/check_indexes.py`：本機通過，55 個契約，llms 0 error。GitHub CI 尚未回讀。
+
 # T-0001 驗證紀錄
 
 日期：2026-11-02。交付：[Draft PR #960](https://github.com/fallrising/newclear/pull/960)。未 merge、deploy 或 release。

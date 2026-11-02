@@ -1,16 +1,18 @@
 ---
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "id": "relationships-gift-allocation",
   "title": "偏好探索與禮物分配",
   "title_en": "Gift preferences and allocation",
   "category": "relationships",
+  "source_category": "relationships",
   "tags": [
     "preference-learning",
     "scarce-resource",
     "relationship"
   ],
   "summary": "用有限禮物連接偏好探索、關係經營與機會成本。",
+  "note_status": "reviewed",
   "related": [
     "commerce-price-discovery",
     "cooking-recipe-learning"
@@ -29,10 +31,17 @@
 ## 來源摘要
 
 原站描述將物品送給不同角色，偏好與贈禮限制影響收益，互動回饋幫助下一次分配。核心循環：蒐集偏好線索 → 取得禮物 → 選擇收禮者 → 記錄反應。
+本次全量快照已用公開頁面內嵌條目複核。
 
 ## 問題與情境（本地分析）
 
 適用於需要將角色互動與資源分配結合的系統。玩家應有理由在已知安全選項與探索未知偏好間權衡。
+
+## 核心循環（本地分析）
+
+- 玩家行動：進行「蒐集偏好線索、取得禮物」。這是玩家在看到後果前就付出去的承諾。
+- 系統回饋：讓「選擇收禮者」變成可區分的結果，而不是只告知成功或失敗。
+- 下一個決策：依據該結果選擇「記錄反應」，或改走成本不同的下一步。回饋若不能改變這個選擇，就不構成循環。
 
 ## 解法與取捨（本地分析）
 
@@ -51,13 +60,15 @@
 
 ## 最小原型與驗收（本地提案）
 
+此原型尚未實玩驗證。其中的數量是本地測試設定，不是來源遊戲參數。
+
 - 本地提案：三名原創角色、三種物品、每天兩次贈禮；不建完整對話系統。
 - 驗收：Given 尚未知的偏好，When 送禮後收到回饋，Then 知識紀錄被更新，下一次選擇可直接查閱；觀察是否減少盲目重試。
 
 ## 相關模式
 
-- [以回饋進行價格探索](commerce-price-discovery.md)
-- [知識與材料雙重解鎖](cooking-recipe-learning.md)
+- [以回饋進行價格探索](commerce-price-discovery.md)：贈禮反應與顧客反應都是用一次付出換資訊，不能把單一個案當成全局真值。
+- [知識與材料雙重解鎖](cooking-recipe-learning.md)：禮物與料理都可能先卡在「知道對方要什麼」或「手上有沒有材料」。
 
 ## 參考來源
 

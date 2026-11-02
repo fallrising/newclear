@@ -1,20 +1,24 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "title": "Gameplay Atlas",
   "url": "https://gameplayatlas.loopyhop.com/",
   "accessed": "2026-11-02",
   "resource_type": "game-mechanic-reference",
   "catalog_language": "zh-Hant",
   "source_language_read": "en",
-  "coverage": "curated-subset",
-  "curated_count": 14,
-  "reported_counts": {
-    "mechanics": 280,
-    "groups": 28
+  "coverage": {
+    "basis": "source-snapshot",
+    "snapshot_id": "atlas-public-2026-11-02",
+    "claim": "complete",
+    "denominator": "sources/manifest.json"
   },
-  "selection": "12 homepage-linked mechanics plus inventory adjacency and price discovery",
-  "verification_boundary": "13 public page-text excerpts; price discovery from a search-index excerpt. No gameplay execution or full-site crawl.",
+  "homepage_observation": {
+    "mechanics": 280,
+    "groups": 28,
+    "count_source": "https://gameplayatlas.loopyhop.com/"
+  },
+  "selection": "Every mechanic in the reconciled public snapshot, including the earlier 14-note subset.",
+  "verification_boundary": "Author reconciliation against each public mechanic page and its embedded entry for this snapshot. Not an independent review, not gameplay execution, and not a claim that the upstream site stays unchanged.",
   "reuse_boundary": "Independent short paraphrases and original design analysis; no upstream images, full text, code or assets copied. Upstream rights are not relicensed.",
-  "count_source": "https://gameplayatlas.loopyhop.com/",
   "policy_source": "https://gameplayatlas.loopyhop.com/about/"
 }

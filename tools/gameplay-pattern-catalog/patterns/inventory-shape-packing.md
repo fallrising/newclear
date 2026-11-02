@@ -1,16 +1,18 @@
 ---
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "id": "inventory-shape-packing",
   "title": "形狀式背包配置",
   "title_en": "Shape-based packing",
   "category": "inventory",
+  "source_category": "inventory",
   "tags": [
     "spatial-budget",
     "packing",
     "opportunity-cost"
   ],
   "summary": "用幾何形狀而不只是重量，讓攜帶選擇同時包含重排與取捨。",
+  "note_status": "reviewed",
   "related": [
     "inventory-adjacency",
     "allocation-shop-reservation"
@@ -29,10 +31,17 @@
 ## 來源摘要
 
 原站描述在有限格子內旋轉與移動不同形狀的物品，避免重疊；留白也會影響後續戰利品。核心循環：看物品形狀 → 重排 → 決定取捨 → 確認攜帶配置。
+本次全量快照已用公開頁面內嵌條目複核。
 
 ## 問題與情境（本地分析）
 
 適用於希望整理本身就是決策的戰利品系統。問題不是把背包填滿，而是讓玩家在幾何效率、戰術用途與未來空間間選擇。
+
+## 核心循環（本地分析）
+
+- 玩家行動：進行「看物品形狀、重排」。這是玩家在看到後果前就付出去的承諾。
+- 系統回饋：讓「決定取捨」變成可區分的結果，而不是只告知成功或失敗。
+- 下一個決策：依據該結果選擇「確認攜帶配置」，或改走成本不同的下一步。回饋若不能改變這個選擇，就不構成循環。
 
 ## 解法與取捨（本地分析）
 
@@ -51,13 +60,15 @@
 
 ## 最小原型與驗收（本地提案）
 
+此原型尚未實玩驗證。其中的數量是本地測試設定，不是來源遊戲參數。
+
 - 本地提案：5×4 背包、四種形狀、六件功能不同的物品；不做戰鬥或隨機掉落。
 - 驗收：Given 已佔用格子，When 旋轉或移動物品，Then 重疊與越界放置被拒絕且原配置不變；觀察玩家是否主動為下一件物品留空。
 
 ## 相關模式
 
-- [相鄰關係驅動的組合加成](inventory-adjacency.md)
-- [商店保留與選項成本](allocation-shop-reservation.md)
+- [相鄰關係驅動的組合加成](inventory-adjacency.md)：先解決放不放得下，才有資格談鄰居加成；兩層空間規則不要合成同一個提示。
+- [商店保留與選項成本](allocation-shop-reservation.md)：背包留白與商店保留都是為了之後的物品，先付出現在的空位。
 
 ## 參考來源
 

@@ -4,6 +4,7 @@
   if (!form) return;
   const search = document.querySelector('#search');
   const category = document.querySelector('#category');
+  const status = document.querySelector('#status');
   const cards = [...document.querySelectorAll('.card')];
   const count = document.querySelector('#count');
   const empty = document.querySelector('#empty');
@@ -14,6 +15,7 @@
     let visible = 0;
     cards.forEach((card, index) => {
       const match = (!category.value || card.dataset.category === category.value)
+        && (!status || !status.value || card.dataset.status === status.value)
         && terms.every(term => searchable[index].includes(term));
       card.hidden = !match;
       visible += Number(match);
@@ -24,9 +26,11 @@
   form.addEventListener('submit', event => event.preventDefault());
   search.addEventListener('input', filter);
   category.addEventListener('change', filter);
+  status?.addEventListener('change', filter);
   form.addEventListener('reset', () => {
     search.value = '';
     category.value = '';
+    if (status) status.value = '';
     filter();
   });
   filter();

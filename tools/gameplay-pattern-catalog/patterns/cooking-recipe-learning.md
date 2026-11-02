@@ -1,16 +1,18 @@
 ---
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "id": "cooking-recipe-learning",
   "title": "知識與材料雙重解鎖",
   "title_en": "Recipe knowledge unlocks",
   "category": "cooking",
+  "source_category": "cooking",
   "tags": [
     "knowledge-gate",
     "progression",
     "resource-budget"
   ],
   "summary": "把「知道怎麼做」與「有能力做」分成兩個可組合的進度條件。",
+  "note_status": "reviewed",
   "related": [
     "gathering-tool-hardness",
     "relationships-gift-allocation"
@@ -29,10 +31,17 @@
 ## 來源摘要
 
 原站將配方知識與材料取得視為不同門檻；玩家先尋找配方，再湊齊資源製作。核心循環：找到知識線索 → 學會配方 → 取得材料 → 製作並使用。
+本次全量快照已用公開頁面內嵌條目複核。
 
 ## 問題與情境（本地分析）
 
 適用於探索、角色互動與製作要互相帶動的系統。只有材料稀缺時，所有進度容易收斂為刷資源；加入知識門檻可讓尋路與發現有獨立價值。
+
+## 核心循環（本地分析）
+
+- 玩家行動：進行「找到知識線索、學會配方」。這是玩家在看到後果前就付出去的承諾。
+- 系統回饋：讓「取得材料」變成可區分的結果，而不是只告知成功或失敗。
+- 下一個決策：依據該結果選擇「製作並使用」，或改走成本不同的下一步。回饋若不能改變這個選擇，就不構成循環。
 
 ## 解法與取捨（本地分析）
 
@@ -51,13 +60,15 @@
 
 ## 最小原型與驗收（本地提案）
 
+此原型尚未實玩驗證。其中的數量是本地測試設定，不是來源遊戲參數。
+
 - 本地提案：三個配方、三種材料、單一工作台；用探索或對話解鎖其中一個。
 - 驗收：Given 材料齊全但尚未學會配方，When 嘗試製作，Then 回饋缺的是知識；學會後材料相同即可製作。
 
 ## 相關模式
 
-- [工具能力門檻](gathering-tool-hardness.md)
-- [偏好探索與禮物分配](relationships-gift-allocation.md)
+- [工具能力門檻](gathering-tool-hardness.md)：配方知識與工具等級都是先看見目標、卻還差一層門檻才能完成。
+- [偏好探索與禮物分配](relationships-gift-allocation.md)：學會配方與摸清偏好都是先取得知識，再決定稀缺材料或禮物要分給誰。
 
 ## 參考來源
 

@@ -6,10 +6,18 @@ Demand:T-0426, claim397 merged. [DC-1–DC-4](T-0426-dynamic-context.md).
 
 | ID | Task | AC | Status | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| DC-01 | Preserve instruction provenance and ordered rendering | DC-1 | in_progress | 2026-11-02T12:19:29.947708+00:00 | — | 2026-11-02T12:38:43.485998+00:00 |
-| DC-02 | Continue idle/saved user turns with inline context | DC-2 | in_progress | 2026-11-02T12:19:29.947708+00:00 | — | 2026-11-02T12:38:43.485998+00:00 |
-| DC-03 | Retain strict tool correlation and regressions | DC-3 | in_progress | 2026-11-02T12:19:29.947708+00:00 | — | 2026-11-02T12:38:43.485998+00:00 |
-| DC-04 | Independent evidence and complete delivery | DC-4 | in_progress | 2026-11-02T12:19:29.947708+00:00 | — | 2026-11-02T12:38:43.485998+00:00 |
+| DC-01 | Preserve instruction provenance and ordered rendering | DC-1 | done | 2026-11-02T12:19:29.947708+00:00 | 2026-11-02T12:56:42Z | 2026-11-02T13:00:17.019153+00:00 |
+| DC-02 | Continue idle/saved user turns with inline context | DC-2 | done | 2026-11-02T12:19:29.947708+00:00 | 2026-11-02T12:56:42Z | 2026-11-02T13:00:17.019153+00:00 |
+| DC-03 | Retain strict tool correlation and regressions | DC-3 | done | 2026-11-02T12:19:29.947708+00:00 | 2026-11-02T12:56:42Z | 2026-11-02T13:00:17.019153+00:00 |
+| DC-04 | Independent evidence and complete delivery | DC-4 | done | 2026-11-02T12:19:29.947708+00:00 | 2026-11-02T12:59:35.128662+00:00 | 2026-11-02T13:00:17.019153+00:00 |
+
+Product [PR980](https://github.com/fallrising/newclear/pull/980), source `44fb50a757d81531785bb77b5ace32eb92f1cf42`, merged `0e332653b7d77c3ccf0da4e975955e44eb6e6374` at 2026-11-02T12:56:42Z. Required component check (5m33s) and validate (10s) passed; all10changed files, ancestry and Desk-Task trailers matched source/merge/origin. DC01–03 preserve Claude+Messages top-level stable versus inline system/developer provenance, original conversation order, and appended instruction/user suffixes for idle or saved sessions. Direct Chat/Responses strip forged annotations and keep strict stable-instruction semantics; generic HTTP/Cursor paths are unchanged. Pure instruction suffixes leave saved sessions available. Newly added context beside pending tool results still takes full-context fresh fallback; exact old inline history and valid results retain the original callback.
+
+Genuine ordering RED preceded5focusedDC tests,444Rust/25groups including14fakeTUI,199componentPython,fmt/Clippy/build,twoofflinewalkthroughs and55contracts/9indexes/20repository tests passing. Initial fake-TUI run12passed/2failed is retained: the synthetic peer acknowledged only the first paste piece; its parser now preserves/acknowledges all pieces with strict fullprompt/two-piece assertions, and the3corrected cases plus full14-case suite passed. Independent T001 design/T002 source+fixture/T003 evidence-ledger reviews accepted. Native TUI receives external instruction text, not a privileged mutable system API. No real CLI/profile/privateDB/provider use, new live allowance, actual-client live/cache/subscription/account-safety or whole-product acceptance. Original17AC and older board history unchanged.
+
+Journal [PR238](https://github.com/fallrising/journal/pull/238) and desk [PR399](https://github.com/fallrising/desk/pull/399) passed CI, normal merge and exact readback; local journal166runs/30tests anddesk449documents passed. DC04 records primary closure at 2026-11-02T12:59:35.128662+00:00: separate complete backup verified88payloadfiles/188222793bytes and modes, then four clean merged owned worktrees were normally removed. Branches, shared caches, other worktrees and old packets/backups remain preserved; prior packet/binary/renewed-tool manifest pins match.
+
+Final board review/CI/normal merge/readback, backup append and removal of this sole closure worktree follow this checkpoint and are recorded in the private final handoff after completion, not preclaimed here. No owner action is required for this selected delivery. Mainline incomplete/usable_tag none/desk in_progress remain; dynamic actual-client acceptance, reliable in-place tool-notice delivery and Cursor container-runner migration remain open. No next milestone or real request starts automatically.
 
 ## T-0426 — Cursor Agent CLI documentation and Claude client continuation
 

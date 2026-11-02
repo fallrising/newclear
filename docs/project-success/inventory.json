@@ -219,6 +219,11 @@
       "source_commit": "ff6459a8fbc9db69d43ba41b9ac5e7d41df3465b"
     },
     {
+      "path": "systems/agent-secrets",
+      "last_source_update": "2026-11-02T09:52:31Z",
+      "source_commit": "244c7f7b416508aedd8f5f8d4a082ae2bb17d022"
+    },
+    {
       "path": "systems/clarkq",
       "last_source_update": "2026-10-10T14:36:19+00:00",
       "source_commit": "79109d62d5d8f47cfe3e673d7467e901e41467eb"

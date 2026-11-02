@@ -449,8 +449,8 @@ the merge time. RWK-AC-01..05 accepted for this backend slice; full M2, completi
 
 Owner said 「繼續」 after HRWK. Source a502addb; no open HAI PR at intake. The remaining M2 row is detail/coverage
 authoritative interpretation: `GET work-items/{id}`/`WorkItemDetail` is declared without handler or consumer, its shape
-requires never-stored fields, and Reviews/Evidence/Approvals lack a stored WorkItem link. HDTLP proposes a truthful
-shape plus subject attribution; implementation waits for owner D1/D2. UI, Impact, providers and release stay out of scope.
+requires never-stored fields, and Reviews/Evidence/Approvals carry their WorkItem only through the immutable audit/result chain. HDTLP proposes a truthful
+shape with audit-derived attribution and no migration; implementation waits for owner D1. UI, Impact, providers and release stay out of scope.
 
 | ID | Task | AC | Status | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -458,4 +458,4 @@ shape plus subject attribution; implementation waits for owner D1/D2. UI, Impact
 
 DTL-PLAN-01 maps the remaining M2 detail gap to source. DTL-PLAN-02 fixes DTL-01..05, DTL-AC-01..06 and the minimal
 owner decisions. DTL-PLAN-03 disposes Claude review, passes document checks and completes Git/CI/readback/ledger delivery.
-[Proposal](../plans/work-item-detail-20261102.md).
+[Proposal](../plans/work-item-detail-20261102.md); [review evidence](../evidence/work-item-detail-plan-20261102.md).

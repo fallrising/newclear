@@ -120,8 +120,8 @@ def _normalize(run_fd, run_id):
     elapsed = report.get('elapsed_s')
     if type(elapsed) in (int, float) and 0 <= elapsed < 10**7 and math.isfinite(elapsed):
         row['elapsed_seconds'] = round(elapsed, 2)
-    if report.get('task') == 'local_text':
-        row['task_kind'] = 'local_text'
+    if report.get('task') in ('local_text','local_revision'):
+        row['task_kind'] = report['task']
         if provider != 'opencode': return dict(row,reason='invalid_text_provider')
         try:
             workspace_fd = os.open('workspace',os.O_RDONLY|os.O_DIRECTORY|os.O_NOFOLLOW,dir_fd=run_fd)
@@ -131,7 +131,17 @@ def _normalize(run_fd, run_id):
             recorded = report.get('text_output',{})
             if (not raw.strip() or recorded != {'name':'output.md','sha256':digest,'bytes':len(raw)}
                     or office.get('artifact_sha256') != digest): raise InvalidRun('text_hash_mismatch')
-            row['artifact'] = {'status':'verified','kind':'text','name':'output.md','sha256':digest,'text':raw.decode('utf8')}
+            text_artifact = {'status':'verified','kind':'text','name':'output.md','sha256':digest,'text':raw.decode('utf8')}
+            if report['task']=='local_revision':
+                receipt,_=read_json(run_fd,('text-task.json',),512*1024)
+                change=local_text_task.revision(receipt,raw)
+                expected={k:change[k] for k in ('target','before_sha256','after_sha256','changed')}
+                if (not isinstance(report.get('text_task'),dict) or report.get('revision') != expected or report['text_task'].get('source_snapshot_sha256') != local_text_task.digest(local_text_task.encoded(receipt['files']))
+                        or local_text_task.read_source(run_fd,change['target']) != change['original'].encode()):
+                    raise InvalidRun('revision_source_mismatch')
+                text_artifact.update(kind='revision',name=Path(change['target']).name,target=change['target'],
+                                before_sha256=change['before_sha256'],original=change['original'],diff=change['diff'],changed=change['changed'])
+            row['artifact'] = text_artifact
         except FileNotFoundError: pass
         except (OSError,ValueError,UnicodeError): row['artifact'] = {'status':'unverified','reason':'text_output_invalid'}
         verified = (report.get('status') == 'completed' and office.get('status') == 'completed'
@@ -139,7 +149,7 @@ def _normalize(run_fd, run_id):
                     and office.get('text_task_completed') is True and report.get('source_snapshot_unchanged') is True
                     and model_matches and row['cleanup_verified'] and row['artifact']['status'] == 'verified')
         row['content_review_required'] = True
-        return dict(row,status='completed' if verified else report['status'] if report.get('status') in ('failed','cancelled') else 'unverified',reason='local_text_task')
+        return dict(row,status='completed' if verified else report['status'] if report.get('status') in ('failed','cancelled') else 'unverified',reason=report['task']+'_task')
     row['artifact'] = artifact(run_fd, office.get('artifact_sha256'))
     if 'resume_check' in report:
         if (provider != 'pi' or report['resume_check'] != {'source':'loopback','http_status':429}

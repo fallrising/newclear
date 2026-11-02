@@ -40,6 +40,17 @@ class ConsoleTests(unittest.TestCase):
             response=connection.getresponse();return response.status,response.read(),dict(response.getheaders())
         finally:connection.close()
 
+    def test_project_file_list_requires_authorization_and_known_registration(self):
+        project=self.lab/'project';project.mkdir();(project/'file.py').write_text('private source text')
+        self.app.projects['project-1']=project.resolve()
+        status,raw,_=self.request('/api/project',{'project':'project-1'})
+        self.assertEqual(status,200);self.assertEqual(json.loads(raw)['files'][0]['name'],'file.py')
+        self.assertNotIn(b'private source text',raw)
+        for headers in [{'Authorization':'wrong'},{'Origin':'http://attacker.invalid'}]:
+            self.assertEqual(self.request('/api/project',{'project':'project-1'},headers)[0],403)
+        self.assertEqual(self.request('/api/project',{'project':'unknown'})[0],409)
+        self.assertEqual(self.request('/api/project',{'project':'project-1','path':'/etc'})[0],404)
+
     def test_auth_origin_host_and_body_boundaries(self):
         for path,body,headers in [('/api/state',None,{'Authorization':'wrong'}),('/api/state',None,{'Host':'attacker.invalid'}),
                                   ('/api/plan',{'provider':'pi','mode':'http_429'},{'Origin':'http://attacker.invalid'}),

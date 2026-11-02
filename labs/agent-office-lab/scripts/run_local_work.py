@@ -165,7 +165,7 @@ def main():
     report = {'status': 'prepared', 'harness': args.harness, 'task': args.task, 'cloud_fallback': False, 'model': settings['model'],
               'context': 32768, 'model_inference_verified': False, 'file_task_passed': False,
               'strict_network_isolation_verified': False}
-    if custom: report.update(task='local_text', text_task={'source_snapshot_sha256':text_task.digest(text_task.encoded(custom['files']))})
+    if custom: report.update(task='local_revision' if custom.get('target') else 'local_text', text_task={'source_snapshot_sha256':text_task.digest(text_task.encoded(custom['files']))})
     print(f'Artifacts: {out}', flush=True)
     server = guard = codex = awake = None
     handles = []
@@ -295,6 +295,9 @@ def main():
             if not all(any(e == {'phase':'finished','tool':tool} for e in tools) for tool in ('read','write')):
                 raise RuntimeError('Text task tool boundary evidence missing')
             report['text_output'] = text_task.output(workspace)
+            if custom.get('target'):
+                change=text_task.revision(custom,text_task.output_bytes(workspace))
+                report['revision']={k:change[k] for k in ('target','before_sha256','after_sha256','changed')}
             report['source_snapshot_unchanged'] = text_task.sources_unchanged(workspace, custom)
             if codex.returncode or not report['model_inference_verified'] or not report['source_snapshot_unchanged'] or not report['office_result'].get('text_task_completed'):
                 raise RuntimeError('Local text task did not finish with intact sources')

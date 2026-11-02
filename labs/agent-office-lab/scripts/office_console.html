@@ -10,7 +10,7 @@
 <div class="workspace">
 <section class="panel"><span class="eyebrow">01 / 準備工作</span><h2 id="selected">OpenCode</h2><p id="model"></p>
 <label for="mode">本次操作</label><select id="mode"></select><p id="mode-note" class="muted"></p>
-<div id="text-fields" hidden><label for="project">來源工作目錄</label><select id="project"></select><p id="project-help" class="muted"></p><label for="prompt">這次要完成什麼？</label><textarea id="prompt" rows="5" maxlength="500" placeholder="例如：閱讀專案說明，整理安裝步驟與待確認事項。"></textarea><p class="muted">最多 500 字。讀取文字副本，產生 output.md；原目錄不會被修改。</p></div>
+<div id="text-fields" hidden><label for="project">來源工作目錄</label><select id="project"></select><p id="project-help" class="muted"></p><div id="target-fields" hidden><label for="target">要修改的檔案</label><select id="target"></select><p class="muted">產生單檔替代內容供審閱、下載；不會覆寫原檔。</p></div><label for="prompt">這次要完成什麼？</label><textarea id="prompt" rows="5" maxlength="500" placeholder="例如：閱讀專案說明，整理安裝步驟與待確認事項。"></textarea><p class="muted">最多 500 字。使用來源副本產生可下載內容；原目錄不會被修改。</p></div>
 <div class="actions"><button id="detect" class="secondary">檢查環境</button><button id="plan">查看執行計畫</button></div><p id="check" class="muted">尚未檢查環境。</p>
 <div id="plan-card" hidden><h3>執行前確認</h3><dl id="plan-fields"></dl><p id="plan-note"></p><button id="execute">確認並啟動</button></div>
 </section>

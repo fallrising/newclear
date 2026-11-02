@@ -3,7 +3,7 @@ const $=id=>document.getElementById(id), el=(tag,text)=>{const n=document.create
 const titles={opencode:'OpenCode',grok:'Grok',pi:'Pi',cursor:'Cursor'};
 const models={opencode:'Strata · Qwen3.8 Flash Next Q2_0',grok:'grok-4.6',pi:'DeepSeek · deepseek-flash',cursor:'Composer 2.5'};
 const labels={completed:'完成且產物已核對',failed:'失敗',stopped:'已停止',cancelled:'已取消',startup_only:'僅啟動檢查',incomplete:'尚無最終報告',unverified:'證據不足',invalid:'無效紀錄'};
-const modes={text:'本地文字任務',task:'合成檔案任務',terminal:'合成任務＋保留原生終端',http_401:'本機 401 故障檢查',http_429:'本機 429 故障檢查',crash:'本機 CLI 崩潰檢查',cancel:'本機原生取消檢查',resume:'原生 session 重新連接檢查'};
+const modes={revision:'單檔修改提案',text:'本地文字任務',task:'合成檔案任務',terminal:'合成任務＋保留原生終端',http_401:'本機 401 故障檢查',http_429:'本機 429 故障檢查',crash:'本機 CLI 崩潰檢查',cancel:'本機原生取消檢查',resume:'原生 session 重新連接檢查'};
 const errors={project_text_unavailable:'來源目錄無法讀取，或超出文字檔限制。請查看登記目錄及操作說明。',unknown_project:'請先選擇已登記的工作目錄。',plan_changed:'來源檔案已變更，請重新查看計畫。',cleanup_unconfirmed:'上次執行的清理尚未確認。請先核對所屬程序，再依 CLI 流程確認；重啟頁面不會解除阻擋。',execution_state_unavailable:'無法確認共用執行狀態，暫停派工。請檢查本機狀態檔與權限。',forbidden:'連線未授權。請使用啟動時顯示的登入網址。',execution_busy:'已有工作執行中。請等候清理完成。',plan_expired_or_used:'計畫已使用或逾時，請重新查看計畫。',remote_execution_requires_cli:'遠端付費執行需使用已授權的 CLI 流程。',retry_limit_reached:'此任務已用完兩次重試。',retry_requires_latest_attempt:'請選擇這個任務最新的失敗紀錄。',retry_source_changed:'執行程式已更新，此舊紀錄不能直接重試。',retry_history_unavailable_or_invalid:'這筆紀錄沒有可驗證的重試歷史。',retry_requires_clean_failed_run:'只有已失敗且清理完成的任務可以重試。'};
 const fragment=new URLSearchParams(location.hash.slice(1));
 if(fragment.get('token')){sessionStorage.setItem('office-token',fragment.get('token'));history.replaceState(null,'',location.pathname);}
@@ -24,29 +24,40 @@ function selectProvider(next){
  provider=next;invalidate();$('selected').textContent=titles[provider];$('model').textContent=models[provider];
  for(const button of $('providers').children)button.setAttribute('aria-pressed',String(button.dataset.provider===provider));
  $('mode').replaceChildren();
- const available=provider==='opencode'?['task','terminal','text']:provider==='pi'?['task','http_401','http_429','crash','cancel','resume']:['task'];
+ const available=provider==='opencode'?['task','terminal','text','revision']:provider==='pi'?['task','http_401','http_429','crash','cancel','resume']:['task'];
  for(const mode of available){const option=el('option',modes[mode]);option.value=mode;$('mode').append(option);}
  updateNote();showCheck();
 }
-function updateNote(){invalidate();const mode=$('mode').value;$('text-fields').hidden=mode!=='text';$('mode-note').textContent=mode==='text'?'使用本地 Strata 閱讀文字檔，依你的要求產生一份可下載的文件。':mode==='terminal'?'任務完成後保留本地模型與原生終端，直到你停止執行。':mode==='resume'?'用本機錯誤建立歷史，再明確接回同一 session；不重送任務、不呼叫模型。':mode==='cancel'?'讓真實 Pi 等待本機請求，再驗證原生取消；不呼叫模型。':mode.startsWith('http_')||mode==='crash'?'使用真實 Pi CLI 與本機故障，不呼叫模型。':provider==='opencode'?'使用本機 Strata，讀取合成 input.json 並寫入 result.json。':'此工位目前可查看計畫，頁面不啟動付費任務。';}
+function updateNote(){invalidate();const mode=$('mode').value;$('text-fields').hidden=!['text','revision'].includes(mode);$('target-fields').hidden=mode!=='revision';refreshTargets();$('mode-note').textContent=mode==='revision'?'選擇一個來源檔案並描述修改需求，完成後審閱差異、下載替代檔案。':mode==='text'?'使用本地 Strata 閱讀文字檔，依你的要求產生一份可下載的文件。':mode==='terminal'?'任務完成後保留本地模型與原生終端，直到你停止執行。':mode==='resume'?'用本機錯誤建立歷史，再明確接回同一 session；不重送任務、不呼叫模型。':mode==='cancel'?'讓真實 Pi 等待本機請求，再驗證原生取消；不呼叫模型。':mode.startsWith('http_')||mode==='crash'?'使用真實 Pi CLI 與本機故障，不呼叫模型。':provider==='opencode'?'使用本機 Strata，讀取合成 input.json 並寫入 result.json。':'此工位目前可查看計畫，頁面不啟動付費任務。';}
+let targetGeneration=0;
+async function refreshTargets(){
+ const generation=++targetGeneration;invalidate();$('target').replaceChildren();
+ const project=$('project').value;if($('mode').value!=='revision'||!project)return;
+ try{const result=await api('/api/project',{project});if(generation!==targetGeneration)return;
+  for(const file of result.files){const option=el('option',file.name);option.value=file.name;$('target').append(option);}
+ }catch(error){if(generation===targetGeneration)message(error.message);}
+}
 function showCheck(){const check=state?.checks[provider];$('check').textContent=!check?'尚未檢查環境。':!check.cli_compatible?'CLI 缺失或版本不相容。':!Object.values(check.runtime).every(Boolean)?'CLI 相容；執行環境尚未齊備。':check.credentials==='not_required'?'本地 CLI 與 Strata 環境已就緒，不需要遠端登入。':check.credentials==='missing'?'CLI 與環境就緒；尚無登入資料。Pi 本機故障檢查不需要登入。':check.credentials!=='present_unverified'?'CLI 與環境就緒；登入資料尚需處理。':'CLI 與環境就緒。登入資料存在不代表已驗證帳號或取得付費授權。';}
 async function makePlan(selection){
  const generation=++planGeneration;
  try{message('');const received=await api('/api/plan',selection);if(generation!==planGeneration)return;currentPlan=received;const p=currentPlan.plan;$('plan-fields').replaceChildren();
   for(const [name,value] of [['工位',titles[p.provider]],['模型',p.model],['執行位置',p.remote?'遠端服務':'本機'],['操作',p.retry_of?`明確重試 ${p.attempt} / 2`:modes[selection.mode]]])$('plan-fields').append(el('dt',name),el('dd',value));
-  if(p.task==='local_text')for(const [name,value]of [['來源',p.project],['任務',p.prompt],['讀取檔案',p.source_files.join('、')],['交付檔案',p.output]])$('plan-fields').append(el('dt',name),el('dd',value));
-  $('plan-note').textContent=p.task==='local_text'?'使用上述檔案的副本；原目錄保留不動。完成後請檢查產物內容。':p.remote?'此計畫需另行取得付費授權，請使用 CLI 執行。':p.keep_open?'本地模型會持續載入，完成操作後請按「停止執行」。':'只啟動這一次，不會自動重試或切換模型。';
+  if(['local_text','local_revision'].includes(p.task))for(const [name,value]of [['來源',p.project],['任務',p.prompt],['讀取檔案',p.source_files.join('、')],['交付檔案',p.target||p.output]])$('plan-fields').append(el('dt',name),el('dd',value));
+  $('plan-note').textContent=p.task==='local_revision'?'產生替代檔案及差異供審閱。原檔不變，生成程式不會被執行或測試。':p.task==='local_text'?'使用上述檔案的副本；原目錄保留不動。完成後請檢查產物內容。':p.remote?'此計畫需另行取得付費授權，請使用 CLI 執行。':p.keep_open?'本地模型會持續載入，完成操作後請按「停止執行」。':'只啟動這一次，不會自動重試或切換模型。';
   $('execute').disabled=!currentPlan.executable||executionBlocked();$('plan-card').hidden=false;
  }catch(e){message(e.message);}
 }
-const resultLabel=run=>run.task_kind==='local_text'&&run.status==='completed'?'已產生文件，待確認':labels[run.status];
+const resultLabel=run=>run.task_kind==='local_revision'&&run.status==='completed'?(run.artifact.changed?'修改提案待審閱':'提案無內容變更'):run.task_kind==='local_text'&&run.status==='completed'?'已產生文件，待確認':labels[run.status];
 function showDetail(run){const d=$('detail');d.replaceChildren(el('h3',`${titles[run.provider]||run.provider} · ${resultLabel(run)}`),el('p',run.id),el('p',`模型：${run.model||'未記錄'}；清理：${run.cleanup_verified?'已確認':'尚未確認'}`));
  if(run.test_scenario==='native_pi_resume')d.append(el('p',run.resume_check_passed?'同 session 重新連接驗收通過；原任務未完成，沒有模型推論。':'重新連接驗收尚未通過。'));
  else if(run.test_scenario==='native_pi_cancel')d.append(el('p',run.cancel_check_passed?'原生取消驗收通過，沒有模型推論。':'取消驗收尚未通過，沒有模型推論。'));
  else if(run.test_scenario)d.append(el('p','本機故障注入；沒有模型推論。'),el('p',run.failure_check_passed?'故障驗收通過，任務仍為失敗。':'故障驗收證據不足。'));
  if(run.retry)d.append(el('p',`原始紀錄：${run.retry.root}；${run.retry.attempt===0?'首次執行':`明確重試 ${run.retry.attempt} / 2`}`));
  if(run.task_kind==='local_text')d.append(el('p','本地文字任務；執行狀態與檔案 hash 已核對，內容仍需你確認。'));
- if(run.artifact.kind==='text'&&run.artifact.status==='verified'){d.append(el('h3','output.md'),el('pre',run.artifact.text),el('p',`SHA-256：${run.artifact.sha256}`));const download=el('button','下載 output.md');download.className='download';download.onclick=()=>{const url=URL.createObjectURL(new Blob([run.artifact.text],{type:'text/plain;charset=utf-8'})),a=el('a','');a.href=url;a.download='output.md';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);};d.append(download);}
+ if(run.task_kind==='local_revision')d.append(el('p','單檔修改提案；原檔未套用，程式尚未執行或測試。'));
+ if(['text','revision'].includes(run.artifact.kind)&&run.artifact.status==='verified'){
+ if(run.artifact.kind==='revision'){d.append(el('h3',run.artifact.target),el('p',`原始檔案 SHA-256：${run.artifact.before_sha256}`));const diff=el('pre',run.artifact.changed?run.artifact.diff:'無內容變更');diff.className='revision-diff';d.append(el('h4','修改差異'),diff);const original=el('details','');original.append(el('summary','查看原始內容'),el('pre',run.artifact.original));d.append(original,el('h4','替代內容'));}
+d.append(el('h3',run.artifact.name),el('pre',run.artifact.text),el('p',`SHA-256：${run.artifact.sha256}`));const download=el('button',`下載 ${run.artifact.name}`);download.className='download';download.onclick=()=>{const url=URL.createObjectURL(new Blob([run.artifact.text],{type:'text/plain;charset=utf-8'})),a=el('a','');a.href=url;a.download=run.artifact.name;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);};d.append(download);}
  else if(run.artifact.content)d.append(el('pre',JSON.stringify(run.artifact.content,null,2)),el('p',`SHA-256：${run.artifact.sha256}`));else d.append(el('p','沒有可顯示的已核對產物。'));
  const close=el('button','關閉詳細內容');close.className='quiet';close.onclick=()=>d.hidden=true;d.append(close);d.hidden=false;d.focus();
 }
@@ -63,11 +74,11 @@ function renderJobs(){const signature=JSON.stringify(state.jobs);if(signature===
  if(job.phase!=='finished'){const stop=el('button','停止執行');stop.className='stop';stop.disabled=job.phase==='stopping';stop.onclick=async()=>{stop.disabled=true;try{await api('/api/stop',{job_id:job.id});await refresh();}catch(e){message(e.message);}};box.append(stop);}
  if(job.result&&job.phase==='finished'){const button=el('button','查看本次結果');button.className='quiet';button.onclick=()=>showDetail(job.result);box.append(button);}jobs.append(box);}
 }
-async function refresh(){if(fetching)return;fetching=true;try{state=await api('/api/state');const projects=state.projects||[],signature=JSON.stringify(projects);if($('project').dataset.signature!==signature){const selected=$('project').value;$('project').replaceChildren();for(const p of projects){const option=el('option',p.name);option.value=p.id;$('project').append(option);}if(projects.some(p=>p.id===selected))$('project').value=selected;$('project').dataset.signature=signature;} $('project-help').textContent=projects.length?'只讀取已登記目錄的支援文字檔。':'尚未登記來源目錄。啟動操作台時使用 --project 指定文字檔目錄。';showExecution();showCheck();renderJobs();renderRuns();if(currentPlan)$('execute').disabled=!currentPlan.executable||executionBlocked();}catch(e){state=null;showExecution();$('execute').disabled=true;message(e.message);}finally{fetching=false;}}
+async function refresh(){if(fetching)return;fetching=true;try{state=await api('/api/state');const projects=state.projects||[],signature=JSON.stringify(projects);if($('project').dataset.signature!==signature){const selected=$('project').value;$('project').replaceChildren();for(const p of projects){const option=el('option',p.name);option.value=p.id;$('project').append(option);}if(projects.some(p=>p.id===selected))$('project').value=selected;$('project').dataset.signature=signature;refreshTargets();} $('project-help').textContent=projects.length?'只讀取已登記目錄的支援文字檔。':'尚未登記來源目錄。啟動操作台時使用 --project 指定文字檔目錄。';showExecution();showCheck();renderJobs();renderRuns();if(currentPlan)$('execute').disabled=!currentPlan.executable||executionBlocked();}catch(e){state=null;showExecution();$('execute').disabled=true;message(e.message);}finally{fetching=false;}}
 for(const [id,title]of Object.entries(titles)){const b=el('button','');b.className='provider';b.dataset.provider=id;b.append(el('strong',title),el('small',id==='opencode'?'本地模型':id==='pi'?'遠端模型 / 本機故障驗收':'遠端模型'));b.onclick=()=>selectProvider(id);$('providers').append(b);}
 $('mode').onchange=updateNote;$('filter').onchange=renderRuns;$('refresh').onclick=refresh;
-$('project').onchange=invalidate;$('prompt').oninput=invalidate;
-$('plan').onclick=()=>makePlan({provider,mode:$('mode').value,...($('mode').value==='text'?{project:$('project').value,prompt:$('prompt').value}:{})});
+$('project').onchange=refreshTargets;$('target').onchange=invalidate;$('prompt').oninput=invalidate;
+$('plan').onclick=()=>makePlan({provider,mode:$('mode').value,...(['text','revision'].includes($('mode').value)?{project:$('project').value,prompt:$('prompt').value,...($('mode').value==='revision'?{target:$('target').value}:{})}:{})});
 $('detect').onclick=async()=>{const target=provider;$('detect').disabled=true;try{message('正在檢查 CLI 與執行環境…');await api('/api/detect',{provider:target});message('環境檢查完成。');await refresh();}catch(e){message(e.message);}finally{$('detect').disabled=false;}};
 $('execute').onclick=async()=>{if(!currentPlan)return;const chosen=currentPlan;invalidate();$('execute').disabled=true;try{await api('/api/execute',{plan_id:chosen.plan_id});message('已啟動。重新整理或關閉分頁都不會重送任務。');await refresh();}catch(e){message(e.message);}};
 selectProvider('opencode');refresh();setInterval(refresh,2000);

@@ -93,21 +93,29 @@ class Console:
         self.directory = private_directory(lab / 'state/console' / secrets.token_hex(12), root=lab)
 
     def preview(self, selection):
-        if isinstance(selection,dict) and selection.get('mode') == 'text':
-            if set(selection) != {'provider','mode','project','prompt'} or selection['provider'] != 'opencode':
+        if isinstance(selection,dict) and selection.get('mode') in ('text','revision'):
+            revision = selection['mode']=='revision'
+            keys={'provider','mode','project','prompt'} | ({'target'} if revision else set())
+            if set(selection) != keys or selection['provider'] != 'opencode' or (revision and not isinstance(selection['target'],str)):
                 raise ConsoleError('invalid_selection')
             project = selection['project']
             if not isinstance(project,str) or project not in self.projects: raise ConsoleError('unknown_project')
             try:
                 path = self.projects[project]
-                data = text_task.request(path.name,selection['prompt'],text_task.snapshot(path))
+                data = text_task.request(path.name,selection['prompt'],text_task.snapshot(path),selection.get('target'))
             except (OSError,ValueError,UnicodeError): raise ConsoleError('project_text_unavailable') from None
             return {'provider':'opencode','model':dispatch.SPECS['opencode']['model'],'remote':False,
-                    'task':'local_text','project':data['project'],'prompt':data['prompt'],
+                    'task':'local_revision' if revision else 'local_text','target':data.get('target'),'project':data['project'],'prompt':data['prompt'],
                     'source_files':list(data['files']),'source_bytes':sum(len(v.encode()) for v in data['files'].values()),
                     'request_sha256':text_task.digest(text_task.encoded(data)), 'output':'output.md',
                     'original_directory_modified':False}, data
         return selection_plan(selection,self.lab), None
+
+    def project_files(self, project):
+        if not isinstance(project,str) or project not in self.projects: raise ConsoleError('unknown_project')
+        try: files=text_task.snapshot(self.projects[project])
+        except (OSError,ValueError,UnicodeError): raise ConsoleError('project_text_unavailable') from None
+        return {'files':[{'name':name,'sha256':text_task.digest(content.encode()),'bytes':len(content.encode())} for name,content in files.items()]}
 
     def plan(self, selection):
         preview, _ = self.preview(selection)
@@ -277,7 +285,8 @@ def serve(console, port=0):
                 if not isinstance(data,dict): raise ValueError()
             except (OSError,ValueError,RecursionError): self.reply(400,{'error':'invalid_request'}); return
             try:
-                if self.path == '/api/plan': value = console.plan(data)
+                if self.path == '/api/project' and set(data)=={'project'}: value=console.project_files(data['project'])
+                elif self.path == '/api/plan': value = console.plan(data)
                 elif self.path == '/api/execute' and set(data)=={'plan_id'}: value = console.execute(data['plan_id'])
                 elif self.path == '/api/stop' and set(data)=={'job_id'}: value = console.stop(data['job_id'])
                 elif self.path == '/api/detect' and set(data)=={'provider'}: value = console.detect(data['provider'])

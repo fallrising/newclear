@@ -1,6 +1,6 @@
 # PP1c PostgreSQL helper 的隱含 volume 修訂提案
 
-狀態：**PENDING OWNER DECISION**。T-0351；這不是11月2日先前兩項批准的一部分。B受影響的 helper/capture 驗收暫停，C/D未開始。本文不授權實作或合併規格。
+狀態：**APPROVED，待本 PR 必要 CI／審查／正常合併及遠端核對後生效**。T-0351；owner 最新原話「批准。」明確回覆本提案。這是新增 PGDATA 修訂的批准，與先前 endpoint/hash 決定分別記錄；C/D 尚未開始。首次批准記錄時間 2026-11-02T12:22:17.868373+00:00；精確發言時間未知。
 
 ## 已觀察問題
 

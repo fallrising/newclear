@@ -30,39 +30,48 @@ func (store *Store) ReadWorkItemDetail(ctx context.Context, project domain.Proje
 	}
 	err := store.readProjection(ctx, func(conn *sql.Conn) error {
 		var err error
-		if result.Material, err = store.readWorkItemMaterialIndex(ctx, conn, project, item); err != nil {
-			return err
-		}
-		result.Summary = port.BoardWorkItem{ID: item, Title: result.Material.Title, OwnerID: result.Material.OwnerID}
-		if err = store.boardItem(ctx, conn, project, &result.Summary); err != nil {
-			return err
-		}
-		if result.Blockers, err = detailBlockers(ctx, conn, project, item); err != nil {
-			return err
-		}
-		attribution, err := detailAttribute(ctx, conn, project, decode)
-		if err != nil {
-			return err
-		}
-		if result.Audit, err = detailAudit(ctx, conn, project, item, attribution); err != nil {
-			return err
-		}
-		if result.Reviews, err = detailReviews(ctx, conn, project, item, attribution); err != nil {
-			return err
-		}
-		if result.Evidence, err = detailEvidence(ctx, conn, project, item, attribution); err != nil {
-			return err
-		}
-		if result.Approvals, err = detailApprovals(ctx, conn, project, item, attribution); err != nil {
-			return err
-		}
-		result.CompletionRecords, err = detailCompletions(ctx, conn, project, item)
+		result, err = store.readWorkItemDetail(ctx, conn, project, item, decode)
 		return err
 	})
 	if err != nil {
 		return port.WorkItemDetail{}, err
 	}
 	return result, nil
+}
+
+// This connection must already be inside readProjection, as for the material
+// index; keeping it connection-local permits WAL snapshot regression tests.
+func (store *Store) readWorkItemDetail(ctx context.Context, conn *sql.Conn, project domain.ProjectID, item domain.WorkItemID, decode port.ResultOwnerDecoder) (port.WorkItemDetail, error) {
+	var result port.WorkItemDetail
+	var err error
+	if result.Material, err = store.readWorkItemMaterialIndex(ctx, conn, project, item); err != nil {
+		return result, err
+	}
+	result.Summary = port.BoardWorkItem{ID: item, Title: result.Material.Title, OwnerID: result.Material.OwnerID}
+	if err = store.boardItem(ctx, conn, project, &result.Summary); err != nil {
+		return result, err
+	}
+	if result.Blockers, err = detailBlockers(ctx, conn, project, item); err != nil {
+		return result, err
+	}
+	attribution, err := detailAttribute(ctx, conn, project, decode)
+	if err != nil {
+		return result, err
+	}
+	if result.Audit, err = detailAudit(ctx, conn, project, item, attribution); err != nil {
+		return result, err
+	}
+	if result.Reviews, err = detailReviews(ctx, conn, project, item, attribution); err != nil {
+		return result, err
+	}
+	if result.Evidence, err = detailEvidence(ctx, conn, project, item, attribution); err != nil {
+		return result, err
+	}
+	if result.Approvals, err = detailApprovals(ctx, conn, project, item, attribution); err != nil {
+		return result, err
+	}
+	result.CompletionRecords, err = detailCompletions(ctx, conn, project, item)
+	return result, err
 }
 
 func detailAppend[T any](list []T, value T) ([]T, error) {

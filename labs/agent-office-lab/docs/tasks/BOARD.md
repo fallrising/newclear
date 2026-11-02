@@ -229,3 +229,12 @@ Owner 指示繼續開發；本輪使用真實程序與瀏覽器，不執行模�
 | T-0019-02 | 唯讀邊界、派工重新檢查與頁面阻擋提示 | AC-11 子集 | done | 2026-11-02T12:36:43Z | 2026-11-02T12:47:03Z | 2026-11-02T12:47:29Z |
 
 T-0019 結案：[PR #982](https://github.com/fallrising/newclear/pull/982) 已合併，commit `e0cdbfba39927aad33d5088c78fe84c7f3bc0952`，offline／validate 兩項 CI success。已回讀主線證據：171 tests、真實 helper 程序與 Chrome 持鎖／SIGKILL／兩次操作台啟動／刷新驗收；中斷 journal 內容與修改時間不變，舊計畫被阻擋，明確核對退出後歸檔保留原紀錄，損壞狀態不洩漏且不放行。新增唯讀 status CLI；不建立狀態檔、不接管程序、不自動解鎖或重跑。所有測試程序退出，零 provider／模型啟動與付費呼叫。完成控制層 AC-08／11 子集，原生 provider host restart／session 恢復、遠端整合及完整安全驗收仍 pending，沒有 release／deploy／usable tag。
+
+## T-0020：Pi 原生同 session 明確重新連接
+
+Owner 指示繼續；使用真實 Pi、本機 429，不載入 owner key 或呼叫模型。
+
+| ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| T-0020-01 | 原生 CLI 退出後同 session 明確重新連接、歷史保留與不重跑 | AC-08 子集 | in_progress | 2026-11-02T14:04:20Z | — | 2026-11-02T14:17:56Z |
+| T-0020-02 | 一次性恢復 gate、派工／結果整合與程序清理 | AC-09／11 子集 | in_progress | 2026-11-02T14:04:20Z | — | 2026-11-02T14:17:56Z |

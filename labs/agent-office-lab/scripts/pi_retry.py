@@ -10,7 +10,7 @@ from office_results import read_json, normalize, MARKER, reject_duplicates
 
 MODES = ('task', 'http_401', 'http_429', 'crash')
 SOURCES = ('run_pi_work.py', 'office_pi.mjs', 'deepseek_relay.py', 'pi_retry.py',
-           'execution_slot.py', 'process_ownership.py', 'remote_cli.py', 'pi_boundary.mjs', 'pi_office_policy.mjs', 'bin/pi')
+           'execution_slot.py', 'process_ownership.py', 'remote_cli.py', 'pi_boundary.mjs', 'pi_office_policy.mjs', 'pi_session_evidence.mjs', 'bin/pi')
 
 
 def fingerprint(lab):

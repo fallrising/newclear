@@ -31,3 +31,5 @@
 OpenCode 子程序的非本機網路與區外寫入限制已做 probe；區外讀取及 Office／Strata 整棵程序樹的 egress 隔離尚未驗收。僅使用合成資料，模型不可用直接失敗，沒有雲端 fallback。
 
 [Pi 原生取消與驗收](docs/CANCEL.md)：本機 held request、原生工位移除、程序清理及操作台結果。
+
+[Pi 同 session 重新連接](docs/PI-RESUME.md)：已保存錯誤歷史、CLI 退出後一次性原生 resume，不新增模型請求。

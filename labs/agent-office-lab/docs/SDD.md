@@ -161,3 +161,5 @@ T-0019 補 [操作台跨入口／重啟狀態](CONSOLE.md)：共用鎖與中斷�
 - 尚未取得四種 CLI 的本機實際版本與 provider 登入成功證據。
 - 預設執行沙箱無法取得 Metal；本次已對具體 runner 命令取得批准，成功使用 Metal／loopback／sysctl。模型工具本身仍使用 workspace-write 沙箱。
 - 已有 SDD、調研、可重跑的 Strata 檔案／程式修復驗證，以及固定 Office 基底與本機預覽 launcher；不宣稱雲端 API 或三個 CLI 已整合完成。
+
+T-0020 的 [Pi 同 session 重新連接](PI-RESUME.md) 已驗證：本機 429 歷史持久化、所屬 CLI 退出、明確一次性無 prompt resume、新 PID／同 session／hook token 更新與歷史保留。結果維持 stopped，不自動請求或重試；Office host 持續存在，不將此結果視為完整 host crash 恢復或任務續做成功。

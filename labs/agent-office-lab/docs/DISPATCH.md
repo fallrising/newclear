@@ -83,3 +83,5 @@ python3 scripts/office_dispatch.py acknowledge-interruption --confirm-all-owned-
 Pi 亦支援 `run pi --check-cancel` 計畫，加上 `--execute` 以真實 CLI 驗證本機請求等待中的原生取消。此模式沒有模型推論或遠端授權，不可混用其他檢查；[操作與限制](CANCEL.md)。
 
 `python3 scripts/office_dispatch.py status` 唯讀檢查共用執行狀態，回傳 available／busy／cleanup_unconfirmed／unavailable，不啟動 CLI 或模型。操作台使用相同檢查，跨入口與重啟後仍會阻擋未清理狀態；[狀態與中斷處理](CONSOLE.md)。
+
+`run pi --check-resume` 預設只顯示計畫，加上 `--execute` 執行本機 429 後同 session 的一次性重新連接檢查。零模型推論、不可混用其他模式或遠端授權；[操作與限制](PI-RESUME.md)。

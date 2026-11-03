@@ -3,7 +3,7 @@
   "snapshot_id": "atlas-public-2026-11-02",
   "llm": "command",
   "model": null,
-  "generated_at": "2026-11-03T11:19:16Z",
+  "generated_at": "2026-11-03T12:12:32Z",
   "notes": [
     {
       "id": "allocation-area-majority",
@@ -27,13 +27,8 @@
     },
     {
       "id": "allocation-route-denial",
-      "verdict": "flag",
-      "issues": [
-        {
-          "kind": "broken-example-logic",
-          "detail": "最小原型與第一條驗收設定 5 節點地圖，卻要求對手有 5 段替代路徑；5 節點的簡單路徑最多只有 4 段（5 段路徑需 6 個節點），因此「對手最短路 3→5 段、繞行 +4」不可能由該前提成立。需增加節點或把替代路徑改為 4 段以下。"
-        }
-      ]
+      "verdict": "pass",
+      "issues": []
     },
     {
       "id": "allocation-savings-interest",
@@ -452,13 +447,8 @@
     },
     {
       "id": "deckbuilding-card-upgrade",
-      "verdict": "flag",
-      "issues": [
-        {
-          "kind": "broken-example-logic",
-          "detail": "邊界驗收以「回血比再升級多 4 點效益」作結，但前提只給出生命 25 對 20、額外傷害 3 對 4，並未定義 1 點生命等於 1 點傷害；若不假定兩者同單位，這個 4 點差額不是由範例自身推出的。"
-        }
-      ]
+      "verdict": "pass",
+      "issues": []
     },
     {
       "id": "deckbuilding-dice-allocation",
@@ -812,13 +802,8 @@
     },
     {
       "id": "gathering-supply-mining",
-      "verdict": "flag",
-      "issues": [
-        {
-          "kind": "broken-example-logic",
-          "detail": "The boundary example's conclusion does not follow from its own numbers. From the stated state (4 ore, 50 energy), the player can skip the detour, mine 4 more units (20 energy) and return (30 energy), ending with 8 ore and 0 energy. The detour path ends with 7 ore and 0 energy, so it is strictly worse by 1 ore and does not demonstrate that the relaxed conversion rate makes the detour worthwhile or removes decision pressure."
-        }
-      ]
+      "verdict": "pass",
+      "issues": []
     },
     {
       "id": "gathering-tool-hardness",
@@ -987,17 +972,8 @@
     },
     {
       "id": "movement-carry-object",
-      "verdict": "flag",
-      "issues": [
-        {
-          "kind": "broken-example-logic",
-          "detail": "In the acceptance case, after the player places the box before gap A and empty-jumps across, the note says the player cannot retrieve the original-side box. That does not follow from its own premise: A is empty-hand jumpable, so the player can jump back empty-handed, pick up or throw the box, and cross again. The stated 'delivery incomplete because retrieval is impossible' is therefore incorrect."
-        },
-        {
-          "kind": "fabricated-claim",
-          "detail": "The reference line claims direct comparison against the public page 'and its embedded entries' and that it is not a search-index excerpt. The snapshot only records the URL and access_method=page-text; it does not support the embedded-entries/non-index claim."
-        }
-      ]
+      "verdict": "pass",
+      "issues": []
     },
     {
       "id": "movement-downward-slam",
@@ -1384,13 +1360,8 @@
     },
     {
       "id": "stealth-synchronized-actions",
-      "verdict": "flag",
-      "issues": [
-        {
-          "kind": "broken-example-logic",
-          "detail": "边界验收先说乙会花 1.5 秒“完成击晕”，但结论又说 B 仍存活且进入警戒。若击晕在触发后 1.5 秒完成，B 应已失效；若 B 仍存活，则乙的击晕并未完成。需要明确 B 的警戒是否打断乙的动作，或改写前提为乙在警报时尚未完成击晕。"
-        }
-      ]
+      "verdict": "pass",
+      "issues": []
     },
     {
       "id": "survival-balanced-nutrition",

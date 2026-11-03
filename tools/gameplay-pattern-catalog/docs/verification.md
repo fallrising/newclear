@@ -8,6 +8,7 @@
 - 自動檢查：簡體字、占位字、無結尾的截斷行、JSON 殘留。被拒的模型輸出重新產生。
 - 人工抽讀 10 篇並對照來源摘要：relationships-secrets-leverage、puzzles-visual-rule-learning、incremental-farm-or-push、gathering-gathering-quota、deckbuilding-reward-choice、movement-moving-platform、defense-tower-upgrade-budget、movement-ledge-catch、defense-trap-sequence、combat-friendly-fire。修正了三篇原型數字矛盾與一條相關模式理由。其餘筆記未經人工審閱。
 - 另修正：三個重複字標題、來源摘要中的 OpenCC 誤轉（「還是隻」「透過」應為「只」「通過」）。
+- PR 審查後修正 defense-early-wave-call 的原型驗收：提前開波會結束休息期，改為斷言在兩波重疊的戰鬥中能立刻買補強；並補上兩個例子的下一波敵人數（3 隻、2 隻），讓重疊數可以核算。
 
 
 日期：2026-11-02。快照：`atlas-public-2026-11-02`，觀察時間 `2026-11-02T14:47:12Z`。未 merge、deploy 或 release。

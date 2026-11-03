@@ -1,0 +1,120 @@
+{
+  "id": "narrative-perspective-handoff",
+  "system": "narrative",
+  "edition": 3,
+  "name": {
+    "zh": "换一个角色承接前面的后果",
+    "en": "Continue earlier consequences through another character"
+  },
+  "summary": {
+    "zh": "换了视角，也要接住上一个角色留下的局面。",
+    "en": "A new viewpoint inherits the situation left by the previous character."
+  },
+  "rules": {
+    "zh": "一条故事由多个可操控角色共同推进，角色拥有不同目标和信息。玩家先以某个角色作出选择，再在另一视角中遇到它造成的局面；切换可以由章节安排，也可以让玩家在允许的节点主动跳转。",
+    "en": "Several playable characters advance one story with different goals and information. A choice made as one character changes the situation encountered as another. Chapters may schedule the handoff, or the player may switch at permitted points."
+  },
+  "loop": [
+    {
+      "zh": "以当前角色处理眼前目标",
+      "en": "Pursue the current character’s goal"
+    },
+    {
+      "zh": "留下会影响别人的结果",
+      "en": "Leave an outcome that affects others"
+    },
+    {
+      "zh": "切到另一角色面对结果",
+      "en": "Face it from another character’s viewpoint"
+    },
+    {
+      "zh": "重新选择并影响后续视角",
+      "en": "Choose again and affect later viewpoints"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "为了当前角色方便，是否愿意给另一角色制造麻烦？",
+      "en": "Make life easier for this character at another’s expense?"
+    },
+    {
+      "zh": "玩家知道的事实，是否该让尚不知情的角色据此行动？",
+      "en": "Should a character act on facts the player knows but that character has not learned?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "切换控制权",
+        "en": "Control over viewpoint changes"
+      },
+      "effect": {
+        "zh": "固定切换便于安排节奏；自由跳转增加查找因果的空间，也需要清晰的时间标记。",
+        "en": "Fixed handoffs shape pacing; free switching enables causal investigation but needs clear time markers."
+      }
+    },
+    {
+      "name": {
+        "zh": "跨视角影响的数量",
+        "en": "Number of cross-viewpoint effects"
+      },
+      "effect": {
+        "zh": "先让一个行动改变另一场景，比让所有人物互相牵连更容易理解和制作。",
+        "en": "One action changing another scene is easier to understand and build than connecting every character to everyone."
+      }
+    }
+  ],
+  "tags": [
+    "narrative",
+    "information",
+    "planning"
+  ],
+  "related": [
+    "narrative-background-dialogue-access",
+    "narrative-conversation-intervention",
+    "narrative-delayed-choice-consequences",
+    "narrative-deliberate-silence"
+  ],
+  "contrast": {
+    "zh": "428 允许围绕相互影响的路线反复调整；底特律更多用章节切换让玩家承接不同人物的处境。",
+    "en": "428 lets players revise interacting routes; Detroit more often uses chapter handoffs to place the player in different circumstances."
+  },
+  "combination": {
+    "zh": "组合提案：两位玩家各控制一个视角，只能看到自己的场景；通过描述对方留下的痕迹，协商下一次行动。",
+    "en": "Design proposal: two players each control one viewpoint and see only their own scene. Describing the traces left by the other lets them coordinate the next action."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "角色甲为了躲雨，把巷口的栅门关上。",
+      "en": "Character A closes an alley gate to shelter from the rain."
+    },
+    "action": {
+      "zh": "视角切到运货的乙，玩家发现原路线被堵住。",
+      "en": "The viewpoint moves to courier B, whose route is now blocked."
+    },
+    "result": {
+      "zh": "乙可以绕路耽误交付，或找甲借钥匙。",
+      "en": "B can take a slow detour or ask A for the key."
+    },
+    "next": {
+      "zh": "乙的选择会决定甲下一幕是否需要离开藏身处。",
+      "en": "B’s decision determines whether A must leave shelter in the next scene."
+    }
+  },
+  "prototype": {
+    "scope": "medium",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "做两位角色、同一地点的两个视角和一个共享门锁状态。",
+      "en": "Build two characters, two views of one place and one shared gate state."
+    },
+    "pitfall": {
+      "zh": "要区分角色知道什么与玩家知道什么，并让时间顺序可以追踪。",
+      "en": "Separate character knowledge from player knowledge and keep chronology trackable."
+    },
+    "test": {
+      "zh": "切换后玩家能否指出当前障碍来自自己先前的哪个行动？",
+      "en": "After a handoff, can players identify which earlier action caused the current obstacle?"
+    }
+  }
+}

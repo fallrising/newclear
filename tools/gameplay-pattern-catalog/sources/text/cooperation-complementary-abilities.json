@@ -1,0 +1,120 @@
+{
+  "id": "cooperation-complementary-abilities",
+  "system": "cooperation",
+  "edition": 2,
+  "name": {
+    "zh": "角色能力互补",
+    "en": "Combine different character abilities"
+  },
+  "summary": {
+    "zh": "每个人擅长不同事情，搭配顺序比谁单独最强更重要。",
+    "en": "Different strengths make the order of teamwork more important than individual power."
+  },
+  "rules": {
+    "zh": "把解决障碍所需的工具分给不同角色，并让一种能力创造另一种能力可以利用的条件。玩家识别瓶颈、决定谁先行动，再用配合后的结果推进；下一种障碍会改变主导者。",
+    "en": "Give characters distinct tools and let one ability create conditions another can exploit. Players identify the obstacle, choose an order and combine actions; the next obstacle can give a different role the lead."
+  },
+  "loop": [
+    {
+      "zh": "识别眼前需要的能力",
+      "en": "Identify the needed abilities"
+    },
+    {
+      "zh": "安排谁先创造条件",
+      "en": "Choose who sets up the situation"
+    },
+    {
+      "zh": "伙伴接着发挥特长",
+      "en": "Let the partner use that setup"
+    },
+    {
+      "zh": "通过障碍并重新分工",
+      "en": "Pass the obstacle and reassign"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "用我的能力直接尝试，还是先给伙伴创造更稳的条件？",
+      "en": "Try my tool directly or set up a safer solution for my partner?"
+    },
+    {
+      "zh": "队伍缺照明、通路还是防守，先补哪个短板？",
+      "en": "Does the team need light, access or protection most urgently?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "能力依赖程度",
+        "en": "Ability dependence"
+      },
+      "effect": {
+        "zh": "完全独立容易各玩各的，完全依赖又会让一人掉队就卡死。",
+        "en": "Fully independent tools encourage parallel solo play; total dependence can stall everyone when one player falls behind."
+      }
+    },
+    {
+      "name": {
+        "zh": "角色轮流主导",
+        "en": "Alternating leadership"
+      },
+      "effect": {
+        "zh": "不同障碍轮流需要不同角色，可避免一个人长期只当跟班。",
+        "en": "Alternating which role solves the bottleneck prevents one player from remaining a permanent assistant."
+      }
+    }
+  ],
+  "tags": [
+    "cooperation",
+    "planning",
+    "creativity"
+  ],
+  "related": [
+    "cooperation-shared-vehicle",
+    "cooperation-discussion-vote",
+    "cooperation-downed-revival",
+    "cooperation-hidden-role"
+  ],
+  "contrast": {
+    "zh": "《深岩银河》把分工放在探索、地形与战斗里；《三位一体2》更集中于同一屏障碍的不同解法。",
+    "en": "Deep Rock Galactic spreads roles across exploration, terrain and combat; Trine 2 focuses more on alternative solutions to shared platforming obstacles."
+  },
+  "combination": {
+    "zh": "设计提案：一人能搭临时桥，一人能穿过窄缝；窄缝后的开关能固定桥，让两种能力形成前后衔接。",
+    "en": "Design proposal: one player builds temporary bridges and another fits through narrow gaps; a switch beyond a gap secures the bridge."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "编辑示例：A能放一个箱子，B能跳两格，前方有三格高墙。",
+      "en": "Editorial example: A can place one box, B can jump two tiles, and a three-tile wall blocks the route."
+    },
+    "action": {
+      "zh": "A把箱子放在墙边，B踩箱跳上去，拉下绳梯。",
+      "en": "A places the box beside the wall; B jumps from it and lowers a ladder."
+    },
+    "result": {
+      "zh": "A沿绳梯上去，两人都通过，箱子还留在原地。",
+      "en": "A climbs the ladder, so both cross while the box remains below."
+    },
+    "next": {
+      "zh": "下一个障碍需要B先探路，再由A补上通道。",
+      "en": "The next obstacle asks B to scout first and A to complete the route."
+    }
+  },
+  "prototype": {
+    "scope": "medium",
+    "interaction": "cooperative",
+    "firstStep": {
+      "zh": "先做两名同屏角色，每人只有一种专属能力，用三个固定障碍交替要求他们先行动。",
+      "en": "Build two local characters with one unique ability each and three fixed obstacles that alternate who acts first."
+    },
+    "pitfall": {
+      "zh": "先验证互相需要又都能操作；职业树、装备和大量技能会让配合原因难以看清。",
+      "en": "First verify mutual dependence with active participation; class trees and many skills can obscure why cooperation works."
+    },
+    "test": {
+      "zh": "每人都至少主导一次解法，并能说出伙伴的能力帮自己做到了什么。",
+      "en": "Each player leads one solution and can explain what their partner enabled them to do."
+    }
+  }
+}

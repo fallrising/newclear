@@ -1,0 +1,120 @@
+{
+  "id": "progression-death-loses-training",
+  "system": "progression",
+  "edition": 2,
+  "name": {
+    "zh": "死亡会损失练出的能力",
+    "en": "Death costs trained abilities"
+  },
+  "summary": {
+    "zh": "失败不只丢物品，还会损失一部分练习成果。",
+    "en": "Death can cost training as well as possessions."
+  },
+  "rules": {
+    "zh": "角色死亡后，已练出的熟练度下降，或新角色不再拥有前一人的训练成果。玩家因此要衡量继续冒险的收益与重新练习的成本；找回装备和找回能力是两回事。",
+    "en": "Death reduces trained proficiency, or a successor does not inherit the previous character’s training. Compare the benefit of pushing farther with the cost of retraining. Recovering equipment and recovering abilities are separate concerns."
+  },
+  "loop": [
+    {
+      "zh": "靠行动练出能力",
+      "en": "Develop abilities through use"
+    },
+    {
+      "zh": "评估危险与撤退时机",
+      "en": "Assess danger and retreat"
+    },
+    {
+      "zh": "失败后查看损失",
+      "en": "Review losses after death"
+    },
+    {
+      "zh": "重新训练并调整路线",
+      "en": "Retrain and revise the route"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "带着已经练强的角色去冒险，还是暂时撤退保住训练成果？",
+      "en": "Risk a well-trained character or retreat to protect that investment?"
+    },
+    {
+      "zh": "损失后先练回原本优势，还是趁机会改练另一种生存方法？",
+      "en": "Rebuild the former specialty or develop a different way to survive?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "损失幅度",
+        "en": "Training loss"
+      },
+      "effect": {
+        "zh": "损失大时撤退更有意义，也更容易让玩家反复做低风险练习。",
+        "en": "Large losses make retreat meaningful but encourage repetitive safe training."
+      }
+    },
+    {
+      "name": {
+        "zh": "恢复途径",
+        "en": "Recovery options"
+      },
+      "effect": {
+        "zh": "重新练习若能换路线，就比强迫重复同一段动作更有选择。",
+        "en": "Recovery offers more agency when retraining can use another route rather than repeat identical actions."
+      }
+    }
+  ],
+  "tags": [
+    "risk",
+    "progression",
+    "planning"
+  ],
+  "related": [
+    "progression-challenge-tiers",
+    "progression-evolution-recipes",
+    "progression-permanent-run-currency",
+    "progression-practice-based-growth"
+  ],
+  "contrast": {
+    "zh": "《英灵神殿》通常削减同一人物的熟练度；《僵尸毁灭工程》让旧人物死亡，新人物重新建立自己的技能成长。",
+    "en": "Valheim normally reduces the same character’s proficiency; Project Zomboid ends that character and starts another person’s training."
+  },
+  "combination": {
+    "zh": "设计提案：死亡后工具留在原地可取回，但工具使用经验下降；玩家要决定立即冒险取回，还是先用备用工具练习。",
+    "en": "Design proposal: tools remain recoverable after death while tool proficiency drops; decide between immediate retrieval and training with a spare."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "你的攀爬熟练度为 10，远处有奖励，但体力只剩一半。",
+      "en": "Climbing proficiency is 10, and a reward lies farther ahead, but stamina is half full."
+    },
+    "action": {
+      "zh": "你继续攀爬却跌落；本例规定死亡扣除 2 点熟练度。",
+      "en": "You push on and fall; this example removes 2 proficiency on death."
+    },
+    "result": {
+      "zh": "重新出发时装备能找回，攀爬熟练度却只剩 8。",
+      "en": "Your gear can be recovered, but climbing proficiency is now 8."
+    },
+    "next": {
+      "zh": "下一次先走安全路线练回能力，或承担更低熟练度继续挑战。",
+      "en": "Retrain on a safer route or face the challenge with lower proficiency."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "做一条安全练习路线和一条高风险路线，只有一个熟练度数值与清楚的死亡扣减。",
+      "en": "Build a safe training route, a risky route and one proficiency value with an explicit death deduction."
+    },
+    "pitfall": {
+      "zh": "先别让大量技能一起掉；玩家若不知道失去什么，惩罚只会变成模糊挫败。",
+      "en": "Avoid reducing many skills at once; unclear losses create frustration without a useful decision."
+    },
+    "test": {
+      "zh": "临近危险时玩家是否主动撤退，死亡后又能准确说明需要恢复什么？",
+      "en": "Do players sometimes retreat near danger and accurately explain what needs rebuilding after death?"
+    }
+  }
+}

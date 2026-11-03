@@ -1,0 +1,120 @@
+{
+  "id": "stealth-hiding-spots",
+  "system": "stealth",
+  "edition": 2,
+  "name": {
+    "zh": "进入藏身点再择机出来",
+    "en": "Hiding spots and exit timing"
+  },
+  "summary": {
+    "zh": "柜子提供暂时安全，却把自由行动换成了等待出口时机。",
+    "en": "A hiding spot offers safety in exchange for waiting for a safe exit."
+  },
+  "rules": {
+    "zh": "玩家进入柜子、箱体等专用藏身点，暂时离开普通视野判定；随后观察外界再出来。进入过程被看见是否失效、藏点是否已占用、出口能看到多少都应明确，不能让藏点成为无条件消除追踪的按钮。",
+    "en": "Enter a designated cabinet or container to leave ordinary sight, then observe before exiting. Clearly define witnessed entry, occupied spots and available visibility; hiding should not automatically erase a pursuer’s knowledge."
+  },
+  "loop": [
+    {
+      "zh": "发现可用藏身点",
+      "en": "Locate an available hiding spot"
+    },
+    {
+      "zh": "趁无人看到时进入",
+      "en": "Enter without being observed"
+    },
+    {
+      "zh": "判断外部巡逻",
+      "en": "Assess the outside patrol"
+    },
+    {
+      "zh": "择机出来继续移动",
+      "en": "Exit at the right moment"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "现在躲进去等待，还是趁巡逻空当继续前进？",
+      "en": "Hide and wait now, or keep moving through the patrol opening?"
+    },
+    {
+      "zh": "出口视野不完整时，是多等一轮还是冒险出来侦察？",
+      "en": "With an incomplete view outside, wait another cycle or emerge to scout?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "进出耗时",
+        "en": "Entry and exit time"
+      },
+      "effect": {
+        "zh": "耗时越长，藏点越像预先安排的落脚处，而不是即时逃生按钮。",
+        "en": "Longer transitions reward planned stops instead of instant escape."
+      }
+    },
+    {
+      "name": {
+        "zh": "内部可见范围",
+        "en": "View from inside"
+      },
+      "effect": {
+        "zh": "视野越窄，离开时越不确定；应给声音或缝隙视线作为判断线索。",
+        "en": "A narrower view makes exiting uncertain; sound or a viewing slit should offer clues."
+      }
+    }
+  ],
+  "tags": [
+    "timing",
+    "risk",
+    "information"
+  ],
+  "related": [
+    "exploration-stealth-awareness",
+    "stealth-disguise-access",
+    "stealth-light-shadow",
+    "stealth-peeking"
+  ],
+  "contrast": {
+    "zh": "《杀手》把藏身空间与身体收纳联系起来；《神偷》提供不同的离开方式。",
+    "en": "HITMAN connects hiding to container occupancy; Thief offers different ways to leave a hiding spot."
+  },
+  "combination": {
+    "zh": "设计提案：藏身柜只有两个位置，救出的同伴会占一个；安全停靠点也成为需要分配的容量。",
+    "en": "Design proposal: a hiding cabinet has two spaces and a rescued companion occupies one, turning safe stops into limited capacity."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "巡逻即将转过来，身旁有一个空柜子。",
+      "en": "A patrol is about to turn the corner beside an empty cabinet."
+    },
+    "action": {
+      "zh": "你趁没人看到钻进去，从门缝等守卫经过。",
+      "en": "Enter unseen and watch through the slit as the guard passes."
+    },
+    "result": {
+      "zh": "你暂时安全，但守卫折返前只有短暂的出口窗口。",
+      "en": "You are safe for now, but have only a brief exit window before the return pass."
+    },
+    "next": {
+      "zh": "等脚步远离后出来，赶到下一处遮挡。",
+      "en": "Exit when the footsteps recede and reach the next obstruction."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "做一个柜子和一个往返守卫，进入后限制移动并保留一个小观察窗口。",
+      "en": "Build a cabinet and a back-and-forth patrol; entry disables movement but leaves a small observation window."
+    },
+    "pitfall": {
+      "zh": "必须规定被看见钻入时会怎样；否则玩家无法理解为何这次藏住、下次却失败。",
+      "en": "Define witnessed entry explicitly so players understand why hiding succeeds or fails."
+    },
+    "test": {
+      "zh": "玩家会不会在出来前主动检查巡逻，而不是把柜子当作无限暂停键？",
+      "en": "Do players check patrol timing before exiting rather than treating the cabinet as an unlimited pause button?"
+    }
+  }
+}

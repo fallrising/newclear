@@ -1,0 +1,120 @@
+{
+  "id": "farming-season-window",
+  "system": "farming",
+  "edition": 1,
+  "name": {
+    "zh": "季节种植窗口",
+    "en": "Seasonal planting windows"
+  },
+  "summary": {
+    "zh": "让收成的截止日期，比种子价格更值得考虑。",
+    "en": "Make the harvest deadline matter as much as seed cost."
+  },
+  "rules": {
+    "zh": "玩家根据当前季节和剩余天数选择作物。作物需要在适宜季节完成成长；跨季后无法继续的作物会失去后续收益，因此播种前必须倒排收获日期。",
+    "en": "Choose crops using the season and days remaining. Crops must grow in a suitable season; incompatible season changes end their future yield, so planting starts with a harvest deadline."
+  },
+  "loop": [
+    {
+      "zh": "查看季节与剩余天数",
+      "en": "Check the season and remaining days"
+    },
+    {
+      "zh": "计算能完成的收获次数",
+      "en": "Estimate feasible harvests"
+    },
+    {
+      "zh": "买种并播种",
+      "en": "Buy seeds and plant"
+    },
+    {
+      "zh": "季末收获或换种",
+      "en": "Harvest or replace at season end"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "高价长周期作物未必适合季末；短周期作物能填补空档。",
+      "en": "A valuable slow crop may be a poor late-season choice; fast crops fill gaps."
+    },
+    {
+      "zh": "多季作物减少换季损失，但可能占用下一季更有利的土地。",
+      "en": "Multi-season crops reduce transition loss but occupy land needed for better next-season options."
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "季节长度",
+        "en": "Season length"
+      },
+      "effect": {
+        "zh": "短季节要求精确规划，长季节允许更松弛的经营。",
+        "en": "Short seasons demand tight planning; long seasons allow a relaxed pace."
+      }
+    },
+    {
+      "name": {
+        "zh": "跨季惩罚",
+        "en": "Transition penalty"
+      },
+      "effect": {
+        "zh": "枯萎制造明确截止线；仅减产则鼓励承担风险。",
+        "en": "Withering creates a firm deadline; reduced yield encourages risk taking."
+      }
+    }
+  ],
+  "tags": [
+    "planning",
+    "time",
+    "economy"
+  ],
+  "related": [
+    "farming-orchard-investment",
+    "farming-regrowth-crops",
+    "commerce-timed-contracts",
+    "farming-growth-care"
+  ],
+  "contrast": {
+    "zh": "两者都用日历限制投资回收，但作物季节表不同；应借鉴时间窗口，而非照搬利润表。",
+    "en": "Both constrain returns with a calendar, but their crop calendars differ; borrow the time-window decision rather than a profit table."
+  },
+  "combination": {
+    "zh": "设计提案：订单在换季前到期，玩家可提前囤货，也可接受昂贵的温室生产。",
+    "en": "Design proposal: orders expire before a season change, letting players stockpile early or pay for greenhouse production."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "本季还剩5天；萝卜4天成熟，南瓜7天成熟。",
+      "en": "Five days remain this season; turnips take four days and pumpkins take seven."
+    },
+    "action": {
+      "zh": "你买萝卜种子，并把预计收获日标在日历上。",
+      "en": "Buy turnip seeds and mark the expected harvest day on the calendar."
+    },
+    "result": {
+      "zh": "萝卜在换季前成熟；此时再播同一作物已经来不及。",
+      "en": "The turnips mature before the season changes; another batch would be too late."
+    },
+    "next": {
+      "zh": "卖出收成，把土地与资金留给下一季。",
+      "en": "Sell the harvest and reserve land and money for the next season."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "做一张10天日历和两种成长时长不同的作物，让玩家预览收获日期。",
+      "en": "Build a ten-day calendar and two crops with different growth times, including a harvest-date preview."
+    },
+    "pitfall": {
+      "zh": "不要一开始叠加天气、病害和多季节例外，否则很难判断玩家算错在哪里。",
+      "en": "Avoid weather, disease and seasonal exceptions initially; they obscure why a planting decision failed."
+    },
+    "test": {
+      "zh": "改变剩余天数，检查玩家是否会换作物，并能说出“这批赶不上收获”。",
+      "en": "Change the days remaining and see whether players switch crops and explain the deadline."
+    }
+  }
+}

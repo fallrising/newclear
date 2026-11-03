@@ -1,0 +1,120 @@
+{
+  "id": "stealth-sound-lures",
+  "system": "stealth",
+  "edition": 2,
+  "name": {
+    "zh": "声源诱导",
+    "en": "Sound lures"
+  },
+  "summary": {
+    "zh": "让守卫走向你制造的声响，空出真正想走的路。",
+    "en": "Send a guard toward a sound to open the route you actually want."
+  },
+  "rules": {
+    "zh": "投掷物或技能在某个位置发出声音，听见的守卫会调查声源并暂时改变巡逻。玩家利用这段空当通过、取物或伏击；声音范围、响应对象和调查结束时机需要可读。",
+    "en": "A thrown object or ability creates a sound that draws nearby guards off patrol. Use the opening to pass, collect something or ambush; make hearing range, responders and investigation duration readable."
+  },
+  "loop": [
+    {
+      "zh": "找出挡路的守卫",
+      "en": "Identify the blocking guard"
+    },
+    {
+      "zh": "选择声源落点",
+      "en": "Choose a sound location"
+    },
+    {
+      "zh": "趁守卫调查行动",
+      "en": "Act while the guard investigates"
+    },
+    {
+      "zh": "离开或回收诱饵",
+      "en": "Leave or recover the lure"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "把守卫引得很远更安全，但会不会同时惊动第二个人？",
+      "en": "A distant lure may be safer, but will it attract a second guard?"
+    },
+    {
+      "zh": "现在取回可重复使用的诱饵，还是先利用短暂的通路？",
+      "en": "Recover the reusable lure now, or use the brief open route first?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "听觉半径",
+        "en": "Hearing radius"
+      },
+      "effect": {
+        "zh": "范围越大越好命中目标，也越难只引开一个人。",
+        "en": "A wider radius reaches targets easily but makes selective distraction harder."
+      }
+    },
+    {
+      "name": {
+        "zh": "调查停留时间",
+        "en": "Investigation duration"
+      },
+      "effect": {
+        "zh": "停留时间决定玩家能完成多长的动作链，过长会抹掉紧迫感。",
+        "en": "Duration sets the length of the available action sequence; excessive time removes urgency."
+      }
+    }
+  ],
+  "tags": [
+    "spatial",
+    "timing",
+    "information"
+  ],
+  "related": [
+    "exploration-stealth-awareness",
+    "stealth-light-shadow",
+    "stealth-hiding-spots",
+    "stealth-synchronized-actions"
+  ],
+  "contrast": {
+    "zh": "硬币把声源放在远处；口哨把声源绑在角色身上，要求先准备好撤退或接敌位置。",
+    "en": "Coins place sound elsewhere; a whistle anchors it to the character, requiring an escape or ambush position."
+  },
+  "combination": {
+    "zh": "设计提案：借用落点选择，让石子在金属、泥土和水面上产生不同声响，玩家先读地面再投掷。",
+    "en": "Design proposal: borrow cast-placement decisions; stones make different sounds on metal, mud and water, so players read surfaces before throwing."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "门前有一名守卫，门右侧有一个空房间。",
+      "en": "A guard watches the door; an empty room sits to the right."
+    },
+    "action": {
+      "zh": "你把石子扔进空房，自己留在门左侧。",
+      "en": "Throw a pebble into the empty room while staying left of the door."
+    },
+    "result": {
+      "zh": "守卫转身调查，门口暂时无人注视。",
+      "en": "The guard turns to investigate, briefly leaving the doorway unwatched."
+    },
+    "next": {
+      "zh": "你穿过门，决定是否还要冒险回收石子。",
+      "en": "Pass through and decide whether recovering the pebble is worth the risk."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "做一个巡逻守卫、一个可投掷石子，以及巡逻—调查—返回三个状态。",
+      "en": "Build one patrolling guard, one throwable pebble and patrol–investigate–return states."
+    },
+    "pitfall": {
+      "zh": "别让守卫无提示地随机无视声响；先固定谁响应、响应多久。",
+      "en": "Avoid unexplained random refusal to investigate; first make responder selection and duration consistent."
+    },
+    "test": {
+      "zh": "玩家能否在投掷前指出哪名守卫会移动，并利用空当完成一次通过？",
+      "en": "Can players predict which guard will move and use the opening to get past?"
+    }
+  }
+}

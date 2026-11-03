@@ -1,0 +1,120 @@
+{
+  "id": "inventory-stack-limits",
+  "system": "inventory",
+  "edition": 1,
+  "name": {
+    "zh": "格数与堆叠上限",
+    "en": "Slots and stack limits"
+  },
+  "summary": {
+    "zh": "同类可以合并，物品种类却仍然占用空间。",
+    "en": "Quantity can stack; variety still consumes slots."
+  },
+  "rules": {
+    "zh": "物品占用有限栏位，同类物品在上限内堆叠；不同类型或品质往往需要分开。玩家决定保留多种少量样品还是少种大量原料，并通过箱子腾出携带栏位。",
+    "en": "Items fill finite slots and compatible items stack up to a cap; distinct types or qualities may stay separate. Choose between varied samples and bulk materials, using storage to free carrying slots."
+  },
+  "loop": [
+    {
+      "zh": "合并兼容物品",
+      "en": "Merge compatible items"
+    },
+    {
+      "zh": "查看剩余栏位",
+      "en": "Check free slots"
+    },
+    {
+      "zh": "保留样品或大宗材料",
+      "en": "Keep samples or bulk goods"
+    },
+    {
+      "zh": "入库释放空间",
+      "en": "Store goods to free slots"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "最后一格要留给未知掉落，还是带备用工具？",
+      "en": "Reserve the final slot for unknown loot, or carry a spare tool?"
+    },
+    {
+      "zh": "保留多种各一份的材料，还是只带少数几种并把它们堆满？",
+      "en": "Keep a sample of many materials, or fill stacks with just a few types?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "堆叠上限",
+        "en": "Stack cap"
+      },
+      "effect": {
+        "zh": "高上限利于批量生产；低上限让采集路线更短。",
+        "en": "High caps support bulk production; low caps shorten gathering routes."
+      }
+    },
+    {
+      "name": {
+        "zh": "品质能否合并",
+        "en": "Quality compatibility"
+      },
+      "effect": {
+        "zh": "不同品质分栏增加整理压力，也让高品质更醒目。",
+        "en": "Separate quality stacks increase sorting pressure while highlighting valuable grades."
+      }
+    }
+  ],
+  "tags": [
+    "planning",
+    "optimization",
+    "economy"
+  ],
+  "related": [
+    "inventory-adjacency",
+    "inventory-death-retrieval",
+    "inventory-deck-thinning",
+    "inventory-equipment-budget"
+  ],
+  "contrast": {
+    "zh": "前者以背包升级控制早期采集规模；后者用专用栏位与整理操作减轻种类繁多的负担。",
+    "en": "The former gates early gathering scale through bag upgrades; the latter eases item variety through specialized slots and sorting tools."
+  },
+  "combination": {
+    "zh": "组合提案：自然调查中每种标本只需保留一份，其余可合并为研究材料，让种类与数量有不同用途。",
+    "en": "Design proposal: a survey needs one specimen per species; duplicates become stacked research material, separating variety from quantity."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "背包只剩一格，已有一堆未满的木头，地上还有新花种。",
+      "en": "One slot remains; your wood stack is not full and new flower seeds lie nearby."
+    },
+    "action": {
+      "zh": "你先把木头合并进旧堆，再决定空格给种子还是备用工具。",
+      "en": "Merge the wood into its existing stack, then choose seeds or a spare tool for the free slot."
+    },
+    "result": {
+      "zh": "数量增加没有多占格，但新增物品种类仍会用掉最后一格。",
+      "en": "More wood costs no extra slot, while a new item type uses the last one."
+    },
+    "next": {
+      "zh": "下一次拾取前，考虑是否回箱子整理不同种类的物品。",
+      "en": "Before another pickup, consider returning to storage to sort item types."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "做六格背包、三种材料和一个堆叠上限，允许拆分与合并。",
+      "en": "Build a six-slot bag, three materials, and a stack cap with splitting and merging."
+    },
+    "pitfall": {
+      "zh": "品质、绑定状态等都能拆出额外种类；初版保持类型差异清楚。",
+      "en": "Quality and binding states multiply item types; keep the initial distinctions clear."
+    },
+    "test": {
+      "zh": "观察玩家能否预测一次拾取会占几格，并据此规划回程。",
+      "en": "Check whether players predict the slots a pickup needs and plan their return accordingly."
+    }
+  }
+}

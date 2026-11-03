@@ -1,0 +1,120 @@
+{
+  "id": "defense-trap-sequence",
+  "system": "defense",
+  "edition": 2,
+  "name": {
+    "zh": "把陷阱串成连续处理",
+    "en": "Chain traps into a sequence"
+  },
+  "summary": {
+    "zh": "先减速、再集中、再造成伤害，让几个普通陷阱一起发挥作用。",
+    "en": "Slow, gather and damage enemies so several simple traps work as a sequence."
+  },
+  "rules": {
+    "zh": "玩家利用道路和陷阱位置安排敌人受到效果的先后顺序。减速让敌人多留一会，推动改变位置，伤害陷阱完成击杀；预算、装填间隔和触发范围限制摆法，实际触发顺序揭示组合是否成立。",
+    "en": "Use routes and placement to determine the order in which enemies encounter effects. Slowing increases exposure, pushing changes position and damage traps finish enemies. Budget, recharge time and trigger areas constrain layouts; actual trigger order reveals whether the sequence works."
+  },
+  "loop": [
+    {
+      "zh": "找出敌人必经的狭窄位置",
+      "en": "Find a narrow route enemies must cross"
+    },
+    {
+      "zh": "安排控制与伤害的顺序",
+      "en": "Order control and damage effects"
+    },
+    {
+      "zh": "观察陷阱触发与恢复",
+      "en": "Watch activation and recovery"
+    },
+    {
+      "zh": "调整间距或补足缺环",
+      "en": "Adjust spacing or repair a missing link"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "把两个陷阱靠近方便接力，却可能同时进入冷却，放过后面的敌人。",
+      "en": "Adjacent traps combine easily but may recharge together and let later enemies pass."
+    },
+    {
+      "zh": "先推动还是先减速？同样两个效果，顺序变化可能让敌人离开伤害区。",
+      "en": "Push first or slow first? The order can move an enemy out of the intended damage zone."
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "触发间隔",
+        "en": "Trigger interval"
+      },
+      "effect": {
+        "zh": "间隔长时必须管理敌人队列；短间隔更依赖整体输出与资源预算。",
+        "en": "Long intervals require queue management; short intervals emphasize total damage and cost."
+      }
+    },
+    {
+      "name": {
+        "zh": "位移强度",
+        "en": "Displacement strength"
+      },
+      "effect": {
+        "zh": "推得远能利用环境，但也可能把目标推出下一道陷阱。",
+        "en": "Stronger pushes exploit the environment but may send enemies beyond the next trap."
+      }
+    }
+  ],
+  "tags": [
+    "spatial",
+    "planning",
+    "timing"
+  ],
+  "related": [
+    "defense-maze-routing",
+    "automation-aerial-logistics",
+    "automation-belt-routing",
+    "automation-flow-splitting"
+  ],
+  "contrast": {
+    "zh": "兽人必须死3还允许玩家即时补刀或引导；地牢战争更强调俯视地图上的陷阱布局与物理后果。",
+    "en": "Orcs Must Die! 3 lets the player intervene directly; Dungeon Warfare puts more emphasis on top-down trap placement and physical consequences."
+  },
+  "combination": {
+    "zh": "组合提案：让传感器只在敌人聚到一定数量后启动推动机关，避免高价值陷阱浪费在单个目标上。",
+    "en": "Design proposal: trigger a push mechanism only when a sensor detects a group, preventing a valuable trap from firing on one enemy."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "敌人分散走过火焰陷阱，后半批趁冷却直接通过。",
+      "en": "Enemies cross a flame trap separately, and later enemies pass while it recharges."
+    },
+    "action": {
+      "zh": "在前面加入减速区，让一批敌人更集中地进入火焰范围。",
+      "en": "Add a slowing zone first so a group enters the flame area together."
+    },
+    "result": {
+      "zh": "同一次喷火命中更多目标，但减速区后面开始堵队。",
+      "en": "One burst hits more targets, but a queue now forms behind the slow zone."
+    },
+    "next": {
+      "zh": "检查下一次喷火能否赶上队列，必要时拉开两处间距。",
+      "en": "Check whether the next burst catches the queue and adjust spacing if necessary."
+    }
+  },
+  "prototype": {
+    "scope": "medium",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "用一条路线和减速、推力、范围伤害三种陷阱做可重复的短波次。",
+      "en": "Use one route and three traps—slow, push and area damage—in a repeatable short wave."
+    },
+    "pitfall": {
+      "zh": "先用简单二维碰撞；大量刚体和联机同步会显著增加调试成本。",
+      "en": "Start with simple 2D collisions; many rigid bodies and network synchronization greatly increase debugging cost."
+    },
+    "test": {
+      "zh": "测试者能否通过调换顺序或间距，稳定改变同一波的结果？",
+      "en": "Can testers reliably change the outcome of the same wave by adjusting order or spacing?"
+    }
+  }
+}

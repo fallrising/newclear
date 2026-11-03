@@ -1,0 +1,120 @@
+{
+  "id": "puzzles-visual-rule-learning",
+  "system": "puzzles",
+  "edition": 1,
+  "name": {
+    "zh": "从例题归纳视觉规则",
+    "en": "Inferring visual puzzle rules"
+  },
+  "summary": {
+    "zh": "不用说明书，让玩家从反馈中自己学会语法。",
+    "en": "Teach a visual grammar through examples and feedback."
+  },
+  "rules": {
+    "zh": "玩家面对统一输入界面和逐步变化的符号，先从简单题猜测规则，再用复杂题验证。错误说明当前组合不满足条件，玩家需要比较题目并修正假设，而不是盲目尝试。",
+    "en": "A consistent interface presents changing symbols. Infer rules from simple puzzles and test harder ones; failure invites comparison and revised hypotheses rather than random input."
+  },
+  "loop": [
+    {
+      "zh": "比较简单样例",
+      "en": "Compare simple examples"
+    },
+    {
+      "zh": "提出规则假设",
+      "en": "Propose a rule"
+    },
+    {
+      "zh": "在新题中验证",
+      "en": "Test in a new puzzle"
+    },
+    {
+      "zh": "用反例修正规则",
+      "en": "Refine using counterexamples"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "哪个差异改变答案，哪些只是视觉装饰？",
+      "en": "Which differences affect the answer rather than decorate it?"
+    },
+    {
+      "zh": "假设能解释所有已解题，还是只碰巧通过上一题？",
+      "en": "Does the rule explain all solved puzzles or only the last?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "示例排序",
+        "en": "Example order"
+      },
+      "effect": {
+        "zh": "先隔离再组合规则可降低误学；过早混合增加负担。",
+        "en": "Isolate rules before combining them to reduce false learning."
+      }
+    },
+    {
+      "name": {
+        "zh": "错误反馈",
+        "en": "Failure detail"
+      },
+      "effect": {
+        "zh": "指出错误位置更友善；只给成败要求更强归纳。",
+        "en": "Specific errors are gentler; binary feedback requires stronger inference."
+      }
+    }
+  ],
+  "tags": [
+    "information",
+    "discovery",
+    "planning"
+  ],
+  "related": [
+    "exploration-earned-map",
+    "puzzles-box-pushing",
+    "puzzles-language-decoding",
+    "puzzles-scene-deduction"
+  ],
+  "contrast": {
+    "zh": "共同点是固定操作、逐步学规则；见证者画路径，太极切换格子，搜索空间不同。",
+    "en": "Both teach rules through stable input; path drawing and tile toggling create different search spaces."
+  },
+  "combination": {
+    "zh": "组合提案：生态调查用相同标记界面，从已知物种归纳新物种的栖息条件。",
+    "en": "Design proposal: use one field-notebook interface to infer new species’ habitat needs from known examples."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "前三道小题都接受把相同颜色放在一起的答案。",
+      "en": "The first three examples accept grouping matching colors together."
+    },
+    "action": {
+      "zh": "你猜测颜色是规则，拿下一道带新符号的题验证。",
+      "en": "Hypothesize that color is the rule, then test it on a puzzle with a new symbol."
+    },
+    "result": {
+      "zh": "答案被拒绝，提示原假设还漏掉了一个条件。",
+      "en": "The answer is rejected, indicating a missing condition in the hypothesis."
+    },
+    "next": {
+      "zh": "对照前几题找出差别，修正规则后再试。",
+      "en": "Compare earlier examples, revise the rule, and try again."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "设计一条清晰规则、四道教学例题和两道会排除错误假设的题。",
+      "en": "Design one clear rule, four teaching examples, and two puzzles that disprove plausible wrong hypotheses."
+    },
+    "pitfall": {
+      "zh": "关键成本在题目安排；规则复杂却没有辨别线索，只会变成猜答案。",
+      "en": "The work is in example sequencing; complexity without distinguishing clues becomes guesswork."
+    },
+    "test": {
+      "zh": "不解释规则，让玩家用自己的话描述它，再解一道没见过的新题。",
+      "en": "Without explaining the rule, ask players to state it and solve a new puzzle."
+    }
+  }
+}

@@ -1,0 +1,120 @@
+{
+  "id": "incremental-offline-window",
+  "system": "incremental",
+  "edition": 3,
+  "name": {
+    "zh": "离开前安排收益，回来后结算",
+    "en": "Set up earnings before leaving"
+  },
+  "summary": {
+    "zh": "离线收益取决于离开时的安排，也可能受到时间上限约束。",
+    "en": "Offline rewards depend on the setup left behind and may have a time limit."
+  },
+  "rules": {
+    "zh": "玩家离开前选择持续执行的动作或产出配置。返回时按有效离线时长结算，耗材、容量或时间上限可能使后续时间不再产生同等收益。下一次离开前，玩家会依据停工原因重新准备。",
+    "en": "Before leaving, choose a continuing action or production setup. On return, the game settles eligible offline time; consumables, capacity or time limits may stop equivalent gains. The reason progress stopped informs the next preparation."
+  },
+  "loop": [
+    {
+      "zh": "查看本次要离开多久",
+      "en": "Estimate time away"
+    },
+    {
+      "zh": "选择可持续执行的安排",
+      "en": "Choose a sustainable setup"
+    },
+    {
+      "zh": "回来查看离线结算",
+      "en": "Review the offline settlement"
+    },
+    {
+      "zh": "补足限制再安排下一次",
+      "en": "Fix the limiting factor for next time"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "离开很久时，选择收益高但很快耗尽材料的任务，还是低收益却能持续的任务？",
+      "en": "For a long absence, choose high output that soon exhausts materials or lower sustainable output?"
+    },
+    {
+      "zh": "先提高产出速度，还是先延长有效离线时间？",
+      "en": "Improve production speed or extend the useful offline window first?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "有效离线时长",
+        "en": "Eligible offline time"
+      },
+      "effect": {
+        "zh": "上限越短，配置与实际离开时间越容易不匹配；应清楚显示何时停止结算。",
+        "en": "Shorter caps create more mismatch with time away; clearly show when settlement stops."
+      }
+    },
+    {
+      "name": {
+        "zh": "离线效率",
+        "en": "Offline efficiency"
+      },
+      "effect": {
+        "zh": "与在线相同便于理解；不同时应同时显示速率和损失原因。",
+        "en": "Matching online efficiency is easier to read; if it differs, show both the rate and reason."
+      }
+    }
+  ],
+  "tags": [
+    "time",
+    "planning",
+    "economy"
+  ],
+  "related": [
+    "incremental-spend-time-advance",
+    "incremental-allocate-progress-capacity",
+    "incremental-escalating-copy-price",
+    "incremental-limited-team-dispatch"
+  ],
+  "contrast": {
+    "zh": "梅尔沃保留正在执行的活动及其条件；饼干点点乐PC版把离线产量和持续时间本身做成可升级能力。",
+    "en": "Melvor carries over the chosen activity and its requirements; PC Cookie Clicker makes offline efficiency and duration upgradeable capabilities."
+  },
+  "combination": {
+    "zh": "组合提案：离线采集先写入有限格数的仓库，离开前可预留空格或选择已有堆叠的资源，回来解释哪种材料最先塞满。",
+    "en": "Design proposal: offline gathering fills a limited-slot store. Before leaving, reserve slots or gather an already stacked resource; explain what filled the storage first."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "采矿每小时得10块矿，有效离线窗口是4小时；玩家准备离开6小时。",
+      "en": "Mining yields ten ore an hour with a four-hour eligible window; the player expects six hours away."
+    },
+    "action": {
+      "zh": "先把离线窗口升级到6小时，再开始采矿。",
+      "en": "Extend the window to six hours before starting mining."
+    },
+    "result": {
+      "zh": "回来结算60块矿，并显示6小时都有效。",
+      "en": "Return to sixty ore and a report that all six hours counted."
+    },
+    "next": {
+      "zh": "下次离开更久，要重新比较延长窗口和提高速度。",
+      "en": "A longer absence creates a new choice between duration and speed."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "保存退出时间与一种任务，返回时结算带上限的时间差，并展示计算明细。",
+      "en": "Save an exit time and one task; settle a capped elapsed duration on return with a visible breakdown."
+    },
+    "pitfall": {
+      "zh": "设备时间变化、重复结算和材料不足都要有确定规则。",
+      "en": "Define behavior for clock changes, duplicate settlement and exhausted materials."
+    },
+    "test": {
+      "zh": "玩家能否从结算报告解释为什么少赚了一部分？",
+      "en": "Can players explain a shortfall from the settlement report?"
+    }
+  }
+}

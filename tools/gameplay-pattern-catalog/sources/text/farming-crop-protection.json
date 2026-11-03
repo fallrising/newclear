@@ -1,0 +1,120 @@
+{
+  "id": "farming-crop-protection",
+  "system": "farming",
+  "edition": 1,
+  "name": {
+    "zh": "农田防护",
+    "en": "Crop protection"
+  },
+  "summary": {
+    "zh": "产量不仅靠种出来，也要靠布防保下来。",
+    "en": "Yield must be protected as well as grown."
+  },
+  "rules": {
+    "zh": "作物可能被害鸟等外部威胁破坏。玩家建设防护物，检查保护范围并在扩田时补齐空隙；损失体现为缺失植株，形成预防成本与预期损失的比较。",
+    "en": "External threats such as birds can destroy crops. Build protection, inspect coverage and close gaps as fields expand; missing plants turn prevention cost into a comparison with expected losses."
+  },
+  "loop": [
+    {
+      "zh": "识别损失来源",
+      "en": "Identify the threat"
+    },
+    {
+      "zh": "配置防护范围",
+      "en": "Arrange protection coverage"
+    },
+    {
+      "zh": "检查未覆盖地块",
+      "en": "Inspect exposed plots"
+    },
+    {
+      "zh": "扩田时同步补防",
+      "en": "Extend defenses with the farm"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "小田可以暂时容忍损失，昂贵作物则值得优先保护。",
+      "en": "Small fields may tolerate occasional losses; expensive crops deserve priority."
+    },
+    {
+      "zh": "防护物占用的田地也有成本，最密集布局未必最稳。",
+      "en": "Protective objects occupy productive space; the densest layout may be fragile."
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "威胁可见性",
+        "en": "Threat visibility"
+      },
+      "effect": {
+        "zh": "可见敌害鼓励主动干预，离线结算则更依赖规划。",
+        "en": "Visible pests encourage intervention; overnight resolution emphasizes preparation."
+      }
+    },
+    {
+      "name": {
+        "zh": "损失规模",
+        "en": "Loss scale"
+      },
+      "effect": {
+        "zh": "偶发单株损失较温和，成片破坏会推动强制布防。",
+        "en": "Occasional single-plant losses are forgiving; widespread destruction makes defense mandatory."
+      }
+    }
+  ],
+  "tags": [
+    "risk",
+    "spatial",
+    "planning"
+  ],
+  "related": [
+    "building-structural-support",
+    "building-water-engineering",
+    "combat-cover-flanking",
+    "combat-destructible-cover"
+  ],
+  "contrast": {
+    "zh": "相同的预防投资，可通过固定范围检查或可见野生动物，产生不同的风险感知。",
+    "en": "The same preventive investment can feel different when risk is communicated through coverage checks or visible wildlife."
+  },
+  "combination": {
+    "zh": "设计提案：害兽会学习固定巡逻路线，玩家可以改良围栏，也可以安排非致命驱赶装置。",
+    "en": "Design proposal: pests learn fixed patrol routes, so players adapt fences or install nonlethal deterrents."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "12株作物中有4株落在稻草人的保护范围之外。",
+      "en": "Four of twelve crops lie outside the scarecrow’s protection."
+    },
+    "action": {
+      "zh": "你先把稻草人移向昂贵作物，再决定是否添一个。",
+      "en": "Move the scarecrow toward the expensive crops before buying another."
+    },
+    "result": {
+      "zh": "受保护格不会遭到这类袭击，未覆盖格仍有损失风险。",
+      "en": "Protected tiles avoid this threat while uncovered tiles remain at risk."
+    },
+    "next": {
+      "zh": "扩田后再次查看范围，避免新种的边角漏防。",
+      "en": "Check coverage again after expansion so new edge plots are not exposed."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "做一种定期出现的威胁、一个覆盖范围和失去作物的可见记录。",
+      "en": "Implement one periodic threat, one protection radius and a visible record of lost crops."
+    },
+    "pitfall": {
+      "zh": "别让随机损失完全没有预警或记录，否则玩家无法区分漏防与程序错误。",
+      "en": "Unexplained losses make it hard to distinguish incomplete coverage from a bug."
+    },
+    "test": {
+      "zh": "玩家见到一次损失后，能否指出漏防格并通过重新布局降低风险？",
+      "en": "After one loss, can players locate the gap and reduce risk through placement?"
+    }
+  }
+}

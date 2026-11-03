@@ -1,0 +1,120 @@
+{
+  "id": "automation-belt-routing",
+  "system": "automation",
+  "edition": 1,
+  "name": {
+    "zh": "传送带路径规划",
+    "en": "Conveyor routing"
+  },
+  "summary": {
+    "zh": "让物料绕过障碍、穿过交叉点，持续抵达机器入口。",
+    "en": "Route materials around obstacles and across junctions to keep machines supplied."
+  },
+  "rules": {
+    "zh": "玩家铺设有方向的运输带，把生产端连接到消费端。占地、交叉方式和吞吐上限限制路线；断料与积压直接显示设计是否有效。",
+    "en": "Players connect producers to consumers with directional belts. Space, crossing options and capacity constrain routes; starvation and queues expose weak links."
+  },
+  "loop": [
+    {
+      "zh": "确定起终点",
+      "en": "Identify endpoints"
+    },
+    {
+      "zh": "选择绕行或跨越",
+      "en": "Choose detours or crossings"
+    },
+    {
+      "zh": "铺带并供料",
+      "en": "Build and feed belts"
+    },
+    {
+      "zh": "观察堵点再改线",
+      "en": "Inspect queues and reroute"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "短路线省空间，但可能堵住未来扩建。",
+      "en": "A short route saves space but may block expansion."
+    },
+    {
+      "zh": "专线更易诊断，混线减少铺设量却更难管理。",
+      "en": "Dedicated lines are readable; mixed lines save construction but complicate control."
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "交叉自由度",
+        "en": "Crossing freedom"
+      },
+      "effect": {
+        "zh": "增加高架或地下通道，难点从避障转向吞吐规划。",
+        "en": "More bridges or tunnels shift difficulty from avoiding obstacles to managing throughput."
+      }
+    },
+    {
+      "name": {
+        "zh": "单带容量",
+        "en": "Belt capacity"
+      },
+      "effect": {
+        "zh": "较低容量促使并行扩线，较高容量允许集中主干。",
+        "en": "Lower capacity encourages parallel routes; higher capacity supports central trunks."
+      }
+    }
+  ],
+  "tags": [
+    "spatial",
+    "optimization",
+    "planning"
+  ],
+  "related": [
+    "automation-aerial-logistics",
+    "automation-flow-splitting",
+    "automation-blueprint-reuse",
+    "automation-byproduct-loop"
+  ],
+  "contrast": {
+    "zh": "前者强调平面占地和双通道，后者把高度变成额外的布线空间。",
+    "en": "Factorio emphasizes planar space and two lanes; Satisfactory adds height as routing space."
+  },
+  "combination": {
+    "zh": "设计一座空间逐层开放的浮岛工厂：玩家先在小平面内布线，再通过解谜解锁运输桥。",
+    "en": "Design a floating-island factory where puzzles unlock transport bridges after players solve compact routing layouts."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "矿机在左边，熔炉在右边，中间有一条已经满载的传送带。",
+      "en": "The mine is left of the furnace, with a busy conveyor crossing the direct route."
+    },
+    "action": {
+      "zh": "你绕过交叉点铺一条单向带，并检查每段朝向。",
+      "en": "Route a one-way belt around the crossing and check every segment’s direction."
+    },
+    "result": {
+      "zh": "矿石开始抵达熔炉；若某段反向，物料会在前一格堆住。",
+      "en": "Ore reaches the furnace; a reversed segment causes a visible queue upstream."
+    },
+    "next": {
+      "zh": "观察持续供料，再为下一台机器预留接口。",
+      "en": "Observe sustained delivery, then reserve a connection for the next machine."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "做小网格、一个物料源、一个接收器和有方向的带格，物料用点表示即可。",
+      "en": "Use a small grid, one source, one sink and directional belt tiles; dots can represent items."
+    },
+    "pitfall": {
+      "zh": "先验证方向与堵塞，再加多层运输和复杂交叉，否则很难查出断料原因。",
+      "en": "Verify direction and blockage before adding layered transport or complex crossings, which complicate diagnosis."
+    },
+    "test": {
+      "zh": "让玩家修一条只有一处反向的线路，观察他能否通过积压位置找到问题。",
+      "en": "Give players one reversed segment and see whether they diagnose it from the queue."
+    }
+  }
+}

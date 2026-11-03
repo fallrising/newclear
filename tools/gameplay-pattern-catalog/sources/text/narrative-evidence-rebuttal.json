@@ -1,0 +1,120 @@
+{
+  "id": "narrative-evidence-rebuttal",
+  "system": "narrative",
+  "edition": 3,
+  "name": {
+    "zh": "拿证据反驳某一句话",
+    "en": "Use evidence to challenge a specific statement"
+  },
+  "summary": {
+    "zh": "不是猜凶手，而是指出这句话与哪条事实冲突。",
+    "en": "Challenge the conflict between a claim and a fact rather than simply guessing the culprit."
+  },
+  "rules": {
+    "zh": "对方给出一组可以逐句审视的陈述，玩家将某份证据对应到其中一句。只有证据内容与该陈述确实冲突时，质询才推进；成功后证词被补充或改写，产生下一处可检查的矛盾。",
+    "en": "A speaker makes statements that can be examined individually. Match evidence to a specific statement; a real contradiction advances the questioning. The resulting clarification or revised testimony creates the next claim to inspect."
+  },
+  "loop": [
+    {
+      "zh": "阅读一段陈述",
+      "en": "Read a statement"
+    },
+    {
+      "zh": "比较证据里的事实",
+      "en": "Compare facts in the evidence"
+    },
+    {
+      "zh": "在矛盾处出示证据",
+      "en": "Present evidence at the contradiction"
+    },
+    {
+      "zh": "检查更新后的说法",
+      "en": "Examine the revised account"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "已经找到明确矛盾就反驳，还是先追问补齐上下文？",
+      "en": "Object to a clear contradiction now or ask for more context first?"
+    },
+    {
+      "zh": "两份证据都相关时，哪份能直接推翻这句话？",
+      "en": "When two items are relevant, which one directly disproves this claim?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "证据与陈述的对应范围",
+        "en": "Evidence-to-statement scope"
+      },
+      "effect": {
+        "zh": "一份证据可反驳多个合理陈述，会减少“只认作者指定句”的挫败感。",
+        "en": "Accepting multiple valid matches reduces the frustration of guessing one author-selected line."
+      }
+    },
+    {
+      "name": {
+        "zh": "错误质询成本",
+        "en": "Cost of a wrong challenge"
+      },
+      "effect": {
+        "zh": "轻罚鼓励验证假设；重罚要求更清楚的文字与复查机会。",
+        "en": "Light penalties encourage hypotheses; heavy penalties require clearer wording and opportunities to review."
+      }
+    }
+  ],
+  "tags": [
+    "information",
+    "narrative",
+    "discovery"
+  ],
+  "related": [
+    "narrative-background-dialogue-access",
+    "narrative-conversation-intervention",
+    "narrative-deliberate-silence",
+    "narrative-loop-event-schedule"
+  ],
+  "contrast": {
+    "zh": "逆转裁判强调逐句选择与出示；弹丸论破还把证据匹配放进持续滚动的辩论操作中。",
+    "en": "Ace Attorney emphasizes selecting a statement and presenting evidence; Danganronpa also places the match inside an active debate interface."
+  },
+  "combination": {
+    "zh": "组合提案：未鉴定的物证只有模糊描述；花资源化验后出现精确时间或材质，才能推翻更具体的证词。",
+    "en": "Design proposal: unidentified evidence has only a vague description. Paying for analysis reveals a precise time or material that can challenge a more specific statement."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "证人说八点听到了钟声，记录表明钟在七点半停摆。",
+      "en": "A witness heard the clock at eight, but a record says it stopped at seven thirty."
+    },
+    "action": {
+      "zh": "玩家对“八点响钟”这句出示维修记录。",
+      "en": "The player presents the repair record against the claim about eight o’clock."
+    },
+    "result": {
+      "zh": "证人改口说时间来自墙上的电子屏。",
+      "en": "The witness revises the source of the time to an electronic display."
+    },
+    "next": {
+      "zh": "玩家再检查电子屏的位置，寻找新的矛盾。",
+      "en": "The player checks the display’s location for the next contradiction."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "做三句证词、三张证据卡和一次改口，不先写完整案件。",
+      "en": "Build three statements, three evidence cards and one revision before writing a full case."
+    },
+    "pitfall": {
+      "zh": "相关不等于矛盾；需要说明证据如何否定陈述，避免猜作者意图。",
+      "en": "Relevance is not contradiction: make the logical conflict clear instead of asking players to guess author intent."
+    },
+    "test": {
+      "zh": "玩家能否不用穷举，就用自己的话解释这一对为什么冲突？",
+      "en": "Can players explain the conflict without brute-forcing every pair?"
+    }
+  }
+}

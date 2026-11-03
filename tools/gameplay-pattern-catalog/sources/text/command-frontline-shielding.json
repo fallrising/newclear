@@ -1,0 +1,119 @@
+{
+  "id": "command-frontline-shielding",
+  "system": "command",
+  "edition": 3,
+  "name": {
+    "zh": "把耐打单位放到前面",
+    "en": "Protect damage dealers with a front line"
+  },
+  "summary": {
+    "zh": "用队列顺序决定谁先挨打。",
+    "en": "Use unit order to decide who takes the first hits."
+  },
+  "rules": {
+    "zh": "攻击通常优先落在一排最前方的单位身上，玩家把耐打者放前面，把输出者放后面。前排倒下会暴露后排；穿透或特殊目标规则又可能绕过保护，因此站位要随敌人变化。",
+    "en": "Attacks usually hit the frontmost unit in a row. Put durable units ahead of damage dealers, knowing that a fallen front line exposes the rear and special attacks may bypass it."
+  },
+  "loop": [
+    {
+      "zh": "查看敌人的攻击对象",
+      "en": "Read enemy targeting"
+    },
+    {
+      "zh": "排列承伤与输出位置",
+      "en": "Order tanks and damage dealers"
+    },
+    {
+      "zh": "观察前排消耗",
+      "en": "Watch front-line health"
+    },
+    {
+      "zh": "替换或补充保护",
+      "en": "Replace or reinforce protection"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "前排更厚能多打几轮，但会占掉输出位置。",
+      "en": "A thicker front line buys turns but uses offensive space."
+    },
+    {
+      "zh": "是否把残血前排撤下，让另一人承接下一击？",
+      "en": "Should an injured front unit move back before the next hit?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "每排容量",
+        "en": "Row capacity"
+      },
+      "effect": {
+        "zh": "容量小让保护与输出直接争位置。",
+        "en": "Small rows make protection compete directly with damage."
+      }
+    },
+    {
+      "name": {
+        "zh": "绕过前排的频率",
+        "en": "Bypass frequency"
+      },
+      "effect": {
+        "zh": "少量穿透敌人可打破固定答案，过多则会让前排规则失去意义。",
+        "en": "Occasional bypass attacks challenge fixed formations; too many undermine the rule."
+      }
+    }
+  ],
+  "tags": [
+    "spatial",
+    "planning"
+  ],
+  "related": [
+    "command-prebattle-formation",
+    "command-split-objectives",
+    "command-focus-fire",
+    "command-initiative-order"
+  ],
+  "contrast": {
+    "zh": "怪物火车强调每层的布置与容量；雪居之地允许更频繁地移动卡牌分担伤害。",
+    "en": "Monster Train emphasizes floor setup and capacity; Wildfrost allows more frequent repositioning to share damage."
+  },
+  "combination": {
+    "zh": "组合提案：受伤会降低单位的移动能力，保护者必须在伤势恶化前决定是否换位。",
+    "en": "Design proposal: injuries reduce movement, so a protector must decide whether to swap before becoming immobile."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "前排盾兵剩三点血，后排弓手仍然满血。",
+      "en": "The front shield unit has three health; the archer behind is healthy."
+    },
+    "action": {
+      "zh": "把另一名耐打单位移到最前。",
+      "en": "Move another durable unit to the front."
+    },
+    "result": {
+      "zh": "下一击由新前排承受，盾兵存活。",
+      "en": "The replacement takes the next hit and the shield unit survives."
+    },
+    "next": {
+      "zh": "后排输出位置减少，下一轮要重算能否清敌。",
+      "en": "Less room remains for damage, so reconsider whether the next wave can be cleared."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "一条双方各三格的队列，普通攻击只打最前目标。",
+      "en": "Build opposing three-slot rows where basic attacks hit the front target."
+    },
+    "pitfall": {
+      "zh": "必须解释特殊攻击为何能绕过保护。",
+      "en": "Explain why exceptional attacks bypass the front line."
+    },
+    "test": {
+      "zh": "玩家是否主动换位分伤，而不是只把最高血量永久放第一格？",
+      "en": "Do players rotate damage instead of permanently parking the largest health pool in front?"
+    }
+  }
+}

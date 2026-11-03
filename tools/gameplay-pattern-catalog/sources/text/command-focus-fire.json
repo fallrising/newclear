@@ -1,0 +1,119 @@
+{
+  "id": "command-focus-fire",
+  "system": "command",
+  "edition": 3,
+  "name": {
+    "zh": "集中火力先减掉一个威胁",
+    "en": "Focus fire to remove one threat"
+  },
+  "summary": {
+    "zh": "打伤所有敌人，与让一个敌人停止攻击，是两种收益。",
+    "en": "Wounding everyone differs from removing one attacker."
+  },
+  "rules": {
+    "zh": "玩家让多个单位攻击同一目标，争取先让它失去战斗能力，减少敌方持续输出。集中火力也可能让剩余伤害溢出、远程弹丸浪费或其他威胁无人处理，因此需要及时换目标。",
+    "en": "Order multiple units onto one target to remove its damage sooner. Concentration can waste overkill, projectiles in flight or attention to other threats, so targets must change at the right time."
+  },
+  "loop": [
+    {
+      "zh": "挑选优先消灭的目标",
+      "en": "Choose the first target to remove"
+    },
+    {
+      "zh": "让多个单位共同攻击",
+      "en": "Concentrate attacks"
+    },
+    {
+      "zh": "确认击倒与剩余伤害",
+      "en": "Check defeat and excess damage"
+    },
+    {
+      "zh": "转向下一个威胁",
+      "en": "Switch to the next threat"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "先杀脆弱输出者，还是先处理正在突破防线的重甲者？",
+      "en": "Remove a fragile attacker or stop the armored enemy breaking through?"
+    },
+    {
+      "zh": "还有弹丸在飞，是否提前切换目标避免溢出？",
+      "en": "Switch targets before incoming projectiles land to avoid overkill?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "过量伤害浪费",
+        "en": "Overkill loss"
+      },
+      "effect": {
+        "zh": "高单发伤害会提高分配最后一击的价值。",
+        "en": "Large individual hits make last-hit allocation more important."
+      }
+    },
+    {
+      "name": {
+        "zh": "目标切换成本",
+        "en": "Target-switch cost"
+      },
+      "effect": {
+        "zh": "切换会移动或重置准备时，需要预先规划顺序。",
+        "en": "Movement or reset costs reward planning the target sequence."
+      }
+    }
+  ],
+  "tags": [
+    "planning",
+    "optimization"
+  ],
+  "related": [
+    "command-trait-thresholds",
+    "combat-combat-deck-cycle",
+    "command-frontline-shielding",
+    "command-initiative-order"
+  ],
+  "contrast": {
+    "zh": "帝国时代要实时处理弹道与移动；幽浮2可以逐次观察命中结果，再决定后续成员是否补枪。",
+    "en": "Age of Empires resolves movement and projectiles live; XCOM 2 lets each shot’s result inform the next soldier’s choice."
+  },
+  "combination": {
+    "zh": "组合提案：击破某个部位会停止敌人的一种攻击，集中火力既可追求击杀，也可优先拆掉最危险的武器。",
+    "en": "Design proposal: breaking a part disables one attack, so focus fire can pursue a kill or first remove a dangerous weapon."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "两个敌人各有六点血，我方三人各能打三点。",
+      "en": "Two enemies have six health each; three allies deal three damage apiece."
+    },
+    "action": {
+      "zh": "让前两人攻击同一个敌人。",
+      "en": "Have the first two allies attack one enemy."
+    },
+    "result": {
+      "zh": "一个敌人倒下，第三人可以打另一人。",
+      "en": "One enemy falls, leaving the third ally free to hit the other."
+    },
+    "next": {
+      "zh": "下轮少承受一个敌人的攻击，继续判断谁最危险。",
+      "en": "One fewer enemy attacks next round; reassess the greatest threat."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "三名友方、两名敌人，显示血量与即将落下的伤害。",
+      "en": "Use three allies and two enemies, showing health and incoming damage."
+    },
+    "pitfall": {
+      "zh": "命中与弹道如果不透明，玩家难以判断何时换目标。",
+      "en": "Opaque accuracy or projectiles make target switches guesswork."
+    },
+    "test": {
+      "zh": "玩家是否能解释为何集中攻击比平均削血更合适，何时又该分火？",
+      "en": "Can players explain when concentration beats spreading damage and when it does not?"
+    }
+  }
+}

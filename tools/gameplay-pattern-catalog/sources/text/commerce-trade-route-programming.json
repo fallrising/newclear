@@ -1,0 +1,120 @@
+{
+  "id": "commerce-trade-route-programming",
+  "system": "commerce",
+  "edition": 1,
+  "name": {
+    "zh": "自动贸易路线",
+    "en": "Programmed trade routes"
+  },
+  "summary": {
+    "zh": "把反复跑商变成可调的路线与装卸规则，管理例外而非每次下令。",
+    "en": "Turn repetitive trading into routes and cargo rules, managing exceptions instead of every trip."
+  },
+  "rules": {
+    "zh": "玩家选择停靠点、货物和运输船，配置每站装卸或交易条件。船只循环执行，短缺、拥堵或风险暴露后再修改路线；自动化仍需监督。",
+    "en": "Choose stops, cargo and ships, then configure loading or trading at each stop. Ships repeat the route; shortages, congestion and hazards prompt revisions, so automation still needs oversight."
+  },
+  "loop": [
+    {
+      "zh": "确定供需地点",
+      "en": "Identify sources and demand"
+    },
+    {
+      "zh": "配置停靠与货物",
+      "en": "Configure stops and cargo"
+    },
+    {
+      "zh": "运行一轮航线",
+      "en": "Run the route"
+    },
+    {
+      "zh": "检查瓶颈并调整",
+      "en": "Inspect and adjust"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "一条长环线充分利用运力，还是多条短线提高稳定性？",
+      "en": "Use one long circuit for utilization or several short routes for resilience?"
+    },
+    {
+      "zh": "运力不够时增加船只，还是调整装卸与停靠顺序？",
+      "en": "Add a ship or improve loading and stop order?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "规则精度",
+        "en": "Rule granularity"
+      },
+      "effect": {
+        "zh": "可设数量和价格更灵活，但配置负担更大。",
+        "en": "Quantity and price rules add flexibility and setup cost."
+      }
+    },
+    {
+      "name": {
+        "zh": "运输可预测性",
+        "en": "Travel predictability"
+      },
+      "effect": {
+        "zh": "稳定航程适合算产量，天气海盗会增加缓冲需求。",
+        "en": "Stable travel supports precise planning; hazards demand buffers."
+      }
+    }
+  ],
+  "tags": [
+    "planning",
+    "optimization",
+    "economy"
+  ],
+  "related": [
+    "allocation-shop-reservation",
+    "commerce-dynamic-market",
+    "commerce-regional-arbitrage",
+    "commerce-shop-display"
+  ],
+  "contrast": {
+    "zh": "纪元常用航线维系自己的生产网络；大航海家4更突出在城市市场间持续交易。",
+    "en": "Anno often uses routes to sustain production networks; Patrician emphasizes continuing trade between city markets."
+  },
+  "combination": {
+    "zh": "组合创意：小镇邮政让玩家设定邮件与货物混合路线，居民关系解锁近路，但过载会拖延约定送达时间。",
+    "en": "Design proposal: a town postal service combines mail and freight routes; relationships unlock shortcuts, while overloaded runs miss promised delivery times."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "港口甲持续产木材，港口乙消耗木材，船每趟最多带十份。",
+      "en": "Port A produces wood, port B consumes it, and a ship carries ten units per trip."
+    },
+    "action": {
+      "zh": "你设置在甲装十份、在乙卸货，然后返回甲。",
+      "en": "Set the ship to load ten at A, unload at B, and return."
+    },
+    "result": {
+      "zh": "船开始循环，但乙消耗太慢时，货舱会带着剩余木材返程。",
+      "en": "The ship loops automatically, but slow demand at B leaves cargo aboard on the return trip."
+    },
+    "next": {
+      "zh": "检查库存变化，调整装卸数量或增加第三个停靠点。",
+      "en": "Inspect inventory changes, then adjust quantities or add a third stop."
+    }
+  },
+  "prototype": {
+    "scope": "medium",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "做三个港口、一艘船和装、卸、等待三个命令，用时间步模拟执行。",
+      "en": "Build three ports, one ship, and load, unload, and wait commands using discrete time steps."
+    },
+    "pitfall": {
+      "zh": "先处理缺货、满仓和目的地不收货的例外，再加入更多船与复杂航线。",
+      "en": "Handle shortages, full holds, and rejected cargo before adding fleets and complex routes."
+    },
+    "test": {
+      "zh": "故意制造一处积压，观察玩家是否通过库存与航程记录找到原因并修改路线。",
+      "en": "Create a deliberate bottleneck and see whether players diagnose it from stock and trip logs."
+    }
+  }
+}

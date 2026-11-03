@@ -1,0 +1,120 @@
+{
+  "id": "fishing-equipment-access",
+  "system": "fishing",
+  "edition": 1,
+  "name": {
+    "zh": "钓具捕获资格",
+    "en": "Equipment-gated catches"
+  },
+  "summary": {
+    "zh": "新装备解锁新的可捕获范围，而不只是让旧任务变快。",
+    "en": "Use equipment to unlock catch categories rather than merely speed up old tasks."
+  },
+  "rules": {
+    "zh": "玩家根据目标水域或鱼种准备兼容钓具，才能开始有效捕获。预算与携带空间限制全能配置；遭遇无法捕捞的地点会暴露下一项研究或采购目标。",
+    "en": "Prepare compatible gear for the target water or species before fishing is possible. Budget and carrying capacity constrain universal loadouts; inaccessible catches reveal future research or purchase goals."
+  },
+  "loop": [
+    {
+      "zh": "发现尚不能捕获的目标",
+      "en": "Discover an inaccessible catch"
+    },
+    {
+      "zh": "识别所需钓具能力",
+      "en": "Identify the required capability"
+    },
+    {
+      "zh": "研究、购买并装配",
+      "en": "Research, buy and equip"
+    },
+    {
+      "zh": "返回原地点验证解锁",
+      "en": "Return and use the new access"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "为一个稀有目标专门换装，还是携带覆盖广的组合，会改变出行目的。",
+      "en": "Refit for one rare target or carry a broader combination? The choice changes the purpose of the trip."
+    },
+    {
+      "zh": "现在花钱解锁一种新水域，还是先用现有装备赚钱，等能兼顾更多目标再升级？",
+      "en": "Pay now to access one new habitat, or earn with existing gear until a broader upgrade is affordable?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "装备覆盖宽度",
+        "en": "Equipment coverage"
+      },
+      "effect": {
+        "zh": "单一适配促使换装，多类兼容减少回城但容易形成唯一最优解。",
+        "en": "Narrow coverage encourages loadout changes; broad coverage reduces returns but may create a dominant choice."
+      }
+    },
+    {
+      "name": {
+        "zh": "配置占地",
+        "en": "Loadout footprint"
+      },
+      "effect": {
+        "zh": "装备越占空间，越必须在捕获范围与运货容量之间选择。",
+        "en": "Bulkier gear makes access coverage compete with cargo capacity."
+      }
+    }
+  ],
+  "tags": [
+    "progression",
+    "planning",
+    "spatial"
+  ],
+  "related": [
+    "fishing-cast-placement",
+    "fishing-pond-production",
+    "exploration-fast-travel-network",
+    "fishing-bait-loadout"
+  ],
+  "contrast": {
+    "zh": "渔帆暗涌用水域适配类型与船体格位约束配置；守墓人通过鱼竿与鱼种之间的对应关系改变捕获范围。",
+    "en": "DREDGE constrains loadouts through habitat types and boat slots; Graveyard Keeper changes catch access through rod–species compatibility."
+  },
+  "combination": {
+    "zh": "设计提案：船只一次只能装两种环境模块，玩家先收集线索，再决定本次远航放弃哪些水域。",
+    "en": "Design proposal: a boat carries only two habitat modules, so clues guide which waters to leave out of each expedition."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "你发现深水钓点，但当前船上只有浅水钓具，安装位也有限。",
+      "en": "You discover deep-water fishing, but your boat has shallow-water gear and limited mounting space."
+    },
+    "action": {
+      "zh": "回港卸下一件旧装备，换上能处理深水目标的钓具。",
+      "en": "Return to port, remove an old tool and fit gear compatible with deep-water targets."
+    },
+    "result": {
+      "zh": "原先不可用的钓点变得可捕获，但其他功能可能被挤掉。",
+      "en": "The previously unusable spot becomes accessible, at the cost of another capability."
+    },
+    "next": {
+      "zh": "根据下一趟目标决定保留新装，还是换回通用配置。",
+      "en": "Choose whether to keep the new gear or restore a general loadout for the next trip."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "用3类钓点和2个装备槽做资格匹配，清楚显示缺少哪种能力。",
+      "en": "Use three fishing-site categories and two equipment slots, explicitly showing missing capabilities."
+    },
+    "pitfall": {
+      "zh": "资格限制与捕获成功率要区分；不兼容时不应让玩家无意义地反复尝试。",
+      "en": "Separate eligibility from success chance; incompatible gear should not encourage pointless retries."
+    },
+    "test": {
+      "zh": "玩家看到新钓点后，能否自行规划换装，并说出牺牲了哪个原有功能？",
+      "en": "Can players plan the required refit and explain which existing capability they sacrifice?"
+    }
+  }
+}

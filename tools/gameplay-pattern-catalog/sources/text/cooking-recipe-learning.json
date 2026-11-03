@@ -1,0 +1,120 @@
+{
+  "id": "cooking-recipe-learning",
+  "system": "cooking",
+  "edition": 1,
+  "name": {
+    "zh": "食谱知识解锁",
+    "en": "Recipe knowledge unlocks"
+  },
+  "summary": {
+    "zh": "先获得做法，再把现有材料变成新的行动选项。",
+    "en": "Acquire a recipe to turn familiar ingredients into new options."
+  },
+  "rules": {
+    "zh": "玩家通过节目、关系或探索学到食谱，再准备材料并在合适的设施制作。知道配方和拥有材料是两道独立门槛；新菜谱列表提供明确的成长反馈。",
+    "en": "Players learn recipes through broadcasts, relationships or exploration, then use ingredients at the appropriate station. Knowledge and material access are separate gates; an expanded recipe list makes progress visible."
+  },
+  "loop": [
+    {
+      "zh": "发现食谱线索",
+      "en": "Find a recipe lead"
+    },
+    {
+      "zh": "取得配方",
+      "en": "Acquire the recipe"
+    },
+    {
+      "zh": "备齐食材",
+      "en": "Gather ingredients"
+    },
+    {
+      "zh": "首次制作并解锁用途",
+      "en": "Cook it and unlock its use"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "先追容易取得的食谱，还是为关键增益专门跑一趟？",
+      "en": "Learn an easy recipe first, or make a special trip for a crucial benefit?"
+    },
+    {
+      "zh": "今天的时间用来找新做法，还是先收齐已学会菜谱的材料，准备明天出发？",
+      "en": "Spend today finding a new recipe, or gather ingredients for a known one before tomorrow’s departure?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "获取频率",
+        "en": "Unlock frequency"
+      },
+      "effect": {
+        "zh": "密集解锁鼓励试菜；稀疏解锁让每张配方成为旅程奖励。",
+        "en": "Frequent unlocks encourage experimentation; scarce recipes become expedition rewards."
+      }
+    },
+    {
+      "name": {
+        "zh": "来源可见度",
+        "en": "Source visibility"
+      },
+      "effect": {
+        "zh": "明确提示降低查攻略需求；模糊线索增加寻宝感，也会漏掉内容。",
+        "en": "Clear hints reduce guide dependence; vague clues add discovery but hide content."
+      }
+    }
+  ],
+  "tags": [
+    "discovery",
+    "progression",
+    "information"
+  ],
+  "related": [
+    "exploration-ability-gates",
+    "cooking-judged-flavor",
+    "cooking-meal-loadout",
+    "cooking-measurement-precision"
+  ],
+  "contrast": {
+    "zh": "《星露谷物语》把配方分散到日常日历与人际往来；《漫漫长夜》让特殊配方成为地图探索奖励。",
+    "en": "Stardew spreads recipes across daily routines and relationships; The Long Dark uses unique recipes as exploration rewards."
+  },
+  "combination": {
+    "zh": "组合创意：旅馆住客口述缺了一步的家乡菜，玩家到其故乡调查后补全食谱。",
+    "en": "Design proposal: an inn guest recalls an incomplete family recipe; visiting their hometown reveals the missing step."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "你有鱼和蔬菜，却还不会做能恢复更多体力的鱼汤。",
+      "en": "You have fish and vegetables but have not learned the more restorative fish soup recipe."
+    },
+    "action": {
+      "zh": "你去完成厨师的教学任务，取得做法后备齐材料。",
+      "en": "Complete the cook’s lesson, then gather the ingredients for the newly learned recipe."
+    },
+    "result": {
+      "zh": "菜谱里出现可制作的鱼汤，原有材料获得了新用途。",
+      "en": "Fish soup becomes craftable, giving existing ingredients a new use."
+    },
+    "next": {
+      "zh": "根据下一次出行需要，选择继续学菜还是先做这道。",
+      "en": "Choose between learning another recipe and preparing this one for the next outing."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "做3张食谱卡、两个知识来源和少量材料，分别显示“不会做”和“缺材料”。",
+      "en": "Use three recipe cards, two learning sources and a few ingredients, distinguishing unknown recipes from missing materials."
+    },
+    "pitfall": {
+      "zh": "食谱数量一多容易只剩清单收集；先让每道新菜解决一个清楚的行动需求。",
+      "en": "Large recipe lists can become collection chores; make each early recipe solve a clear activity need."
+    },
+    "test": {
+      "zh": "玩家缺少目标菜时，能否判断应该先找做法，还是补食材？",
+      "en": "When a desired dish is unavailable, can players tell whether they need knowledge or ingredients?"
+    }
+  }
+}

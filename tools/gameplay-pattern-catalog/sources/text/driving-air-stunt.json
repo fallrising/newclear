@@ -1,0 +1,120 @@
+{
+  "id": "driving-air-stunt",
+  "system": "driving",
+  "edition": 3,
+  "name": {
+    "zh": "腾空做动作换取加速",
+    "en": "Perform an airborne trick for a boost"
+  },
+  "summary": {
+    "zh": "把跳台提供的短暂腾空时间，变成额外动作和速度奖励。",
+    "en": "Turn a ramp’s brief airtime into an extra action and a speed reward."
+  },
+  "rules": {
+    "zh": "玩家经过跳台或落差时获得动作窗口，在起跳时或空中输入特技，成功后获得加速奖励。窗口的位置和可连续动作次数由规则决定；玩家既要找到可利用的地形，也要判断剩余时间能否完成动作。",
+    "en": "A ramp or drop creates a trick window at takeoff or during airtime. Successful input awards a boost. The rules determine the timing window and how many actions can be chained, so players read the terrain and judge whether enough time remains."
+  },
+  "loop": [
+    {
+      "zh": "发现跳台或落差",
+      "en": "Spot a ramp or drop"
+    },
+    {
+      "zh": "判断可用动作时间",
+      "en": "Judge the available trick window"
+    },
+    {
+      "zh": "输入特技并完成落地",
+      "en": "Perform the trick and land"
+    },
+    {
+      "zh": "利用奖励准备下个路段",
+      "en": "Use the reward for the next section"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "走平稳路线还是利用有特技机会的落差？",
+      "en": "Take the smooth route or a drop that offers a trick?"
+    },
+    {
+      "zh": "剩余腾空时间够再做一次，还是应准备落地？",
+      "en": "Is there time for another trick, or should you prepare to land?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "动作窗口位置",
+        "en": "Where the window occurs"
+      },
+      "effect": {
+        "zh": "起跳瞬间输入强调地形预判；空中输入更强调剩余时间判断。",
+        "en": "A takeoff input rewards anticipation; midair input rewards judging remaining airtime."
+      }
+    },
+    {
+      "name": {
+        "zh": "连续动作奖励",
+        "en": "Chained-trick reward"
+      },
+      "effect": {
+        "zh": "递增奖励鼓励多做一次，但必须让失败原因清楚可见。",
+        "en": "Increasing rewards tempt one more trick, but the reason for a failed attempt must be legible."
+      }
+    }
+  ],
+  "tags": [
+    "timing",
+    "risk",
+    "dexterity"
+  ],
+  "related": [
+    "driving-air-balance",
+    "driving-drift-boost",
+    "driving-slipstream",
+    "driving-start-charge"
+  ],
+  "contrast": {
+    "zh": "马力欧卡丁车主要奖励起跳时的准确输入；索尼克允许在跳跃期间连续安排方向动作，增加了腾空时间的分配。",
+    "en": "Mario Kart emphasizes timing at takeoff; Sonic permits a sequence of directional actions during a jump, adding an airtime-allocation decision."
+  },
+  "combination": {
+    "zh": "组合提案：随机路线每次改变跳台和出口位置，玩家要临时判断哪次腾空值得做特技，哪次应该专心落地。",
+    "en": "Design proposal: random routes change ramps and exits, forcing players to decide which jumps are worth a trick and which need full attention on landing."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "教学原型有长、短两种跳台，做一次特技需要一段固定时间。",
+      "en": "The teaching prototype has long and short jumps, with each trick taking a fixed amount of time."
+    },
+    "action": {
+      "zh": "玩家在长跳中先完成一次特技，再尝试第二次。",
+      "en": "Complete one trick on the long jump, then attempt a second."
+    },
+    "result": {
+      "zh": "第二次刚好完成，落地获得双份奖励；短跳不够做两次。",
+      "en": "The second finishes just in time, earning two rewards on landing; the short jump cannot fit both."
+    },
+    "next": {
+      "zh": "下次看到短跳，玩家改为只做一次。",
+      "en": "On the next short jump, the player chooses only one trick."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "先用固定跳跃轨迹、两种滞空时间和一个特技按钮验证时机，无需真实车辆物理。",
+      "en": "Start with fixed jump arcs, two airtimes and one trick button; vehicle physics is unnecessary for this timing test."
+    },
+    "pitfall": {
+      "zh": "动画时长和判定时长必须一致，否则动作看似完成却失败。",
+      "en": "Match animation and completion timing so a visibly finished trick does not fail."
+    },
+    "test": {
+      "zh": "玩家是否会根据跳台长度主动减少或增加特技次数？",
+      "en": "Do players change the number of tricks according to jump length?"
+    }
+  }
+}

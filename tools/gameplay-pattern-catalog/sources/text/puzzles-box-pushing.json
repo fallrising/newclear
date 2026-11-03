@@ -1,0 +1,120 @@
+{
+  "id": "puzzles-box-pushing",
+  "system": "puzzles",
+  "edition": 1,
+  "name": {
+    "zh": "推箱与不可逆走位",
+    "en": "Box pushing and positional traps"
+  },
+  "summary": {
+    "zh": "移动物体之前，先想好自己还能站在哪里。",
+    "en": "Before moving a box, consider where you can still stand."
+  },
+  "rules": {
+    "zh": "玩家从相邻格推动箱子，通过位置变化打开路径或满足目标。推动后可能无法走到反方向，也可能把物体卡入死角，因此解题关注站位与操作顺序；撤销帮助验证方案。",
+    "en": "Push boxes from adjacent cells to open routes or satisfy goals. A push may block access to the opposite side or trap a box, making position and action order central; undo supports experiments."
+  },
+  "loop": [
+    {
+      "zh": "辨认目标与死角",
+      "en": "Identify goals and dead ends"
+    },
+    {
+      "zh": "规划可站立位置",
+      "en": "Plan access positions"
+    },
+    {
+      "zh": "按顺序推动箱子",
+      "en": "Push in the chosen order"
+    },
+    {
+      "zh": "检查目标或撤销",
+      "en": "Check completion or undo"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "先解决远处目标，还是先腾出操作通道？",
+      "en": "Solve the distant target first or clear working space?"
+    },
+    {
+      "zh": "当前动作是否保留反向推动的站位？",
+      "en": "Does this move preserve access for a later reverse push?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "撤销范围",
+        "en": "Undo scope"
+      },
+      "effect": {
+        "zh": "无限撤销鼓励推理实验；有限撤销增加执行压力。",
+        "en": "Unlimited undo encourages experiments; limited undo adds pressure."
+      }
+    },
+    {
+      "name": {
+        "zh": "箱子特殊性质",
+        "en": "Box properties"
+      },
+      "effect": {
+        "zh": "少量例外可扩展解法；太多例外削弱可读性。",
+        "en": "A few exceptions expand solutions; too many reduce readability."
+      }
+    }
+  ],
+  "tags": [
+    "spatial",
+    "planning",
+    "information"
+  ],
+  "related": [
+    "building-room-requirements",
+    "puzzles-beam-routing",
+    "puzzles-gravity",
+    "puzzles-linked-portals"
+  ],
+  "contrast": {
+    "zh": "前者改变容器与空间关系；后者让可推物体参与规则表达。",
+    "en": "The former changes containment and space; the latter makes objects express rules."
+  },
+  "combination": {
+    "zh": "组合提案：仓储谜题中货箱需要冷藏，推箱时必须保持冷气通道连通。",
+    "en": "Design proposal: refrigerated warehouse crates must be pushed without blocking cold-air routes."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "箱子前面是目标格，旁边有一条狭窄通道。",
+      "en": "A box faces its target beside a narrow passage."
+    },
+    "action": {
+      "zh": "你先绕到箱子另一侧，把通道留出来，再推向目标。",
+      "en": "Circle to the opposite side, preserve the passage, then push toward the target."
+    },
+    "result": {
+      "zh": "目标被满足，而且你仍能绕到下一个箱子的后方。",
+      "en": "The target is satisfied and you can still reach behind the next box."
+    },
+    "next": {
+      "zh": "检查剩余箱子所需站位，再执行下一步；卡死就撤销。",
+      "en": "Check the standing space needed for remaining boxes, then move or undo a dead end."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "做一张小格子地图、两个箱子、两个目标与逐步撤销。",
+      "en": "Build a small grid with two boxes, two targets, and single-step undo."
+    },
+    "pitfall": {
+      "zh": "先手工验证谜题有解；多加箱子只会增加搜索量，不保证更多好决策。",
+      "en": "Verify a solution by hand; extra boxes increase search without guaranteeing interesting choices."
+    },
+    "test": {
+      "zh": "观察玩家是否会提前保留站位，能否说出把箱子推入死角的后果。",
+      "en": "See whether players preserve access and can explain why a corner push is irreversible."
+    }
+  }
+}

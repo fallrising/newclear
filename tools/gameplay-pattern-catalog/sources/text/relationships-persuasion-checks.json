@@ -1,0 +1,120 @@
+{
+  "id": "relationships-persuasion-checks",
+  "system": "relationships",
+  "edition": 1,
+  "name": {
+    "zh": "对话说服检定",
+    "en": "Dialogue persuasion checks"
+  },
+  "summary": {
+    "zh": "把说服变成可准备、会失败、能改变后续路径的行动。",
+    "en": "Make persuasion an action with preparation, failure and branching consequences."
+  },
+  "rules": {
+    "zh": "玩家选择劝说、威胁或其他论证方式；技能、已知线索及随机结果决定能否过关。成功改变对方行为，失败要面对新的局面或另找办法。",
+    "en": "Choose persuasion, intimidation or another argument. Skills, clues and random outcomes govern success; failure creates a new situation or forces an alternative approach."
+  },
+  "loop": [
+    {
+      "zh": "理解对方诉求",
+      "en": "Understand the target"
+    },
+    {
+      "zh": "收集优势条件",
+      "en": "Gather advantages"
+    },
+    {
+      "zh": "选择论证并检定",
+      "en": "Choose and test an argument"
+    },
+    {
+      "zh": "承担结果",
+      "en": "Follow the result"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "现在冒险说服，还是先找证据再来？",
+      "en": "Attempt persuasion now or return with evidence?"
+    },
+    {
+      "zh": "选择胜率最高的话，还是符合角色立场的话？",
+      "en": "Choose the best odds or the line that fits your character?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "重试规则",
+        "en": "Retry rules"
+      },
+      "effect": {
+        "zh": "可重试鼓励准备；一次性机会强化不可逆选择。",
+        "en": "Retries reward preparation; one-shot checks heighten commitment."
+      }
+    },
+    {
+      "name": {
+        "zh": "失败后内容",
+        "en": "Failure content"
+      },
+      "effect": {
+        "zh": "失败开出不同路径，比只阻挡进度更鼓励尝试。",
+        "en": "Alternative failure paths encourage attempts more than simple locks."
+      }
+    }
+  ],
+  "tags": [
+    "information",
+    "risk",
+    "narrative"
+  ],
+  "related": [
+    "relationships-secrets-leverage",
+    "relationships-companion-approval",
+    "relationships-faction-reputation",
+    "relationships-relationship-commitment"
+  ],
+  "contrast": {
+    "zh": "BG3强调角色构筑与加值；极乐迪斯科用重试类别显著改变“现在要不要试”的判断。",
+    "en": "BG3 emphasizes builds and bonuses; Disco’s retry categories reshape the decision to attempt a check now."
+  },
+  "combination": {
+    "zh": "组合创意：先观察现场可找到谈判筹码，线索既用于逻辑解谜，也改变说服条件；不要求玩家只刷口才。",
+    "en": "Design proposal: scene observation produces clues used both in a logic puzzle and in persuasion, reducing reliance on grinding a speech statistic."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "守门人拒绝通行，你可以立即劝说，也能先找能证明身份的信件。",
+      "en": "A guard refuses entry; persuade him now or first find a letter proving your identity."
+    },
+    "action": {
+      "zh": "你先取得信件，再选择与证据相符的说法。",
+      "en": "Get the letter, then choose an argument supported by it."
+    },
+    "result": {
+      "zh": "准备改变了说服条件；成功能通行，失败则要另找入口。",
+      "en": "Preparation changes the check; success grants entry, while failure requires another route."
+    },
+    "next": {
+      "zh": "根据结果推进目标，或寻找新的证据与替代办法。",
+      "en": "Proceed on success or seek further evidence and alternatives."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "做一场对话、一条可搜集证据和一个失败后仍可走的替代路线。",
+      "en": "Build one conversation, one collectible clue, and an alternative route after failure."
+    },
+    "pitfall": {
+      "zh": "先说明哪些准备有帮助；只有不透明骰点会让玩家难以理解失败。",
+      "en": "Show which preparation helps; opaque dice alone make failure difficult to understand."
+    },
+    "test": {
+      "zh": "观察玩家是否为了提高说服把握主动搜集证据，并在失败后继续行动。",
+      "en": "See whether players seek evidence to improve their chances and continue after failure."
+    }
+  }
+}

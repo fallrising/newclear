@@ -1,0 +1,130 @@
+{
+  "id": "rhythm-sustain-notes",
+  "system": "rhythm",
+  "edition": 3,
+  "name": {
+    "zh": "按住跨过整段长音",
+    "en": "Hold through a sustained note"
+  },
+  "summary": {
+    "zh": "按准开头只是开始，还要把输入保持到指定终点。",
+    "en": "Hitting the start is only the beginning: keep the input held through the required span."
+  },
+  "rules": {
+    "zh": "长音标出开始和持续区段，玩家到点按下后必须维持对应输入。过早松开会丢失后续判定或收益；若同时出现别的提示，还要在保持长按的同时处理它。结束时是否另判一次松手，应由具体规则明确。",
+    "en": "A sustained note marks a start and a duration. Press at its start and keep the required input held; releasing early loses later judgments or rewards. Other prompts may need attention during the hold. Whether release timing receives its own judgment must be specified by the implementation."
+  },
+  "loop": [
+    {
+      "zh": "读出长音起点与长度",
+      "en": "Read the note’s start and length"
+    },
+    {
+      "zh": "到点按下并持续保持",
+      "en": "Press on time and keep holding"
+    },
+    {
+      "zh": "兼顾长音期间的新提示",
+      "en": "Handle new prompts during the hold"
+    },
+    {
+      "zh": "结束长音并准备下一个输入",
+      "en": "Finish the hold and prepare the next input"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "长音还没结束时，怎样分配手指去处理另一条输入？",
+      "en": "How should you allocate fingers to another input before the hold ends?"
+    },
+    {
+      "zh": "两个输入来不及兼顾时，要保住正在持续的长音，还是提前松开争取下一次命中？",
+      "en": "If you cannot manage both inputs, keep the current hold or release early to attempt the next hit?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "持续长度",
+        "en": "Hold length"
+      },
+      "effect": {
+        "zh": "更长会占用手指更久，只有搭配清楚的节奏变化才不容易变成单纯等待。",
+        "en": "Longer holds occupy an input longer; clear rhythmic changes keep them from becoming empty waiting."
+      }
+    },
+    {
+      "name": {
+        "zh": "长按期间的并行输入",
+        "en": "Inputs during a hold"
+      },
+      "effect": {
+        "zh": "加入另一轨的短音能测试协调；应逐步增加，避免第一次就要求复杂指法。",
+        "en": "Short notes on another lane test coordination; introduce them gradually before demanding complex finger patterns."
+      }
+    },
+    {
+      "name": {
+        "zh": "松手判定",
+        "en": "Release judgment"
+      },
+      "effect": {
+        "zh": "只要求按够时长更易理解；额外判定松手时刻会增加一个独立的精准操作。",
+        "en": "Requiring sufficient duration is simpler; judging release timing adds a separate precision demand."
+      }
+    }
+  ],
+  "tags": [
+    "timing",
+    "precision",
+    "dexterity"
+  ],
+  "related": [
+    "rhythm-cue-response",
+    "rhythm-hidden-beats",
+    "rhythm-onbeat-actions",
+    "cooking-measurement-precision"
+  ],
+  "contrast": {
+    "zh": "Spin Rhythm XD 可进一步检查长音末端的松手；Muse Dash 的典型变化是持续长音时还要处理另一组攻击。",
+    "en": "Spin Rhythm XD can add a release cue at the hold ending; Muse Dash highlights handling other attacks while a hold continues."
+  },
+  "combination": {
+    "zh": "组合提案：用长按维持蒸汽阀门四拍，再在出锅窗口松手；另一口锅的提示穿插其中，形成保持与切换的取舍。",
+    "en": "Design proposal: hold a steam valve for four beats and release within a cooking window while another pot inserts prompts, testing when to sustain or switch inputs."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "教学示例：左键长音持续四拍，第三拍另有一次右键短音。",
+      "en": "Teaching example: a left-key hold lasts four beats, with a right-key tap on beat three."
+    },
+    "action": {
+      "zh": "玩家左手一直按住，第三拍用右手点一下。",
+      "en": "The player keeps the left input held and taps with the right hand on beat three."
+    },
+    "result": {
+      "zh": "长音的持续段被完整点亮，右侧短音也获得命中反馈。",
+      "en": "The held segment fills completely and the right-side note also registers a hit."
+    },
+    "next": {
+      "zh": "下一组长音换到右键，需要提前调整两手分工。",
+      "en": "The next hold moves to the right key, requiring a new division between the hands."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "只做两个键、四个长音和两个穿插短音；显示长音起止以及保持是否中断。",
+      "en": "Use two keys, four holds and two interleaved taps; show hold boundaries and whether input was interrupted."
+    },
+    "pitfall": {
+      "zh": "只在起点判定会让长按变成装饰；每帧乱扣分又会让一次误松被重复惩罚。",
+      "en": "Judging only the start makes the hold cosmetic; repeated penalties every frame can overpunish one accidental release."
+    },
+    "test": {
+      "zh": "玩家能否指出自己是开头没按准，还是中途松开导致丢分？",
+      "en": "Can players tell whether lost credit came from a mistimed start or an early release?"
+    }
+  }
+}

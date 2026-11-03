@@ -1,0 +1,120 @@
+{
+  "id": "driving-start-charge",
+  "system": "driving",
+  "edition": 3,
+  "name": {
+    "zh": "倒计时中踩准起步蓄力",
+    "en": "Time the throttle during the countdown"
+  },
+  "summary": {
+    "zh": "比赛开始前的一次或几次油门输入，决定起步能否抢得速度。",
+    "en": "One or several timed throttle inputs determine the speed gained at the start."
+  },
+  "rules": {
+    "zh": "倒计时提供可预测的声音或画面提示。玩家在有效窗口踩油门，积累或触发起步加速；过早、漏按或错误节奏可能失去奖励。回合从辨认提示开始，以看到起步结果并调整下一次时机结束，适合短距离反复练习。",
+    "en": "A countdown supplies predictable audio or visual cues. Throttle inputs within a valid window charge or trigger a start boost; early, missed or mistimed inputs can lose the reward. Read the cue, act, see the launch result and adjust the next attempt in a short practice loop."
+  },
+  "loop": [
+    {
+      "zh": "识别倒计时提示",
+      "en": "Read the countdown cue"
+    },
+    {
+      "zh": "在窗口内踩油门",
+      "en": "Apply throttle in the window"
+    },
+    {
+      "zh": "看起步加速或失败反馈",
+      "en": "Read the boost or failure feedback"
+    },
+    {
+      "zh": "下一次调整输入时机",
+      "en": "Adjust timing on the next attempt"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "采用稳妥的宽窗口，还是追求更精确的高收益时机？",
+      "en": "Choose a safer timing window or aim for a more precise, stronger launch?"
+    },
+    {
+      "zh": "连按蓄力时，继续追下一次提示还是保住当前掌握的节奏？",
+      "en": "During repeated charges, chase the next cue or stick to a rhythm you can reliably execute?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "有效输入窗口",
+        "en": "Valid input window"
+      },
+      "effect": {
+        "zh": "宽窗口易上手；窄窗口需要更清楚的声音、动画和失败原因。",
+        "en": "A wide window is approachable; a narrow one needs clearer cues and failure explanations."
+      }
+    },
+    {
+      "name": {
+        "zh": "失败损失",
+        "en": "Failure cost"
+      },
+      "effect": {
+        "zh": "只失去奖励适合学习；额外起步迟滞会让抢按风险更大。",
+        "en": "Losing only the bonus supports learning; an extra delay makes early input riskier."
+      }
+    }
+  ],
+  "tags": [
+    "timing",
+    "precision",
+    "dexterity"
+  ],
+  "related": [
+    "driving-air-balance",
+    "driving-air-stunt",
+    "driving-drift-boost",
+    "cooking-measurement-precision"
+  ],
+  "contrast": {
+    "zh": "马力欧卡丁车重点是一处开始按住的时机；索尼克通常需要跟随连续提示多次输入。",
+    "en": "Mario Kart focuses on when to begin holding the throttle; Sonic typically asks for repeated inputs across the countdown."
+  },
+  "combination": {
+    "zh": "组合提案：餐车先把锅预热到合适区间，再用准确起步让热食尽快送出；两个时机窗口可以重叠，产生注意力分配。",
+    "en": "Design proposal: preheat a food truck’s pan into a useful window, then launch accurately to deliver hot food. Overlapping timing windows create an attention tradeoff."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "教学原型提示灯每秒变化一次，最后一次亮起后有短暂输入窗口。",
+      "en": "The teaching prototype changes its cue light once a second, with a short input window after the final light."
+    },
+    "action": {
+      "zh": "玩家看见最后提示后按住油门。",
+      "en": "Hold the throttle after noticing the final cue."
+    },
+    "result": {
+      "zh": "车获得起步加速，反馈条显示本次输入略晚。",
+      "en": "The car launches with a boost; feedback shows the input was slightly late."
+    },
+    "next": {
+      "zh": "下一次尝试提前少许，比较起步距离。",
+      "en": "Try slightly earlier on the next attempt and compare launch distance."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "做倒计时、一个按钮和三秒直线冲刺，并在每次结束后显示早晚偏差。",
+      "en": "Build a countdown, one button and a three-second straight sprint, then show timing error after each attempt."
+    },
+    "pitfall": {
+      "zh": "先处理输入延迟与提示同步，避免玩家被设备差异误导。",
+      "en": "Handle input latency and cue synchronization before interpreting player errors."
+    },
+    "test": {
+      "zh": "只看反馈，玩家是否能稳定地把下一次输入往正确方向调整？",
+      "en": "Can players use feedback to consistently adjust their next input in the right direction?"
+    }
+  }
+}

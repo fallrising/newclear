@@ -1,0 +1,120 @@
+{
+  "id": "matching-gravity-cascade",
+  "system": "matching",
+  "edition": 3,
+  "name": {
+    "zh": "预留掉落位置触发连续消除",
+    "en": "Set up gravity-driven cascades"
+  },
+  "summary": {
+    "zh": "先消掉支撑物，让上面的物件落下来完成下一组。",
+    "en": "Remove supporting pieces so falling pieces complete the next group."
+  },
+  "rules": {
+    "zh": "一次消除后，物件落进空位；如果新的位置又满足消除条件，就自动继续结算。玩家可以利用已经看得见的排列准备连锁，也要区分可预测的掉落与随机补入带来的意外结果。",
+    "en": "After a clear, pieces fall into the gaps. If their new positions satisfy another match, resolution continues automatically. Players can prepare cascades using visible arrangements while distinguishing predictable falls from random refill outcomes."
+  },
+  "loop": [
+    {
+      "zh": "看上层物件会落到哪里",
+      "en": "Predict where upper pieces will land"
+    },
+    {
+      "zh": "选择先消除的支撑组",
+      "en": "Choose a supporting group to clear"
+    },
+    {
+      "zh": "按顺序结算掉落连锁",
+      "en": "Resolve the sequence of falling matches"
+    },
+    {
+      "zh": "观察连锁后的剩余结构",
+      "en": "Inspect what remains after the cascade"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "直接清目标附近的块，还是先清下方一组让上层自动落到目标？",
+      "en": "Clear beside the target directly or clear below so upper pieces fall into a useful position?"
+    },
+    {
+      "zh": "确定能触发的两段连锁，是否比依赖随机新块的大连锁更值得选？",
+      "en": "Prefer a guaranteed two-step cascade or gamble on a larger one from random new pieces?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "补入信息",
+        "en": "Refill information"
+      },
+      "effect": {
+        "zh": "固定或可见补入让连锁可规划；隐藏随机补入增加惊喜和不可控性。",
+        "en": "Fixed or visible refill makes cascades plannable; hidden random refill adds surprise and uncertainty."
+      }
+    },
+    {
+      "name": {
+        "zh": "连锁奖励增长",
+        "en": "Cascade reward growth"
+      },
+      "effect": {
+        "zh": "奖励增长越快，越鼓励先做准备；过高会使普通消除显得无价值。",
+        "en": "Faster reward growth encourages setup, but excessive growth makes ordinary matches feel worthless."
+      }
+    }
+  ],
+  "tags": [
+    "planning",
+    "spatial",
+    "randomness"
+  ],
+  "related": [
+    "matching-clear-under-cargo",
+    "matching-complete-lines",
+    "matching-merge-three-upgrade",
+    "matching-pattern-creates-power"
+  ],
+  "contrast": {
+    "zh": "宝石迷阵3可把级联直接用于持续得分；糖果传奇还要求看连锁是否落在关卡目标需要的位置。",
+    "en": "Bejeweled 3 uses cascades for continued scoring; Candy Crush also makes their location relative to level goals matter."
+  },
+  "combination": {
+    "zh": "组合提案：每次消除产生一块可回流的副产物，玩家选择把它送回哪一列。回流既可能补齐下一段连锁，也可能堵住原有布局。",
+    "en": "Design proposal: each clear generates a byproduct returned to a chosen column. The returning piece can complete the next cascade or obstruct the planned layout."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "上方两块蓝色相隔一格，下方红色支撑组挡住第三块蓝色的落点。",
+      "en": "Two upper blue pieces are one cell apart, while red support pieces prevent a third blue from reaching the gap."
+    },
+    "action": {
+      "zh": "先消除红色支撑组。",
+      "en": "Clear the red support group first."
+    },
+    "result": {
+      "zh": "蓝块落下后自动连成一组，再次消除。",
+      "en": "The blue piece falls into place, completing and clearing another group."
+    },
+    "next": {
+      "zh": "连锁停下后留下新的高度差，玩家重新判断下一次掉落。",
+      "en": "The cascade leaves a new height pattern, requiring another prediction."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "用一个固定棋盘设计三种可预测的两段连锁，逐段慢放结算。",
+      "en": "Create three predictable two-step cascades on fixed boards, resolving each stage slowly."
+    },
+    "pitfall": {
+      "zh": "动画可以增强反馈，但不能掩盖是哪一步造成了下一次匹配。",
+      "en": "Animation should reinforce feedback without hiding which event caused the next match."
+    },
+    "test": {
+      "zh": "玩家能否在点击前指出第二次消除发生在哪里？",
+      "en": "Can players identify the second clear before making the initiating move?"
+    }
+  }
+}

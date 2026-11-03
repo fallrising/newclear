@@ -1,0 +1,120 @@
+{
+  "id": "gathering-tool-hardness",
+  "system": "gathering",
+  "edition": 1,
+  "name": {
+    "zh": "采集工具门槛",
+    "en": "Harvesting tool gates"
+  },
+  "summary": {
+    "zh": "看得到的资源，不一定能用现在的工具带走。",
+    "en": "Visible resources may remain inaccessible to the current tool."
+  },
+  "rules": {
+    "zh": "矿物或植物要求特定工具类别或等级，低级工具无法采得有效材料。玩家记录位置、取得升级材料再回来，成功开采反馈工具升级的实际价值。",
+    "en": "Resources require a tool type or tier, and weaker tools cannot yield useful material. Players remember locations, acquire upgrades and return; successful extraction demonstrates progression."
+  },
+  "loop": [
+    {
+      "zh": "发现新资源",
+      "en": "Find a new resource"
+    },
+    {
+      "zh": "检查工具要求",
+      "en": "Check tool requirements"
+    },
+    {
+      "zh": "升级或更换工具",
+      "en": "Upgrade or switch tools"
+    },
+    {
+      "zh": "返回开采",
+      "en": "Return to extract"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "现在为升级绕路，还是先采现有工具能处理的资源？",
+      "en": "Detour for an upgrade or gather currently accessible resources?"
+    },
+    {
+      "zh": "新工具先服务哪条装备或建筑路线？",
+      "en": "Which equipment or building route should the new tool unlock first?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "门槛跨度",
+        "en": "Tier spacing"
+      },
+      "effect": {
+        "zh": "跨度大让升级更有冲击力，也可能造成长时间空转。",
+        "en": "Large gaps make upgrades dramatic but may create long stalls."
+      }
+    },
+    {
+      "name": {
+        "zh": "失败反馈",
+        "en": "Failure feedback"
+      },
+      "effect": {
+        "zh": "明确提示缺少工具减少无效敲击；只显示零伤害容易误导。",
+        "en": "Explicit tool messages prevent wasted effort; zero-damage feedback alone can mislead."
+      }
+    }
+  ],
+  "tags": [
+    "progression",
+    "planning",
+    "discovery"
+  ],
+  "related": [
+    "gathering-depth-targeting",
+    "gathering-renewable-forage-route",
+    "gathering-gathering-quota",
+    "gathering-hidden-deposit-clues"
+  ],
+  "contrast": {
+    "zh": "泰拉瑞亚把门槛映射到镐力数值；英灵神殿将工具等级与生物群系推进和维护成本结合。",
+    "en": "Terraria expresses gates through pickaxe power; Valheim connects tool tiers with biome progression and upkeep."
+  },
+  "combination": {
+    "zh": "组合创意：新镐能采硬矿但噪声更大，开启资源的同时引来地下生物，使升级保留取舍。",
+    "en": "Design proposal: a stronger pickaxe mines hard ore but generates more noise, opening resources while attracting creatures."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "你找到铁矿，但石镐无法开采，地图上还有能采的铜矿。",
+      "en": "You find iron your stone pick cannot mine, while accessible copper remains on the map."
+    },
+    "action": {
+      "zh": "你标记铁矿位置，先采铜并制造更合适的镐。",
+      "en": "Mark the iron deposit, gather copper and craft a suitable pick."
+    },
+    "result": {
+      "zh": "回到同一处后，之前无效的攻击开始产出资源。",
+      "en": "On returning, the previously ineffective mining action now yields resources."
+    },
+    "next": {
+      "zh": "用新材料推进下一项制作，再寻找更高门槛的资源。",
+      "en": "Use the new material for another project and look for the next resource barrier."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "做两种工具和两种矿点，显示不能开采的原因，并允许标记位置。",
+      "en": "Use two tools and two deposit types, explaining incompatibility and allowing location markers."
+    },
+    "pitfall": {
+      "zh": "工具层级太多会造成反复刷同样材料；先让每次升级带来清楚的新用途。",
+      "en": "Too many tool tiers create repeated grinding; make each upgrade unlock a clear new use."
+    },
+    "test": {
+      "zh": "玩家遇到不可采矿点后，是否能自行找到升级目标并愿意回来？",
+      "en": "After finding an inaccessible deposit, can players identify the upgrade and plan a return?"
+    }
+  }
+}

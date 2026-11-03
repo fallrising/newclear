@@ -1,0 +1,120 @@
+{
+  "id": "cooking-order-triage",
+  "system": "cooking",
+  "edition": 1,
+  "name": {
+    "zh": "限时订单排序",
+    "en": "Timed order triage"
+  },
+  "summary": {
+    "zh": "不只做得快，还要判断哪张单值得先做。",
+    "en": "Decide which order deserves attention first, not only how fast to cook."
+  },
+  "rules": {
+    "zh": "多个订单同时等待，制作耗时不同，耐心或截止时间持续下降。玩家选择处理顺序并交付匹配菜品，及时服务获得收益，延误则失去奖励或结束营业。",
+    "en": "Several orders wait at once with different preparation times and shrinking patience or deadlines. Players prioritize and deliver matching dishes; timely service earns rewards, while delays lose rewards or end the run."
+  },
+  "loop": [
+    {
+      "zh": "查看等待订单",
+      "en": "Inspect queued orders"
+    },
+    {
+      "zh": "估算剩余时间与工时",
+      "en": "Estimate slack and preparation time"
+    },
+    {
+      "zh": "优先制作",
+      "en": "Prepare the priority dish"
+    },
+    {
+      "zh": "交付后重排",
+      "en": "Deliver and reprioritize"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "先做快到期的复杂单，还是先清掉两个快单？",
+      "en": "Finish the urgent complex order or clear two quick ones?"
+    },
+    {
+      "zh": "为了守住连单奖励，是否值得放弃更方便的顺序？",
+      "en": "Is preserving a service streak worth an inconvenient order?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "截止时间差异",
+        "en": "Deadline variation"
+      },
+      "effect": {
+        "zh": "差异越大越需要动态调度；相同时间容易退化为队列。",
+        "en": "Varied deadlines require dynamic scheduling; identical ones tend toward a simple queue."
+      }
+    },
+    {
+      "name": {
+        "zh": "失败容忍度",
+        "en": "Failure tolerance"
+      },
+      "effect": {
+        "zh": "单次失误只扣分允许冒险；一桌离开就结束会鼓励保险计划。",
+        "en": "Score-only penalties allow risk; run-ending abandonment encourages conservative planning."
+      }
+    }
+  ],
+  "tags": [
+    "time",
+    "planning",
+    "risk"
+  ],
+  "related": [
+    "cooking-food-preservation",
+    "cooking-heat-window",
+    "commerce-regional-arbitrage",
+    "commerce-timed-contracts"
+  ],
+  "contrast": {
+    "zh": "胡闹厨房主要用分数和订单连贯性施压；PlateUp 把最不耐烦的顾客变成整局的短板。",
+    "en": "Overcooked pressures scores and order flow; PlateUp makes the least-patient customer a run-ending bottleneck."
+  },
+  "combination": {
+    "zh": "组合创意：顾客可接受一次解释性延期，玩家用有限的人情额度交换更合理的出餐顺序。",
+    "en": "Design proposal: customers accept one explained delay, letting limited goodwill buy scheduling flexibility."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "两张单快到期：汤要20秒，沙拉只要5秒。",
+      "en": "Two orders are nearly due: soup takes twenty seconds and salad takes five."
+    },
+    "action": {
+      "zh": "你先交沙拉清掉一张单，再集中处理汤。",
+      "en": "Deliver the salad first to clear one order, then focus on soup."
+    },
+    "result": {
+      "zh": "短单完成释放压力，但汤的剩余耐心也更少。",
+      "en": "The quick order is cleared, but the soup customer now has less patience."
+    },
+    "next": {
+      "zh": "新单加入后重新评估，不能永远只做最短的一张。",
+      "en": "Reassess when a new order arrives; shortest-first is not always best."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "做三个同时倒计时的订单卡和固定制作时长，先用点击选择制作对象。",
+      "en": "Use three countdown order cards and fixed preparation times, selecting work with a click."
+    },
+    "pitfall": {
+      "zh": "别先增加大量菜谱；不同工时与截止时间已足够验证调度决策。",
+      "en": "A large menu is unnecessary initially; varied durations and deadlines can already test scheduling choices."
+    },
+    "test": {
+      "zh": "改变一张订单的剩余耐心，玩家是否会调整顺序，而不是照出现次序完成？",
+      "en": "When one deadline changes, do players reprioritise instead of following arrival order?"
+    }
+  }
+}

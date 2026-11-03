@@ -1,0 +1,120 @@
+{
+  "id": "deckbuilding-reward-choice",
+  "system": "deckbuilding",
+  "edition": 2,
+  "name": {
+    "zh": "奖励选牌与跳过",
+    "en": "Drafting rewards and skipping"
+  },
+  "summary": {
+    "zh": "赢了以后选一张牌，也可以为了稳定抽牌什么都不拿。",
+    "en": "Choose a reward card after a win, or keep the deck consistent by taking none."
+  },
+  "rules": {
+    "zh": "每次过关给出少量候选牌，玩家选一张加入现有牌库，也可以跳过。新牌能补足短板，但会占用以后抽牌的位置；反馈来自下一战是否更容易抽到需要的牌。",
+    "en": "After an encounter, offer a few cards and let the player take one or skip. A useful addition also occupies future draws, so its value becomes clear in the next fight."
+  },
+  "loop": [
+    {
+      "zh": "发现牌组缺口",
+      "en": "Identify a missing role"
+    },
+    {
+      "zh": "比较本次奖励",
+      "en": "Compare the offered cards"
+    },
+    {
+      "zh": "选一张或跳过",
+      "en": "Take one or skip"
+    },
+    {
+      "zh": "在下一战验证",
+      "en": "Test it in the next encounter"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "现在缺防守，还是只想追求一张更强的攻击？奖励必须解决真实问题。",
+      "en": "Do you need defense now, or are you merely tempted by another attack?"
+    },
+    {
+      "zh": "选一张以后可能有用的牌，还是保留当前抽牌的稳定性？",
+      "en": "Take a speculative card, or preserve reliable draws?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "候选数量",
+        "en": "Offer size"
+      },
+      "effect": {
+        "zh": "越多越容易补齐需求，也越容易每局重复同一种组合。",
+        "en": "More options improve access but can make builds converge."
+      }
+    },
+    {
+      "name": {
+        "zh": "初始牌库大小",
+        "en": "Starting deck size"
+      },
+      "effect": {
+        "zh": "牌越少，新加入的一张越容易改变抽牌节奏。",
+        "en": "An addition changes a small deck more strongly."
+      }
+    }
+  ],
+  "tags": [
+    "planning",
+    "randomness",
+    "optimization"
+  ],
+  "related": [
+    "deckbuilding-dice-allocation",
+    "combat-combat-deck-cycle",
+    "deckbuilding-discard-redraw",
+    "deckbuilding-duplicate-investment"
+  ],
+  "contrast": {
+    "zh": "《杀戮尖塔》主要补足角色的出牌计划；《怪物火车》还要考虑单位与分层战场的配合。",
+    "en": "Slay the Spire develops a character’s card plan; Monster Train also asks how recruits fit its floors."
+  },
+  "combination": {
+    "zh": "设计提案：每个钓鱼赛段后给三张技巧牌，允许跳过，让下一段手牌反映玩家的取舍。",
+    "en": "Design proposal: Offer three fishing-technique cards after each contest segment, with skipping allowed."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "编辑示例：十张牌里只有一张防守牌，下一关会连续攻击。",
+      "en": "Editorial example: a ten-card deck has one defense card before an aggressive encounter."
+    },
+    "action": {
+      "zh": "奖励是两张攻击与一张护盾；玩家拿护盾。",
+      "en": "The offer contains two attacks and a shield; choose the shield."
+    },
+    "result": {
+      "zh": "牌库变成十一张，防守牌增至两张。",
+      "en": "The deck now has eleven cards, including two defenses."
+    },
+    "next": {
+      "zh": "下一战观察能否及时抽到护盾，再决定是否继续加牌。",
+      "en": "Check whether defense arrives in time before adding another card."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "先做六张起始牌、六种奖励和三场固定战斗，奖励界面保留跳过按钮。",
+      "en": "Build a six-card starter deck, six reward types and three fixed encounters, including a skip button."
+    },
+    "pitfall": {
+      "zh": "不要先扩成上百张牌；先验证奖励中是否经常存在有理由的取舍。",
+      "en": "Avoid a hundred-card pool before the offers produce meaningful trade-offs."
+    },
+    "test": {
+      "zh": "试玩者能说出至少一次拿牌理由与一次跳过理由，而不是永远点稀有牌。",
+      "en": "Players can explain one pick and one skip without always choosing rarity."
+    }
+  }
+}

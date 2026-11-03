@@ -1,0 +1,120 @@
+{
+  "id": "stealth-synchronized-actions",
+  "system": "stealth",
+  "edition": 2,
+  "name": {
+    "zh": "预排同步行动",
+    "en": "Queued synchronized actions"
+  },
+  "summary": {
+    "zh": "先给几名队员安排动作，再一口气处理互相照应的守卫。",
+    "en": "Queue several characters, then act together against guards watching one another."
+  },
+  "rules": {
+    "zh": "玩家为多个角色预先指定目标与动作，再用一次确认触发。同步解决相互照看的敌人，避免一人倒下时另一人报警；不同动作的行走与出手时间仍需计算。",
+    "en": "Assign targets and actions to several characters before one release command. Resolve mutually watching guards together before one can raise an alarm; approach and execution times still matter."
+  },
+  "loop": [
+    {
+      "zh": "找出互相照看的敌人",
+      "en": "Identify mutually watching enemies"
+    },
+    {
+      "zh": "让队员各就各位",
+      "en": "Position each character"
+    },
+    {
+      "zh": "预排目标与动作",
+      "en": "Queue actions and targets"
+    },
+    {
+      "zh": "同步执行后撤离",
+      "en": "Execute together and withdraw"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "全员立即出手，还是让远处队员先接近再触发？",
+      "en": "Release everyone now, or let the distant character get closer first?"
+    },
+    {
+      "zh": "安排第三人解决新巡逻，还是留他处理计划失误？",
+      "en": "Assign the third character to another patrol, or reserve them for a failed plan?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "执行时间差",
+        "en": "Execution-time difference"
+      },
+      "effect": {
+        "zh": "动作完成时间差越大，玩家越需要提前站位或设置延迟。",
+        "en": "Larger duration differences increase the value of positioning and staggered starts."
+      }
+    },
+    {
+      "name": {
+        "zh": "排队时是否暂停",
+        "en": "Pause while queuing"
+      },
+      "effect": {
+        "zh": "暂停降低操作负担；不暂停则保留观察巡逻和快速安排的压力。",
+        "en": "Pausing reduces execution pressure; live queuing retains patrol-reading and speed demands."
+      }
+    }
+  ],
+  "tags": [
+    "planning",
+    "timing",
+    "spatial"
+  ],
+  "related": [
+    "exploration-stealth-awareness",
+    "stealth-body-concealment",
+    "stealth-light-shadow",
+    "stealth-sound-lures"
+  ],
+  "contrast": {
+    "zh": "两者都把多人动作压缩成一次触发；《赏金奇兵3》还把规划时是否暂停作为难度选项。",
+    "en": "Both compress squad execution into one release; Desperados III also makes planning-time pause a difficulty choice."
+  },
+  "combination": {
+    "zh": "设计提案：潜入厨房时，一人递出餐盘引开视线，另一人同时换走文件；动作成功依赖交接时点。",
+    "en": "Design proposal: during a kitchen infiltration, one character hands over a tray as another swaps a document; success depends on the handoff timing."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "两名守卫相互看着，两个队员已分别躲在他们身后。",
+      "en": "Two guards watch one another; each has an agent hidden behind them."
+    },
+    "action": {
+      "zh": "你分别指定击晕目标，再按下同时执行。",
+      "en": "Queue one knockout per agent and release both."
+    },
+    "result": {
+      "zh": "两人同时倒下，没有留下看见同伴遇袭的目击者。",
+      "en": "Both guards fall before either can react to the other’s takedown."
+    },
+    "next": {
+      "zh": "接着分配谁藏身体、谁观察下一班巡逻。",
+      "en": "Assign one agent to bodies and another to watch the next patrol."
+    }
+  },
+  "prototype": {
+    "scope": "medium",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "先做两名队员、两个固定守卫、每人一个可排队动作，再加共同执行按钮。",
+      "en": "Start with two agents, two stationary guards, one queued action each and a shared release button."
+    },
+    "pitfall": {
+      "zh": "不要一开始做长指令链；优先解释“尚未就位”和“已准备执行”的区别。",
+      "en": "Avoid long command chains initially; distinguish moving into place from being ready to execute."
+    },
+    "test": {
+      "zh": "玩家能否说清失败是站位、动作耗时还是触发时机造成，而非觉得队员不听指挥？",
+      "en": "Can players explain failure in terms of position, action duration or release timing rather than unresponsive agents?"
+    }
+  }
+}

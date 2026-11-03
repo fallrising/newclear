@@ -1,0 +1,120 @@
+{
+  "id": "farming-livestock-care",
+  "system": "farming",
+  "edition": 1,
+  "name": {
+    "zh": "家畜日常照料",
+    "en": "Livestock care"
+  },
+  "summary": {
+    "zh": "喂养与照顾把动物变成持续产出、持续占用时间的伙伴。",
+    "en": "Feeding and care make animals recurring producers with recurring needs."
+  },
+  "rules": {
+    "zh": "玩家为家畜准备住处、食物并定期互动，成熟后收集蛋、奶等产物。产出受成长或照料状态影响，扩大家畜数量也扩大饲料与每日工作量。",
+    "en": "Provide shelter, feed and routine attention, then collect eggs, milk or other products once animals mature. Growth and care influence output; a larger herd also increases feed demand and daily work."
+  },
+  "loop": [
+    {
+      "zh": "建住处并引入家畜",
+      "en": "Build shelter and acquire animals"
+    },
+    {
+      "zh": "补充饲料与互动",
+      "en": "Supply feed and attention"
+    },
+    {
+      "zh": "检查状态并收集产物",
+      "en": "Check condition and collect output"
+    },
+    {
+      "zh": "安排加工或扩群",
+      "en": "Process products or expand the herd"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "扩群前要保证饲料来源，不能只看购买动物的价格。",
+      "en": "Before expanding the herd, secure feed rather than considering only the purchase price."
+    },
+    {
+      "zh": "今天逐只互动，还是先花钱减轻喂食工作，把时间留给外出？",
+      "en": "Spend today interacting with each animal, or pay to reduce feeding chores and preserve time for an outing?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "照料与产出关系",
+        "en": "Care–output relationship"
+      },
+      "effect": {
+        "zh": "仅影响品质比较宽容，完全停产会迫使每日打卡。",
+        "en": "Quality-only effects are forgiving; total production shutdown creates mandatory daily chores."
+      }
+    },
+    {
+      "name": {
+        "zh": "自动化解锁时间",
+        "en": "Automation timing"
+      },
+      "effect": {
+        "zh": "过晚容易重复疲劳，过早则削弱认识动物的过程。",
+        "en": "Late automation risks repetition; very early automation can weaken familiarity with individual animals."
+      }
+    }
+  ],
+  "tags": [
+    "planning",
+    "progression",
+    "economy"
+  ],
+  "related": [
+    "farming-seed-reinvestment",
+    "farming-orchard-investment",
+    "farming-regrowth-crops",
+    "farming-season-window"
+  ],
+  "contrast": {
+    "zh": "星露谷用友好度与心情深化个体养成；Dinkum把许可与设施准备放在入门流程里。",
+    "en": "Stardew deepens individual care with friendship and mood; Dinkum foregrounds licenses and facility preparation."
+  },
+  "combination": {
+    "zh": "设计提案：每只动物偏好不同照料方式，自动设备负责基础需求，个性互动用于特殊产物。",
+    "en": "Design proposal: automate basic needs while individual care preferences unlock specialty products."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "你养了3只动物，只剩2份饲料，今天还要外出。",
+      "en": "You own three animals but have two portions of feed and an outing planned."
+    },
+    "action": {
+      "zh": "你先补足饲料，再决定把互动时间留给状态较差的那只。",
+      "en": "Refill the feed, then give your limited interaction time to the animal in poorer condition."
+    },
+    "result": {
+      "zh": "动物状态得到改善，产物或生产进度显示照料效果。",
+      "en": "Animal condition improves; products or production progress make the care visible."
+    },
+    "next": {
+      "zh": "收集产物后估算明天饲料，不急着再买新动物。",
+      "en": "After collecting products, budget tomorrow’s feed before buying another animal."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "只做3个动物卡片、饲料库存和每日一次照料，用状态提示代替复杂行为AI。",
+      "en": "Start with three animal cards, a feed stock and daily care; use status indicators rather than complex behaviour AI."
+    },
+    "pitfall": {
+      "zh": "繁殖、疾病、自由寻路和品种差异都能扩大范围，先检查每日照料是否有取舍。",
+      "en": "Breeding, illness, roaming and breed differences expand the scope; first test the daily care choices."
+    },
+    "test": {
+      "zh": "当饲料与时间受限时，玩家是否会推迟扩群并调整照料顺序？",
+      "en": "When time and feed are tight, do players delay expansion and change care priorities?"
+    }
+  }
+}

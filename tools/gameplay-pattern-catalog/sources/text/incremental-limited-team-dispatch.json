@@ -1,0 +1,120 @@
+{
+  "id": "incremental-limited-team-dispatch",
+  "system": "incremental",
+  "edition": 3,
+  "name": {
+    "zh": "派出有限队伍，等待任务回报",
+    "en": "Dispatch limited teams for delayed rewards"
+  },
+  "summary": {
+    "zh": "长任务占住名额，更高奖励要和错过其他任务一起计算。",
+    "en": "A long task occupies a team, so its reward must be weighed against missed alternatives."
+  },
+  "rules": {
+    "zh": "玩家把有限的队伍或角色派到有时长与回报的任务中。被派出的单位暂时不可参加其他任务，能力匹配和风险影响结果；任务完成后再回收队伍与奖励。关键是名额被占用的时间，不是玩家亲自完成订单。",
+    "en": "Assign limited teams or characters to tasks with durations and rewards. Dispatched units are unavailable for other tasks; suitability and risk affect outcomes. On completion, recover the team and rewards. The key cost is how long a team remains committed, not personally fulfilling an order."
+  },
+  "loop": [
+    {
+      "zh": "查看队伍与可选任务",
+      "en": "Inspect available teams and tasks"
+    },
+    {
+      "zh": "按能力与时长分配",
+      "en": "Assign by suitability and duration"
+    },
+    {
+      "zh": "等待并承担期间机会成本",
+      "en": "Wait and bear the commitment cost"
+    },
+    {
+      "zh": "回收队伍后重新派遣",
+      "en": "Recover teams and dispatch again"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "把最强队伍锁进高回报长任务，还是留着应对可能出现的新机会？",
+      "en": "Commit the strongest team to a long high-reward task or keep it for new opportunities?"
+    },
+    {
+      "zh": "用不完全匹配的队伍冒险，还是让一个名额暂时空着？",
+      "en": "Risk a poorly matched team or leave a slot idle?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "并行任务名额",
+        "en": "Concurrent assignments"
+      },
+      "effect": {
+        "zh": "名额少会突出优先级；名额太多容易只剩全派出去。",
+        "en": "Few slots emphasize priority; too many can reduce the choice to dispatching everyone."
+      }
+    },
+    {
+      "name": {
+        "zh": "时长与风险的关系",
+        "en": "Duration-risk relationship"
+      },
+      "effect": {
+        "zh": "长任务不应只按比例放大奖励，还可改变风险、稀缺产物或准备需求。",
+        "en": "Long tasks can change risk, rare rewards or preparation requirements rather than only scaling payout."
+      }
+    }
+  ],
+  "tags": [
+    "planning",
+    "time",
+    "risk"
+  ],
+  "related": [
+    "cooking-order-triage",
+    "incremental-allocate-progress-capacity",
+    "incremental-offline-window",
+    "incremental-spend-time-advance"
+  ],
+  "contrast": {
+    "zh": "点击英雄主要围绕单个佣兵的时长与奖励类型；无人深空加入舰队组成、能力匹配和航程中的事件选择。",
+    "en": "Clicker Heroes centers on individual mercenary duration and rewards; No Man’s Sky adds fleet composition, suitability and expedition events."
+  },
+  "combination": {
+    "zh": "组合提案：出发前给队伍配一份饭，耐力餐缩短任务时间，防护餐降低损伤风险，同一份食材只能用在一队。",
+    "en": "Design proposal: equip each team with one meal; stamina food shortens the task while protective food reduces damage risk, competing for shared ingredients."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "只有两支队伍，面前有一个3轮任务和两个1轮任务。",
+      "en": "Two teams face one three-round task and two one-round tasks."
+    },
+    "action": {
+      "zh": "派强队去长任务，另一队先做一个短任务。",
+      "en": "Send the strong team on the long task and the other on one short task."
+    },
+    "result": {
+      "zh": "一轮后只有短任务队伍空闲，长任务仍占用强队。",
+      "en": "After one round, only the short-task team is available."
+    },
+    "next": {
+      "zh": "玩家决定继续短任务，还是为新出现的任务保留名额。",
+      "en": "Choose another short task or reserve the team for a new opportunity."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "做两个队伍槽、三个定时任务和一次完成结算，不需要真实多人或后台服务器。",
+      "en": "Build two team slots, three timed tasks and completion settlement without real multiplayer or a backend."
+    },
+    "pitfall": {
+      "zh": "任务完成、领取奖励和释放队伍必须是清楚且不会重复领取的状态。",
+      "en": "Make completion, reward claiming and team release explicit states that cannot duplicate rewards."
+    },
+    "test": {
+      "zh": "玩家是否会为预计出现的任务保留队伍，而不总是立刻全派出去？",
+      "en": "Do players ever reserve a team for an expected task rather than always dispatch everyone?"
+    }
+  }
+}

@@ -1,0 +1,120 @@
+{
+  "id": "incremental-farm-or-push",
+  "system": "incremental",
+  "edition": 3,
+  "name": {
+    "zh": "稳定刷取，还是继续推进",
+    "en": "Farm reliably or push ahead"
+  },
+  "summary": {
+    "zh": "下一关更诱人，但当前目标可能更适合积累下一次突破的资源。",
+    "en": "The next stage is tempting, but a familiar target may better fund the next breakthrough."
+  },
+  "rules": {
+    "zh": "玩家可以重复处理已经能稳定完成的目标来积累资源，也可以尝试更高门槛的新目标。推进可能解锁更好收益，但耗时、失败或补给消耗会拖慢积累。玩家根据实际表现退回刷取、升级，再次尝试突破。",
+    "en": "Repeat a reliably completed target to build resources, or attempt a harder new target. Progress can unlock better rewards, but time, failure or supply costs can slow accumulation. Use observed performance to return to farming, upgrade and try again."
+  },
+  "loop": [
+    {
+      "zh": "估计新目标的门槛",
+      "en": "Estimate the next target’s requirement"
+    },
+    {
+      "zh": "选择刷取或挑战",
+      "en": "Choose farming or advancement"
+    },
+    {
+      "zh": "观察单位时间收益与损耗",
+      "en": "Observe yield and costs over time"
+    },
+    {
+      "zh": "升级后重新判断能否推进",
+      "en": "Upgrade and reassess advancement"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "能勉强打赢的新敌人，收益是否真的高过快速重复旧敌人？",
+      "en": "Does barely beating a new enemy actually earn more than quickly repeating an old one?"
+    },
+    {
+      "zh": "为了新掉落接受低效率，还是先积累稳定提升再来？",
+      "en": "Accept lower efficiency for a new drop or build reliable upgrades first?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "失败成本",
+        "en": "Failure cost"
+      },
+      "effect": {
+        "zh": "只损失时间便于试探；再损失补给或装备会让准备更重要。",
+        "en": "Losing only time encourages probing; losing supplies or equipment makes preparation more important."
+      }
+    },
+    {
+      "name": {
+        "zh": "收益可读性",
+        "en": "Yield visibility"
+      },
+      "effect": {
+        "zh": "同时显示完成时间、掉落和消耗，帮助玩家理解“更难”不一定“更划算”。",
+        "en": "Showing completion time, drops and consumption helps explain why harder need not be more profitable."
+      }
+    }
+  ],
+  "tags": [
+    "economy",
+    "risk",
+    "progression"
+  ],
+  "related": [
+    "allocation-savings-interest",
+    "incremental-manual-to-passive",
+    "incremental-quantity-milestones",
+    "incremental-escalating-copy-price"
+  ],
+  "contrast": {
+    "zh": "点击英雄把刷取与推进直接做成模式切换；梅尔沃通过玩家选择目标区域、装备和补给形成类似循环。",
+    "en": "Clicker Heroes exposes a direct farming/progression switch; Melvor creates a similar loop through target-area, equipment and supply choices."
+  },
+  "combination": {
+    "zh": "组合提案：高难目标会更快磨损工具，界面同时显示净收入与维修成本，让返回低难区刷资源成为合理选择。",
+    "en": "Design proposal: harder targets wear equipment faster; show net earnings and repair costs so returning to an easier target is a meaningful option."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "旧目标每轮掉4币，新目标要3轮才能打倒、掉10币。",
+      "en": "An old target drops four coins each round; a new one takes three rounds and drops ten."
+    },
+    "action": {
+      "zh": "玩家先刷旧目标3轮，再花积蓄提升攻击。",
+      "en": "Farm the old target for three rounds, then spend the earnings on attack."
+    },
+    "result": {
+      "zh": "升级后新目标只需2轮，其每轮平均收益反而更高。",
+      "en": "After upgrading, the new target takes two rounds, making its average yield higher."
+    },
+    "next": {
+      "zh": "现在转去新目标，下一次卡点再比较。",
+      "en": "Move to the new target and reassess at the next bottleneck."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "做两个目标、一个自动处理计时器和一项影响速度的升级。",
+      "en": "Build two targets, one automatic-resolution timer and an upgrade that affects speed."
+    },
+    "pitfall": {
+      "zh": "不要只显示敌人等级；让玩家看到用时与净收益，避免无法判断为什么停滞。",
+      "en": "Show time and net yield rather than only enemy levels, so players can understand a stall."
+    },
+    "test": {
+      "zh": "玩家失败后是否知道该回哪里积累什么，再回来验证？",
+      "en": "After failing, do players know where to gather what they need and then retry?"
+    }
+  }
+}

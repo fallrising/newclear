@@ -1,0 +1,120 @@
+{
+  "id": "progression-knowledge-gates",
+  "system": "progression",
+  "edition": 2,
+  "name": {
+    "zh": "懂了规则，就能跨过障碍",
+    "en": "Progress through learned knowledge"
+  },
+  "summary": {
+    "zh": "角色没有变强，是玩家知道了一种原本就能用的做法。",
+    "en": "The character is unchanged; the player learns an action that was already possible."
+  },
+  "rules": {
+    "zh": "一个障碍不检查等级或新道具，而是要求玩家知道特定规律、时机或操作。通过探索线索形成理解，再回到旧地点验证；一旦理解，就可以更快走过同样的流程。",
+    "en": "An obstacle checks no new level or item; it requires knowledge of a rule, timing or action. Explore for clues, form an understanding and return to test it. Once understood, the same route can be completed more directly."
+  },
+  "loop": [
+    {
+      "zh": "遇到暂时不懂的障碍",
+      "en": "Meet an unexplained obstacle"
+    },
+    {
+      "zh": "在别处找到线索",
+      "en": "Find a clue elsewhere"
+    },
+    {
+      "zh": "形成可验证的猜想",
+      "en": "Form a testable idea"
+    },
+    {
+      "zh": "返回应用知识继续前进",
+      "en": "Return and apply it"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "继续在原地尝试，还是去别处寻找能解释现象的线索？",
+      "en": "Keep experimenting here or search elsewhere for an explanation?"
+    },
+    {
+      "zh": "已经有一个猜想，要现在验证，还是多找证据避免一次高成本尝试？",
+      "en": "Test the current idea now or gather more evidence before a costly attempt?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "线索距离",
+        "en": "Distance to clues"
+      },
+      "effect": {
+        "zh": "线索与障碍相隔越远，越需要清楚的记录和地标帮助玩家联系。",
+        "en": "Distant clues require better records and landmarks to connect them to an obstacle."
+      }
+    },
+    {
+      "name": {
+        "zh": "验证成本",
+        "en": "Cost of testing"
+      },
+      "effect": {
+        "zh": "验证快会鼓励猜想；重跑很久才知道对错，会压低实验意愿。",
+        "en": "Fast tests encourage hypotheses; long repeats discourage experiments."
+      }
+    }
+  ],
+  "tags": [
+    "information",
+    "discovery",
+    "progression"
+  ],
+  "related": [
+    "exploration-ability-gates",
+    "progression-evolution-recipes",
+    "exploration-earned-map",
+    "exploration-fast-travel-network"
+  ],
+  "contrast": {
+    "zh": "《星际拓荒》把理解世界接到时间循环探索；TUNIC 的部分秘密把理解接到收集说明书。两者的知识门槛都可被玩家记住，而不必反复购买能力。",
+    "en": "Outer Wilds ties understanding to time-loop exploration; some TUNIC secrets tie it to collecting manual pages. Their knowledge gates can be remembered rather than repurchased as abilities."
+  },
+  "combination": {
+    "zh": "设计提案：地图上的门看似要钥匙，翻译古文后才知道敲击节奏；记住规则的人可在下一次直接通过。",
+    "en": "Design proposal: a map door appears to need a key, but translated writing teaches a knocking rhythm; players who remember it can pass directly next time."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "一扇门上只有三盏灯，你没有钥匙，也没有新技能。",
+      "en": "A door has three lights; you have no key or new ability."
+    },
+    "action": {
+      "zh": "你在另一处读懂提示：“亮一次就敲一次”，回去照灯光敲门。",
+      "en": "Elsewhere, decode “one knock for each flash,” then follow the lights at the door."
+    },
+    "result": {
+      "zh": "门打开，背包和人物数值都没有改变。",
+      "en": "The door opens with no change to inventory or character stats."
+    },
+    "next": {
+      "zh": "记下这条规律，寻找其他使用同样灯光的机关。",
+      "en": "Remember the rule and look for other mechanisms using the same signals."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "做一个三步输入机关、一条远处线索和一条返回捷径；开始时所有操作已可用。",
+      "en": "Build a three-input mechanism, a distant clue and a return shortcut; all controls are available from the start."
+    },
+    "pitfall": {
+      "zh": "不要把解法只藏在无法推理的暗号里；线索要让玩家能解释为什么有效。",
+      "en": "Avoid an arbitrary secret code; the clue should let players explain why the solution works."
+    },
+    "test": {
+      "zh": "玩家读到线索后能否自己返回解开机关，并在重开后直接通过？",
+      "en": "Can players return and solve it after reading the clue, then pass directly after a restart?"
+    }
+  }
+}

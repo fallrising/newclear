@@ -1,0 +1,120 @@
+{
+  "id": "defense-ammunition-supply",
+  "system": "defense",
+  "edition": 2,
+  "name": {
+    "zh": "给炮塔持续送弹药",
+    "en": "Keep defensive guns supplied"
+  },
+  "summary": {
+    "zh": "塔建好了还不算完成，子弹断供时，再强的防线也会停火。",
+    "en": "A built turret is not a finished defense: it stops firing when ammunition runs out."
+  },
+  "rules": {
+    "zh": "需要弹药的炮塔把库存转成攻击，玩家负责制造、运输和补充消耗品。敌人密集时消耗突然增加，供给路线和缓冲库存决定防线能坚持多久；弹药量、运输拥堵和停火直接反馈瓶颈。",
+    "en": "Ammo-fed turrets turn stored supplies into attacks. Manufacture, transport and refill those supplies. Dense attacks increase demand, making delivery routes and buffer stocks determine endurance. Ammo counts, congestion and silence reveal bottlenecks."
+  },
+  "loop": [
+    {
+      "zh": "估计敌袭的弹药需求",
+      "en": "Estimate ammunition demand"
+    },
+    {
+      "zh": "制造并送到炮塔",
+      "en": "Produce and deliver ammunition"
+    },
+    {
+      "zh": "战斗中观察消耗与补给",
+      "en": "Watch consumption and replenishment"
+    },
+    {
+      "zh": "补库存或修运输瓶颈",
+      "en": "Refill buffers or repair delivery bottlenecks"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "先多造一座塔，还是先保证现有塔不缺弹？更多枪口也会更快吃光库存。",
+      "en": "Add another turret or keep existing ones fed? More barrels also empty reserves faster."
+    },
+    {
+      "zh": "前线存很多弹药能扛突袭，但会占用本可扩产或升级的材料。",
+      "en": "A large frontline reserve survives surges but ties up materials that could expand production or improve technology."
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "每次攻击耗弹量",
+        "en": "Ammo per attack"
+      },
+      "effect": {
+        "zh": "耗弹高会把持续防守变成物流问题；耗弹低时供应容易退化为开局步骤。",
+        "en": "High consumption makes sustained defense a logistics problem; low consumption can make supply a one-time setup."
+      }
+    },
+    {
+      "name": {
+        "zh": "炮塔缓冲容量",
+        "en": "Turret buffer capacity"
+      },
+      "effect": {
+        "zh": "容量大能容忍短时断供；容量小则要求运输更加稳定。",
+        "en": "Large buffers tolerate brief interruptions; small buffers demand steadier delivery."
+      }
+    }
+  ],
+  "tags": [
+    "planning",
+    "economy",
+    "optimization"
+  ],
+  "related": [
+    "defense-day-night-investment",
+    "defense-maze-routing",
+    "defense-target-priority",
+    "defense-tower-upgrade-budget"
+  ],
+  "contrast": {
+    "zh": "异星工厂常先把材料加工成弹匣再补给；像素工厂的部分炮塔直接消耗生产材料，让弹药选择也参与资源分配。",
+    "en": "Factorio commonly processes materials into magazines before delivery; some Mindustry turrets consume production materials directly, adding ammo choice to resource allocation."
+  },
+  "combination": {
+    "zh": "组合提案：把副产物回流接到防线，低价值加工副产物可做应急弹药，但伤害较低，让工厂堵塞与防守缺口互相影响。",
+    "en": "Design proposal: route production by-products to emergency ammunition with lower damage, connecting factory blockage and defensive shortages."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "两座炮塔每秒共用4份弹药，生产线每秒只能送来3份。",
+      "en": "Two turrets consume four ammo units per second, but delivery supplies only three."
+    },
+    "action": {
+      "zh": "先准备一箱储备，熬过短波次，同时增加一段输送能力。",
+      "en": "Stock a reserve for the short wave and then improve a delivery segment."
+    },
+    "result": {
+      "zh": "储备暂时补上缺口；如果敌袭更长，库存仍会见底。",
+      "en": "The buffer covers the temporary deficit, but a longer attack still drains it."
+    },
+    "next": {
+      "zh": "下一轮在扩建炮塔前，先测算总供应能否跟上。",
+      "en": "Before adding more turrets, check whether total supply can support them."
+    }
+  },
+  "prototype": {
+    "scope": "medium",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "先做一条抽象供给线、一个库存计数器和一座耗弹炮塔，不必先实现完整工厂。",
+      "en": "Start with one abstract supply line, an inventory counter and one ammo-fed turret; a full factory is unnecessary."
+    },
+    "pitfall": {
+      "zh": "先把断供原因显示清楚，再添加多种弹药；否则玩家会分不清缺料与射程问题。",
+      "en": "Show the cause of a stoppage before adding ammo types, or players may confuse supply and range problems."
+    },
+    "test": {
+      "zh": "玩家是否能从库存变化发现持续亏空，并在停火前补救？",
+      "en": "Can players detect a sustained deficit from the inventory trend and fix it before firing stops?"
+    }
+  }
+}

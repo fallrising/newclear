@@ -1,0 +1,120 @@
+{
+  "id": "inventory-deck-thinning",
+  "system": "inventory",
+  "edition": 1,
+  "name": {
+    "zh": "删除卡牌与抽取密度",
+    "en": "Card removal and draw density"
+  },
+  "summary": {
+    "zh": "删掉弱卡，让想要的组合更常出现。",
+    "en": "Remove weak cards to draw desired combinations more often."
+  },
+  "rules": {
+    "zh": "玩家管理可反复抽取的牌库，删除卡牌通常需要支付资源或访问特定节点。减少无用牌会提高关键牌出现频率，但也可能损失应对不同局面的能力。",
+    "en": "Manage a repeatedly drawn deck; permanent removal usually costs resources or requires a specific stop. Removing weak cards increases key-card frequency but may reduce coverage against varied situations."
+  },
+  "loop": [
+    {
+      "zh": "识别低效卡牌",
+      "en": "Identify low-value cards"
+    },
+    {
+      "zh": "获取删除机会",
+      "en": "Reach a removal opportunity"
+    },
+    {
+      "zh": "权衡费用与覆盖面",
+      "en": "Weigh cost against coverage"
+    },
+    {
+      "zh": "观察后续抽牌稳定性",
+      "en": "Observe later draw consistency"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "删掉最弱单卡，还是删掉与当前策略冲突的牌？",
+      "en": "Remove the weakest card or one that conflicts with the current plan?"
+    },
+    {
+      "zh": "极薄牌库更稳定，但面对干扰时是否过于脆弱？",
+      "en": "A tiny deck is consistent, but does disruption make it fragile?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "删除成本递增",
+        "en": "Increasing removal cost"
+      },
+      "effect": {
+        "zh": "递增费用限制快速压缩，迫使玩家排序。",
+        "en": "Rising fees limit rapid thinning and force priorities."
+      }
+    },
+    {
+      "name": {
+        "zh": "初始牌库冗余",
+        "en": "Starting redundancy"
+      },
+      "effect": {
+        "zh": "弱牌越多，前期删除越有价值；冗余少则更难取舍。",
+        "en": "More weak starters make early removal valuable; less redundancy makes decisions harder."
+      }
+    }
+  ],
+  "tags": [
+    "optimization",
+    "planning",
+    "randomness"
+  ],
+  "related": [
+    "combat-combat-deck-cycle",
+    "inventory-adjacency",
+    "inventory-equipment-budget",
+    "inventory-shape-packing"
+  ],
+  "contrast": {
+    "zh": "两者都把删牌当成成长；地图机会、费用与战斗牌型不同，使同样的压缩策略产生不同机会成本。",
+    "en": "Both treat subtraction as progression, but map access, fees and combat roles change the opportunity cost."
+  },
+  "combination": {
+    "zh": "组合提案：调查游戏中的线索牌库允许归档无关线索，以提高下一轮抽到关键证据的概率。",
+    "en": "Design proposal: archive irrelevant clue cards to improve the chance of drawing useful evidence during an investigation."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "十张牌里只有两张能配合核心招式，商店允许付费删一张。",
+      "en": "Only two cards in a ten-card deck support your key move; a shop offers one paid removal."
+    },
+    "action": {
+      "zh": "你删掉一张常常用不上的牌，放弃本次购买新牌的机会。",
+      "en": "Remove a frequently unused card instead of buying another card."
+    },
+    "result": {
+      "zh": "牌库变小，关键牌更容易出现，但少了一种备用应对。",
+      "en": "The smaller deck finds key cards more often but loses a fallback option."
+    },
+    "next": {
+      "zh": "打几轮观察稳定性，再判断下次该删冗余还是补短板。",
+      "en": "Play several rounds, then decide whether to remove redundancy or fill a gap next."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "做十张固定牌、可查看的抽牌记录，以及一次付费删除机会。",
+      "en": "Create ten fixed cards, a visible draw history, and one paid removal opportunity."
+    },
+    "pitfall": {
+      "zh": "需要让删牌前后可比较；只写概率说明而看不到实际抽牌变化很难理解。",
+      "en": "Make before-and-after draws comparable; probability text alone may not convey the effect."
+    },
+    "test": {
+      "zh": "让玩家解释为何删掉一张可用的牌，并检查关键组合是否更稳定出现。",
+      "en": "Ask why a usable card was removed and check whether the intended combination appears more reliably."
+    }
+  }
+}

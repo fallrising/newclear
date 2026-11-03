@@ -1,0 +1,120 @@
+{
+  "id": "projectiles-maintain-lock",
+  "system": "projectiles",
+  "edition": 3,
+  "name": {
+    "zh": "把目标留在锁定区再开火",
+    "en": "Keep a target inside the lock zone"
+  },
+  "summary": {
+    "zh": "先付出持续追踪的时间，再换取发射时的命中帮助。",
+    "en": "Spend time tracking a target before gaining assistance when firing."
+  },
+  "rules": {
+    "zh": "目标进入锁定区域后开始累积锁定，离开范围、遮挡或超过时限会中断或削弱进度。玩家需保持视线并等待提示，再发射追踪弹或已分配的弹药；等待期间仍可能受到反击。",
+    "en": "Targets accumulate lock while inside a targeting zone. Range, obstruction or timeout can interrupt it. Maintain sight until the cue, then fire guided shots or assigned ammunition, remaining vulnerable while waiting."
+  },
+  "loop": [
+    {
+      "zh": "把目标放进锁定范围",
+      "en": "Place the target in the lock zone"
+    },
+    {
+      "zh": "维持视线等待标记",
+      "en": "Maintain sight while marks build"
+    },
+    {
+      "zh": "确认锁定后发射",
+      "en": "Fire after confirming the lock"
+    },
+    {
+      "zh": "观察命中并寻找下一个目标",
+      "en": "Check the hit and acquire another target"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "先发射少量已锁定弹药，还是多等一会儿争取完整齐射？",
+      "en": "Release a partial lock now or wait for a fuller volley?"
+    },
+    {
+      "zh": "追踪高价值目标时，是否应该放弃锁定先躲开眼前攻击？",
+      "en": "Abandon a valuable lock to evade an immediate threat?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "锁定时间与范围",
+        "en": "Lock time and zone"
+      },
+      "effect": {
+        "zh": "宽范围、短等待降低跟瞄负担；窄范围、长等待更强调稳定追踪。",
+        "en": "Wide zones and short waits reduce tracking demand; narrow zones and long waits emphasize sustained aim."
+      }
+    },
+    {
+      "name": {
+        "zh": "失去目标后的保留时间",
+        "en": "Grace after losing the target"
+      },
+      "effect": {
+        "zh": "短暂保留能容忍小遮挡；立即清空会强化找安全射线的压力。",
+        "en": "A brief grace period tolerates small interruptions; immediate loss increases the pressure to find a safe line."
+      }
+    }
+  ],
+  "tags": [
+    "precision",
+    "time",
+    "risk"
+  ],
+  "related": [
+    "projectiles-charged-release",
+    "projectiles-graze-reward",
+    "projectiles-spread-recovery",
+    "projectiles-active-reload"
+  ],
+  "contrast": {
+    "zh": "LOK-1 可以给多个目标分配弹药；Archer 把等待集中在单个泰坦上的一发火箭。",
+    "en": "The LOK-1 allocates shots among targets; the Archer concentrates the wait on one rocket against one Titan."
+  },
+  "combination": {
+    "zh": "组合提案：黑入摄像头后借它维持远处目标的锁定，但敌人发现并破坏摄像头会中断发射准备。",
+    "en": "Design proposal: use a hacked camera to maintain a distant target lock; enemies can interrupt preparation by discovering and destroying it."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "目标来回穿过两根柱子，锁定条只走了一半。",
+      "en": "A target moves between pillars while the lock is half complete."
+    },
+    "action": {
+      "zh": "玩家向侧面移动，让目标持续处在准星范围。",
+      "en": "The player moves sideways to keep the target in the zone."
+    },
+    "result": {
+      "zh": "锁定完成，但自己也离开了掩护。",
+      "en": "The lock completes, but the player has left cover."
+    },
+    "next": {
+      "zh": "决定立即发射再撤回，还是取消攻击避开反击。",
+      "en": "Choose to fire and retreat or cancel to avoid return fire."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "做一个来回移动的靶子、一个锁定圈和一根遮挡柱，先不做网络对抗。",
+      "en": "Build one moving target, a lock zone and one occluding pillar, without network play."
+    },
+    "pitfall": {
+      "zh": "锁定成功不应被误读为必定命中；障碍和有效距离要用反馈说明。",
+      "en": "Do not imply that acquiring a lock guarantees a hit; communicate obstruction and range limits."
+    },
+    "test": {
+      "zh": "玩家能否判断锁定为什么中断，并为了保持视线改变位置？",
+      "en": "Can players explain a broken lock and reposition to maintain sight?"
+    }
+  }
+}

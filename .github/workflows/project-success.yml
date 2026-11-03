@@ -23,3 +23,10 @@ jobs:
           persist-credentials: false
       - run: python3 -m unittest discover -s scripts/tests -v
       - run: python3 scripts/check_indexes.py
+      - name: Catalog PR description matches generated status
+        if: github.event_name == 'pull_request'
+        env:
+          PR_BODY: ${{ github.event.pull_request.body }}
+        run: |
+          git fetch --no-tags --depth=1 "https://github.com/${{ github.repository }}" "${{ github.base_ref }}:refs/remotes/pr-base/${{ github.base_ref }}"
+          python3 tools/gameplay-pattern-catalog/status.py --check-pr-body --base "refs/remotes/pr-base/${{ github.base_ref }}"

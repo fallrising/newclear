@@ -1,0 +1,119 @@
+{
+  "id": "survival-competing-needs",
+  "system": "survival",
+  "edition": 2,
+  "name": {
+    "zh": "多种生存需求抢时间",
+    "en": "Competing survival needs"
+  },
+  "summary": {
+    "zh": "解决饥饿时，口渴和疲劳还在继续累积。",
+    "en": "While fixing hunger, thirst and fatigue keep building."
+  },
+  "rules": {
+    "zh": "玩家查看多个持续变化的需求，挑选当前最值得处理的一项。采集、吃饭、休息都要花时间；补上一条状态时，其他状态可能恶化，因此目标是维持可行动的余量。",
+    "en": "Read several changing needs and decide which deserves attention now. Gathering, eating and resting all take time; helping one need can let another worsen, so preserve enough capacity to keep acting."
+  },
+  "loop": [
+    {
+      "zh": "查看最紧迫的需求",
+      "en": "Check the most urgent need"
+    },
+    {
+      "zh": "选择补给或休息",
+      "en": "Choose supplies or rest"
+    },
+    {
+      "zh": "付出时间并恢复一项",
+      "en": "Spend time to restore one need"
+    },
+    {
+      "zh": "重看其他需求再安排",
+      "en": "Reassess the others"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "先补最少的一条，还是先处理下降最快的一条？剩余量和恶化速度都要看。",
+      "en": "Fix the lowest meter or the fastest falling one? Both level and rate matter."
+    },
+    {
+      "zh": "绕路拿更多食物，还是趁精力足够先回营地？",
+      "en": "Detour for more food or return while enough energy remains?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "下降速度差",
+        "en": "Different drain rates"
+      },
+      "effect": {
+        "zh": "不同速度使优先级不断变化；完全同速容易变成固定轮流补满。",
+        "en": "Different rates change priorities; identical rates encourage a fixed refill routine."
+      }
+    },
+    {
+      "name": {
+        "zh": "临界惩罚",
+        "en": "Threshold penalties"
+      },
+      "effect": {
+        "zh": "先降低行动效率、再扣生命，能给玩家一次调整计划的机会。",
+        "en": "Losing efficiency before health gives players a chance to change plans."
+      }
+    }
+  ],
+  "tags": [
+    "planning",
+    "risk"
+  ],
+  "related": [
+    "survival-bleeding-triage",
+    "survival-fatigue-rest",
+    "survival-limb-impairment",
+    "survival-safe-water"
+  ],
+  "contrast": {
+    "zh": "漫漫长夜围绕身体补给安排日程；饥荒额外让理智参与决策，同样的食物路线会遇到不同压力。",
+    "en": "The Long Dark schedules physical needs; Don’t Starve adds sanity, changing the pressures around a food route."
+  },
+  "combination": {
+    "zh": "设计提案：资源复访路线按饥饿、疲劳和日落时间重新排序，让今天的最优路线不同于昨天。",
+    "en": "Design proposal: reorder renewable foraging routes around hunger, fatigue and sunset so today’s best route differs from yesterday’s."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "演示设定：饥饿还够两轮，疲劳只够一轮。",
+      "en": "Example: food lasts two turns; energy lasts one."
+    },
+    "action": {
+      "zh": "先在营地休息一轮，放弃立即采果。",
+      "en": "Rest at camp for one turn instead of picking fruit."
+    },
+    "result": {
+      "zh": "精力恢复，但食物只够下一轮。",
+      "en": "Energy returns, but food now lasts only one turn."
+    },
+    "next": {
+      "zh": "下一轮必须找食物，不能继续休息。",
+      "en": "The next turn must secure food rather than more rest."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "先做两个需求条、采集和休息两个按钮，每次操作推进一轮。",
+      "en": "Start with two need meters and Gather/Rest buttons; each action advances one turn."
+    },
+    "pitfall": {
+      "zh": "需求过多会把判断变成检查仪表；先让两项形成清楚冲突。",
+      "en": "Too many meters turn decisions into dashboard checking; start with two clear conflicts."
+    },
+    "test": {
+      "zh": "交换两个需求的下降速度，看玩家是否主动改变行动顺序。",
+      "en": "Swap the drain rates and observe whether players change action order."
+    }
+  }
+}

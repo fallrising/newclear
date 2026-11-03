@@ -32,6 +32,14 @@
 
 不建立資料庫、大型前端框架、帳號、自動排程或模型服務。不把 HTTP 200 或檔案數量當成內容已核對。不部署、不合併、不打 usable tag。後續來源變動不併入這次快照。
 
+## 忠實度檢查與產生的狀態
+
+`review/auto_check.py` 把筆記對到已快取的來源文字投影。模型步驟是環境變數指定的外部命令，或一個 OpenAI 相容端點。沒有金鑰也沒有命令時略過模型，退出碼為 0。CI 不呼叫模型，也不把 `note_status` 改成 reviewed。flag 的種類是 fabricated claim、missing key point、over-inference、wrong number、broken example logic。pass 只代表這次自動檢查沒有標出問題。
+
+人工抽樣 10 到 20 篇 pass 筆記，讀過之後用 `review/promote.py --apply` 把那一批改成 reviewed。這不把 catalog 標成 complete，也不滿足 AC-F02 的「全部 reviewed」。
+
+total、draft、reviewed、flagged 與 `source_commit` 由 `status.py` 從筆記檔產生，寫進 SUCCESS、inventory 的 catalog 列，以及可貼上 PR 描述的片段。`source_commit` 是筆記檔的 git tree SHA。檢查失敗表示這三處與重算結果不一致，不是筆記已審閱。
+
 ## 驗證計畫
 
 單元測試覆蓋壞 metadata、重複來源、缺筆記、blocked、pending、搜尋索引摘錄不能 reviewed、危險 URL、來源末節、跳脫與確定性輸出。瀏覽器 smoke 讀實際建置結果。離線測試不要求原站在線。

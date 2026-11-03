@@ -1,0 +1,120 @@
+{
+  "id": "farming-orchard-investment",
+  "system": "farming",
+  "edition": 1,
+  "name": {
+    "zh": "果园长期投资",
+    "en": "Long-term orchards"
+  },
+  "summary": {
+    "zh": "以漫长成熟期和固定占地，换取重复采摘。",
+    "en": "Trade a long maturation period and lasting footprint for recurring fruit."
+  },
+  "rules": {
+    "zh": "玩家种下树苗或果实，等待树木长成后定期采摘。树木占用空间且回报延迟，成长与产果条件可能不同；砍掉果树能回收土地，却会失去已完成的成长投资。",
+    "en": "Plant saplings or fruit, wait for maturity and harvest repeatedly. Trees occupy space with delayed returns, and growth conditions may differ from fruiting conditions; clearing them frees land but discards invested growth time."
+  },
+  "loop": [
+    {
+      "zh": "规划果园位置",
+      "en": "Plan orchard placement"
+    },
+    {
+      "zh": "种植并保持成长条件",
+      "en": "Plant and preserve growing conditions"
+    },
+    {
+      "zh": "等待成熟",
+      "en": "Wait for maturity"
+    },
+    {
+      "zh": "周期采摘并评估扩种",
+      "en": "Harvest periodically and assess expansion"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "早期钱少时，果树会锁住资金；长期经营则降低反复买种的负担。",
+      "en": "When cash is scarce, trees tie up funds; over a long horizon they reduce repeated seed purchases."
+    },
+    {
+      "zh": "多种几棵会增加未来收益，还是少种一排保留通路，让每次采摘更快？",
+      "en": "Plant more trees for future yield, or leave a row open to make each harvest quicker?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "成熟期",
+        "en": "Maturation time"
+      },
+      "effect": {
+        "zh": "越长越需要提前投资，也越怕重新布局。",
+        "en": "Longer maturity rewards foresight and makes relocation costly."
+      }
+    },
+    {
+      "name": {
+        "zh": "产果季限制",
+        "en": "Fruiting season"
+      },
+      "effect": {
+        "zh": "季节性产果强调多品种搭配，全年产果强调稳定物流。",
+        "en": "Seasonal fruit encourages variety; year-round fruit encourages steady logistics."
+      }
+    }
+  ],
+  "tags": [
+    "planning",
+    "economy",
+    "time"
+  ],
+  "related": [
+    "farming-regrowth-crops",
+    "farming-season-window",
+    "commerce-timed-contracts",
+    "farming-growth-care"
+  ],
+  "contrast": {
+    "zh": "星露谷把树苗购买、成长空间和季节组织在一起；Dinkum以埋果再生把采集接入果园扩张。",
+    "en": "Stardew combines purchased saplings, growth clearance and seasons; Dinkum connects gathering to orchard expansion through planting fruit."
+  },
+  "combination": {
+    "zh": "设计提案：果树可嫁接另一品种，但停产一段时间；玩家用现金流换取未来订单适应性。",
+    "en": "Design proposal: graft a new variety onto a tree at the cost of temporary downtime, trading cash flow for future order flexibility."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "你有一笔启动钱；树苗要等几轮才结果，短期作物下轮就能卖。",
+      "en": "You have starting cash; a sapling takes several rounds to yield, while annual crops sell next round."
+    },
+    "action": {
+      "zh": "你只种一棵树，把剩余钱留给短期周转。",
+      "en": "Plant one tree and keep the remaining money for short-term production."
+    },
+    "result": {
+      "zh": "树占着土地暂时没有收入，成熟后开始反复结果。",
+      "en": "The tree occupies land without income at first, then begins repeated yields."
+    },
+    "next": {
+      "zh": "现金稳定后再添树，并保留方便采摘的通路。",
+      "en": "Add trees once cash flow stabilises, leaving an accessible harvesting route."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "做“幼树／成熟／待采”三态和一个定期支出，先验证等待是否产生压力。",
+      "en": "Use sapling, mature and ready-to-pick states plus recurring expenses to test the delayed return."
+    },
+    "pitfall": {
+      "zh": "漫长等待若没有其他可做的决策，会成为纯计时器；先给玩家短期资金安排。",
+      "en": "Long waits become idle timers without other decisions; give players short-term cash commitments."
+    },
+    "test": {
+      "zh": "观察玩家是否会保留周转金，而非开局把钱全部换成树苗。",
+      "en": "See whether players retain operating cash instead of buying saplings with every coin."
+    }
+  }
+}

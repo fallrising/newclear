@@ -1,0 +1,120 @@
+{
+  "id": "deckbuilding-exhaust-for-burst",
+  "system": "deckbuilding",
+  "edition": 2,
+  "name": {
+    "zh": "这一战只用一次的强牌",
+    "en": "Powerful cards spent for the fight"
+  },
+  "summary": {
+    "zh": "先打出强力效果，代价是这场战斗后面再也抽不到它。",
+    "en": "Take a powerful effect now, losing access to that card for the rest of the fight."
+  },
+  "rules": {
+    "zh": "带有消耗标记的牌打出后进入本场战斗的移除区，不跟弃牌一起洗回。玩家必须判断当前危机是否值得花掉它；战斗结束后恢复到原牌库，和永久删牌分开处理。",
+    "en": "A marked card leaves the combat cycle when played instead of returning with the discard pile. The player decides whether the present threat warrants spending it; ordinary copies return for the next fight."
+  },
+  "loop": [
+    {
+      "zh": "识别最危险回合",
+      "en": "Identify the dangerous turn"
+    },
+    {
+      "zh": "决定是否消耗强牌",
+      "en": "Decide whether to spend the card"
+    },
+    {
+      "zh": "结算一次性效果",
+      "en": "Resolve the one-use effect"
+    },
+    {
+      "zh": "用剩余牌撑到结束",
+      "en": "Finish with the remaining deck"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "现在保命，还是留给已经预告的首领大招？",
+      "en": "Survive now, or save it for the announced boss attack?"
+    },
+    {
+      "zh": "消耗一张辅助牌后牌库更精简，但还能应付后续变化吗？",
+      "en": "A spent utility card thins the cycle, but will you need it later?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "单次效果强度",
+        "en": "One-use strength"
+      },
+      "effect": {
+        "zh": "越强越有救场感，也越容易让普通牌失去作用。",
+        "en": "Stronger effects rescue bad turns but can overshadow reusable cards."
+      }
+    },
+    {
+      "name": {
+        "zh": "预计战斗长度",
+        "en": "Expected fight length"
+      },
+      "effect": {
+        "zh": "战斗越长，失去重复使用机会的代价越明显。",
+        "en": "Longer fights make the lost reuse more costly."
+      }
+    }
+  ],
+  "tags": [
+    "risk",
+    "timing",
+    "planning"
+  ],
+  "related": [
+    "combat-stamina-budget",
+    "deckbuilding-discard-redraw",
+    "deckbuilding-dual-use-cards",
+    "combat-cover-flanking"
+  ],
+  "contrast": {
+    "zh": "《杀戮尖塔》可围绕消耗其他牌建立连锁；《怪物火车》把一次性法术放进持续多波的防守。",
+    "en": "Slay the Spire can build reactions around exhausting other cards; Monster Train places spent spells inside multi-wave defense."
+  },
+  "combination": {
+    "zh": "设计提案：把一次性震击留给敌人即将失衡的回合，让爆发牌与破防时机互相配合。",
+    "en": "Design proposal: Save a one-use shock for the turn an enemy approaches a posture break."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "编辑示例：敌人本回合打十点，手里有普通三点护盾和一次性十点护盾。",
+      "en": "Editorial example: an enemy threatens ten damage; you hold three-block and one-use ten-block cards."
+    },
+    "action": {
+      "zh": "玩家用十点护盾挡住攻击。",
+      "en": "Play the ten-block card."
+    },
+    "result": {
+      "zh": "伤害被挡住，但这张牌进入本战消耗区。",
+      "en": "The attack is blocked and the card leaves the combat cycle."
+    },
+    "next": {
+      "zh": "之后必须靠普通护盾或尽快击败敌人。",
+      "en": "Rely on ordinary defense or end the fight quickly."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "只做抽牌、弃牌和消耗三个区，再加一张明显值得保留的救命牌。",
+      "en": "Implement draw, discard and exhausted piles plus one compelling emergency card."
+    },
+    "pitfall": {
+      "zh": "不要把永久删牌和本战消耗放在同一个按钮或同一种提示中。",
+      "en": "Do not present permanent deletion and combat exhaustion with the same label."
+    },
+    "test": {
+      "zh": "玩家首次使用后能准确说出它何时回来，并会为了未来威胁保留它。",
+      "en": "Players know when the card returns and sometimes save it for a future threat."
+    }
+  }
+}

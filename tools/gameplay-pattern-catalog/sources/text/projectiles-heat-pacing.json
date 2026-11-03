@@ -1,0 +1,120 @@
+{
+  "id": "projectiles-heat-pacing",
+  "system": "projectiles",
+  "edition": 3,
+  "name": {
+    "zh": "在过热之前停火冷却",
+    "en": "Stop firing before overheating"
+  },
+  "summary": {
+    "zh": "现在多打一会儿，可能换来之后更长的一段无法射击。",
+    "en": "A little more fire now may force a much longer pause afterward."
+  },
+  "rules": {
+    "zh": "开火持续积累热量，松开后冷却；越过临界点会触发更长停机或其他明确惩罚。玩家观察热量和敌人状态，在主动短停与强行补完最后一击之间取舍。热量管理与弹药管理可以并存。",
+    "en": "Firing builds heat that falls when the trigger is released. Crossing a threshold causes a longer shutdown or a clear penalty. Watch heat and enemy state to choose a short voluntary pause or a final risky burst; heat may coexist with ammunition limits."
+  },
+  "loop": [
+    {
+      "zh": "查看热量和当前威胁",
+      "en": "Read heat and the current threat"
+    },
+    {
+      "zh": "开火到接近临界点",
+      "en": "Fire toward the threshold"
+    },
+    {
+      "zh": "主动冷却或冒险继续",
+      "en": "Cool deliberately or risk more fire"
+    },
+    {
+      "zh": "恢复后安排下一段射击",
+      "en": "Plan the next firing window after recovery"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "敌人只剩少量生命时，是否值得让武器过热来确保击杀？",
+      "en": "Is finishing a nearly defeated enemy worth overheating?"
+    },
+    {
+      "zh": "冷却时换副武器，还是继续保持主武器瞄准等待？",
+      "en": "Switch weapons during cooling or keep the primary aimed and wait?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "正常冷却与过热停机差距",
+        "en": "Cooling versus overheat downtime"
+      },
+      "effect": {
+        "zh": "差距越大，提前停火越重要；差距太小则很难形成取舍。",
+        "en": "A larger gap makes early release valuable; little difference weakens the decision."
+      }
+    },
+    {
+      "name": {
+        "zh": "临界提示",
+        "en": "Threshold feedback"
+      },
+      "effect": {
+        "zh": "声音、颜色和动画共同提示接近过热，让玩家不用一直盯着仪表。",
+        "en": "Sound, color and animation can warn of heat without requiring constant meter watching."
+      }
+    }
+  ],
+  "tags": [
+    "timing",
+    "risk",
+    "optimization"
+  ],
+  "related": [
+    "projectiles-active-reload",
+    "projectiles-charged-release",
+    "projectiles-spread-recovery",
+    "defense-early-wave-call"
+  ],
+  "contrast": {
+    "zh": "深岩银河把热量与任务弹药储备叠加；Titanfall 2 的 L-STAR 更突出连续交火中的停火节奏。",
+    "en": "DRG combines heat with mission ammunition reserves; Titanfall 2’s L-STAR emphasizes trigger pacing during sustained encounters."
+  },
+  "combination": {
+    "zh": "组合提案：塔炮有热量表，提前叫波能多拿资源，但会压缩冷却时间；玩家要看防线剩余火力再决定要不要加速。",
+    "en": "Design proposal: towers have heat meters, so calling waves early earns resources while reducing cooling time; spare firing capacity becomes part of the call decision."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "热量已到八成，两个敌人还在靠近。",
+      "en": "Heat is at eighty percent and two enemies are approaching."
+    },
+    "action": {
+      "zh": "玩家先松开扳机，绕过柱子争取冷却。",
+      "en": "The player releases fire and circles a pillar to cool."
+    },
+    "result": {
+      "zh": "热量下降，敌人也绕到了同一侧。",
+      "en": "Heat drops while the enemies move to the same side."
+    },
+    "next": {
+      "zh": "重新开火，并判断这轮能否在过热前结束。",
+      "en": "Fire again and judge whether the encounter can end before overheating."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "做一根热量条、正常冷却和过热锁定两种状态，配一个持续接近的靶子。",
+      "en": "Build one heat meter, ordinary cooling, an overheated lockout and one approaching target."
+    },
+    "pitfall": {
+      "zh": "不要让热量条看似线性、实际临界点却无法预测。",
+      "en": "Keep the displayed threshold predictable instead of hiding an unexpected overheat point."
+    },
+    "test": {
+      "zh": "玩家是否会在临界前主动松手，而不是每次都等系统强制停机？",
+      "en": "Do players release before the limit instead of always waiting for forced shutdown?"
+    }
+  }
+}

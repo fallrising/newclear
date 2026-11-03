@@ -1,0 +1,120 @@
+{
+  "id": "exploration-wall-jump",
+  "system": "movement",
+  "edition": 1,
+  "name": {
+    "zh": "蹬墙跳与竖直穿越",
+    "en": "Wall-jump traversal"
+  },
+  "summary": {
+    "zh": "把墙从边界变成可连续借力的移动节点。",
+    "en": "Turn walls from boundaries into reusable movement anchors."
+  },
+  "rules": {
+    "zh": "贴近墙面后跳离，借助另一面墙或空中调整继续上升。玩家要在墙距、危险物和落点之间规划节奏；失败通常来自方向或时机，而非缺少一把钥匙。",
+    "en": "Jump away from a wall, then use another wall or air control to continue rising. Plan around wall spacing, hazards and landing points; failure mainly tests timing and direction rather than key possession."
+  },
+  "loop": [
+    {
+      "zh": "判断墙距与出口",
+      "en": "Read wall spacing and exit"
+    },
+    {
+      "zh": "贴墙建立起跳点",
+      "en": "Reach a wall"
+    },
+    {
+      "zh": "蹬离并调整方向",
+      "en": "Push off and steer"
+    },
+    {
+      "zh": "接住下一面墙或平台",
+      "en": "Catch the next wall or platform"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "贴墙多停一会儿更容易看清路线，却可能滑向危险。",
+      "en": "Waiting on a wall can reveal the route but may slide the character into danger."
+    },
+    {
+      "zh": "连续高速蹬墙更快，停在安全平台则能重新校准。",
+      "en": "Fast consecutive jumps save time; a safe platform provides a reset."
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "横向推力",
+        "en": "Horizontal push"
+      },
+      "effect": {
+        "zh": "推力大强调两墙交替，推力小允许沿同一墙反复攀升。",
+        "en": "Strong push favors alternating walls; weak push supports repeated jumps up one wall."
+      }
+    },
+    {
+      "name": {
+        "zh": "空中转向能力",
+        "en": "Air control"
+      },
+      "effect": {
+        "zh": "转向宽松降低失误代价，惯性强则需要提前规划。",
+        "en": "Generous control softens mistakes; strong inertia requires earlier planning."
+      }
+    }
+  ],
+  "tags": [
+    "dexterity",
+    "spatial",
+    "timing"
+  ],
+  "related": [
+    "exploration-grapple-swing",
+    "movement-low-slide",
+    "combat-invulnerable-dodge",
+    "exploration-air-action-refill"
+  ],
+  "contrast": {
+    "zh": "《超级肉肉哥》把蹬墙当作开局就要精通的技能；《空洞骑士》还把它作为扩展世界可达性的阶段奖励。",
+    "en": "Super Meat Boy makes wall jumping a baseline skill to master; Hollow Knight also uses it as a progression reward that expands world access."
+  },
+  "combination": {
+    "zh": "设计提案：只允许在被玩家墨水染色的墙面蹬跳，路线选择与有限涂料分配一起决定上升路径。",
+    "en": "Design proposal: allow wall jumps only on surfaces painted by the player, combining route execution with a limited paint supply."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "两面墙之间有落脚台，上方的刺迫使你改变蹬墙节奏。",
+      "en": "Two walls lead to a ledge, with spikes above forcing a change of rhythm."
+    },
+    "action": {
+      "zh": "你从左墙跳向右墙，在刺下方再次反向蹬出。",
+      "en": "Jump from the left wall to the right, then push off again below the spikes."
+    },
+    "result": {
+      "zh": "高度增加，但每次转向都改变了到落脚台的距离。",
+      "en": "You gain height, while each reversal changes the distance to the ledge."
+    },
+    "next": {
+      "zh": "落上平台重新观察下一段，或继续蹬墙追求更快通过。",
+      "en": "Land to inspect the next section or keep climbing for a faster route."
+    }
+  },
+  "prototype": {
+    "scope": "medium",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "先做一条双墙竖井、固定跳跃曲线和一个安全平台。",
+      "en": "Start with a two-wall shaft, a consistent jump arc, and one safe platform."
+    },
+    "pitfall": {
+      "zh": "贴墙判定、转向和按键宽容需要统一；先别用狭小关卡掩盖操作问题。",
+      "en": "Unify wall contact, turning, and input forgiveness before building tight challenges."
+    },
+    "test": {
+      "zh": "观察新玩家是否能连续蹬墙上升，并把失败归因到可理解的时机或方向。",
+      "en": "See whether new players can climb repeatedly and understand failed timing or direction."
+    }
+  }
+}

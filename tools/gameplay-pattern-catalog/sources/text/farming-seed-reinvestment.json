@@ -1,0 +1,120 @@
+{
+  "id": "farming-seed-reinvestment",
+  "system": "farming",
+  "edition": 1,
+  "name": {
+    "zh": "留种与再投资",
+    "en": "Seed reinvestment"
+  },
+  "summary": {
+    "zh": "把一部分收成留给下一轮，而不是全部变现。",
+    "en": "Reserve part of a harvest for the next cycle instead of selling everything."
+  },
+  "rules": {
+    "zh": "玩家从收成或收获过程获得下一轮种子，建立种植循环。种子回收可能需要加工、牺牲产物或依赖概率；保留不足会迫使玩家重新购买或探索寻找种源。",
+    "en": "Obtain next-cycle seeds from harvested produce or harvesting itself. Seed recovery may require processing, sacrificed output or probability; insufficient reserves force new purchases or exploration."
+  },
+  "loop": [
+    {
+      "zh": "收获产物",
+      "en": "Harvest produce"
+    },
+    {
+      "zh": "分配出售与留种份额",
+      "en": "Split sale and seed reserves"
+    },
+    {
+      "zh": "回收或加工种子",
+      "en": "Recover or process seeds"
+    },
+    {
+      "zh": "补齐缺口并再播种",
+      "en": "Fill shortages and replant"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "现在卖掉还是扩大下轮产能，是现金与未来产出的交换。",
+      "en": "Selling now versus expanding later trades liquidity for future capacity."
+    },
+    {
+      "zh": "随机回收要求安全库存，不能只按平均收益安排。",
+      "en": "Random seed return calls for a safety buffer, not just average-yield planning."
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "种子回收率",
+        "en": "Seed return rate"
+      },
+      "effect": {
+        "zh": "低于持续补种需求时，必须接入商店或探索补给。",
+        "en": "Returns below replacement demand require shops or exploration to sustain production."
+      }
+    },
+    {
+      "name": {
+        "zh": "产物机会成本",
+        "en": "Opportunity cost"
+      },
+      "effect": {
+        "zh": "加工越多可售产物，扩张越会挤压当前收入。",
+        "en": "Sacrificing more saleable produce makes expansion compete with current income."
+      }
+    }
+  ],
+  "tags": [
+    "economy",
+    "progression",
+    "planning"
+  ],
+  "related": [
+    "farming-livestock-care",
+    "farming-orchard-investment",
+    "farming-regrowth-crops",
+    "farming-season-window"
+  ],
+  "contrast": {
+    "zh": "星露谷通过机器与牺牲产物扩张；护核纪元通过返种概率和技能维持循环。",
+    "en": "Stardew expands through machinery and sacrificed produce; Core Keeper sustains the loop through seed-return probability and skills."
+  },
+  "combination": {
+    "zh": "设计提案：种子会逐代适应当地环境，玩家可出售优良种源，或保留它扩大自己的产线。",
+    "en": "Design proposal: seeds adapt over generations, letting players sell valuable seed stock or retain it to expand production."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "本轮收获6份作物；每留1份做种，就少卖1份。",
+      "en": "You harvest six crops; each crop kept for seed is one you cannot sell."
+    },
+    "action": {
+      "zh": "你卖4份支付费用，留下2份作为下一轮种源。",
+      "en": "Sell four to cover expenses and keep two for the next planting."
+    },
+    "result": {
+      "zh": "现金增加了，但下一轮规模受留下的种子限制。",
+      "en": "Cash rises, but the seeds retained limit the size of the next harvest."
+    },
+    "next": {
+      "zh": "下轮收获后，再按现金缺口决定扩大还是维持。",
+      "en": "At the next harvest, reconsider expansion against your cash needs."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "用“出售／留种”两个分配按钮和三轮固定账单，先不用农场移动或种植动画。",
+      "en": "Start with Sell and Keep Seed controls and three rounds of bills; no movement or crop animation is necessary."
+    },
+    "pitfall": {
+      "zh": "若留种永远回报更高又没有近期支出，玩家会机械地把一切再投入。",
+      "en": "Without near-term expenses, reinvesting everything may always dominate."
+    },
+    "test": {
+      "zh": "观察玩家是否因下一轮账单改变留种数量，而非每轮使用同一比例。",
+      "en": "See whether upcoming bills change the amount retained instead of producing one fixed ratio."
+    }
+  }
+}

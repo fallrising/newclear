@@ -1,0 +1,120 @@
+{
+  "id": "relationships-bond-scenes",
+  "system": "relationships",
+  "edition": 1,
+  "name": {
+    "zh": "关系阶段解锁事件",
+    "en": "Relationship-gated scenes"
+  },
+  "summary": {
+    "zh": "通过持续互动解锁人物片段，让数值进度变成可感知的关系变化。",
+    "en": "Unlock character scenes through sustained interaction, turning progress into visible change."
+  },
+  "rules": {
+    "zh": "玩家投入互动时间积累关系；达到门槛后，还要满足人物在场、日期或地点条件。完成事件得到新的认识或能力，下一阶段提供新的目标。",
+    "en": "Invest interaction time to build a bond; scenes may also require a date, location or presence condition. The event reveals character information or rewards and establishes the next milestone."
+  },
+  "loop": [
+    {
+      "zh": "选择想了解的人",
+      "en": "Choose a character"
+    },
+    {
+      "zh": "积累关系",
+      "en": "Build a bond"
+    },
+    {
+      "zh": "满足事件条件",
+      "en": "Meet scene conditions"
+    },
+    {
+      "zh": "经历事件与新目标",
+      "en": "Experience the scene"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "优先看完一个人的故事，还是浅度了解更多人？",
+      "en": "Finish one character’s story or sample several?"
+    },
+    {
+      "zh": "门槛满足后主动找事件，还是等日常自然相遇？",
+      "en": "Seek the event after reaching its threshold or encounter it naturally?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "阶段间距",
+        "en": "Milestone spacing"
+      },
+      "effect": {
+        "zh": "间距越大，单次事件要承担更强的回报感。",
+        "en": "Longer gaps require stronger scene payoffs."
+      }
+    },
+    {
+      "name": {
+        "zh": "触发条件透明度",
+        "en": "Trigger transparency"
+      },
+      "effect": {
+        "zh": "隐藏条件增加发现感，也可能让已投入的玩家卡住。",
+        "en": "Hidden requirements encourage discovery but can stall invested players."
+      }
+    }
+  ],
+  "tags": [
+    "narrative",
+    "progression",
+    "time"
+  ],
+  "related": [
+    "relationships-daily-contact",
+    "relationships-date-itinerary",
+    "relationships-dynastic-marriage",
+    "relationships-relationship-commitment"
+  ],
+  "contrast": {
+    "zh": "星露谷把事件埋在日常空间里；P4G把社群推进放入有限的日历安排。",
+    "en": "Stardew embeds scenes in everyday spaces; P4G makes bond progression compete for calendar slots."
+  },
+  "combination": {
+    "zh": "组合创意：探险伙伴的关系事件不是额外奖励房，而是揭示一条新路线；理解人物后，旧地图也产生新的用途。",
+    "en": "Design proposal: a companion scene reveals a new route rather than a separate reward room, giving an old map a new use."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "一位角色的关系达到门槛，提示他傍晚会在车站出现。",
+      "en": "A character reaches a relationship threshold and is expected at the station in the evening."
+    },
+    "action": {
+      "zh": "你把其他活动提前，傍晚前往车站找他。",
+      "en": "Move other activities earlier and visit the station that evening."
+    },
+    "result": {
+      "zh": "触发一段新事件，角色透露此前不知道的事情，下一阶段目标出现。",
+      "en": "A new scene reveals something about the character and opens the next relationship goal."
+    },
+    "next": {
+      "zh": "带着新的理解选择接下来怎样互动。",
+      "en": "Use that understanding to choose the next interaction."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "做一位角色、两个关系阶段和一个明确的时间地点触发条件。",
+      "en": "Build one character, two relationship stages, and one clear time-and-place trigger."
+    },
+    "pitfall": {
+      "zh": "事件条件太隐蔽会让进度看似卡住；先提供能理解的线索。",
+      "en": "Hidden trigger conditions can look like stalled progress; provide understandable hints."
+    },
+    "test": {
+      "zh": "达到门槛后，玩家能否不查攻略找到事件，并记住事件带来的新信息。",
+      "en": "After reaching the threshold, can players find the scene unaided and recall what it revealed?"
+    }
+  }
+}

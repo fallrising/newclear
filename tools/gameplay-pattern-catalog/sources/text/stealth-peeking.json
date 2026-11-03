@@ -1,0 +1,120 @@
+{
+  "id": "stealth-peeking",
+  "system": "stealth",
+  "edition": 2,
+  "name": {
+    "zh": "探头与隔门侦察",
+    "en": "Peeking before committing"
+  },
+  "summary": {
+    "zh": "先花一点时间看清另一侧，再决定要不要走进去。",
+    "en": "Spend a little time seeing the other side before stepping into it."
+  },
+  "rules": {
+    "zh": "门、拐角和墙遮住信息，玩家可停下探看，获得有限视野而不用直接进入危险区域。观察可能花行动点或时间，且未必看见全部敌人；重点是“先确认，再承诺移动”。",
+    "en": "Doors and corners hide information. Peeking reveals a limited view without fully entering the danger area; it may cost time or action points and does not necessarily reveal every enemy. Check before committing to movement."
+  },
+  "loop": [
+    {
+      "zh": "来到遮挡边缘",
+      "en": "Reach an obstruction"
+    },
+    {
+      "zh": "探看另一侧",
+      "en": "Peek beyond it"
+    },
+    {
+      "zh": "判断安全路线",
+      "en": "Assess the safe route"
+    },
+    {
+      "zh": "移动或换入口",
+      "en": "Move or choose another entrance"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "花一次观察确认安全，还是保留行动点直接冲过？",
+      "en": "Spend an action to check, or save it and cross immediately?"
+    },
+    {
+      "zh": "看到一名守卫就足够了吗，还是要换角度确认盲区？",
+      "en": "Is seeing one guard enough, or should you check the blind spot from another angle?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "观察成本",
+        "en": "Observation cost"
+      },
+      "effect": {
+        "zh": "成本低便于教学；成本过低且信息完全可靠时，可能变成每个门口的例行点击。",
+        "en": "Low cost helps learning, but cheap complete information can become a routine click at every door."
+      }
+    },
+    {
+      "name": {
+        "zh": "视野覆盖",
+        "en": "Reveal coverage"
+      },
+      "effect": {
+        "zh": "只显示部分房间，会保留换角度与进一步侦察的价值。",
+        "en": "Partial room coverage preserves the value of a second viewpoint."
+      }
+    }
+  ],
+  "tags": [
+    "information",
+    "risk",
+    "planning"
+  ],
+  "related": [
+    "stealth-disguise-access",
+    "stealth-body-concealment",
+    "stealth-hiding-spots",
+    "stealth-knockout-window"
+  ],
+  "contrast": {
+    "zh": "《神偷》用第一人称孔洞限制视角；《隐形公司》把情报获取变成行动点预算的一部分。",
+    "en": "Thief limits a first-person view through an aperture; Invisible, Inc. makes information part of the action-point budget."
+  },
+  "combination": {
+    "zh": "设计提案：只有亲眼探看过的门后布局才画进地图；地图保留最后观测时间，提醒巡逻可能已变化。",
+    "en": "Design proposal: map rooms only after peeking inside, and timestamp observations to remind players patrols may have changed."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "你站在关闭的门旁，还剩三点行动。",
+      "en": "You stand beside a closed door with three action points left."
+    },
+    "action": {
+      "zh": "花一点探看，发现守卫正朝另一边走。",
+      "en": "Spend one point to peek and see a guard walking away."
+    },
+    "result": {
+      "zh": "你知道现在可进入，但只剩两点，无法当场摸到远处柜子。",
+      "en": "Entry is safe now, but the remaining two points cannot reach the distant cabinet."
+    },
+    "next": {
+      "zh": "选择先进入门后掩体，下一回合再取物。",
+      "en": "Move into cover beyond the door and collect the item next turn."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "做一个门后隐藏的房间和探看按钮；按钮揭示有限区域并扣一点行动。",
+      "en": "Build one hidden room and a peek button that reveals a limited area for one action point."
+    },
+    "pitfall": {
+      "zh": "不要把探看做成无脑必按按钮；至少提供绕行、等待或直接进入的有效替代。",
+      "en": "Avoid making peeking mandatory busywork; offer useful alternatives such as waiting, detouring or entering directly."
+    },
+    "test": {
+      "zh": "玩家会不会根据剩余行动点改变侦察选择，而不是每扇门都机械地点一次？",
+      "en": "Do remaining action points change the decision to peek, rather than producing the same click at every door?"
+    }
+  }
+}

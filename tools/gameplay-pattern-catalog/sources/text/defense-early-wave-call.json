@@ -1,0 +1,120 @@
+{
+  "id": "defense-early-wave-call",
+  "system": "defense",
+  "edition": 2,
+  "name": {
+    "zh": "提前叫下一波",
+    "en": "Call the next wave early"
+  },
+  "summary": {
+    "zh": "主动缩短休息时间，用更危险的重叠进攻换取奖励。",
+    "en": "Shorten the rest period to exchange overlapping attacks for a reward."
+  },
+  "rules": {
+    "zh": "当前波尚未完全结束时，玩家可以提前启动下一波。提前行动带来奖励或节奏收益，但旧敌人、技能冷却和未完成的建设仍然存在；剩余时间与敌人数量让风险可以估计。",
+    "en": "Start the next wave before the current interval ends. Early action grants a reward or pacing advantage, but surviving enemies, skill cooldowns and unfinished defenses remain. Remaining time and enemy counts make the added risk assessable."
+  },
+  "loop": [
+    {
+      "zh": "判断当前防线余量",
+      "en": "Assess spare defensive capacity"
+    },
+    {
+      "zh": "查看下一波与剩余时间",
+      "en": "Inspect the next wave and remaining interval"
+    },
+    {
+      "zh": "提前开波或继续等待",
+      "en": "Call early or keep waiting"
+    },
+    {
+      "zh": "处理重叠敌人并结算收益",
+      "en": "Handle overlapping enemies and collect the benefit"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "只剩一个慢怪时提前开波很划算，但它也可能正在占住关键火力。",
+      "en": "Calling early with one slow enemy left looks attractive, but that enemy may still occupy a critical tower."
+    },
+    {
+      "zh": "提前得到的钱能否立刻买到一项补强，抵消多出来的压力？",
+      "en": "Can the early reward immediately buy enough reinforcement to offset the additional pressure?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "奖励随时间变化",
+        "en": "Reward versus time saved"
+      },
+      "effect": {
+        "zh": "越早奖励越高，会不断追问玩家“还能不能再快一点”；固定奖励更易理解。",
+        "en": "A larger reward for earlier calls continually tests how much faster players can go; a fixed reward is easier to read."
+      }
+    },
+    {
+      "name": {
+        "zh": "波次重叠上限",
+        "en": "Overlap limit"
+      },
+      "effect": {
+        "zh": "允许连续召唤会放大高手表达空间，也更需要清楚提示总威胁。",
+        "en": "Repeated calls allow aggressive play but require clearer warnings about the combined threat."
+      }
+    }
+  ],
+  "tags": [
+    "risk",
+    "timing",
+    "economy"
+  ],
+  "related": [
+    "commerce-haggling",
+    "defense-day-night-investment",
+    "commerce-auction-bidding",
+    "commerce-debt-pressure"
+  ],
+  "contrast": {
+    "zh": "王国保卫战的额外金币可直接补塔；宝石争霸把波次操作放进更密集的宝石升级与挑战节奏中。",
+    "en": "Kingdom Rush bonus gold can directly reinforce towers; GemCraft places wave management within a denser gem-upgrade and challenge rhythm."
+  },
+  "combination": {
+    "zh": "组合提案：提前开波给一笔短期贷款，玩家必须用这一波的收入还清，形成主动选择的偿债压力。",
+    "en": "Design proposal: an early call provides a short-term loan repayable from that wave, creating debt pressure the player deliberately chooses."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "下一波还有20秒，场上只剩两只慢怪。",
+      "en": "The next wave is 20 seconds away, with two slow enemies remaining."
+    },
+    "action": {
+      "zh": "提前开波拿到奖金，立刻补一座便宜塔。",
+      "en": "Call early, collect the bonus and immediately build a cheap tower."
+    },
+    "result": {
+      "zh": "新旧敌人叠在一起；补塔成功就赚到时间，失败则可能漏怪。",
+      "en": "The waves overlap; the reinforcement either buys time or leaves the player exposed."
+    },
+    "next": {
+      "zh": "下次根据实际余量选择更早或更晚召唤。",
+      "en": "Use the observed spare capacity to adjust the next call."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "实现两波敌人、一个倒计时和一次性提前奖励；先固定来敌组合。",
+      "en": "Implement two fixed waves, a timer and one early-call reward."
+    },
+    "pitfall": {
+      "zh": "不要把奖励做成永远值得点的按钮；重叠压力必须真实存在。",
+      "en": "Avoid a button that is always beneficial; overlapping pressure must be real."
+    },
+    "test": {
+      "zh": "测试者是否有时提前、有时等待，并能解释原因？",
+      "en": "Do testers sometimes call early and sometimes wait, with a reason for each?"
+    }
+  }
+}

@@ -1,0 +1,120 @@
+{
+  "id": "ecology-species-compatibility",
+  "system": "ecology",
+  "edition": 2,
+  "name": {
+    "zh": "为不同物种安排合住关系",
+    "en": "Plan which species can share a home"
+  },
+  "summary": {
+    "zh": "能适应同一环境，不代表彼此适合住在一起。",
+    "en": "Sharing environmental needs does not guarantee compatible neighbors."
+  },
+  "rules": {
+    "zh": "玩家将不同物种分配到有限的栖息地，同时检查相互威胁、群居偏好或同住收益。一个新住户可能改变其他住户的安全与收益，因此要评估组合，而不是逐只独立评分。",
+    "en": "Assign species to limited habitats while checking threats, social preferences or cohabitation benefits. A newcomer can change existing residents’ safety or value, so evaluate combinations rather than independent scores."
+  },
+  "loop": [
+    {
+      "zh": "列出候选住户与相处规则",
+      "en": "List candidates and interaction rules"
+    },
+    {
+      "zh": "安排共享或分开的栖息地",
+      "en": "Plan shared or separate housing"
+    },
+    {
+      "zh": "检查组合收益与冲突",
+      "en": "Check benefits and conflicts"
+    },
+    {
+      "zh": "随成长或新增物种重新分配",
+      "en": "Reassign after growth or arrivals"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "共享设施节省空间，是否值得承担体型变化带来的捕食风险？",
+      "en": "Is shared infrastructure worth a predation risk that may change with size?"
+    },
+    {
+      "zh": "为了获得同住收益增加一个物种，还是维持照料更简单的单一群体？",
+      "en": "Add a species for cohabitation benefits or keep a simpler single-species group?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "关系规则可见度",
+        "en": "Relationship visibility"
+      },
+      "effect": {
+        "zh": "放入之前就显示明确冲突，能让损失来自玩家取舍而不是知识陷阱。",
+        "en": "Show clear conflicts before placement so losses follow decisions rather than hidden knowledge."
+      }
+    },
+    {
+      "name": {
+        "zh": "关系随成长变化",
+        "en": "Growth-dependent relationships"
+      },
+      "effect": {
+        "zh": "幼体时兼容、成年后有冲突，会要求玩家提前准备分居空间。",
+        "en": "Compatibility that changes with growth requires advance relocation planning."
+      }
+    }
+  ],
+  "tags": [
+    "planning",
+    "spatial",
+    "optimization"
+  ],
+  "related": [
+    "ecology-habitat-capacity",
+    "ecology-plant-crossbreeding",
+    "ecology-population-limits",
+    "inventory-adjacency"
+  ],
+  "contrast": {
+    "zh": "Megaquarium把混养选择与捕食尺寸风险相连；动物园之星还提供特定同住组合的正面收益，不能只用“会不会攻击”判断。",
+    "en": "Megaquarium ties cohabitation to prey-size risk; Planet Zoo also offers positive bonuses for particular combinations."
+  },
+  "combination": {
+    "zh": "设计提案：把栖息地格子当作有限配置位，某个相处良好的物种组合可以减少独立设施数量。",
+    "en": "Design proposal: treat habitat slots as a limited loadout where compatible combinations reduce separate infrastructure."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "演示设定：有两个水池，三种鱼，其中大鱼成年后会吃最小的鱼。",
+      "en": "Example: two tanks house three fish species; the largest will eventually prey on the smallest."
+    },
+    "action": {
+      "zh": "把大小鱼分开，让中型鱼与大鱼同住。",
+      "en": "Separate large and small fish, placing medium fish with the large species."
+    },
+    "result": {
+      "zh": "当前少用一个独立水池，也避开已知的成长冲突。",
+      "en": "The arrangement saves a separate tank while avoiding the known future conflict."
+    },
+    "next": {
+      "zh": "出现新物种时，先检查它与整缸住户的关系再决定加入。",
+      "en": "Before adding a new species, compare it with every resident in the tank."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "用四个物种、两个栖息地和一张可见关系表，先只做一种冲突与一种奖励。",
+      "en": "Use four species, two habitats and a visible relationship table, with one conflict and one bonus."
+    },
+    "pitfall": {
+      "zh": "关系数量随物种平方增长；不要靠堆物种数量制造深度。",
+      "en": "Pairwise relationships grow quadratically; do not rely on a large species catalog for depth."
+    },
+    "test": {
+      "zh": "加入一个会改变原有组合的新物种，看玩家是否重排现有住户。",
+      "en": "Introduce a species that changes the best grouping and see whether players reorganize current residents."
+    }
+  }
+}

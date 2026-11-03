@@ -1,3 +1,13 @@
+# T-0003 驗證紀錄
+
+日期：2026-11-03。沒有呼叫模型，沒有改任何筆記的 `note_status`，沒有 merge 或打 tag。
+
+- `python3 sources/text_cache.py --fetch` 對上 manifest 的 280 條雜湊後寫入 `sources/text/`。案例長文沒有進快取。
+- `python3 sources/text_cache.py --check`、`python3 sources/inventory.py --check`、`python3 status.py --check`、`python3 build.py --check` 通過。
+- `python3 status.py --write` 產生 total 280、draft 280、reviewed 0、flagged 0、`auto_check: absent`。`source_commit` 是筆記檔 git tree `59a5f13201bff024e059b647b07ad711927a7a8f`，與 `git mktree` 一致。
+- `python3 -m unittest discover -s tests -v`：44 項通過。`python3 -m unittest discover -s scripts/tests -v`：21 項通過。涵蓋 skip、外部命令、本機 API、不跟隨重新導向、抽樣、promote 的 dry-run 與拒絕 flag。CI workflow 不含 `auto_check.py` 或 `promote.py`。
+- 筆記仍全部是 draft。GitHub CI 以 PR 為準，這裡不把尚未回讀的 run 寫成通過。
+
 # T-0002 驗證紀錄
 
 ## 2026-11-03 分析重寫

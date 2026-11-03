@@ -1,0 +1,120 @@
+{
+  "id": "cooperation-physical-tether",
+  "system": "cooperation",
+  "edition": 2,
+  "name": {
+    "zh": "身体连接与互相借力",
+    "en": "Move while physically tethered"
+  },
+  "summary": {
+    "zh": "绳子把两人的移动连在一起，伙伴既能拉你上去，也会被你拖下去。",
+    "en": "A tether links movement: a partner can pull you upward or be dragged down with you."
+  },
+  "rules": {
+    "zh": "角色之间有长度受限的物理连接，超过距离会产生牵拉。玩家协调站位、起跳和支撑，用连接把一个人的移动传给另一个人；失误也会沿连接影响全队。",
+    "en": "A limited physical link pulls characters when stretched. Players coordinate positions, jumps and anchors to transfer motion; mistakes can propagate through the same link."
+  },
+  "loop": [
+    {
+      "zh": "观察平台与绳长",
+      "en": "Inspect platforms and tether length"
+    },
+    {
+      "zh": "约定谁固定谁移动",
+      "en": "Choose who anchors and who moves"
+    },
+    {
+      "zh": "同步起跳或借力摆荡",
+      "en": "Jump together or swing for momentum"
+    },
+    {
+      "zh": "落稳后交换职责",
+      "en": "Land securely and exchange roles"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "一起跳容易互相干扰，要不要让一人先站稳当支点？",
+      "en": "Jump together or secure one player as an anchor first?"
+    },
+    {
+      "zh": "抢救正在掉落的伙伴，还是先稳住自己避免两人一起掉？",
+      "en": "Pull a falling partner immediately or secure yourself first?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "连接长度",
+        "en": "Tether length"
+      },
+      "effect": {
+        "zh": "短绳要求贴近配合，长绳给摆荡空间也更难预判。",
+        "en": "Short links require close coordination; long ones enable wider swings but are harder to predict."
+      }
+    },
+    {
+      "name": {
+        "zh": "失误回退距离",
+        "en": "Distance lost on a fall"
+      },
+      "effect": {
+        "zh": "回退太远会把练习变成重复赶路，应匹配操作难度。",
+        "en": "Large setbacks can turn practice into repeated travel; match them to control difficulty."
+      }
+    }
+  ],
+  "tags": [
+    "cooperation",
+    "spatial",
+    "dexterity"
+  ],
+  "related": [
+    "cooperation-synchronized-triggers",
+    "cooperation-complementary-abilities",
+    "cooperation-discussion-vote",
+    "cooperation-downed-revival"
+  ],
+  "contrast": {
+    "zh": "《面包和年糕》突出一人固定、一人摆荡；《Chained Together》还要考虑三维平台如何挡住或改变链条路径。",
+    "en": "Bread & Fred emphasizes anchoring and swinging; Chained Together also makes 3D platform geometry affect the chain’s route."
+  },
+  "combination": {
+    "zh": "设计提案：把抓钩锚点换成另一个玩家；先只做二维固定绳长，观察双方能否一起找到摆荡节奏。",
+    "en": "Design proposal: replace a grapple anchor with another player, beginning with a fixed-length 2D rope to test shared swinging rhythm."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "编辑示例：两人被三米绳连接，B够不到对面平台，A身后有安全地面。",
+      "en": "Editorial example: a three-meter rope joins A and B; B cannot reach the next platform and A has safe ground behind them."
+    },
+    "action": {
+      "zh": "A后退固定，B走下边缘摆荡，接近最高点时跳向平台。",
+      "en": "A anchors behind the edge while B swings below it and jumps near the top of the arc."
+    },
+    "result": {
+      "zh": "B落稳后绳子绷紧，变成A接下来借力的支点。",
+      "en": "B lands securely and becomes the next anchor for A."
+    },
+    "next": {
+      "zh": "两人交换职责，把同样的方法用到下一个缺口。",
+      "en": "They swap roles and apply the method to the next gap."
+    }
+  },
+  "prototype": {
+    "scope": "medium",
+    "interaction": "cooperative",
+    "firstStep": {
+      "zh": "先做二维两人、三个平台、一条固定长度绳和明确的固定动作，只支持本机双人。",
+      "en": "Build two local 2D characters, three platforms, a fixed-length rope and an explicit anchor action."
+    },
+    "pitfall": {
+      "zh": "先避免绳子缠绕与三维碰撞；物理失控或联网延迟会让失败难以归因。",
+      "en": "Defer rope wrapping and 3D collisions; unstable physics or network delay can make failure hard to understand."
+    },
+    "test": {
+      "zh": "试玩者能预测谁会被拉动，并在失败后主动改变支点或起跳顺序。",
+      "en": "Testers can predict who will be pulled and adjust the anchor or jump order after failure."
+    }
+  }
+}

@@ -1,0 +1,120 @@
+{
+  "id": "narrative-deliberate-silence",
+  "system": "narrative",
+  "edition": 3,
+  "name": {
+    "zh": "选择不回答，让对方继续",
+    "en": "Choose silence and let the other person continue"
+  },
+  "summary": {
+    "zh": "不提供信息也是一种回应，但未必能避免后果。",
+    "en": "Withholding an answer is a response, though it may not avoid consequences."
+  },
+  "rules": {
+    "zh": "在对话中保留明确的不回答路径。玩家可以拒绝透露立场，让对方继续说、自行猜测或改变问题；系统要为沉默写出有意义的反馈，而非把它当成漏按按钮。即使没有倒计时，这个规则也可以成立。",
+    "en": "Provide an explicit no-answer path. The player withholds a position while the other person continues, interprets the silence or changes the question. Write meaningful feedback for silence rather than treating it as a missed button; the rule also works without a timer."
+  },
+  "loop": [
+    {
+      "zh": "判断是否愿意透露立场",
+      "en": "Decide whether to reveal a position"
+    },
+    {
+      "zh": "回答或保持沉默",
+      "en": "Answer or stay silent"
+    },
+    {
+      "zh": "观察对方如何理解",
+      "en": "Observe the other person’s interpretation"
+    },
+    {
+      "zh": "决定继续隐瞒还是开口",
+      "en": "Decide whether to keep withholding or speak"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "不撒谎也不坦白，是否值得承受对方的不信任？",
+      "en": "Is avoiding both a lie and a confession worth the resulting distrust?"
+    },
+    {
+      "zh": "先让对方说出更多，还是及时澄清误会？",
+      "en": "Let the other person reveal more or clarify a misunderstanding immediately?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "沉默反馈的明确程度",
+        "en": "Clarity of silence feedback"
+      },
+      "effect": {
+        "zh": "让角色追问或移开话题，可表明游戏确实接收到了这个选择。",
+        "en": "A follow-up question or a changed subject shows that the choice registered."
+      }
+    },
+    {
+      "name": {
+        "zh": "沉默能保留多少信息",
+        "en": "Information preserved by silence"
+      },
+      "effect": {
+        "zh": "若每次沉默都被准确猜中，隐藏信息就失去作用。",
+        "en": "If every silence is interpreted perfectly, withholding information has little value."
+      }
+    }
+  ],
+  "tags": [
+    "information",
+    "narrative",
+    "risk"
+  ],
+  "related": [
+    "narrative-background-dialogue-access",
+    "narrative-conversation-intervention",
+    "narrative-evidence-rebuttal",
+    "narrative-perspective-handoff"
+  ],
+  "contrast": {
+    "zh": "行尸走肉把沉默摆成一个可选回答；Oxenfree 也允许玩家通过不介入来表达。",
+    "en": "The Walking Dead presents silence as a selectable answer; Oxenfree also expresses it through non-intervention."
+  },
+  "combination": {
+    "zh": "组合提案：伪装潜入时，回答能证明身份，也可能暴露知识漏洞；沉默能少说错话，却会让守卫提高警惕。",
+    "en": "Design proposal: under disguise, answering can establish identity but expose missing knowledge; silence avoids mistakes while raising a guard’s suspicion."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "同伴问是谁打开了仓库门，玩家知道答案。",
+      "en": "A companion asks who opened the warehouse, and the player knows."
+    },
+    "action": {
+      "zh": "玩家选择沉默，让同伴继续分析。",
+      "en": "The player stays silent and lets the companion continue."
+    },
+    "result": {
+      "zh": "同伴没拿到名字，但开始怀疑玩家有所隐瞒。",
+      "en": "The companion gets no name but suspects that something is being withheld."
+    },
+    "next": {
+      "zh": "下一次追问更直接，玩家重新衡量保密的代价。",
+      "en": "A more direct follow-up makes the player reassess the cost of secrecy."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "写两次连续问话，为回答、撒谎、沉默分别保留一条可见反应。",
+      "en": "Write two linked questions with visible reactions to truth, a lie and silence."
+    },
+    "pitfall": {
+      "zh": "不要把沉默统一写成“坏回答”，否则它只是一个陷阱按钮。",
+      "en": "Do not make silence universally wrong, or it becomes a trap button."
+    },
+    "test": {
+      "zh": "玩家是否能预测沉默保护了什么、又损失了什么？",
+      "en": "Can players predict what silence protects and what it costs?"
+    }
+  }
+}

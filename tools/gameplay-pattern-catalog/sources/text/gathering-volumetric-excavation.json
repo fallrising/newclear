@@ -1,0 +1,120 @@
+{
+  "id": "gathering-volumetric-excavation",
+  "system": "gathering",
+  "edition": 1,
+  "name": {
+    "zh": "体积式挖掘",
+    "en": "Volumetric excavation"
+  },
+  "summary": {
+    "zh": "资源不是一个按钮，而是埋在可改变地形里的体积。",
+    "en": "Resources occupy alterable terrain rather than a single interaction button."
+  },
+  "rules": {
+    "zh": "玩家以工具移除一部分地形，逐步暴露或收取资源。工具影响的形状与大小决定开口、坡道和挖掘精度；挖掘也会改变之后的通行路线。",
+    "en": "Tools remove volumes of terrain to reveal or collect material. Brush shape and size affect openings, slopes and precision, while excavation changes future traversal."
+  },
+  "loop": [
+    {
+      "zh": "定位埋藏区域",
+      "en": "Locate the buried area"
+    },
+    {
+      "zh": "选择挖掘形状",
+      "en": "Choose a digging shape"
+    },
+    {
+      "zh": "逐步移除地形",
+      "en": "Remove terrain incrementally"
+    },
+    {
+      "zh": "收集并整理出口",
+      "en": "Collect material and keep an exit"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "大范围快速挖开，还是细挖保护通路与目标？",
+      "en": "Excavate broadly for speed or carefully to preserve routes?"
+    },
+    {
+      "zh": "从上方直挖，还是多花时间做可返回的坡道？",
+      "en": "Dig straight down or spend time creating a return ramp?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "工具作用范围",
+        "en": "Brush size"
+      },
+      "effect": {
+        "zh": "大范围提高吞吐量但降低精确度；小范围强化空间规划。",
+        "en": "Large brushes increase throughput but reduce precision; small brushes reward spatial planning."
+      }
+    },
+    {
+      "name": {
+        "zh": "地形回填能力",
+        "en": "Terrain restoration"
+      },
+      "effect": {
+        "zh": "能回填鼓励试验；不可逆地形让玩家更谨慎。",
+        "en": "Restoration encourages experimentation; irreversible edits encourage caution."
+      }
+    }
+  ],
+  "tags": [
+    "spatial",
+    "creativity",
+    "precision"
+  ],
+  "related": [
+    "building-modular-snapping",
+    "building-terrain-shaping",
+    "building-vertical-stacking",
+    "gathering-hidden-deposit-clues"
+  ],
+  "contrast": {
+    "zh": "无人深空将挖掘嵌入扫描与矿床开采；异星探险家让造坡、挖洞与日常移动紧密交织。",
+    "en": "No Man’s Sky links excavation to surveying deposits; Astroneer closely connects digging and shaping with everyday traversal."
+  },
+  "combination": {
+    "zh": "组合创意：矿脉旁有脆弱遗迹，玩家需要用小刷头开安全隧道，大刷头虽快却可能损坏考古线索。",
+    "en": "Design proposal: fragile ruins surround a vein; careful tunnels preserve clues while broad excavation risks damage."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "一团矿体埋在坡内，直接向下挖虽然快，却可能难以爬回来。",
+      "en": "An ore body sits inside a slope; digging straight down is quick but may make returning difficult."
+    },
+    "action": {
+      "zh": "你从侧面挖出斜坡通道，再沿矿体逐步扩大开口。",
+      "en": "Dig a ramp from the side, then widen the opening along the deposit."
+    },
+    "result": {
+      "zh": "资源被取走，留下的空洞也真实改变了通行地形。",
+      "en": "Collected material leaves a cavity that changes the traversable terrain."
+    },
+    "next": {
+      "zh": "检查出口还能走，再继续挖下一段矿体。",
+      "en": "Check that the exit remains usable before mining the next section."
+    }
+  },
+  "prototype": {
+    "scope": "large",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "先做一小块可挖体素、单一工具与碰撞更新，验证挖后能通行；暂不做无限世界。",
+      "en": "Start with one small voxel mass, one tool and updated collision; verify traversal after digging, without an infinite world."
+    },
+    "pitfall": {
+      "zh": "连续地形重建、碰撞、存档体积和碎块表现都可能成为大工程，应逐项验证。",
+      "en": "Terrain rebuilding, collision, save size and debris can each become major systems; validate them separately."
+    },
+    "test": {
+      "zh": "玩家能否有意挖出可返回的通路，且反复挖掘后不出现穿地或卡住？",
+      "en": "Can players deliberately create a return route without falling through terrain or getting stuck after repeated digging?"
+    }
+  }
+}

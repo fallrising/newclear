@@ -1,0 +1,120 @@
+{
+  "id": "progression-permanent-run-currency",
+  "system": "progression",
+  "edition": 2,
+  "name": {
+    "zh": "失败也能带回成长资源",
+    "en": "Persistent currency between attempts"
+  },
+  "summary": {
+    "zh": "这一趟没通关，也能为下一趟留下可用的提升。",
+    "en": "An unsuccessful attempt can still fund the next one."
+  },
+  "rules": {
+    "zh": "每次尝试中获得一种能跨局保留的资源，结束后用它购买长期提升。玩家在单次成功之外还有一个较小目标：把资源转成下一次更好的起点；局内临时收益要与永久资源清楚区分。",
+    "en": "Attempts award a resource that persists between runs and buys lasting improvements. Alongside winning this run, players pursue a smaller goal: funding a better next start. Temporary and persistent rewards need distinct identities."
+  },
+  "loop": [
+    {
+      "zh": "进入一次挑战",
+      "en": "Start an attempt"
+    },
+    {
+      "zh": "积累可保留资源",
+      "en": "Earn persistent resources"
+    },
+    {
+      "zh": "结束后购买长期提升",
+      "en": "Buy lasting improvements"
+    },
+    {
+      "zh": "带着新起点再试",
+      "en": "Retry with a better start"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "这次争取过关，还是走更容易拿成长资源的路线？",
+      "en": "Pursue a win or take the route that funds future attempts?"
+    },
+    {
+      "zh": "买便宜的即时提升，还是攒钱等待能改变打法的大升级？",
+      "en": "Buy a small benefit now or save for a more transformative upgrade?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "失败时保留比例",
+        "en": "Retention on failure"
+      },
+      "effect": {
+        "zh": "保留越多，失败越少白费；太高也可能让快速送死变得划算。",
+        "en": "Higher retention softens failure but may make deliberately short runs efficient."
+      }
+    },
+    {
+      "name": {
+        "zh": "升级对起点的影响",
+        "en": "Starting advantage"
+      },
+      "effect": {
+        "zh": "提升过大，会让前期挑战变成重复劳动；提升过小又难感到进步。",
+        "en": "Large gains trivialize early sections; tiny gains make progress hard to feel."
+      }
+    }
+  ],
+  "tags": [
+    "progression",
+    "economy",
+    "risk"
+  ],
+  "related": [
+    "progression-challenge-tiers",
+    "progression-death-loses-training",
+    "progression-prestige-reset",
+    "progression-research-prerequisites"
+  ],
+  "contrast": {
+    "zh": "《哈迪斯》把永久能力放在圣镜中；《盗贼遗产2》用庄园把多代角色的财富投入串起来。两者都把单次失败接入长期成长。",
+    "en": "Hades organizes lasting abilities through the Mirror; Rogue Legacy 2 connects successive characters through manor investment. Both turn a failed attempt into longer-term progress."
+  },
+  "combination": {
+    "zh": "设计提案：随机路线同时出现过关捷径和成长资源支路，玩家根据这次目的决定走哪条。",
+    "en": "Design proposal: random routes offer a shortcut to the finish or a detour with persistent resources, supporting different goals for an attempt."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "你已有 8 枚徽章，永久增加一次治疗要 12 枚。",
+      "en": "You have 8 badges; an extra starting heal costs 12."
+    },
+    "action": {
+      "zh": "这次没打赢首领，但途中获得 4 枚可保留徽章。",
+      "en": "You lose to the boss but retain 4 badges earned on the way."
+    },
+    "result": {
+      "zh": "回到据点花掉 12 枚，下一次开局多一次治疗。",
+      "en": "Spend 12 at the hub to start the next attempt with one extra heal."
+    },
+    "next": {
+      "zh": "你可以重试首领，也能继续攒下一个升级。",
+      "en": "Retry the boss or gather resources for the next upgrade."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "做一个短关卡、一种跨局资源和两个永久升级；失败后直接进入购买页。",
+      "en": "Build one short challenge, one persistent currency and two lasting upgrades, with purchases after failure."
+    },
+    "pitfall": {
+      "zh": "先别做无限升级；避免玩家必须刷很多次才能体验基础操作。",
+      "en": "Avoid endless upgrade ranks or requiring many runs before the core controls become enjoyable."
+    },
+    "test": {
+      "zh": "失败后玩家是否能说出本次留下了什么，并主动选择下一次目标？",
+      "en": "After failure, can players name what they retained and choose a goal for the next attempt?"
+    }
+  }
+}

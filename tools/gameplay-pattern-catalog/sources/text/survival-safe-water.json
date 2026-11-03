@@ -1,0 +1,119 @@
+{
+  "id": "survival-safe-water",
+  "system": "survival",
+  "edition": 2,
+  "name": {
+    "zh": "取水与净水准备",
+    "en": "Collecting and purifying water"
+  },
+  "summary": {
+    "zh": "有水可喝，不代表现在喝最划算。",
+    "en": "Available water is not always worth drinking immediately."
+  },
+  "rules": {
+    "zh": "玩家找到水源后，选择直接饮用或先花燃料、容器和时间处理。安全水能补充行程，但携带量有限；水质标签和口渴状态让准备程度可见。",
+    "en": "After finding water, drink immediately or spend fuel, a container and time making it safe. Safe water supports travel but carrying capacity is limited; quality labels and thirst show readiness."
+  },
+  "loop": [
+    {
+      "zh": "找到水源并判断水质",
+      "en": "Find water and check its quality"
+    },
+    {
+      "zh": "准备容器与处理材料",
+      "en": "Prepare a vessel and treatment"
+    },
+    {
+      "zh": "处理并装入随身储备",
+      "en": "Purify and pack a reserve"
+    },
+    {
+      "zh": "按行程消耗并补充",
+      "en": "Consume and replenish along the route"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "现在很渴时，冒水质风险还是再等一次处理？",
+      "en": "When already thirsty, accept unsafe water or wait for treatment?"
+    },
+    {
+      "zh": "多带水更安全，却挤掉战利品或燃料容量。",
+      "en": "Extra water improves safety but displaces loot or fuel."
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "处理耗时",
+        "en": "Treatment time"
+      },
+      "effect": {
+        "zh": "长耗时让净水成为出发前计划；短耗时适合沿途快速补给。",
+        "en": "Long treatment favors preparation; short treatment supports quick stops."
+      }
+    },
+    {
+      "name": {
+        "zh": "水质信息",
+        "en": "Quality information"
+      },
+      "effect": {
+        "zh": "明确标注让风险可计算；模糊信息需要额外线索支持判断。",
+        "en": "Clear labels make risk legible; uncertainty needs clues."
+      }
+    }
+  ],
+  "tags": [
+    "planning",
+    "risk"
+  ],
+  "related": [
+    "survival-bleeding-triage",
+    "survival-competing-needs",
+    "survival-fatigue-rest",
+    "survival-limb-impairment"
+  ],
+  "contrast": {
+    "zh": "漫漫长夜把融雪与煮水分成阶段；绿色地狱更突出已有水源的安全性和容器准备。",
+    "en": "The Long Dark separates melting from boiling; Green Hell emphasizes source safety and vessel preparation."
+  },
+  "combination": {
+    "zh": "设计提案：把净水设备与饮水放进同一负重预算，形成“背水赶路”和“带设备途中处理”两种准备方式。",
+    "en": "Design proposal: put water and purification equipment in one weight budget, trading carried water for on-route treatment."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "演示设定：只有一份燃料和两瓶脏水，下一段路要一瓶水。",
+      "en": "Example: one fuel unit, two dirty bottles, and a route requiring one bottle."
+    },
+    "action": {
+      "zh": "先处理一瓶，把另一瓶留在营地。",
+      "en": "Purify one bottle and leave the other at camp."
+    },
+    "result": {
+      "zh": "获得安全饮水，但没有剩余燃料。",
+      "en": "You gain safe water but have no fuel left."
+    },
+    "next": {
+      "zh": "返程时要先搜集燃料，才能再次净水。",
+      "en": "Collect fuel on return before purifying again."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "用三种物品、一个净水按钮和两种水质做一段往返路线。",
+      "en": "Build one round trip with three items, a Purify button and two water qualities."
+    },
+    "pitfall": {
+      "zh": "别一开始模拟完整液体系统；先验证准备成本是否改变路线。",
+      "en": "Avoid a full fluid simulation; first test whether preparation changes routes."
+    },
+    "test": {
+      "zh": "给玩家轻量长路与重载短路两种方案，观察是否按供水条件选路。",
+      "en": "Offer a light long route and a loaded short route; observe water-based choices."
+    }
+  }
+}

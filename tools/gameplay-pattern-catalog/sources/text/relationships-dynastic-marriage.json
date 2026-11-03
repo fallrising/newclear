@@ -1,0 +1,120 @@
+{
+  "id": "relationships-dynastic-marriage",
+  "system": "relationships",
+  "edition": 1,
+  "name": {
+    "zh": "联姻与家族连接",
+    "en": "Dynastic marriage"
+  },
+  "summary": {
+    "zh": "用人物关系连接政治资源，把短期盟友和长期继承放在一起权衡。",
+    "en": "Connect political resources through family ties, balancing alliances and succession."
+  },
+  "rules": {
+    "zh": "玩家比较可婚配人物及双方接受条件，安排婚姻。人物去向、家族联系或联盟随之变化；收益不能只看当前角色，还要考虑后续家族结构。",
+    "en": "Compare eligible characters and acceptance conditions, then arrange a marriage. Character movement, family ties or alliances change, with consequences beyond the current generation."
+  },
+  "loop": [
+    {
+      "zh": "比较候选家族",
+      "en": "Compare families"
+    },
+    {
+      "zh": "评估接受条件",
+      "en": "Assess acceptance"
+    },
+    {
+      "zh": "安排婚姻",
+      "en": "Arrange marriage"
+    },
+    {
+      "zh": "管理新关系",
+      "en": "Manage new ties"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "选强大的盟友，还是保住优秀人物在自己阵营？",
+      "en": "Gain a powerful ally or retain a valuable character?"
+    },
+    {
+      "zh": "眼前军事收益是否值得承担未来家族结构变化？",
+      "en": "Does immediate military value justify future family changes?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "人物转移规则",
+        "en": "Character transfer"
+      },
+      "effect": {
+        "zh": "婚后转入哪一方，决定联姻是否伴随人才流失。",
+        "en": "Post-marriage residence determines whether the deal costs talent."
+      }
+    },
+    {
+      "name": {
+        "zh": "关系持续条件",
+        "en": "Tie persistence"
+      },
+      "effect": {
+        "zh": "随人物死亡而失效的关系需要持续维护。",
+        "en": "Ties that lapse when people die require ongoing renewal."
+      }
+    }
+  ],
+  "tags": [
+    "planning",
+    "narrative",
+    "progression"
+  ],
+  "related": [
+    "relationships-bond-scenes",
+    "relationships-daily-contact",
+    "relationships-date-itinerary",
+    "relationships-gift-allocation"
+  ],
+  "contrast": {
+    "zh": "CK3将婚配嵌入代际继承；三国更直接地让婚姻成为人物流动与外交交易。",
+    "en": "CK3 embeds marriage in generational succession; Three Kingdoms makes it an explicit tool of character movement and diplomacy."
+  },
+  "combination": {
+    "zh": "组合创意：经营多个工匠家族的联盟，关系连接共享学徒名额；每次结盟要决定技艺传给谁。",
+    "en": "Design proposal: allied artisan families share apprenticeship slots, making each alliance a decision about who inherits specialized skills."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "家族有一位优秀继承人，两份婚约分别提供军事盟友与更有利的家族归属。",
+      "en": "Your family has a strong heir; two marriages offer either military allies or better family continuity."
+    },
+    "action": {
+      "zh": "你比较人物去向与后代归属，选择适合长期计划的一份婚约。",
+      "en": "Compare residence and descendants’ affiliation, then choose the arrangement fitting your long-term plan."
+    },
+    "result": {
+      "zh": "家族关系网更新，眼前获得的盟友与未来保留的人才不完全相同。",
+      "en": "The family network changes, trading immediate alliances against future continuity."
+    },
+    "next": {
+      "zh": "下一代成长后，再根据新的家族结构安排合作关系。",
+      "en": "As the next generation grows, arrange relationships around the changed family structure."
+    }
+  },
+  "prototype": {
+    "scope": "medium",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "用人物卡做两个家族、四位角色和明确的婚后归属规则。",
+      "en": "Use character cards for two families, four people, and explicit post-marriage affiliation rules."
+    },
+    "pitfall": {
+      "zh": "继承、亲属禁限和多代关系容易互相冲突；初版限制代数和可选关系。",
+      "en": "Inheritance, relationship restrictions, and multiple generations interact; limit generations and allowed relationships initially."
+    },
+    "test": {
+      "zh": "确认婚约前，让玩家说明谁会离开、谁会继承，检查结果是否可预测。",
+      "en": "Before confirmation, ask who leaves and who inherits to check that outcomes are predictable."
+    }
+  }
+}

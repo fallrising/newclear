@@ -1,0 +1,120 @@
+{
+  "id": "movement-low-slide",
+  "system": "movement",
+  "edition": 3,
+  "name": {
+    "zh": "压低身体，滑过狭窄通道",
+    "en": "Lower the body and slide through a gap"
+  },
+  "summary": {
+    "zh": "利用已有速度穿过低处空间，出口还要留好落脚位置。",
+    "en": "Use existing speed to pass through low space, with room to recover at the exit."
+  },
+  "rules": {
+    "zh": "角色在移动中进入更低的姿态，得以从站立时过不去的障碍下方通过。滑行距离受进入速度和阻力影响，玩家要选择开始的位置，并在空间足够时恢复站立；不是只换一个蹲姿动画。",
+    "en": "Moving into a lower posture allows passage beneath obstacles that block a standing body. Entry speed and drag shape sliding distance. Choose where to start and recover to standing only where there is room; the posture changes physical clearance, not just animation."
+  },
+  "loop": [
+    {
+      "zh": "判断低通道长度",
+      "en": "Read the low passage length"
+    },
+    {
+      "zh": "取得合适速度",
+      "en": "Build suitable speed"
+    },
+    {
+      "zh": "在入口前压低滑行",
+      "en": "Slide before the entrance"
+    },
+    {
+      "zh": "穿出后恢复或接动作",
+      "en": "Recover or chain an action after exiting"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "通道很长，先加速再滑，还是改走更高但更安全的路线？",
+      "en": "For a long tunnel, build speed for the slide or take a higher but safer route?"
+    },
+    {
+      "zh": "出口紧接深坑，应该晚一点开始滑，还是提前减速保留停步距离？",
+      "en": "A pit follows the exit: slide later or reduce speed early to leave stopping room?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "滑行阻力",
+        "en": "Sliding drag"
+      },
+      "effect": {
+        "zh": "阻力越小越能保持速度，但出口附近更容易冲过安全区。",
+        "en": "Less drag preserves speed but makes overshooting a safe exit more likely."
+      }
+    },
+    {
+      "name": {
+        "zh": "低姿高度与恢复空间",
+        "en": "Low posture height and recovery clearance"
+      },
+      "effect": {
+        "zh": "尺寸差决定哪些通道可用，恢复空间检查决定是否会卡住或穿过顶棚。",
+        "en": "The height difference defines usable passages; recovery clearance determines whether standing can cause snagging or ceiling penetration."
+      }
+    }
+  ],
+  "tags": [
+    "timing",
+    "spatial",
+    "dexterity"
+  ],
+  "related": [
+    "exploration-grapple-swing",
+    "exploration-wall-jump",
+    "combat-invulnerable-dodge",
+    "exploration-air-action-refill"
+  ],
+  "contrast": {
+    "zh": "《泰坦陨落2》尤其利用滑行接续速度与动作；《消逝的光芒2》的环境穿越也暴露出低姿通过后能否安全恢复的空间设计问题。",
+    "en": "Titanfall 2 particularly uses sliding to chain speed and actions; Dying Light 2 traversal also highlights the need to recover safely after passing through low environmental spaces."
+  },
+  "combination": {
+    "zh": "设计提案：走廊的高位光束会提前亮起，玩家用低姿滑行通过，再在光束结束前决定是否接一次跳跃。",
+    "en": "Design proposal: a high beam in a corridor lights up before firing. Slide beneath it, then decide whether to chain a jump as the beam ends."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "教学示例：一条低通道长 4 格，出口后只有 2 格安全地面。",
+      "en": "Teaching example: a low tunnel is four tiles long, with only two safe tiles beyond its exit."
+    },
+    "action": {
+      "zh": "你从入口前 1 格开始滑行，并在出口处减速。",
+      "en": "Begin the slide one tile before the entrance, then reduce speed at the exit."
+    },
+    "result": {
+      "zh": "角色穿过顶棚，停在深坑之前，站立空间恢复。",
+      "en": "You pass beneath the ceiling, stop before the pit and regain standing room."
+    },
+    "next": {
+      "zh": "下一段低通道更长，需要重新估计助跑距离。",
+      "en": "The next tunnel is longer, so reconsider the run-up distance."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "用一个矩形角色做站立与低姿两种碰撞高度，再加三种长度的低通道和可调滑行阻力。",
+      "en": "Give a rectangular character standing and low collision heights; add three tunnel lengths and adjustable sliding drag."
+    },
+    "pitfall": {
+      "zh": "低顶棚下强制站起容易卡住角色；先定义出口前保持低姿的规则。",
+      "en": "Forcing a stand under a low ceiling can trap the character; define how the low posture persists until clearance returns."
+    },
+    "test": {
+      "zh": "检查玩家是否能根据通道长度调整滑行起点，并在出口后可靠恢复站立。",
+      "en": "Check whether players adjust the slide start to tunnel length and reliably return to standing after the exit."
+    }
+  }
+}

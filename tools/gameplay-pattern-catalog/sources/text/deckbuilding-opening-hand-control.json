@@ -1,0 +1,119 @@
+{
+  "id": "deckbuilding-opening-hand-control",
+  "system": "deckbuilding",
+  "edition": 2,
+  "name": {
+    "zh": "指定开局必到的牌",
+    "en": "Choosing guaranteed opening cards"
+  },
+  "summary": {
+    "zh": "把最关键的准备步骤放进首回合，换取开局的稳定性。",
+    "en": "Guarantee an essential setup card at the start of a fight."
+  },
+  "rules": {
+    "zh": "给少量牌附加开局保证，使它们必定出现在首手或专门的开局阶段。玩家在战前选择先保证哪个环节，同时承担占用首手位置、金币或稀缺标记的成本。",
+    "en": "Give a few cards guaranteed access in the opening hand or a special opening phase. Before battle, choose which setup step deserves certainty and pay with a hand slot, money or a scarce marker."
+  },
+  "loop": [
+    {
+      "zh": "找出开局依赖",
+      "en": "Identify opening dependencies"
+    },
+    {
+      "zh": "分配开局标记",
+      "en": "Assign opening access"
+    },
+    {
+      "zh": "稳定启动组合",
+      "en": "Start the combination reliably"
+    },
+    {
+      "zh": "按新需求重新安排",
+      "en": "Reassign for new needs"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "保证防守能降低翻车风险，保证引擎牌能更快滚起优势，先选哪一个？",
+      "en": "Guarantee safety or guarantee the engine that builds an advantage?"
+    },
+    {
+      "zh": "首手全是准备牌时，是否还留得下立即应对敌人的牌？",
+      "en": "Will a setup-heavy opening still contain immediate answers?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "保证数量",
+        "en": "Guaranteed-card count"
+      },
+      "effect": {
+        "zh": "数量过多会让每场开局变成固定脚本。",
+        "en": "Too many guaranteed cards turn openings into a fixed script."
+      }
+    },
+    {
+      "name": {
+        "zh": "附加行动成本",
+        "en": "Opening action cost"
+      },
+      "effect": {
+        "zh": "只保证抽到与额外免费打出，会产生很不同的强度。",
+        "en": "Guaranteed drawing is much weaker than guaranteed free deployment."
+      }
+    }
+  ],
+  "tags": [
+    "planning",
+    "optimization"
+  ],
+  "related": [
+    "deckbuilding-dice-allocation",
+    "deckbuilding-duplicate-investment",
+    "deckbuilding-reward-choice",
+    "deckbuilding-temporary-generation"
+  ],
+  "contrast": {
+    "zh": "Innate 主要解决抽不到的问题；皇冠还改变行动时机，允许先完成部署。",
+    "en": "Innate primarily fixes access; crowns also change timing by allowing deployment before normal turns."
+  },
+  "combination": {
+    "zh": "设计提案：允许玩家指定一张自动装置卡开局出现，再用条件控制决定它何时启动。",
+    "en": "Design proposal: Guarantee one automation card at setup, then let conditions govern when it activates."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "编辑示例：八张牌里有一张发电机，其他机器需要它供电。",
+      "en": "Editorial example: an eight-card deck contains one generator required by other machines."
+    },
+    "action": {
+      "zh": "玩家把唯一的开局标记给发电机。",
+      "en": "Assign the only opening marker to the generator."
+    },
+    "result": {
+      "zh": "第一回合必定能先建发电机，但少抽一张随机牌。",
+      "en": "The generator is available on turn one, replacing one random draw."
+    },
+    "next": {
+      "zh": "后续再按抽到的机器决定生产方向。",
+      "en": "Choose the production plan from subsequent machine draws."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "做八张牌和一个可移动的开局标记，让玩家连续试三次开局。",
+      "en": "Use eight cards and one movable opening marker across three test openings."
+    },
+    "pitfall": {
+      "zh": "首版不要同时支持免费打出、额外抽牌和任意排序，以免分不清稳定性的价值。",
+      "en": "Avoid adding free play, bonus draws and full ordering at once."
+    },
+    "test": {
+      "zh": "玩家能察觉开局更可靠，也能指出为它牺牲了哪个首手选项。",
+      "en": "Players notice greater reliability and identify the opening option it displaced."
+    }
+  }
+}

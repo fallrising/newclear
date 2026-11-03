@@ -1,0 +1,120 @@
+{
+  "id": "commerce-dynamic-market",
+  "system": "commerce",
+  "edition": 1,
+  "name": {
+    "zh": "供需驱动价格",
+    "en": "Supply-driven market prices"
+  },
+  "summary": {
+    "zh": "让买卖行为改变下一次报价，市场成为会被玩家影响的系统。",
+    "en": "Let trading change subsequent prices, making the market responsive to players."
+  },
+  "rules": {
+    "zh": "玩家观察行情后买入或卖出。市场供需随交易与生产变化，连续抛售可能压低自身利润；收入反馈同时也是下一步的市场信号。",
+    "en": "Observe prices, then buy or sell. Trading and production alter supply and demand; repeated selling can reduce the seller’s own margins, feeding information into the next decision."
+  },
+  "loop": [
+    {
+      "zh": "观察价格与产量",
+      "en": "Inspect prices and output"
+    },
+    {
+      "zh": "选择买卖方向",
+      "en": "Choose a trade"
+    },
+    {
+      "zh": "执行交易",
+      "en": "Execute it"
+    },
+    {
+      "zh": "重估改变后的市场",
+      "en": "Reassess the changed market"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "现在卖掉锁定收益，还是等待需求上升？",
+      "en": "Lock in a return now or wait for demand?"
+    },
+    {
+      "zh": "扩大产能是否会把高价市场自己做没？",
+      "en": "Will expanding production erase its attractive price?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "价格弹性",
+        "en": "Price elasticity"
+      },
+      "effect": {
+        "zh": "交易少量就大幅变价会强化择时，也可能鼓励短线操控。",
+        "en": "Large changes from small trades emphasize timing and manipulation."
+      }
+    },
+    {
+      "name": {
+        "zh": "市场共享范围",
+        "en": "Market scope"
+      },
+      "effect": {
+        "zh": "共享市场加强对抗，分区市场增加运输意义。",
+        "en": "Shared markets strengthen competition; regional markets reward transport."
+      }
+    }
+  ],
+  "tags": [
+    "economy",
+    "optimization",
+    "risk"
+  ],
+  "related": [
+    "commerce-auction-bidding",
+    "commerce-debt-pressure",
+    "commerce-haggling",
+    "commerce-price-discovery"
+  ],
+  "contrast": {
+    "zh": "外星贸易公司的实时共享市场让对手直接影响行情；大航海家4把价格与城市、航程连接。",
+    "en": "Offworld’s shared real-time market makes rivals direct influences; Patrician ties pricing to cities and voyages."
+  },
+  "combination": {
+    "zh": "组合创意：矿业小镇中玩家开采过多某矿会拉低当地价格，逼迫采集路线与制造用途一起调整。",
+    "en": "Design proposal: excessive mining depresses a town’s local ore price, forcing changes to gathering routes and manufacturing uses."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "市场急缺木材，当前每份卖 10，你手上有一批库存。",
+      "en": "The market lacks wood and pays 10 per unit; you hold a large stock."
+    },
+    "action": {
+      "zh": "你先卖出一小批，观察剩余需求与新报价。",
+      "en": "Sell a small batch and inspect remaining demand and the new price."
+    },
+    "result": {
+      "zh": "供给增加后价格下降，继续全卖的平均收益会变低。",
+      "en": "The added supply lowers the price, reducing the average return of selling everything."
+    },
+    "next": {
+      "zh": "决定分批等待、转卖其他商品，或接受低价尽快回笼资金。",
+      "en": "Wait between batches, sell another good, or accept the lower price for immediate cash."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "做两种商品、可见库存与简单的供需价格公式，每轮刷新需求。",
+      "en": "Build two goods, visible stocks, a simple supply-demand pricing rule, and periodic demand updates."
+    },
+    "pitfall": {
+      "zh": "先限制价格边界和买卖差价，避免玩家靠同一循环无限套利。",
+      "en": "Set price bounds and trading spreads to avoid an unlimited buy-sell exploit."
+    },
+    "test": {
+      "zh": "大批卖出后，玩家是否理解自己压低了价格，并改变后续交易量。",
+      "en": "After a large sale, do players understand their price impact and adjust later quantities?"
+    }
+  }
+}

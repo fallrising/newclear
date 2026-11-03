@@ -1,0 +1,120 @@
+{
+  "id": "narrative-investigation-time-slots",
+  "system": "narrative",
+  "edition": 3,
+  "name": {
+    "zh": "把有限时段分给不同线索",
+    "en": "Allocate limited time among leads"
+  },
+  "summary": {
+    "zh": "查这一条线索，就暂时放下另一条。",
+    "en": "Following one lead means setting another aside for now."
+  },
+  "rules": {
+    "zh": "调查行动消耗游戏内时间，人物和事件也有出现时段。玩家根据预期收益安排访问、交谈和等待；到达新时段后，能见的人或剩余机会发生变化。它关注调查顺序与机会成本，不要求玩家现实中快速阅读。",
+    "en": "Investigative actions advance in-game time, while people and events have schedules. Plan visits, conversations and waiting according to expected value. A new time period changes availability or remaining opportunities; the rule concerns scheduling, not reading quickly in real time."
+  },
+  "loop": [
+    {
+      "zh": "查看线索与可用时段",
+      "en": "Review leads and available time"
+    },
+    {
+      "zh": "选择一次调查或等待",
+      "en": "Choose an investigation or wait"
+    },
+    {
+      "zh": "获得信息并推进时钟",
+      "en": "Gain information and advance time"
+    },
+    {
+      "zh": "按新的日程重新排优先级",
+      "en": "Reprioritize against the new schedule"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "先查把握较大的线索，还是赶在人物离开前问一个不确定问题？",
+      "en": "Follow the promising lead or catch a departing witness for an uncertain question?"
+    },
+    {
+      "zh": "等关键人物出现，还是用这段时间调查别处？",
+      "en": "Wait for a key person or investigate elsewhere in the interval?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "行动消耗的粒度",
+        "en": "Time-cost granularity"
+      },
+      "effect": {
+        "zh": "整段时段易读；细分分钟更灵活，但需要更好的日程提示。",
+        "en": "Whole time slots are easy to read; minute-level costs are flexible but need clearer scheduling aids."
+      }
+    },
+    {
+      "name": {
+        "zh": "错过机会能否重来",
+        "en": "Whether missed opportunities return"
+      },
+      "effect": {
+        "zh": "隔天再来会减轻焦虑；永久错过则需要提前提醒。",
+        "en": "Returning the next day reduces anxiety; permanent misses need advance warnings."
+      }
+    }
+  ],
+  "tags": [
+    "planning",
+    "time",
+    "information"
+  ],
+  "related": [
+    "narrative-background-dialogue-access",
+    "narrative-delayed-choice-consequences",
+    "narrative-loop-event-schedule",
+    "narrative-perspective-handoff"
+  ],
+  "contrast": {
+    "zh": "Pentiment 的阶段限制会迫使玩家舍弃线索；Disco Elysium 更强调一天内的时间推进与人物可用时段，不能把所有任务都当成硬截止。",
+    "en": "Pentiment’s phases force abandoned leads; Disco Elysium emphasizes time progression and character schedules rather than a hard deadline for every task."
+  },
+  "combination": {
+    "zh": "组合提案：先实地走通路线才能建立快速旅行节点；减少之后的路程耗时，就能在同一天多安排一次访谈。",
+    "en": "Design proposal: surveying a route opens a fast-travel node. Saving later travel time allows one more interview in the same day."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "下午只剩两个时段，能验物证、访证人或参加集会。",
+      "en": "Two afternoon slots remain for evidence analysis, a witness visit or a meeting."
+    },
+    "action": {
+      "zh": "玩家先访即将离开的证人，再去集会。",
+      "en": "The player visits the departing witness, then attends the meeting."
+    },
+    "result": {
+      "zh": "拿到一段证词，但物证当天来不及检验。",
+      "en": "A testimony is obtained, but evidence cannot be analyzed that day."
+    },
+    "next": {
+      "zh": "第二天需要决定先验证证词，还是追新线索。",
+      "en": "The next day brings a choice between checking the testimony and following a new lead."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "做三个地点、四个行动和两个时段，提前显示每项行动是否推进时间。",
+      "en": "Build three locations, four actions and two slots, clearly labeling time-advancing actions."
+    },
+    "pitfall": {
+      "zh": "不要在玩家刚读完一大段文字后，才突然告知时间已经耗尽。",
+      "en": "Do not reveal that time expired only after the player finishes a long passage."
+    },
+    "test": {
+      "zh": "玩家是在衡量线索价值，还是因为不懂计时规则而反复读档？",
+      "en": "Are players weighing leads or reloading because the time rules are unclear?"
+    }
+  }
+}

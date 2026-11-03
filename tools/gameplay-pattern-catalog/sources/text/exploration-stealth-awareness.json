@@ -1,0 +1,120 @@
+{
+  "id": "exploration-stealth-awareness",
+  "system": "stealth",
+  "edition": 1,
+  "name": {
+    "zh": "分级警觉与潜行绕路",
+    "en": "Escalating awareness and stealth routing"
+  },
+  "summary": {
+    "zh": "被看见并非立刻失败，警觉阶段为玩家留下处理窗口。",
+    "en": "Being noticed need not mean instant failure; awareness stages create response windows."
+  },
+  "rules": {
+    "zh": "在敌人的视线、听觉和巡逻路线间移动。可疑行为先累积警觉，再触发搜索或战斗；玩家可停下、遮挡视线、制造诱饵或换路，警觉反馈帮助理解哪里出了问题。",
+    "en": "Navigate enemy sight, sound and patrol routes. Suspicious behavior escalates toward searching or combat; pause, break sight, distract or reroute in response to readable awareness feedback."
+  },
+  "loop": [
+    {
+      "zh": "观察巡逻与视线",
+      "en": "Observe patrols and sightlines"
+    },
+    {
+      "zh": "选择遮挡与时机",
+      "en": "Choose cover and timing"
+    },
+    {
+      "zh": "通过或制造诱饵",
+      "en": "Pass through or distract"
+    },
+    {
+      "zh": "处理警觉后继续",
+      "en": "Manage suspicion and continue"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "等待巡逻离开最稳，制造声音更快，却会改变后续巡逻状态。",
+      "en": "Waiting is reliable; a noise distraction is faster but changes subsequent behavior."
+    },
+    {
+      "zh": "发现尸体或违法动作会带来连锁后果，路线必须考虑离开时的状态。",
+      "en": "A discovered body or illegal act can alter the route, so plan the exit as well as entry."
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "警觉累积速度",
+        "en": "Awareness buildup"
+      },
+      "effect": {
+        "zh": "缓慢累积允许补救，快速累积强调提前侦察。",
+        "en": "Slow buildup permits correction; rapid buildup demands reconnaissance."
+      }
+    },
+    {
+      "name": {
+        "zh": "搜索持续时间",
+        "en": "Search persistence"
+      },
+      "effect": {
+        "zh": "长时间搜索让失误改变整段关卡，短时间搜索更便于试错。",
+        "en": "Persistent search reshapes the level after a mistake; brief search supports experimentation."
+      }
+    }
+  ],
+  "tags": [
+    "information",
+    "timing",
+    "spatial"
+  ],
+  "related": [
+    "stealth-light-shadow",
+    "stealth-sound-lures",
+    "stealth-hiding-spots",
+    "stealth-synchronized-actions"
+  ],
+  "contrast": {
+    "zh": "《耻辱》突出物理遮挡与垂直路线；《杀手》还加入身份权限，站在人群中也可能是安全选择。",
+    "en": "Dishonored emphasizes occlusion and vertical routes; Hitman adds identity permissions, making standing openly among people a possible safe choice."
+  },
+  "combination": {
+    "zh": "设计提案：博物馆修复师可以合法进入展厅，但携带错误工具会引起注意；玩家通过借还工具改变可走路线。",
+    "en": "Design proposal: a museum restorer may enter galleries legally, but carrying the wrong tools draws attention; borrowing and returning tools changes viable routes."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "守卫转身看向走廊，你的位置刚进入他的视线边缘。",
+      "en": "A guard turns toward the corridor and catches you at the edge of his view."
+    },
+    "action": {
+      "zh": "警觉开始上升，你立刻退到箱子后面。",
+      "en": "As suspicion rises, move behind a crate."
+    },
+    "result": {
+      "zh": "守卫失去直接视线，开始调查刚才的位置，而没有立即开战。",
+      "en": "The guard loses sight and investigates your last position instead of immediately fighting."
+    },
+    "next": {
+      "zh": "趁调查改变路线，等待新的通过窗口。",
+      "en": "Change route during the investigation and wait for another opening."
+    }
+  },
+  "prototype": {
+    "scope": "medium",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "做一条巡逻路线、视野范围，以及平静、怀疑、追踪三个明确状态。",
+      "en": "Build one patrol route, a vision cone, and calm, suspicious, and pursuing states."
+    },
+    "pitfall": {
+      "zh": "不要一开始叠加听觉、伪装和群体警报；先保证每次状态变化有原因。",
+      "en": "Defer sound, disguises, and group alarms until every state transition has a readable cause."
+    },
+    "test": {
+      "zh": "被怀疑后，玩家能否看懂警觉进度并成功采取一次补救行动。",
+      "en": "After detection begins, can players read suspicion and successfully recover once?"
+    }
+  }
+}

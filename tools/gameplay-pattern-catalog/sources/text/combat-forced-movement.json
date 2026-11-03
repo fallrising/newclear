@@ -1,0 +1,120 @@
+{
+  "id": "combat-forced-movement",
+  "system": "combat",
+  "edition": 2,
+  "name": {
+    "zh": "推拉敌人改变站位",
+    "en": "Forced movement"
+  },
+  "summary": {
+    "zh": "把敌人送到不该站的位置，有时比直接扣血更有效。",
+    "en": "Moving an enemy somewhere dangerous can matter more than damage."
+  },
+  "rules": {
+    "zh": "攻击除了伤害，还会把目标沿方向推走或拉近。新位置会改变攻击目标、障碍关系和危险地形的作用。玩家先预估落点，再选择施力方向；位移后的局面成为下一步行动的起点。",
+    "en": "An attack can push or pull a target as well as deal damage. Its new position changes targeting, obstacles and hazards. Predict the landing point, choose a direction, then plan from the altered board."
+  },
+  "loop": [
+    {
+      "zh": "找出危险落点",
+      "en": "Find useful landing tiles"
+    },
+    {
+      "zh": "调整施力位置",
+      "en": "Position the attacker"
+    },
+    {
+      "zh": "推开或拉近目标",
+      "en": "Push or pull the target"
+    },
+    {
+      "zh": "利用新站位",
+      "en": "Exploit the new position"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "直接打伤害，还是用位移让敌人的攻击落空？",
+      "en": "Deal direct damage or displace the enemy so its attack misses?"
+    },
+    {
+      "zh": "把敌人推出战场，是否也会失去可回收的战利品？",
+      "en": "Will pushing an enemy out of reach also lose recoverable loot?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "位移距离",
+        "en": "Displacement distance"
+      },
+      "effect": {
+        "zh": "距离改变可达落点；过长会让站位准备失去意义。",
+        "en": "Distance changes reachable positions; excessive range weakens positioning."
+      }
+    },
+    {
+      "name": {
+        "zh": "碰撞规则",
+        "en": "Collision rules"
+      },
+      "effect": {
+        "zh": "撞墙、撞人和落坑的结果必须分别清楚，玩家才能预判。",
+        "en": "Wall, unit and pit collisions need distinct, readable outcomes."
+      }
+    }
+  ],
+  "tags": [
+    "spatial",
+    "planning",
+    "risk"
+  ],
+  "related": [
+    "combat-cover-flanking",
+    "combat-destructible-cover",
+    "combat-friendly-fire",
+    "combat-overwatch"
+  ],
+  "contrast": {
+    "zh": "《陷阵之志》多用确定的格子位移解局；《博德之门3》还需要权衡成功判定、地形高度和战利品损失。",
+    "en": "Into the Breach emphasizes deterministic grid displacement; Baldur’s Gate 3 adds success checks, elevation and possible loot loss."
+  },
+  "combination": {
+    "zh": "让推拉同时改变光束机关：敌人挡住光路，也能被推到开关上。",
+    "en": "Let displacement also alter a beam puzzle: enemies block beams or land on switches."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "怪物血量很高，身后一格是深坑，你站在它侧面。",
+      "en": "A tough monster stands one tile from a pit, while you are beside it."
+    },
+    "action": {
+      "zh": "先绕到它正前方，再用只造成1点伤害的推击。",
+      "en": "Move in front of it, then use a push dealing only 1 damage."
+    },
+    "result": {
+      "zh": "怪物被推入坑中，低伤害动作解决了高血量目标。",
+      "en": "The push drops it into the pit, solving a high-health threat with little damage."
+    },
+    "next": {
+      "zh": "下一只怪物背后是墙，你要重新寻找可利用的方向。",
+      "en": "The next monster stands against a wall, requiring a different direction."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "只做四方向推一格、墙和坑；先不用真实物理模拟。",
+      "en": "Start with one-tile cardinal pushes, walls and pits, without full physics."
+    },
+    "pitfall": {
+      "zh": "落点不可见或碰撞结算顺序含糊，会让空间决策变成试错。",
+      "en": "Hidden landing positions or ambiguous collision order turn planning into guessing."
+    },
+    "test": {
+      "zh": "给出同一敌人的三种站位，看试玩者能否提出不同解法。",
+      "en": "Give testers three positions for the same enemy and look for different solutions."
+    }
+  }
+}

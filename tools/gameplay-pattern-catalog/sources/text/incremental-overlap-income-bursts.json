@@ -1,0 +1,120 @@
+{
+  "id": "incremental-overlap-income-bursts",
+  "system": "incremental",
+  "edition": 3,
+  "name": {
+    "zh": "让短时加成在同一窗口重叠",
+    "en": "Overlap temporary income boosts"
+  },
+  "summary": {
+    "zh": "两个加成一起生效的短时间，可能比各自开满更值钱。",
+    "en": "A short overlap of two boosts can be worth more than using each separately."
+  },
+  "rules": {
+    "zh": "玩家拥有持续时间有限的增产效果，有些可主动触发，有些来自随机机会。不同加成同时存在时，收益规则可能相乘或放大特定动作。玩家在等待重叠与立刻兑现之间取舍，并在窗口结束后重新积累触发条件。",
+    "en": "Temporary output boosts may be activated deliberately or appear as opportunities. Compatible simultaneous effects can multiply returns or amplify particular actions. Choose between waiting for overlap and using a boost immediately, then rebuild the conditions for another window."
+  },
+  "loop": [
+    {
+      "zh": "观察已有加成与剩余时间",
+      "en": "Inspect active boosts and time remaining"
+    },
+    {
+      "zh": "准备另一种可兼容加成",
+      "en": "Prepare a compatible second effect"
+    },
+    {
+      "zh": "在重叠窗口集中操作",
+      "en": "Concentrate actions during the overlap"
+    },
+    {
+      "zh": "结算后准备下一次窗口",
+      "en": "Set up the next window afterward"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "现在使用技能拿确定收益，还是等一个可能错过的搭配机会？",
+      "en": "Take a certain gain now or wait for a combination that may not arrive?"
+    },
+    {
+      "zh": "窗口很短时，是继续配置，还是立即执行能吃到倍率的动作？",
+      "en": "With little time left, keep setting up or perform the action that benefits now?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "加成叠加规则",
+        "en": "Stacking rule"
+      },
+      "effect": {
+        "zh": "相乘会放大时机价值；相加更平缓；互斥关系要明确提示。",
+        "en": "Multiplication emphasizes timing; addition is gentler; incompatible effects need explicit feedback."
+      }
+    },
+    {
+      "name": {
+        "zh": "重叠窗口长度",
+        "en": "Overlap duration"
+      },
+      "effect": {
+        "zh": "窗口短强调准备和执行，窗口长更侧重资源配置。",
+        "en": "Short windows emphasize preparation and execution; long windows emphasize resource planning."
+      }
+    }
+  ],
+  "tags": [
+    "timing",
+    "economy",
+    "planning"
+  ],
+  "related": [
+    "incremental-escalating-copy-price",
+    "incremental-offline-window",
+    "incremental-quantity-milestones",
+    "incremental-spend-held-bonus"
+  ],
+  "contrast": {
+    "zh": "饼干点点乐常围绕随机出现的黄金饼干机会安排点击；王国放置更多围绕法力储备和可主动施放的法术顺序。",
+    "en": "Cookie Clicker often responds to golden-cookie opportunities; Realm Grinder more directly schedules spells around mana reserves."
+  },
+  "combination": {
+    "zh": "组合提案：厨房的“所有订单双倍收益”与“某台炉子加速”可重叠，玩家提前备料并优先完成最匹配的订单。",
+    "en": "Design proposal: overlap a double-order-reward window with a faster oven, encouraging advance preparation and targeted order priority."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "一个加成持续3轮，使产量翻倍；另一个从下一轮起可以使用，只在启用的那一轮使产量变为3倍。",
+      "en": "One boost doubles output for three rounds; another becomes ready next round and triples output for one round."
+    },
+    "action": {
+      "zh": "玩家现在开启长加成，下一轮开启短加成。",
+      "en": "Start the longer boost now and the short boost next round."
+    },
+    "result": {
+      "zh": "若规则相乘，重叠的那轮得到6倍产量。",
+      "en": "With multiplicative rules, the overlapping round yields sixfold output."
+    },
+    "next": {
+      "zh": "加成结束后，要再攒触发资源而不能无限连开。",
+      "en": "Afterward, rebuild the resources needed to trigger another window."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "做两个定时加成和一个产出按钮，把同时生效的计算过程显示出来。",
+      "en": "Build two timed boosts and one output action; display how simultaneous effects are calculated."
+    },
+    "pitfall": {
+      "zh": "别让玩家必须靠外部计算器才知道哪些效果互斥。",
+      "en": "Do not require an external calculator to discover incompatible effects."
+    },
+    "test": {
+      "zh": "玩家是否会主动等待一个可解释的重叠机会，而不是看到亮起就按？",
+      "en": "Do players wait for an understandable overlap rather than activate every ready button?"
+    }
+  }
+}

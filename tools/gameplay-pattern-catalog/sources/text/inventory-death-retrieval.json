@@ -1,0 +1,120 @@
+{
+  "id": "inventory-death-retrieval",
+  "system": "inventory",
+  "edition": 1,
+  "name": {
+    "zh": "死亡后的资源回收",
+    "en": "Recovering resources after death"
+  },
+  "summary": {
+    "zh": "一次失败会生成一个必须重新规划的取回任务。",
+    "en": "Failure creates a retrieval mission to plan anew."
+  },
+  "rules": {
+    "zh": "死亡把部分资源留在危险地点，玩家复活后可以重新准备再去取回。取回收益必须与路途危险比较；地图标记、遗物或敌对残影明确提示损失仍有恢复可能。",
+    "en": "Death leaves resources in a dangerous location. After respawning, prepare a retrieval trip and weigh the recoverable value against the route’s danger; markers or remains keep the possibility visible."
+  },
+  "loop": [
+    {
+      "zh": "死亡并留下资源",
+      "en": "Die and leave resources"
+    },
+    {
+      "zh": "准备回收路线",
+      "en": "Prepare the retrieval route"
+    },
+    {
+      "zh": "穿越危险取回",
+      "en": "Return through danger"
+    },
+    {
+      "zh": "撤离或继续原任务",
+      "en": "Withdraw or resume the mission"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "裸身速跑取回，还是先花时间制造备用装备？",
+      "en": "Rush back lightly equipped or spend time preparing backup gear?"
+    },
+    {
+      "zh": "损失很小时是否放弃回收，避免把小失误变成连锁失败？",
+      "en": "Is abandoning a small loss wiser than risking a chain of failures?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "重复死亡规则",
+        "en": "Repeated death rule"
+      },
+      "effect": {
+        "zh": "旧资源保留减轻焦虑；覆盖旧资源强化单次回收压力。",
+        "en": "Persistent remains reduce anxiety; replacing them increases retrieval pressure."
+      }
+    },
+    {
+      "name": {
+        "zh": "回收地点安全性",
+        "en": "Recovery safety"
+      },
+      "effect": {
+        "zh": "资源略偏离死点可避免必死循环；原地回收更残酷。",
+        "en": "Offsetting recovery from the exact death point avoids traps; exact placement is harsher."
+      }
+    }
+  ],
+  "tags": [
+    "risk",
+    "planning",
+    "economy"
+  ],
+  "related": [
+    "inventory-weight-budget",
+    "commerce-regional-arbitrage",
+    "inventory-durability",
+    "inventory-light-reserve"
+  ],
+  "contrast": {
+    "zh": "前者主要回收装备物资且可保留多个遗物点；后者以单个暗影制造更明确的二次失败代价。",
+    "en": "The former recovers physical supplies with persistent remains; the latter uses one Shade to create a sharper second-failure cost."
+  },
+  "combination": {
+    "zh": "组合提案：远航失事后货箱随潮汐漂流，玩家能买保险保住价值，或自己规划一次寻回航线。",
+    "en": "Design proposal: shipwreck cargo drifts with tides; buy insurance or plan a recovery voyage yourself."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "你在洞穴深处失败，一袋材料留在怪物旁边，复活点在入口。",
+      "en": "You die deep in a cave; materials remain near a monster and you respawn at the entrance."
+    },
+    "action": {
+      "zh": "你先拿一把备用武器，再沿较安全的支路返回。",
+      "en": "Take a spare weapon and return through a safer side route."
+    },
+    "result": {
+      "zh": "取回材料后损失得到补偿，但准备和绕路消耗了时间。",
+      "en": "Recovering the materials reverses the loss, at the cost of preparation and travel."
+    },
+    "next": {
+      "zh": "根据剩余状态选择撤离，或继续完成上次没做完的目标。",
+      "en": "Choose to leave or resume the unfinished objective using your remaining resources."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "做一个可重复进入的小关卡、死亡掉落包与明确回收标记。",
+      "en": "Build one replayable level, a dropped resource bag, and a clear recovery marker."
+    },
+    "pitfall": {
+      "zh": "别让连续失败无限堆叠惩罚；先定义再次死亡时旧掉落如何处理。",
+      "en": "Define what a second death does to the old drop before allowing punishment to compound."
+    },
+    "test": {
+      "zh": "用高价值与低价值掉落各测试一次，观察玩家是否会合理选择放弃回收。",
+      "en": "Test valuable and trivial drops and see whether players sometimes reasonably abandon recovery."
+    }
+  }
+}

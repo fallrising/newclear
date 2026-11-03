@@ -1,0 +1,120 @@
+{
+  "id": "progression-respec-investment",
+  "system": "progression",
+  "edition": 2,
+  "name": {
+    "zh": "退点后重新分配",
+    "en": "Refund and reassign upgrades"
+  },
+  "summary": {
+    "zh": "保留已有成长，付出代价后换一种能力组合。",
+    "en": "Keep earned progress but pay to change its allocation."
+  },
+  "rules": {
+    "zh": "玩家可以退回已经投入的技能点，再按规则分配到其他能力。重分配可能收费、限定地点或限制可改内容，让失败的方案能修正，同时保留更换路线的取舍。",
+    "en": "Refund invested points and allocate them to other abilities. A fee, location requirement or limit on what can change makes failed plans recoverable while retaining a cost for switching."
+  },
+  "loop": [
+    {
+      "zh": "发现当前能力不合需求",
+      "en": "Identify a mismatch"
+    },
+    {
+      "zh": "查看能退回的投入和代价",
+      "en": "Check refunds and cost"
+    },
+    {
+      "zh": "重新分配",
+      "en": "Reassign"
+    },
+    {
+      "zh": "用同一挑战比较效果",
+      "en": "Compare on the same challenge"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "花钱立即换路线，还是继续用现有方案攒资源？",
+      "en": "Pay to switch now or save resources with the current setup?"
+    },
+    {
+      "zh": "只改一个短板，还是重做整套能力？改动越多，越需要重新适应。",
+      "en": "Fix one weakness or rebuild everything and relearn how the parts work?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "退点成本",
+        "en": "Refund cost"
+      },
+      "effect": {
+        "zh": "成本太高会让玩家不敢实验；完全免费则更容易每场都换最优解。",
+        "en": "High cost discourages experiments; no cost encourages a tailored setup for every encounter."
+      }
+    },
+    {
+      "name": {
+        "zh": "允许修改的范围",
+        "en": "Editable choices"
+      },
+      "effect": {
+        "zh": "能改技能但不能改身份，会保留一部分长期承诺。",
+        "en": "Changing abilities while keeping identity preserves some long-term commitment."
+      }
+    }
+  ],
+  "tags": [
+    "planning",
+    "economy",
+    "progression"
+  ],
+  "related": [
+    "progression-research-prerequisites",
+    "progression-challenge-tiers",
+    "progression-death-loses-training",
+    "progression-evolution-recipes"
+  ],
+  "contrast": {
+    "zh": "《博德之门3》可重新整理职业与升级选择；《恐怖黎明》的技能退点强调逐项收费及技能依赖。",
+    "en": "Baldur’s Gate 3 rebuilds class and level choices; Grim Dawn’s skill refunds operate on individual investments and their dependencies."
+  },
+  "combination": {
+    "zh": "设计提案：工匠可以花钱重选专长，但当天还有贷款要还；让修正能力和保住现金成为同一次预算决策。",
+    "en": "Design proposal: a craftsperson can pay to change specialties while a loan payment is due, making adaptation compete with cash safety."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "你有 6 个技能点，全投在火焰攻击；下一关敌人怕冰，钱包剩 30 元。",
+      "en": "All 6 points boost fire; the next enemy is weak to ice, and you have 30 coins."
+    },
+    "action": {
+      "zh": "你花 10 元退回 3 点，改投冰冻能力。",
+      "en": "Pay 10 coins to move 3 points into freezing."
+    },
+    "result": {
+      "zh": "伤害不再全靠火焰，但钱包只剩 20 元。",
+      "en": "You now have another damage option but only 20 coins left."
+    },
+    "next": {
+      "zh": "测试是否足够过关，再决定要不要继续付费重配。",
+      "en": "Test the new setup before paying for more changes."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "做两条各三级的能力、固定敌人和可撤回的点数界面，先显示费用再确认。",
+      "en": "Build two three-rank abilities, a fixed enemy and a refund screen that previews the fee."
+    },
+    "pitfall": {
+      "zh": "别先支持所有身份重建；先把点数返还和能力依赖处理清楚。",
+      "en": "Avoid rebuilding every identity choice before refunds and dependencies behave clearly."
+    },
+    "test": {
+      "zh": "一次失败后，玩家能否自己找到可修正的点，并准确预判退款和新能力？",
+      "en": "After failure, can players identify an adjustment and predict the refund and new ability?"
+    }
+  }
+}

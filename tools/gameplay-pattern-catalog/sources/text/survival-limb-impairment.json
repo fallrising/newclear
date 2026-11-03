@@ -1,0 +1,119 @@
+{
+  "id": "survival-limb-impairment",
+  "system": "survival",
+  "edition": 2,
+  "name": {
+    "zh": "受伤部位改变行动能力",
+    "en": "Injured limbs change capabilities"
+  },
+  "summary": {
+    "zh": "腿伤影响撤离，手伤影响作战，同样的掉血会产生不同的处理顺序。",
+    "en": "A leg injury affects escape and an arm injury affects work or combat, changing treatment priorities."
+  },
+  "rules": {
+    "zh": "伤害落在具体部位，并削弱该部位关联的行动。玩家除了保住生命，还要判断哪项能力最急需恢复，并通过换人、保护或改变路线渡过恢复期。",
+    "en": "Damage affects specific body regions and their associated actions. Beyond staying alive, players prioritize which capability to restore and adapt through substitutions, protection or route changes."
+  },
+  "loop": [
+    {
+      "zh": "读取受伤位置和功能影响",
+      "en": "Read the injury and affected function"
+    },
+    {
+      "zh": "调整动作或队伍分工",
+      "en": "Change actions or team roles"
+    },
+    {
+      "zh": "治疗并保护受伤者",
+      "en": "Treat and protect the injured"
+    },
+    {
+      "zh": "恢复后重新分配任务",
+      "en": "Reassign duties after recovery"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "先治疗跑不动的侦察员，还是拿不稳武器的护卫？",
+      "en": "Treat the slow scout or the guard struggling with a weapon first?"
+    },
+    {
+      "zh": "带伤坚持原计划，还是改走允许慢速撤离的路线？",
+      "en": "Keep the plan while injured or choose a route allowing a slow retreat?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "部位数量",
+        "en": "Number of regions"
+      },
+      "effect": {
+        "zh": "少量明确部位比很多差异不明显的部位更容易形成可读决策。",
+        "en": "A few meaningful regions are more readable than many nearly identical ones."
+      }
+    },
+    {
+      "name": {
+        "zh": "功能损失强度",
+        "en": "Impairment strength"
+      },
+      "effect": {
+        "zh": "完全失能会迫使替换，部分衰减则允许玩家评估是否硬撑。",
+        "en": "Total loss forces replacement; partial impairment allows a decision to push on."
+      }
+    }
+  ],
+  "tags": [
+    "planning",
+    "risk"
+  ],
+  "related": [
+    "survival-bleeding-triage",
+    "survival-competing-needs",
+    "survival-fatigue-rest",
+    "survival-safe-water"
+  ],
+  "contrast": {
+    "zh": "剑士让移动受损直接影响野外队伍撤离；环世界把身体能力连接到整个殖民地的工作分配。",
+    "en": "Kenshi makes impaired movement an expedition problem; RimWorld connects body capacities to colony work allocation."
+  },
+  "combination": {
+    "zh": "设计提案：腿伤角色可以留在掩体后支援，由移动正常的队友执行侧翼任务。",
+    "en": "Design proposal: an injured character supports from cover while a mobile teammate handles the flank."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "演示设定：弓手右臂受伤，搬运工左腿受伤。",
+      "en": "Example: an archer injures an arm while a carrier injures a leg."
+    },
+    "action": {
+      "zh": "让弓手轻装带路，给搬运工治疗并减负。",
+      "en": "Let the archer lead with a light load; treat and unload the carrier."
+    },
+    "result": {
+      "zh": "队伍暂时放弃远程交战，但能够一起撤回。",
+      "en": "The party gives up ranged combat temporarily but can retreat together."
+    },
+    "next": {
+      "zh": "回营后再恢复弓手的作战能力。",
+      "en": "Restore the archer’s combat ability after reaching camp."
+    }
+  },
+  "prototype": {
+    "scope": "medium",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "用腿和手两类部位分别关联移动与攻击，只做一种治疗和一个替换角色。",
+      "en": "Link legs to movement and arms to attacks, with one treatment and one replacement character."
+    },
+    "pitfall": {
+      "zh": "部位系统会牵动动画、装备与AI；原型先用图标和数值反馈。",
+      "en": "Body parts affect animation, equipment and AI; prototype with icons and values first."
+    },
+    "test": {
+      "zh": "交换两人的受伤部位，看玩家是否改变分工，而不只是重复点治疗。",
+      "en": "Swap the injuries and see whether players change roles rather than just repeat treatment clicks."
+    }
+  }
+}

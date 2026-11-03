@@ -1,0 +1,120 @@
+{
+  "id": "exploration-earned-map",
+  "system": "exploration",
+  "edition": 1,
+  "name": {
+    "zh": "探索换取地图信息",
+    "en": "Earned map information"
+  },
+  "summary": {
+    "zh": "地图不是开局全知，而是需要主动获取的探索成果。",
+    "en": "Make map knowledge something earned through exploration."
+  },
+  "rules": {
+    "zh": "玩家先在不完整信息下移动，再通过寻找地图、测绘或据点更新获得区域信息。地图降低重复迷路成本，却保留未探索支路；信息获取本身成为有价值的目标。",
+    "en": "Move with incomplete information, then acquire a map, survey an area or update it at a base. Mapping reduces repeated confusion while preserving unknown branches; information acquisition becomes a goal."
+  },
+  "loop": [
+    {
+      "zh": "在未知区域辨认地标",
+      "en": "Read landmarks in unknown terrain"
+    },
+    {
+      "zh": "寻找地图或记录条件",
+      "en": "Find map information"
+    },
+    {
+      "zh": "更新已知空间",
+      "en": "Update known space"
+    },
+    {
+      "zh": "据此选择新路线",
+      "en": "Choose the next route"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "先绕路补地图，还是带着不确定性直接深入？",
+      "en": "Detour for a map, or push deeper with uncertain information?"
+    },
+    {
+      "zh": "已经知道主路后，还要不要为未标明的支路消耗补给？",
+      "en": "Once the main route is known, are unmarked branches worth spending supplies on?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "更新时机",
+        "en": "Update timing"
+      },
+      "effect": {
+        "zh": "实时更新方便导航，回到据点才更新会强调记忆与风险。",
+        "en": "Live updates aid navigation; base-only updates emphasize memory and risk."
+      }
+    },
+    {
+      "name": {
+        "zh": "信息粒度",
+        "en": "Information detail"
+      },
+      "effect": {
+        "zh": "只给地形保留观察空间，连奖励都标注则偏向任务清单。",
+        "en": "Terrain-only information preserves discovery; marking every reward creates a checklist."
+      }
+    }
+  ],
+  "tags": [
+    "information",
+    "discovery",
+    "planning"
+  ],
+  "related": [
+    "exploration-ability-gates",
+    "exploration-fast-travel-network",
+    "exploration-procedural-route-reading",
+    "gathering-depth-targeting"
+  ],
+  "contrast": {
+    "zh": "《空洞骑士》把地图更新绑定安全休息点；《艾尔登法环》用碎片一次提供更大区域的地形信息。",
+    "en": "Hollow Knight ties updates to safe rest; Elden Ring uses fragments to reveal terrain across larger areas at once."
+  },
+  "combination": {
+    "zh": "设计提案：不同 NPC 提供带主观遗漏的地图，玩家实地核对后合并为自己的路线册。",
+    "en": "Design proposal: different NPCs provide maps with biased omissions, which the player verifies and merges into a personal route book."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "你走进岔路区域，地图只有已经发现的入口。",
+      "en": "You enter a branching area; the map shows only the entrance discovered so far."
+    },
+    "action": {
+      "zh": "你绕去找到测绘点，补全附近通道的大致连接。",
+      "en": "Detour to a survey point to reveal the rough connections nearby."
+    },
+    "result": {
+      "zh": "你发现两条路会汇合，减少无意义的重复试路。",
+      "en": "You discover that two routes reconnect, avoiding unnecessary repeated exploration."
+    },
+    "next": {
+      "zh": "据此选择未走过的支路，继续获得更细的信息。",
+      "en": "Choose an unexplored branch and gather more precise information."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "做六个房间的地图、未发现遮罩和一个能揭示区域的节点。",
+      "en": "Build six rooms, an unexplored overlay, and one node that reveals the area."
+    },
+    "pitfall": {
+      "zh": "地图一次揭示全部奖励会削弱现场观察；先区分路线信息与秘密信息。",
+      "en": "Showing every reward can undermine observation; separate route information from secrets."
+    },
+    "test": {
+      "zh": "比较获得地图前后的路线，观察玩家是否减少重复迷路又继续探索支路。",
+      "en": "Compare routes before and after the map: do players stop looping yet still explore side paths?"
+    }
+  }
+}

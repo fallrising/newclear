@@ -1,0 +1,120 @@
+{
+  "id": "building-room-requirements",
+  "system": "building",
+  "edition": 1,
+  "name": {
+    "zh": "房间资格判定",
+    "en": "Room qualification rules"
+  },
+  "summary": {
+    "zh": "用围合空间和指定设施，把普通地块变成有功能的房间。",
+    "en": "Turn enclosed space and required fixtures into a functional room."
+  },
+  "rules": {
+    "zh": "玩家围出空间、设置入口并放置设施。系统按面积、封闭状态和内容判定用途或资格；不达标时无法获得预期功能。",
+    "en": "Players enclose space, add access and furnish it. Area, enclosure and contents determine room roles or eligibility; failed requirements block intended functions."
+  },
+  "loop": [
+    {
+      "zh": "查看要求",
+      "en": "Read requirements"
+    },
+    {
+      "zh": "围合并留入口",
+      "en": "Enclose with access"
+    },
+    {
+      "zh": "配置设施",
+      "en": "Add fixtures"
+    },
+    {
+      "zh": "检查判定并修正",
+      "en": "Check and revise"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "紧凑布局便宜，却挤压后续扩容。",
+      "en": "Compact rooms are cheap but constrain expansion."
+    },
+    {
+      "zh": "合用房间省空间，但可能改变识别用途。",
+      "en": "Shared spaces save area but may alter the recognized role."
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "规则透明度",
+        "en": "Rule transparency"
+      },
+      "effect": {
+        "zh": "显示缺失条件可减少盲目拆改。",
+        "en": "Showing missing requirements reduces blind rebuilding."
+      }
+    },
+    {
+      "name": {
+        "zh": "资格梯度",
+        "en": "Qualification tiers"
+      },
+      "effect": {
+        "zh": "二元达标容易理解，多级品质提供持续优化目标。",
+        "en": "Binary eligibility is readable; quality tiers provide ongoing goals."
+      }
+    }
+  ],
+  "tags": [
+    "spatial",
+    "planning",
+    "information"
+  ],
+  "related": [
+    "building-access-network",
+    "building-service-coverage",
+    "building-structural-support",
+    "building-terrain-shaping"
+  ],
+  "contrast": {
+    "zh": "Terraria重在能否入住；RimWorld还把用途和品质纳入居民反馈。",
+    "en": "Terraria emphasizes eligibility; RimWorld also considers role and quality."
+  },
+  "combination": {
+    "zh": "开一家旅馆，每位客人的要求不同，玩家在固定建筑内重新分隔和布置家具。",
+    "en": "Run an inn with different guest requirements, rearranging walls and furniture in a fixed building."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "你造了卧室，床和灯都有，却因为墙上缺一格而不被识别。",
+      "en": "Your bedroom has a bed and lamp but fails recognition because one wall cell is missing."
+    },
+    "action": {
+      "zh": "你查看缺失条件，补上墙并保留合法入口。",
+      "en": "Inspect the unmet conditions, close the gap and keep a valid entrance."
+    },
+    "result": {
+      "zh": "房间状态从“不合格”变为“可用”，相关功能开始生效。",
+      "en": "The room changes from invalid to usable and its function becomes available."
+    },
+    "next": {
+      "zh": "扩建房间或移动家具后，再确认资格有没有改变。",
+      "en": "Recheck qualification after expanding or rearranging furniture."
+    }
+  },
+  "prototype": {
+    "scope": "medium",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "做封闭区域识别、一个入口和两件必需家具，逐条显示达标条件。",
+      "en": "Detect enclosed areas with an entrance and two required furniture items, displaying each condition separately."
+    },
+    "pitfall": {
+      "zh": "房间用途冲突、嵌套空间与多层识别会增加边界情况，先限定一个简单平面。",
+      "en": "Conflicting uses, nested spaces and multiple floors add edge cases; begin on one simple floor."
+    },
+    "test": {
+      "zh": "给一个只缺一项条件的房间，玩家能否凭提示修好，并理解原因？",
+      "en": "Given a room missing one condition, can players fix it using the feedback and explain why?"
+    }
+  }
+}

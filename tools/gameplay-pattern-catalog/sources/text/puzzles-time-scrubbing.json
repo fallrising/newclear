@@ -1,0 +1,120 @@
+{
+  "id": "puzzles-time-scrubbing",
+  "system": "puzzles",
+  "edition": 1,
+  "name": {
+    "zh": "时间回拨与因果调整",
+    "en": "Rewinding time to change outcomes"
+  },
+  "summary": {
+    "zh": "回到关键时刻，理解哪些状态会随时间倒退。",
+    "en": "Revisit the decisive moment and learn which states rewind."
+  },
+  "rules": {
+    "zh": "玩家推动或回拨时间，观察物体、角色与机关如何沿时间轴变化。目标不是单纯重试，而是利用不同状态的先后关系，让某个时间点出现可行通路或互动条件。",
+    "en": "Move time forward or backward to observe objects, characters and mechanisms. Exploit the order of states so a route or interaction becomes possible at a particular moment."
+  },
+  "loop": [
+    {
+      "zh": "观察事件顺序",
+      "en": "Observe event order"
+    },
+    {
+      "zh": "回拨到关键状态",
+      "en": "Rewind to the key state"
+    },
+    {
+      "zh": "改变互动时机",
+      "en": "Alter interaction timing"
+    },
+    {
+      "zh": "推进时间验证结果",
+      "en": "Advance time to test"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "障碍来自位置，还是事件先后？",
+      "en": "Is the obstacle about position or event order?"
+    },
+    {
+      "zh": "部分对象不随时间回退时，如何利用状态差？",
+      "en": "How can an object that resists rewind help?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "可回拨对象",
+        "en": "Rewind scope"
+      },
+      "effect": {
+        "zh": "全部倒退易理解；选择性倒退产生更深因果组合。",
+        "en": "Universal rewind is readable; selective rewind creates causal combinations."
+      }
+    },
+    {
+      "name": {
+        "zh": "控制粒度",
+        "en": "Time resolution"
+      },
+      "effect": {
+        "zh": "连续拖动适合精细时机；离散阶段便于比较状态。",
+        "en": "Continuous scrubbing allows fine timing; discrete phases simplify comparisons."
+      }
+    }
+  ],
+  "tags": [
+    "information",
+    "timing",
+    "planning"
+  ],
+  "related": [
+    "puzzles-box-pushing",
+    "puzzles-visual-rule-learning",
+    "automation-item-filtering",
+    "exploration-earned-map"
+  ],
+  "contrast": {
+    "zh": "时空幻境仍直接操控角色；花园之间把操控重点转向事件时间轴本身。",
+    "en": "Braid retains direct character control; The Gardens Between centers control on the event timeline."
+  },
+  "combination": {
+    "zh": "组合提案：修机器时只能回拨一个零件，使其与仍向前运转的其他部件同步。",
+    "en": "Design proposal: rewind one machine component until it synchronizes with parts still moving forward."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "平台移动时门会关闭，你总是晚一步赶到。",
+      "en": "A moving platform passes a door that closes just before you arrive."
+    },
+    "action": {
+      "zh": "你把时间退回平台出发前，调整出发时机再推进时间。",
+      "en": "Rewind to before the platform departs, adjust your departure, and advance time again."
+    },
+    "result": {
+      "zh": "这次你在门关闭前抵达，看清了两个事件的先后关系。",
+      "en": "You arrive before closure and understand the order of both events."
+    },
+    "next": {
+      "zh": "保留这个因果判断，再处理后面另一组需要配合的状态。",
+      "en": "Use the discovered timing relationship to solve the next set of linked states."
+    }
+  },
+  "prototype": {
+    "scope": "medium",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "做一个角色、一个移动平台和一扇门，记录并回放它们的有限状态。",
+      "en": "Record and replay the finite states of one character, one moving platform, and one door."
+    },
+    "pitfall": {
+      "zh": "先规定哪些对象会回退；任意物理和大量随机事件会让回放难以一致。",
+      "en": "Define which objects rewind; unrestricted physics and random events make replay consistency difficult."
+    },
+    "test": {
+      "zh": "观察玩家回拨后是否有针对性地调整一个时机，而非重复整段相同操作。",
+      "en": "See whether rewinding leads to a specific timing adjustment rather than repeating the same sequence."
+    }
+  }
+}

@@ -1,0 +1,120 @@
+{
+  "id": "combat-part-destruction",
+  "system": "combat",
+  "edition": 1,
+  "name": {
+    "zh": "部位破坏改写战局",
+    "en": "Part destruction changes the fight"
+  },
+  "summary": {
+    "zh": "攻击局部目标，永久削减敌人的能力或取得专属掉落。",
+    "en": "Damage a local target to change enemy capabilities or earn specific rewards."
+  },
+  "rules": {
+    "zh": "敌人的部分身体拥有独立破坏条件。集中攻击触发断裂、武器脱落或奖励变化；部位目标可能不等于最快击杀路线，且并非每个部位都会削弱招式。",
+    "en": "Some enemy regions have separate break conditions. Focused attacks may sever a part, detach a weapon or change rewards. Breaking every part is not always the fastest kill, and not every break weakens attacks."
+  },
+  "loop": [
+    {
+      "zh": "选定有价值部位",
+      "en": "Choose a valuable part"
+    },
+    {
+      "zh": "调整武器与站位",
+      "en": "Adjust weapon and position"
+    },
+    {
+      "zh": "集中伤害触发破坏",
+      "en": "Concentrate damage to break it"
+    },
+    {
+      "zh": "利用战局变化",
+      "en": "Exploit the changed fight"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "先拆危险武器更安全，先打生命弱点更快，玩家可选击杀顺序。",
+      "en": "Removing a dangerous weapon can be safer; attacking a damage weakness can be faster."
+    },
+    {
+      "zh": "为了素材追打难够到的部位，可能延长整场战斗。",
+      "en": "Pursuing a hard-to-reach part for materials can prolong the encounter."
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "部位耐久",
+        "en": "Part durability"
+      },
+      "effect": {
+        "zh": "耐久过高会让拆解失去实用性，过低则缺少铺垫。",
+        "en": "Excessive durability makes dismantling impractical; too little removes the setup."
+      }
+    },
+    {
+      "name": {
+        "zh": "功能损失程度",
+        "en": "Capability loss"
+      },
+      "effect": {
+        "zh": "明确禁用一项攻击，比只掉一块装甲更容易让玩家读懂收益。",
+        "en": "Disabling a recognizable attack communicates the reward more clearly than a cosmetic break."
+      }
+    }
+  ],
+  "tags": [
+    "planning",
+    "precision",
+    "progression"
+  ],
+  "related": [
+    "automation-production-chain",
+    "combat-action-points",
+    "combat-combat-deck-cycle",
+    "combat-cover-flanking"
+  ],
+  "contrast": {
+    "zh": "《地平线》让拆下来的武器立即变成工具；《怪物猎人》常把破坏收益延伸到素材获取与后续制作。",
+    "en": "Horizon can turn a detached weapon into an immediate tool; Monster Hunter often extends the reward into materials and later crafting."
+  },
+  "combination": {
+    "zh": "设计提案：拆下机器人冷却器会让它过热，但冷却器也正是任务需要的完好零件，迫使玩家权衡安全与交付质量。",
+    "en": "Design proposal: removing a robot cooler makes it overheat, but the mission needs that cooler intact, creating a tradeoff between safety and delivery quality."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "敌人装有远程炮台和护甲，炮台有独立耐久。",
+      "en": "An enemy has armor and a ranged turret with its own durability."
+    },
+    "action": {
+      "zh": "你先集中攻击炮台，暂时放慢对主体的伤害。",
+      "en": "Focus on the turret first, accepting slower damage to the main body."
+    },
+    "result": {
+      "zh": "炮台被拆掉后，敌人失去这一攻击方式，但仍然活着。",
+      "en": "Destroying the turret removes that attack while the enemy remains alive."
+    },
+    "next": {
+      "zh": "利用减少的威胁重新选位，决定拆下一部位还是结束战斗。",
+      "en": "Use the reduced threat to reposition and choose another part or finish the fight."
+    }
+  },
+  "prototype": {
+    "scope": "medium",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "做一个主体加两个独立部位，破坏其中一个就关闭对应攻击。",
+      "en": "Build a main body and two parts; destroying a part disables its associated attack."
+    },
+    "pitfall": {
+      "zh": "部位越多，动画、受击和残骸状态组合越多；先保证破坏结果看得懂。",
+      "en": "More parts multiply animation, hit, and debris states; make the first destruction result readable."
+    },
+    "test": {
+      "zh": "给两种部位不同威胁，观察玩家是否改变拆除顺序。",
+      "en": "Give the parts different threats and see whether players change their destruction order."
+    }
+  }
+}

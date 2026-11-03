@@ -1,0 +1,120 @@
+{
+  "id": "exploration-procedural-route-reading",
+  "system": "exploration",
+  "edition": 1,
+  "name": {
+    "zh": "随机地形下的路线判断",
+    "en": "Route reading in procedural terrain"
+  },
+  "summary": {
+    "zh": "每局都要重新判断怎么走，而不是背熟同一条最优路。",
+    "en": "Read a new route each run instead of memorizing one optimal path."
+  },
+  "rules": {
+    "zh": "关卡用随机组合改变通道、危险与奖励位置。玩家观察当前局部信息，判断绕路收益与生存风险；学习保留的是规则和危险识别，而非每个房间的固定答案。",
+    "en": "Procedural layouts vary passages, hazards and rewards. Read local information and weigh detours against survival; learned rules and hazard recognition persist even when room solutions do not."
+  },
+  "loop": [
+    {
+      "zh": "观察新布局",
+      "en": "Read the new layout"
+    },
+    {
+      "zh": "评估出口与支路",
+      "en": "Assess exits and branches"
+    },
+    {
+      "zh": "选择路径并应对变化",
+      "en": "Commit and adapt"
+    },
+    {
+      "zh": "带着规则经验进入下一层",
+      "en": "Carry rule knowledge to the next level"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "已知出口近在眼前，是否为看得到的奖励多冒一次险？",
+      "en": "An exit is close: is a visible reward worth one more risk?"
+    },
+    {
+      "zh": "地形可改造时，绕路与直接开路的成本需要重新比较。",
+      "en": "When terrain is editable, detouring competes with making a direct route."
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "安全路径保证",
+        "en": "Guaranteed safe connectivity"
+      },
+      "effect": {
+        "zh": "保证出口连通能把难度集中在选择；不保证则容易产生无解感。",
+        "en": "Guaranteed connectivity focuses difficulty on choices; without it, runs may feel unsolvable."
+      }
+    },
+    {
+      "name": {
+        "zh": "信息可见范围",
+        "en": "Visible information range"
+      },
+      "effect": {
+        "zh": "短视野强调探路，长视野更像整体路线优化。",
+        "en": "Short visibility emphasizes scouting; broad visibility emphasizes route optimization."
+      }
+    }
+  ],
+  "tags": [
+    "randomness",
+    "discovery",
+    "risk"
+  ],
+  "related": [
+    "exploration-ability-gates",
+    "exploration-earned-map",
+    "exploration-fast-travel-network",
+    "gathering-depth-targeting"
+  ],
+  "contrast": {
+    "zh": "《洞穴探险2》强调读懂随机组合的陷阱与平台；《女巫》还允许材料反应持续改写原本的地形。",
+    "en": "Spelunky 2 emphasizes reading recombined traps and platforms; Noita also lets material reactions continuously rewrite the generated terrain."
+  },
+  "combination": {
+    "zh": "设计提案：随机矿洞保留玩家上次留下的支撑柱，地形变化与持久建设共同决定下一次的安全通道。",
+    "en": "Design proposal: a procedural mine retains support pillars from prior visits, letting shifting terrain and persistent construction jointly shape future safe routes."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "这次出口在左下方，右侧奖励附近却出现了新的陷阱布局。",
+      "en": "This run’s exit is down-left, while a reward on the right has a new trap arrangement."
+    },
+    "action": {
+      "zh": "你先观察陷阱的触发方式，再决定绕过去拿奖励。",
+      "en": "Inspect how the trap triggers before deciding whether to detour for the reward."
+    },
+    "result": {
+      "zh": "你没有依靠上局路线，而是用熟悉的规则判断这局风险。",
+      "en": "You judge this run using learned rules instead of following the previous route."
+    },
+    "next": {
+      "zh": "带着消耗后的资源进入下一块区域，重新判断局部路线。",
+      "en": "Enter the next area with your remaining resources and reassess the local route."
+    }
+  },
+  "prototype": {
+    "scope": "medium",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "先随机组合少量手工房间，并验证入口到出口始终可达。",
+      "en": "Randomly assemble a small set of authored rooms and verify that the exit stays reachable."
+    },
+    "pitfall": {
+      "zh": "无限随机容易产生无解或无趣布局；先保证可读的选择，再增加组合数量。",
+      "en": "Unrestricted randomness creates impossible or dull layouts; prioritize readable choices before variety."
+    },
+    "test": {
+      "zh": "多次游玩后，观察玩家是否说出通用判断规则，而非只记住固定走法。",
+      "en": "Across runs, check whether players learn reusable rules rather than a fixed path."
+    }
+  }
+}

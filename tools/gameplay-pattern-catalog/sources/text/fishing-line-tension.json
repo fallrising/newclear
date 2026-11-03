@@ -1,0 +1,120 @@
+{
+  "id": "fishing-line-tension",
+  "system": "fishing",
+  "edition": 1,
+  "name": {
+    "zh": "收线与张力控制",
+    "en": "Line tension control"
+  },
+  "summary": {
+    "zh": "在鱼挣扎时松手，在停顿时回收距离。",
+    "en": "Release during resistance and reel during pauses."
+  },
+  "rules": {
+    "zh": "玩家交替收线和放松，以缩短鱼与岸边的距离，同时避免鱼线张力超过上限。持续猛拉可能断线，放手过久则丢失进度；距离与张力反馈让风险始终可读。",
+    "en": "Alternate reeling and release to bring the fish closer without exceeding line tension. Constant pulling risks a break; excessive release loses progress. Distance and tension feedback make the tradeoff legible."
+  },
+  "loop": [
+    {
+      "zh": "观察鱼是否挣扎",
+      "en": "Read resistance"
+    },
+    {
+      "zh": "平静时收线",
+      "en": "Reel during a pause"
+    },
+    {
+      "zh": "张力升高时松开",
+      "en": "Release as tension rises"
+    },
+    {
+      "zh": "重复直到拉近鱼",
+      "en": "Repeat until the fish reaches you"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "再多收一点能更快拉近鱼，但是否还有余量承受下一次突然挣扎？",
+      "en": "Another pull closes the distance faster, but is there room for the next sudden struggle?"
+    },
+    {
+      "zh": "鱼刚平静下来，是立刻收线追进度，还是继续松手把张力降得更低？",
+      "en": "When the fish calms, reel immediately for progress or wait longer to lower tension further?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "张力恢复速度",
+        "en": "Tension recovery"
+      },
+      "effect": {
+        "zh": "恢复快允许短促冲刺，恢复慢要求更保守节奏。",
+        "en": "Fast recovery supports bursts; slow recovery demands restraint."
+      }
+    },
+    {
+      "name": {
+        "zh": "挣扎规律",
+        "en": "Resistance pattern"
+      },
+      "effect": {
+        "zh": "固定节奏可学习，随机变化则强调读反馈。",
+        "en": "Fixed patterns reward learning; variable patterns reward live feedback reading."
+      }
+    }
+  ],
+  "tags": [
+    "risk",
+    "timing",
+    "precision"
+  ],
+  "related": [
+    "combat-timed-parry",
+    "fishing-bite-window",
+    "fishing-target-tracking",
+    "combat-posture-break"
+  ],
+  "contrast": {
+    "zh": "Dinkum在场景中的鱼与鱼线传达拉扯；护核纪元的旧版小游戏使用专门的进度与张力显示。",
+    "en": "Dinkum communicates the fight through the fish and line in the world; Core Keeper's legacy mode uses dedicated progress and tension displays."
+  },
+  "combination": {
+    "zh": "设计提案：耐久鱼线承受高张力，但占背包更多空间；远征前决定稳定性与携带量。",
+    "en": "Design proposal: tougher line tolerates tension but occupies more inventory, trading reliability against expedition capacity."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "鱼还很远，张力条接近上限，鱼刚开始猛烈挣扎。",
+      "en": "The fish is still far away, the tension gauge is high, and it starts struggling."
+    },
+    "action": {
+      "zh": "你松开收线，等张力下降，再趁鱼平静时拉回。",
+      "en": "Release the reel to lower tension, then retrieve while the fish is calm."
+    },
+    "result": {
+      "zh": "距离缩短，但猛拉会再次抬高断线风险。",
+      "en": "The fish gets closer, but aggressive reeling raises the risk of a snapped line again."
+    },
+    "next": {
+      "zh": "在下一次挣扎前保留张力余量，重复收放。",
+      "en": "Leave tension headroom before the next struggle and repeat."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "用距离与张力两条数值、鱼的平静／挣扎两态和收线按钮即可验证。",
+      "en": "Use distance and tension values, calm/struggling fish states and one reel button."
+    },
+    "pitfall": {
+      "zh": "若张力变化全靠随机且没有预兆，松手会变成猜测；先做清楚的行为反馈。",
+      "en": "Random tension changes without warning turn release timing into guessing; begin with readable fish behaviour."
+    },
+    "test": {
+      "zh": "检查玩家是否主动在危险前松手，以及更熟悉鱼后能否更快完成捕获。",
+      "en": "See whether players release before danger and catch faster as they learn the fish’s pattern."
+    }
+  }
+}

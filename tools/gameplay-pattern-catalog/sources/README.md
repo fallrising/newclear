@@ -7,8 +7,9 @@
 ```sh
 python3 sources/inventory.py --check
 python3 sources/inventory.py --fetch
+python3 sources/text_cache.py --check
 ```
 
 `--check` 不連網。`--fetch` 以約每 0.4 秒一個請求重讀公開入口，只在終端列出與已提交快照的 ID 或雜湊差異；它不改筆記、不寫 manifest、不發布。若要改寫 manifest，必須另存快照 ID，避免把不同時間的分母混在一起。
 
-快取與全文 JSON 不進版控。筆記由 `sources/write_notes.py` 這個維護工具產生或修補；離線建置不依賴它，也不依賴 OpenCC。
+`sources/text/` 是已提交的文字投影，給自動對照用。它不是全文、案例或圖片。重抓入口的暫存仍不進版控。筆記由 `sources/write_notes.py` 這個維護工具產生或修補；離線建置不依賴它，也不依賴 OpenCC。

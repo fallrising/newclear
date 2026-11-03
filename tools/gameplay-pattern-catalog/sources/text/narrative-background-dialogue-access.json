@@ -1,0 +1,120 @@
+{
+  "id": "narrative-background-dialogue-access",
+  "system": "narrative",
+  "edition": 3,
+  "name": {
+    "zh": "用身份和经历打开额外话题",
+    "en": "Open extra dialogue through identity and experience"
+  },
+  "summary": {
+    "zh": "同一个问题，不同经历的人能提出不同回答。",
+    "en": "People with different histories can offer different answers to the same question."
+  },
+  "rules": {
+    "zh": "玩家的职业、经历或已经取得的身份标签决定哪些话题可用。满足条件便能看到额外问题或解决办法；这些选项仍可能有取舍，不保证必定说服对方。这里判断“有没有这段经历”，与掷骰决定说服成功不同。",
+    "en": "Occupation, history or acquired identity tags determine available topics. Meeting a condition reveals an extra question or approach, which may still have trade-offs and need not persuade anyone. This checks what the character knows or is, rather than rolling for persuasion success."
+  },
+  "loop": [
+    {
+      "zh": "建立角色的经历或身份",
+      "en": "Establish a history or identity"
+    },
+    {
+      "zh": "遇到相关人物与问题",
+      "en": "Meet a relevant person or problem"
+    },
+    {
+      "zh": "选择由经历打开的话题",
+      "en": "Choose a history-enabled topic"
+    },
+    {
+      "zh": "利用回应决定下一条路",
+      "en": "Use the response to choose a route"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "使用专业身份争取解释权，还是避免暴露自己所属的群体？",
+      "en": "Use expertise to gain a hearing or avoid revealing group membership?"
+    },
+    {
+      "zh": "熟悉的回答未必合适，是否改用普通人也能选择的问法？",
+      "en": "If the specialist response is unwise, should you use the ordinary question instead?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "身份标签的数量",
+        "en": "Number of identity tags"
+      },
+      "effect": {
+        "zh": "少量清楚的标签易于预期；过多交叉条件容易让玩家看不懂选项为何出现。",
+        "en": "A few clear tags are predictable; many intersecting conditions obscure why a line appears."
+      }
+    },
+    {
+      "name": {
+        "zh": "专属选项的优势",
+        "en": "Advantage of exclusive options"
+      },
+      "effect": {
+        "zh": "提供不同视角比永远给出最优解更能保留角色选择。",
+        "en": "Offering another perspective preserves role choice better than always giving the best answer."
+      }
+    }
+  ],
+  "tags": [
+    "narrative",
+    "information",
+    "planning"
+  ],
+  "related": [
+    "narrative-perspective-handoff",
+    "narrative-conversation-intervention",
+    "narrative-delayed-choice-consequences",
+    "narrative-deliberate-silence"
+  ],
+  "contrast": {
+    "zh": "Pentiment 把学识与生活背景放进个人见闻；博德之门3还让队伍中由谁开口影响可用话题。",
+    "en": "Pentiment emphasizes personal learning and experience; Baldur’s Gate 3 also makes the chosen party speaker relevant."
+  },
+  "combination": {
+    "zh": "组合提案：在安全据点重新分配有限的学习点，改变下次调查可用的专业话题；旧证据保留，但不能同时精通所有领域。",
+    "en": "Design proposal: reassign limited study points at a safe hub to change professional topics for the next investigation. Keep evidence, but prevent mastery of every field at once."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "医师背景的角色遇到一名声称只是疲劳的病人。",
+      "en": "A medically trained character meets someone claiming mere fatigue."
+    },
+    "action": {
+      "zh": "玩家选择额外的“追问伤口变化”话题。",
+      "en": "The player selects the extra topic about changes to a wound."
+    },
+    "result": {
+      "zh": "病人提供新细节，但也开始防备玩家的调查。",
+      "en": "New details emerge, but the patient becomes wary of the investigation."
+    },
+    "next": {
+      "zh": "玩家决定继续用专业身份追问，还是换个普通话题。",
+      "en": "The player chooses between pressing with expertise and returning to an ordinary topic."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "做两个背景标签、三段共用对话和各一条专属话题。",
+      "en": "Build two background tags, three shared conversations and one exclusive topic for each tag."
+    },
+    "pitfall": {
+      "zh": "专属选项若总是无代价成功，角色身份会变成寻找最优攻略。",
+      "en": "If exclusive options always succeed for free, identity becomes a search for the optimal guide."
+    },
+    "test": {
+      "zh": "玩家能否从自身背景猜到会出现哪种话题，同时仍认真选择？",
+      "en": "Can players predict topics from their background while still weighing the choice?"
+    }
+  }
+}

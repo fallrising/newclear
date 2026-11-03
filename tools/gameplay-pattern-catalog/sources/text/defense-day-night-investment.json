@@ -1,0 +1,120 @@
+{
+  "id": "defense-day-night-investment",
+  "system": "defense",
+  "edition": 2,
+  "name": {
+    "zh": "白天投资，夜晚验收",
+    "en": "Invest by day, defend by night"
+  },
+  "summary": {
+    "zh": "每次安全期都在决定：今天多赚钱，还是今晚更安全。",
+    "en": "Each safe period asks whether to earn more tomorrow or survive more safely tonight."
+  },
+  "rules": {
+    "zh": "玩法把建设与防守分成可辨认的阶段。玩家在安全时段花钱扩张收入或增强防线，危险时段则承受此前投资的结果；存活的经济设施带来下一轮资金，损失会压缩之后的选择。",
+    "en": "Separate investment and defense into recognizable phases. During safety, spend on income or protection; during danger, live with those decisions. Surviving economic structures finance the next round, while losses restrict future choices."
+  },
+  "loop": [
+    {
+      "zh": "结算上轮收入与损失",
+      "en": "Review income and damage"
+    },
+    {
+      "zh": "分配经济与防御投入",
+      "en": "Split spending between income and defense"
+    },
+    {
+      "zh": "抵御夜间进攻",
+      "en": "Survive the night attack"
+    },
+    {
+      "zh": "用结果安排下一天",
+      "en": "Plan the next day from the result"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "今晚已经能勉强守住，要不要冒险把钱留给明天的收入？",
+      "en": "If tonight looks barely survivable, should extra money go into tomorrow’s income?"
+    },
+    {
+      "zh": "扩张后防线变长，新收入是否足够支付新增的守卫？",
+      "en": "After expansion lengthens the perimeter, can the extra income fund its guards?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "经济回本轮数",
+        "en": "Payback period"
+      },
+      "effect": {
+        "zh": "回本越慢，提前投资越需要信心；回本很快则容易形成滚雪球。",
+        "en": "Slow payback demands confidence in future survival; rapid payback can snowball."
+      }
+    },
+    {
+      "name": {
+        "zh": "进攻信息透明度",
+        "en": "Attack preview detail"
+      },
+      "effect": {
+        "zh": "提前知道敌人方向与类型有利于规划；信息少会鼓励保守留钱。",
+        "en": "Knowing enemy routes and types supports planning; limited information encourages reserves."
+      }
+    }
+  ],
+  "tags": [
+    "economy",
+    "planning",
+    "risk"
+  ],
+  "related": [
+    "defense-ammunition-supply",
+    "defense-early-wave-call",
+    "defense-mobile-defender",
+    "defense-resistance-counters"
+  ],
+  "contrast": {
+    "zh": "王权陨落把每一夜变成较集中的战斗考验；王国还要求君主在横向地图上奔走，把招募和扩张路程纳入白天安排。",
+    "en": "Thronefall makes each night a concentrated defense test; Kingdom also makes recruitment and expansion depend on travel across a side-view map."
+  },
+  "combination": {
+    "zh": "组合提案：农作物在白天收入结算时成熟，但收割需要工人；玩家要决定让工人抢收还是提前修墙。",
+    "en": "Design proposal: crops mature during daytime settlement but need workers to harvest, creating a choice between securing food and repairing walls."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "手里有8枚金币：修墙要4枚，新农田要6枚。",
+      "en": "You have eight coins: wall repair costs four, a new field costs six."
+    },
+    "action": {
+      "zh": "判断今晚敌人不多，先买农田，只修最危险的一段。",
+      "en": "Expecting a light attack, buy the field and make only a minimal repair at the weak point."
+    },
+    "result": {
+      "zh": "农田若保住，明天收入增加；墙若被攻破，经济投入也可能一起损失。",
+      "en": "If the field survives, tomorrow’s income increases; a breached wall can destroy the investment."
+    },
+    "next": {
+      "zh": "根据夜战损伤重新分配下一天的钱。",
+      "en": "Reallocate the next day’s budget after seeing the damage."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "用一张固定地图、一个产钱建筑、一段城墙和三次夜袭验证投资取舍。",
+      "en": "Use one fixed map, one income building, one wall and three night attacks to test investment choices."
+    },
+    "pitfall": {
+      "zh": "先不做大地图扩张；必须让玩家看懂每笔收入来自哪座存活建筑。",
+      "en": "Defer large-map expansion; show which surviving building generated each payment."
+    },
+    "test": {
+      "zh": "玩家是否会因下一夜的威胁改变经济投入，而非每轮照同一个顺序买？",
+      "en": "Do upcoming threats change spending, or does the same purchase order always win?"
+    }
+  }
+}

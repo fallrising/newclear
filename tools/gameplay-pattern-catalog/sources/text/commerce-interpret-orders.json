@@ -1,0 +1,120 @@
+{
+  "id": "commerce-interpret-orders",
+  "system": "commerce",
+  "edition": 1,
+  "name": {
+    "zh": "识别顾客需求",
+    "en": "Interpreting customer requests"
+  },
+  "summary": {
+    "zh": "从自然表达中识别需求，再用产品属性满足它。",
+    "en": "Infer a need from natural language and match it with product properties."
+  },
+  "rules": {
+    "zh": "顾客不一定直接报出商品名，可能描述症状、口味或用途。玩家解析关键条件，选择或制作合适产品；接受、拒绝与追加报酬反馈理解是否准确。",
+    "en": "Customers may describe symptoms, tastes or uses instead of naming a product. Infer constraints, choose or craft a match, and learn from acceptance, rejection or extra payment."
+  },
+  "loop": [
+    {
+      "zh": "听取需求",
+      "en": "Listen to the request"
+    },
+    {
+      "zh": "提取关键属性",
+      "en": "Identify properties"
+    },
+    {
+      "zh": "选择或制作产品",
+      "en": "Select or craft"
+    },
+    {
+      "zh": "交付并观察反馈",
+      "en": "Serve and observe"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "满足最低要求，还是投入稀有材料完成额外偏好？",
+      "en": "Meet the minimum or spend rare inputs on preferences?"
+    },
+    {
+      "zh": "模糊描述有多种合理答案时，选成本低还是故事上合适的？",
+      "en": "When several answers fit, favor cost or character context?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "描述含糊度",
+        "en": "Request ambiguity"
+      },
+      "effect": {
+        "zh": "适度含糊制造推理，缺少可识别线索则变猜谜。",
+        "en": "Moderate ambiguity creates inference; missing clues create guesswork."
+      }
+    },
+    {
+      "name": {
+        "zh": "可接受答案数量",
+        "en": "Valid alternatives"
+      },
+      "effect": {
+        "zh": "多个答案鼓励创造，唯一答案强调知识识别。",
+        "en": "Several valid answers reward creativity; one emphasizes recognition."
+      }
+    }
+  ],
+  "tags": [
+    "information",
+    "creativity",
+    "narrative"
+  ],
+  "related": [
+    "commerce-auction-bidding",
+    "commerce-price-discovery",
+    "cooking-judged-flavor",
+    "puzzles-language-decoding"
+  ],
+  "contrast": {
+    "zh": "药剂工艺把需求拆成效果与约束；VA-11 HALL-A让服务结果继续参与叙事。",
+    "en": "Potion Craft frames requests as effects and constraints; VA-11 HALL-A also carries the serving result into narrative."
+  },
+  "combination": {
+    "zh": "组合创意：冒险者说“想在雪山不被发现”，裁缝可在保暖、颜色和静音材料之间设计不同合格方案。",
+    "en": "Design proposal: an adventurer wants to remain unnoticed in snowy mountains; a tailor can satisfy that through different combinations of warmth, color and quiet materials."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "顾客说想要清爽、不太甜的饮品，没有直接报出名字。",
+      "en": "A customer asks for a refreshing drink that is not too sweet, without naming one."
+    },
+    "action": {
+      "zh": "你提取两个条件，从配方里选择符合口味且材料够用的一种。",
+      "en": "Identify both conditions and choose an affordable recipe with suitable flavors."
+    },
+    "result": {
+      "zh": "顾客接受并评价口味，反馈说明你满足了哪些要求。",
+      "en": "The customer accepts and comments on the flavor, showing which requirements were met."
+    },
+    "next": {
+      "zh": "下一位顾客给出新描述，你用已学会的属性继续匹配。",
+      "en": "The next customer describes another need; use the learned attributes to match it."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "做五种有两个明确属性的商品、六条自然语言需求和可解释的反馈。",
+      "en": "Build five products with two clear attributes, six natural-language requests, and explanatory feedback."
+    },
+    "pitfall": {
+      "zh": "先使用人工编写的有限描述；无边界自然语言会让规则验证变困难。",
+      "en": "Start with a finite set of authored descriptions; unrestricted language makes rule validation difficult."
+    },
+    "test": {
+      "zh": "顾客拒绝后，玩家能否指出遗漏的条件，并改选真正符合要求的商品。",
+      "en": "After rejection, can players identify the missed condition and select a genuinely matching product?"
+    }
+  }
+}

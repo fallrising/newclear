@@ -1,0 +1,120 @@
+{
+  "id": "automation-flow-splitting",
+  "system": "automation",
+  "edition": 1,
+  "name": {
+    "zh": "分流与产能配比",
+    "en": "Flow splitting and ratios"
+  },
+  "summary": {
+    "zh": "把有限输入分给多台机器，避免一边吃撑、一边断粮。",
+    "en": "Divide limited input among machines without starving one branch."
+  },
+  "rules": {
+    "zh": "玩家用分流器把一条输入接到多个消费者。每台机器有不同消耗速度，某个出口积压会改变实际分配；以稳定开工率而非建筑数量判断成功。",
+    "en": "Players split one input among consumers with different consumption rates. Blocked exits change actual distribution; sustained operation matters more than machine count."
+  },
+  "loop": [
+    {
+      "zh": "计算各支路需求",
+      "en": "Estimate branch demand"
+    },
+    {
+      "zh": "选择分流拓扑",
+      "en": "Choose a splitter layout"
+    },
+    {
+      "zh": "运行到稳定状态",
+      "en": "Wait for steady operation"
+    },
+    {
+      "zh": "调整机器或支路",
+      "en": "Adjust branches or machines"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "平均分配简单，但需求不等时会浪费供给。",
+      "en": "Equal distribution is simple but mismatched demand can waste supply."
+    },
+    {
+      "zh": "串联喂料占地小，却需要等待前端缓冲填满。",
+      "en": "A manifold is compact but needs its upstream buffers to fill."
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "需求比例差",
+        "en": "Demand imbalance"
+      },
+      "effect": {
+        "zh": "差异越大，平均分流越不够用，需要优先级或多级分配。",
+        "en": "Larger differences make equal splits insufficient and reward priorities or staged division."
+      }
+    },
+    {
+      "name": {
+        "zh": "缓冲容量",
+        "en": "Buffer size"
+      },
+      "effect": {
+        "zh": "大缓冲平滑短时波动，也拉长稳定运行前的等待。",
+        "en": "Larger buffers smooth interruptions but delay steady-state behavior."
+      }
+    }
+  ],
+  "tags": [
+    "optimization",
+    "planning",
+    "spatial"
+  ],
+  "related": [
+    "automation-aerial-logistics",
+    "automation-belt-routing",
+    "automation-blueprint-reuse",
+    "automation-byproduct-loop"
+  ],
+  "contrast": {
+    "zh": "两个出口加优先级便于处理抢料；三个出口使三分支网络更直接。",
+    "en": "Two outputs with priority help allocate contested supply; three outputs make three-way layouts straightforward."
+  },
+  "combination": {
+    "zh": "让自动厨房同时处理食堂和高价订单，玩家调节分流优先级，承受不同订单的超时成本。",
+    "en": "Build an automated kitchen that divides ingredients between a canteen and premium orders with different late penalties."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "同一条带每轮送来6块矿，两台机器分别需要2块和4块。",
+      "en": "A belt supplies six ore per round; two machines need two and four respectively."
+    },
+    "action": {
+      "zh": "你把支路分配改成约1比2，避免机械地对半分。",
+      "en": "Adjust the split toward one-to-two instead of dividing evenly."
+    },
+    "result": {
+      "zh": "两台机器都能连续工作，前端积压与后端缺料同时减少。",
+      "en": "Both machines run continuously, reducing both upstream queues and downstream starvation."
+    },
+    "next": {
+      "zh": "新增机器后重新算需求，再调整支路。",
+      "en": "Recalculate demand and branches when adding another machine."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "做一个固定供给源、两个不同消耗速度的接收器和可调分流器，显示开工率。",
+      "en": "Use one fixed source, two consumers with different rates and an adjustable splitter, displaying uptime."
+    },
+    "pitfall": {
+      "zh": "不要先加入几十种配方；两种不同需求已经能检验比例是否影响产出。",
+      "en": "Do not start with dozens of recipes; two different demands can reveal whether allocation matters."
+    },
+    "test": {
+      "zh": "玩家看到“一台堆料、一台停机”时，是否会改比例，而非只增加输入？",
+      "en": "When one machine queues and another stalls, do players change allocation rather than simply add input?"
+    }
+  }
+}

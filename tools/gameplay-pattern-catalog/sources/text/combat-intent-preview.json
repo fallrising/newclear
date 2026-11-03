@@ -1,0 +1,120 @@
+{
+  "id": "combat-intent-preview",
+  "system": "combat",
+  "edition": 2,
+  "name": {
+    "zh": "敌人下一步提前公开",
+    "en": "Previewing enemy intent"
+  },
+  "summary": {
+    "zh": "先知道威胁，再用有限行动改变将要发生的事。",
+    "en": "Read the threat, then spend limited actions to change what happens."
+  },
+  "rules": {
+    "zh": "敌人行动前显示下一次攻击的目标、范围或伤害。玩家据此选择防御、击杀、移动或打断，回合结算后检查危险是否解除。可见的信息必须可靠；不公开的部分也要明确标示，才会形成能推理的局面。",
+    "en": "Before an enemy acts, reveal its target, area or damage. Players defend, kill, move or interrupt, then check the resolution. Visible information must be reliable, with any remaining uncertainty clearly indicated."
+  },
+  "loop": [
+    {
+      "zh": "读出即将发生的攻击",
+      "en": "Read the next attack"
+    },
+    {
+      "zh": "比较可用应对",
+      "en": "Compare available responses"
+    },
+    {
+      "zh": "花行动改变局面",
+      "en": "Spend actions to change the situation"
+    },
+    {
+      "zh": "结算并读取新威胁",
+      "en": "Resolve and read the next threat"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "挡住伤害，还是先消灭威胁最大的敌人？",
+      "en": "Block the damage or eliminate the most dangerous enemy?"
+    },
+    {
+      "zh": "救自己，还是保护这一回合受到攻击的目标？",
+      "en": "Protect yourself or an objective threatened this turn?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "预告精度",
+        "en": "Preview detail"
+      },
+      "effect": {
+        "zh": "只给攻击类型会保留猜测；给出目标和数值更适合精确解题。",
+        "en": "Showing only attack type preserves uncertainty; exact targets and values support precise planning."
+      }
+    },
+    {
+      "name": {
+        "zh": "应对行动数量",
+        "en": "Response budget"
+      },
+      "effect": {
+        "zh": "行动越少，越需要挑选真正值得解除的威胁。",
+        "en": "Fewer actions force the player to choose which threats deserve intervention."
+      }
+    }
+  ],
+  "tags": [
+    "information",
+    "planning",
+    "risk"
+  ],
+  "related": [
+    "combat-cover-flanking",
+    "combat-destructible-cover",
+    "combat-forced-movement",
+    "combat-friendly-fire"
+  ],
+  "contrast": {
+    "zh": "《陷阵之志》强调空间中的目标与推拉；《杀戮尖塔》把预告转成出牌时的攻防预算。",
+    "en": "Into the Breach makes intent spatial; Slay the Spire turns it into an attack-versus-block budget."
+  },
+  "combination": {
+    "zh": "把敌人意图接到推箱子：箱子既能挡炮，也会占用撤退空间。",
+    "en": "Combine intent previews with box pushing: a crate blocks a shot but may obstruct retreat."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "两个敌人分别准备打你3点和打村民5点，你只有两次行动。",
+      "en": "Two enemies will deal 3 damage to you and 5 to a villager; you have two actions."
+    },
+    "action": {
+      "zh": "先把攻击村民的敌人推离射线，再用一次防御挡自己的伤害。",
+      "en": "Push the enemy off the villager’s firing line, then defend yourself."
+    },
+    "result": {
+      "zh": "结算后村民没受伤，你的护盾吸收了3点伤害。",
+      "en": "The villager is safe and your shield absorbs 3 damage."
+    },
+    "next": {
+      "zh": "下一回合敌人换了目标，你重新判断哪一个威胁最急。",
+      "en": "Targets change next turn, so reassess the most urgent threat."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "用一张小网格、两类敌人和“移动／攻击／防御”做三回合战斗。",
+      "en": "Build three turns on a small grid with two enemy types and move, attack and defend."
+    },
+    "pitfall": {
+      "zh": "预告与实际结果不一致，会让玩家觉得自己被规则欺骗。",
+      "en": "A preview that disagrees with resolution breaks trust."
+    },
+    "test": {
+      "zh": "观察试玩者能否在结算前说出自己为什么安全，失败后能否解释原因。",
+      "en": "Check whether testers can explain safety before resolution and the cause of failure afterward."
+    }
+  }
+}

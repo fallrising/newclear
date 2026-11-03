@@ -1,0 +1,120 @@
+{
+  "id": "fishing-pond-production",
+  "system": "fishing",
+  "edition": 1,
+  "name": {
+    "zh": "鱼塘繁育",
+    "en": "Fish-pond production"
+  },
+  "summary": {
+    "zh": "把一次成功捕获，转化为持续繁育的生产起点。",
+    "en": "Turn a successful catch into the starting stock of a recurring production loop."
+  },
+  "rules": {
+    "zh": "玩家把捕获的鱼放入鱼塘，等待繁殖或收集鱼卵，再决定提取多少存量。鱼塘空间有限，保留繁殖基础与立即出售之间存在取舍；不同鱼种改变产出价值。",
+    "en": "Stock a pond with caught fish, wait for breeding or collect roe, then decide how much stock to remove. Limited capacity creates a choice between preserving productive stock and selling immediately; species affect output value."
+  },
+  "loop": [
+    {
+      "zh": "捕获并选择种鱼",
+      "en": "Catch and select stock"
+    },
+    {
+      "zh": "建塘并放入鱼",
+      "en": "Build and stock a pond"
+    },
+    {
+      "zh": "等待繁殖或产卵",
+      "en": "Wait for reproduction or roe"
+    },
+    {
+      "zh": "收获并保留生产基础",
+      "en": "Harvest while retaining productive stock"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "稀有鱼直接出售能回笼资金，留下繁殖则可能带来长期收益。",
+      "en": "Selling rare fish provides cash now; retaining them may build long-term returns."
+    },
+    {
+      "zh": "每个鱼塘投入哪种鱼，会锁定土地和后续维护方向。",
+      "en": "Choosing a species commits pond space and future maintenance priorities."
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "繁殖速度",
+        "en": "Reproduction rate"
+      },
+      "effect": {
+        "zh": "慢繁殖强调保护种群，快繁殖容易转成大规模流水线。",
+        "en": "Slow reproduction emphasizes stock preservation; fast reproduction supports mass production."
+      }
+    },
+    {
+      "name": {
+        "zh": "容量扩张条件",
+        "en": "Expansion conditions"
+      },
+      "effect": {
+        "zh": "材料任务增加阶段目标，纯付费升级则更侧重资本积累。",
+        "en": "Material requests add milestones; cash-only upgrades emphasize capital accumulation."
+      }
+    }
+  ],
+  "tags": [
+    "economy",
+    "progression",
+    "planning"
+  ],
+  "related": [
+    "farming-livestock-care",
+    "farming-seed-reinvestment",
+    "fishing-bait-loadout",
+    "fishing-equipment-access"
+  ],
+  "contrast": {
+    "zh": "星露谷强调鱼群的阶段性物品需求；Dinkum把取鱼、留空间与鱼卵生产连在一起。",
+    "en": "Stardew emphasizes staged item requests; Dinkum links removing fish and freeing space with roe production."
+  },
+  "combination": {
+    "zh": "设计提案：鱼塘水质受上游农田影响，种植计划同时改变养殖收益，迫使两条产线协调。",
+    "en": "Design proposal: upstream farming changes pond water quality, making crop planning and aquaculture coordinate."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "鱼塘快满了，卖掉全部鱼能拿到钱，却会失去生产基础。",
+      "en": "The pond is nearly full; selling every fish raises cash but removes its productive stock."
+    },
+    "action": {
+      "zh": "你只取出一部分，留下足够的种群继续繁育。",
+      "en": "Take only some fish and leave enough breeding stock."
+    },
+    "result": {
+      "zh": "获得收入并腾出容量，剩余鱼继续支撑后续产出。",
+      "en": "You earn money and free capacity while the remaining fish sustain future production."
+    },
+    "next": {
+      "zh": "下次收取前再看数量、订单和扩容需求。",
+      "en": "Check population, orders and expansion needs before harvesting again."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "做一个有容量上限的鱼塘、繁育计时和“取出几条”的选择，先只用一种鱼。",
+      "en": "Use one capped pond, a breeding timer and a harvest-quantity choice, starting with one species."
+    },
+    "pitfall": {
+      "zh": "别把完整遗传、疾病与多鱼种生态一起塞入第一版；先测试提取与保留的平衡。",
+      "en": "Postpone genetics, disease and multi-species ecology; first test the harvest-versus-retention balance."
+    },
+    "test": {
+      "zh": "遇到紧急订单时，玩家是否理解抽空鱼塘会损失后续收益？",
+      "en": "When an urgent order appears, do players understand the future cost of emptying the pond?"
+    }
+  }
+}

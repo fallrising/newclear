@@ -1,0 +1,120 @@
+{
+  "id": "inventory-weight-budget",
+  "system": "inventory",
+  "edition": 1,
+  "name": {
+    "zh": "负重与搬运预算",
+    "en": "Carry-weight budgets"
+  },
+  "summary": {
+    "zh": "容量不是能否装下，而是还能否带着它行动。",
+    "en": "Capacity governs movement as well as storage."
+  },
+  "rules": {
+    "zh": "每件物品贡献重量，累计超额后行动受到限制。玩家比较用途与重量，丢弃、存放或分批搬运战利品；重量条将看不见的后勤成本变成即时反馈。",
+    "en": "Every carried item adds weight; exceeding capacity restricts movement. Compare usefulness to weight, then discard, cache or haul goods in separate trips, guided by the load meter."
+  },
+  "loop": [
+    {
+      "zh": "估算返程所需补给",
+      "en": "Estimate return supplies"
+    },
+    {
+      "zh": "拾取并查看负重",
+      "en": "Loot and check weight"
+    },
+    {
+      "zh": "比较保留价值",
+      "en": "Compare retained value"
+    },
+    {
+      "zh": "卸货后继续探索",
+      "en": "Unload and resume"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "低价值重物值得多走一趟，还是应留给后续专门运输？",
+      "en": "Does bulky low-value loot justify another trip or a dedicated haul later?"
+    },
+    {
+      "zh": "把容量用于收益还是安全补给？",
+      "en": "Spend capacity on profit or on a safety margin?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "超重惩罚曲线",
+        "en": "Penalty curve"
+      },
+      "effect": {
+        "zh": "突然无法行动制造强制取舍；渐进减速让风险更可估量。",
+        "en": "A hard movement stop forces decisions; gradual slowdown makes risk easier to estimate."
+      }
+    },
+    {
+      "name": {
+        "zh": "卸货距离",
+        "en": "Unloading distance"
+      },
+      "effect": {
+        "zh": "距离越远，路线与中转点越有价值。",
+        "en": "Longer unloading routes make caches and route planning more valuable."
+      }
+    }
+  ],
+  "tags": [
+    "planning",
+    "risk",
+    "economy"
+  ],
+  "related": [
+    "inventory-death-retrieval",
+    "inventory-durability",
+    "inventory-light-reserve",
+    "inventory-stack-limits"
+  ],
+  "contrast": {
+    "zh": "《天际》主要限制移动方式；《英灵神殿》又把负重接入耐力预算，并保留格数限制。",
+    "en": "Skyrim primarily restricts movement modes; Valheim also ties load to stamina and retains a separate slot limit."
+  },
+  "combination": {
+    "zh": "组合提案：救援游戏允许拖拽伤员，但伤员重量会挤占撤离途中可带的补给。",
+    "en": "Design proposal: rescuing an injured traveler consumes the same hauling budget as evacuation supplies."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "负重上限是 20，你已带 18，新矿石重 5。",
+      "en": "Your carrying limit is 20; you carry 18 and find ore weighing 5."
+    },
+    "action": {
+      "zh": "你放下重 4 的普通石头，带上矿石。",
+      "en": "Drop 4 weight of common stone and take the ore."
+    },
+    "result": {
+      "zh": "总重回到限制内，可以正常返程，但放弃了一部分材料。",
+      "en": "Your load is within the limit, allowing normal travel at the cost of some materials."
+    },
+    "next": {
+      "zh": "回基地卸货，再决定是否专门回来搬剩余物资。",
+      "en": "Unload at base, then decide whether the remaining supplies justify another trip."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "做十种有重量与用途的物品、一条负重条和超重减速。",
+      "en": "Create ten weighted items with distinct uses, a load meter, and an overload slowdown."
+    },
+    "pitfall": {
+      "zh": "物品价值如果总和重量成正比，取舍会退化成固定排序。",
+      "en": "If value always scales directly with weight, decisions collapse into a fixed ranking."
+    },
+    "test": {
+      "zh": "改变下一次任务需求，观察玩家是否保留不同物品而非总按售价排序。",
+      "en": "Change the next mission’s needs and see whether kept items change beyond resale value."
+    }
+  }
+}

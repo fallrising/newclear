@@ -1,0 +1,120 @@
+{
+  "id": "cooking-measurement-precision",
+  "system": "cooking",
+  "edition": 1,
+  "name": {
+    "zh": "定量配料",
+    "en": "Measured ingredient dosing"
+  },
+  "summary": {
+    "zh": "把配方中的数字变成手上需要控制的分量。",
+    "en": "Turn recipe quantities into amounts the player must physically control."
+  },
+  "rules": {
+    "zh": "玩家按要求称量、倾倒或分割材料，实际投入量参与结果计算。过量不一定能撤回，计量工具和分步添加能降低误差；反馈让玩家区分操作失误与配方问题。",
+    "en": "Players weigh, pour or divide ingredients, and actual quantities affect results. Excess may be hard to undo; measuring tools and incremental additions reduce error, while feedback distinguishes execution from recipe design."
+  },
+  "loop": [
+    {
+      "zh": "读取目标用量",
+      "en": "Read the target amount"
+    },
+    {
+      "zh": "选择容器或切分方式",
+      "en": "Choose a container or portioning method"
+    },
+    {
+      "zh": "逐步加料",
+      "en": "Add incrementally"
+    },
+    {
+      "zh": "检查实际剂量",
+      "en": "Check the actual quantity"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "一次倒完节省时间，还是分次加料保证精度？",
+      "en": "Pour in one motion for speed or add gradually for precision?"
+    },
+    {
+      "zh": "误差出现后补救整批，还是从头开始？",
+      "en": "Rebalance an inaccurate batch or restart?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "允许误差",
+        "en": "Tolerance"
+      },
+      "effect": {
+        "zh": "宽容差更适合轻松操作；窄容差提高工具掌握的价值。",
+        "en": "Wide tolerances suit relaxed play; narrow ones reward tool mastery."
+      }
+    },
+    {
+      "name": {
+        "zh": "信息精度",
+        "en": "Measurement feedback"
+      },
+      "effect": {
+        "zh": "实时数字方便校准；只看外观会强调经验但降低可预测性。",
+        "en": "Live numbers support calibration; visual estimation rewards experience but reduces predictability."
+      }
+    }
+  ],
+  "tags": [
+    "precision",
+    "dexterity",
+    "information"
+  ],
+  "related": [
+    "cooking-judged-flavor",
+    "cooking-recipe-learning",
+    "commerce-auction-bidding",
+    "commerce-interpret-orders"
+  ],
+  "contrast": {
+    "zh": "料理模拟器的误差直接来自眼前的物理操作；酿酒大师把配比纳入整批产品的实验与复现。",
+    "en": "Cooking Simulator ties errors to immediate physical actions; Brewmaster makes ratios part of batch experimentation and repeatability."
+  },
+  "combination": {
+    "zh": "组合创意：药膳订单允许一个误差区间，昂贵订单更严格，但可购买校准工具把技术难度转为经营选择。",
+    "en": "Design proposal: medicinal-food orders have varying tolerances; calibration tools convert execution difficulty into a business decision."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "配方要100毫升液体，你已经倒了85毫升。",
+      "en": "The recipe needs 100 ml of liquid and you have poured 85 ml."
+    },
+    "action": {
+      "zh": "你从持续倾倒改成轻点添加，每次只加一点。",
+      "en": "Switch from continuous pouring to short taps for smaller additions."
+    },
+    "result": {
+      "zh": "计量读数接近目标；倒过头会改变这一批的结果。",
+      "en": "The reading approaches the target; overshooting changes the batch outcome."
+    },
+    "next": {
+      "zh": "根据误差反馈，下一次更早减速或改用小容器。",
+      "en": "Use the error feedback to slow earlier or choose a smaller container next time."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "做一个倾倒按钮、液量读数和目标范围，先用确定流速，不模拟完整液体物理。",
+      "en": "Use a pour button, quantity readout and target band with a fixed flow rate, not full fluid physics."
+    },
+    "pitfall": {
+      "zh": "工具惯性、抖动与隐藏容差一起加入会难以调试；先让玩家理解误差来源。",
+      "en": "Combining inertia, jitter and hidden tolerance complicates tuning; first make errors understandable."
+    },
+    "test": {
+      "zh": "重复同一配方时，玩家是否逐渐从大步加料改为接近目标后的细调？",
+      "en": "On repeats, do players learn to make large additions first and fine adjustments near the target?"
+    }
+  }
+}

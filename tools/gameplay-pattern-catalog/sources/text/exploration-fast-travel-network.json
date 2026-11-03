@@ -1,0 +1,120 @@
+{
+  "id": "exploration-fast-travel-network",
+  "system": "exploration",
+  "edition": 1,
+  "name": {
+    "zh": "逐步解锁的快速旅行",
+    "en": "Unlockable fast-travel networks"
+  },
+  "summary": {
+    "zh": "第一次路程保留探索，重复路程逐渐转化为网络选择。",
+    "en": "Preserve the first journey, then turn repeated travel into a network choice."
+  },
+  "rules": {
+    "zh": "先实际抵达并激活旅行节点，再从已知网络选择目的地。危险状态或特殊区域可限制使用；新节点的反馈是后续路程变短，而不只是地图上多一个图标。",
+    "en": "Reach and activate travel nodes before selecting them as destinations. Danger or special locations may restrict use; a new node rewards the player with shorter future journeys, not merely another icon."
+  },
+  "loop": [
+    {
+      "zh": "探索抵达新节点",
+      "en": "Reach a new node"
+    },
+    {
+      "zh": "解锁网络连接",
+      "en": "Activate the connection"
+    },
+    {
+      "zh": "选择后续目的地",
+      "en": "Choose a later destination"
+    },
+    {
+      "zh": "跳过重复路段",
+      "en": "Skip the repeated journey"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "冒险深入解锁节点，可能大幅降低今后的回访成本。",
+      "en": "Risk pushing deeper to unlock a node that makes future visits much cheaper."
+    },
+    {
+      "zh": "现在回基地补给，还是先走到下一个节点，避免下次重复这段路？",
+      "en": "Return for supplies now, or reach the next node first to avoid repeating this stretch?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "可用条件",
+        "en": "Availability conditions"
+      },
+      "effect": {
+        "zh": "战斗中禁用可避免把传送变成无代价逃生按钮。",
+        "en": "Disabling travel in combat prevents it from becoming a free escape button."
+      }
+    },
+    {
+      "name": {
+        "zh": "节点密度",
+        "en": "Node density"
+      },
+      "effect": {
+        "zh": "密度高适合内容回收，密度低保留路途的重量。",
+        "en": "Dense nodes support revisits; sparse nodes preserve the significance of journeys."
+      }
+    }
+  ],
+  "tags": [
+    "progression",
+    "planning",
+    "discovery"
+  ],
+  "related": [
+    "exploration-ability-gates",
+    "exploration-earned-map",
+    "exploration-procedural-route-reading",
+    "allocation-shop-reservation"
+  ],
+  "contrast": {
+    "zh": "《艾尔登法环》通常可从野外地图发起传送；《空洞骑士》要求到车站，返程本身仍是一段路线。",
+    "en": "Elden Ring generally permits initiating travel through the field map; Hollow Knight requires reaching a station, preserving a return route."
+  },
+  "combination": {
+    "zh": "设计提案：商队先修复驿站再获得快速运输，但货物仍按沿途危险计算损耗，让交通便利与经营风险并存。",
+    "en": "Design proposal: repairing caravan stations unlocks fast shipping, while cargo losses still depend on route danger."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "山路尽头有未激活的传送站，走过去需要穿过危险区。",
+      "en": "An inactive travel station lies beyond a dangerous mountain route."
+    },
+    "action": {
+      "zh": "你先徒步抵达并激活它，再从已解锁节点返回基地。",
+      "en": "Reach and activate it on foot, then travel back through the unlocked network."
+    },
+    "result": {
+      "zh": "以后去这片区域可以直接抵达节点，不必反复走完整山路。",
+      "en": "Future trips reach that station directly instead of repeating the entire mountain route."
+    },
+    "next": {
+      "zh": "选择从新节点继续开图，或先去别处准备物资。",
+      "en": "Continue exploring from the new node or prepare supplies elsewhere first."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "做三个区域、三个可激活节点和一张只显示已解锁目的地的旅行菜单。",
+      "en": "Build three areas, three activatable nodes, and a menu of unlocked destinations."
+    },
+    "pitfall": {
+      "zh": "节点过密会消除区域之间的体验；先验证首次抵达是否仍值得玩家记住。",
+      "en": "Dense nodes can erase travel experiences; check that the first journey remains meaningful."
+    },
+    "test": {
+      "zh": "观察玩家是否愿意为一个未来有用的节点绕路，而非只把它当免费图标。",
+      "en": "See whether players detour for a strategically useful node rather than merely collecting an icon."
+    }
+  }
+}

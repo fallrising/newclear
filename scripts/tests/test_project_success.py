@@ -122,5 +122,9 @@ class SuccessContractTests(unittest.TestCase):
     def test_local_evidence_cannot_escape_repository(self):
         self.assertTrue(any("broken/outside" in e for e in self.check(contract().replace("(README.md)", "(../../../outside.md)"))))
 
+    def test_catalog_generated_status_matches_the_notes(self):
+        repo = Path(__file__).resolve().parents[2]
+        self.assertEqual([], success.catalog_generated_status_errors(repo))
+
 if __name__ == "__main__":
     unittest.main()

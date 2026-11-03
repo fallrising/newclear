@@ -1,0 +1,119 @@
+{
+  "id": "command-interrupt-action",
+  "system": "command",
+  "edition": 3,
+  "name": {
+    "zh": "趁准备阶段打断行动",
+    "en": "Interrupt an action during preparation"
+  },
+  "summary": {
+    "zh": "放弃眼前伤害，换掉敌人即将完成的大动作。",
+    "en": "Give up immediate damage to stop a dangerous action."
+  },
+  "rules": {
+    "zh": "部分行动先准备再生效，期间玩家能用指定攻击或控制把它打断或延后。玩家看准备条、姿势和冷却安排打断时机；用太早可能被无关动作消耗，用太晚则敌人已经完成行动。",
+    "en": "Some actions prepare before resolving. A qualifying hit or control effect interrupts or delays them. Read wind-ups and cooldowns: acting too soon wastes the interrupt, while acting too late lets the action resolve."
+  },
+  "loop": [
+    {
+      "zh": "辨认敌人的准备动作",
+      "en": "Recognize preparation"
+    },
+    {
+      "zh": "保留或使用打断手段",
+      "en": "Save or spend an interrupt"
+    },
+    {
+      "zh": "确认动作取消或延后",
+      "en": "Check the cancellation or delay"
+    },
+    {
+      "zh": "等下一次危险准备",
+      "en": "Prepare for the next threat"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "现在打断普通攻击，还是等更危险的法术？",
+      "en": "Interrupt a basic attack now or save it for a dangerous spell?"
+    },
+    {
+      "zh": "打断者要靠近目标，值不值得承担途中伤害？",
+      "en": "Is reaching interrupt range worth the incoming damage?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "准备时间",
+        "en": "Preparation duration"
+      },
+      "effect": {
+        "zh": "窗口越短越考验反应；较长窗口更适合指挥多个单位。",
+        "en": "Short windows demand reactions; longer ones support multi-unit planning."
+      }
+    },
+    {
+      "name": {
+        "zh": "打断后的处理",
+        "en": "After interruption"
+      },
+      "effect": {
+        "zh": "完全取消奖励抓时机；只延后则要求其他单位跟进。",
+        "en": "Cancellation rewards precise timing; delay requires a follow-up."
+      }
+    }
+  ],
+  "tags": [
+    "timing",
+    "information"
+  ],
+  "related": [
+    "command-initiative-order",
+    "command-scout-current-vision",
+    "combat-combo-variation",
+    "combat-intent-preview"
+  ],
+  "contrast": {
+    "zh": "龙腾世纪把打断与施法受击联系起来；暴君将它做成更明确的能力效果。",
+    "en": "Dragon Age ties disruption to taking hits while casting; Tyranny makes it an explicit ability effect."
+  },
+  "combination": {
+    "zh": "组合提案：打断消耗与闪避共用的耐力，玩家要决定把最后一点体力用来阻止施法还是自保。",
+    "en": "Design proposal: interrupts and dodges share stamina, forcing a choice between stopping the cast and protecting oneself."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "敌人读条两秒，我方重击还有一次可用。",
+      "en": "An enemy has a two-second wind-up and one heavy strike is ready."
+    },
+    "action": {
+      "zh": "先停止普通连击，等读条出现再重击。",
+      "en": "Stop the basic combo and use the heavy strike when the wind-up begins."
+    },
+    "result": {
+      "zh": "法术被打断，但重击进入冷却。",
+      "en": "The spell is interrupted, but the heavy strike goes on cooldown."
+    },
+    "next": {
+      "zh": "另一名敌人开始准备，必须换人处理或躲开。",
+      "en": "A second enemy starts preparing, requiring another unit or an evasive response."
+    }
+  },
+  "prototype": {
+    "scope": "medium",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "只做一名读条敌人、一种普通攻击和一个打断按钮。",
+      "en": "Build one wind-up enemy, a basic attack and an interrupt button."
+    },
+    "pitfall": {
+      "zh": "打断成功与目标免疫必须有不同反馈。",
+      "en": "Show successful interruption differently from immunity."
+    },
+    "test": {
+      "zh": "玩家会不会主动停手，把打断留给危险动作？",
+      "en": "Do players hold their interrupt for dangerous actions?"
+    }
+  }
+}

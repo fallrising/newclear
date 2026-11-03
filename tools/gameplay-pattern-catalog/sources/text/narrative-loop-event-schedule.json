@@ -1,0 +1,120 @@
+{
+  "id": "narrative-loop-event-schedule",
+  "system": "narrative",
+  "edition": 3,
+  "name": {
+    "zh": "重过同一段时间，换一种事件顺序",
+    "en": "Repeat a time window with a different event plan"
+  },
+  "summary": {
+    "zh": "世界回到起点，玩家用上一轮的发现改变下一轮安排。",
+    "en": "The world returns to the start while the player uses discoveries to change the next attempt."
+  },
+  "rules": {
+    "zh": "一段时间内的事件按规则推进，到终点或失败后世界状态重置，玩家保留已经理解的信息。下一轮可以更早赶到地点、先处理前置条件或尝试新对话，观察事件链如何改变。重点是重新安排整段事件，不是逐帧撤销刚才的动作。",
+    "en": "Events progress through a defined time window. At its end or on failure, the world resets while the player retains understanding. Arrive earlier, satisfy a prerequisite first or try new dialogue to change the chain. This replans events rather than undoing individual frames."
+  },
+  "loop": [
+    {
+      "zh": "观察这一轮的事件顺序",
+      "en": "Observe the event order"
+    },
+    {
+      "zh": "记住障碍与时间条件",
+      "en": "Remember obstacles and timing conditions"
+    },
+    {
+      "zh": "重置后改变行动安排",
+      "en": "Replan after the reset"
+    },
+    {
+      "zh": "验证变化并获得下一条线索",
+      "en": "Test the change and gain another clue"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "本轮继续追一个新发现，还是先验证已经想到的解法？",
+      "en": "Follow a fresh discovery this loop or test a solution already in mind?"
+    },
+    {
+      "zh": "提早改变一个事件，是否会错过原本想观察的后续？",
+      "en": "Will changing one event early prevent observing the later event you wanted?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "循环长度",
+        "en": "Loop length"
+      },
+      "effect": {
+        "zh": "短循环便于试验；长循环需要跳过已知流程的办法，减少重复劳动。",
+        "en": "Short loops support experiments; long loops need ways to bypass known routines."
+      }
+    },
+    {
+      "name": {
+        "zh": "跨循环保留的内容",
+        "en": "What persists between loops"
+      },
+      "effect": {
+        "zh": "只保留知识会强调理解；保留部分物品或关系会改变解题方式，需要明确说明。",
+        "en": "Knowledge-only persistence emphasizes understanding; retaining items or relationships changes the puzzle and needs explicit rules."
+      }
+    }
+  ],
+  "tags": [
+    "time",
+    "information",
+    "discovery"
+  ],
+  "related": [
+    "narrative-evidence-rebuttal",
+    "narrative-investigation-time-slots",
+    "narrative-background-dialogue-access",
+    "narrative-conversation-intervention"
+  ],
+  "contrast": {
+    "zh": "十二分钟把循环压缩在公寓中的人物事件；Outer Wilds 把时间条件铺到整个太阳系。两者都不依赖把角色数值永久练高。",
+    "en": "Twelve Minutes concentrates on apartment events, while Outer Wilds distributes timing conditions across a solar system. Neither depends on permanent stat growth."
+  },
+  "combination": {
+    "zh": "组合提案：一个短循环里有三份限时送货任务，重置后库存恢复，但玩家保留已发现的捷径和顾客作息，逐轮调整交付顺序。",
+    "en": "Design proposal: three timed deliveries occur in one short loop. Stock resets, but learned shortcuts and customer schedules let players revise delivery order each attempt."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "第一轮玩家看到信使在第三分钟经过锁着的大门。",
+      "en": "On the first loop, a courier reaches a locked gate in minute three."
+    },
+    "action": {
+      "zh": "重置后，玩家先到门房借钥匙，再去大门等候。",
+      "en": "After resetting, the player borrows the key before waiting at the gate."
+    },
+    "result": {
+      "zh": "信使这次按时通过，带来之前没出现的后续事件。",
+      "en": "The courier passes on time, enabling an event absent on the first attempt."
+    },
+    "next": {
+      "zh": "玩家据此调整下一轮去见收信人的时间。",
+      "en": "The discovery changes when the player plans to meet the recipient next loop."
+    }
+  },
+  "prototype": {
+    "scope": "medium",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "做一张小地图、三个定时事件和一个循环重置按钮，知识记在简单笔记里。",
+      "en": "Build one small map, three scheduled events and a reset button, with a simple knowledge notebook."
+    },
+    "pitfall": {
+      "zh": "若关键状态没有正确重置，因果规则会变得无法信任；长段重复对白也要能跳过。",
+      "en": "Incomplete resets undermine causal rules; long repeated dialogue also needs a skip path."
+    },
+    "test": {
+      "zh": "每次重来时，玩家是否带着新假设，而非重复同一套操作？",
+      "en": "Does each restart begin with a new hypothesis rather than the same routine?"
+    }
+  }
+}

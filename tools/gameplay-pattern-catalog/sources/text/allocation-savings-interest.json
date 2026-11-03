@@ -1,0 +1,119 @@
+{
+  "id": "allocation-savings-interest",
+  "system": "incremental",
+  "edition": 3,
+  "name": {
+    "zh": "留住资金换下一轮利息",
+    "en": "Keep savings to earn next-round interest"
+  },
+  "summary": {
+    "zh": "少买一次强化，可能让以后每轮都多一笔收入。",
+    "en": "Skipping an upgrade can increase income in later rounds."
+  },
+  "rules": {
+    "zh": "每轮按结算时持有的资金计算额外收入，通常以整数门槛分档并设上限。玩家在即时强化与未来增长之间取舍；购买后是否跌破利息档位、当前战力能否撑住，决定存钱的代价。",
+    "en": "Round-end savings generate extra income, often in capped thresholds. Balance immediate upgrades against future growth, checking whether a purchase crosses an interest threshold and whether the current force can survive the delay."
+  },
+  "loop": [
+    {
+      "zh": "检查余额与下一档门槛",
+      "en": "Check savings and the next threshold"
+    },
+    {
+      "zh": "选择消费或保留资金",
+      "en": "Spend or save"
+    },
+    {
+      "zh": "结算战果与利息",
+      "en": "Resolve the round and interest"
+    },
+    {
+      "zh": "用新收入再次分配",
+      "en": "Allocate the new income"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "为保住一档利息少买单位，可能多输一轮，能承受吗？",
+      "en": "Can you afford another loss to preserve an interest threshold?"
+    },
+    {
+      "zh": "接近出局时继续存钱，还是把积蓄一次花掉换即时强度？",
+      "en": "Keep saving near elimination or spend the reserve for immediate strength?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "利息档位",
+        "en": "Interest thresholds"
+      },
+      "effect": {
+        "zh": "台阶式收入让接近门槛的每枚钱更有分量。",
+        "en": "Thresholds make each coin near a breakpoint matter more."
+      }
+    },
+    {
+      "name": {
+        "zh": "利息上限",
+        "en": "Interest cap"
+      },
+      "effect": {
+        "zh": "上限提供开始消费的明确时点，也控制领先者滚雪球速度。",
+        "en": "A cap creates a clear spending point and limits compounding advantage."
+      }
+    }
+  ],
+  "tags": [
+    "economy",
+    "risk"
+  ],
+  "related": [
+    "incremental-farm-or-push",
+    "commerce-auction-bidding",
+    "commerce-debt-pressure",
+    "commerce-dynamic-market"
+  ],
+  "contrast": {
+    "zh": "两作都用金币存量产生利息，但收入组成、计算时点与版本上限不同，不宜把某一版数值当作通用规则。",
+    "en": "Both reward banked gold, but income sources, timing and version-specific caps differ; one patch’s numbers are not a universal rule."
+  },
+  "combination": {
+    "zh": "组合提案：商店经营中同时存在存款利息与到期贷款，保留现金能增收，却可能让库存不足以赶上还款日。",
+    "en": "Design proposal: a shop earns savings interest while a loan approaches repayment; retaining cash raises income but may leave too little stock to repay on time."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "示例规则每存十币多得一币利息，你有二十币，下一场需要补强。",
+      "en": "In this example, each ten saved coins earns one interest; you have twenty and need an upgrade."
+    },
+    "action": {
+      "zh": "只花两币购买小强化。",
+      "en": "Spend two coins on a small upgrade."
+    },
+    "result": {
+      "zh": "余额十八币，下一次利息从两币降为一币。",
+      "en": "Savings fall to eighteen, reducing next interest from two to one."
+    },
+    "next": {
+      "zh": "判断小强化是否足以扭转战斗；否则考虑干脆继续花到更有效的强度。",
+      "en": "Decide whether the upgrade is enough; otherwise consider spending further for a meaningful improvement."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "competitive",
+    "firstStep": {
+      "zh": "做三轮数字战斗、两件强化和可见的利息预览，不需要英雄库。",
+      "en": "Build three numerical rounds, two upgrades and a visible interest preview."
+    },
+    "pitfall": {
+      "zh": "结算时点不清会让玩家觉得系统吞钱；花费前就展示收入变化。",
+      "en": "Unclear timing feels unfair; preview the income change before spending."
+    },
+    "test": {
+      "zh": "玩家能否解释这次消费会少拿多少利息，以及为何仍值得？",
+      "en": "Can players explain the interest lost on a purchase and why it is worthwhile?"
+    }
+  }
+}

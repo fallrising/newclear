@@ -1,0 +1,120 @@
+{
+  "id": "combat-combat-deck-cycle",
+  "system": "combat",
+  "edition": 1,
+  "name": {
+    "zh": "战斗牌库循环",
+    "en": "Combat draw–discard cycles"
+  },
+  "summary": {
+    "zh": "每次出牌既解决眼前问题，也改变下一轮抽牌结构。",
+    "en": "Playing a card solves the present while shaping the next draw cycle."
+  },
+  "rules": {
+    "zh": "从牌库抽取手牌，在能量限制内出牌；使用或未保留的牌进入弃牌区。抽牌堆耗尽后弃牌堆重新洗入，玩家通过过牌、保留和移除改变关键牌出现的频率。",
+    "en": "Draw a hand and play within an energy budget. Played or unretained cards enter discard; when the draw pile empties, discard is reshuffled. Draw, retain and removal effects change access to key cards."
+  },
+  "loop": [
+    {
+      "zh": "查看手牌与敌情",
+      "en": "Inspect hand and threats"
+    },
+    {
+      "zh": "分配能量与出牌顺序",
+      "en": "Allocate energy and play order"
+    },
+    {
+      "zh": "弃牌并结束回合",
+      "en": "Discard and end the turn"
+    },
+    {
+      "zh": "抽取或重洗下一手",
+      "en": "Draw or reshuffle the next hand"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "本回合防守与快速过牌冲突：能否承受一点伤害换下一手关键组合？",
+      "en": "Defense can compete with cycling: can some damage be accepted to reach a key combination?"
+    },
+    {
+      "zh": "一张强牌只有被抽到才有价值，精简与冗余各有代价。",
+      "en": "A strong card only matters when drawn; deck thinning and redundancy have different costs."
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "手牌与能量比",
+        "en": "Hand-to-energy ratio"
+      },
+      "effect": {
+        "zh": "牌多能量少强调取舍，能量宽松则强调排序。",
+        "en": "Many cards with scarce energy emphasize selection; abundant energy emphasizes ordering."
+      }
+    },
+    {
+      "name": {
+        "zh": "重洗节奏",
+        "en": "Reshuffle frequency"
+      },
+      "effect": {
+        "zh": "小牌库更稳定，大牌库更需要搜索与冗余。",
+        "en": "Small decks are more consistent; large decks need search and redundancy."
+      }
+    }
+  ],
+  "tags": [
+    "planning",
+    "randomness",
+    "optimization"
+  ],
+  "related": [
+    "inventory-deck-thinning",
+    "automation-aerial-logistics",
+    "automation-belt-routing",
+    "automation-blueprint-reuse"
+  ],
+  "contrast": {
+    "zh": "《杀戮尖塔》常把手牌直接兑换为当回合攻防；《怪物火车》还有持续驻场单位，让早期部署影响多轮战斗。",
+    "en": "Slay the Spire often converts a hand directly into immediate offense and defense; Monster Train also deploys persistent units that influence many rounds."
+  },
+  "combination": {
+    "zh": "设计提案：把维修动作做成循环牌库，机器故障会加入临时故障牌；修理不仅恢复设备，也清理未来抽牌。",
+    "en": "Design proposal: represent maintenance as a cycling deck where breakdowns add temporary fault cards; repairs restore machinery and improve future draws."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "本回合有 3 点能量，手里有攻击、防御和抽牌三种牌。",
+      "en": "You have 3 energy and attack, defense, and draw cards in hand."
+    },
+    "action": {
+      "zh": "你先花 1 点抽牌，再用剩余能量应对敌人即将发动的攻击。",
+      "en": "Spend 1 energy drawing, then use the rest to answer the enemy’s coming attack."
+    },
+    "result": {
+      "zh": "打出的牌进入弃牌区；抽牌堆空后，这些牌会重新回到循环。",
+      "en": "Played cards enter the discard pile and return to circulation when the draw pile empties."
+    },
+    "next": {
+      "zh": "下一手到来时，重新判断眼前的攻防与后续抽牌机会。",
+      "en": "When the next hand arrives, reconsider immediate defense and future draw opportunities."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "做十张固定卡、一名显示意图的敌人、抽牌堆与弃牌堆。",
+      "en": "Start with ten fixed cards, one enemy with visible intent, a draw pile, and a discard pile."
+    },
+    "pitfall": {
+      "zh": "先确认抽牌、弃牌、洗牌的时序；特殊效果太早加入会掩盖循环问题。",
+      "en": "Settle draw, discard, and shuffle timing before special effects obscure the core cycle."
+    },
+    "test": {
+      "zh": "观察玩家是否会为了下一轮少打一张牌，并能解释抽牌堆与弃牌堆的区别。",
+      "en": "See whether players sacrifice an immediate play for the next turn and understand both piles."
+    }
+  }
+}

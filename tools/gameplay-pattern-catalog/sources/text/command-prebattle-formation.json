@@ -1,0 +1,119 @@
+{
+  "id": "command-prebattle-formation",
+  "system": "command",
+  "edition": 3,
+  "name": {
+    "zh": "开打之前布阵，开打之后观察",
+    "en": "Arrange before combat, then observe"
+  },
+  "summary": {
+    "zh": "把操作重点放在开战前的一次布置。",
+    "en": "Put the important decisions into preparation."
+  },
+  "rules": {
+    "zh": "玩家在准备阶段调整单位位置和装备，开战后单位按自动规则行动。结果会暴露谁先接敌、谁被包围、谁没来得及输出；下一轮再通过布阵修正，而不是在战斗中逐个下指令。",
+    "en": "Position units and equipment during preparation, then let automatic combat resolve. Watch who engages first, gets surrounded or fails to contribute; revise the next formation rather than issuing orders mid-fight."
+  },
+  "loop": [
+    {
+      "zh": "观察对手与上一轮失败点",
+      "en": "Read opponents and the last failure"
+    },
+    {
+      "zh": "调整初始阵型",
+      "en": "Change starting positions"
+    },
+    {
+      "zh": "让战斗自动结算",
+      "en": "Let combat resolve automatically"
+    },
+    {
+      "zh": "把结果用于下一次布阵",
+      "en": "Use the result for the next setup"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "集中保护核心单位，还是分散防止一起吃范围伤害？",
+      "en": "Protect a carry in a cluster or spread out against area damage?"
+    },
+    {
+      "zh": "针对眼前对手调整，会不会暴露给另一种阵容？",
+      "en": "Does adapting to one opponent expose the team to another?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "准备时间",
+        "en": "Preparation time"
+      },
+      "effect": {
+        "zh": "时间短强调快速识别，时间长允许仔细比较阵型。",
+        "en": "Short preparation rewards recognition; longer windows allow comparison."
+      }
+    },
+    {
+      "name": {
+        "zh": "战斗回放信息",
+        "en": "Battle feedback"
+      },
+      "effect": {
+        "zh": "显示目标与伤害去向，才能把失败转成下一轮可执行的调整。",
+        "en": "Show targets and damage so failure leads to actionable changes."
+      }
+    }
+  ],
+  "tags": [
+    "planning",
+    "spatial"
+  ],
+  "related": [
+    "command-frontline-shielding",
+    "command-split-objectives",
+    "combat-action-points",
+    "combat-cover-flanking"
+  ],
+  "contrast": {
+    "zh": "两者都把决策放在准备期，但英雄技能、棋盘规则与阵营搭配让有效站位不同，不能照搬同一阵型。",
+    "en": "Both emphasize preparation, but different abilities, boards and synergies make formations non-transferable."
+  },
+  "combination": {
+    "zh": "组合提案：场景里的油、水与火也在开战前布置，自动战斗时观察单位是否把敌人引进连锁区域。",
+    "en": "Design proposal: place oil, water and fire before combat, then observe whether automated units draw enemies into the reaction zone."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "上一轮弓手站前面，很快倒下。",
+      "en": "The archer stood in front and fell early last round."
+    },
+    "action": {
+      "zh": "把盾兵放前排，弓手退到角落。",
+      "en": "Place the guard up front and move the archer to a corner."
+    },
+    "result": {
+      "zh": "弓手多攻击几次，但被绕后的敌人威胁。",
+      "en": "The archer attacks more, but a flanker now threatens it."
+    },
+    "next": {
+      "zh": "下一轮给角落留一个保护单位。",
+      "en": "Next round, reserve a protector for that corner."
+    }
+  },
+  "prototype": {
+    "scope": "medium",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "四个自动攻击单位，一块小棋盘，先只做布置与开战两个阶段。",
+      "en": "Use four auto-attacking units on a small board with setup and combat phases."
+    },
+    "pitfall": {
+      "zh": "路径与选目标规则若不可理解，玩家只能盲猜阵型。",
+      "en": "Opaque movement and targeting make formations feel like guesswork."
+    },
+    "test": {
+      "zh": "只换站位不换数值，玩家能否解释结果为何变化？",
+      "en": "Can players explain a changed result when only positions change?"
+    }
+  }
+}

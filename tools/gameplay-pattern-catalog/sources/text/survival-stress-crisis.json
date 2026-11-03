@@ -1,0 +1,119 @@
+{
+  "id": "survival-stress-crisis",
+  "system": "survival",
+  "edition": 2,
+  "name": {
+    "zh": "压力积累与失控风险",
+    "en": "Stress buildup and crisis"
+  },
+  "summary": {
+    "zh": "坏事不断发生时，角色可能暂时不再听指挥，休息和安抚因此有了价值。",
+    "en": "Accumulated hardship can disrupt control, giving rest and reassurance practical value."
+  },
+  "rules": {
+    "zh": "事件和环境改变压力或心情。越接近危险区，继续工作或冒险的收益就越需要与失控后果比较；缓解压力会占用时间、资源或队伍位置。",
+    "en": "Events and surroundings change stress or mood. Near the danger zone, extra work or exploration must be weighed against a crisis; relief costs time, resources or a party slot."
+  },
+  "loop": [
+    {
+      "zh": "观察压力及其来源",
+      "en": "Read stress and its causes"
+    },
+    {
+      "zh": "选择继续任务或缓解",
+      "en": "Continue the task or seek relief"
+    },
+    {
+      "zh": "承担波动或失控结果",
+      "en": "Resolve fluctuations or a crisis"
+    },
+    {
+      "zh": "调整队伍与工作安排",
+      "en": "Reorganize the party or schedule"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "让压力高的人再做一轮，还是现在换人？",
+      "en": "Ask a stressed character for one more shift or replace them now?"
+    },
+    {
+      "zh": "用稀缺资源快速安抚，还是接受休息造成的停工？",
+      "en": "Spend a scarce relief resource or accept downtime?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "风险提示",
+        "en": "Risk visibility"
+      },
+      "effect": {
+        "zh": "明确显示危险区和主要原因，玩家才会把危机当作可管理的结果。",
+        "en": "Show the danger zone and leading causes so crises feel manageable."
+      }
+    },
+    {
+      "name": {
+        "zh": "失控持续与影响",
+        "en": "Crisis duration and impact"
+      },
+      "effect": {
+        "zh": "短暂拒绝行动与伤害队友需要完全不同的预警和恢复空间。",
+        "en": "Brief refusal and harm to allies require very different warnings and recovery room."
+      }
+    }
+  ],
+  "tags": [
+    "risk",
+    "planning"
+  ],
+  "related": [
+    "survival-bleeding-triage",
+    "survival-competing-needs",
+    "survival-fatigue-rest",
+    "survival-limb-impairment"
+  ],
+  "contrast": {
+    "zh": "环世界的压力来自持续生活并打断工作安排；暗黑地牢把压力集中到一次远征和关键判定上。",
+    "en": "RimWorld ties crises to ongoing life and work; Darkest Dungeon concentrates stress in expeditions and threshold checks."
+  },
+  "combination": {
+    "zh": "设计提案：让熟悉彼此的同伴承担安抚任务，但占用本可用于探索的位置。",
+    "en": "Design proposal: a trusted companion can provide reassurance at the cost of an exploration slot."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "演示设定：矿工压力接近红区，还有一批矿石未搬。",
+      "en": "Example: a miner nears the stress danger zone with one ore batch remaining."
+    },
+    "action": {
+      "zh": "停下采矿，安排一轮休息，让另一人搬运。",
+      "en": "Stop mining, assign rest and let another worker haul."
+    },
+    "result": {
+      "zh": "本轮产量下降，但矿工回到可控状态。",
+      "en": "Output falls this round, but the miner returns to a manageable state."
+    },
+    "next": {
+      "zh": "以后在连续夜班前预留替班人。",
+      "en": "Reserve a relief worker before the next run of night shifts."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "先做一个角色、三种压力来源和两种缓解动作，危机只用一种短暂拒绝行动。",
+      "en": "Use one character, three stress sources, two relief actions and one brief refusal crisis."
+    },
+    "pitfall": {
+      "zh": "不要用大量不可预测的惩罚遮住原因；先让玩家理解压力从哪里来。",
+      "en": "Do not obscure causes with many unpredictable punishments; make stress sources understandable first."
+    },
+    "test": {
+      "zh": "发生一次危机后，观察玩家下一轮是否主动改变安排。",
+      "en": "After one crisis, observe whether players proactively change the next schedule."
+    }
+  }
+}

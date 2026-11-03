@@ -11,6 +11,7 @@
 - [全部 pattern 筆記](patterns/README.md)：可在 GitHub 閱讀，不必先開網站。
 - [網站 metadata](site.json)、[pattern JSON Schema](pattern.schema.json)、[來源說明](sources/README.md)。
 - [驗證紀錄](docs/verification.md) 與 [任務板](docs/tasks/BOARD.md)。
+- [自動檢查與升格](review/README.md)：可選的模型對照、抽樣與 reviewed 批次。CI 不呼叫模型。
 
 ## 本機使用
 
@@ -19,6 +20,8 @@ Runtime 只需 Python 3.11+。建置不安裝套件、不抓網路、不呼叫�
 ```sh
 cd tools/gameplay-pattern-catalog
 python3 sources/inventory.py --check
+python3 sources/text_cache.py --check
+python3 status.py --check
 python3 build.py --check
 python3 -m unittest discover -s tests -v
 python3 build.py
@@ -27,7 +30,7 @@ python3 -m http.server 8080 --bind 127.0.0.1 --directory dist
 
 瀏覽器開啟 `http://127.0.0.1:8080/`。首頁可搜尋繁中、英文、標籤與筆記內文，可按本地分類與核對狀態篩選。無 JavaScript 仍可從完整索引閱讀筆記與狀態。資源使用相對路徑。本次沒有部署。
 
-`dist/catalog.json` 由 build 產生，包含網站 metadata、完整度與筆記內文。不要手改 `dist`、`docs/coverage.md` 或 `patterns/README.md`。
+`dist/catalog.json` 由 build 產生，包含網站 metadata、完整度與筆記內文。不要手改 `dist`、`docs/coverage.md`、`patterns/README.md`、SUCCESS 裡的產生狀態區、`review/pr-snippet.md` 或 inventory 的 catalog `source_commit`。改筆記後執行 `python3 status.py --write`。
 
 ## 瀏覽器 QA
 
@@ -44,4 +47,4 @@ python3 tests/browser_smoke.py
 
 Markdown frontmatter 是筆記權威，manifest 是來源權威。沒有帳號、分析追蹤、遠端字型、外部圖片、背景更新或自動發布。`python3 sources/inventory.py --fetch` 只報告後續來源差異。
 
-reviewed 表示作者對過本次快照的公開頁面，不是獨立審查，也不是實玩原遊戲。目前各篇的本地分析是模型依來源摘要起草的 draft，尚未經人工審閱，所以完整度宣告是 partial。未發行 usable tag。
+reviewed 表示作者對過本次快照的公開頁面，不是獨立審查，也不是實玩原遊戲。目前各篇的本地分析是模型依來源摘要起草的 draft，尚未經人工審閱，所以完整度宣告是 partial。篇數以 `python3 status.py --check` 從筆記算出的狀態區為準。未發行 usable tag。

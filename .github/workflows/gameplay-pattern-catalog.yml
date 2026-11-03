@@ -23,6 +23,9 @@ jobs:
       - name: Validate metadata and unit tests
         working-directory: tools/gameplay-pattern-catalog
         run: |
+          python3 sources/inventory.py --check
+          python3 sources/text_cache.py --check
+          python3 status.py --check
           python3 build.py --check
           python3 -m unittest discover -s tests -v
           python3 build.py

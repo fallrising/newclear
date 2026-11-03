@@ -1,5 +1,15 @@
 # 任務板
 
+## T-0003 — 自動忠實度檢查與由筆記產生的狀態
+
+輸入：owner 直接指示。範圍是自動對照腳本、來源文字快取、可重現抽樣、升格 reviewed 的做法，以及 SUCCESS／inventory／PR 片段與筆記重算結果的 CI 對帳。不改任何筆記的 `note_status`，不在 CI 呼叫模型，不 merge。
+
+| ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| T-0003-1 | 快取來源文字投影，並以可插拔命令或 API 做忠實度檢查；沒有金鑰則略過模型 | AC-F03 | in_progress | 2026-11-03T02:20:00Z |  | 2026-11-03T02:41:53Z |
+| T-0003-2 | 可重現抽樣與批次升格 reviewed 的命令；本 PR 不執行升格 | AC-F02、AC-F03 | in_progress | 2026-11-03T02:20:00Z |  | 2026-11-03T02:41:53Z |
+| T-0003-3 | 由筆記產生篇數與 source_commit，CI 比對 SUCCESS、inventory 與 PR 片段 | AC-F07 | in_progress | 2026-11-03T02:20:00Z |  | 2026-11-03T02:41:53Z |
+
 ## T-0002 — 以來源快照為分母的全量 catalog
 
 輸入：owner 2026-11-02 直接指示。範圍與驗收：[SDD](../../SDD.md) 的 AC-F01 至 AC-F07（SUCCESS 列號 AC-05 至 AC-11）。執行者：本次主導 agent。未授權 merge、deploy、release、tag、force push。

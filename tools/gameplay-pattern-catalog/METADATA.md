@@ -46,8 +46,10 @@ Schema 檢查型別；`build.py --check` 另外檢查檔名、日期、來源末
 
 - 改變來源時另建快照，不覆寫本次分母。
 - 先改筆記或 manifest，再執行 `python3 build.py --write-docs`，讓完整度報表與 pattern 索引從權威資料重生。不要手改 `docs/coverage.md`、`patterns/README.md` 或 `dist`。
-- 執行 `python3 build.py --check`、`python3 -m unittest discover -s tests -v`、`python3 build.py`。
-- 一般離線建置與單元測試不連到原站。
+- 篇數與 `source_commit` 由 `python3 status.py --write` 從筆記檔產生。`source_commit` 是筆記檔的 git tree SHA，不是分支 commit。不要手改 SUCCESS 的產生狀態區、`review/pr-snippet.md` 或 inventory 裡這個元件的 `source_commit`。
+- 自動對照、抽樣與升成 reviewed 的步驟寫在 `review/README.md`。`review/auto_check.py` 不改 `note_status`。沒有命令或金鑰就略過模型。CI 不跑模型，也不跑 promote。
+- 執行 `python3 sources/text_cache.py --check`、`python3 status.py --check`、`python3 build.py --check`、`python3 -m unittest discover -s tests -v`、`python3 build.py`。
+- 一般離線建置與單元測試不連到原站，也不呼叫模型。
 
 ## 參考來源
 

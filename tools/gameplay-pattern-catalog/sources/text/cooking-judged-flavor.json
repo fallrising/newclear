@@ -1,0 +1,120 @@
+{
+  "id": "cooking-judged-flavor",
+  "system": "cooking",
+  "edition": 1,
+  "name": {
+    "zh": "目标风味评分",
+    "en": "Targeted flavor scoring"
+  },
+  "summary": {
+    "zh": "同样能吃的食物，也要按评判标准决定做成什么样。",
+    "en": "A valid dish still needs to satisfy a particular evaluation target."
+  },
+  "rules": {
+    "zh": "系统给出目标风味或配方要求，玩家用配料与加工操作影响多个评分维度。端上菜后得到分项评价，下一轮据此调整；关键是理解评分标准，而非只追求总量。",
+    "en": "The game presents flavor or recipe targets, and ingredients and processing affect several scoring dimensions. Serving produces feedback for the next attempt; understanding criteria matters more than maximizing quantity."
+  },
+  "loop": [
+    {
+      "zh": "读取评价目标",
+      "en": "Read evaluation goals"
+    },
+    {
+      "zh": "选择材料与处理",
+      "en": "Choose ingredients and processing"
+    },
+    {
+      "zh": "提交成品",
+      "en": "Submit the dish"
+    },
+    {
+      "zh": "按分项反馈改进",
+      "en": "Improve using component feedback"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "把时间用于补齐短板，还是继续强化已经占优的风味？",
+      "en": "Fix a weak dimension or strengthen an existing advantage?"
+    },
+    {
+      "zh": "为了评委偏好牺牲通用高分组合是否划算？",
+      "en": "Is adapting to a judge worth abandoning a strong general recipe?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "目标公开程度",
+        "en": "Target disclosure"
+      },
+      "effect": {
+        "zh": "公开标准使玩家可规划；隐藏偏好适合试探但要提供可读反馈。",
+        "en": "Visible criteria support planning; hidden tastes need readable feedback."
+      }
+    },
+    {
+      "name": {
+        "zh": "维度权重",
+        "en": "Scoring weights"
+      },
+      "effect": {
+        "zh": "单一高权重会导向专精；多项均衡促使材料搭配。",
+        "en": "One dominant weight favors specialization; balanced criteria encourage ingredient combinations."
+      }
+    }
+  ],
+  "tags": [
+    "optimization",
+    "information",
+    "creativity"
+  ],
+  "related": [
+    "cooking-ingredient-substitution",
+    "cooking-meal-loadout",
+    "cooking-measurement-precision",
+    "cooking-preparation-chain"
+  ],
+  "contrast": {
+    "zh": "战斗厨师旅团把料理表现交给拼图操作；料理模拟器强调遵循配方并控制物理过程。",
+    "en": "Battle Chef Brigade uses puzzle manipulation; Cooking Simulator emphasizes recipe execution and physical handling."
+  },
+  "combination": {
+    "zh": "组合创意：美食评委只公布两个偏好，玩家从历次评语推断第三项隐藏标准，再决定是否为其定制菜单。",
+    "en": "Design proposal: judges reveal two preferences; players infer a third from past reviews and decide whether to specialize."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "评审要偏酸的菜，你的试作品咸味够了，酸味明显不足。",
+      "en": "The judge wants a sour dish; your trial has enough salt but not enough acidity."
+    },
+    "action": {
+      "zh": "你用最后一份配料增加酸味，不再继续堆已经够高的咸味。",
+      "en": "Spend the final ingredient on acidity rather than adding more salt."
+    },
+    "result": {
+      "zh": "分项评分指出哪一项接近目标，哪一项仍偏离。",
+      "en": "Separate scores show which flavour matches the target and which still misses."
+    },
+    "next": {
+      "zh": "下一轮按差距调整比例，再提交检验。",
+      "en": "Adjust proportions based on the gaps and submit another attempt."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "做酸、甜、咸三维目标和4种配料，用条形反馈展示提交后的差距。",
+      "en": "Use sour, sweet and salty targets with four ingredients and bar feedback showing gaps after submission."
+    },
+    "pitfall": {
+      "zh": "评分公式若不透明，玩家只会试遍组合；先让分项反馈能指导下一次改变。",
+      "en": "Opaque scoring encourages exhaustive guessing; feedback should guide the next change."
+    },
+    "test": {
+      "zh": "看一次评分后，玩家能否明确指出该增加或减少哪种配料？",
+      "en": "After one evaluation, can players identify an ingredient to increase or reduce?"
+    }
+  }
+}

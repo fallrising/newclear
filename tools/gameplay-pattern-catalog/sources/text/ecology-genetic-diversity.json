@@ -1,0 +1,120 @@
+{
+  "id": "ecology-genetic-diversity",
+  "system": "ecology",
+  "edition": 2,
+  "name": {
+    "zh": "保留不同血缘与基因",
+    "en": "Preserve genetic diversity"
+  },
+  "summary": {
+    "zh": "只留下最优秀的一家，可能让后续配对越来越困难。",
+    "en": "Keeping only one successful family can make future pairings harder."
+  },
+  "rules": {
+    "zh": "种群不仅需要当前强壮个体，还需要可持续配对的差异。玩家检查亲缘或关键基因，保留不同来源的成员，并在短期表现与长期繁殖选择之间取舍。",
+    "en": "A population needs compatible future pairings as well as strong current individuals. Inspect lineage or key genes, retain members from different sources and balance immediate performance against future breeding options."
+  },
+  "loop": [
+    {
+      "zh": "查看现有血缘与关键基因",
+      "en": "Inspect lineages and key genes"
+    },
+    {
+      "zh": "找出过度集中或冲突的组合",
+      "en": "Find concentrated or conflicting combinations"
+    },
+    {
+      "zh": "保留外来或少见个体",
+      "en": "Retain newcomers or rare variants"
+    },
+    {
+      "zh": "在下一代重新检查配对空间",
+      "en": "Recheck mating options next generation"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "引入数值普通但血缘不同的个体，还是继续繁殖现有优秀家族？",
+      "en": "Introduce an ordinary unrelated individual or keep breeding the strong existing family?"
+    },
+    {
+      "zh": "空间不足时保留少见基因，还是优先留下当前贡献最大的成员？",
+      "en": "When space is tight, keep a rare gene or the strongest current contributor?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "重复基因的后果",
+        "en": "Cost of repeated genes"
+      },
+      "effect": {
+        "zh": "后果应可提前推断，不能到出生后才给出无从避免的惩罚。",
+        "en": "Consequences should be predictable before birth rather than unavoidable surprises."
+      }
+    },
+    {
+      "name": {
+        "zh": "外来个体获得成本",
+        "en": "Newcomer cost"
+      },
+      "effect": {
+        "zh": "外来来源越难获得，保留现有多样性的长期价值越高。",
+        "en": "Harder access to newcomers makes existing diversity more valuable."
+      }
+    }
+  ],
+  "tags": [
+    "planning",
+    "information",
+    "progression"
+  ],
+  "related": [
+    "ecology-breeding-conditions",
+    "ecology-parent-trait-selection",
+    "ecology-animal-taming",
+    "ecology-habitat-capacity"
+  ],
+  "contrast": {
+    "zh": "Niche让玩家直接比较特定免疫基因；动物园之星提供家谱关系供玩家规划配对，信息组织方式不同。",
+    "en": "Niche exposes specific immunity alleles; Planet Zoo organizes family relationships through genealogy."
+  },
+  "combination": {
+    "zh": "设计提案：某条血缘在自己的种群里越稀缺，其引入价值越高，即使市场标价并不高。",
+    "en": "Design proposal: an underrepresented lineage can be valuable to your population even when its market price is low."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "演示设定：现有四只动物都来自同一家族，空位只剩一个。",
+      "en": "Example: four animals share one lineage, with only one slot remaining."
+    },
+    "action": {
+      "zh": "保留新引入的普通个体，而不留下第五只高分后代。",
+      "en": "Keep an ordinary newcomer instead of a fifth high-scoring descendant."
+    },
+    "result": {
+      "zh": "当前平均能力稍降，但下一代多了一种可选配对。",
+      "en": "Average current ability falls slightly, but another future pairing becomes available."
+    },
+    "next": {
+      "zh": "下一轮把它与现有家族配对，再检查后代的基因组合。",
+      "en": "Pair it with the established line and inspect the next generation."
+    }
+  },
+  "prototype": {
+    "scope": "medium",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "先用三种可见基因标记和有限栏位，明确提示哪种配对有风险。",
+      "en": "Start with three visible gene markers and limited slots, clearly showing risky pairings."
+    },
+    "pitfall": {
+      "zh": "家谱会迅速变成信息负担；先做两代关系和直接配对提示。",
+      "en": "Pedigrees quickly become an information burden; begin with two generations and direct pairing guidance."
+    },
+    "test": {
+      "zh": "给一只数值较弱的外来个体，看玩家是否因未来配对价值主动保留它。",
+      "en": "Offer a weaker newcomer and see whether players keep it for future breeding value."
+    }
+  }
+}

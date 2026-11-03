@@ -406,12 +406,6 @@ def patch_preserved(path: Path, entry: dict, titles: dict[str, str]) -> None:
             '公開頁面描述玩家為待售物訂價，觀察顧客是否接受以及情緒反應，再把觀察用於下一輪報價。較高價格提高單筆收益，也可能失去成交。核心循環：選品並估價 → 報出試探價格 → 觀察顧客反應 → 調整下一次報價。本次對照的是頁面內嵌的公開條目；先前精選版只核到搜尋索引摘錄，該限制已由這次直接取得取代。',
         )
         body = body.replace('取得方式：search-index-excerpt。', '取得方式：page-text。')
-    elif '本次全量快照已用公開頁面內嵌條目複核。' not in body:
-        body = body.replace(
-            '\n## 問題與情境（本地分析）\n',
-            '本次全量快照已用公開頁面內嵌條目複核。\n\n## 問題與情境（本地分析）\n',
-            1,
-        )
     for related_id in ordered['related']:
         reason = PRESERVE_REASONS[(entry['id'], related_id)]
         pattern = rf'- \[[^\]]+\]\({related_id}\.md\)(?:：.*)?\n'

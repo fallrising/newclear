@@ -3,55 +3,32 @@
   "snapshot_id": "atlas-public-2026-11-02",
   "llm": "command",
   "model": null,
-  "generated_at": "2026-11-03T08:19:24Z",
+  "generated_at": "2026-11-03T09:12:55Z",
   "notes": [
     {
       "id": "allocation-area-majority",
-      "verdict": "flag",
-      "issues": [
-        {
-          "kind": "wrong-number",
-          "detail": "驗收例的單位記帳和它自己的原型設定（每人六枚、每輪放兩枚）對不上：甲在盤面上 A2＋B0＋C1＝3 枚，手上剩 2 枚，總共只有 5 枚；乙則是 A1＋B2＋C1＝4 枚，加上手上 2 枚，共 6 枚。在「本輪最後一次動作」時，甲應已在盤面放置 4 枚。A、B、C 三區歸屬的結論雖可由給定計數推出，但這個兵力前提與六枚設定矛盾，需修正盤面數量或剩餘枚數，例如把甲在 A 區改為 3 枚，或說明還有一枚在別處。"
-        }
-      ]
+      "verdict": "pass",
+      "issues": []
     },
     {
       "id": "allocation-follow-phase",
       "verdict": "flag",
       "issues": [
         {
-          "kind": "missing-key-point",
-          "detail": "來源規則明訂「其他玩家也可在符合條件時參與」，來源原型的注意事項也特別要求區分「選階段」與「在階段中有資格行動」。筆記卻在核心循環寫成「所有玩家在同一個階段內一起執行」，最小原型也寫「全員依序執行」，把參與資格這項關鍵限制整個略去，讓跟隨階段的門檻看起來毫無條件。"
+          "kind": "fabricated-claim",
+          "detail": "The 「相關模式」 section asserts specific mechanics for allocation-public-pick, allocation-area-majority, allocation-public-goal-race, and allocation-shared-stock (e.g. shared-pool depletion, area ownership flips, first-to-goal rewards, shared-stock scarcity). The snapshot only lists these as related IDs and does not describe their rules; this section is also not marked as local analysis."
         }
       ]
     },
     {
       "id": "allocation-public-goal-race",
-      "verdict": "flag",
-      "issues": [
-        {
-          "kind": "broken-example-logic",
-          "detail": "邊界驗收只說 A 的完成判定延後到回合結束，卻沒有規定雙方同回合跨過門檻時以最終點數較高者取勝；因此直接判給 P2 6 點、P1 5 點，並把 P1 的投入視為損失，並不從示例前提推出。"
-        },
-        {
-          "kind": "over-inference",
-          "detail": "本地分析開頭斷言公開目標獎勵「只能被先到的人拿走」，但來源規則與參數明說獎勵可能可被奪回；這個絕對說法與來源的可奪回機制不一致。"
-        },
-        {
-          "kind": "broken-example-logic",
-          "detail": "主驗收的 Given 只定義 A、B 兩個目標，Then 卻出現 P2 下一回合只剩 B 與 C 可選；C 未在局面中建立，示例設定不完整。"
-        }
-      ]
+      "verdict": "pass",
+      "issues": []
     },
     {
       "id": "allocation-public-pick",
-      "verdict": "flag",
-      "issues": [
-        {
-          "kind": "broken-example-logic",
-          "detail": "驗收例中，A 取走 K1 後 B 的關鍵選項只剩 K2、K3；B 取 K2 不能證明 B 是「因而改拿」K2，因為前提沒有給出 B 原本偏好 K1，或 K2 與 K3 之間的排序。B 也可能本來就選 K2 或可改選 K3；此段把選項縮減直接寫成 B 的選擇改變，結論超出前提。"
-        }
-      ]
+      "verdict": "pass",
+      "issues": []
     },
     {
       "id": "allocation-route-denial",
@@ -59,7 +36,7 @@
       "issues": [
         {
           "kind": "broken-example-logic",
-          "detail": "边界验收说“其他条件不变”，因此抢占的中间路段仍是玩家唯一的捷径，玩家自己的路径应从4段变3段、节省2点；但结论只比较“付2点”和“对手多付2点”，还断言“这次占用不划算”，忽略了玩家自身的收益，结论不成立。"
+          "detail": "The boundary acceptance says the player's construction cost breaks even, but its own premise gives a 4→3 path change at 2 points per segment. If the claimed middle edge is part of the new 3-segment path, the path cost drops from 8 to 6, so the player is 2 points ahead, not break-even; adding the 2-point claim again to offset the saved segment double-counts that edge."
         }
       ]
     },
@@ -120,21 +97,16 @@
     },
     {
       "id": "automation-flow-splitting",
-      "verdict": "flag",
-      "issues": [
-        {
-          "kind": "missing-key-point",
-          "detail": "The source rules state that blocked exits change the actual distribution of input. The note's source summary keeps only the steady-operation/machine-count rule and does not preserve this key blocked-exit redistribution rule; local discussion of waste and starvation does not state it as a source rule."
-        }
-      ]
+      "verdict": "pass",
+      "issues": []
     },
     {
       "id": "automation-fluid-routing",
       "verdict": "flag",
       "issues": [
         {
-          "kind": "broken-example-logic",
-          "detail": "边界验收写“关闭或阻塞第二条支路”后总耗电由 3 降为 2，但前提只说明“关闭支路时该支路的泵一并关闭”；若只是阻塞支路，泵未必断电，因此耗电下降不必然成立。"
+          "kind": "missing-key-point",
+          "detail": "來源規則中的核心限制「玩家需在距離、高度或分支限制下連接供液端與消耗端」未在來源摘要中保留；筆記只在本地分析提到高度與分支，未標明這是來源規則。"
         }
       ]
     },
@@ -213,28 +185,15 @@
       "verdict": "flag",
       "issues": [
         {
-          "kind": "broken-example-logic",
-          "detail": "主驗收例在回合結束時讓兩張未打出的防禦牌留在手中並只補抽到 5 張；但來源規則是打出或未保留的牌進入棄牌區，這兩張防禦應先棄掉，棄牌堆應為 7 而非 5，抽牌數也應是 5 而非 3。因此「重洗 5、抽 2」的流程不成立。"
-        },
-        {
-          "kind": "wrong-number",
-          "detail": "同一驗收例起始為抽牌堆 1 張、棄牌堆 4 張、手牌 3 張，合計 8 張，與其自身宣告的 10 張牌組（以及來源原型的十張固定牌）不一致，且未說明另外 2 張是移除或耗盡。"
+          "kind": "over-inference",
+          "detail": "「可調參數」一節雖標為本地分析，但對來源參數「手牌與能量比」的改寫與快照相衝突：來源說「能量寬鬆則強調排序」（能量多時更強調出牌排序／規劃），筆記卻寫「壓低手牌或提高能量，則幾乎每張牌都打得完，佈局感會明顯轉弱」。這是把來源的效果反轉成相反的推論，並非對來源的忠實轉述或無害延伸。"
         }
       ]
     },
     {
       "id": "combat-combo-variation",
-      "verdict": "flag",
-      "issues": [
-        {
-          "kind": "broken-example-logic",
-          "detail": "最小原型驗收設定「同一招在4秒內第二次出現時評價增量減半」，但輸入是快斬→快斬→快斬→上挑，Then 卻要求「第三次快斬」增量減半；依前提應是第二次快斬觸發減半，第三次的規則未定義，示例結果不從前提推出。"
-        },
-        {
-          "kind": "missing-key-point",
-          "detail": "來源規則要求「維持命中與節奏」才能獲得評價；筆記的來源摘要與核心循環只寫串接不同招式及受擊／斷連扣分，未保留維持接觸與節奏這個條件。"
-        }
-      ]
+      "verdict": "pass",
+      "issues": []
     },
     {
       "id": "combat-cover-flanking",
@@ -243,13 +202,8 @@
     },
     {
       "id": "combat-destructible-cover",
-      "verdict": "flag",
-      "issues": [
-        {
-          "kind": "broken-example-logic",
-          "detail": "邊界驗收中，小隊繞行後可攻擊 1 名敵人，但同一條視線仍被說成敵人對小隊的射線為 0 條；在來源所述的雙向視線與掩體模型中，若小隊能看見並攻擊敵人，敵人也應能看見小隊，除非另有面向或單向視野規則，但前提未給出。此結果與自身前提及前文「開出的射線是雙向的」不一致。"
-        }
-      ]
+      "verdict": "pass",
+      "issues": []
     },
     {
       "id": "combat-forced-movement",
@@ -323,13 +277,8 @@
     },
     {
       "id": "command-frontline-shielding",
-      "verdict": "flag",
-      "issues": [
-        {
-          "kind": "broken-example-logic",
-          "detail": "驗收範例的攻擊佇列與回退規則自相矛盾：設定說「前排倒下才輪到後排」，且指定目標倒下改打可攻擊目標；但在保持不動的分支，B 於第二輪倒下後 A 仍有 2 點血，第三輪不應落到後排 C，而應先打仍存活的前排 A。第四輪直接指向 C 也與「前排倒下才輪到後排」衝突，因此「C 首次受擊由第三輪延到第四輪」的結論不成立。"
-        }
-      ]
+      "verdict": "pass",
+      "issues": []
     },
     {
       "id": "command-initiative-order",
@@ -338,23 +287,13 @@
     },
     {
       "id": "command-interrupt-action",
-      "verdict": "flag",
-      "issues": [
-        {
-          "kind": "broken-example-logic",
-          "detail": "邊界驗收說打斷在第 6 秒仍在冷卻，因此法術完成；但冷卻只到第 7 秒，法術準備到第 10 秒，玩家可在第 7 秒打斷，所以「法術不被取消並於第 10 秒完成」不從前提推出。"
-        }
-      ]
+      "verdict": "pass",
+      "issues": []
     },
     {
       "id": "command-prebattle-formation",
-      "verdict": "flag",
-      "issues": [
-        {
-          "kind": "broken-example-logic",
-          "detail": "最小原型的通過條件中，Given 只設定「對手為兩前排兩後排遠程」，沒有交代敵方具備範圍攻擊，也沒交代範圍攻擊能越過前排打到後排；但 Then 直接斷言「敵方範圍攻擊同時命中兩個輸出，兩者於第 2 回合陣亡」。這個結果不是從題設推導出來的，玩家把兩個輸出集中在同一側後排並不能保證敵方範圍攻擊命中，更不能保證兩者在第 2 回合死亡。因此這條驗收條例的結論與前提不連貫："
-        }
-      ]
+      "verdict": "pass",
+      "issues": []
     },
     {
       "id": "command-scout-current-vision",
@@ -383,17 +322,8 @@
     },
     {
       "id": "commerce-auction-bidding",
-      "verdict": "flag",
-      "issues": [
-        {
-          "kind": "broken-example-logic",
-          "detail": "In the first acceptance case, starting bid 50 with +10 increments cannot reach 80 after the player 'follows three rounds' as stated: three player follow-bids alternating with the NPC would put the price at 100 (or 80 corresponds to only two player follow-bids). The precondition and result are inconsistent."
-        },
-        {
-          "kind": "missing-key-point",
-          "detail": "The source rule explicitly says winning is not automatically profitable and that cost must be compared with resale or strategic value; the note's source summary preserves only the later-settlement clause and does not state this core rule as a source fact."
-        }
-      ]
+      "verdict": "pass",
+      "issues": []
     },
     {
       "id": "commerce-debt-pressure",
@@ -416,7 +346,7 @@
       "issues": [
         {
           "kind": "broken-example-logic",
-          "detail": "邊界驗收中，額外偏好加成 6 高於稀有材料成本 5，且評價較高，因此稀有材料路線淨收益 11 嚴格優於基礎路線 10；這無法展示「成本與故事性之間的取捨」，結論與自身數字不符。"
+          "detail": "边界验收称只要温度超过“最低门槛”，额外偏好“温度超过门槛”就命中；但前一个验收中温度已标为“高”却未命中同一额外偏好。两处对门槛与额外偏好关系的描述不一致，因此 +6 的结果并不从前提自然推出。"
         }
       ]
     },
@@ -477,13 +407,8 @@
     },
     {
       "id": "cooking-order-triage",
-      "verdict": "flag",
-      "issues": [
-        {
-          "kind": "missing-key-point",
-          "detail": "The source's 'Deadline variation' parameter says varied deadlines require dynamic scheduling and identical deadlines tend toward a simple queue. The note omits that effect, and its local '可調參數' section states the inverse: widening deadline spacing makes ordering easier, while narrowing it forces harder simultaneous deadlines. This drops/reverses a key source parameter rule."
-        }
-      ]
+      "verdict": "pass",
+      "issues": []
     },
     {
       "id": "cooking-preparation-chain",
@@ -497,25 +422,8 @@
     },
     {
       "id": "cooking-station-handoff",
-      "verdict": "flag",
-      "issues": [
-        {
-          "kind": "over-inference",
-          "detail": "Frontmatter summary says handoff is 'faster' than each cook making a whole dish; the snapshot says 'outperform/more effective', not specifically faster."
-        },
-        {
-          "kind": "over-inference",
-          "detail": "The local 'handoff range' parameter says a longer range makes players plan buffers/relay points and makes walking time the main rhythm, while the snapshot's parameter says throwing/long range bridges obstacles and short-range handoffs depend more on layout; this conflicts with the stated effect."
-        },
-        {
-          "kind": "broken-example-logic",
-          "detail": "In the acceptance example, B simply taking the item from the buffer is claimed to advance the cooking station three times; taking the item does not by itself establish that B cooked or placed it into the cooking station."
-        },
-        {
-          "kind": "broken-example-logic",
-          "detail": "The boundary example asserts that A and B conflicting on a one-tile lane will make one wait 'one tile time' and produce a longer total than a detour version, but the premise gives no detour route or timings, so the stated result does not follow."
-        }
-      ]
+      "verdict": "pass",
+      "issues": []
     },
     {
       "id": "cooperation-complementary-abilities",
@@ -553,19 +461,14 @@
       "issues": [
         {
           "kind": "broken-example-logic",
-          "detail": "The first acceptance test contradicts its own premise: the clue-holder is said to be unable to see the screen and not to know the objects' positions, yet the Then has that player treat “left” as a position hint and says both ends' screens display the operated object. The stated failure (operating the leftmost red square) therefore does not follow from the setup; it requires position knowledge and a visible result that the premise denies."
+          "detail": "邊界驗收中，線索端只聽到「右邊那個」，且依前例並不知道三個物件的位置，卻能直接複述「藍色圓形、靠右」並下令；它沒有足夠資訊把「右邊」對應到藍圓形，因此成功結果不從其前提推出。"
         }
       ]
     },
     {
       "id": "cooperation-synchronized-triggers",
-      "verdict": "flag",
-      "issues": [
-        {
-          "kind": "fabricated-claim",
-          "detail": "The frontmatter summary says players must press the switches at the same instant, but the source rules define simultaneity as overlapping effective times and explicitly allow countdowns, signals, or sustained holds rather than same-instant activation. This also contradicts the note body's own source summary."
-        }
-      ]
+      "verdict": "pass",
+      "issues": []
     },
     {
       "id": "cooperation-temporary-alliance",
@@ -577,8 +480,8 @@
       "verdict": "flag",
       "issues": [
         {
-          "kind": "broken-example-logic",
-          "detail": "The edge-acceptance example’s conclusion does not follow from its premise. It compares the first upgrade’s realized +2 damage over two draws with a 5-point heal, but the upgraded card can still be drawn later; at the second rest the actual choice is between a second upgrade’s future +1 per draw and 5 healing, and the example never fixes the remaining draw horizon. So the stated expectation that the player chooses healing and thereby proves the investment loop breaks is not entailed."
+          "kind": "over-inference",
+          "detail": "The local core loop says the player should pick a card that \"升級後也會更常被抽到\" (will be drawn more often after upgrading). The snapshot only supports that the upgrade pays off each time the card is drawn; it does not support that upgrading changes drawing frequency, and upgrading a single card does not alter deck composition or draw probability."
         }
       ]
     },
@@ -637,8 +540,8 @@
       "verdict": "flag",
       "issues": [
         {
-          "kind": "fabricated-claim",
-          "detail": "The related-patterns preamble says the source provides no contrast cases (“未提供對照案例”), but the snapshot includes a contrast section naming Balatro and Slay the Spire. The claim should be scoped to the four related entries or corrected."
+          "kind": "broken-example-logic",
+          "detail": "The boundary acceptance test pays 2 energy to activate 'weakness' but then computes the attack only as base 3 + 2 = 5, ignoring any damage effect from the weakness. Its conclusion that the attack remains 5 and is below the recovery threshold 6 does not follow from the stated premise unless weakness has no effect, which would make the test fail to exercise the weakness-before-attack ordering."
         }
       ]
     },
@@ -664,23 +567,13 @@
     },
     {
       "id": "defense-mobile-defender",
-      "verdict": "flag",
-      "issues": [
-        {
-          "kind": "broken-example-logic",
-          "detail": "Both acceptance examples give towers attack range 4 but calculate as if towers only fire when enemies reach them. In the first example, the right enemy (lane length 6, speed 1) enters tower range at t=2, so it takes 20 damage before t=6; its HP at t=6 is 10, not 30, and the stated kill time and final right-tower durability 90 do not follow. In the boundary case, the elite enters range at t=4 and has taken 50 damage by t=14, not 30; its HP is 190, not 210, and the stated final right-tower durabil"
-        }
-      ]
+      "verdict": "pass",
+      "issues": []
     },
     {
       "id": "defense-resistance-counters",
-      "verdict": "flag",
-      "issues": [
-        {
-          "kind": "wrong-number",
-          "detail": "The boundary acceptance example says 40+30=70 exceeds the available 60 by 30, but 70−60=10. The later statements (20 left vs 30 needed, 30 left vs 40 needed) are consistent; the “差 30” figure is the arithmetic error."
-        }
-      ]
+      "verdict": "pass",
+      "issues": []
     },
     {
       "id": "defense-target-priority",
@@ -699,13 +592,8 @@
     },
     {
       "id": "driving-air-balance",
-      "verdict": "flag",
-      "issues": [
-        {
-          "kind": "broken-example-logic",
-          "detail": "邊界驗收示例的前提是：鬆手時俯仰 0 度、慣性再帶 -3 度、坡面 -5 度，落地 -3 度與坡面差 +2 度，仍在 ±8 容錯內；但由此不能推出「下一次停手時機不應晚於這次」。更晚鬆手仍可能安全，例如鬆手時 -1 度、慣性再帶 -3 度到 -4 度，與 -5 度坡面只差 +1 度。該結論不是其自身前提的邏輯結果。"
-        }
-      ]
+      "verdict": "pass",
+      "issues": []
     },
     {
       "id": "driving-air-stunt",
@@ -734,31 +622,13 @@
     },
     {
       "id": "ecology-breeding-conditions",
-      "verdict": "flag",
-      "issues": [
-        {
-          "kind": "broken-example-logic",
-          "detail": "The acceptance test's premise states the target species requires both a nest site and the night time slot, and the feedback reports the time condition unmet. The stated follow-up option — \"改用另一對親本\" — cannot resolve a missing time condition, since both offered pairs are the same species with the same requirements; only waiting for night follows from the premise. Either the alternative should be a species/pair with different time requirements, or the option should be dropped."
-        }
-      ]
+      "verdict": "pass",
+      "issues": []
     },
     {
       "id": "ecology-genetic-diversity",
-      "verdict": "flag",
-      "issues": [
-        {
-          "kind": "missing-key-point",
-          "detail": "來源的參數「重複基因的後果」明確要求後果可在出生前預判、不能到出生後才給無從避免的懲罰；筆記只討論後果輕重，沒有保留這項可預測性規則。"
-        },
-        {
-          "kind": "broken-example-logic",
-          "detail": "最小原型驗收允許第三代可用配對為 0 或 1 組，卻同時要求配對面板標示「無合法組合」；若仍有 1 組合法配對，面板不能顯示無合法組合。"
-        },
-        {
-          "kind": "broken-example-logic",
-          "detail": "該驗收從 8 個欄位已滿開始，卻要求玩家連續兩代繁殖且不引進外來者，未說明要淘汰哪些個體以騰出欄位；在此前提下第三代配對數無法由題設直接推出。"
-        }
-      ]
+      "verdict": "pass",
+      "issues": []
     },
     {
       "id": "ecology-habitat-capacity",
@@ -772,17 +642,8 @@
     },
     {
       "id": "ecology-plant-crossbreeding",
-      "verdict": "flag",
-      "issues": [
-        {
-          "kind": "broken-example-logic",
-          "detail": "邊界驗收第二輪把 C 移到 (4,4) 後只剩 A+B 一組合格配對，且 (2,4) 仍為空；依前一個驗收的確定表，A+B 相鄰且 B 右側為空時應產出 1 株 XY，總株數應由 3 變 4，而不是維持 3。此結論與自身前提不一致。"
-        },
-        {
-          "kind": "broken-example-logic",
-          "detail": "邊界驗收說玩家無法判斷「可能的 XY」來自 A+B 或 A+C，但 C 的性狀是 Z，A+C 不可能產生 XY；在性狀已知的情況下，XY 只能來自 A+B，因此該理由不成立。"
-        }
-      ]
+      "verdict": "pass",
+      "issues": []
     },
     {
       "id": "ecology-population-limits",
@@ -791,23 +652,13 @@
     },
     {
       "id": "ecology-species-compatibility",
-      "verdict": "flag",
-      "issues": [
-        {
-          "kind": "broken-example-logic",
-          "detail": "The boundary acceptance example has only one C, yet says the player can later check C's social preference by housing it with '同類' (same species); that cannot follow from the stated setup. It also says removing B from a 2-capacity habitat leaves 'only 1 empty slot' when removing B actually leaves 2 empty slots."
-        }
-      ]
+      "verdict": "pass",
+      "issues": []
     },
     {
       "id": "exploration-ability-gates",
-      "verdict": "flag",
-      "issues": [
-        {
-          "kind": "fabricated-claim",
-          "detail": "來源摘要 claims “本次全量快照已用公開頁面內嵌條目複核” (the full snapshot was cross-checked using embedded entries on the public page). The source_snapshot contains no such provenance or verification claim; its only access metadata is access_method: page-text. This is presented as source fact but is unsupported by the snapshot."
-        }
-      ]
+      "verdict": "pass",
+      "issues": []
     },
     {
       "id": "exploration-air-action-refill",
@@ -866,47 +717,23 @@
     },
     {
       "id": "farming-growth-care",
-      "verdict": "flag",
-      "issues": [
-        {
-          "kind": "fabricated-claim",
-          "detail": "The note's source summary states 「本次全量快照已用公開頁面內嵌條目複核。」 (this full snapshot was re-verified using the public page's embedded entry). The provided source_snapshot contains no verification or provenance metadata of that kind, so this presents a process claim as source fact that the snapshot does not support."
-        }
-      ]
+      "verdict": "pass",
+      "issues": []
     },
     {
       "id": "farming-irrigation-layout",
-      "verdict": "flag",
-      "issues": [
-        {
-          "kind": "broken-example-logic",
-          "detail": "邊界驗收的預算與覆蓋數不一致：每座十字裝置花 10、覆蓋 5 格，預算只有 10 時最多只能放 1 座並覆蓋 5 格，不可能先覆蓋現有 20 格；且後面又說把「剩下的 10」拿去放裝置，與 Given 的預算設定衝突。"
-        }
-      ]
+      "verdict": "pass",
+      "issues": []
     },
     {
       "id": "farming-livestock-care",
-      "verdict": "flag",
-      "issues": [
-        {
-          "kind": "fabricated-claim",
-          "detail": "The related-patterns comparison says livestock \"會生病、要互動\" (get sick and need interaction). The snapshot never lists illness as a livestock-care mechanic; its prototype pitfall mentions 疾病 only as an optional scope expansion, so presenting illness as an inherent trait of the pattern is unsupported."
-        },
-        {
-          "kind": "fabricated-claim",
-          "detail": "The comparison with seed reinvestment says livestock \"在你沒上線的每天持續吃掉飼料和互動時間\" — asserting feed and time consumption while the player is offline. The snapshot only says a larger herd increases feed demand and daily work; it says nothing about offline/real-time consumption, so this is invented source fact rather than labeled local analysis."
-        }
-      ]
+      "verdict": "pass",
+      "issues": []
     },
     {
       "id": "farming-orchard-investment",
-      "verdict": "flag",
-      "issues": [
-        {
-          "kind": "broken-example-logic",
-          "detail": "邊界驗收沿用「6 格農地」，卻設定 3 棵果樹「彼此相隔 3 格」；在 6 格地圖上無法同時容納這種間距（直線排列至少需 7 格），因此該測試的前提與結果不成立。"
-        }
-      ]
+      "verdict": "pass",
+      "issues": []
     },
     {
       "id": "farming-regrowth-crops",
@@ -969,7 +796,7 @@
       "issues": [
         {
           "kind": "broken-example-logic",
-          "detail": "邊界驗收只設定 3 尾魚、容量 4、每輪 30 秒，未設定每輪出生數；因此「繁殖一輪後容量已滿並停止繁殖」不一定成立（除非每輪恰好多 1 尾，而這點沒有寫明）。"
+          "detail": "第一個驗收範例說玩家把 2 尾稀有魚放入甲塘、乙塘空著過一輪，並在該輪結算；但同一個原型設定是每塘每輪繁殖 1 尾，因此甲塘過一輪應由 2 尾增至 3 尾，範例卻寫「甲塘維持 2 尾」。此外，範例說「兩輪後可能多出的 2 尾」只有在比較當下甲塘仍是 2 尾時才成立；若已經過一輪繁殖，再兩輪只會達到容量上限 4，也就是只再多 1 尾。範例的繁殖狀態與自己的前提不一致。"
         }
       ]
     },
@@ -1023,8 +850,8 @@
       "verdict": "flag",
       "issues": [
         {
-          "kind": "broken-example-logic",
-          "detail": "驗收例的結果不從自身前提推出：開場 100 能源、走 6 格且每格耗 5，應剩 70；題面只說採集也耗能源，未給每單位採礦耗能，因此「採到 4 單位時能源剩 30」需要額外假設。且此時直接回程 6 格剛好耗 30 能源，不會如文中所說「能源不足而中斷」。"
+          "kind": "fabricated-claim",
+          "detail": "The frontmatter summary says the player must trade target resources for ammo/energy. The snapshot instead says some resources are not final objectives but serve as supplies; it does not state that final objective resources are consumed as fuel/ammo. This is a local design extension, but the summary presents it without labeling it as local analysis."
         }
       ]
     },
@@ -1050,13 +877,8 @@
     },
     {
       "id": "incremental-farm-or-push",
-      "verdict": "flag",
-      "issues": [
-        {
-          "kind": "broken-example-logic",
-          "detail": "邊界驗收設定玩家戰力 85、門檻 100，玩家無法通關，因此不能觀察到「新關卡通關後每 10 秒 12 金幣」的收益。用它和舊區的 15 金幣比較來支持「回舊區刷取」，結論不從前提推出；應只以門檻未達與機會成本說明，或先設定可通關條件。"
-        }
-      ]
+      "verdict": "pass",
+      "issues": []
     },
     {
       "id": "incremental-limited-team-dispatch",
@@ -1065,13 +887,8 @@
     },
     {
       "id": "incremental-manual-to-passive",
-      "verdict": "flag",
-      "issues": [
-        {
-          "kind": "broken-example-logic",
-          "detail": "本地原型把「手動每次 +1」與「自動每秒 +1」直接說成兩者速率相同，但沒有指定點擊頻率；若玩家每秒點擊超過一次，手動速率就高於自動，因此這個比較結論不成立。"
-        }
-      ]
+      "verdict": "pass",
+      "issues": []
     },
     {
       "id": "incremental-offline-window",
@@ -1080,13 +897,8 @@
     },
     {
       "id": "incremental-overlap-income-bursts",
-      "verdict": "flag",
-      "issues": [
-        {
-          "kind": "wrong-number",
-          "detail": "最小原型驗收寫「重疊的 3 秒採相乘規則，產出 ×6，其餘時間 ×1」，但同一段設定中 A 單獨生效 6 秒為 ×2、B 單獨生效 6 秒為 ×3；因此非重疊的 A 或 B 單獨時段不可能是 ×1，與自身前提矛盾。後續 200/400 的計算雖只用到 A 單獨與重疊時段，但此倍率描述仍不正確。"
-        }
-      ]
+      "verdict": "pass",
+      "issues": []
     },
     {
       "id": "incremental-quantity-milestones",
@@ -1120,23 +932,13 @@
     },
     {
       "id": "inventory-durability",
-      "verdict": "flag",
-      "issues": [
-        {
-          "kind": "broken-example-logic",
-          "detail": "驗收例子以「每次採集扣 25、耐久 100」為前提，卻宣稱第四次採集在耐久歸零時「未能完成」。依前提，第四次採集應先完成再使耐久降到 0；例子沒有定義耐久歸零會在中途打斷動作，因此「必須返程」以及備用工具耐久降為 75 的結果不是由前提推出。"
-        }
-      ]
+      "verdict": "pass",
+      "issues": []
     },
     {
       "id": "inventory-equipment-budget",
-      "verdict": "flag",
-      "issues": [
-        {
-          "kind": "broken-example-logic",
-          "detail": "The boundary acceptance test compares A+C on a multi-small-enemy wave with B+C on a single high-health wave, so it does not establish that both loadouts are viable under the same conditions. It also says B+C improves survival against a high-health target, but B+C has the same defensive C as A+C while using lower single-target damage; against a thick single target that should prolong the fight and increase exposure, not improve survival relative to A+C. The conclusion that capacity 4 makes both c"
-        }
-      ]
+      "verdict": "pass",
+      "issues": []
     },
     {
       "id": "inventory-identification",
@@ -1160,13 +962,8 @@
     },
     {
       "id": "inventory-weight-budget",
-      "verdict": "flag",
-      "issues": [
-        {
-          "kind": "broken-example-logic",
-          "detail": "In the prototype acceptance test, the 1-weight low-value supply is stated to be in the room (not in the player's load), yet the Then step says the player can discard it to go from 23/20 to 23−1=22/20. Dropping an item that was never carried cannot change the load, so the stated result does not follow from the premise. The setup should either put the supply already in the player's 18/20 load or change the recovery arithmetic."
-        }
-      ]
+      "verdict": "pass",
+      "issues": []
     },
     {
       "id": "matching-clear-under-cargo",
@@ -1189,7 +986,7 @@
       "issues": [
         {
           "kind": "broken-example-logic",
-          "detail": "The prototype’s Given puts the red three-match in column 3 at rows 3–5 while row 6 is explicitly empty and the target is at row 7. Under the note’s own gravity/support rule, those red pieces would already have fallen to rows 4–6 before the player acts, so the described starting board and the “first move clears rows 3–5” step are not stable or performable as written. The boundary test repeats the same unsupported red trio above an empty row 6."
+          "detail": "In the first acceptance example, the setup excludes refill only from column 3 (rows 2–6), but the second-step blue matches clear rows 5–6 in columns 1–2 as well. Without also ruling out refill in those cleared cells, or accounting for the refill, the stated final board of only the target and two fixed supports does not follow from the premise."
         }
       ]
     },
@@ -1200,13 +997,8 @@
     },
     {
       "id": "matching-pattern-creates-power",
-      "verdict": "flag",
-      "issues": [
-        {
-          "kind": "broken-example-logic",
-          "detail": "第一個驗收例把清列方塊從 (1,1) 搬到 (4,4) 才算覆蓋目標，並據此稱最少 6 步；但同一例設定該方塊清除所在欄，移到 (1,4)（3 次相鄰交換）即可清到第 4 欄的目標格，邊界例也明說 (1,4) 可直接覆蓋目標。因此「最少是 6 步」不從其自身前提推出，與自己的效果定義及邊界例衝突。"
-        }
-      ]
+      "verdict": "pass",
+      "issues": []
     },
     {
       "id": "matching-slide-board-merge",
@@ -1238,8 +1030,12 @@
       "verdict": "flag",
       "issues": [
         {
-          "kind": "missing-key-point",
-          "detail": "The source rules state the carried object is a physical entity that retains its own position and collisions, and that this is not a total-inventory-weight comparison. The note's source summary only says the object must arrive and can be carried, placed, or sent across, omitting that core collision/position rule and the inventory-weight contrast."
+          "kind": "broken-example-logic",
+          "detail": "In the acceptance case, after the player places the box before gap A and empty-jumps across, the note says the player cannot retrieve the original-side box. That does not follow from its own premise: A is empty-hand jumpable, so the player can jump back empty-handed, pick up or throw the box, and cross again. The stated 'delivery incomplete because retrieval is impossible' is therefore incorrect."
+        },
+        {
+          "kind": "fabricated-claim",
+          "detail": "The reference line claims direct comparison against the public page 'and its embedded entries' and that it is not a search-index excerpt. The snapshot only records the URL and access_method=page-text; it does not support the embedded-entries/non-index claim."
         }
       ]
     },
@@ -1255,13 +1051,8 @@
     },
     {
       "id": "movement-low-slide",
-      "verdict": "flag",
-      "issues": [
-        {
-          "kind": "broken-example-logic",
-          "detail": "The prototype examples overcount one tile. From one tile before a 4-tile tunnel to the second safe tile beyond the exit is 6 moves, not 7; with start speed 7 the character would still have 1 point on the second safe tile and continue into the pit, so it would not stop there. In the boundary case, reaching the single safe tile is 5 moves; start speed 6 leaves 1 point and still falls, not stops. The stated results do not follow from their premises."
-        }
-      ]
+      "verdict": "pass",
+      "issues": []
     },
     {
       "id": "movement-moving-platform",
@@ -1290,13 +1081,8 @@
     },
     {
       "id": "narrative-background-dialogue-access",
-      "verdict": "flag",
-      "issues": [
-        {
-          "kind": "missing-key-point",
-          "detail": "The source rule distinguishes identity/history access from persuasion: meeting a tag only reveals an extra question or approach, which may still have trade-offs and need not persuade anyone; it is not a persuasion roll. The note's source summary records only that conditions reveal extra questions/answers and drops this non-guarantee, so a core rule is missing."
-        }
-      ]
+      "verdict": "pass",
+      "issues": []
     },
     {
       "id": "narrative-conversation-intervention",
@@ -1405,13 +1191,8 @@
     },
     {
       "id": "projectiles-active-reload",
-      "verdict": "flag",
-      "issues": [
-        {
-          "kind": "missing-key-point",
-          "detail": "The source rule says a successful second press can either finish the reload sooner or strengthen the next shots. The note repeatedly frames the reward only as a strengthened magazine/buff and never states the shortened-reload option, so it drops one of the source's core success outcomes."
-        }
-      ]
+      "verdict": "pass",
+      "issues": []
     },
     {
       "id": "projectiles-ballistic-arc",
@@ -1435,13 +1216,8 @@
     },
     {
       "id": "projectiles-independent-aim",
-      "verdict": "flag",
-      "issues": [
-        {
-          "kind": "broken-example-logic",
-          "detail": "邊界驗收的 Then 無法由 Given/When 推出：只說以 0.8 倍速度沿弧線繞行 2 秒並修正瞄準，沒有給定繞行半徑、敵人移動方式或初始夾角，因此不能保證與敵人距離維持固定區間、射線持續連接，也不能保證兩名敵人夾角縮到 30 度以下。"
-        }
-      ]
+      "verdict": "pass",
+      "issues": []
     },
     {
       "id": "projectiles-maintain-lock",
@@ -1465,31 +1241,13 @@
     },
     {
       "id": "puzzles-beam-routing",
-      "verdict": "flag",
-      "issues": [
-        {
-          "kind": "broken-example-logic",
-          "detail": "驗收例子先設定門是「通電才開」，且進門後兩條光線仍無斷點、A/B 仍由門外的中繼物供電；在這種前提下門不應自動關上。例子卻說玩家進門後門關上且無法從內側打開，結果與自身前提矛盾。"
-        },
-        {
-          "kind": "missing-key-point",
-          "detail": "來源規則明確把 portal paths 列為可調整的光路選項之一；筆記只提中繼物與反射物，來源摘要與核心循環都漏掉傳送路徑。"
-        }
-      ]
+      "verdict": "pass",
+      "issues": []
     },
     {
       "id": "puzzles-box-pushing",
-      "verdict": "flag",
-      "issues": [
-        {
-          "kind": "over-inference",
-          "detail": "The note's local loop says a box pushed into a corner or against a wall can be seen to be unable to reach its target. The snapshot only says a push may trap a box or block access to the opposite side; a box against a wall can still be pushed along the wall, so this overgeneralizes 'may trap' into a general deadlock rule presented as an observable player read."
-        },
-        {
-          "kind": "missing-key-point",
-          "detail": "The snapshot's adjustable parameters include box special properties (a few exceptions expand solutions; too many reduce readability), but the note's adjustable-parameters list omits that source parameter and substitutes local knobs such as push/pull, box count, passage width, and target placement."
-        }
-      ]
+      "verdict": "pass",
+      "issues": []
     },
     {
       "id": "puzzles-gravity",
@@ -1498,13 +1256,8 @@
     },
     {
       "id": "puzzles-language-decoding",
-      "verdict": "flag",
-      "issues": [
-        {
-          "kind": "broken-example-logic",
-          "detail": "邊界驗收對詞形 B 的起始狀態用「旁邊沒有可觀察動作」來設定「人名」支持次數 0、衝突次數 0，但本地規則說人名義要看所有出現是否指向同一位可觀察人物；若無人可對應，起始那次依規則就應計為衝突，若不是無人而是有可指認人物，支持次數也不應為 0。後續才把第 4 次記為首個衝突，與「所有出現」的規則不一致。"
-        }
-      ]
+      "verdict": "pass",
+      "issues": []
     },
     {
       "id": "puzzles-linked-portals",
@@ -1512,11 +1265,7 @@
       "issues": [
         {
           "kind": "broken-example-logic",
-          "detail": "最小原型先設定房間只有 A、B 兩塊可放置面，驗收 Given 卻說有 A、B、C 三塊有效表面，並要求把入口從 A 改到 C；在原先的 A/B 設定中 C 不存在，該驗收情境無法按前提執行。"
-        },
-        {
-          "kind": "wrong-number",
-          "detail": "本地分析說每條連線只佔用一塊表面，但來源規則是成對出入口，一組連線需要入口與出口兩個表面；應為兩塊。"
+          "detail": "邊界驗收先說四塊可放置面 A、B、C、D 已被 A→B 與 C→D 兩組連線各佔兩塊而全部佔滿，又要求替換其中一組的一端卻不影響另一組；在沒有第五塊可用表面、也未先釋放表面的前提下，新端點無處可放或只能佔用他組表面，因此「只有被替換的那組斷線，另一組仍可輸送」不從其前提推出。"
         }
       ]
     },
@@ -1542,13 +1291,8 @@
     },
     {
       "id": "puzzles-visual-rule-learning",
-      "verdict": "flag",
-      "issues": [
-        {
-          "kind": "broken-example-logic",
-          "detail": "邊界驗收只說第 5 題「數量為偶數卻不成立」，但建議的較窄規則「數量大於 2 且為偶數」不一定能排除該題；若第 5 題的偶數是 4 或 6，這個較窄規則仍會判定成立，因此範例所述修正無法從前提推出。"
-        }
-      ]
+      "verdict": "pass",
+      "issues": []
     },
     {
       "id": "relationships-bond-scenes",
@@ -1562,13 +1306,8 @@
     },
     {
       "id": "relationships-daily-contact",
-      "verdict": "flag",
-      "issues": [
-        {
-          "kind": "missing-key-point",
-          "detail": "來源規則明說同一天重複同一互動通常不能反覆刷每日收益；筆記的來源摘要只保留「找到角色並交談」，沒有交代這條核心防刷規則。來源也提到新台詞與關係變化提供回饋、移動耗時是成本，摘要中同樣未保留。"
-        }
-      ]
+      "verdict": "pass",
+      "issues": []
     },
     {
       "id": "relationships-date-itinerary",
@@ -1587,13 +1326,8 @@
     },
     {
       "id": "relationships-gift-allocation",
-      "verdict": "flag",
-      "issues": [
-        {
-          "kind": "missing-key-point",
-          "detail": "來源原型的驗收測試是「禮物不足時，觀察玩家是否依據偏好和目標分配，而非每人機械送一份」，但筆記的驗收改成知識紀錄更新與減少盲目重試，沒有保留『稀缺下是否做偏好導向分配、而非平均送禮』這項關鍵驗證目標。"
-        }
-      ]
+      "verdict": "pass",
+      "issues": []
     },
     {
       "id": "relationships-persuasion-checks",
@@ -1655,17 +1389,8 @@
     },
     {
       "id": "stealth-disguise-access",
-      "verdict": "flag",
-      "issues": [
-        {
-          "kind": "broken-example-logic",
-          "detail": "邊界驗收把「只持有訪客身份、0 張員工證」的玩家直接走向需要 1 張員工證的員工門；拒絕進入也可由缺少員工證解釋，因此不能如文末所稱確認通行判定綁在身份上。"
-        },
-        {
-          "kind": "broken-example-logic",
-          "detail": "主驗收的 Given 只說技師門允許帶武器，沒有說技師門要求或接受技師服；Then 以「技師服符合身份」判定放行，前提不足。"
-        }
-      ]
+      "verdict": "pass",
+      "issues": []
     },
     {
       "id": "stealth-hiding-spots",
@@ -1683,7 +1408,11 @@
       "issues": [
         {
           "kind": "broken-example-logic",
-          "detail": "边界验收只说玩家在亮区停留超过 1.5 秒，却没有给出察觉值累积速率、达到上限所需时间，也没有给出该 1.5 秒与守卫 6 秒往返巡逻周期的对应关系，因此无法推出“察觉值累积至上限、守卫回头并进入警戒状态”的结果。"
+          "detail": "第一個驗收把「按下開關後移動 7 格＝2.8 秒」直接跟守衛單程 3 秒比較，但玩家在按開關前已花 0.4 秒從第 1 格走到第 2 格；若守衛在起步時背對，按開關後只剩約 2.6 秒，全程為 3.2 秒。因此「未超過 3 秒」不能由前提推出，結論需額外假設（例如關燈後暗區完全不累積察覺）。"
+        },
+        {
+          "kind": "broken-example-logic",
+          "detail": "邊界驗收說察覺值在第 1.25 秒已達上限 100，卻又說守衛到第 1.5 秒回頭時才「隨即進入警戒狀態」；若上限即觸發警戒，警戒應在第 1.25 秒發生，兩個時間點不一致。"
         }
       ]
     },
@@ -1703,11 +1432,7 @@
       "issues": [
         {
           "kind": "broken-example-logic",
-          "detail": "主驗收把 A 的「空窗」算成 2 秒去程加 4 秒停留，共 6 秒，卻忽略 A 從 5 格返回 3 格還要 2 秒；依同一 Given，A 要到 t=8 才回到原位，而玩家取物後 7 秒就回到出口，故「來不及在空窗內回到出口」不成立。"
-        },
-        {
-          "kind": "broken-example-logic",
-          "detail": "邊界驗收的 Then 聲稱 Given 設定兩名守衛調查結束後沿回程走道返回原位，但邊界 Given 只列位置、速度與聽覺半徑，沒有這條返回規則，也未指定玩家何時從 6 格折返；因此「回程會與 3 至 7 格路線重疊」不是由所列前提推出。"
+          "detail": "第一個驗收例子中，「若取物多花 1 秒，玩家就會在 t=8 與返位的 A 相遇」不成立：玩家在 t=8 回到出口 0 格，而 A 於 t=8 回到原位 3 格，兩者並不在同一位置；若聲源在側房，整段回程更不會在該時點與 A 相遇。"
         }
       ]
     },
@@ -1722,7 +1447,7 @@
       "issues": [
         {
           "kind": "broken-example-logic",
-          "detail": "The minimal prototype scope specifies three mutually watching guards, but the acceptance test only models guards A and B and concludes that no one enters alert. A third guard watching A and B would remain a witness, so the stated result does not follow from the test's own premise."
+          "detail": "邊界驗收中，B 在觸發後 0.75 秒看到 A 倒下，並非由「兩人每 4 秒互相對望一次」的前提推出；若觸發時不是對望時點，B 可能要到 4 秒才看到，晚於乙 1.5 秒完成，結論會反轉。"
         }
       ]
     },
@@ -1753,23 +1478,13 @@
     },
     {
       "id": "survival-fatigue-rest",
-      "verdict": "flag",
-      "issues": [
-        {
-          "kind": "broken-example-logic",
-          "detail": "邊界驗收的結論與前提矛盾：醒來精力 65 點，每段消耗 20 點，走 2 段後為 25 點，已低於 40 的疲勞懲罰門檻，因此懲罰應在第二段後立即生效，而不是「再走 2 段後」才出現；該 Then 不成立。"
-        }
-      ]
+      "verdict": "pass",
+      "issues": []
     },
     {
       "id": "survival-limb-impairment",
-      "verdict": "flag",
-      "issues": [
-        {
-          "kind": "broken-example-logic",
-          "detail": "驗收結論把「治療順序」和「路線」同時改變：第一例先治療偵察員且改走慢速路線，第二例先治療護衛且維持原路線，因此兩例的差異無法單獨證明治療順序會改變可行路線；需固定路線後再比較治療順序。"
-        }
-      ]
+      "verdict": "pass",
+      "issues": []
     },
     {
       "id": "survival-safe-water",
@@ -1783,23 +1498,13 @@
     },
     {
       "id": "survival-temporary-relief",
-      "verdict": "flag",
-      "issues": [
-        {
-          "kind": "fabricated-claim",
-          "detail": "「相關模式」段落描述失血分診、競爭需求、疲勞休息點、肢體機能受損的具體機制與串接方式，但來源快照只列出相關 ID，未提供這些描述，且該段未標示為本地分析。"
-        }
-      ]
+      "verdict": "pass",
+      "issues": []
     },
     {
       "id": "survival-weather-exposure",
-      "verdict": "flag",
-      "issues": [
-        {
-          "kind": "missing-key-point",
-          "detail": "The snapshot states that clothing, shelter and heat alter exposure and recovery, and its loop includes choosing protection and shelter stops. The note keeps the exposure-accumulation rule and later discusses shelter/heat recovery, but it never records clothing/protection as an exposure modifier, so a key source rule is dropped."
-        }
-      ]
+      "verdict": "pass",
+      "issues": []
     },
     {
       "id": "survival-wound-cleanliness",

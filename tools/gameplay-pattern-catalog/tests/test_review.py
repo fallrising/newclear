@@ -313,5 +313,37 @@ class PiAdapterTests(unittest.TestCase):
         self.assertIsNone(pi_review.extract_object('no json here {broken'))
 
 
+class PiFixTests(unittest.TestCase):
+    def setUp(self):
+        import pi_fix
+        try:
+            from opencc import OpenCC
+            self.cc = OpenCC('s2t')
+        except ImportError:  # CI has no opencc; the simplified check is then skipped
+            self.cc = None
+        self.fix = pi_fix
+        self.path = ROOT / 'patterns' / 'allocation-area-majority.md'
+        self.head, self.body = pi_fix.split_note(self.path.read_text(encoding='utf-8'))
+
+    def check(self, body):
+        return self.fix.validate(self.path, self.head, self.body, body, self.cc)
+
+    def test_unchanged_body_is_valid_and_bad_rewrites_are_refused(self):
+        self.assertIsNone(self.check(self.body))
+        self.assertIn('footer', self.check(self.body.replace('page-text。', '')))
+        self.assertIn('label', self.check(self.body.replace('尚未實玩驗證', '已驗證')))
+        top, rest = self.body.split('## 相關模式', 1)
+        short = '\n'.join(line for line in top.splitlines() if not line.startswith('- ') or '尚未' in line)
+        self.assertIn('too short', self.check(short + '\n## 相關模式' + rest))
+        if self.cc is not None:
+            self.assertIn('simplified', self.check(self.body.replace('區域', '区域')))
+        self.assertIn('parse_note', self.check(self.body.replace('## 失敗模式（本地分析）', '## 失敗模式')))
+
+    def test_extract_reads_markers_or_refusal_and_nothing_else(self):
+        self.assertEqual(('body', 'x\ny'), self.fix.extract('chat\n<<<NOTE_BODY\nx\ny\nNOTE_BODY>>>\n'))
+        self.assertEqual('cannot-fix', self.fix.extract('CANNOT_FIX: 來源不支持')[0])
+        self.assertEqual('none', self.fix.extract('{"verdict": "pass"}')[0])
+
+
 if __name__ == '__main__':
     unittest.main()

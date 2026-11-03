@@ -339,6 +339,19 @@ class PiFixTests(unittest.TestCase):
             self.assertIn('simplified', self.check(self.body.replace('區域', '区域')))
         self.assertIn('parse_note', self.check(self.body.replace('## 失敗模式（本地分析）', '## 失敗模式')))
 
+    def test_summary_edit_changes_only_the_summary_value(self):
+        new_head, problem = self.fix.replace_summary(self.head, '在數個區域之間分配有限單位，比較數量決定歸屬，平局規則要事先講清楚。', self.cc)
+        self.assertIsNone(problem)
+        old_meta = json.loads(self.head[4:-5])
+        new_meta = json.loads(new_head[4:-5])
+        self.assertNotEqual(old_meta['summary'], new_meta['summary'])
+        self.assertEqual({k: v for k, v in old_meta.items() if k != 'summary'}, {k: v for k, v in new_meta.items() if k != 'summary'})
+        self.assertEqual(self.head.splitlines()[:12], new_head.splitlines()[:12])
+        self.assertIsNotNone(self.fix.replace_summary(self.head, '太短', self.cc)[1])
+        self.assertIsNotNone(self.fix.replace_summary(self.head, '第一行很長很長很長很長很長很長很長\n第二行很長很長很長很長', self.cc)[1])
+        self.assertTrue(self.fix.summary_flagged([{'kind': 'fabricated-claim', 'detail': 'The frontmatter summary says X'}]))
+        self.assertFalse(self.fix.summary_flagged([{'kind': 'wrong-number', 'detail': '來源摘要 的數字錯'}]))
+
     def test_extract_reads_markers_or_refusal_and_nothing_else(self):
         self.assertEqual(('body', 'x\ny'), self.fix.extract('chat\n<<<NOTE_BODY\nx\ny\nNOTE_BODY>>>\n'))
         self.assertEqual('cannot-fix', self.fix.extract('CANNOT_FIX: 來源不支持')[0])

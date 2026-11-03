@@ -11,7 +11,7 @@
     "timing",
     "spatial"
   ],
-  "summary": "兩名玩家得各自趕到不同控制點，還要對上同一瞬間按下開關，考驗誰先守著、誰負責喊倒數與風險分配。",
+  "summary": "兩名玩家分頭到達不同控制點，透過倒數、訊號或持續按住讓有效時間重疊，考驗溝通、分工與等待。",
   "note_status": "draft",
   "related": [
     "cooperation-downed-revival",

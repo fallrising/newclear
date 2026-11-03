@@ -100,6 +100,8 @@ class CommandTests(unittest.TestCase):
 
     def test_skip_without_a_key_writes_nothing_and_does_not_pass_notes(self):
         env = self.clean_env()
+        committed = ROOT / 'review' / 'auto-check.json'
+        before = committed.read_bytes() if committed.exists() else None
         completed = subprocess.run(
             [sys.executable, str(ROOT / 'review' / 'auto_check.py')],
             cwd=ROOT, env=env, capture_output=True, text=True, check=False,
@@ -108,7 +110,8 @@ class CommandTests(unittest.TestCase):
         payload = json.loads(completed.stdout)
         self.assertEqual('skipped', payload['llm'])
         self.assertEqual([], payload['notes'])
-        self.assertFalse((ROOT / 'review' / 'auto-check.json').exists())
+        after = committed.read_bytes() if committed.exists() else None
+        self.assertEqual(before, after, 'a skip run must not write or replace committed verdicts')
         self.assertIn('SKIP', completed.stderr)
 
     def test_command_receives_source_text_as_data(self):
@@ -300,6 +303,14 @@ class PromoteTests(unittest.TestCase):
             if path.name == 'README.md':
                 continue
             self.assertIn('"note_status": "draft"', path.read_text(encoding='utf-8'))
+
+
+class PiAdapterTests(unittest.TestCase):
+    def test_extracts_the_last_verdict_object_and_rejects_prose(self):
+        import pi_review
+        text = 'note {"x": 1} then {"verdict": "pass", "issues": []} and {"verdict": "flag", "issues": [{"kind": "wrong-number", "detail": "d"}]}'
+        self.assertEqual('flag', pi_review.extract_object(text)['verdict'])
+        self.assertIsNone(pi_review.extract_object('no json here {broken'))
 
 
 if __name__ == '__main__':

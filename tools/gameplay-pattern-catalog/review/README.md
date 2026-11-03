@@ -41,6 +41,14 @@ python3 review/auto_check.py --out review/auto-check.json
 - `CATALOG_REVIEW_API_BASE` 或 `OPENAI_BASE_URL`（預設 `https://api.openai.com/v1`）
 - `CATALOG_REVIEW_MODEL`（預設 `gpt-4o-mini`）
 
+用 pi coding agent 跑時，`review/pi_review.py` 是轉接器：它以無工具、無 session、無 context file 的 headless 模式呼叫 pi，從回覆取出 verdict JSON。模型與 provider 取自 pi 自己的設定；檔案裡沒有金鑰。
+
+```sh
+CATALOG_REVIEW_COMMAND="python3 review/pi_review.py" python3 review/auto_check.py
+```
+
+`PI_REVIEW_THINKING` 預設 `low`；pi 預設的思考等級常超過 auto_check 每篇 120 秒的上限。`PI_REVIEW_TIMEOUT` 預設 100 秒，`PI_BIN`、`PI_REVIEW_MODEL` 可覆寫。可用 `--id` 分批並行，再合併結果；`checker-error` 的筆記要重跑，不能當 pass。
+
 API 必須是 HTTPS；只有 `127.0.0.1` 與 `localhost` 可以用 HTTP，供本機測試。重新導向不會跟著走。跑完若要讓 CI 看見 flagged 數，把 `review/auto-check.json` 提交，並執行 `python3 status.py --write`。不要把 skip 結果蓋掉已提交的 verdict。
 
 ## 抽樣

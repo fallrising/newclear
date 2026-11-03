@@ -88,4 +88,4 @@
 
 ## 參考來源
 
-- [Combine two power pieces into one effect — Gameplay Atlas](https://gameplayatlas.loopyhop.com/mechanic/matching-combine-power-pieces/) — 查閱：2026-11-02；取得方式：page-text。直接對照公開頁面及其內嵌條目，不是搜尋索引摘錄。
+- [Combine two power pieces into one effect — Gameplay Atlas](https://gameplayatlas.loopyhop.com/mechanic/matching-combine-power-pieces/) — 查閱：2026-11-02；取得方式：page-text。

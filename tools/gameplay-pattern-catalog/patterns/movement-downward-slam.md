@@ -88,4 +88,4 @@
 
 ## 參考來源
 
-- [Commit to a downward slam — Gameplay Atlas](https://gameplayatlas.loopyhop.com/mechanic/movement-downward-slam/) — 查閱：2026-11-02；取得方式：page-text。直接對照公開頁面及其內嵌條目，不是搜尋索引摘錄。
+- [Commit to a downward slam — Gameplay Atlas](https://gameplayatlas.loopyhop.com/mechanic/movement-downward-slam/) — 查閱：2026-11-02；取得方式：page-text。

@@ -90,4 +90,4 @@
 
 ## 參考來源
 
-- [Paired portal connections — Gameplay Atlas](https://gameplayatlas.loopyhop.com/mechanic/puzzles-linked-portals/) — 查閱：2026-11-02；取得方式：page-text。直接對照公開頁面及其內嵌條目，不是搜尋索引摘錄。
+- [Paired portal connections — Gameplay Atlas](https://gameplayatlas.loopyhop.com/mechanic/puzzles-linked-portals/) — 查閱：2026-11-02；取得方式：page-text。

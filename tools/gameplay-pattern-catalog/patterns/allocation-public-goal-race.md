@@ -87,4 +87,4 @@
 
 ## 參考來源
 
-- [Race for a public objective reward — Gameplay Atlas](https://gameplayatlas.loopyhop.com/mechanic/allocation-public-goal-race/) — 查閱：2026-11-02；取得方式：page-text。直接對照公開頁面及其內嵌條目，不是搜尋索引摘錄。
+- [Race for a public objective reward — Gameplay Atlas](https://gameplayatlas.loopyhop.com/mechanic/allocation-public-goal-race/) — 查閱：2026-11-02；取得方式：page-text。

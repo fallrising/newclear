@@ -355,7 +355,7 @@ def render_new_with(entry: dict, titles: dict[str, str], by_id: dict[str, dict])
 
 ## 參考來源
 
-- [{source_title}]({url}) — 查閱：2026-11-02；取得方式：page-text。直接對照公開頁面及其內嵌條目，不是搜尋索引摘錄。
+- [{source_title}]({url}) — 查閱：2026-11-02；取得方式：page-text。
 '''
     return '---\n' + json.dumps(meta, ensure_ascii=False, indent=2) + '\n---\n\n' + body
 

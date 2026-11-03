@@ -88,4 +88,4 @@
 
 ## 參考來源
 
-- [Progress through learned knowledge — Gameplay Atlas](https://gameplayatlas.loopyhop.com/mechanic/progression-knowledge-gates/) — 查閱：2026-11-02；取得方式：page-text。直接對照公開頁面及其內嵌條目，不是搜尋索引摘錄。
+- [Progress through learned knowledge — Gameplay Atlas](https://gameplayatlas.loopyhop.com/mechanic/progression-knowledge-gates/) — 查閱：2026-11-02；取得方式：page-text。

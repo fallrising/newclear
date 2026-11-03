@@ -88,4 +88,4 @@
 
 ## 參考來源
 
-- [Spend a resource that also grants a held bonus — Gameplay Atlas](https://gameplayatlas.loopyhop.com/mechanic/incremental-spend-held-bonus/) — 查閱：2026-11-02；取得方式：page-text。直接對照公開頁面及其內嵌條目，不是搜尋索引摘錄。
+- [Spend a resource that also grants a held bonus — Gameplay Atlas](https://gameplayatlas.loopyhop.com/mechanic/incremental-spend-held-bonus/) — 查閱：2026-11-02；取得方式：page-text。

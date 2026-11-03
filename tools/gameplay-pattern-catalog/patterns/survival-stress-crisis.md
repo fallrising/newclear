@@ -87,4 +87,4 @@
 
 ## 參考來源
 
-- [Stress buildup and crisis — Gameplay Atlas](https://gameplayatlas.loopyhop.com/mechanic/survival-stress-crisis/) — 查閱：2026-11-02；取得方式：page-text。直接對照公開頁面及其內嵌條目，不是搜尋索引摘錄。
+- [Stress buildup and crisis — Gameplay Atlas](https://gameplayatlas.loopyhop.com/mechanic/survival-stress-crisis/) — 查閱：2026-11-02；取得方式：page-text。

@@ -88,4 +88,4 @@
 
 ## 參考來源
 
-- [Reusable factory blueprints — Gameplay Atlas](https://gameplayatlas.loopyhop.com/mechanic/automation-blueprint-reuse/) — 查閱：2026-11-02；取得方式：page-text。直接對照公開頁面及其內嵌條目，不是搜尋索引摘錄。
+- [Reusable factory blueprints — Gameplay Atlas](https://gameplayatlas.loopyhop.com/mechanic/automation-blueprint-reuse/) — 查閱：2026-11-02；取得方式：page-text。

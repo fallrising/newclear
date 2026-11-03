@@ -88,4 +88,4 @@
 
 ## 參考來源
 
-- [Select parents for offspring traits — Gameplay Atlas](https://gameplayatlas.loopyhop.com/mechanic/ecology-parent-trait-selection/) — 查閱：2026-11-02；取得方式：page-text。直接對照公開頁面及其內嵌條目，不是搜尋索引摘錄。
+- [Select parents for offspring traits — Gameplay Atlas](https://gameplayatlas.loopyhop.com/mechanic/ecology-parent-trait-selection/) — 查閱：2026-11-02；取得方式：page-text。

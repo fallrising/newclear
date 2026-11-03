@@ -88,4 +88,4 @@
 
 ## 參考來源
 
-- [Selective discarding and redrawing — Gameplay Atlas](https://gameplayatlas.loopyhop.com/mechanic/deckbuilding-discard-redraw/) — 查閱：2026-11-02；取得方式：page-text。直接對照公開頁面及其內嵌條目，不是搜尋索引摘錄。
+- [Selective discarding and redrawing — Gameplay Atlas](https://gameplayatlas.loopyhop.com/mechanic/deckbuilding-discard-redraw/) — 查閱：2026-11-02；取得方式：page-text。

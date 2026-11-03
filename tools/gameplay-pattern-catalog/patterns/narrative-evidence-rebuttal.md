@@ -88,4 +88,4 @@
 
 ## 參考來源
 
-- [Use evidence to challenge a specific statement — Gameplay Atlas](https://gameplayatlas.loopyhop.com/mechanic/narrative-evidence-rebuttal/) — 查閱：2026-11-02；取得方式：page-text。直接對照公開頁面及其內嵌條目，不是搜尋索引摘錄。
+- [Use evidence to challenge a specific statement — Gameplay Atlas](https://gameplayatlas.loopyhop.com/mechanic/narrative-evidence-rebuttal/) — 查閱：2026-11-02；取得方式：page-text。

@@ -88,4 +88,4 @@
 
 ## 參考來源
 
-- [Check habitat capacity before adding animals — Gameplay Atlas](https://gameplayatlas.loopyhop.com/mechanic/ecology-habitat-capacity/) — 查閱：2026-11-02；取得方式：page-text。直接對照公開頁面及其內嵌條目，不是搜尋索引摘錄。
+- [Check habitat capacity before adding animals — Gameplay Atlas](https://gameplayatlas.loopyhop.com/mechanic/ecology-habitat-capacity/) — 查閱：2026-11-02；取得方式：page-text。

@@ -1,0 +1,842 @@
+{
+  "round": 2,
+  "base": "595cd41998c2e69619a16b3ecc710443e738dce4",
+  "runs": [
+    {
+      "generated_at": "2026-11-03T08:28:17Z",
+      "applied": true,
+      "counts": {
+        "fixed": 2,
+        "failed": 0,
+        "cannot-fix": 0
+      },
+      "notes": [
+        {
+          "id": "cooperation-synchronized-triggers",
+          "result": "fixed",
+          "provider": "default",
+          "summary_changed": true,
+          "chars_before": 2535,
+          "chars_after": 2535,
+          "attempts": []
+        },
+        {
+          "id": "driving-start-charge",
+          "result": "fixed",
+          "attempts": []
+        }
+      ],
+      "run": "report-trial"
+    },
+    {
+      "generated_at": "2026-11-03T08:47:59Z",
+      "applied": true,
+      "counts": {
+        "fixed": 60,
+        "failed": 4,
+        "cannot-fix": 0
+      },
+      "notes": [
+        {
+          "id": "allocation-area-majority",
+          "result": "failed",
+          "attempts": [
+            {
+              "provider": "default",
+              "error": "no body markers"
+            },
+            {
+              "provider": "default",
+              "error": "no body markers"
+            },
+            {
+              "provider": "deepseek",
+              "error": "pi exit 1 402: {\"message\":\"Insufficient Balance (request_id: 3b2cbe14-5a1f-4a93-9629-0fe584c6ff3a)\",\"type\":\"insufficient_balance_error\",\"param\":null,\"code\":\"invalid_request_error\"}"
+            }
+          ]
+        },
+        {
+          "id": "allocation-follow-phase",
+          "result": "fixed",
+          "provider": "default",
+          "summary_changed": false,
+          "chars_before": 2425,
+          "chars_after": 2522,
+          "attempts": []
+        },
+        {
+          "id": "allocation-public-goal-race",
+          "result": "fixed",
+          "provider": "default",
+          "summary_changed": false,
+          "chars_before": 2575,
+          "chars_after": 2775,
+          "attempts": []
+        },
+        {
+          "id": "allocation-public-pick",
+          "result": "fixed",
+          "provider": "default",
+          "summary_changed": false,
+          "chars_before": 2707,
+          "chars_after": 2794,
+          "attempts": []
+        },
+        {
+          "id": "allocation-route-denial",
+          "result": "fixed",
+          "provider": "default",
+          "summary_changed": false,
+          "chars_before": 2529,
+          "chars_after": 2745,
+          "attempts": [
+            {
+              "provider": "default",
+              "error": "no body markers"
+            }
+          ]
+        },
+        {
+          "id": "automation-belt-routing",
+          "result": "failed",
+          "attempts": [
+            {
+              "provider": "default",
+              "error": "related links changed"
+            },
+            {
+              "provider": "default",
+              "error": "related links changed"
+            },
+            {
+              "provider": "deepseek",
+              "error": "pi exit 1 402: {\"message\":\"Insufficient Balance (request_id: 0d55d880-7d63-4a59-a201-371b122dac52)\",\"type\":\"insufficient_balance_error\",\"param\":null,\"code\":\"invalid_request_error\"}"
+            }
+          ]
+        },
+        {
+          "id": "automation-flow-splitting",
+          "result": "fixed",
+          "provider": "default",
+          "summary_changed": true,
+          "chars_before": 2505,
+          "chars_after": 2531,
+          "attempts": []
+        },
+        {
+          "id": "automation-fluid-routing",
+          "result": "fixed",
+          "provider": "default",
+          "summary_changed": false,
+          "chars_before": 2349,
+          "chars_after": 2447,
+          "attempts": []
+        },
+        {
+          "id": "combat-combat-deck-cycle",
+          "result": "fixed",
+          "provider": "default",
+          "summary_changed": false,
+          "chars_before": 2361,
+          "chars_after": 2462,
+          "attempts": []
+        },
+        {
+          "id": "combat-combo-variation",
+          "result": "fixed",
+          "provider": "default",
+          "summary_changed": false,
+          "chars_before": 2565,
+          "chars_after": 2774,
+          "attempts": [
+            {
+              "provider": "default",
+              "error": "no body markers"
+            }
+          ]
+        },
+        {
+          "id": "combat-destructible-cover",
+          "result": "fixed",
+          "provider": "default",
+          "summary_changed": false,
+          "chars_before": 2562,
+          "chars_after": 2676,
+          "attempts": []
+        },
+        {
+          "id": "command-frontline-shielding",
+          "result": "fixed",
+          "provider": "default",
+          "summary_changed": false,
+          "chars_before": 2656,
+          "chars_after": 2898,
+          "attempts": []
+        },
+        {
+          "id": "command-interrupt-action",
+          "result": "fixed",
+          "provider": "default",
+          "summary_changed": false,
+          "chars_before": 2381,
+          "chars_after": 2445,
+          "attempts": []
+        },
+        {
+          "id": "command-prebattle-formation",
+          "result": "fixed",
+          "provider": "default",
+          "summary_changed": false,
+          "chars_before": 2114,
+          "chars_after": 2334,
+          "attempts": []
+        },
+        {
+          "id": "commerce-auction-bidding",
+          "result": "fixed",
+          "provider": "default",
+          "summary_changed": true,
+          "chars_before": 2452,
+          "chars_after": 2591,
+          "attempts": [
+            {
+              "provider": "default",
+              "error": "no body markers"
+            }
+          ]
+        },
+        {
+          "id": "commerce-interpret-orders",
+          "result": "fixed",
+          "provider": "default",
+          "summary_changed": false,
+          "chars_before": 2224,
+          "chars_after": 2246,
+          "attempts": []
+        },
+        {
+          "id": "cooking-order-triage",
+          "result": "fixed",
+          "provider": "default",
+          "summary_changed": false,
+          "chars_before": 2458,
+          "chars_after": 2470,
+          "attempts": []
+        },
+        {
+          "id": "cooking-station-handoff",
+          "result": "fixed",
+          "provider": "default",
+          "summary_changed": true,
+          "chars_before": 2299,
+          "chars_after": 2523,
+          "attempts": []
+        },
+        {
+          "id": "cooperation-split-information",
+          "result": "fixed",
+          "provider": "default",
+          "summary_changed": false,
+          "chars_before": 2479,
+          "chars_after": 2549,
+          "attempts": []
+        },
+        {
+          "id": "deckbuilding-card-upgrade",
+          "result": "fixed",
+          "provider": "default",
+          "summary_changed": false,
+          "chars_before": 2823,
+          "chars_after": 3032,
+          "attempts": []
+        },
+        {
+          "id": "deckbuilding-trigger-order",
+          "result": "fixed",
+          "provider": "default",
+          "summary_changed": false,
+          "chars_before": 2311,
+          "chars_after": 2302,
+          "attempts": [
+            {
+              "provider": "default",
+              "error": "simplified characters: 丑"
+            }
+          ]
+        },
+        {
+          "id": "defense-mobile-defender",
+          "result": "fixed",
+          "provider": "default",
+          "summary_changed": false,
+          "chars_before": 3188,
+          "chars_after": 3545,
+          "attempts": [
+            {
+              "provider": "default",
+              "error": "Command '['/home/box/.local/bin/pi', '-p', '--no-session', '--no-tools', '--no-context-files', '--no-skills', '--no-extensions', '--no-mcp', '--no-prompt-templates', '--no-approve', '--system-prompt', 'You repair a gameplay design note written in Traditional Chinese (Taiwan). The user message is one"
+            }
+          ]
+        },
+        {
+          "id": "defense-resistance-counters",
+          "result": "fixed",
+          "provider": "default",
+          "summary_changed": false,
+          "chars_before": 2601,
+          "chars_after": 2601,
+          "attempts": []
+        },
+        {
+          "id": "driving-air-balance",
+          "result": "fixed",
+          "provider": "default",
+          "summary_changed": false,
+          "chars_before": 2221,
+          "chars_after": 2287,
+          "attempts": []
+        },
+        {
+          "id": "ecology-breeding-conditions",
+          "result": "fixed",
+          "provider": "default",
+          "summary_changed": false,
+          "chars_before": 2409,
+          "chars_after": 2431,
+          "attempts": [
+            {
+              "provider": "default",
+              "error": "no body markers"
+            }
+          ]
+        },
+        {
+          "id": "ecology-genetic-diversity",
+          "result": "fixed",
+          "provider": "default",
+          "summary_changed": false,
+          "chars_before": 2426,
+          "chars_after": 2783,
+          "attempts": []
+        },
+        {
+          "id": "ecology-plant-crossbreeding",
+          "result": "fixed",
+          "provider": "default",
+          "summary_changed": false,
+          "chars_before": 2670,
+          "chars_after": 2849,
+          "attempts": [
+            {
+              "provider": "default",
+              "error": "no body markers"
+            }
+          ]
+        },
+        {
+          "id": "ecology-species-compatibility",
+          "result": "fixed",
+          "provider": "default",
+          "summary_changed": false,
+          "chars_before": 2748,
+          "chars_after": 2971,
+          "attempts": [
+            {
+              "provider": "default",
+              "error": "no body markers"
+            }
+          ]
+        },
+        {
+          "id": "exploration-ability-gates",
+          "result": "fixed",
+          "provider": "default",
+          "summary_changed": false,
+          "chars_before": 1163,
+          "chars_after": 1143,
+          "attempts": [
+            {
+              "provider": "default",
+              "error": "no body markers"
+            }
+          ]
+        },
+        {
+          "id": "farming-growth-care",
+          "result": "fixed",
+          "provider": "default",
+          "summary_changed": false,
+          "chars_before": 1094,
+          "chars_after": 1074,
+          "attempts": []
+        },
+        {
+          "id": "farming-irrigation-layout",
+          "result": "fixed",
+          "provider": "default",
+          "summary_changed": false,
+          "chars_before": 2478,
+          "chars_after": 2560,
+          "attempts": []
+        },
+        {
+          "id": "farming-livestock-care",
+          "result": "fixed",
+          "provider": "default",
+          "summary_changed": false,
+          "chars_before": 2389,
+          "chars_after": 2372,
+          "attempts": []
+        },
+        {
+          "id": "farming-orchard-investment",
+          "result": "fixed",
+          "provider": "default",
+          "summary_changed": false,
+          "chars_before": 2469,
+          "chars_after": 2621,
+          "attempts": []
+        },
+        {
+          "id": "fishing-pond-production",
+          "result": "fixed",
+          "provider": "default",
+          "summary_changed": false,
+          "chars_before": 2350,
+          "chars_after": 2456,
+          "attempts": []
+        },
+        {
+          "id": "gathering-supply-mining",
+          "result": "fixed",
+          "provider": "default",
+          "summary_changed": false,
+          "chars_before": 2453,
+          "chars_after": 2743,
+          "attempts": []
+        },
+        {
+          "id": "incremental-farm-or-push",
+          "result": "fixed",
+          "provider": "default",
+          "summary_changed": false,
+          "chars_before": 2508,
+          "chars_after": 2675,
+          "attempts": []
+        },
+        {
+          "id": "incremental-manual-to-passive",
+          "result": "fixed",
+          "provider": "default",
+          "summary_changed": false,
+          "chars_before": 2475,
+          "chars_after": 2590,
+          "attempts": []
+        },
+        {
+          "id": "incremental-overlap-income-bursts",
+          "result": "fixed",
+          "provider": "default",
+          "summary_changed": false,
+          "chars_before": 2858,
+          "chars_after": 2880,
+          "attempts": []
+        },
+        {
+          "id": "inventory-durability",
+          "result": "fixed",
+          "provider": "default",
+          "summary_changed": false,
+          "chars_before": 2245,
+          "chars_after": 2342,
+          "attempts": []
+        },
+        {
+          "id": "inventory-equipment-budget",
+          "result": "fixed",
+          "provider": "default",
+          "summary_changed": false,
+          "chars_before": 2577,
+          "chars_after": 2705,
+          "attempts": []
+        },
+        {
+          "id": "inventory-weight-budget",
+          "result": "fixed",
+          "provider": "default",
+          "summary_changed": false,
+          "chars_before": 2155,
+          "chars_after": 2188,
+          "attempts": []
+        },
+        {
+          "id": "matching-gravity-cascade",
+          "result": "fixed",
+          "provider": "default",
+          "summary_changed": false,
+          "chars_before": 2589,
+          "chars_after": 2821,
+          "attempts": []
+        },
+        {
+          "id": "matching-pattern-creates-power",
+          "result": "fixed",
+          "provider": "default",
+          "summary_changed": false,
+          "chars_before": 2644,
+          "chars_after": 2661,
+          "attempts": []
+        },
+        {
+          "id": "movement-carry-object",
+          "result": "fixed",
+          "provider": "default",
+          "summary_changed": false,
+          "chars_before": 2849,
+          "chars_after": 2907,
+          "attempts": []
+        },
+        {
+          "id": "movement-low-slide",
+          "result": "fixed",
+          "provider": "default",
+          "summary_changed": false,
+          "chars_before": 2613,
+          "chars_after": 2792,
+          "attempts": []
+        },
+        {
+          "id": "narrative-background-dialogue-access",
+          "result": "fixed",
+          "provider": "default",
+          "summary_changed": false,
+          "chars_before": 2554,
+          "chars_after": 2606,
+          "attempts": []
+        },
+        {
+          "id": "projectiles-active-reload",
+          "result": "fixed",
+          "provider": "default",
+          "summary_changed": false,
+          "chars_before": 2519,
+          "chars_after": 2593,
+          "attempts": []
+        },
+        {
+          "id": "projectiles-independent-aim",
+          "result": "fixed",
+          "provider": "default",
+          "summary_changed": false,
+          "chars_before": 2439,
+          "chars_after": 2672,
+          "attempts": []
+        },
+        {
+          "id": "puzzles-beam-routing",
+          "result": "fixed",
+          "provider": "default",
+          "summary_changed": false,
+          "chars_before": 2651,
+          "chars_after": 2797,
+          "attempts": []
+        },
+        {
+          "id": "puzzles-box-pushing",
+          "result": "fixed",
+          "provider": "default",
+          "summary_changed": false,
+          "chars_before": 1040,
+          "chars_after": 1087,
+          "attempts": []
+        },
+        {
+          "id": "puzzles-language-decoding",
+          "result": "fixed",
+          "provider": "default",
+          "summary_changed": false,
+          "chars_before": 2472,
+          "chars_after": 2537,
+          "attempts": []
+        },
+        {
+          "id": "puzzles-linked-portals",
+          "result": "fixed",
+          "provider": "default",
+          "summary_changed": false,
+          "chars_before": 2427,
+          "chars_after": 2506,
+          "attempts": []
+        },
+        {
+          "id": "puzzles-visual-rule-learning",
+          "result": "fixed",
+          "provider": "default",
+          "summary_changed": false,
+          "chars_before": 2258,
+          "chars_after": 2377,
+          "attempts": []
+        },
+        {
+          "id": "relationships-daily-contact",
+          "result": "fixed",
+          "provider": "default",
+          "summary_changed": false,
+          "chars_before": 2485,
+          "chars_after": 2529,
+          "attempts": []
+        },
+        {
+          "id": "relationships-gift-allocation",
+          "result": "fixed",
+          "provider": "default",
+          "summary_changed": false,
+          "chars_before": 1034,
+          "chars_after": 1063,
+          "attempts": []
+        },
+        {
+          "id": "rhythm-hidden-beats",
+          "result": "failed",
+          "attempts": [
+            {
+              "provider": "default",
+              "error": "no body markers"
+            },
+            {
+              "provider": "default",
+              "error": "reference footer changed"
+            },
+            {
+              "provider": "deepseek",
+              "error": "pi exit 1 402: {\"message\":\"Insufficient Balance (request_id: 74f7bad8-a25f-464f-af13-00104a251954)\",\"type\":\"insufficient_balance_error\",\"param\":null,\"code\":\"invalid_request_error\"}"
+            }
+          ]
+        },
+        {
+          "id": "stealth-disguise-access",
+          "result": "fixed",
+          "provider": "default",
+          "summary_changed": false,
+          "chars_before": 2342,
+          "chars_after": 2477,
+          "attempts": []
+        },
+        {
+          "id": "stealth-light-shadow",
+          "result": "fixed",
+          "provider": "default",
+          "summary_changed": false,
+          "chars_before": 2309,
+          "chars_after": 2510,
+          "attempts": []
+        },
+        {
+          "id": "stealth-sound-lures",
+          "result": "fixed",
+          "provider": "default",
+          "summary_changed": false,
+          "chars_before": 2863,
+          "chars_after": 3171,
+          "attempts": [
+            {
+              "provider": "default",
+              "error": "no body markers"
+            }
+          ]
+        },
+        {
+          "id": "stealth-synchronized-actions",
+          "result": "fixed",
+          "provider": "default",
+          "summary_changed": false,
+          "chars_before": 2309,
+          "chars_after": 2449,
+          "attempts": []
+        },
+        {
+          "id": "survival-fatigue-rest",
+          "result": "fixed",
+          "provider": "default",
+          "summary_changed": false,
+          "chars_before": 2443,
+          "chars_after": 2490,
+          "attempts": []
+        },
+        {
+          "id": "survival-limb-impairment",
+          "result": "fixed",
+          "provider": "default",
+          "summary_changed": false,
+          "chars_before": 2713,
+          "chars_after": 2709,
+          "attempts": []
+        },
+        {
+          "id": "survival-temporary-relief",
+          "result": "failed",
+          "attempts": [
+            {
+              "provider": "default",
+              "error": "parse_note: related pattern needs a reason"
+            },
+            {
+              "provider": "default",
+              "error": "parse_note: related pattern needs a reason"
+            },
+            {
+              "provider": "deepseek",
+              "error": "pi exit 1 402: {\"message\":\"Insufficient Balance (request_id: 14ecdb6a-8d83-4047-9f77-31a5bbe9831f)\",\"type\":\"insufficient_balance_error\",\"param\":null,\"code\":\"invalid_request_error\"}"
+            }
+          ]
+        },
+        {
+          "id": "survival-weather-exposure",
+          "result": "fixed",
+          "provider": "default",
+          "summary_changed": false,
+          "chars_before": 2362,
+          "chars_after": 2411,
+          "attempts": []
+        }
+      ],
+      "run": "report-fix-1793694548"
+    },
+    {
+      "generated_at": "2026-11-03T08:48:30Z",
+      "applied": true,
+      "counts": {
+        "fixed": 4,
+        "failed": 0,
+        "cannot-fix": 0
+      },
+      "notes": [
+        {
+          "id": "command-prebattle-formation",
+          "result": "fixed",
+          "attempts": []
+        },
+        {
+          "id": "deckbuilding-trigger-order",
+          "result": "fixed",
+          "attempts": [
+            {
+              "error": "simplified characters: 关"
+            }
+          ]
+        },
+        {
+          "id": "driving-air-balance",
+          "result": "fixed",
+          "attempts": []
+        },
+        {
+          "id": "matching-gravity-cascade",
+          "result": "fixed",
+          "attempts": [
+            {
+              "error": "parse_note: placeholder content"
+            }
+          ]
+        }
+      ],
+      "run": "report-related-1793695679"
+    },
+    {
+      "generated_at": "2026-11-03T09:12:05Z",
+      "applied": true,
+      "counts": {
+        "fixed": 2,
+        "failed": 2,
+        "cannot-fix": 0
+      },
+      "notes": [
+        {
+          "id": "allocation-area-majority",
+          "result": "fixed",
+          "provider": "default",
+          "summary_changed": false,
+          "chars_before": 2341,
+          "chars_after": 2379,
+          "attempts": [
+            {
+              "provider": "default",
+              "error": "no body markers"
+            }
+          ]
+        },
+        {
+          "id": "automation-belt-routing",
+          "result": "failed",
+          "attempts": [
+            {
+              "provider": "default",
+              "error": "related links changed"
+            },
+            {
+              "provider": "default",
+              "error": "related links changed"
+            },
+            {
+              "provider": "default",
+              "error": "related links changed"
+            },
+            {
+              "provider": "default",
+              "error": "related links changed"
+            }
+          ]
+        },
+        {
+          "id": "rhythm-hidden-beats",
+          "result": "failed",
+          "attempts": [
+            {
+              "provider": "default",
+              "error": "reference footer changed"
+            },
+            {
+              "provider": "default",
+              "error": "reference footer changed"
+            },
+            {
+              "provider": "default",
+              "error": "no body markers"
+            },
+            {
+              "provider": "default",
+              "error": "reference footer changed"
+            }
+          ]
+        },
+        {
+          "id": "survival-temporary-relief",
+          "result": "fixed",
+          "provider": "default",
+          "summary_changed": false,
+          "chars_before": 2458,
+          "chars_after": 2353,
+          "attempts": []
+        }
+      ],
+      "run": "report-retry"
+    },
+    {
+      "generated_at": "2026-11-03T09:14:27Z",
+      "applied": true,
+      "counts": {
+        "fixed": 1,
+        "failed": 0,
+        "cannot-fix": 0
+      },
+      "notes": [
+        {
+          "id": "survival-temporary-relief",
+          "result": "fixed",
+          "attempts": []
+        }
+      ],
+      "run": "report-related-str"
+    }
+  ]
+}

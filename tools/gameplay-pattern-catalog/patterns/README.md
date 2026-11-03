@@ -19,7 +19,7 @@
 | [藍圖重用](automation-blueprint-reuse.md) | 自動化與物流 | automation | 草稿 | 把驗證過的生產單元存成藍圖再複製到新場地，玩家在複製速度、貼合度與通用性之間取捨。 |
 | [副產品循環](automation-byproduct-loop.md) | 自動化與物流 | automation | 草稿 | 玩家得替沒人要的副產品找出路，在直接丟棄與回收再利用之間，決定要讓產線單純還是讓資源在環節間互相牽動。 |
 | [條件控制](automation-conditional-control.md) | 自動化與物流 | automation | 草稿 | 玩家要把感測訊號接成啟停規則，在貼近目標值與避免在邊界附近反覆開關之間取捨。 |
-| [流量分流](automation-flow-splitting.md) | 自動化與物流 | automation | 草稿 | 把有限輸入分給多臺機器時，玩家要在平均分配與依需求配比之間取捨，並靠穩定開工率而非機器數量確認分流是否成立。 |
+| [流量分流](automation-flow-splitting.md) | 自動化與物流 | automation | 草稿 | 把有限輸入分給多臺消耗速度不同的機器時，某個出口積壓會改變實際分配；玩家要在平均分配與依需求配比間取捨，並以穩定開工率而非機器數量確認分流是否成立。 |
 | [流體路由](automation-fluid-routing.md) | 自動化與物流 | automation | 草稿 | 在共用管網與獨立支路之間取捨，用泵與分支把液體送到對的裝置，並在流量異常時回頭改管。 |
 | [物品篩選](automation-item-filtering.md) | 自動化與物流 | automation | 草稿 | 玩家替混雜的輸送線訂出分流規則，讓每種物品自動找到正確出口；並在分類精度與例外處理空間之間取捨。 |
 | [電力預算](automation-power-budget.md) | 自動化與物流 | automation | 草稿 | 玩家要在擴產前後拿捏發電、儲能與負載的平衡，既怕跳電停機，又怕把資源全押在備援上。 |
@@ -62,7 +62,7 @@
 | [威脅轉移](command-threat-redirection.md) | 單位調度 | command | 草稿 | 讓耐打單位主動吸走敵人注意力，玩家得在保住脆弱隊友與自身承傷上限之間拿捏接手時機。 |
 | [性狀門檻](command-trait-thresholds.md) | 單位調度 | command | 草稿 | 玩家要在有限的上場名額裡，權衡換上較弱但能補齊標籤的成員來觸發團隊加成，還是維持個別單位的強度。 |
 | [勞力與兵力的分配](command-workers-or-soldiers.md) | 單位調度 | command | 草稿 | 玩家要在同一批人口裡決定誰去生產、誰去作戰，並承受戰力與產能此消彼長的時間差。 |
-| [拍賣出價](commerce-auction-bidding.md) | 交易與資訊 | commerce | 草稿 | 在對手抬價與時間流逝中，判斷標的對自己的真實價值，並守住最高出價。 |
+| [拍賣出價](commerce-auction-bidding.md) | 交易與資訊 | commerce | 草稿 | 在對手抬價與時間流逝中，判斷標的對自己的真實價值，並守住最高出價；獲勝不等於盈利，須比較成本與轉售或策略用途。 |
 | [債務壓力](commerce-debt-pressure.md) | 交易與資訊 | commerce | 草稿 | 把賺到的錢先扣掉償債義務，讓玩家在升級投資與保留現金之間來回盤算，並權衡是否承擔風險以換取提前解脫。 |
 | [動態市場](commerce-dynamic-market.md) | 交易與資訊 | commerce | 草稿 | 玩家在行情與產能之間押注：現在脫手鎖住利潤，還是等需求推高價格，同時小心自己把市場做塌。 |
 | [議價中的讓步](commerce-haggling.md) | 交易與資訊 | commerce | 草稿 | 在成交前改動報價，玩家得在既有利潤與繼續施壓的失敗風險之間，決定何時收手。 |
@@ -81,7 +81,7 @@
 | [限時訂單的取捨順序](cooking-order-triage.md) | 配方與製作 | cooking | 草稿 | 當多張訂單的耐心同時下降時，玩家得決定先做哪一張、又要放棄哪張連單獎勵。 |
 | [備料連鎖](cooking-preparation-chain.md) | 配方與製作 | cooking | 草稿 | 一道菜被拆成有依賴順序的工序後，玩家得決定先備哪一批料、哪一步交給誰，換取流暢出餐。 |
 | [知識與材料雙重解鎖](cooking-recipe-learning.md) | 配方與製作 | cooking | 草稿 | 把「知道怎麼做」與「有能力做」分成兩個可組合的進度條件。 |
-| [工作站交接](cooking-station-handoff.md) | 配方與製作 | cooking | 草稿 | 把半成品交到對的人手上，比各做一道菜更快：玩家要在固定崗位與臨時換班、搶最短路線與繞路讓流之間取捨。 |
+| [工作站交接](cooking-station-handoff.md) | 配方與製作 | cooking | 草稿 | 把半成品交到對的人手上，比每個人各做一道菜更有效：玩家要在固定崗位與臨時換班、搶最短路線與繞路讓流之間取捨。 |
 | [互補能力組](cooperation-complementary-abilities.md) | 合作與博弈 | cooperation | 草稿 | 隊員各自擅長不同環節，玩家得決定誰先替夥伴鋪好路、誰後手收尾，並隨障礙更換主導者。 |
 | [討論投票](cooperation-discussion-vote.md) | 合作與博弈 | cooperation | 草稿 | 把每人手上零碎的見聞攤上桌，在證據不足時決定要跟多數還是保留異議，並一起承擔表決後的局面。 |
 | [倒地救起](cooperation-downed-revival.md) | 合作與博弈 | cooperation | 草稿 | 隊友倒地後，玩家得在救人與清場之間分配時間、位置與防禦資源，並承擔救援被打斷的風險。 |
@@ -89,7 +89,7 @@
 | [身體拘束繫繩](cooperation-physical-tether.md) | 合作與博弈 | cooperation | 草稿 | 繩長有限的兩人必須分工固定與移動，並在夥伴墜落時決定救人或自保。 |
 | [共享載具](cooperation-shared-vehicle.md) | 合作與博弈 | cooperation | 草稿 | 一艘船的轉向、維修與防守同時要人，隊伍得在航路上不斷決定誰守哪個崗位、什麼時候換手。 |
 | [分工資訊](cooperation-split-information.md) | 合作與博弈 | cooperation | 草稿 | 兩人各握一半的資訊，玩家得決定先講哪個特徵、以及聽到模糊指令時要不要先複述確認再動手。 |
-| [同步觸發組](cooperation-synchronized-triggers.md) | 合作與博弈 | cooperation | 草稿 | 兩名玩家得各自趕到不同控制點，還要對上同一瞬間按下開關，考驗誰先守著、誰負責喊倒數與風險分配。 |
+| [同步觸發組](cooperation-synchronized-triggers.md) | 合作與博弈 | cooperation | 草稿 | 兩名玩家分頭到達不同控制點，透過倒數、訊號或持續按住讓有效時間重疊，考驗溝通、分工與等待。 |
 | [暫時結盟](cooperation-temporary-alliance.md) | 合作與博弈 | cooperation | 草稿 | 眼前的互利讓玩家願意先出手相助，但在對方兌現承諾前，每次都得重新計算：這份幫助會不會養出下一個更難纏的對手。 |
 | [強化既有卡牌](deckbuilding-card-upgrade.md) | 牌組構築 | deckbuilding | 草稿 | 玩家從既有牌庫挑一張反覆抽到的牌投入資源強化，並在升級它與保留資源回血之間做出取捨。 |
 | [骰子配給](deckbuilding-dice-allocation.md) | 牌組構築 | deckbuilding | 草稿 | 每回合先把擲出的點數攤開來看，再決定哪個行動吃哪個結果，玩家在即時戰力與保留彈藥之間來回取捨。 |

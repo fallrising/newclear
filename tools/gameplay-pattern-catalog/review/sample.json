@@ -7,17 +7,17 @@
     "commerce-haggling",
     "inventory-deck-thinning",
     "deckbuilding-poker-hand-requirements",
+    "cooking-station-handoff",
     "gathering-salvage-dismantling",
     "gathering-hidden-deposit-clues",
+    "combat-destructible-cover",
     "deckbuilding-rule-changing-passives",
     "commerce-trade-route-programming",
+    "inventory-equipment-budget",
     "progression-challenge-tiers",
+    "commerce-auction-bidding",
     "progression-practice-based-growth",
     "building-water-engineering",
-    "combat-simultaneous-orders",
-    "survival-contagion-control",
-    "narrative-investigation-time-slots",
-    "automation-byproduct-loop",
-    "command-split-objectives"
+    "combat-simultaneous-orders"
   ]
 }

@@ -51,6 +51,21 @@ CATALOG_REVIEW_COMMAND="python3 review/pi_review.py" python3 review/auto_check.p
 
 API 必須是 HTTPS；只有 `127.0.0.1` 與 `localhost` 可以用 HTTP，供本機測試。重新導向不會跟著走。跑完若要讓 CI 看見 flagged 數，把 `review/auto-check.json` 提交，並執行 `python3 status.py --write`。不要把 skip 結果蓋掉已提交的 verdict。
 
+## 依 flag 修正筆記
+
+`review/pi_fix.py` 讀 `review/auto-check.json` 的 flag 筆記，只把筆記本文、`sources/text/<id>.json` 與該筆 issues 交給 pi（與 `pi_review.py` 同樣無工具、無 session、無 context file）。pi 回傳整份本文；frontmatter 不經模型，原樣保留，所以 `note_status` 不變。修正原則是刪除或弱化來源沒有支持的說法，不補新事實。
+
+候選本文必須通過 `build.parse_note`，參考來源區與相關模式連結不變，`本地分析`、`本地提案`、`尚未實玩驗證` 標示不能消失，不能新增簡體字（需要 `opencc`），長度不得少於原文 70%。不合格就重試，最後一次可改用 `--fallback-provider`/`--fallback-model`；全部失敗的筆記不改，列在報告裡。pi 也可以回 `CANNOT_FIX`，表示來源撐不起筆記的核心，這種要由人決定刪除或改寫。
+
+```sh
+python3 review/pi_fix.py --report review/fix-report.json --jobs 4 \
+  --fallback-provider deepseek --fallback-model deepseek-flash
+CATALOG_REVIEW_COMMAND="python3 review/pi_review.py" python3 review/auto_check.py
+python3 status.py --write
+```
+
+並行不要超過 4 個 pi；開太多會讓各家 API 逾時。`PI_FIX_TIMEOUT` 預設 240 秒，`PI_FIX_THINKING` 預設 `low`。修正後要重跑自動檢查；修過的筆記仍是 draft，pass 也不是 reviewed。
+
 ## 抽樣
 
 對 `verdict: pass` 的筆記做可重現抽樣。排序鍵是 `sha256(seed + 換行 + id)`，取前 N 筆。N 為 10 到 20，預設 15。不使用 Python `random`，所以換版本結果不變。flag 與尚未檢查的筆記不會入選。預設 seed 是 `atlas-public-2026-11-02`。

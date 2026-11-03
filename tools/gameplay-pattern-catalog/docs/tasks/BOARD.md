@@ -11,6 +11,7 @@
 | T-0003-3 | 由筆記產生篇數與 source_commit，CI 比對 SUCCESS、inventory 與 PR 片段 | AC-F07 | done | 2026-11-03T02:20:00Z | 2026-11-03T02:45:02Z | 2026-11-03T03:57:24Z |
 | T-0003-4 | 以 `review/pi_fix.py` 依 flag 修正 180 篇並重跑自動檢查；筆記仍為 draft，不升格 | AC-F03 | done | 2026-11-03T06:05:00Z | 2026-11-03T08:22:28Z | 2026-11-03T08:22:28Z |
 | T-0003-5 | 第二輪：pi 再修仍被 flag 的 65 篇（摘要被點名者可改 frontmatter summary）、以關聯筆記來源重寫 6 篇相關模式說明並重跑檢查；不升格 | AC-F03 | done | 2026-11-03T08:30:00Z | 2026-11-03T09:17:28Z | 2026-11-03T09:17:28Z |
+| T-0003-6 | 第三輪：pi 再修 16 篇（automation-belt-routing、rhythm-hidden-beats 由 owner 自修）、刪除 5 篇未有來源的快照複核句、移除 allocation-area-majority 驗收例中來源未提供的平局規則並重跑檢查；不升格 | AC-F03 | in_progress | 2026-11-03T10:55:00Z |  | 2026-11-03T11:19:24Z |
 
 ## T-0002 — 以來源快照為分母的全量 catalog
 

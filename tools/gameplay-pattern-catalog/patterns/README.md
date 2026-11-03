@@ -162,7 +162,7 @@
 | [再生資源採食路線](gathering-renewable-forage-route.md) | 採集與工具 | gathering | 草稿 | 玩家得記住各採集點的再生時機，並在固定巡迴與探索新點位、當下取用與等待多點成熟之間取捨。 |
 | [資源偵測](gathering-resource-detection.md) | 採集與工具 | gathering | 草稿 | 玩家得決定先花資源鋪探測、把盲搜換成地圖上的候選點，還是靠地形經驗省下成本直接去找，並在近處低產與遠處富集之間取捨。 |
 | [拆件拆解](gathering-salvage-dismantling.md) | 採集與工具 | gathering | 草稿 | 把仍有用途的物件拆成材料：眼前資源與未來設施二選一，還得算上拆解所耗的時間。 |
-| [供給開採](gathering-supply-mining.md) | 採集與工具 | gathering | 草稿 | 採集途中要用目標資源換取彈藥或能源，玩家因此得拿捏繞路補給與囤積備用的時機。 |
+| [供給開採](gathering-supply-mining.md) | 採集與工具 | gathering | 草稿 | 採集途中要補充彈藥、能源或生命等續航資源；部分資源不直接作為目標，而是維持行動所需的補給，補給不足會迫使行程提早結束。 |
 | [工具能力門檻](gathering-tool-hardness.md) | 採集與工具 | gathering | 草稿 | 先展示可見但暫不可取的資源，讓工具升級改變可行動範圍。 |
 | [體積挖掘](gathering-volumetric-excavation.md) | 採集與工具 | gathering | 草稿 | 玩家要在可挖穿的地形裡決定挖掘形狀與路徑，權衡快速取礦與保留可通行的通道。 |
 | [分配進度容量](incremental-allocate-progress-capacity.md) | 收益與累積 | incremental | 草稿 | 把有限的總投入分給多個持續專案，玩家得在短期急救與長期不停工之間反覆抽換資源。 |

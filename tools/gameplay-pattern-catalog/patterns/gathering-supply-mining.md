@@ -11,7 +11,7 @@
     "risk",
     "optimization"
   ],
-  "summary": "採集途中要用目標資源換取彈藥或能源，玩家因此得拿捏繞路補給與囤積備用的時機。",
+  "summary": "採集途中要補充彈藥、能源或生命等續航資源；部分資源不直接作為目標，而是維持行動所需的補給，補給不足會迫使行程提早結束。",
   "note_status": "draft",
   "related": [
     "gathering-gathering-quota",

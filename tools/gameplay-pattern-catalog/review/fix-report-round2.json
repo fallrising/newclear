@@ -820,6 +820,23 @@
         }
       ],
       "run": "report-retry"
+    },
+    {
+      "generated_at": "2026-11-03T09:14:27Z",
+      "applied": true,
+      "counts": {
+        "fixed": 1,
+        "failed": 0,
+        "cannot-fix": 0
+      },
+      "notes": [
+        {
+          "id": "survival-temporary-relief",
+          "result": "fixed",
+          "attempts": []
+        }
+      ],
+      "run": "report-related-str"
     }
   ]
 }

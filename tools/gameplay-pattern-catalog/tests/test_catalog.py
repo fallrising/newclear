@@ -34,6 +34,23 @@ class CatalogTests(unittest.TestCase):
         shutil.copytree(ROOT, self.root, ignore=shutil.ignore_patterns('dist', '__pycache__'))
         self.path = self.root / 'patterns' / 'inventory-shape-packing.md'
 
+    def set_claim(self, claim):
+        path = self.root / 'site.json'
+        site = json.loads(path.read_text(encoding='utf-8'))
+        site['coverage']['claim'] = claim
+        path.write_text(json.dumps(site, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
+
+    def promote_all_reviewed(self):
+        """Simulate a fully reviewed snapshot so negative cases hit one named gap."""
+        for path in sorted((self.root / 'patterns').glob('*.md')):
+            if path.name == 'README.md':
+                continue
+            front, body = path.read_text(encoding='utf-8')[4:].split('\n---\n', 1)
+            meta = json.loads(front)
+            meta['note_status'] = 'reviewed'
+            path.write_text('---\n' + json.dumps(meta, ensure_ascii=False, indent=2) + '\n---\n' + body, encoding='utf-8')
+        self.set_claim('complete')
+
     def mutate(self, operation):
         text = self.path.read_text(encoding='utf-8')
         front, body = text[4:].split('\n---\n', 1)
@@ -42,13 +59,22 @@ class CatalogTests(unittest.TestCase):
         self.path.write_text('---\n' + json.dumps(meta, ensure_ascii=False) + '\n---\n' + body, encoding='utf-8')
 
     def test_current_catalog(self):
-        site, notes = build.load_catalog(self.root)
-        self.assertEqual(len(notes), 14)
-        self.assertEqual(len({n['meta']['category'] for n in notes}), 13)
-        self.assertEqual(site['coverage'], 'curated-subset')
-        methods = [s['access_method'] for n in notes for s in n['meta']['sources']]
-        self.assertEqual(methods.count('page-text'), 13)
-        self.assertEqual(methods.count('search-index-excerpt'), 1)
+        site, notes, manifest = build.load_catalog(self.root)
+        self.assertEqual(len(notes), len(manifest['entries']))
+        self.assertEqual(site['coverage']['basis'], 'source-snapshot')
+        statuses = {note['meta']['note_status'] for note in notes}
+        self.assertTrue(statuses <= {'draft', 'reviewed'}, statuses)
+        expected = 'complete' if statuses == {'reviewed'} else 'partial'
+        self.assertEqual(site['coverage']['claim'], expected)
+        self.assertEqual(site['coverage']['denominator'], 'sources/manifest.json')
+        self.assertEqual(manifest['reconciliation']['enumerated_mechanics'], len(manifest['entries']))
+        self.assertEqual(manifest['reconciliation']['enumerated_groups'], len({entry['source_category'] for entry in manifest['entries']}))
+        self.assertTrue(all(entry['fetch_status'] == 'fetched' for entry in manifest['entries']))
+        self.assertTrue(all(source['access_method'] == 'page-text' for note in notes for source in note['meta']['sources']))
+        reserved = next(note for note in notes if note['meta']['id'] == 'allocation-shop-reservation')
+        self.assertEqual(reserved['meta']['category'], 'allocation')
+        self.assertEqual(reserved['meta']['source_category'], 'commerce')
+        self.assertIn('fishing-bite-window', {note['meta']['id'] for note in notes})
 
     def test_schema_fields_and_categories_match_validator(self):
         schema = json.loads((self.root / 'pattern.schema.json').read_text())
@@ -63,7 +89,7 @@ class CatalogTests(unittest.TestCase):
 
     def test_duplicate_json_key_rejected(self):
         text = self.path.read_text()
-        self.path.write_text(text.replace('"schema_version": 1,', '"schema_version": 1, "schema_version": 1,'))
+        self.path.write_text(text.replace('"schema_version": 2,', '"schema_version": 2, "schema_version": 2,'))
         with self.assertRaisesRegex(ValueError, 'duplicate JSON key'):
             build.load_catalog(self.root)
 
@@ -99,7 +125,7 @@ class CatalogTests(unittest.TestCase):
 
     def test_reference_footer_must_match(self):
         text = self.path.read_text()
-        self.path.write_text(text.rsplit('## 參考來源', 1)[0] + '## 參考來源\n\n沒有網址。\n')
+        self.path.write_text(text.rsplit('## 參考來源', 1)[0] + '## 參考來源\n\n這一段故意拿掉來源連結，用來確認文末引用必須和 frontmatter 一致。\n')
         with self.assertRaisesRegex(ValueError, 'reference footer'):
             build.load_catalog(self.root)
 
@@ -108,12 +134,64 @@ class CatalogTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, 'references last'):
             build.load_catalog(self.root)
 
-    def test_count_drift_rejected(self):
+    def test_complete_claim_rejects_draft_notes(self):
+        self.set_claim('complete')
+        drafts = [path.stem for path in sorted((self.root / 'patterns').glob('*.md'))
+                  if path.name != 'README.md' and '"note_status": "draft"' in path.read_text(encoding='utf-8')]
+        if not drafts:
+            self.skipTest('no draft notes in the current catalog')
+        with self.assertRaisesRegex(ValueError, 'complete claim has gaps: ' + drafts[0]):
+            build.load_catalog(self.root)
+
+    def test_note_generator_never_writes_reviewed(self):
+        source = (ROOT / 'sources' / 'write_notes.py').read_text(encoding='utf-8')
+        self.assertNotIn("'note_status': 'reviewed'", source)
+        self.assertNotIn("['note_status'] = 'reviewed'", source)
+
+    def test_complete_claim_rejects_pending_note(self):
+        self.promote_all_reviewed()
+        self.mutate(lambda meta: meta.update(note_status='pending'))
+        with self.assertRaisesRegex(ValueError, 'complete claim has gaps: inventory-shape-packing'):
+            build.load_catalog(self.root)
+
+    def test_reviewed_requires_direct_page_text(self):
+        self.mutate(lambda meta: meta.update(note_status='reviewed'))
+        text = self.path.read_text(encoding='utf-8')
+        text = text.replace('"access_method": "page-text"', '"access_method": "search-index-excerpt"')
+        self.path.write_text(text, encoding='utf-8')
+        with self.assertRaisesRegex(ValueError, 'reviewed requires page-text'):
+            build.load_catalog(self.root)
+
+    def test_blocked_source_is_a_named_gap(self):
+        self.promote_all_reviewed()
+        path = self.root / 'sources' / 'manifest.json'
+        manifest = json.loads(path.read_text(encoding='utf-8'))
+        entry = next(item for item in manifest['entries'] if item['source_id'] == 'fishing-bite-window')
+        entry.update(fetch_status='blocked', error='HTTP 403', content_sha256=None, page_sha256=None,
+                     mechanic_json_sha256=None, catalog_sha256=None)
+        path.write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
+        with self.assertRaisesRegex(ValueError, 'fishing-bite-window'):
+            build.load_catalog(self.root)
+
+    def test_missing_note_is_named(self):
+        self.path.unlink()
+        with self.assertRaisesRegex(ValueError, 'inventory-shape-packing'):
+            build.load_catalog(self.root)
+
+    def test_duplicate_source_id_rejected(self):
+        path = self.root / 'sources' / 'manifest.json'
+        manifest = json.loads(path.read_text(encoding='utf-8'))
+        manifest['entries'].append(copy.deepcopy(manifest['entries'][0]))
+        path.write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
+        with self.assertRaisesRegex(ValueError, 'duplicate source id'):
+            build.load_catalog(self.root)
+
+    def test_homepage_observation_cannot_diverge_silently(self):
         path = self.root / 'site.json'
-        site = json.loads(path.read_text())
-        site['curated_count'] += 1
-        path.write_text(json.dumps(site))
-        with self.assertRaisesRegex(ValueError, 'count drift'):
+        site = json.loads(path.read_text(encoding='utf-8'))
+        site['homepage_observation']['mechanics'] += 1
+        path.write_text(json.dumps(site), encoding='utf-8')
+        with self.assertRaisesRegex(ValueError, 'homepage observation'):
             build.load_catalog(self.root)
 
     def test_types_and_empty_sections(self):
@@ -148,7 +226,13 @@ class CatalogTests(unittest.TestCase):
                 self.assertTrue(destination.is_relative_to(output), target)
                 self.assertTrue(destination.is_file(), f'{path.name}: {target}')
         exported = json.loads((output / 'catalog.json').read_text())
-        self.assertEqual(len(exported['patterns']), 14)
+        manifest = json.loads((self.root / 'sources' / 'manifest.json').read_text(encoding='utf-8'))
+        self.assertEqual(len(exported['patterns']), len(manifest['entries']))
+        self.assertEqual(exported['coverage']['denominator'], len(manifest['entries']))
+        status = {note['id']: note['note_status'] for note in exported['patterns']}
+        expected_gaps = [{'id': entry['source_id'], 'reasons': [status[entry['source_id']]]}
+                         for entry in manifest['entries'] if status[entry['source_id']] != 'reviewed']
+        self.assertEqual(exported['coverage']['gaps'], expected_gaps)
         for note in exported['patterns']:
             detail = (output / note['page']).read_text()
             self.assertIn('id="references"', detail)

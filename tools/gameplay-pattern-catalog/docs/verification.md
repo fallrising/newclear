@@ -1,3 +1,42 @@
+# T-0002 驗證紀錄
+
+## 2026-11-03 分析重寫
+
+- 原因：抽查發現新增筆記的分析由 `write_notes.py` 的固定句型產生，`reviewed` 也是寫死的。
+- 作法：新增筆記的分析各節逐篇由模型（pi，OpenCode `deepseek-v4.1-flash`）依該篇來源摘要重寫；舊 14 篇只換掉模板插入的「核心循環」。全部改為 `draft`。
+- 重複句型：把「」內文字遮蔽後，統計出現在 3 篇以上筆記的同一句。分析各節從 109 種、10,493 次降到 5 種、826 次；剩下的 5 種都是刻意保留的標示句（模型起草聲明、原型未實玩聲明）。
+- 自動檢查：簡體字、占位字、無結尾的截斷行、JSON 殘留。被拒的模型輸出重新產生。
+- 人工抽讀 10 篇並對照來源摘要：relationships-secrets-leverage、puzzles-visual-rule-learning、incremental-farm-or-push、gathering-gathering-quota、deckbuilding-reward-choice、movement-moving-platform、defense-tower-upgrade-budget、movement-ledge-catch、defense-trap-sequence、combat-friendly-fire。修正了三篇原型數字矛盾與一條相關模式理由。其餘筆記未經人工審閱。
+- 另修正：三個重複字標題、來源摘要中的 OpenCC 誤轉（「還是隻」「透過」應為「只」「通過」）。
+- PR 審查後修正 defense-early-wave-call 的原型驗收：提前開波會結束休息期，改為斷言在兩波重疊的戰鬥中能立刻買補強；並補上兩個例子的下一波敵人數（3 隻、2 隻），讓重疊數可以核算。
+
+
+日期：2026-11-02。快照：`atlas-public-2026-11-02`，觀察時間 `2026-11-02T14:47:12Z`。未 merge、deploy 或 release。
+
+以下 T-0001 各節是精選里程碑的歷史紀錄。那次的 14 篇與 CI 不計入本次全量。
+
+## 本輪已跑
+
+- 來源入口：sitemap、`index.json`、`catalog.json`、280 個機制頁內嵌條目、280 個 `mechanics/<id>.json`。頁面與兩份 JSON 的文字投影雜湊全部一致，沒有重新導向。
+- `python3 sources/inventory.py --check`：通過。
+- `python3 build.py --check`：通過，筆記數等於 manifest 條目數。
+- `python3 -m unittest discover -s tests -v`：23 項通過。負向案例包含 pending、blocked、缺筆記、重複來源 ID、首頁觀察漂移、搜尋索引摘錄不能 reviewed。
+- `node --check app.js`：通過。
+- 瀏覽器 smoke：本機 `/usr/bin/google-chrome` 與 Playwright 1.57.0，完整 HTTP 模式通過。路徑是 `/nested/catalog/`。測過搜尋、inventory 分類交集、空結果、重設、NFKC、狀態 pending 的空結果、完整度頁、形狀背包詳情與來源連結、相鄰模式、metadata、390px 無水平溢出、無 JavaScript。沒有 pageerror，也沒有頁面外的請求。
+- `python3 scripts/check_project_success.py --write-index` 與 `python3 scripts/check_indexes.py`：本機通過，55 個契約，llms 0 error。
+
+## GitHub CI 回讀
+
+回讀 commit：`16ca12fc0aebef7347ab4acbb6f356e60993299d`。三項因路徑觸發的 workflow 都是 completed / success。沒有改 workflow 檔，所以 Workflow static validation 這次沒有跑。
+
+| Workflow | 結果 | 來源 |
+| --- | --- | --- |
+| Gameplay pattern catalog | success | [run 41467066827](https://github.com/fallrising/newclear/actions/runs/41467066827) |
+| Project success contracts | success | [run 41467066361](https://github.com/fallrising/newclear/actions/runs/41467066361) |
+| llms.txt CI | success | [run 41467066578](https://github.com/fallrising/newclear/actions/runs/41467066578) |
+
+Catalog job 在 Ubuntu、Python 3.11.17 實跑：`build.py --check` 為 280 篇對 280 個來源、23 項單元測試 OK、靜態建置通過、55 個專案契約通過、llms 0 error。2026-11-02T14:59:39Z 完整瀏覽器測試成功，日誌有 `PASS: full browser HTTP navigation`，涵蓋搜尋、分類、空結果、重設、NFKC、詳情、來源、390px 與無 JavaScript。這次沒有把未跑項目改成通過。
+
 # T-0001 驗證紀錄
 
 日期：2026-11-02。交付：[Draft PR #960](https://github.com/fallrising/newclear/pull/960)。未 merge、deploy 或 release。

@@ -1,16 +1,18 @@
 ---
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "id": "gathering-tool-hardness",
   "title": "工具能力門檻",
   "title_en": "Harvesting tool gates",
   "category": "gathering",
+  "source_category": "gathering",
   "tags": [
     "capability-gate",
     "progression",
     "backtracking"
   ],
   "summary": "先展示可見但暫不可取的資源，讓工具升級改變可行動範圍。",
+  "note_status": "draft",
   "related": [
     "exploration-ability-gates",
     "cooking-recipe-learning"
@@ -29,10 +31,17 @@
 ## 來源摘要
 
 原站描述資源需要特定工具種類或等級，玩家取得升級後返回採集。核心循環：看見資源 → 理解工具要求 → 選擇升級 → 返回取得新材料。
+本次全量快照已用公開頁面內嵌條目複核。
 
 ## 問題與情境（本地分析）
 
 適用於需要引導製作順序與探索節奏的資源系統。門檻應表達新的可行動能力，而不只是延長採集時間。
+
+## 核心循環（本地分析）
+
+- 玩家行動：看見一處資源，嘗試採集後得知它需要的工具種類或等級高於手上的裝備。
+- 系統回饋：介面標示出差了哪一級或哪種工具，玩家能把「升級工具」與「這處資源」連起來，而不只是看到採集失敗。
+- 下一個決策：決定是否投入材料升級工具，升級後再回來取得新材料，或先轉去採其他已能處理的資源。
 
 ## 解法與取捨（本地分析）
 
@@ -51,13 +60,15 @@
 
 ## 最小原型與驗收（本地提案）
 
+此原型尚未實玩驗證。其中的數量是本地測試設定，不是來源遊戲參數。
+
 - 本地提案：兩級工具、三種資源點、一條無循環的升級依賴。
 - 驗收：Given 初階工具與高階資源，When 嘗試採集，Then 顯示能力缺口且不扣材料；升級後同一地點可成功採集。
 
 ## 相關模式
 
-- [能力解鎖與回訪](exploration-ability-gates.md)
-- [知識與材料雙重解鎖](cooking-recipe-learning.md)
+- [能力解鎖與回訪](exploration-ability-gates.md)：工具升級與能力解鎖都讓舊地點從「看得到」變成「進得去」。
+- [知識與材料雙重解鎖](cooking-recipe-learning.md)：新材料常是新配方的另一半條件；先有工具還是先有知識，會改變玩家先追哪一條線。
 
 ## 參考來源
 

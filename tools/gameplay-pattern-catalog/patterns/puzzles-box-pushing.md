@@ -1,16 +1,18 @@
 ---
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "id": "puzzles-box-pushing",
   "title": "不可逆推動與位置可達性",
   "title_en": "Box pushing and positional traps",
   "category": "puzzles",
+  "source_category": "puzzles",
   "tags": [
     "state-space",
     "deadlock",
     "action-order"
   ],
   "summary": "讓每一步同時改變物件位置與玩家之後能站的位置。",
+  "note_status": "draft",
   "related": [
     "inventory-shape-packing",
     "building-structural-support"
@@ -29,10 +31,17 @@
 ## 來源摘要
 
 原站描述從相鄰格推動箱子，某些推法會封住回路或困住箱子；操作順序與撤銷有關。核心循環：找目標與死角 → 規劃站位 → 按順序推動 → 判定或撤銷。
+本次全量快照已用公開頁面內嵌條目複核。
 
 ## 問題與情境（本地分析）
 
 適用於低操作門檻、重視推理與先後順序的空間謎題。評估一個動作時，必須把玩家可達區域與箱子位置一起納入狀態。
+
+## 核心循環（本地分析）
+
+- 玩家行動：先找出目標位置與會困死箱子的死角，規劃自己要站在哪一格才能往正確方向推。
+- 系統回饋：每推一步，箱子與玩家的新位置都會改變之後的可達範圍；推進角落或靠牆時，玩家能看出這個箱子已無法再移到目標。
+- 下一個決策：判斷局面是否仍可解：還能解就照順序繼續推，已經封死就撤銷回到出錯前的那一步。
 
 ## 解法與取捨（本地分析）
 
@@ -51,13 +60,15 @@
 
 ## 最小原型與驗收（本地提案）
 
+此原型尚未實玩驗證。其中的數量是本地測試設定，不是來源遊戲參數。
+
 - 本地提案：一張小網格、兩個箱子、兩個目標、完整撤銷紀錄。
 - 驗收：Given 推箱後封住回路，When 撤銷一次，Then 玩家與所有箱子精確回到前一狀態；另以小型狀態搜尋證明範例關卡可解。
 
 ## 相關模式
 
-- [形狀式背包配置](inventory-shape-packing.md)
-- [支撐約束與結構失效](building-structural-support.md)
+- [形狀式背包配置](inventory-shape-packing.md)：推箱與形狀背包都是在格子裡移動輪廓，差別是推箱還會擋住自己的站位。
+- [支撐約束與結構失效](building-structural-support.md)：錯誤的推動與過長的跨度都會把退路一起拆掉，而且失敗原因必須能讀出來。
 
 ## 參考來源
 

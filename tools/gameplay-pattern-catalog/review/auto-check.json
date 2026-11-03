@@ -3,7 +3,7 @@
   "snapshot_id": "atlas-public-2026-11-02",
   "llm": "command",
   "model": null,
-  "generated_at": "2026-11-03T09:15:05Z",
+  "generated_at": "2026-11-03T11:19:16Z",
   "notes": [
     {
       "id": "allocation-area-majority",
@@ -12,13 +12,8 @@
     },
     {
       "id": "allocation-follow-phase",
-      "verdict": "flag",
-      "issues": [
-        {
-          "kind": "fabricated-claim",
-          "detail": "The 「相關模式」 section asserts specific mechanics for allocation-public-pick, allocation-area-majority, allocation-public-goal-race, and allocation-shared-stock (e.g. shared-pool depletion, area ownership flips, first-to-goal rewards, shared-stock scarcity). The snapshot only lists these as related IDs and does not describe their rules; this section is also not marked as local analysis."
-        }
-      ]
+      "verdict": "pass",
+      "issues": []
     },
     {
       "id": "allocation-public-goal-race",
@@ -36,7 +31,7 @@
       "issues": [
         {
           "kind": "broken-example-logic",
-          "detail": "The boundary acceptance says the player's construction cost breaks even, but its own premise gives a 4→3 path change at 2 points per segment. If the claimed middle edge is part of the new 3-segment path, the path cost drops from 8 to 6, so the player is 2 points ahead, not break-even; adding the 2-point claim again to offset the saved segment double-counts that edge."
+          "detail": "最小原型與第一條驗收設定 5 節點地圖，卻要求對手有 5 段替代路徑；5 節點的簡單路徑最多只有 4 段（5 段路徑需 6 個節點），因此「對手最短路 3→5 段、繞行 +4」不可能由該前提成立。需增加節點或把替代路徑改為 4 段以下。"
         }
       ]
     },
@@ -102,13 +97,8 @@
     },
     {
       "id": "automation-fluid-routing",
-      "verdict": "flag",
-      "issues": [
-        {
-          "kind": "missing-key-point",
-          "detail": "來源規則中的核心限制「玩家需在距離、高度或分支限制下連接供液端與消耗端」未在來源摘要中保留；筆記只在本地分析提到高度與分支，未標明這是來源規則。"
-        }
-      ]
+      "verdict": "pass",
+      "issues": []
     },
     {
       "id": "automation-item-filtering",
@@ -182,13 +172,8 @@
     },
     {
       "id": "combat-combat-deck-cycle",
-      "verdict": "flag",
-      "issues": [
-        {
-          "kind": "over-inference",
-          "detail": "「可調參數」一節雖標為本地分析，但對來源參數「手牌與能量比」的改寫與快照相衝突：來源說「能量寬鬆則強調排序」（能量多時更強調出牌排序／規劃），筆記卻寫「壓低手牌或提高能量，則幾乎每張牌都打得完，佈局感會明顯轉弱」。這是把來源的效果反轉成相反的推論，並非對來源的忠實轉述或無害延伸。"
-        }
-      ]
+      "verdict": "pass",
+      "issues": []
     },
     {
       "id": "combat-combo-variation",
@@ -342,13 +327,8 @@
     },
     {
       "id": "commerce-interpret-orders",
-      "verdict": "flag",
-      "issues": [
-        {
-          "kind": "broken-example-logic",
-          "detail": "边界验收称只要温度超过“最低门槛”，额外偏好“温度超过门槛”就命中；但前一个验收中温度已标为“高”却未命中同一额外偏好。两处对门槛与额外偏好关系的描述不一致，因此 +6 的结果并不从前提自然推出。"
-        }
-      ]
+      "verdict": "pass",
+      "issues": []
     },
     {
       "id": "commerce-price-discovery",
@@ -457,13 +437,8 @@
     },
     {
       "id": "cooperation-split-information",
-      "verdict": "flag",
-      "issues": [
-        {
-          "kind": "broken-example-logic",
-          "detail": "邊界驗收中，線索端只聽到「右邊那個」，且依前例並不知道三個物件的位置，卻能直接複述「藍色圓形、靠右」並下令；它沒有足夠資訊把「右邊」對應到藍圓形，因此成功結果不從其前提推出。"
-        }
-      ]
+      "verdict": "pass",
+      "issues": []
     },
     {
       "id": "cooperation-synchronized-triggers",
@@ -480,8 +455,8 @@
       "verdict": "flag",
       "issues": [
         {
-          "kind": "over-inference",
-          "detail": "The local core loop says the player should pick a card that \"升級後也會更常被抽到\" (will be drawn more often after upgrading). The snapshot only supports that the upgrade pays off each time the card is drawn; it does not support that upgrading changes drawing frequency, and upgrading a single card does not alter deck composition or draw probability."
+          "kind": "broken-example-logic",
+          "detail": "邊界驗收以「回血比再升級多 4 點效益」作結，但前提只給出生命 25 對 20、額外傷害 3 對 4，並未定義 1 點生命等於 1 點傷害；若不假定兩者同單位，這個 4 點差額不是由範例自身推出的。"
         }
       ]
     },
@@ -537,13 +512,8 @@
     },
     {
       "id": "deckbuilding-trigger-order",
-      "verdict": "flag",
-      "issues": [
-        {
-          "kind": "broken-example-logic",
-          "detail": "The boundary acceptance test pays 2 energy to activate 'weakness' but then computes the attack only as base 3 + 2 = 5, ignoring any damage effect from the weakness. Its conclusion that the attack remains 5 and is below the recovery threshold 6 does not follow from the stated premise unless weakness has no effect, which would make the test fail to exercise the weakness-before-attack ordering."
-        }
-      ]
+      "verdict": "pass",
+      "issues": []
     },
     {
       "id": "defense-ammunition-supply",
@@ -792,13 +762,8 @@
     },
     {
       "id": "fishing-pond-production",
-      "verdict": "flag",
-      "issues": [
-        {
-          "kind": "broken-example-logic",
-          "detail": "第一個驗收範例說玩家把 2 尾稀有魚放入甲塘、乙塘空著過一輪，並在該輪結算；但同一個原型設定是每塘每輪繁殖 1 尾，因此甲塘過一輪應由 2 尾增至 3 尾，範例卻寫「甲塘維持 2 尾」。此外，範例說「兩輪後可能多出的 2 尾」只有在比較當下甲塘仍是 2 尾時才成立；若已經過一輪繁殖，再兩輪只會達到容量上限 4，也就是只再多 1 尾。範例的繁殖狀態與自己的前提不一致。"
-        }
-      ]
+      "verdict": "pass",
+      "issues": []
     },
     {
       "id": "fishing-target-tracking",
@@ -850,8 +815,8 @@
       "verdict": "flag",
       "issues": [
         {
-          "kind": "fabricated-claim",
-          "detail": "The frontmatter summary says the player must trade target resources for ammo/energy. The snapshot instead says some resources are not final objectives but serve as supplies; it does not state that final objective resources are consumed as fuel/ammo. This is a local design extension, but the summary presents it without labeling it as local analysis."
+          "kind": "broken-example-logic",
+          "detail": "The boundary example's conclusion does not follow from its own numbers. From the stated state (4 ore, 50 energy), the player can skip the detour, mine 4 more units (20 energy) and return (30 energy), ending with 8 ore and 0 energy. The detour path ends with 7 ore and 0 energy, so it is strictly worse by 1 ore and does not demonstrate that the relaxed conversion rate makes the detour worthwhile or removes decision pressure."
         }
       ]
     },
@@ -982,13 +947,8 @@
     },
     {
       "id": "matching-gravity-cascade",
-      "verdict": "flag",
-      "issues": [
-        {
-          "kind": "broken-example-logic",
-          "detail": "In the first acceptance example, the setup excludes refill only from column 3 (rows 2–6), but the second-step blue matches clear rows 5–6 in columns 1–2 as well. Without also ruling out refill in those cleared cells, or accounting for the refill, the stated final board of only the target and two fixed supports does not follow from the premise."
-        }
-      ]
+      "verdict": "pass",
+      "issues": []
     },
     {
       "id": "matching-merge-three-upgrade",
@@ -1261,13 +1221,8 @@
     },
     {
       "id": "puzzles-linked-portals",
-      "verdict": "flag",
-      "issues": [
-        {
-          "kind": "broken-example-logic",
-          "detail": "邊界驗收先說四塊可放置面 A、B、C、D 已被 A→B 與 C→D 兩組連線各佔兩塊而全部佔滿，又要求替換其中一組的一端卻不影響另一組；在沒有第五塊可用表面、也未先釋放表面的前提下，新端點無處可放或只能佔用他組表面，因此「只有被替換的那組斷線，另一組仍可輸送」不從其前提推出。"
-        }
-      ]
+      "verdict": "pass",
+      "issues": []
     },
     {
       "id": "puzzles-paper-folding",
@@ -1404,17 +1359,8 @@
     },
     {
       "id": "stealth-light-shadow",
-      "verdict": "flag",
-      "issues": [
-        {
-          "kind": "broken-example-logic",
-          "detail": "第一個驗收把「按下開關後移動 7 格＝2.8 秒」直接跟守衛單程 3 秒比較，但玩家在按開關前已花 0.4 秒從第 1 格走到第 2 格；若守衛在起步時背對，按開關後只剩約 2.6 秒，全程為 3.2 秒。因此「未超過 3 秒」不能由前提推出，結論需額外假設（例如關燈後暗區完全不累積察覺）。"
-        },
-        {
-          "kind": "broken-example-logic",
-          "detail": "邊界驗收說察覺值在第 1.25 秒已達上限 100，卻又說守衛到第 1.5 秒回頭時才「隨即進入警戒狀態」；若上限即觸發警戒，警戒應在第 1.25 秒發生，兩個時間點不一致。"
-        }
-      ]
+      "verdict": "pass",
+      "issues": []
     },
     {
       "id": "stealth-peeking",
@@ -1428,13 +1374,8 @@
     },
     {
       "id": "stealth-sound-lures",
-      "verdict": "flag",
-      "issues": [
-        {
-          "kind": "broken-example-logic",
-          "detail": "第一個驗收例子中，「若取物多花 1 秒，玩家就會在 t=8 與返位的 A 相遇」不成立：玩家在 t=8 回到出口 0 格，而 A 於 t=8 回到原位 3 格，兩者並不在同一位置；若聲源在側房，整段回程更不會在該時點與 A 相遇。"
-        }
-      ]
+      "verdict": "pass",
+      "issues": []
     },
     {
       "id": "stealth-staged-accidents",
@@ -1447,7 +1388,7 @@
       "issues": [
         {
           "kind": "broken-example-logic",
-          "detail": "邊界驗收中，B 在觸發後 0.75 秒看到 A 倒下，並非由「兩人每 4 秒互相對望一次」的前提推出；若觸發時不是對望時點，B 可能要到 4 秒才看到，晚於乙 1.5 秒完成，結論會反轉。"
+          "detail": "边界验收先说乙会花 1.5 秒“完成击晕”，但结论又说 B 仍存活且进入警戒。若击晕在触发后 1.5 秒完成，B 应已失效；若 B 仍存活，则乙的击晕并未完成。需要明确 B 的警戒是否打断乙的动作，或改写前提为乙在警报时尚未完成击晕。"
         }
       ]
     },

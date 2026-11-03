@@ -10,6 +10,7 @@
     "cooking-station-handoff",
     "gathering-salvage-dismantling",
     "gathering-hidden-deposit-clues",
+    "cooperation-split-information",
     "combat-destructible-cover",
     "deckbuilding-rule-changing-passives",
     "commerce-trade-route-programming",
@@ -17,7 +18,6 @@
     "progression-challenge-tiers",
     "commerce-auction-bidding",
     "progression-practice-based-growth",
-    "building-water-engineering",
-    "combat-simultaneous-orders"
+    "building-water-engineering"
   ]
 }

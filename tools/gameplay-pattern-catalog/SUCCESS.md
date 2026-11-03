@@ -18,10 +18,10 @@ source_commit: 59a5f13201bff024e059b647b07ad711927a7a8f
 total: 280
 draft: 280
 reviewed: 0
-flagged: 0
+flagged: 180
 pending: 0
-auto_checked: 0
-auto_check: absent
+auto_checked: 280
+auto_check: present
 source_commit: 59a5f13201bff024e059b647b07ad711927a7a8f
 snapshot_id: atlas-public-2026-11-02
 

@@ -71,8 +71,15 @@ class StatusTests(unittest.TestCase):
         self.assertEqual(facts['draft'], facts['total'])
         self.assertEqual(facts['reviewed'], 0)
         self.assertEqual(facts['pending'], 0)
-        self.assertEqual(facts['flagged'], 0)
-        self.assertEqual(facts['auto_check'], 'absent')
+        auto_path = ROOT / 'review' / 'auto-check.json'
+        if auto_path.exists():
+            notes = json.loads(auto_path.read_text(encoding='utf-8'))['notes']
+            self.assertEqual(facts['auto_check'], 'present')
+            self.assertEqual(facts['auto_checked'], len(notes))
+            self.assertEqual(facts['flagged'], sum(item['verdict'] == 'flag' for item in notes))
+        else:
+            self.assertEqual(facts['flagged'], 0)
+            self.assertEqual(facts['auto_check'], 'absent')
         self.assertEqual(facts['snapshot_id'], SNAPSHOT_ID)
         self.assertNotEqual(facts['total'], 0)
 

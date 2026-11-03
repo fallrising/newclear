@@ -1,3 +1,15 @@
+# T-0003 自動檢查實跑
+
+日期：2026-11-03。基準 `a285669c`。沒有改任何筆記的 `note_status`，沒有執行 `promote.py --apply`。
+
+- 命令：`CATALOG_REVIEW_COMMAND="python3 review/pi_review.py" python3 review/auto_check.py`，pi 1.4.0、OpenCode Go `deepseek-v4.1-flash`、thinking `low`。以 `--id` 分 8 批並行。
+- 第一輪有 21 篇因並行過多逾時而得 `checker-error`，另一批 35 篇中途被中止。這些筆記重跑兩輪後全部取得 verdict。最終 `review/auto-check.json`：280 篇，pass 100、flag 180、checker-error 0。
+- flag 種類（以篇計）：broken-example-logic 152、missing-key-point 53、fabricated-claim 12、over-inference 12、wrong-number 5。多數是原型驗收例子的前提與結論對不上。這些是模型判斷，尚未人工確認。
+- `python3 review/sample.py --count 15 --write review/sample.json`，seed `atlas-public-2026-11-02`，只從 pass 抽。
+- `python3 status.py --write` 後 flagged 180、`auto_check: present`、auto_checked 280；`source_commit` 不變。
+- `tests/test_review.py` 與 `tests/test_status.py` 原本斷言 repo 裡沒有 `auto-check.json`；改成斷言略過時不改動已提交的 verdict，以及 flagged 與檔案內的 flag 數相同。
+- `sources/inventory.py --check`、`sources/text_cache.py --check`、`status.py --check`、`build.py --check`、`unittest`（catalog 與 scripts）、`check_project_success.py --write-index`、`check_indexes.py` 通過。
+
 # T-0003 驗證紀錄
 
 日期：2026-11-03。沒有呼叫模型，沒有改任何筆記的 `note_status`，沒有 merge 或打 tag。

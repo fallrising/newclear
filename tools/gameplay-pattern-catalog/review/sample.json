@@ -4,20 +4,20 @@
   "seed": "atlas-public-2026-11-02",
   "count": 15,
   "ids": [
+    "commerce-haggling",
     "inventory-deck-thinning",
+    "deckbuilding-poker-hand-requirements",
     "gathering-salvage-dismantling",
     "gathering-hidden-deposit-clues",
+    "deckbuilding-rule-changing-passives",
+    "commerce-trade-route-programming",
     "progression-challenge-tiers",
     "progression-practice-based-growth",
+    "building-water-engineering",
+    "combat-simultaneous-orders",
+    "survival-contagion-control",
     "narrative-investigation-time-slots",
     "automation-byproduct-loop",
-    "exploration-climbing-rest-route",
-    "movement-downward-slam",
-    "cooperation-downed-revival",
-    "projectiles-graze-reward",
-    "farming-regrowth-crops",
-    "cooking-recipe-learning",
-    "narrative-deliberate-silence",
-    "puzzles-perspective-reality"
+    "command-split-objectives"
   ]
 }

@@ -3,7 +3,7 @@
   "snapshot_id": "atlas-public-2026-11-02",
   "llm": "command",
   "model": null,
-  "generated_at": "2026-11-03T12:12:32Z",
+  "generated_at": "2026-11-04T06:23:09Z",
   "notes": [
     {
       "id": "allocation-area-majority",
@@ -62,13 +62,8 @@
     },
     {
       "id": "automation-belt-routing",
-      "verdict": "flag",
-      "issues": [
-        {
-          "kind": "over-inference",
-          "detail": "The note's frontmatter related list and the body's “相關模式” section present building-structural-support and farming-growth-care as related patterns, with analogies not in the source snapshot. The snapshot's related list contains automation-aerial-logistics, automation-flow-splitting, automation-blueprint-reuse, and automation-byproduct-loop, and the note does not label these added analogies as local analysis."
-        }
-      ]
+      "verdict": "pass",
+      "issues": []
     },
     {
       "id": "automation-blueprint-reuse",
@@ -1286,15 +1281,11 @@
       "issues": [
         {
           "kind": "broken-example-logic",
-          "detail": "邊界驗收的對照組只關閉第 13 拍強重音，但仍設定第 13 拍提示全回來；既然其他回歸提示仍可供重新校準，不能推出第 14、15 拍偏移必然維持 +120ms/+160ms。對照組需移除所有可重新對齊的提示，或改寫預期結果。"
+          "detail": "最小原型設定第四小節提示全回來，但「邊界驗收」又說第 13 拍是唯一回歸強提示、第 14、15 拍不再給提示；同一原型前提不一致，讓有回歸提示與對照組的比較不是同一條件。"
         },
         {
-          "kind": "fabricated-claim",
-          "detail": "參考來源段落聲稱「直接對照公開頁面及其內嵌條目，不是搜尋索引摘錄」，但來源快照只提供 URL、查閱日期與 access_method=page-text，未支持「內嵌條目」或「非搜尋索引摘錄」的斷言。"
-        },
-        {
-          "kind": "over-inference",
-          "detail": "相關模式段落對提示回應、長音、拍點上動作、連續倍率的機制描述未出現在來源快照，且未標示為本地分析，等於把推論寫成來源事實。"
+          "kind": "broken-example-logic",
+          "detail": "把第 14 拍的 +20ms 描述成「帶外最大偏移從 160ms 降到 20ms」不成立：+20ms 已在 ±30ms 帶內，且第 13 拍仍有 160ms 帶外偏移；160−20=140ms 只是差值，不是帶外最大值。"
         }
       ]
     },

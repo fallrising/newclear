@@ -203,20 +203,25 @@ def param_expectation(name_en: str, name_zh: str, steps: list[str], index: int) 
 def related_reason(source: dict, target: dict, titles: dict[str, str]) -> str:
     key = (source['id'], target['id'])
     if key in PRESERVE_REASONS:
-        return PRESERVE_REASONS[key]
-    shared = [tag for tag in source['tags'] if tag in target['tags']]
-    source_steps = steps_of(source)
-    target_steps = steps_of(target)
-    if shared:
-        pressure = TAG_PRESSURE.get(shared[0], shared[0])
-        return (
-            f'共享的張力是「{pressure}」。「{titles[source["id"]]}」從「{source_steps[0]}」承諾，'
-            f'「{titles[target["id"]]}」從「{target_steps[0]}」承諾，下一步分別走向「{source_steps[-1]}」與「{target_steps[-1]}」。'
-        )
-    return (
-        f'「{titles[source["id"]]}」走到「{source_steps[-1]}」之後，常會碰到「{titles[target["id"]]}」的「{target_steps[0]}」。'
-        f'兩邊的觸發條件不同，不能合成一個按鈕。'
-    )
+        reason = PRESERVE_REASONS[key]
+    else:
+        shared = [tag for tag in source['tags'] if tag in target['tags']]
+        source_steps = steps_of(source)
+        target_steps = steps_of(target)
+        if shared:
+            pressure = TAG_PRESSURE.get(shared[0], shared[0])
+            reason = (
+                f'共享的張力是「{pressure}」。「{titles[source["id"]]}」從「{source_steps[0]}」承諾，'
+                f'「{titles[target["id"]]}」從「{target_steps[0]}」承諾，下一步分別走向「{source_steps[-1]}」與「{target_steps[-1]}」。'
+            )
+        else:
+            reason = (
+                f'「{titles[source["id"]]}」走到「{source_steps[-1]}」之後，常會碰到「{titles[target["id"]]}」的「{target_steps[0]}」。'
+                f'兩邊的觸發條件不同，不能合成一個按鈕。'
+            )
+    if not reason.startswith('（本地分析）'):
+        reason = '（本地分析）' + reason
+    return reason
 
 
 def source_summary(entry: dict) -> str:
@@ -302,6 +307,7 @@ _CLAUSE_FIXES = (
     ('，隻', '，只'),
     ('反饋', '回饋'),
     ('信息', '資訊'),
+    ('複制', '複製'),
 )
 
 
@@ -322,25 +328,26 @@ def acceptance_checks(entry: dict) -> tuple[str, str]:
     test = _clause(entry['prototype']['test']['zh'])
     pitfall = _clause(entry['prototype']['pitfall']['zh'])
     first = _clause(entry['decisions'][0]['zh'])
-    second = _clause(entry['decisions'][1]['zh'])
     passed = (
         f'- 驗收：（本地分析）對照來源規則「{rule}」。通過要能滿足「{test}」，'
         f'並分得出「{first}」。做不到就算失敗。'
     )
     boundary = (
-        f'- 邊界驗收：（本地分析）來源指出的邊界是「{pitfall}」。'
-        f'若「{second}」只剩一種走法，就不算測到這個邊界。'
+        f'- 邊界驗收：（本地分析）來源指出要避開的情況是「{pitfall}」。'
+        f'通過要直接檢查這件事：踩進這個情況時，結果必須和避開時不同；看不出差別，就不算測到這個邊界。'
     )
     return passed, boundary
 
 
 def acceptance_text(entry: dict) -> str:
-    """Short local prototype. No invented counts, durations, or numeric walkthroughs."""
+    """Short local prototype. Source counts stay inside the quoted first step."""
     joined = '、'.join(f'「{step}」' for step in steps_of(entry))
+    first_step = _clause(entry['prototype']['firstStep']['zh'])
     passed, boundary = acceptance_checks(entry)
     return (
-        '此原型尚未實玩驗證。這裡只說明要觀察的差異，不另設來源沒有寫出的數量。\n\n'
-        f'- 最小範圍：做一個小場景，讓玩家依序經歷{joined}。只保留能分辨這些狀態的回饋，不加入來源沒有寫出的計數、時間或門檻。\n'
+        '此原型尚未實玩驗證。下列通過與否是本地判斷。\n\n'
+        f'- 最小範圍：（本地分析）做一個小場景，讓玩家依序經歷{joined}。'
+        f'來源的原型第一步是「{first_step}」。\n'
         f'{passed}\n'
         f'{boundary}\n'
     )
@@ -364,34 +371,19 @@ def kept_acceptance_lines(section: str) -> list[str]:
     return kept
 
 
-def replace_check_lines(section: str, entry: dict) -> str:
-    """Replace only 驗收 and 邊界驗收. Keep 最小範圍 and any non-numeric extra bullet."""
-    passed, boundary = acceptance_checks(entry)
+def label_related_section(body: str) -> str:
+    """The source lists related ids only, so any description is local analysis."""
+    start = '## 相關模式\n'
+    end = '\n## 參考來源\n'
+    head, rest = body.split(start, 1)
+    section, tail = rest.split(end, 1)
     lines = []
-    saw_pass = saw_boundary = False
     for line in section.splitlines():
-        if line.startswith('- 驗收：'):
-            if not saw_pass:
-                lines.append(passed)
-                saw_pass = True
-            continue
-        if line.startswith('- 邊界驗收'):
-            if not saw_boundary:
-                lines.append(boundary)
-                saw_boundary = True
-            continue
+        if line.startswith('- [') and '：（本地分析）' not in line:
+            line = line.replace(')：', ')：（本地分析）', 1)
         lines.append(line)
-    if not saw_pass or not saw_boundary:
-        raise ValueError('prototype section is missing 驗收 or 邊界驗收')
-    if lines and lines[0] != '':
-        lines.insert(0, '')
-    text = '\n'.join(lines)
-    if not text.endswith('\n'):
-        text += '\n'
-    for line in kept_acceptance_lines(section):
-        if line not in text:
-            text = text.rstrip('\n') + '\n' + line + '\n'
-    return text
+    joined = '\n'.join(line for line in lines if line != '').strip('\n')
+    return head + start + '\n' + joined + '\n\n' + end.lstrip('\n') + tail
 
 
 def replace_acceptance(body: str, entry: dict) -> str:
@@ -399,7 +391,11 @@ def replace_acceptance(body: str, entry: dict) -> str:
     end = '\n## 相關模式\n'
     head, rest = body.split(start, 1)
     old, tail = rest.split(end, 1)
-    return head + start + replace_check_lines(old, entry) + end + tail
+    section = '\n' + acceptance_text(entry).rstrip('\n') + '\n'
+    for line in kept_acceptance_lines(old):
+        if line not in section:
+            section = section.rstrip('\n') + '\n' + line + '\n'
+    return head + start + section + end + tail
 
 
 def prototype_section(entry: dict) -> str:

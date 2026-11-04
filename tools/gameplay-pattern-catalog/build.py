@@ -76,17 +76,42 @@ def shared_check_overflow(notes: list[dict]) -> str | None:
     return None
 
 
+def _digit_windows(text: str, token: str, radius: int = 16) -> list[str]:
+    spans = []
+    start = 0
+    while True:
+        index = text.find(token, start)
+        if index < 0:
+            break
+        spans.append(text[max(0, index - radius):index + len(token) + radius])
+        start = index + len(token)
+    return spans
+
+
 def invented_prototype_number(note_id: str, section: str, catalog: Path) -> str | None:
-    """A prototype number is allowed only when that digit run is in the note's source snapshot."""
-    tokens = re.findall(r'[0-9０-９]+', section)
-    if not tokens:
-        return None
+    """A prototype digit is allowed only inside a source quote, near the same words.
+
+    The digit run must occur in the source snapshot, and at least two of the
+    Chinese characters beside it in the quote must sit beside that same digit
+    in the snapshot. A digit that merely appears somewhere else in the JSON
+    does not count.
+    """
     source_path = catalog / 'sources' / 'text' / f'{note_id}.json'
     source = source_path.read_text(encoding='utf-8') if source_path.is_file() else ''
-    for token in tokens:
-        ascii_token = token.translate(_FULLWIDTH_DIGITS)
-        if ascii_token not in source and token not in source:
-            return ascii_token
+    outside = re.sub(r'「[^」]*」', '', section)
+    stray = re.findall(r'[0-9０-９]+', outside)
+    if stray:
+        return stray[0].translate(_FULLWIDTH_DIGITS)
+    for quote in re.findall(r'「([^」]*)」', section):
+        for token in re.findall(r'[0-9０-９]+', quote):
+            ascii_token = token.translate(_FULLWIDTH_DIGITS)
+            quote_windows = _digit_windows(quote, token) + _digit_windows(quote, ascii_token)
+            source_windows = _digit_windows(source, ascii_token) + _digit_windows(source, token)
+            if not source_windows:
+                return ascii_token
+            quote_chars = {char for window in quote_windows for char in window if '\u4e00' <= char <= '\u9fff'}
+            if not any(sum(char in window for char in quote_chars) >= 2 for window in source_windows):
+                return ascii_token
     return None
 
 

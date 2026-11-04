@@ -6,6 +6,9 @@ commit that only rewrites this status does not chase its own hash. The same
 value is written to SUCCESS.md, the catalog row in
 ``docs/project-success/inventory.json``, and ``review/pr-snippet.md``.
 
+``quote_check`` comes from ``check_quotes.py``. ``review/auto-check.json`` is
+not read.
+
 ``--check`` fails when those copies disagree with a fresh computation.
 ``--check-pr-body`` also fails when a pull request changes this catalog, or
 the catalog inventory row, and the description omits the snippet.
@@ -22,18 +25,18 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
-sys.path.insert(0, str(ROOT / 'review'))
+sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / 'sources'))
 
-from schema import validate_auto_check  # noqa: E402
+import check_quotes  # noqa: E402
 from snapshot import SNAPSHOT_ID  # noqa: E402
 
 BEGIN = '<!-- catalog-status:start -->'
 END = '<!-- catalog-status:end -->'
 NOTE_STATUS = ('pending', 'draft', 'reviewed')
 FIELDS = (
-    'total', 'draft', 'reviewed', 'flagged', 'pending',
-    'auto_checked', 'auto_check', 'source_commit', 'snapshot_id',
+    'total', 'draft', 'reviewed', 'pending',
+    'quoted_spans', 'quote_check', 'source_commit', 'snapshot_id',
 )
 CATALOG_PREFIX = 'tools/gameplay-pattern-catalog/'
 INVENTORY_PATH = 'docs/project-success/inventory.json'
@@ -87,21 +90,20 @@ def compute(catalog: Path) -> dict:
     rows = note_rows(catalog)
     counts = {status: sum(status == item for _source_id, item in rows) for status in NOTE_STATUS}
     require(sum(counts.values()) == len(rows), 'note status counts')
-    auto_path = catalog / 'review' / 'auto-check.json'
-    if auto_path.is_file():
-        data = json.loads(auto_path.read_text(encoding='utf-8'))
-        require(data.get('snapshot_id') == SNAPSHOT_ID, 'auto-check snapshot_id')
-        auto = validate_auto_check(data, {source_id for source_id, _status in rows})
+    text_dir = catalog / 'sources' / 'text'
+    if text_dir.is_dir():
+        errors, stats = check_quotes.check_catalog(catalog)
+        require(not errors, 'quote check failed: ' + (errors[0] if errors else ''))
+        quote = {'quoted_spans': stats['spans'], 'quote_check': 'pass'}
     else:
-        auto = {'state': 'absent', 'flagged': 0, 'checked': 0}
+        quote = {'quoted_spans': 0, 'quote_check': 'absent'}
     return {
         'total': len(rows),
         'draft': counts['draft'],
         'reviewed': counts['reviewed'],
-        'flagged': auto['flagged'],
         'pending': counts['pending'],
-        'auto_checked': auto['checked'],
-        'auto_check': auto['state'],
+        'quoted_spans': quote['quoted_spans'],
+        'quote_check': quote['quote_check'],
         'source_commit': notes_tree_sha(catalog),
         'snapshot_id': SNAPSHOT_ID,
     }
@@ -119,7 +121,7 @@ def render_block(facts: dict) -> str:
     lines.extend([
         '',
         '`source_commit` 是筆記檔的 git tree SHA（不含 `patterns/README.md`），由檔案位元組算出，不是分支 commit。',
-        '`flagged` 是自動檢查的 flag 數，不是 `note_status`。`auto_check` 為 `absent`、`skipped` 或 `present`。',
+        '`quote_check` 是確定性引文檢查。`pass` 表示每個內容片段都等於所引來源的那個位置。它不是 note_status。',
         END,
         '',
     ])
@@ -137,7 +139,7 @@ def render_snippet(facts: dict) -> str:
     lines.extend([
         '',
         '`source_commit` is the git tree SHA of the note files, not a branch tip.',
-        'flagged counts auto-check verdicts; it is not a note status.',
+        '`quote_check` is the deterministic span check. `pass` means every content span matches its citation. It is not a note status.',
         '',
     ])
     return '\n'.join(lines)

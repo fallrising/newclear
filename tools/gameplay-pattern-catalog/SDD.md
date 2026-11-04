@@ -34,11 +34,13 @@
 
 ## 忠實度檢查與產生的狀態
 
-`review/auto_check.py` 把筆記對到已快取的來源文字投影。模型步驟是環境變數指定的外部命令，或一個 OpenAI 相容端點。沒有金鑰也沒有命令時略過模型，退出碼為 0。CI 不呼叫模型，也不把 `note_status` 改成 reviewed。flag 的種類是 fabricated claim、missing key point、over-inference、wrong number、broken example logic。pass 只代表這次自動檢查沒有標出問題。
+忠實度由 `check_quotes.py` 決定。每個內容片段必須是所引 `sources/text/<id>.json` 在標明字元位置上的原文。沒有出處的內容行、對不上的字、空的必填欄，檢查都失敗。顯示行若存在，只能是 OpenCC `s2t` 的逐字結果。這支檢查不呼叫模型。
 
-人工抽樣 10 到 20 篇 pass 筆記，讀過之後用 `review/promote.py --apply` 把那一批改成 reviewed。這不把 catalog 標成 complete，也不滿足 AC-F02 的「全部 reviewed」。
+`review/auto_check.py` 與 `review/pi_review.py` 仍留在目錄裡，validate 不讀它們的結果，CI 也不執行。模型的 pass 不是 reviewed。
 
-total、draft、reviewed、flagged 與 `source_commit` 由 `status.py` 從筆記檔產生，寫進 SUCCESS、inventory 的 catalog 列，以及可貼上 PR 描述的片段。`source_commit` 是筆記檔的 git tree SHA。檢查失敗表示這三處與重算結果不一致，不是筆記已審閱。
+人工升格仍是 `review/promote.py --apply`。這不把 catalog 標成 complete，也不滿足 AC-F02 的「全部 reviewed」。
+
+total、draft、reviewed、quoted_spans、quote_check 與 `source_commit` 由 `status.py` 從筆記檔與引文檢查產生，寫進 SUCCESS、inventory 的 catalog 列，以及可貼上 PR 描述的片段。`source_commit` 是筆記檔的 git tree SHA。檢查失敗表示這三處與重算結果不一致，不是筆記已審閱。
 
 ## 驗證計畫
 

@@ -223,6 +223,10 @@ class PromoteTests(unittest.TestCase):
         note_dir.mkdir(parents=True)
         source = ROOT / 'patterns' / 'allocation-shop-reservation.md'
         shutil.copy(source, note_dir / source.name)
+        source_text = ROOT / 'sources' / 'text' / 'allocation-shop-reservation.json'
+        text_dir = self.catalog / 'sources' / 'text'
+        text_dir.mkdir(parents=True)
+        shutil.copy(source_text, text_dir / source_text.name)
         self.note = note_dir / source.name
         self.original = self.note.read_text(encoding='utf-8')
         notes = []
@@ -331,13 +335,13 @@ class PiFixTests(unittest.TestCase):
     def test_unchanged_body_is_valid_and_bad_rewrites_are_refused(self):
         self.assertIsNone(self.check(self.body))
         self.assertIn('footer', self.check(self.body.replace('page-text。', '')))
-        self.assertIn('label', self.check(self.body.replace('尚未實玩驗證', '已驗證')))
+        self.assertIn('missing citation', self.check(self.body.replace('出處：', '沒有出處：', 1)))
         top, rest = self.body.split('## 相關模式', 1)
-        short = '\n'.join(line for line in top.splitlines() if not line.startswith('- ') or '尚未' in line)
+        short = '\n'.join(line for line in top.splitlines() if line.startswith('##'))
         self.assertIn('too short', self.check(short + '\n## 相關模式' + rest))
-        if self.cc is not None:
-            self.assertIn('simplified', self.check(self.body.replace('區域', '区域')))
-        self.assertIn('parse_note', self.check(self.body.replace('## 失敗模式（本地分析）', '## 失敗模式')))
+        if '區域' in self.body:
+            self.assertIn('display is not character-only conversion', self.check(self.body.replace('區域', '区域', 1)))
+        self.assertIn('parse_note', self.check(self.body.replace('## 原型\n', '## 失敗模式\n', 1)))
 
     def test_summary_edit_changes_only_the_summary_value(self):
         new_head, problem = self.fix.replace_summary(self.head, '在數個區域之間分配有限單位，比較數量決定歸屬，平局規則要事先講清楚。', self.cc)

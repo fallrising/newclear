@@ -123,10 +123,11 @@ def validate(note_path: Path, head: str, old: str, new: str, converter) -> str |
             return 'label dropped: ' + label
     if len(new) < MIN_RATIO * len(old):
         return f'too short: {len(new)} < {MIN_RATIO} * {len(old)}'
-    prototype = new.split('## 最小原型與驗收（本地提案）\n', 1)[-1].split('\n## ', 1)[0]
-    invented = invented_prototype_number(note_path.stem, prototype, note_path.parents[1])
-    if invented:
-        return 'invented prototype number: ' + invented
+    if '## 最小原型與驗收（本地提案）\n' in new:
+        prototype = new.split('## 最小原型與驗收（本地提案）\n', 1)[-1].split('\n## ', 1)[0]
+        invented = invented_prototype_number(note_path.stem, prototype, note_path.parents[1])
+        if invented:
+            return 'invented prototype number: ' + invented
     if converter is not None:
         extra = simplified_chars(new, converter) - simplified_chars(old, converter)
         if extra:

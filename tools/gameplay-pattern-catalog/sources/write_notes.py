@@ -332,16 +332,27 @@ def acceptance_checks(entry: dict) -> tuple[str, str]:
         f'- 驗收：（本地分析）對照來源規則「{rule}」。通過要能滿足「{test}」，'
         f'並分得出「{first}」。做不到就算失敗。'
     )
-    boundary = (
-        f'- 邊界驗收：（本地分析）來源指出要避開的情況是「{pitfall}」。'
-        f'通過要直接檢查這件事：踩進這個情況時，結果必須和避開時不同；看不出差別，就不算測到這個邊界。'
-    )
+    boundary = _boundary_line(pitfall)
     return passed, boundary
+
+
+# Ordering, scope, and “do this” pitfalls are guidance. The rest describe a failure.
+_GUIDANCE = re.compile(r'先|不要|別|必須|避免|再|之前|延後|另做|應|初版|需要')
+
+
+def _boundary_line(pitfall: str) -> str:
+    """Check the pitfall as the source states it. Do not recast it as enter-versus-avoid."""
+    if _GUIDANCE.search(pitfall):
+        return f'- 邊界驗收：（本地分析）通過是原型照來源這句做：「{pitfall}」。'
+    return (
+        f'- 邊界驗收：（本地分析）直接測試來源描述的失敗：「{pitfall}」。'
+        f'通過是這個失敗有清楚、可預期的處理。'
+    )
 
 
 def acceptance_text(entry: dict) -> str:
     """Short local prototype. Source counts stay inside the quoted first step."""
-    joined = '、'.join(f'「{step}」' for step in steps_of(entry))
+    joined = '、'.join(f'「{_clause(step["zh"])}」' for step in entry['loop'])
     first_step = _clause(entry['prototype']['firstStep']['zh'])
     passed, boundary = acceptance_checks(entry)
     return (

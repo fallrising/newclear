@@ -266,7 +266,7 @@
     {
       "path": "tools/gameplay-pattern-catalog",
       "last_source_update": "2026-11-03T01:44:52Z",
-      "source_commit": "5ac4bf6082f5408617eee93e1aa4f69c24f3d92f"
+      "source_commit": "111e9bfed2fb1a438743763da5920e16070c0080"
     },
     {
       "path": "tools/motion-prompt",

@@ -161,6 +161,16 @@ class CatalogTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, '驗收 repeated 3 times'):
             build.load_catalog(self.root)
 
+    def test_prototype_digit_must_sit_beside_the_same_source_words(self):
+        note_id = 'inventory-shape-packing'
+        source = (self.root / 'sources' / 'text' / f'{note_id}.json').read_text(encoding='utf-8')
+        self.assertIn('1', source)
+        foreign = '「甲乙丙丁戊 1 己庚辛壬」'
+        self.assertEqual('1', build.invented_prototype_number(note_id, foreign, self.root))
+        real = next(note for note in build.load_catalog(self.root)[1] if note['meta']['id'] == 'farming-growth-care')
+        prototype = real['sections'][6]
+        self.assertIsNone(build.invented_prototype_number('farming-growth-care', prototype, self.root))
+
     def test_prototype_rejects_invented_numbers(self):
         text = self.path.read_text(encoding='utf-8')
         old = '## 最小原型與驗收（本地提案）\n'

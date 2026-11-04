@@ -3,17 +3,31 @@
   "snapshot_id": "atlas-public-2026-11-02",
   "llm": "command",
   "model": null,
-  "generated_at": "2026-11-04T09:42:21Z",
+  "generated_at": "2026-11-04T11:05:32Z",
   "notes": [
     {
       "id": "allocation-area-majority",
-      "verdict": "pass",
-      "issues": []
+      "verdict": "flag",
+      "issues": [
+        {
+          "kind": "fabricated-claim",
+          "detail": "筆記的邊界驗收稱「來源指出要避開的情況是『必須讓當前數量、領先者與結算時點同時可見』」，但來源的 pitfall 實際是要求把數量、領先者與結算時點保持可見，並非把「保持可見」描述成要避開的情況。這是把來源未支持的說法寫成來源事實。"
+        },
+        {
+          "kind": "broken-example-logic",
+          "detail": "同一段又說「踩進這個情況時，結果必須和避開時不同」，可是來源的 pitfall 是可見性要求，不是會產生不同結果的邊界條件；這種驗收說法無法從前提推出，也沒有測到來源真正要求的可見性。"
+        }
+      ]
     },
     {
       "id": "allocation-follow-phase",
-      "verdict": "pass",
-      "issues": []
+      "verdict": "flag",
+      "issues": [
+        {
+          "kind": "over-inference",
+          "detail": "The note states that a source prototype's first step is 「兩名本地玩家輪流遮屏選三種階段…」, but the snapshot only says two local players choose among three phases privately; it does not say the players take turns. Because the note presents this as a sourced quote, the added turn-taking detail goes beyond the snapshot."
+        }
+      ]
     },
     {
       "id": "allocation-public-goal-race",
@@ -22,13 +36,8 @@
     },
     {
       "id": "allocation-public-pick",
-      "verdict": "flag",
-      "issues": [
-        {
-          "kind": "over-inference",
-          "detail": "The '相關模式' section describes four related mechanics in detail (e.g., follow-phase leaves a reusable phase, area-majority is relative count, goal-race is first-to-finish, shared talent pool accumulates units long-term). The snapshot only lists their IDs and provides no such descriptions, and this section is not labeled as local analysis."
-        }
-      ]
+      "verdict": "pass",
+      "issues": []
     },
     {
       "id": "allocation-route-denial",
@@ -37,23 +46,13 @@
     },
     {
       "id": "allocation-savings-interest",
-      "verdict": "flag",
-      "issues": [
-        {
-          "kind": "missing-key-point",
-          "detail": "The source's minimal-prototype spec is concrete — three numerical rounds, two upgrades, and a visible interest preview (plus competitive interaction) — but the note's 最小原型與驗收 section drops the round/upgrade counts and interaction while saying it will not add quantities the source did not write. This omits the source's actual prototype scope and can mislead readers into thinking no such numbers exist."
-        }
-      ]
+      "verdict": "pass",
+      "issues": []
     },
     {
       "id": "allocation-shared-stock",
-      "verdict": "flag",
-      "issues": [
-        {
-          "kind": "broken-example-logic",
-          "detail": "The boundary acceptance conflates two unrelated things: the source pitfall is failing to explain that the stock is shared (so odds feel like luck), but the note says the boundary is not tested if the deny/rival-blocking decision has only one viable line. That conclusion does not follow from the stated pitfall premise."
-        }
-      ]
+      "verdict": "pass",
+      "issues": []
     },
     {
       "id": "allocation-shop-reservation",
@@ -72,13 +71,8 @@
     },
     {
       "id": "automation-aerial-logistics",
-      "verdict": "flag",
-      "issues": [
-        {
-          "kind": "missing-key-point",
-          "detail": "The source rule says coverage/routes, energy and handling capacity limit throughput; the note mentions coverage/routes, energy and payload but never handling capacity, dropping one of the stated throughput limiters."
-        }
-      ]
+      "verdict": "pass",
+      "issues": []
     },
     {
       "id": "automation-belt-routing",
@@ -102,28 +96,23 @@
     },
     {
       "id": "automation-flow-splitting",
-      "verdict": "pass",
-      "issues": []
-    },
-    {
-      "id": "automation-fluid-routing",
       "verdict": "flag",
       "issues": [
         {
           "kind": "broken-example-logic",
-          "detail": "「邊界驗收」引用來源的 pitfall（物理精度、循環管網、多液體混合會增加狀態問題，應分階段加入），但判準卻設成「增加泵或獨立支路提高可控性…只剩一種走法，就不算測到這個邊界」。這個條件測的是取捨是否退化，與所述「分階段加入複雜度」的邊界無關，因此結論不從前提推出；這個小節應改為檢查原型是否仍可運作，且未引入自由液面模擬、迴圈管網或多液體混合。"
+          "detail": "邊界驗收段落把來源的原型範圍建議（「不要先加入幾十種配方；兩種不同需求已經能檢驗比例是否影響產出」）當成機制邊界，並要求「踩進這個情況時，結果必須和避開時不同」。來源只主張用兩種不同需求就足以檢驗配比是否影響產出，並未主張加入幾十種配方會帶來可觀測的不同結果；此處的通過條件不從其自身前提推出，作為驗收測試邏輯不成立。"
         }
       ]
     },
     {
+      "id": "automation-fluid-routing",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
       "id": "automation-item-filtering",
-      "verdict": "flag",
-      "issues": [
-        {
-          "kind": "fabricated-claim",
-          "detail": "The '相關模式' section describes related mechanics with specifics not present in source_snapshot (e.g., aerial logistics relying on coverage/energy, belt routing making queuing spatial, blueprint reuse copying validated production units, byproduct loops handling unwanted outputs). The snapshot only supplies related IDs; these unsupported descriptions are not labeled as local analysis, so they read as source-based claims."
-        }
-      ]
+      "verdict": "pass",
+      "issues": []
     },
     {
       "id": "automation-power-budget",
@@ -132,28 +121,23 @@
     },
     {
       "id": "automation-production-chain",
-      "verdict": "flag",
-      "issues": [
-        {
-          "kind": "broken-example-logic",
-          "detail": "最小原型的「邊界驗收」把來源的「先固定配方樹／物流／機器速度其中兩項，再改第三項」與「提前擴建上游 vs 眼前材料成本」的取捨混為同一個邊界；因此「若提前擴建的取捨只剩一種走法，就不算測到這個邊界」的結論無法由所引用的邊界推出，屬於測試條件與前提不對應。"
-        }
-      ]
-    },
-    {
-      "id": "building-access-network",
       "verdict": "pass",
       "issues": []
     },
     {
-      "id": "building-construction-sequencing",
+      "id": "building-access-network",
       "verdict": "flag",
       "issues": [
         {
           "kind": "broken-example-logic",
-          "detail": "邊界驗收把來源的實作陷阱（多工人搶任務、搬運預約、中途改計劃需狀態處理）連到「先修應急設施…只剩一種走法」，但後者是否只有一種走法並不檢驗前者所指的多工人／預約狀態處理，結論不從前提推出。"
+          "detail": "「邊界驗收」把來源 prototype pitfall 的「大量單位避讓與複雜交通可以另做」誤寫成必須踩進去比較的邊界，並要求「踩進這個情況時，結果必須和避開時不同」；但來源是說先延後該範圍、優先驗證入口與斷路回饋，這個驗收結果無法由其前提推出。"
         }
       ]
+    },
+    {
+      "id": "building-construction-sequencing",
+      "verdict": "pass",
+      "issues": []
     },
     {
       "id": "building-modular-snapping",
@@ -202,13 +186,8 @@
     },
     {
       "id": "combat-combat-deck-cycle",
-      "verdict": "flag",
-      "issues": [
-        {
-          "kind": "missing-key-point",
-          "detail": "The snapshot's firstStep explicitly specifies “ten fixed cards, one enemy with visible intent, a draw pile, and a discard pile” (and the walkthrough uses 3 energy). The note replaces this with a generic “small scene” and asserts it will not add “counts, times, or thresholds not written in the source,” dropping the concrete prototype setup the source actually provides."
-        }
-      ]
+      "verdict": "pass",
+      "issues": []
     },
     {
       "id": "combat-combo-variation",
@@ -217,8 +196,13 @@
     },
     {
       "id": "combat-cover-flanking",
-      "verdict": "pass",
-      "issues": []
+      "verdict": "flag",
+      "issues": [
+        {
+          "kind": "fabricated-claim",
+          "detail": "筆記的邊界驗收把來源 pitfall「先把側翼判定畫清楚，再考慮複雜地形和多層建築」說成「來源指出要避開的情況」，語意反轉：這是來源建議的先後順序，不是要避開的情境；後續「踩進這個情況」的驗收因此建立在錯誤前提上。"
+        }
+      ]
     },
     {
       "id": "combat-destructible-cover",
@@ -227,13 +211,8 @@
     },
     {
       "id": "combat-forced-movement",
-      "verdict": "flag",
-      "issues": [
-        {
-          "kind": "broken-example-logic",
-          "detail": "The boundary acceptance links the source pitfall about unclear landing/collision readability to the loot-loss decision. A loot tradeoff having only one route does not test whether hidden landing positions or ambiguous collision order make planning into guessing, so the stated failure condition does not follow from the premise."
-        }
-      ]
+      "verdict": "pass",
+      "issues": []
     },
     {
       "id": "combat-friendly-fire",
@@ -256,7 +235,7 @@
       "issues": [
         {
           "kind": "broken-example-logic",
-          "detail": "邊界驗收先說來源邊界是「多個警戒同時觸發時，射擊順序和目標死亡後的處理容易混亂」，卻用「守窄入口 vs 擴大範圍只剩一種走法」作為是否測到該邊界的判準；這個條件與同時觸發的結算順序無關，不能推出未測到來源邊界。"
+          "detail": "邊界驗收把來源的原型陷阱「多個警戒同時觸發時，射擊順序和目標死亡後的處理容易混亂」說成「來源指出要避開的情況」，但來源要求的是為同時觸發定義清楚的結算順序與死亡處理，不是「避開」這個情況（玩家無法避免同時觸發）。因此其通過條件「踩進這個情況時，結果必須和避開時不同」並不成立：既沒有可對照的「避開」版本，也無法驗證順序是否清楚；應改為檢查多發同時觸發時是否有明確、可預期的結算順序，以及目標提前死亡時是否正確處理。"
         }
       ]
     },
@@ -265,8 +244,8 @@
       "verdict": "flag",
       "issues": [
         {
-          "kind": "missing-key-point",
-          "detail": "來源 rules 明說「並非每個部位都會削弱招式」，但來源摘要只保留「獨立破壞條件」，核心循環還把破壞回饋寫成每個部位都會使對應功能變弱或失效，沒有保留這個關鍵例外。"
+          "kind": "broken-example-logic",
+          "detail": "「邊界驗收」把來源的 pitfall（部位越多，動畫／受擊／殘骸狀態組合越多；先保證破壞結果看得懂）當成可比較的邊界條件，並規定「踩進這個情況時，結果必須和避開時不同；看不出差別，就不算測到這個邊界」。但多放部位必然會增加狀態組合，結果自然會不同，這個判準幾乎恆真，並不能檢查來源要求的「破壞結果看得懂」；此驗收的結論無法從其前提推出。"
         }
       ]
     },
@@ -276,7 +255,7 @@
       "issues": [
         {
           "kind": "fabricated-claim",
-          "detail": "「相關模式」段稱此機制「只凍結自己一方、敵人的節奏照跑」，但來源快照只說戰鬥即時進行、玩家可暫停下令、解除暫停後命令才執行；沒有支持暫停時僅凍結玩家一方或敵人節奏持續推進的說法。此句也未標為本地分析，應刪除或改寫為有來源依據的描述。"
+          "detail": "在「相關模式」一節中，筆記對「暫停指令」與「同時指令」作比較時聲稱：「這裡只凍結自己一方、敵人的節奏照跑。」來源快照並未說明暫停期間敵人的時間會繼續流動；它只說「解除暫停後命令在實時環境中執行」，且暫停「允許玩家處理平行任務」，並未說明這只管住玩家一方。這個機制細節被呈現為關於該模式的既定事實（即使放在本地分析標籤下，也是關於來源機制的說法），而快照並不支持。"
         }
       ]
     },
@@ -302,18 +281,18 @@
     },
     {
       "id": "combat-timed-parry",
-      "verdict": "pass",
-      "issues": []
-    },
-    {
-      "id": "combat-weakpoint-aim",
       "verdict": "flag",
       "issues": [
         {
           "kind": "broken-example-logic",
-          "detail": "The boundary-acceptance section quotes the source pitfall about avoiding many weapons and tuning aim assistance, occlusion, and weak-point readability, but then says the boundary is untested if the flanking tradeoff has only one route. That conclusion does not follow from the cited boundary; it conflates the source's prototype-tuning pitfall with the separate positioning-risk decision."
+          "detail": "邊界驗收把來源的原型陷阱說成「要避開的情況」，並引用「動畫、命中時刻和輸入判定必須對齊；先別用隨機延遲增加難度」。這段其實是來源的正確做法／警告，不是要踩進的情況；因此後文要求「踩進這個情況」再和避開時比較，前提與測試步驟相反。"
         }
       ]
+    },
+    {
+      "id": "combat-weakpoint-aim",
+      "verdict": "pass",
+      "issues": []
     },
     {
       "id": "command-focus-fire",
@@ -327,23 +306,13 @@
     },
     {
       "id": "command-initiative-order",
-      "verdict": "flag",
-      "issues": [
-        {
-          "kind": "missing-key-point",
-          "detail": "The snapshot's rule states that turn order also depends on whether sides alternate and whether initiative rerolls each round (\"速度不一定增加行動次數；還要看敵我是否交替、每輪是否重排\"). The note's source summary keeps only \"速度不一定增加行動次數\" and never mentions side alternation anywhere; the alternation constraint on initiative is a key loop/rule element that is dropped, leaving the note implying order is purely a function of adjustable speed."
-        }
-      ]
+      "verdict": "pass",
+      "issues": []
     },
     {
       "id": "command-interrupt-action",
-      "verdict": "flag",
-      "issues": [
-        {
-          "kind": "broken-example-logic",
-          "detail": "「邊界驗收」把來源的 pitfall（打斷成功與目標免疫必須有不同回饋）和 decision（打斷者靠近目標是否值得承受途中傷害）混在一起；即使靠近目標只剩一種走法，也無法檢驗成功打斷與免疫的回饋是否不同，因此結論不從前提推出。"
-        }
-      ]
+      "verdict": "pass",
+      "issues": []
     },
     {
       "id": "command-prebattle-formation",
@@ -377,13 +346,8 @@
     },
     {
       "id": "commerce-auction-bidding",
-      "verdict": "flag",
-      "issues": [
-        {
-          "kind": "over-inference",
-          "detail": "The '相關模式' section asserts specific mechanics for commerce-price-discovery, commerce-debt-pressure, commerce-dynamic-market, and commerce-haggling; the snapshot only lists those IDs, and this section is not marked as local analysis, so the descriptions are unsupported inference presented as fact."
-        }
-      ]
+      "verdict": "pass",
+      "issues": []
     },
     {
       "id": "commerce-debt-pressure",
@@ -392,23 +356,32 @@
     },
     {
       "id": "commerce-dynamic-market",
-      "verdict": "pass",
-      "issues": []
+      "verdict": "flag",
+      "issues": [
+        {
+          "kind": "over-inference",
+          "detail": "「失敗模式」下方的邊界驗收把來源原型注意事項（pitfall）「先限制價格邊界和買賣差價，避免玩家靠同一循環無限套利」講成「來源指出要避開的情況」，把原文的建議防護（設定價格上下限與買賣價差以避免無限套利）讀成要迴避的危險情境，再據此推出「踩進這個情況時結果必須和避開時不同」的驗收方式。這是把重新詮釋寫成來源事實，snapshot 並不支持這種理解。"
+        },
+        {
+          "kind": "missing-key-point",
+          "detail": "來源摘要只引用規則片段「玩家觀察行情後買入或賣出」，卻把規則主體「市場供需隨交易與生產變化；連續拋售可能壓低自身利潤；收入反饋同時也是下一步的市場信號」略過；價格隨供給上升而下滑、生產也影響供需這兩點，在後文只以「本地分析」重新推導，未標明出自來源規則。"
+        }
+      ]
     },
     {
       "id": "commerce-haggling",
-      "verdict": "pass",
-      "issues": []
-    },
-    {
-      "id": "commerce-interpret-orders",
       "verdict": "flag",
       "issues": [
         {
           "kind": "fabricated-claim",
-          "detail": "The 最小原型 section states the note will not '另設來源沒有寫出的數量' and '不加入來源沒有寫出的計數、時間或門檻', implying the source gives no counts. The snapshot's prototype.firstStep explicitly specifies concrete counts: five products each with two clear attributes, and six natural-language requests (plus explanatory feedback). The note both misstates the source and drops that concrete prototype spec."
+          "detail": "邊界驗收把來源的 pitfall 反轉：來源是建議讓回饋反映接近底線、避免把結果藏在不可見隨機數後；筆記卻稱來源要避開「讓回饋能反映接近底線的程度……」，並把這個建議當成要踩入的失敗情況。"
         }
       ]
+    },
+    {
+      "id": "commerce-interpret-orders",
+      "verdict": "pass",
+      "issues": []
     },
     {
       "id": "commerce-price-discovery",
@@ -426,7 +399,7 @@
       "issues": [
         {
           "kind": "missing-key-point",
-          "detail": "The source rules state that display space and restocking time are limited and that unshelved/stored inventory does not automatically get equal sales exposure. The note’s source summary only mentions limited display positions and omits the limited restocking-time and unequal-exposure rule, which is central to the allocation tradeoff."
+          "detail": "來源摘要只引用規則的前半，漏掉來源規則明列的「展示位與補貨時間有限；未上架的庫存不會自動獲得同等銷售機會」，這是陳列分配的核心限制。"
         }
       ]
     },
@@ -487,33 +460,27 @@
     },
     {
       "id": "cooking-station-handoff",
-      "verdict": "flag",
-      "issues": [
-        {
-          "kind": "broken-example-logic",
-          "detail": "邊界驗收把來源的 pitfall（聯網同步、自由物理碰撞、大量菜譜的範圍控制）和來源 decision（最短路線搶道 vs 繞路讓流）混在一起；「路徑只剩一種走法」並不能驗證是否把聯網、物理、菜譜與崗位協作分開測試，前提與結論不匹配。"
-        }
-      ]
+      "verdict": "pass",
+      "issues": []
     },
     {
       "id": "cooperation-complementary-abilities",
       "verdict": "flag",
       "issues": [
         {
-          "kind": "fabricated-claim",
-          "detail": "「相關模式」段落對共享載具、討論投票、倒地救起、隱藏角色的具體機制描述，在 source_snapshot 中只有 related ID 清單，沒有這些內容支撐；該段也未標示為本地分析，等於把未支持的推論寫成來源事實。"
+          "kind": "over-inference",
+          "detail": "筆記把來源 pitfalls 欄位改寫成「來源指出要避開的情況是『先驗證互相需要又都能操作；…』」，但「先驗證互相需要又都能操作」是來源建議先做的第一步，不是要避開的情況；來源要避開的只是職業樹、裝備與大量技能讓配合原因難以看清。把正面驗證步驟混進『要避開』清單，屬於對來源內容的過度推論。"
+        },
+        {
+          "kind": "broken-example-logic",
+          "detail": "邊界驗收寫「踩進這個情況時，結果必須和避開時不同；看不出差別，就不算測到這個邊界」：前提是原型第一步該先驗證互相需要且都能操作、避開職業樹與大量技能，但測試設計卻要求『踩進』該情況再比較差異；這與來源要求的先簡化範圍不一致，結論無法由其前提推出。"
         }
       ]
     },
     {
       "id": "cooperation-discussion-vote",
-      "verdict": "flag",
-      "issues": [
-        {
-          "kind": "fabricated-claim",
-          "detail": "最小原型 section repeatedly asserts that the source does not specify counts, time, or thresholds (“不另設來源沒有寫出的數量”, “不加入來源沒有寫出的計數、時間或門檻”), but the snapshot’s prototype.firstStep explicitly specifies four different accounts, a timed discussion, paper ballots, and three short cases. The note also omits those concrete source prototype details, so its prototype cannot be reproduced as the snapshot proposed."
-        }
-      ]
+      "verdict": "pass",
+      "issues": []
     },
     {
       "id": "cooperation-downed-revival",
@@ -527,13 +494,8 @@
     },
     {
       "id": "cooperation-physical-tether",
-      "verdict": "flag",
-      "issues": [
-        {
-          "kind": "broken-example-logic",
-          "detail": "The boundary-acceptance paragraph equates the source prototype pitfall—deferring rope wrapping and 3D collisions, with unstable physics or network delay making failure hard to attribute—with the rescue-vs-self-preserve decision, then says that if the rescue choice has only one viable route the boundary was not tested. Those technical pitfalls are independent of how many rescue choices exist, so the stated result does not follow from its own premise."
-        }
-      ]
+      "verdict": "pass",
+      "issues": []
     },
     {
       "id": "cooperation-shared-vehicle",
@@ -547,8 +509,13 @@
     },
     {
       "id": "cooperation-synchronized-triggers",
-      "verdict": "pass",
-      "issues": []
+      "verdict": "flag",
+      "issues": [
+        {
+          "kind": "over-inference",
+          "detail": "In the 邊界驗收 paragraph, the note characterizes the source's pitfall text as a situation to avoid (「來源指出要避開的情況是『先讓失敗原因可見；新增機關種類之前，要分清…』」), but the snapshot's pitfall is itself the recommended practice — make failure causes visible and distinguish wrong position / poor sync / insufficient hold before adding devices. The note inverts advice into a hazard, then builds a boundary test on that inversion (「踩進這個情況時，結果必須和避開時不同」), which does not follow from the source's guidance. The quoted text is accurat"
+        }
+      ]
     },
     {
       "id": "cooperation-temporary-alliance",
@@ -557,23 +524,13 @@
     },
     {
       "id": "deckbuilding-card-upgrade",
-      "verdict": "flag",
-      "issues": [
-        {
-          "kind": "broken-example-logic",
-          "detail": "The boundary-validation bullet pairs the source pitfall—random affixes and layered upgrades hiding what changed—with an unrelated condition: whether the upgrade-vs-heal decision has only one path. That condition tests the opportunity-cost decision, not the stated pitfall, so the conclusion that it “doesn’t test this boundary” does not follow from the premise."
-        }
-      ]
+      "verdict": "pass",
+      "issues": []
     },
     {
       "id": "deckbuilding-dice-allocation",
-      "verdict": "flag",
-      "issues": [
-        {
-          "kind": "missing-key-point",
-          "detail": "來源規則明確包含「可用結果有限，玩家要把不理想的骰子也安排出用途」，這是配給取捨的核心限制；筆記的來源摘要只保留「行動可能要求特定點數、奇偶或效果型別」，未把這條來源規則列出，僅在本地分析中提到剩餘點數。"
-        }
-      ]
+      "verdict": "pass",
+      "issues": []
     },
     {
       "id": "deckbuilding-discard-redraw",
@@ -587,13 +544,8 @@
     },
     {
       "id": "deckbuilding-duplicate-investment",
-      "verdict": "flag",
-      "issues": [
-        {
-          "kind": "fabricated-claim",
-          "detail": "最小原型段落稱「不加入來源沒有寫出的計數」，但來源 firstStep 明確指定六張可升級牌與一次複製節點；筆記不僅省略這些數量，還反向斷言來源沒有寫出計數。"
-        }
-      ]
+      "verdict": "pass",
+      "issues": []
     },
     {
       "id": "deckbuilding-exhaust-for-burst",
@@ -602,18 +554,18 @@
     },
     {
       "id": "deckbuilding-opening-hand-control",
-      "verdict": "pass",
-      "issues": []
-    },
-    {
-      "id": "deckbuilding-poker-hand-requirements",
       "verdict": "flag",
       "issues": [
         {
           "kind": "over-inference",
-          "detail": "The note calls the source's prototype pitfall about not implementing every poker hand before legality is communicated a 'boundary', then says a one-path overlap choice means that boundary is untested. The snapshot's pitfall concerns UI legality clarity, not whether the offense/defense overlap has multiple choices; the stated test result does not follow from the cited source point."
+          "detail": "The frontmatter summary says the cards are marked “at deck construction” (在構築時), but the snapshot says the choice is made before battle; the body later labels this as a local timing variant, yet the summary itself does not, so it presents a local change without that qualification."
         }
       ]
+    },
+    {
+      "id": "deckbuilding-poker-hand-requirements",
+      "verdict": "pass",
+      "issues": []
     },
     {
       "id": "deckbuilding-reward-choice",
@@ -622,27 +574,13 @@
     },
     {
       "id": "deckbuilding-rule-changing-passives",
-      "verdict": "flag",
-      "issues": [
-        {
-          "kind": "missing-key-point",
-          "detail": "The minimal-prototype section says to run the four loop stages but omits the source's explicit firstStep: implement one base rule plus one clear exception so the same hand can be compared before and after acquisition. That before/after comparison is a key prototype requirement in the snapshot."
-        },
-        {
-          "kind": "broken-example-logic",
-          "detail": "The boundary acceptance ties the source pitfall (“alter at least one legal action”) to the draw/discard decision and says that if the draw-clog decision has only one route it does not test the boundary. That conclusion does not follow: the pitfall is about whether the passive changes a legal action, not about how many routes the draw-clog decision has, and the snapshot does not present that decision as a boundary test."
-        }
-      ]
+      "verdict": "pass",
+      "issues": []
     },
     {
       "id": "deckbuilding-temporary-generation",
-      "verdict": "flag",
-      "issues": [
-        {
-          "kind": "broken-example-logic",
-          "detail": "邊界驗收段落先引用來源的「生成牌再生成自身會造成無限鏈；首版禁止遞歸造牌」作為邊界，卻用「持續造牌的單位佔了戰場位置，產出的牌是否值得這個位置」只剩一種走法當作未測到該邊界的判準。這個判準與遞歸造牌的無限鏈無關，從前提推不出結論；通過與否也不會驗證到禁止遞歸造牌這條規則。"
-        }
-      ]
+      "verdict": "pass",
+      "issues": []
     },
     {
       "id": "deckbuilding-trigger-order",
@@ -651,13 +589,8 @@
     },
     {
       "id": "defense-ammunition-supply",
-      "verdict": "flag",
-      "issues": [
-        {
-          "kind": "broken-example-logic",
-          "detail": "邊界驗收引用來源的 pitfall「先把斷供原因顯示清楚，再添加多種彈藥」，卻用「前線囤彈 vs 擴產/升級」這條資源取捨是否只剩一種走法來判定是否測到該邊界；兩者不是同一條件，該結論不從前提推出。"
-        }
-      ]
+      "verdict": "pass",
+      "issues": []
     },
     {
       "id": "defense-day-night-investment",
@@ -694,15 +627,28 @@
       "verdict": "flag",
       "issues": [
         {
-          "kind": "fabricated-claim",
-          "detail": "筆記在最小原型段落兩次聲稱「來源沒有寫出的計數／數量」，並表示不加入來源沒有寫出的計數、時間或門檻；但來源快照的 prototype.firstStep 明確寫出「三個固定塔位和兩級升級」以及「一波走主路、一波走支路」的具體數量與安排。這是把來源實際有寫的內容說成沒有寫，屬於與快照不符的來源事實陳述。"
+          "kind": "missing-key-point",
+          "detail": "來源規則明說「敵人的種類與行進路線決定哪一種投入更有用」，筆記只保留路線與波次，沒有提到敵人種類這項關鍵條件。"
+        },
+        {
+          "kind": "over-inference",
+          "detail": "本地分析稱地圖只有單一入口、塔位極少時，升級與新建的比較會失去意義；但來源參數反而說優質塔位稀少會提高升級的價值，兩者相衝突。"
+        },
+        {
+          "kind": "broken-example-logic",
+          "detail": "邊界驗收把來源的原型陷阱「不要先做幾十種塔」當成可踩入的邊界條件，並要求踩入與避開時結果不同；來源沒有給出這種結果，該驗收推論不成立。"
         }
       ]
     },
     {
       "id": "defense-trap-sequence",
-      "verdict": "pass",
-      "issues": []
+      "verdict": "flag",
+      "issues": [
+        {
+          "kind": "broken-example-logic",
+          "detail": "邊界驗收把來源的原型注意事項（先用簡單 2D 碰撞、避免大量剛體與聯機同步以降低調試成本）當成可玩的邊界測試，並要求「踩進這個情況」時結果必須和避開時不同；但來源只說這樣會增加調試成本，並未說會造成可觀察的遊戲結果差異，因此該驗收結果不從前提推出。"
+        }
+      ]
     },
     {
       "id": "driving-air-balance",
@@ -711,13 +657,8 @@
     },
     {
       "id": "driving-air-stunt",
-      "verdict": "flag",
-      "issues": [
-        {
-          "kind": "fabricated-claim",
-          "detail": "The “相關模式” section asserts specific mechanics for related patterns—e.g. that driving-air-balance changes landing angle, driving-drift-boost has ground friction in turns, driving-slipstream uses following position, and driving-start-charge is a stationary countdown—but the snapshot only lists those related IDs and gives no such descriptions. This section is also not labeled as local analysis."
-        }
-      ]
+      "verdict": "pass",
+      "issues": []
     },
     {
       "id": "driving-drift-boost",
@@ -731,8 +672,13 @@
     },
     {
       "id": "driving-start-charge",
-      "verdict": "pass",
-      "issues": []
+      "verdict": "flag",
+      "issues": [
+        {
+          "kind": "fabricated-claim",
+          "detail": "The related-pattern bullets describe specific mechanics for driving-air-balance, driving-air-stunt, driving-drift-boost, and cooking-measurement-precision, but the source_snapshot only lists those IDs and does not provide their content. Statements such as “該來源則處理騰空後調整車身角度…” are unsupported source-content claims, even though labeled local analysis."
+        }
+      ]
     },
     {
       "id": "ecology-animal-taming",
@@ -804,12 +750,12 @@
       "verdict": "flag",
       "issues": [
         {
-          "kind": "missing-key-point",
-          "detail": "最小原型段落沒有納入來源 firstStep 的關鍵規格：固定下沉速度、方向控制、一處上升氣流、三個不同高度的落點；只寫了小場景與四個循環狀態。"
+          "kind": "fabricated-claim",
+          "detail": "筆記寫「來源指出要避開的情況是『先讓高度損失容易估計…』」，但來源的 pitfall 是要求先讓高度損失可預測，再加法強化慣性與複雜風場；「先讓高度損失容易估計」不是要避開的情況，這段把來源的正面前置條件誤寫成應避免情況。"
         },
         {
-          "kind": "fabricated-claim",
-          "detail": "筆記稱「不加入來源沒有寫出的計數、時間或門檻」，但 snapshot 的 firstStep 明寫「one updraft」與「three landing elevations」，所以此聲稱與來源不符。"
+          "kind": "broken-example-logic",
+          "detail": "邊界驗收要求「踩進這個情況」再與避開時比較，但前句引用的情況同時包含應先做到的高度損失可預測性；照其前提無法形成有效的壞情境對照，通過條件與自身描述不一致。"
         }
       ]
     },
@@ -835,13 +781,8 @@
     },
     {
       "id": "farming-crop-protection",
-      "verdict": "flag",
-      "issues": [
-        {
-          "kind": "over-inference",
-          "detail": "相關模式段落稱「作物防護的損失只落在單一地塊」，但來源的損失規模明說可出現成片破壞（widespread destruction），並未把損失限制在單一地塊；這是把對比推論寫成事實。"
-        }
-      ]
+      "verdict": "pass",
+      "issues": []
     },
     {
       "id": "farming-fertilizer-tradeoff",
@@ -858,8 +799,8 @@
       "verdict": "flag",
       "issues": [
         {
-          "kind": "checker-error",
-          "detail": "review command failed"
+          "kind": "over-inference",
+          "detail": "The boundary-acceptance bullet attributes to the source a rule that pressure/underground pipes/rotating heads are a situation to avoid and must be tested by stepping into it and comparing outcomes. The snapshot's prototype.pitfall only says these add separate rules and should be postponed until placement is engaging; it does not prescribe that avoid-vs-enter boundary test."
         }
       ]
     },
@@ -870,13 +811,8 @@
     },
     {
       "id": "farming-orchard-investment",
-      "verdict": "flag",
-      "issues": [
-        {
-          "kind": "fabricated-claim",
-          "detail": "「相關模式」段落稱果樹是「永久佔地」，但來源規則是樹木佔用空間、砍掉可回收土地；這是把固定佔地誤寫成永久佔地。"
-        }
-      ]
+      "verdict": "pass",
+      "issues": []
     },
     {
       "id": "farming-regrowth-crops",
@@ -915,23 +851,13 @@
     },
     {
       "id": "fishing-equipment-access",
-      "verdict": "flag",
-      "issues": [
-        {
-          "kind": "fabricated-claim",
-          "detail": "『相關模式』段落對其他條目下了具體機制斷言（例如拋投放置調距離與角度、魚池產線把捕獲轉繁殖起點、快速旅行縮短重複路程、餌配置組影響等待與命中），但 source_snapshot 只提供 related id，沒有這些內容，且該段未標為本地分析，讀起來像來源支持的事實。"
-        }
-      ]
+      "verdict": "pass",
+      "issues": []
     },
     {
       "id": "fishing-habitat-search",
-      "verdict": "flag",
-      "issues": [
-        {
-          "kind": "fabricated-claim",
-          "detail": "The note asserts twice that the source does not write counts (\"不另設來源沒有寫出的數量\", \"不加入來源沒有寫出的計數、時間或門檻\"), but the snapshot's prototype.firstStep explicitly specifies concrete numbers: three fishing locations, two weather states, and a few species rules, tested via a location-selection screen. The note thus states a fact about the source that the snapshot contradicts, and in doing so drops the source's actual prototype scope."
-        }
-      ]
+      "verdict": "pass",
+      "issues": []
     },
     {
       "id": "fishing-line-tension",
@@ -940,23 +866,13 @@
     },
     {
       "id": "fishing-passive-traps",
-      "verdict": "flag",
-      "issues": [
-        {
-          "kind": "missing-key-point",
-          "detail": "來源的可調參數明定：低容量促使高頻回訪、高容量允許更長遠征；維護方式則是補餌消耗資源、維修造成停機。筆記的「可調參數（本地分析）」改寫成容量高低導致鋪滿水域／精選點位，以及自動化與手動維護的取捨，卻漏掉來源這兩個核心調參效果。"
-        }
-      ]
+      "verdict": "pass",
+      "issues": []
     },
     {
       "id": "fishing-pond-production",
-      "verdict": "flag",
-      "issues": [
-        {
-          "kind": "checker-error",
-          "detail": "review command failed"
-        }
-      ]
+      "verdict": "pass",
+      "issues": []
     },
     {
       "id": "fishing-target-tracking",
@@ -975,17 +891,8 @@
     },
     {
       "id": "gathering-gathering-quota",
-      "verdict": "flag",
-      "issues": [
-        {
-          "kind": "missing-key-point",
-          "detail": "The source prototype's first step specifies a clear collection target, two optional deposits, and a shrinking action budget. The note's minimal prototype omits the two optional deposits and the shrinking budget, so the described scene lacks the extra resource and cost on which the stop/continue decision depends."
-        },
-        {
-          "kind": "broken-example-logic",
-          "detail": "The failure mode says that if surplus resource value equals in-quota resource value, continuing is the only rational choice. That conclusion ignores the detour and supply costs that the source and the note's own loop treat as central, so it does not follow from the stated premise."
-        }
-      ]
+      "verdict": "pass",
+      "issues": []
     },
     {
       "id": "gathering-hidden-deposit-clues",
@@ -1024,8 +931,17 @@
     },
     {
       "id": "gathering-volumetric-excavation",
-      "verdict": "pass",
-      "issues": []
+      "verdict": "flag",
+      "issues": [
+        {
+          "kind": "fabricated-claim",
+          "detail": "筆記寫「來源指出要避開的情況是」連續地形重建、碰撞、存檔體積和碎塊表現，但 snapshot 的 pitfall 只說這些可能各自變成大型系統、應逐項驗證，並未把它們描述成要避開的遊戲情境。"
+        },
+        {
+          "kind": "broken-example-logic",
+          "detail": "邊界驗收要求「踩進這個情況時，結果必須和避開時不同；看不出差別，就不算測到這個邊界」，但來源的 pitfall 是工程風險清單，不是可透過「踩進／避開」比較結果的玩法情境；這個驗收判定不從其前提推出，也測不到所述風險。"
+        }
+      ]
     },
     {
       "id": "incremental-allocate-progress-capacity",
@@ -1034,13 +950,8 @@
     },
     {
       "id": "incremental-escalating-copy-price",
-      "verdict": "flag",
-      "issues": [
-        {
-          "kind": "broken-example-logic",
-          "detail": "The boundary acceptance links the source pitfall (overflow/rounding making distinct next prices appear identical) to whether the bulk-buy decision has only one path. The stated result—that this would mean the boundary is not tested—does not follow; a single-path bulk-buy decision says nothing about price-display or rounding behavior."
-        }
-      ]
+      "verdict": "pass",
+      "issues": []
     },
     {
       "id": "incremental-farm-or-push",
@@ -1053,11 +964,11 @@
       "issues": [
         {
           "kind": "missing-key-point",
-          "detail": "The snapshot's rules state that suitability and risk affect task outcomes, and its duration-risk parameter says long tasks can change risk, rare rewards or preparation requirements rather than only scaling payout. The note reduces this to mismatch/“gamble” and discusses duration mainly against reward, so it drops the key risk/outcome and parameter effect."
+          "detail": "The snapshot's “Duration-risk relationship” parameter says long tasks can change risk, rare rewards, or preparation requirements rather than only scaling payout. The note's same parameter discusses only reward versus wait time and “curve slope,” so it drops the source's stated non-payout effects."
         },
         {
           "kind": "broken-example-logic",
-          "detail": "In the boundary acceptance, the premise is the snapshot's pitfall that completion, reward claiming and team release must be explicit and non-duplicating. The stated conclusion—that if the “poorly matched team vs idle slot” decision has only one path, this boundary is not tested—does not follow; that decision is separate from the state/reward-duplication boundary."
+          "detail": "The boundary acceptance for the “cannot duplicate rewards” pitfall says passing requires the result to differ when entering the state. That does not actually test duplicate claiming: a duplicate-reward bug would also produce a difference. The test should check that repeated completion/claim/release does not grant extra rewards or leave the team unreleased."
         }
       ]
     },
@@ -1068,21 +979,8 @@
     },
     {
       "id": "incremental-offline-window",
-      "verdict": "flag",
-      "issues": [
-        {
-          "kind": "fabricated-claim",
-          "detail": "「相關模式」段落把其他條目寫成具體機制（時間券需道具、派遣卡名額、複本漲價，以及離線窗口的延長上限/產出速度價格會變），但 source_snapshot 只有 related ID，沒有這些事實，且未標為本地分析。"
-        },
-        {
-          "kind": "missing-key-point",
-          "detail": "來源 rules 明確把「容量」與耗材、時間上限並列為可能停止等效收益的限制；筆記的來源摘要、核心循環與參數段只延續耗材與時間上限，未把容量作為結算停止條件保留。"
-        },
-        {
-          "kind": "broken-example-logic",
-          "detail": "參數段說縮短有效離線時長會讓高耗材高收益任務「有機會在結算前跑完」；縮短上限只會更早截斷結算，不能使任務本身更快完成，與來源「上限越短越容易不匹配」的說明相反。"
-        }
-      ]
+      "verdict": "pass",
+      "issues": []
     },
     {
       "id": "incremental-overlap-income-bursts",
@@ -1101,13 +999,27 @@
     },
     {
       "id": "incremental-spend-time-advance",
-      "verdict": "pass",
-      "issues": []
+      "verdict": "flag",
+      "issues": [
+        {
+          "kind": "broken-example-logic",
+          "detail": "The boundary-acceptance bullet turns the source's prototype pitfall ('don't bind prototype validation to real payments; use level rewards first') into an A/B test requiring the violating and avoided cases to produce different outcomes. That does not follow: avoiding real payments is a prototype constraint, not a premise that player results must differ."
+        }
+      ]
     },
     {
       "id": "inventory-adjacency",
-      "verdict": "pass",
-      "issues": []
+      "verdict": "flag",
+      "issues": [
+        {
+          "kind": "missing-key-point",
+          "detail": "Source rules and loop explicitly use battle outcomes to assess the layout and rearrange after results; the note's core loop and summary instead describe rearranging from active-link display and never mention battle-result feedback."
+        },
+        {
+          "kind": "broken-example-logic",
+          "detail": "The boundary acceptance says that mixing adjacency, diagonals, direction, and chained effects must produce a different result from avoiding the pitfall; the source pitfall is about resolution order and explainability, not outcome difference, so the stated pass condition does not follow."
+        }
+      ]
     },
     {
       "id": "inventory-death-retrieval",
@@ -1141,8 +1053,17 @@
     },
     {
       "id": "inventory-shape-packing",
-      "verdict": "pass",
-      "issues": []
+      "verdict": "flag",
+      "issues": [
+        {
+          "kind": "over-inference",
+          "detail": "邊界驗收把來源的原型開發順序建議（「先別加裝備屬性；最基本的拾取、旋轉和放回必須順手」）當成可測試的行為邊界，並要求「踩進這個情況時，結果必須和避開時不同」；但來源用意是延後加入裝備屬性，先把核心操作做好，這並非兩種遊戲狀態的對照測試，因此這個通過條件無法從前提推出。"
+        },
+        {
+          "kind": "over-inference",
+          "detail": "frontmatter 摘要寫「用幾何形狀而不只是重量」，但快照完全沒有提到重量制背包或與重量相關的對比；這個對照是筆者自行加入的框架，來源並未支持。"
+        }
+      ]
     },
     {
       "id": "inventory-stack-limits",
@@ -1165,19 +1086,14 @@
       "issues": [
         {
           "kind": "missing-key-point",
-          "detail": "來源規則明說組合結果可擴大範圍或把效果傳播到另一批目標，且不是把兩個原有效果各播放一次；筆記只泛稱「更強效果」，未保留這個關鍵區別。"
+          "detail": "筆記在來源摘要只保留「佔位和等待成本」，卻漏掉核心規則：組合結果可以擴大範圍或把效果傳播到其他目標，而不是簡單播放兩次原有效果；本地段落也沒有補上這點，因此沒有定義組合效果與單獨使用效果的差異。"
         }
       ]
     },
     {
       "id": "matching-complete-lines",
-      "verdict": "flag",
-      "issues": [
-        {
-          "kind": "fabricated-claim",
-          "detail": "「相關模式」段落描述其他模式的具體機制（例如合成三消升級會把多個佔位壓成一個並升級），但 source_snapshot 只提供 related IDs，沒有這些名稱或機制描述，且該段未標為本地分析。"
-        }
-      ]
+      "verdict": "pass",
+      "issues": []
     },
     {
       "id": "matching-gravity-cascade",
@@ -1186,13 +1102,8 @@
     },
     {
       "id": "matching-merge-three-upgrade",
-      "verdict": "flag",
-      "issues": [
-        {
-          "kind": "checker-error",
-          "detail": "review command failed"
-        }
-      ]
+      "verdict": "pass",
+      "issues": []
     },
     {
       "id": "matching-pattern-creates-power",
@@ -1201,31 +1112,13 @@
     },
     {
       "id": "matching-slide-board-merge",
-      "verdict": "flag",
-      "issues": [
-        {
-          "kind": "fabricated-claim",
-          "detail": "「相關模式」段落對四個相關模式的具體機制描述（例如清除下方貨物要改變支撐物、合併電力棋子是稀有道具取捨、完成整行靠湊滿一排、重力連鎖由消除支撐物觸發）不在 source_snapshot 中，且該段未標明為本地分析，等於把未提供的來源事實寫成已知。"
-        },
-        {
-          "kind": "over-inference",
-          "detail": "核心循環寫「整排物件一起滑到底」，但 snapshot 的「單次滑動距離」參數明示可以只走一格；把滑到盡頭寫成固定機制，是把參數選項當成規則。"
-        }
-      ]
+      "verdict": "pass",
+      "issues": []
     },
     {
       "id": "matching-swap-to-align",
-      "verdict": "flag",
-      "issues": [
-        {
-          "kind": "broken-example-logic",
-          "detail": "〈解法與取捨〉說「保留一組不消可以空出位置給更大的組合」，但保留不消正好讓該組繼續佔格，下一句也承認「保留期間它仍佔著格子」；前提與所述結果自相矛盾。"
-        },
-        {
-          "kind": "broken-example-logic",
-          "detail": "〈邊界驗收〉把來源的「隨機補位可能產生無可行交換」邊界，和「多消幾塊…是否清到關卡要求的位置只剩一種走法」混在一起；後者是否只剩一種走法，不能推出是否測到無可行交換／重排邊界。"
-        }
-      ]
+      "verdict": "pass",
+      "issues": []
     },
     {
       "id": "matching-tap-connected-group",
@@ -1244,13 +1137,8 @@
     },
     {
       "id": "movement-carry-object",
-      "verdict": "flag",
-      "issues": [
-        {
-          "kind": "broken-example-logic",
-          "detail": "「邊界驗收」把來源的防卡／重置邊界（物件卡住或遺失）與另一個「是否把物件留在開關上」的決策綁在一起；即使該決策只剩一種走法，也不能推論沒有測到物件卡住或遺失的邊界，前提與結論不相關。"
-        }
-      ]
+      "verdict": "pass",
+      "issues": []
     },
     {
       "id": "movement-downward-slam",
@@ -1259,8 +1147,13 @@
     },
     {
       "id": "movement-ledge-catch",
-      "verdict": "pass",
-      "issues": []
+      "verdict": "flag",
+      "issues": [
+        {
+          "kind": "missing-key-point",
+          "detail": "The source rules explicitly scope the mechanic as an edge pause/transfer, not a sustained stamina climb across a wall; the note's source summary omits this exclusion, dropping a key boundary."
+        }
+      ]
     },
     {
       "id": "movement-low-slide",
@@ -1274,13 +1167,8 @@
     },
     {
       "id": "movement-run-walk-control",
-      "verdict": "flag",
-      "issues": [
-        {
-          "kind": "fabricated-claim",
-          "detail": "「相關模式」段落把 movement-auto-forward、movement-downward-slam、movement-ledge-catch、movement-short-retry 的具體機制寫成事實（例如方向交給系統、下砸加速下落、抓邊把失敗跳躍轉為新選擇、短距重試修正單一動作），但 source_snapshot 的 related 只列出 id，沒有這些描述；該段也未標為本地分析。"
-        }
-      ]
+      "verdict": "pass",
+      "issues": []
     },
     {
       "id": "movement-short-retry",
@@ -1289,13 +1177,8 @@
     },
     {
       "id": "movement-target-bounce",
-      "verdict": "flag",
-      "issues": [
-        {
-          "kind": "broken-example-logic",
-          "detail": "邊界驗收段先引用來源的邊界為「側面與頂部接觸回饋不一致卻沒有清楚提示，玩家會覺得借力隨機」，但接著宣稱若「彈起後直達出口，還是再踩一次拿到旁邊的獎勵」只剩一種走法就不算測到這個邊界。該條件檢查的是決策分支是否保留兩條走法，與前提所說的接觸回饋可讀性無關；因此由前提推不出這個判定結果。"
-        }
-      ]
+      "verdict": "pass",
+      "issues": []
     },
     {
       "id": "movement-variable-jump",
@@ -1309,8 +1192,13 @@
     },
     {
       "id": "narrative-conversation-intervention",
-      "verdict": "pass",
-      "issues": []
+      "verdict": "flag",
+      "issues": [
+        {
+          "kind": "over-inference",
+          "detail": "The snapshot's prototype pitfall says to handle interrupted dialogue/subtitles/actions so characters do not speak two lines at once. The note recasts this as a source-stated 'situation to avoid' and derives a boundary test that stepping into it must produce a different result; that framing is not supported by the snapshot."
+        }
+      ]
     },
     {
       "id": "narrative-delayed-choice-consequences",
@@ -1349,13 +1237,8 @@
     },
     {
       "id": "narrative-timed-response",
-      "verdict": "flag",
-      "issues": [
-        {
-          "kind": "checker-error",
-          "detail": "review command failed"
-        }
-      ]
+      "verdict": "pass",
+      "issues": []
     },
     {
       "id": "progression-challenge-tiers",
@@ -1364,23 +1247,13 @@
     },
     {
       "id": "progression-death-loses-training",
-      "verdict": "flag",
-      "issues": [
-        {
-          "kind": "fabricated-claim",
-          "detail": "核心循環把訓練損失寫成「練不回來」，暗示訓練成果不可恢復；但來源只說死亡會降低熟練度或後繼者不繼承，並要求重新訓練，同段也說要重練，並非練不回來。"
-        }
-      ]
+      "verdict": "pass",
+      "issues": []
     },
     {
       "id": "progression-evolution-recipes",
-      "verdict": "flag",
-      "issues": [
-        {
-          "kind": "fabricated-claim",
-          "detail": "The minimal-prototype section says it does not add counts, time, or thresholds '來源沒有寫出的' (that the source did not write), but the source snapshot's prototype explicitly specifies four components and two fixed recipes. This is an inaccurate claim about what the source contains."
-        }
-      ]
+      "verdict": "pass",
+      "issues": []
     },
     {
       "id": "progression-knowledge-gates",
@@ -1397,8 +1270,8 @@
       "verdict": "flag",
       "issues": [
         {
-          "kind": "fabricated-claim",
-          "detail": "「相關模式」段落描述了挑戰層級、死亡失去訓練、進化配方鏈、重置換加速等模式的具體機制，但 source_snapshot 只提供相關 id，沒有這些描述，且該段未標為本地分析；這些是未受來源支持的斷言。"
+          "kind": "missing-key-point",
+          "detail": "來源規則明確指出經驗不能任意分配給其他技能，這是「練習弱項 vs. 完成當前目標」取捨的核心限制；筆記的來源摘要只保留「行動成功給對應經驗」與門檻效果，沒有把這條關鍵規則列為來源機制。"
         }
       ]
     },
@@ -1409,37 +1282,18 @@
     },
     {
       "id": "progression-random-level-choices",
-      "verdict": "flag",
-      "issues": [
-        {
-          "kind": "over-inference",
-          "detail": "「可調參數（本地分析）」把候選數量多的效果寫成比較成本上升、玩家只挑當下最強而稀釋長期規劃，與來源明列的「候選多時更容易按計畫成長，少時更需要臨時應變」相反；這是把本地推論寫成參數效果，未標明與來源相反。"
-        }
-      ]
+      "verdict": "pass",
+      "issues": []
     },
     {
       "id": "progression-research-prerequisites",
-      "verdict": "flag",
-      "issues": [
-        {
-          "kind": "fabricated-claim",
-          "detail": "筆記在「最小原型與驗收」稱來源沒有寫出計數、時間或門檻，但來源快照的 prototype 明確寫六個研究節點、兩種資源、一名研究員，walkthrough 也有一天完成一個項目、三天後訂單等時間資訊。"
-        }
-      ]
+      "verdict": "pass",
+      "issues": []
     },
     {
       "id": "progression-respec-investment",
-      "verdict": "flag",
-      "issues": [
-        {
-          "kind": "missing-key-point",
-          "detail": "來源規則明確包含「重分配可能收費、限定地點或限制可改內容」；筆記的來源摘要只寫「按規則分配」，後文也只討論成本與可改範圍，完全漏掉地點限制這項來源約束。"
-        },
-        {
-          "kind": "over-inference",
-          "detail": "「相關模式」段落把研究前置、挑戰層級、死亡失去訓練、進化配方鏈的具體運作寫成事實，但 source_snapshot 只提供 related ID，沒有這些描述，且該段未標示為本地分析。"
-        }
-      ]
+      "verdict": "pass",
+      "issues": []
     },
     {
       "id": "progression-specialization-branches",
@@ -1448,13 +1302,8 @@
     },
     {
       "id": "progression-successor-selection",
-      "verdict": "flag",
-      "issues": [
-        {
-          "kind": "checker-error",
-          "detail": "review command failed"
-        }
-      ]
+      "verdict": "pass",
+      "issues": []
     },
     {
       "id": "projectiles-active-reload",
@@ -1463,13 +1312,8 @@
     },
     {
       "id": "projectiles-ballistic-arc",
-      "verdict": "flag",
-      "issues": [
-        {
-          "kind": "broken-example-logic",
-          "detail": "邊界驗收把來源的原型陷阱（鏡頭與發射點偏移造成準星和實際軌跡不一致）與「先打一發校準 vs 靠近再射」的決策多樣性混為一談；即使該決策只剩一種走法，也無法推出沒有測到準星偏移這個邊界。"
-        }
-      ]
+      "verdict": "pass",
+      "issues": []
     },
     {
       "id": "projectiles-charged-release",
@@ -1478,28 +1322,23 @@
     },
     {
       "id": "projectiles-graze-reward",
+      "verdict": "flag",
+      "issues": [
+        {
+          "kind": "broken-example-logic",
+          "detail": "邊界驗收把來源的設計告誡「不要把大角色圖像當作受傷範圍」當成可「踩進」的測試情境，並要求踩進與避開的結果不同；這個結果判定並不能從該前提推出，也不是可操作的驗收條件。"
+        }
+      ]
+    },
+    {
+      "id": "projectiles-heat-pacing",
       "verdict": "pass",
       "issues": []
     },
     {
-      "id": "projectiles-heat-pacing",
-      "verdict": "flag",
-      "issues": [
-        {
-          "kind": "broken-example-logic",
-          "detail": "邊界驗收把來源的「臨界點可預測」與「冷卻時換副武器或保持主武器瞄準等待」的決策混在一起；即使該決策只剩一種走法，也不能推出沒有測到臨界可預測性這個邊界。"
-        }
-      ]
-    },
-    {
       "id": "projectiles-independent-aim",
-      "verdict": "flag",
-      "issues": [
-        {
-          "kind": "broken-example-logic",
-          "detail": "The 邊界驗收 paragraph says that if the circling trade-off has only one possible route, the facing/muzzle/cursor mismatch boundary has not been tested. That conclusion does not follow: the source pitfall is about readable shot direction, not about whether circling has multiple routes. The test for aim/muzzle/cursor mismatch should not be made to depend on the circling decision's route diversity."
-        }
-      ]
+      "verdict": "pass",
+      "issues": []
     },
     {
       "id": "projectiles-maintain-lock",
@@ -1508,13 +1347,8 @@
     },
     {
       "id": "projectiles-piercing-line",
-      "verdict": "flag",
-      "issues": [
-        {
-          "kind": "broken-example-logic",
-          "detail": "邊界驗收把來源的「同一彈丸不可每幀重複傷害同一目標；命中與繼續穿過的回饋要分清」當作邊界，卻用「繞到側面是否只剩一種走法」來判定是否測到該邊界；前提與結論無關，不能推出未測到重複命中與穿透回饋的邊界。"
-        }
-      ]
+      "verdict": "pass",
+      "issues": []
     },
     {
       "id": "projectiles-spread-recovery",
@@ -1528,25 +1362,16 @@
     },
     {
       "id": "puzzles-beam-routing",
-      "verdict": "flag",
-      "issues": [
-        {
-          "kind": "fabricated-claim",
-          "detail": "The note says the prototype will not add “counts not written by the source,” but the snapshot’s prototype.firstStep explicitly specifies a 2D grid with one source, two rotating reflectors, and one receiver. This misstates the source and omits those concrete setup parameters."
-        },
-        {
-          "kind": "broken-example-logic",
-          "detail": "The boundary acceptance claims that if “taking a relay closes the door behind you” has only one solution path, it does not test the source boundary about deferring color mixing/dynamic occlusion and keeping the basic beam followable. That conclusion does not follow: door self-lock is a separate decision, and having only one route for it does not establish whether the basic light path is legible or whether color mixing and dynamic blockers were deferred."
-        }
-      ]
+      "verdict": "pass",
+      "issues": []
     },
     {
       "id": "puzzles-box-pushing",
       "verdict": "flag",
       "issues": [
         {
-          "kind": "missing-key-point",
-          "detail": "The source has two tunable parameters: undo scope (unlimited undo encourages experimental reasoning; limited undo adds execution pressure) and box properties. The note's 「可調參數」 section labels only box properties as a 來源參數, and pushes undo down to a local knob (撤銷深度) while dropping the source's stated tradeoff that limited undo adds pressure. This presents an incomplete parameter list as the source's parameter set."
+          "kind": "fabricated-claim",
+          "detail": "筆記把來源 pitfall 整句當成「要避開的情況」，但來源的第一句是建議「先手工驗證謎題有解」，不是要避免；這使後面的邊界驗收建立在錯誤的來源陳述上。"
         }
       ]
     },
@@ -1570,12 +1395,8 @@
       "verdict": "flag",
       "issues": [
         {
-          "kind": "fabricated-claim",
-          "detail": "The frontmatter summary says players must choose foldable terrains within a limited field of view. The snapshot only describes two-sided information as a parameter (viewing or hiding the reverse), and does not state that the mechanic uses limited vision by default."
-        },
-        {
-          "kind": "broken-example-logic",
-          "detail": "The boundary acceptance says that if “where the character must stand before the next fold” has only one solution, then the source boundary about consistent character layers/walkable edges and avoiding arbitrary angles or multilayer folds is not tested. That does not follow: uniqueness of a standing position is separate from whether layer and walkable-edge consistency is maintained."
+          "kind": "over-inference",
+          "detail": "frontmatter summary says players choose folds '在有限視野裡' (in limited vision), but the snapshot never states a limited field of view; it only says folding hides areas and that two-sided information can be shown or hidden. This is an unlabelled inference presented in the note summary."
         }
       ]
     },
@@ -1584,20 +1405,34 @@
       "verdict": "flag",
       "issues": [
         {
-          "kind": "broken-example-logic",
-          "detail": "In the boundary acceptance section, the cited source boundary is about avoiding costly arbitrary image-to-3D conversion, occlusion, and collision by constraining viewpoints/assets. The proposed test instead checks whether the 'enlarge as a step vs. shrink through a gap' decision has more than one route. A single-solution scale choice does not test the stated technical boundary, so the acceptance condition does not follow from its premise."
+          "kind": "over-inference",
+          "detail": "「解法與取捨（本地分析）」段落斷言「視覺關係一旦實體化就固定下來」，並以此推論允許反悔會稀釋取捨。來源未說明實體化後是否不可逆；來源反而把「不確定性需要便捷撤銷」列為參數，暗示可逆性是設計選項。此處把未經來源支持的機制屬性寫成既成事實。"
+        },
+        {
+          "kind": "over-inference",
+          "detail": "相關模式段落稱視角規則「不動地形本身，只改玩家看它的方式，因此改動可逆且成本低」。來源未提供可逆性或成本判斷，且此說法與同文前面「一旦實體化就固定下來」的斷言互相矛盾。"
         }
       ]
     },
     {
       "id": "puzzles-scene-deduction",
-      "verdict": "pass",
-      "issues": []
+      "verdict": "flag",
+      "issues": [
+        {
+          "kind": "fabricated-claim",
+          "detail": "The note says the source's pitfall is to avoid the situation “先驗證證據能唯一支持答案；增加人物和文本會迅速增加校對成本”. The snapshot actually says to verify that evidence supports a unique answer before adding more people and text, because scaling multiplies consistency work. The note reverses the advice and builds the boundary acceptance test on that misreading."
+        }
+      ]
     },
     {
       "id": "puzzles-time-scrubbing",
-      "verdict": "pass",
-      "issues": []
+      "verdict": "flag",
+      "issues": [
+        {
+          "kind": "fabricated-claim",
+          "detail": "The boundary-acceptance section says the source identifies 「先規定哪些對象會回退；任意物理和大量隨機事件會讓回放難以一致」 as a situation to avoid. In the snapshot, the prototype pitfall actually instructs developers to define which objects rewind first, and warns that unrestricted physics and many random events make replay consistency difficult. The note reverses this prescription into something to avoid, while presenting it as a source statement."
+        }
+      ]
     },
     {
       "id": "puzzles-visual-rule-learning",
@@ -1611,13 +1446,8 @@
     },
     {
       "id": "relationships-companion-approval",
-      "verdict": "flag",
-      "issues": [
-        {
-          "kind": "missing-key-point",
-          "detail": "來源規則明確補充「反應會影響後續交流與關係，但不是一根全世界通用的善惡條」；筆記的來源摘要與驗收引用只保留到「按自己的價值觀增加或降低認可」，未保留這個關鍵限定。"
-        }
-      ]
+      "verdict": "pass",
+      "issues": []
     },
     {
       "id": "relationships-daily-contact",
@@ -1636,51 +1466,38 @@
     },
     {
       "id": "relationships-faction-reputation",
-      "verdict": "flag",
-      "issues": [
-        {
-          "kind": "missing-key-point",
-          "detail": "The source's prototype firstStep explicitly requires two factions, three consequential tasks, and two later options affected by reputation; the note's minimal prototype drops these concrete counts and instead says to build only a small scene while avoiding counts, so the cross-faction test setup is missing."
-        },
-        {
-          "kind": "broken-example-logic",
-          "detail": "The boundary acceptance ties the source pitfall about traceability/hidden numbers to the separate decision about mixed fear and respect; 'mixed fear/respect has only one path' does not show that the traceability boundary was not tested. The stated failure condition does not follow from the cited premise."
-        }
-      ]
+      "verdict": "pass",
+      "issues": []
     },
     {
       "id": "relationships-gift-allocation",
-      "verdict": "pass",
-      "issues": []
-    },
-    {
-      "id": "relationships-persuasion-checks",
-      "verdict": "pass",
-      "issues": []
-    },
-    {
-      "id": "relationships-relationship-commitment",
       "verdict": "flag",
       "issues": [
         {
           "kind": "fabricated-claim",
-          "detail": "「相關模式」段落對四個 related 條目的機制下了具體斷言（例如 companion-approval 是「隊友對選擇的被動評價」、dynastic-marriage「把承諾當政治資本來換長期資源」、faction-reputation「分散記錄多方評價」、bond-scenes「把門檻後的片段當獎勵」），但來源快照只列出這些條目的 id，並未提供其內容。這些描述未標示為本地分析，屬於來源未支持的斷言。"
+          "detail": "最小原型段落以引號列出四步循環，第一步寫成「瞭解物件」並掛在來源循環上；來源快照的第一步是「了解对象」（了解收禮者／對象的偏好），並非「物件」。這是把「認識對方」誤引成「認識物品」，屬於對來源內容的不實引用。"
         }
       ]
     },
     {
-      "id": "relationships-secrets-leverage",
+      "id": "relationships-persuasion-checks",
       "verdict": "flag",
       "issues": [
         {
-          "kind": "missing-key-point",
-          "detail": "The source's '拒絕後果' parameter says automatic exposure makes threats credible while reducing flexibility. The note's local parameter discussion omits that effect and instead says lighter consequences let casual threats work ('放輕時，隨口威脅也能成立'), which reverses the source's stated logic."
-        },
-        {
-          "kind": "over-inference",
-          "detail": "The '相關模式' bullets assert specific mechanics for persuasion checks, companion approval, faction reputation, and relationship commitment (e.g. changing difficulty/skipping checks, separate reputation accounting), but the snapshot only lists those related IDs. These extensions are not labeled as local analysis."
+          "kind": "fabricated-claim",
+          "detail": "來源的 pitfall 是「先說明哪些準備有幫助；只有不透明骰點會讓玩家難以理解失敗」，其中「先說明哪些準備有幫助」是建議做法；筆記卻把整句當成來源指出「要避開的情況」，把建議誤讀成應避免的情境。"
         }
       ]
+    },
+    {
+      "id": "relationships-relationship-commitment",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "relationships-secrets-leverage",
+      "verdict": "pass",
+      "issues": []
     },
     {
       "id": "rhythm-cue-response",
@@ -1704,13 +1521,23 @@
     },
     {
       "id": "rhythm-sustain-notes",
-      "verdict": "pass",
-      "issues": []
+      "verdict": "flag",
+      "issues": [
+        {
+          "kind": "missing-key-point",
+          "detail": "來源規則明說「結束時是否另判一次鬆手，應由具體規則明確」，並在參數效果區分「只要求按夠時長」與「另判鬆手時刻會多一個精準要求」。筆記的來源摘要未保留這個關鍵限定，且「鬆手判定」段落只談提前鬆手的寬嚴，沒有呈現「不判鬆手／另判鬆手」的二元選擇。"
+        }
+      ]
     },
     {
       "id": "stealth-body-concealment",
-      "verdict": "pass",
-      "issues": []
+      "verdict": "flag",
+      "issues": [
+        {
+          "kind": "broken-example-logic",
+          "detail": "邊界驗收把來源的開發注意事項（避免先做身體碰撞與動畫，改用可拖動標記驗證路線成本）當成遊戲內可「踩進」的情境，並要求踩進與避開時產生不同遊戲結果；這是原型實作範疇，不是可由玩家進入的行為邊界，因此該驗收推論不成立。"
+        }
+      ]
     },
     {
       "id": "stealth-disguise-access",
@@ -1739,22 +1566,18 @@
     },
     {
       "id": "stealth-security-network",
-      "verdict": "pass",
-      "issues": []
-    },
-    {
-      "id": "stealth-sound-lures",
       "verdict": "flag",
       "issues": [
         {
           "kind": "broken-example-logic",
-          "detail": "邊界驗收先引用來源 pitfall「先固定誰響應、響應多久」，但結論卻說「若『現在取回誘餌，還是先利用通路』只剩一種走法，就不算測到這個邊界」。這個結果無法從該前提推出：回收或利用通路的取捨對應的是來源的第二個決策，並不檢驗「誰響應、響應多久」的一致性。"
-        },
-        {
-          "kind": "missing-key-point",
-          "detail": "來源的最小原型 firstStep 指定「一個巡邏守衛、一顆可投擲石子、巡邏—調查—返回三個狀態」；筆記的「最小原型」改以玩家四步驟循環取代這些守衛狀態，並聲稱「不另設來源沒有寫出的數量」，但來源其實已寫明一個守衛、一顆石子，等於把這項具體原型規格略去。"
+          "detail": "The boundary acceptance says that when the player 'steps into' the source pitfall, the result must differ from avoiding it, otherwise the boundary was not tested. The source pitfall is to avoid building a full hacking minigame initially and instead make ownership visibly change what the player can see; the note's pass condition does not follow from that premise and does not actually test the stated pitfall."
         }
       ]
+    },
+    {
+      "id": "stealth-sound-lures",
+      "verdict": "pass",
+      "issues": []
     },
     {
       "id": "stealth-staged-accidents",
@@ -1777,7 +1600,11 @@
       "issues": [
         {
           "kind": "over-inference",
-          "detail": "In the local-analysis section “解法與取捨,” the note says that with limited supplies, treating slower-bleeding wounds first is worthwhile long-term. This reverses the source decision that limited supplies should prioritize the fastest-bleeding wound, so it is an unsupported inference presented as a design conclusion."
+          "detail": "Frontmatter summary adds “追兵壓力” (pursuer pressure) as a core pressure, but the snapshot only says bandaging risks interruption and running first costs more blood; no pursuers are stated, and this addition is not marked as local analysis."
+        },
+        {
+          "kind": "over-inference",
+          "detail": "The local analysis says a lenient interruption rule would let players “無腦站著補血,” but the source rule says treatment stops further blood loss without instantly healing the original wound."
         }
       ]
     },
@@ -1786,12 +1613,8 @@
       "verdict": "flag",
       "issues": [
         {
-          "kind": "fabricated-claim",
-          "detail": "The related-patterns section asserts specifics about other mechanics (for example that language decoding uses repeated word forms, that visual-rule learning has fixed rules, and that contagion control focuses on populations and routes) even though the snapshot only lists those mechanics as related IDs. The section is not labeled as local analysis, so these unsupported details read as source facts."
-        },
-        {
           "kind": "over-inference",
-          "detail": "The frontmatter summary says the player must decide within limited time, but the snapshot treats timed inspection as only one option under the inspection-cost parameter; free inspection explicitly supports slower diagnosis."
+          "detail": "The frontmatter summary says players must decide within limited time, but the source only presents timed inspection as one optional parameter and explicitly says free inspection supports slower diagnosis."
         }
       ]
     },
@@ -1802,13 +1625,8 @@
     },
     {
       "id": "survival-contagion-control",
-      "verdict": "flag",
-      "issues": [
-        {
-          "kind": "fabricated-claim",
-          "detail": "The prototype section says it will not add counts, times or thresholds that 'the source did not write' (來源沒有寫出的計數、時間或門檻), but the snapshot's prototype.firstStep explicitly specifies five characters, one foodborne route and an exposure log. The note thus presents a false statement about the source and drops the source's concrete first implementation step."
-        }
-      ]
+      "verdict": "pass",
+      "issues": []
     },
     {
       "id": "survival-fatigue-rest",
@@ -1817,13 +1635,8 @@
     },
     {
       "id": "survival-limb-impairment",
-      "verdict": "flag",
-      "issues": [
-        {
-          "kind": "over-inference",
-          "detail": "The note presents the animation/equipment/AI warning as a source-stated 'boundary', but the snapshot labels it a prototype pitfall. The following boundary test about the route decision having only one path does not follow from that pitfall."
-        }
-      ]
+      "verdict": "pass",
+      "issues": []
     },
     {
       "id": "survival-safe-water",
@@ -1842,20 +1655,21 @@
     },
     {
       "id": "survival-weather-exposure",
-      "verdict": "pass",
-      "issues": []
+      "verdict": "flag",
+      "issues": [
+        {
+          "kind": "broken-example-logic",
+          "detail": "邊界驗收把來源的實作取捨（先跳過動態氣候與布料模擬；暴露在移動前必須可估計）誤寫成一個可「踩進去」並與避開情況比較結果的遊戲情境。來源的 pitfall 不是這種可比較結果的邊界條件，所述通過標準不成立。"
+        }
+      ]
     },
     {
       "id": "survival-wound-cleanliness",
       "verdict": "flag",
       "issues": [
         {
-          "kind": "missing-key-point",
-          "detail": "Snapshot's 'Complication delay' parameter explicitly says delayed consequences need causal logs so they do not feel like random punishment. The note discusses delay length and feedback timing but omits the causal-log requirement."
-        },
-        {
-          "kind": "broken-example-logic",
-          "detail": "The boundary-acceptance bullet ties the source pitfall ('do not require real medical knowledge; item text should explain in-game use') to whether the 'interrupt vs wait' decision has more than one route. A single-route decision does not test that pitfall, so the stated acceptance condition does not follow from the cited boundary."
+          "kind": "over-inference",
+          "detail": "note_frontmatter.summary states 「傷口會隨時間惡化」 (wounds worsen over time), but source_snapshot only says wounds keep changing during recovery and that later complications may occur. It does not establish that wounds generally or inevitably deteriorate, so this is an unlabeled inference presented as a factual summary."
         }
       ]
     }

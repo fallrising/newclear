@@ -560,10 +560,10 @@ def write_all(entries: list[dict]) -> None:
 
 
 def main() -> None:
-    cache = Path('/tmp/atlas-cache/catalog.json')
-    entries = json.loads(cache.read_text(encoding='utf-8'))
-    write_all(entries)
-    print(f'wrote notes for {len(entries)} entries')
+    raise SystemExit(
+        'write_notes.py no longer writes notes. Content must be exact source spans; '
+        'run python3 check_quotes.py --write-notes.'
+    )
 
 
 if __name__ == '__main__':

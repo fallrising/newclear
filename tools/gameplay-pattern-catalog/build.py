@@ -12,7 +12,9 @@ from pathlib import Path
 from urllib.parse import urlsplit
 
 ROOT = Path(__file__).resolve().parent
+sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / 'sources'))
+import check_quotes
 from snapshot import SNAPSHOT_ID, load_manifest
 
 CATEGORIES = {
@@ -28,11 +30,7 @@ CATEGORIES = {
     'rhythm': '節拍與時序', 'driving': '載具操控',
 }
 NOTE_STATUS = {'pending': '待寫', 'draft': '草稿', 'reviewed': '已對照來源'}
-HEADINGS = (
-    '來源摘要', '問題與情境（本地分析）', '核心循環（本地分析）',
-    '解法與取捨（本地分析）', '可調參數（本地分析）', '失敗模式（本地分析）',
-    '最小原型與驗收（本地提案）', '相關模式', '參考來源',
-)
+HEADINGS = check_quotes.HEADINGS
 FIELDS = {
     'schema_version', 'id', 'title', 'title_en', 'category', 'source_category',
     'tags', 'summary', 'note_status', 'related', 'sources',
@@ -41,39 +39,16 @@ SOURCE_FIELDS = {'title', 'url', 'accessed', 'access_method'}
 SLUG = re.compile(r'[a-z0-9]+(?:-[a-z0-9]+)*\Z')
 LINK = re.compile(r'\[([^\]\n]+)\]\(([^\s)]+)\)')
 TOKEN = re.compile(r'\[([^\]\n]+)\]\(([^\s)]+)\)|`([^`\n]+)`')
-PLACEHOLDERS = ('TODO', 'TBD', 'FIXME', '占位', 'lorem')
+# 占位 is a real source term (a worker or piece occupies a slot), not a stub.
+PLACEHOLDERS = ('TODO', 'TBD', 'FIXME', 'lorem')
 _FULLWIDTH_DIGITS = str.maketrans('０１２３４５６７８９', '0123456789')
-_PROTOTYPE_BULLETS = ('- 最小範圍：', '- 驗收：', '- 邊界驗收：')
-# Two notes may phrase one edge the same way. Three or more copies of a
-# 驗收 or 邊界驗收 sentence is the fixed template this check exists to stop.
-MAX_SHARED_CHECK = 2
+# Quote notes do not share a generated 驗收 sentence. check_quotes.py is the
+# faithfulness check. The digit helper below stays for the retired judge.
 
 
 def require(condition: bool, message: str) -> None:
     if not condition:
         raise ValueError(message)
-
-
-def prototype_check_text(section: str, label: str) -> str:
-    prefix = f'- {label}：'
-    matches = [line[len(prefix):].strip() for line in section.splitlines() if line.startswith(prefix)]
-    require(len(matches) == 1, f'prototype needs exactly one {label}')
-    require(matches[0] != '', f'empty {label}')
-    return matches[0]
-
-
-def shared_check_overflow(notes: list[dict]) -> str | None:
-    """Return an error when one 驗收 or 邊界驗收 sentence is used too widely."""
-    proto_index = HEADINGS.index('最小原型與驗收（本地提案）')
-    for label in ('驗收', '邊界驗收'):
-        counts: dict[str, int] = {}
-        for note in notes:
-            text = prototype_check_text(note['sections'][proto_index], label)
-            counts[text] = counts.get(text, 0) + 1
-        worst = max(counts.values(), default=0)
-        if worst > MAX_SHARED_CHECK:
-            return f'{label} repeated {worst} times; more than {MAX_SHARED_CHECK} notes sharing one sentence is boilerplate'
-    return None
 
 
 def _digit_windows(text: str, token: str, radius: int = 16) -> list[str]:
@@ -180,27 +155,19 @@ def parse_note(path: Path):
     require(all(section.strip() for section in sections), 'empty note section')
     footer = body.split('## 參考來源\n', 1)[1]
     require(LINK.findall(footer) == [(source['title'], source['url']) for source in meta['sources']], 'reference footer must match metadata sources')
-    require(all(len(section.strip()) >= 40 for section in sections), 'note section is not substantive')
-    prototype = sections[HEADINGS.index('最小原型與驗收（本地提案）')]
-    require('尚未實玩驗證' in prototype, 'prototype must stay unverified')
-    require(all(bullet in prototype for bullet in _PROTOTYPE_BULLETS), 'prototype needs a short scope, check, and boundary')
-    invented = invented_prototype_number(meta['id'], prototype, path.parents[1])
-    require(invented is None, 'invented prototype number: ' + (invented or ''))
     for token in PLACEHOLDERS:
         require(token not in body, 'placeholder content')
     if meta['note_status'] == 'reviewed':
         require(all(source['access_method'] == 'page-text' for source in meta['sources']), 'reviewed requires page-text')
-        require('玩家行動' in body and '系統回饋' in body and '下一個決策' in body, 'reviewed note needs an explicit loop')
-        require('尚未實玩驗證' in body, 'reviewed prototype must stay unverified')
-        require('本地分析' in body and '本地提案' in body, 'analysis must stay labeled')
     for _label, target in LINK.findall(body):
         require(target in urls or target in [f'{item}.md' for item in meta['related']], 'unregistered note link: ' + target)
     related_section = body.split('## 相關模式\n', 1)[1].split('## 參考來源\n', 1)[0]
     related_lines = [line for line in related_section.splitlines() if line.startswith('- ')]
     require([target for _label, target in LINK.findall(related_section)] == [f'{item}.md' for item in meta['related']], 'related section must match related IDs')
-    for line in related_lines:
-        reason = line.split(')', 1)[-1]
-        require('：' in reason and len(reason.split('：', 1)[1].strip()) >= 12, 'related pattern needs a reason')
+    for line, related_id in zip(related_lines, meta['related']):
+        require(re.fullmatch(r'- \[[^\]\n]+\]\(' + re.escape(related_id) + r'\.md\)', line) is not None, 'related pattern is a link, not a written comparison')
+    quote_errors = check_quotes.check_note(path, meta, body)
+    require(not quote_errors, quote_errors[0] if quote_errors else '')
     return {'meta': meta, 'body': body.strip(), 'sections': sections}
 
 
@@ -323,7 +290,8 @@ def pattern_index(notes: list[dict], manifest: dict) -> str:
     for note in notes:
         meta = note['meta']
         source = by_source[meta['id']]['source_category']
-        lines.append(f"| [{meta['title']}]({meta['id']}.md) | {CATEGORIES[meta['category']]} | {source} | {NOTE_STATUS[meta['note_status']]} | {meta['summary']} |")
+        summary = check_quotes.display_of(note['sections'][0])
+        lines.append(f"| [{meta['title']}]({meta['id']}.md) | {CATEGORIES[meta['category']]} | {source} | {NOTE_STATUS[meta['note_status']]} | {summary} |")
     lines.append('')
     lines.append('欄位與維護方式見 [Metadata 指引](../METADATA.md)。來源對帳見 [完整度報表](../docs/coverage.md)。')
     lines.append('')
@@ -349,8 +317,6 @@ def load_catalog(root: Path = ROOT):
     require(bool(ids) and len(set(ids)) == len(ids), 'empty catalog or duplicate ID')
     require(len({note['meta']['summary'] for note in notes}) == len(notes), 'duplicate summary')
     require(len({note['sections'][0] for note in notes}) == len(notes), 'duplicate source summary')
-    overflow = shared_check_overflow(notes)
-    require(overflow is None, overflow or '')
     by_source = {entry['source_id']: entry for entry in manifest['entries']}
     missing_notes = sorted(set(by_source) - set(ids))
     extra_notes = sorted(set(ids) - set(by_source))
@@ -483,9 +449,10 @@ def build(out: Path, root: Path = ROOT):
         category = CATEGORIES[meta['category']]
         source_category = by_source[meta['id']]['source_category']
         status = NOTE_STATUS[meta['note_status']]
+        shown = check_quotes.display_of(note['sections'][0])
         search = ' '.join([
             meta['id'], meta['title'], meta['title_en'], category, source_category,
-            meta['summary'], status, *meta['tags'], note['body'].split('## 相關模式', 1)[0],
+            meta['summary'], shown, status, *meta['tags'], note['body'].split('## 相關模式', 1)[0],
         ])
         tags = ''.join('<span class="tag">' + html.escape(tag) + '</span>' for tag in meta['tags'])
         cards.append(
@@ -493,17 +460,17 @@ def build(out: Path, root: Path = ROOT):
             f'data-status="{meta["note_status"]}" data-search="{html.escape(search, quote=True)}">'
             f'<div class="eyebrow">{category}</div><p class="status {meta["note_status"]}">{status} · 原站 {html.escape(source_category)}</p>'
             f'<h2><a href="patterns/{meta["id"]}.html">{title}</a></h2><p class="english">{html.escape(meta["title_en"])}</p>'
-            f'<p>{html.escape(meta["summary"])}</p><div class="tags">{tags}</div></article>'
+            f'<p>{html.escape(shown)}</p><div class="tags">{tags}</div></article>'
         )
         body = (
             f'<article class="note"><a class="back" href="../index.html">← 回到全部模式</a>'
             f'<div class="eyebrow">{category} / {meta["id"]}</div><h1>{title}</h1>'
-            f'<p class="english">{html.escape(meta["title_en"])}</p><p class="lead">{html.escape(meta["summary"])}</p>'
+            f'<p class="english">{html.escape(meta["title_en"])}</p><p class="lead">{html.escape(shown)}</p>'
             f'<p class="status {meta["note_status"]}">{status} · 原站分類 {html.escape(source_category)} · 本地分類 {html.escape(meta["category"])}</p>'
-            f'<aside>「來源摘要」是簡短改寫；其餘設計分析與原型為本地提案，並非原站或原遊戲的完整規格。已對照來源不是獨立審查。</aside>'
+            f'<aside>正文是來源快照的原文，每段都標了檔案與字元位置。顯示行只做 OpenCC s2t 逐字轉換。草稿不是已審閱。</aside>'
             f'{markdown(note["body"])}</article>'
         )
-        (out / 'patterns' / f'{meta["id"]}.html').write_text(page(meta['title'], meta['summary'], body, '../'), encoding='utf-8')
+        (out / 'patterns' / f'{meta["id"]}.html').write_text(page(meta['title'], shown, body, '../'), encoding='utf-8')
     options = ''.join(f'<option value="{key}">{label}</option>' for key, label in CATEGORIES.items() if any(note['meta']['category'] == key for note in notes))
     statuses = ''.join(f'<option value="{key}">{label}</option>' for key, label in NOTE_STATUS.items())
     content = f'''<section class="hero"><div class="eyebrow">SOURCE SNAPSHOT {html.escape(manifest["snapshot_id"])}</div><h1>以來源快照為基準的設計模式筆記。</h1><p class="lead">每一篇對應一個公開機制頁。先看玩家的選擇，再讀取捨與最小驗證。<br>不是遊戲素材庫，也不是原站鏡像。</p><div class="stats"><strong>{facts["denominator"]} <small>個來源條目</small></strong><strong>{facts["reviewed"]} <small>篇已對照</small></strong><strong>{facts["groups"]} <small>個原站分類</small></strong></div></section>

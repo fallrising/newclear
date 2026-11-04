@@ -45,7 +45,7 @@ slug 使用項目目錄末段；若發生命名碰撞，先在本規範及索引
 
 文件檢查指令：`python3 scripts/check_project_success.py`。它只檢查覆蓋、格式及導航一致性，不替人判斷產品已可用。
 
-`tools/gameplay-pattern-catalog` 的 `source_commit`、total／draft／reviewed／flagged，以及 `review/pr-snippet.md`，由該目錄的筆記檔產生。同一支檢查會重算這些值；SUCCESS.md、inventory 裡該列與重算結果不一致就失敗。這只抓手抄狀態漂移，不表示筆記已審閱。變更這個 catalog 或它的 inventory `source_commit` 的 PR，描述必須包含該片段。
+`tools/gameplay-pattern-catalog` 的 `source_commit`、total／draft／reviewed／quoted_spans／quote_check，以及 `review/pr-snippet.md`，由該目錄的筆記檔與 `check_quotes.py` 產生。同一支檢查會重算這些值；SUCCESS.md、inventory 裡該列與重算結果不一致就失敗。這只抓手抄狀態漂移，不表示筆記已審閱。變更這個 catalog 或它的 inventory `source_commit` 的 PR，描述必須包含該片段。
 
 ## 新增元件與提交前檢查
 

@@ -8,6 +8,6 @@
 
 提交前執行 `python3 sources/inventory.py --check`、`python3 sources/text_cache.py --check`、`python3 status.py --check`、`python3 build.py --check`、單元測試、靜態建置與瀏覽器 smoke。環境限制逐項記錄。從 repo root 執行 `python3 scripts/check_project_success.py --write-index` 與 `python3 scripts/check_indexes.py`。
 
-`status.py --write` 從筆記產生 SUCCESS 狀態區、frontmatter `source_commit`、inventory 該列與 `review/pr-snippet.md`。不要手抄篇數或 SHA。改了 catalog 或該列 `source_commit` 的 PR，描述要包含這個片段。`review/auto_check.py` 沒有金鑰就略過模型；CI 不呼叫它，也不執行 `review/promote.py`。自動檢查的 pass 不是 reviewed。
+`status.py --write` 從筆記與 `check_quotes.py` 產生 SUCCESS 狀態區、frontmatter `source_commit`、inventory 該列與 `review/pr-snippet.md`。不要手抄篇數或 SHA。改了 catalog 或該列 `source_commit` 的 PR，描述要包含這個片段。內容欄只能是來源原文的引用；`python3 check_quotes.py --check` 失敗就不能當通過。`review/auto_check.py` 仍在目錄裡，但 validate 不讀它，CI 也不呼叫它或 `review/promote.py`。模型的 pass 不是 reviewed。
 
 收尾更新 SUCCESS、證據與根索引。新增來源或分類先同步 metadata 契約和測試。不把 pending 改成 passed，也不用筆記篇數代替 manifest 分母。

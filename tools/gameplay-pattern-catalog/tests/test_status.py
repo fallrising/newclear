@@ -63,7 +63,7 @@ class StatusTests(unittest.TestCase):
         for path in sorted((ROOT / 'patterns').glob('*.md')):
             if path.name == 'README.md':
                 continue
-            blob = subprocess.check_output(['git', 'hash-object', str(path)], text=True).strip()
+            blob = subprocess.check_output(['git', 'hash-object', '-w', str(path)], text=True).strip()
             lines.append(f'100644 blob {blob}\t{path.name}\n')
         tree = subprocess.check_output(['git', 'mktree'], input=''.join(lines), text=True).strip()
         facts = status.compute(ROOT)
@@ -71,15 +71,8 @@ class StatusTests(unittest.TestCase):
         self.assertEqual(facts['draft'], facts['total'])
         self.assertEqual(facts['reviewed'], 0)
         self.assertEqual(facts['pending'], 0)
-        auto_path = ROOT / 'review' / 'auto-check.json'
-        if auto_path.exists():
-            notes = json.loads(auto_path.read_text(encoding='utf-8'))['notes']
-            self.assertEqual(facts['auto_check'], 'present')
-            self.assertEqual(facts['auto_checked'], len(notes))
-            self.assertEqual(facts['flagged'], sum(item['verdict'] == 'flag' for item in notes))
-        else:
-            self.assertEqual(facts['flagged'], 0)
-            self.assertEqual(facts['auto_check'], 'absent')
+        self.assertEqual(facts['quote_check'], 'pass')
+        self.assertGreater(facts['quoted_spans'], 0)
         self.assertEqual(facts['snapshot_id'], SNAPSHOT_ID)
         self.assertNotEqual(facts['total'], 0)
 
@@ -99,7 +92,7 @@ class StatusTests(unittest.TestCase):
         (self.catalog / 'review' / 'pr-snippet.md').write_text(snippet.replace('draft:', 'draft: 1'), encoding='utf-8')
         self.assertIn('review/pr-snippet.md does not match the notes', status.check(self.catalog))
 
-    def test_flagged_count_comes_from_auto_check(self):
+    def test_auto_check_file_does_not_change_the_status(self):
         result = {
             'schema_version': 1,
             'snapshot_id': SNAPSHOT_ID,
@@ -114,9 +107,9 @@ class StatusTests(unittest.TestCase):
         }
         (self.catalog / 'review' / 'auto-check.json').write_text(json.dumps(result) + '\n', encoding='utf-8')
         facts = status.compute(self.catalog)
-        self.assertEqual(1, facts['flagged'])
-        self.assertEqual(1, facts['auto_checked'])
-        self.assertEqual('present', facts['auto_check'])
+        self.assertEqual(0, facts['quoted_spans'])
+        self.assertEqual('absent', facts['quote_check'])
+        self.assertNotIn('flagged', facts)
         self.assertEqual(facts['draft'], facts['total'])
 
     def test_pr_description_must_carry_the_snippet_only_when_the_catalog_changes(self):

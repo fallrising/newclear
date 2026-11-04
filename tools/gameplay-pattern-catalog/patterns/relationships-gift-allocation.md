@@ -11,7 +11,7 @@
     "scarce-resource",
     "relationship"
   ],
-  "summary": "用有限禮物連接偏好探索、關係經營與機會成本。",
+  "summary": "把有限礼物送给合适的人，换取关系或实用回馈。",
   "note_status": "draft",
   "related": [
     "commerce-price-discovery",
@@ -28,47 +28,82 @@
 }
 ---
 
-## 來源摘要
+## 摘要
 
-原站描述將物品送給不同角色，偏好與贈禮限制影響收益，互動回饋幫助下一次分配。核心循環：蒐集偏好線索 → 取得禮物 → 選擇收禮者與物品並贈送 → 記錄反應。
+「把有限礼物送给合适的人，换取关系或实用回馈。」
+出處：`sources/text/relationships-gift-allocation.json` 字元 196-218 `summary.zh`
+顯示：把有限禮物送給合適的人，換取關係或實用回饋。
 
-## 問題與情境（本地分析）
+## 規則
 
-適用於需要將角色互動與資源分配結合的系統。玩家應有理由在已知安全選項與探索未知偏好間權衡。
+「玩家从礼物库存中选择对象和物品。接收者的偏好、赠送次数限制或剧情门槛改变收益；台词、关系记录或回礼让玩家修正下一次分配。」
+出處：`sources/text/relationships-gift-allocation.json` 字元 334-394 `rules.zh`
+顯示：玩家從禮物庫存中選擇對象和物品。接收者的偏好、贈送次數限制或劇情門檻改變收益；臺詞、關係記錄或回禮讓玩家修正下一次分配。
 
-## 核心循環（本地分析）
+## 核心循環
 
-- 玩家行動：從對話或互動中蒐集角色偏好的線索，並取得可以送出的禮物；贈送時要同時選擇收禮者與物品。
-- 系統回饋：選定收禮者與禮物送出後，角色以不同程度的反應回應，玩家能分辨這份禮物是投其所好、普通還是踩雷。
-- 下一個決策：記錄這次反應，決定下一份稀缺禮物要給同一個角色加深關係，還是轉給其他人。
+「了解对象」
+出處：`sources/text/relationships-gift-allocation.json` 字元 616-620 `loop[0].zh`
+顯示：瞭解對象
 
-## 解法與取捨（本地分析）
+「获得礼物」
+出處：`sources/text/relationships-gift-allocation.json` 字元 681-685 `loop[1].zh`
+顯示：獲得禮物
 
-- 分開保存已知偏好與關係數值；介面應保留已觀察到的反應，避免重複背誦。
-- 喜愛角色與實用獎勵可以構成不同動機，但不要暗示角色關係只有交換收益。
+「分配并赠送」
+出處：`sources/text/relationships-gift-allocation.json` 字元 742-747 `loop[2].zh`
+顯示：分配並贈送
 
-## 可調參數（本地分析）
+「记录反应」
+出處：`sources/text/relationships-gift-allocation.json` 字元 808-812 `loop[3].zh`
+顯示：記錄反應
 
-- 禮物稀缺度、偏好提示、每日或故事階段限制、回饋是否即時。
-- 偏好是否固定；若變動，需給出可理解的新情境。
+## 玩家取捨
 
-## 失敗模式（本地分析）
+「稀有礼物给最喜欢的角色，还是给能立即提供能力的人？」
+出處：`sources/text/relationships-gift-allocation.json` 字元 893-918 `decisions[0].zh`
+顯示：稀有禮物給最喜歡的角色，還是給能立即提供能力的人？
 
-- 唯一高收益禮物適用所有角色，會消除分配問題。
-- 隱藏偏好頻繁隨機變動，會抹消學習價值。
+「未知偏好值得试错，还是重复已知的安全选择？」
+出處：`sources/text/relationships-gift-allocation.json` 字元 1041-1062 `decisions[1].zh`
+顯示：未知偏好值得試錯，還是重複已知的安全選擇？
 
-## 最小原型與驗收（本地提案）
+## 可調參數
 
-此原型尚未實玩驗證。下列通過與否是本地判斷。
+「偏好差异」
+出處：`sources/text/relationships-gift-allocation.json` 字元 1197-1201 `parameters[0].name.zh`
+顯示：偏好差異
 
-- 最小範圍：（本地分析）做一個小場景，讓玩家依序經歷「瞭解對象」、「獲得禮物」、「分配並贈送」、「記錄反應」。來源的原型第一步是「做三位角色、六種禮物和可記錄的喜歡、普通、討厭三種反應」。
-- 驗收：（本地分析）對照來源規則「玩家從禮物庫存中選擇對象和物品」。通過要能滿足「禮物不足時，觀察玩家是否依據偏好和目標分配，而非每人機械送一份」，並分得出「稀有禮物給最喜歡的角色，還是給能立即提供能力的人」。做不到就算失敗。
-- 邊界驗收：（本地分析）通過是原型照來源這句做：「不必先寫大量臺詞；先讓偏好能被觀察與記憶，避免純試錯查表」。
+「差异越大，记住人物细节越有价值。」
+出處：`sources/text/relationships-gift-allocation.json` 字元 1280-1296 `parameters[0].effect.zh`
+顯示：差異越大，記住人物細節越有價值。
+
+「赠送上限」
+出處：`sources/text/relationships-gift-allocation.json` 字元 1424-1428 `parameters[1].name.zh`
+顯示：贈送上限
+
+「上限越低，单次分配越重要，也越容易形成等待。」
+出處：`sources/text/relationships-gift-allocation.json` 字元 1504-1526 `parameters[1].effect.zh`
+顯示：上限越低，單次分配越重要，也越容易形成等待。
+
+## 原型
+
+「做三位角色、六种礼物和可记录的喜欢、普通、讨厌三种反应。」
+出處：`sources/text/relationships-gift-allocation.json` 字元 3024-3052 `prototype.firstStep.zh`
+顯示：做三位角色、六種禮物和可記錄的喜歡、普通、討厭三種反應。
+
+「礼物不足时，观察玩家是否依据偏好和目标分配，而非每人机械送一份。」
+出處：`sources/text/relationships-gift-allocation.json` 字元 3382-3414 `prototype.test.zh`
+顯示：禮物不足時，觀察玩家是否依據偏好和目標分配，而非每人機械送一份。
+
+「不必先写大量台词；先让偏好能被观察与记忆，避免纯试错查表。」
+出處：`sources/text/relationships-gift-allocation.json` 字元 3194-3223 `prototype.pitfall.zh`
+顯示：不必先寫大量臺詞；先讓偏好能被觀察與記憶，避免純試錯查表。
 
 ## 相關模式
 
-- [以回饋進行價格探索](commerce-price-discovery.md)：（本地分析）贈禮反應與顧客反應都是用一次付出換資訊，不能把單一個案當成全局真值。
-- [知識與材料雙重解鎖](cooking-recipe-learning.md)：（本地分析）禮物與料理都可能先卡在「知道對方要什麼」或「手上有沒有材料」。
+- [以回饋進行價格探索](commerce-price-discovery.md)
+- [知識與材料雙重解鎖](cooking-recipe-learning.md)
 
 ## 參考來源
 

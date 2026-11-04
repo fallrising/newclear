@@ -23,8 +23,10 @@ jobs:
       - name: Validate metadata and unit tests
         working-directory: tools/gameplay-pattern-catalog
         run: |
+          python3 -m pip install opencc-python-reimplemented==0.1.7
           python3 sources/inventory.py --check
           python3 sources/text_cache.py --check
+          python3 check_quotes.py --check
           python3 status.py --check
           python3 build.py --check
           python3 -m unittest discover -s tests -v

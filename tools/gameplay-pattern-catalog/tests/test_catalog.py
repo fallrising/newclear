@@ -143,22 +143,28 @@ class CatalogTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, 'complete claim has gaps: ' + drafts[0]):
             build.load_catalog(self.root)
 
-    def test_shared_acceptance_sentence_is_limited(self):
-        paths = sorted(path for path in (self.root / 'patterns').glob('*.md') if path.name != 'README.md')
-        replacement = '- 驗收：（本地分析）這句被複製到超過兩篇，用來確認樣板句會被拒絕。'
+    def test_altered_source_character_fails_the_quote_check(self):
+        text = self.path.read_text(encoding='utf-8')
+        start = text.index('## 摘要\n')
+        quote = text.index('「', start)
+        self.path.write_text(text[:quote + 1] + '改' + text[quote + 1:], encoding='utf-8')
+        with self.assertRaisesRegex(ValueError, 'span is not the cited source text'):
+            build.load_catalog(self.root)
 
-        def set_check(path: Path) -> None:
-            text = path.read_text(encoding='utf-8')
-            lines = []
-            for line in text.splitlines():
-                lines.append(replacement if line.startswith('- 驗收：') else line)
-            path.write_text('\n'.join(lines) + '\n', encoding='utf-8')
+    def test_missing_citation_fails_the_quote_check(self):
+        text = self.path.read_text(encoding='utf-8')
+        cite = text.index('出處：')
+        line_end = text.index('\n', cite)
+        self.path.write_text(text[:cite] + text[line_end + 1:], encoding='utf-8')
+        with self.assertRaisesRegex(ValueError, 'missing citation'):
+            build.load_catalog(self.root)
 
-        set_check(paths[0])
-        set_check(paths[1])
-        build.load_catalog(self.root)
-        set_check(paths[2])
-        with self.assertRaisesRegex(ValueError, '驗收 repeated 3 times'):
+    def test_empty_required_section_fails(self):
+        text = self.path.read_text(encoding='utf-8')
+        start = text.index('## 摘要\n')
+        end = text.index('## 規則\n')
+        self.path.write_text(text[:start] + '## 摘要\n\n這段沒有引用。\n\n' + text[end:], encoding='utf-8')
+        with self.assertRaisesRegex(ValueError, 'lacks a citation'):
             build.load_catalog(self.root)
 
     def test_quoted_source_clause_uses_character_conversion_only(self):
@@ -166,20 +172,20 @@ class CatalogTests(unittest.TestCase):
             from opencc import OpenCC
         except ImportError:
             self.skipTest('opencc required to check character conversion')
-        sys.path.insert(0, str(ROOT / 'sources'))
-        from write_notes import quote_clause
-        converted = OpenCC('s2tw')
-
-        def characters_only(text: str) -> str:
-            return converted.convert(text).replace('里', '裡').strip().rstrip('？?。；;')
-
-        for raw in ('识别破防反馈', '了解对象', '已有信息', '未来复制机会'):
-            self.assertEqual(quote_clause(raw), characters_only(raw))
-        self.assertEqual(quote_clause('识别破防反馈'), '識別破防反饋')
-        self.assertEqual(quote_clause('了解对象'), '瞭解對象')
-        self.assertNotIn('回饋', quote_clause('识别破防反馈'))
-        self.assertNotIn('物件', quote_clause('了解对象'))
-        self.assertNotIn('資訊', quote_clause('已有信息'))
+        converted = OpenCC('s2t')
+        samples = ('识别破防反馈', '了解对象', '已有信息', '未来复制机会')
+        for raw in samples:
+            shown = converted.convert(raw)
+            self.assertEqual(shown, converted.convert(shown))
+            self.assertNotIn('回饋', shown)
+            self.assertNotIn('物件', shown)
+            self.assertNotIn('資訊', shown)
+        self.assertEqual(converted.convert('识别破防反馈'), '識別破防反饋')
+        self.assertEqual(converted.convert('已有信息'), '已有信息')
+        note = (self.root / 'patterns' / 'combat-posture-break.md').read_text(encoding='utf-8')
+        self.assertIn('「识别破防反馈」', note)
+        self.assertIn('顯示：識別破防反饋', note)
+        self.assertNotIn('識別破防回饋', note)
 
     def test_every_pitfall_has_a_reviewed_class(self):
         classes = json.loads((self.root / 'sources' / 'pitfall_class.json').read_text(encoding='utf-8'))['classes']
@@ -194,22 +200,12 @@ class CatalogTests(unittest.TestCase):
         self.assertEqual(classes['rhythm-cue-response'], 'failure')
         self.assertEqual(classes['combat-posture-break'], 'failure')
 
-    def test_prototype_digit_must_sit_beside_the_same_source_words(self):
-        note_id = 'inventory-shape-packing'
-        source = (self.root / 'sources' / 'text' / f'{note_id}.json').read_text(encoding='utf-8')
-        self.assertIn('1', source)
-        foreign = '「甲乙丙丁戊 1 己庚辛壬」'
-        self.assertEqual('1', build.invented_prototype_number(note_id, foreign, self.root))
-        real = next(note for note in build.load_catalog(self.root)[1] if note['meta']['id'] == 'farming-growth-care')
-        prototype = real['sections'][6]
-        self.assertIsNone(build.invented_prototype_number('farming-growth-care', prototype, self.root))
-
-    def test_prototype_rejects_invented_numbers(self):
+    def test_invented_sentence_is_not_a_citation(self):
         text = self.path.read_text(encoding='utf-8')
-        old = '## 最小原型與驗收（本地提案）\n'
+        old = '## 原型\n'
         self.assertIn(old, text)
         self.path.write_text(text.replace(old, old + '\n本地測試門檻 987654。\n', 1), encoding='utf-8')
-        with self.assertRaisesRegex(ValueError, 'invented prototype number: 987654'):
+        with self.assertRaisesRegex(ValueError, 'lacks a citation'):
             build.load_catalog(self.root)
 
     def test_note_generator_never_writes_reviewed(self):

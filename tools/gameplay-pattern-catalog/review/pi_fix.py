@@ -44,7 +44,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / 'sources'))
-from build import parse_note  # noqa: E402
+from build import invented_prototype_number, parse_note  # noqa: E402
 from text_cache import load_cached  # noqa: E402
 
 START, END = '<<<NOTE_BODY', 'NOTE_BODY>>>'
@@ -56,8 +56,9 @@ SYSTEM = (
     'Prefer removing or softening an unsupported claim over inventing support. '
     'Never add facts, numbers, games or quotes that source_snapshot does not contain. '
     'Sections labeled 本地分析 or 本地提案 may keep local design reasoning, but it must not be written as source fact. '
-    'For broken-example-logic, recompute every number in the example so each Then follows from its Given and When; '
-    'state starting counts, every move, and final totals explicitly. '
+    'The 最小原型與驗收 section must stay a short plain-language description of what to build and what passing or failing looks like. '
+    'Do not add counts, durations, thresholds, or step-by-step numeric scenarios there. '
+    'If an issue is broken-example-logic inside that section, delete the numeric scenario instead of repairing the arithmetic. '
     'For missing-key-point, add the dropped source rule or loop step in short paraphrase in 來源摘要 or the matching section. '
     'Keep all ## headings, their order and wording exactly; keep the 相關模式 links and the 參考來源 section exactly; '
     'keep the existing tone and length; change only what the issues require. Write Traditional Chinese, never simplified. '
@@ -122,6 +123,10 @@ def validate(note_path: Path, head: str, old: str, new: str, converter) -> str |
             return 'label dropped: ' + label
     if len(new) < MIN_RATIO * len(old):
         return f'too short: {len(new)} < {MIN_RATIO} * {len(old)}'
+    prototype = new.split('## 最小原型與驗收（本地提案）\n', 1)[-1].split('\n## ', 1)[0]
+    invented = invented_prototype_number(note_path.stem, prototype, note_path.parents[1])
+    if invented:
+        return 'invented prototype number: ' + invented
     if converter is not None:
         extra = simplified_chars(new, converter) - simplified_chars(old, converter)
         if extra:

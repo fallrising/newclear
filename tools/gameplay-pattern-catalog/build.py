@@ -42,11 +42,27 @@ SLUG = re.compile(r'[a-z0-9]+(?:-[a-z0-9]+)*\Z')
 LINK = re.compile(r'\[([^\]\n]+)\]\(([^\s)]+)\)')
 TOKEN = re.compile(r'\[([^\]\n]+)\]\(([^\s)]+)\)|`([^`\n]+)`')
 PLACEHOLDERS = ('TODO', 'TBD', 'FIXME', '占位', 'lorem')
+_FULLWIDTH_DIGITS = str.maketrans('０１２３４５６７８９', '0123456789')
+_PROTOTYPE_BULLETS = ('- 最小範圍：', '- 驗收：', '- 邊界驗收：')
 
 
 def require(condition: bool, message: str) -> None:
     if not condition:
         raise ValueError(message)
+
+
+def invented_prototype_number(note_id: str, section: str, catalog: Path) -> str | None:
+    """A prototype number is allowed only when that digit run is in the note's source snapshot."""
+    tokens = re.findall(r'[0-9０-９]+', section)
+    if not tokens:
+        return None
+    source_path = catalog / 'sources' / 'text' / f'{note_id}.json'
+    source = source_path.read_text(encoding='utf-8') if source_path.is_file() else ''
+    for token in tokens:
+        ascii_token = token.translate(_FULLWIDTH_DIGITS)
+        if ascii_token not in source and token not in source:
+            return ascii_token
+    return None
 
 
 def no_duplicates(pairs):
@@ -115,6 +131,11 @@ def parse_note(path: Path):
     footer = body.split('## 參考來源\n', 1)[1]
     require(LINK.findall(footer) == [(source['title'], source['url']) for source in meta['sources']], 'reference footer must match metadata sources')
     require(all(len(section.strip()) >= 40 for section in sections), 'note section is not substantive')
+    prototype = sections[HEADINGS.index('最小原型與驗收（本地提案）')]
+    require('尚未實玩驗證' in prototype, 'prototype must stay unverified')
+    require(all(bullet in prototype for bullet in _PROTOTYPE_BULLETS), 'prototype needs a short scope, check, and boundary')
+    invented = invented_prototype_number(meta['id'], prototype, path.parents[1])
+    require(invented is None, 'invented prototype number: ' + (invented or ''))
     for token in PLACEHOLDERS:
         require(token not in body, 'placeholder content')
     if meta['note_status'] == 'reviewed':

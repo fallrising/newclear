@@ -143,6 +143,14 @@ class CatalogTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, 'complete claim has gaps: ' + drafts[0]):
             build.load_catalog(self.root)
 
+    def test_prototype_rejects_invented_numbers(self):
+        text = self.path.read_text(encoding='utf-8')
+        old = '## 最小原型與驗收（本地提案）\n'
+        self.assertIn(old, text)
+        self.path.write_text(text.replace(old, old + '\n本地測試門檻 987654。\n', 1), encoding='utf-8')
+        with self.assertRaisesRegex(ValueError, 'invented prototype number: 987654'):
+            build.load_catalog(self.root)
+
     def test_note_generator_never_writes_reviewed(self):
         source = (ROOT / 'sources' / 'write_notes.py').read_text(encoding='utf-8')
         self.assertNotIn("'note_status': 'reviewed'", source)

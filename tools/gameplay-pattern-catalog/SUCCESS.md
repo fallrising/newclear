@@ -18,7 +18,7 @@ source_commit: 1e7330833cb8fcc1ad5b1584957ce87b2ef534b9
 total: 280
 draft: 280
 reviewed: 0
-flagged: 1
+flagged: 78
 pending: 0
 auto_checked: 280
 auto_check: present

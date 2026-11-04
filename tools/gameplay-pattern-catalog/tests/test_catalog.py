@@ -161,6 +161,39 @@ class CatalogTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, '驗收 repeated 3 times'):
             build.load_catalog(self.root)
 
+    def test_quoted_source_clause_uses_character_conversion_only(self):
+        try:
+            from opencc import OpenCC
+        except ImportError:
+            self.skipTest('opencc required to check character conversion')
+        sys.path.insert(0, str(ROOT / 'sources'))
+        from write_notes import quote_clause
+        converted = OpenCC('s2tw')
+
+        def characters_only(text: str) -> str:
+            return converted.convert(text).replace('里', '裡').strip().rstrip('？?。；;')
+
+        for raw in ('识别破防反馈', '了解对象', '已有信息', '未来复制机会'):
+            self.assertEqual(quote_clause(raw), characters_only(raw))
+        self.assertEqual(quote_clause('识别破防反馈'), '識別破防反饋')
+        self.assertEqual(quote_clause('了解对象'), '瞭解對象')
+        self.assertNotIn('回饋', quote_clause('识别破防反馈'))
+        self.assertNotIn('物件', quote_clause('了解对象'))
+        self.assertNotIn('資訊', quote_clause('已有信息'))
+
+    def test_every_pitfall_has_a_reviewed_class(self):
+        classes = json.loads((self.root / 'sources' / 'pitfall_class.json').read_text(encoding='utf-8'))['classes']
+        ids = {path.stem for path in (self.root / 'sources' / 'text').glob('*.json')}
+        self.assertEqual(set(classes), ids)
+        self.assertTrue(set(classes.values()) <= {'guidance', 'failure'})
+        self.assertEqual(classes['combat-cover-flanking'], 'guidance')
+        self.assertEqual(classes['combat-overwatch'], 'failure')
+        self.assertEqual(classes['combat-destructible-cover'], 'failure')
+        self.assertEqual(classes['allocation-snake-order'], 'failure')
+        self.assertEqual(classes['exploration-climbing-rest-route'], 'failure')
+        self.assertEqual(classes['rhythm-cue-response'], 'failure')
+        self.assertEqual(classes['combat-posture-break'], 'failure')
+
     def test_prototype_digit_must_sit_beside_the_same_source_words(self):
         note_id = 'inventory-shape-packing'
         source = (self.root / 'sources' / 'text' / f'{note_id}.json').read_text(encoding='utf-8')

@@ -293,29 +293,24 @@ def failure_section(entry: dict) -> str:
     )
 
 
-# s2twp turns 连接 into 連線 and 通过 into 透過. s2t/s2tw still rewrite 只能 as 隻能.
+# s2tw converts characters. s2twp also rewrites words (对象→物件, 连接→連線).
+# Quoted source text must not go through those word substitutions.
 _CHECK_CONVERTER = OpenCC('s2tw')
-_CLAUSE_FIXES = (
-    ('隻能', '只能'),
-    ('隻有', '只有'),
-    ('隻剩', '只剩'),
-    ('隻是', '只是'),
-    ('隻要', '只要'),
-    ('不是隻', '不是只'),
-    ('還是隻', '還是只'),
-    ('別隻', '別只'),
-    ('，隻', '，只'),
-    ('反饋', '回饋'),
-    ('信息', '資訊'),
-    ('複制', '複製'),
-)
+_PITFALL_CLASS = ROOT / 'sources' / 'pitfall_class.json'
 
 
-def _clause(text: str) -> str:
+def quote_clause(text: str) -> str:
+    """Traditional characters only. No phrase or word substitution."""
     text = _CHECK_CONVERTER.convert(text).replace('里', '裡')
-    for src, dst in _CLAUSE_FIXES:
-        text = text.replace(src, dst)
     return text.strip().rstrip('？?。；;')
+
+
+def pitfall_kind(note_id: str) -> str:
+    data = json.loads(_PITFALL_CLASS.read_text(encoding='utf-8'))
+    kind = data['classes'].get(note_id)
+    if kind not in ('guidance', 'failure'):
+        raise ValueError('unclassified pitfall: ' + note_id)
+    return kind
 
 
 def acceptance_checks(entry: dict) -> tuple[str, str]:
@@ -324,25 +319,21 @@ def acceptance_checks(entry: dict) -> tuple[str, str]:
     The pass/fail framing is local analysis. The quoted clauses are the source's
     own wording. Nothing here is a sentence shared by every note.
     """
-    rule = _clause(re.split(r'[。]', entry['rules']['zh'])[0])
-    test = _clause(entry['prototype']['test']['zh'])
-    pitfall = _clause(entry['prototype']['pitfall']['zh'])
-    first = _clause(entry['decisions'][0]['zh'])
+    rule = quote_clause(re.split(r'[。]', entry['rules']['zh'])[0])
+    test = quote_clause(entry['prototype']['test']['zh'])
+    pitfall = quote_clause(entry['prototype']['pitfall']['zh'])
+    first = quote_clause(entry['decisions'][0]['zh'])
     passed = (
         f'- 驗收：（本地分析）對照來源規則「{rule}」。通過要能滿足「{test}」，'
         f'並分得出「{first}」。做不到就算失敗。'
     )
-    boundary = _boundary_line(pitfall)
+    boundary = _boundary_line(entry['id'], pitfall)
     return passed, boundary
 
 
-# Ordering, scope, and “do this” pitfalls are guidance. The rest describe a failure.
-_GUIDANCE = re.compile(r'先|不要|別|必須|避免|再|之前|延後|另做|應|初版|需要')
-
-
-def _boundary_line(pitfall: str) -> str:
-    """Check the pitfall as the source states it. Do not recast it as enter-versus-avoid."""
-    if _GUIDANCE.search(pitfall):
+def _boundary_line(note_id: str, pitfall: str) -> str:
+    """Use the reviewed class. Do not decide from characters inside the sentence."""
+    if pitfall_kind(note_id) == 'guidance':
         return f'- 邊界驗收：（本地分析）通過是原型照來源這句做：「{pitfall}」。'
     return (
         f'- 邊界驗收：（本地分析）直接測試來源描述的失敗：「{pitfall}」。'
@@ -352,8 +343,8 @@ def _boundary_line(pitfall: str) -> str:
 
 def acceptance_text(entry: dict) -> str:
     """Short local prototype. Source counts stay inside the quoted first step."""
-    joined = '、'.join(f'「{_clause(step["zh"])}」' for step in entry['loop'])
-    first_step = _clause(entry['prototype']['firstStep']['zh'])
+    joined = '、'.join(f'「{quote_clause(step["zh"])}」' for step in entry['loop'])
+    first_step = quote_clause(entry['prototype']['firstStep']['zh'])
     passed, boundary = acceptance_checks(entry)
     return (
         '此原型尚未實玩驗證。下列通過與否是本地判斷。\n\n'

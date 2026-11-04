@@ -9,7 +9,7 @@ catalog-status-snippet: atlas-public-2026-11-02
 - pending: 0
 - auto_checked: 280
 - auto_check: present
-- source_commit: `111e9bfed2fb1a438743763da5920e16070c0080`
+- source_commit: `7d200fafbe8c5f6b3440c1daaab87228481360a3`
 - snapshot_id: atlas-public-2026-11-02
 
 `source_commit` is the git tree SHA of the note files, not a branch tip.

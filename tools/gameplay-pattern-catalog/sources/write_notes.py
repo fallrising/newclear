@@ -6,9 +6,12 @@ the remaining sections are local analysis or an unverified prototype.
 
 The analysis sentences below are fixed templates. They are only a scaffold for a
 source entry that has no note yet, so a generated note is marked `pending`.
-Existing notes are never overwritten: their analysis sections are rewritten one
-note at a time and stay `draft` until a person checks them. This tool never
-writes `reviewed`.
+The prototype says what to build and what passing or failing looks like.
+驗收 and 邊界驗收 are built from that entry's rule, test, pitfall, and
+decisions. They are not one sentence copied onto every note. They do not
+invent counts, durations, thresholds, or step-by-step numeric scenarios.
+``replace_acceptance`` rewrites only those two bullets. Notes stay `draft`
+until a person checks them. This tool never writes `reviewed`.
 """
 from __future__ import annotations
 
@@ -285,14 +288,122 @@ def failure_section(entry: dict) -> str:
     )
 
 
-def prototype_section(entry: dict) -> str:
-    steps = steps_of(entry)
-    return (
-        f'此原型尚未實玩驗證。範圍、數量與文字都是本地測試設定，不是來源遊戲參數，也不是原站原型文案。\n\n'
-        f'- 最小範圍：只實作「{steps[0]}」「{steps[-2]}」「{steps[-1]}」三種可區分狀態，不搬原站插圖、案例關卡或程式。\n'
-        f'- 驗收：Given 玩家已完成「{steps[0]}」且系統處於可觀察的中間態，When 玩家選擇走向「{steps[-2]}」，Then 回饋必須指出結果屬於哪一類，並給出一個與「{steps[-1]}」不同的下一步。\n'
-        f'- 對照：Given 玩家停在中間態不操作，When 超過一個可辨識的等待，Then 結果必須與主動選擇不同，避免不操作也算過關。'
+# s2twp turns 连接 into 連線 and 通过 into 透過. s2t/s2tw still rewrite 只能 as 隻能.
+_CHECK_CONVERTER = OpenCC('s2tw')
+_CLAUSE_FIXES = (
+    ('隻能', '只能'),
+    ('隻有', '只有'),
+    ('隻剩', '只剩'),
+    ('隻是', '只是'),
+    ('隻要', '只要'),
+    ('不是隻', '不是只'),
+    ('還是隻', '還是只'),
+    ('別隻', '別只'),
+    ('，隻', '，只'),
+    ('反饋', '回饋'),
+    ('信息', '資訊'),
+)
+
+
+def _clause(text: str) -> str:
+    text = _CHECK_CONVERTER.convert(text).replace('里', '裡')
+    for src, dst in _CLAUSE_FIXES:
+        text = text.replace(src, dst)
+    return text.strip().rstrip('？?。；;')
+
+
+def acceptance_checks(entry: dict) -> tuple[str, str]:
+    """Pass and boundary lines from this entry's rule, test, pitfall, and decisions.
+
+    The pass/fail framing is local analysis. The quoted clauses are the source's
+    own wording. Nothing here is a sentence shared by every note.
+    """
+    rule = _clause(re.split(r'[。]', entry['rules']['zh'])[0])
+    test = _clause(entry['prototype']['test']['zh'])
+    pitfall = _clause(entry['prototype']['pitfall']['zh'])
+    first = _clause(entry['decisions'][0]['zh'])
+    second = _clause(entry['decisions'][1]['zh'])
+    passed = (
+        f'- 驗收：（本地分析）對照來源規則「{rule}」。通過要能滿足「{test}」，'
+        f'並分得出「{first}」。做不到就算失敗。'
     )
+    boundary = (
+        f'- 邊界驗收：（本地分析）來源指出的邊界是「{pitfall}」。'
+        f'若「{second}」只剩一種走法，就不算測到這個邊界。'
+    )
+    return passed, boundary
+
+
+def acceptance_text(entry: dict) -> str:
+    """Short local prototype. No invented counts, durations, or numeric walkthroughs."""
+    joined = '、'.join(f'「{step}」' for step in steps_of(entry))
+    passed, boundary = acceptance_checks(entry)
+    return (
+        '此原型尚未實玩驗證。這裡只說明要觀察的差異，不另設來源沒有寫出的數量。\n\n'
+        f'- 最小範圍：做一個小場景，讓玩家依序經歷{joined}。只保留能分辨這些狀態的回饋，不加入來源沒有寫出的計數、時間或門檻。\n'
+        f'{passed}\n'
+        f'{boundary}\n'
+    )
+
+
+_SCENARIO_LABEL = re.compile(r'^(?:最小範圍|驗收|邊界驗收|本地提案|基礎驗收)')
+
+
+def kept_acceptance_lines(section: str) -> list[str]:
+    """Keep an existing bullet only when it is not a numeric scenario."""
+    kept = []
+    for line in section.splitlines():
+        if not line.startswith('- '):
+            continue
+        label = line[2:].split('：', 1)[0].split(':', 1)[0].strip()
+        if _SCENARIO_LABEL.match(label):
+            continue
+        if re.search(r'[0-9０-９]', line):
+            continue
+        kept.append(line)
+    return kept
+
+
+def replace_check_lines(section: str, entry: dict) -> str:
+    """Replace only 驗收 and 邊界驗收. Keep 最小範圍 and any non-numeric extra bullet."""
+    passed, boundary = acceptance_checks(entry)
+    lines = []
+    saw_pass = saw_boundary = False
+    for line in section.splitlines():
+        if line.startswith('- 驗收：'):
+            if not saw_pass:
+                lines.append(passed)
+                saw_pass = True
+            continue
+        if line.startswith('- 邊界驗收'):
+            if not saw_boundary:
+                lines.append(boundary)
+                saw_boundary = True
+            continue
+        lines.append(line)
+    if not saw_pass or not saw_boundary:
+        raise ValueError('prototype section is missing 驗收 or 邊界驗收')
+    if lines and lines[0] != '':
+        lines.insert(0, '')
+    text = '\n'.join(lines)
+    if not text.endswith('\n'):
+        text += '\n'
+    for line in kept_acceptance_lines(section):
+        if line not in text:
+            text = text.rstrip('\n') + '\n' + line + '\n'
+    return text
+
+
+def replace_acceptance(body: str, entry: dict) -> str:
+    start = '## 最小原型與驗收（本地提案）\n'
+    end = '\n## 相關模式\n'
+    head, rest = body.split(start, 1)
+    old, tail = rest.split(end, 1)
+    return head + start + replace_check_lines(old, entry) + end + tail
+
+
+def prototype_section(entry: dict) -> str:
+    return acceptance_text(entry).rstrip('\n')
 
 
 def render_new_with(entry: dict, titles: dict[str, str], by_id: dict[str, dict]) -> str:
@@ -394,12 +505,7 @@ def patch_preserved(path: Path, entry: dict, titles: dict[str, str]) -> None:
         summary = body.split('## 問題與情境', 1)[0]
         block = f'## 核心循環（本地分析）\n\n{core_from_existing(summary)}\n\n'
         body = body.replace('## 解法與取捨（本地分析）\n', block + '## 解法與取捨（本地分析）\n', 1)
-    if '尚未實玩驗證' not in body:
-        body = body.replace(
-            '## 最小原型與驗收（本地提案）\n\n',
-            '## 最小原型與驗收（本地提案）\n\n此原型尚未實玩驗證。其中的數量是本地測試設定，不是來源遊戲參數。\n\n',
-            1,
-        )
+    body = replace_acceptance(body, entry)
     if entry['id'] == 'commerce-price-discovery':
         body = body.replace(
             '原站的搜尋索引摘錄描述：玩家提出售價，觀察顧客是否接受與其反應，再調整報價。核心循環：估價 → 試價 → 觀察 → 更新下一次選擇。此筆僅核對搜尋摘錄，未取得完整互動頁。',

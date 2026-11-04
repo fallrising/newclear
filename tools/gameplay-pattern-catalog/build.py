@@ -42,11 +42,52 @@ SLUG = re.compile(r'[a-z0-9]+(?:-[a-z0-9]+)*\Z')
 LINK = re.compile(r'\[([^\]\n]+)\]\(([^\s)]+)\)')
 TOKEN = re.compile(r'\[([^\]\n]+)\]\(([^\s)]+)\)|`([^`\n]+)`')
 PLACEHOLDERS = ('TODO', 'TBD', 'FIXME', '占位', 'lorem')
+_FULLWIDTH_DIGITS = str.maketrans('０１２３４５６７８９', '0123456789')
+_PROTOTYPE_BULLETS = ('- 最小範圍：', '- 驗收：', '- 邊界驗收：')
+# Two notes may phrase one edge the same way. Three or more copies of a
+# 驗收 or 邊界驗收 sentence is the fixed template this check exists to stop.
+MAX_SHARED_CHECK = 2
 
 
 def require(condition: bool, message: str) -> None:
     if not condition:
         raise ValueError(message)
+
+
+def prototype_check_text(section: str, label: str) -> str:
+    prefix = f'- {label}：'
+    matches = [line[len(prefix):].strip() for line in section.splitlines() if line.startswith(prefix)]
+    require(len(matches) == 1, f'prototype needs exactly one {label}')
+    require(matches[0] != '', f'empty {label}')
+    return matches[0]
+
+
+def shared_check_overflow(notes: list[dict]) -> str | None:
+    """Return an error when one 驗收 or 邊界驗收 sentence is used too widely."""
+    proto_index = HEADINGS.index('最小原型與驗收（本地提案）')
+    for label in ('驗收', '邊界驗收'):
+        counts: dict[str, int] = {}
+        for note in notes:
+            text = prototype_check_text(note['sections'][proto_index], label)
+            counts[text] = counts.get(text, 0) + 1
+        worst = max(counts.values(), default=0)
+        if worst > MAX_SHARED_CHECK:
+            return f'{label} repeated {worst} times; more than {MAX_SHARED_CHECK} notes sharing one sentence is boilerplate'
+    return None
+
+
+def invented_prototype_number(note_id: str, section: str, catalog: Path) -> str | None:
+    """A prototype number is allowed only when that digit run is in the note's source snapshot."""
+    tokens = re.findall(r'[0-9０-９]+', section)
+    if not tokens:
+        return None
+    source_path = catalog / 'sources' / 'text' / f'{note_id}.json'
+    source = source_path.read_text(encoding='utf-8') if source_path.is_file() else ''
+    for token in tokens:
+        ascii_token = token.translate(_FULLWIDTH_DIGITS)
+        if ascii_token not in source and token not in source:
+            return ascii_token
+    return None
 
 
 def no_duplicates(pairs):
@@ -115,6 +156,11 @@ def parse_note(path: Path):
     footer = body.split('## 參考來源\n', 1)[1]
     require(LINK.findall(footer) == [(source['title'], source['url']) for source in meta['sources']], 'reference footer must match metadata sources')
     require(all(len(section.strip()) >= 40 for section in sections), 'note section is not substantive')
+    prototype = sections[HEADINGS.index('最小原型與驗收（本地提案）')]
+    require('尚未實玩驗證' in prototype, 'prototype must stay unverified')
+    require(all(bullet in prototype for bullet in _PROTOTYPE_BULLETS), 'prototype needs a short scope, check, and boundary')
+    invented = invented_prototype_number(meta['id'], prototype, path.parents[1])
+    require(invented is None, 'invented prototype number: ' + (invented or ''))
     for token in PLACEHOLDERS:
         require(token not in body, 'placeholder content')
     if meta['note_status'] == 'reviewed':
@@ -278,6 +324,8 @@ def load_catalog(root: Path = ROOT):
     require(bool(ids) and len(set(ids)) == len(ids), 'empty catalog or duplicate ID')
     require(len({note['meta']['summary'] for note in notes}) == len(notes), 'duplicate summary')
     require(len({note['sections'][0] for note in notes}) == len(notes), 'duplicate source summary')
+    overflow = shared_check_overflow(notes)
+    require(overflow is None, overflow or '')
     by_source = {entry['source_id']: entry for entry in manifest['entries']}
     missing_notes = sorted(set(by_source) - set(ids))
     extra_notes = sorted(set(ids) - set(by_source))

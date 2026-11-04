@@ -55,7 +55,7 @@ API 必須是 HTTPS；只有 `127.0.0.1` 與 `localhost` 可以用 HTTP，供本
 
 `review/pi_fix.py` 讀 `review/auto-check.json` 的 flag 筆記，只把筆記本文、`sources/text/<id>.json` 與該筆 issues 交給 pi（與 `pi_review.py` 同樣無工具、無 session、無 context file）。pi 回傳整份本文；frontmatter 不經模型，原樣保留，所以 `note_status` 不變。修正原則是刪除或弱化來源沒有支持的說法，不補新事實。
 
-候選本文必須通過 `build.parse_note`，參考來源區與相關模式連結不變，`本地分析`、`本地提案`、`尚未實玩驗證` 標示不能消失，不能新增簡體字（需要 `opencc`），長度不得少於原文 70%。不合格就重試，最後一次可改用 `--fallback-provider`/`--fallback-model`；全部失敗的筆記不改，列在報告裡。pi 也可以回 `CANNOT_FIX`，表示來源撐不起筆記的核心，這種要由人決定刪除或改寫。
+候選本文必須通過 `build.parse_note`，參考來源區與相關模式連結不變，`本地分析`、`本地提案`、`尚未實玩驗證` 標示不能消失，不能新增簡體字（需要 `opencc`），長度不得少於原文 70%。最小原型與驗收不得新增來源快照裡沒有的數字或逐步數字腳本；有問題時刪掉該腳本，不把算式修到自洽。不合格就重試，最後一次可改用 `--fallback-provider`/`--fallback-model`；全部失敗的筆記不改，列在報告裡。pi 也可以回 `CANNOT_FIX`，表示來源撐不起筆記的核心，這種要由人決定刪除或改寫。
 
 ```sh
 python3 review/pi_fix.py --report review/fix-report.json --jobs 4 \

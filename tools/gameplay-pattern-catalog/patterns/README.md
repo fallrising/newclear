@@ -97,7 +97,7 @@
 | [同一張牌的兩種用途](deckbuilding-dual-use-cards.md) | 牌組構築 | deckbuilding | 草稿 | 同一張牌同時背著攻擊與位移，打出其中一種就得放棄另一種，玩家得在缺口出現前先想好怎麼補。 |
 | [複製投入](deckbuilding-duplicate-investment.md) | 牌組構築 | deckbuilding | 草稿 | 玩家得在「先投資再複製」與「先複製保命」之間取捨，並決定把副本投在主力攻擊或啟動組合的輔助牌上。 |
 | [耗盡爆發](deckbuilding-exhaust-for-burst.md) | 牌組構築 | deckbuilding | 草稿 | 玩家在最危急的回合要決定是否打掉一張強牌換取一次性效果，代價是這場戰鬥再也抽不到它。 |
-| [起手牌的可控範圍](deckbuilding-opening-hand-control.md) | 牌組構築 | deckbuilding | 草稿 | 在構築時把少數關鍵牌標成必定起手，玩家得先決定這場要保障防守、保障引擎，還是兩者各留一張，並承擔首手靈活度下降的代價。 |
+| [起手牌的可控範圍](deckbuilding-opening-hand-control.md) | 牌組構築 | deckbuilding | 草稿 | 在戰前把少數關鍵牌標成必定起手，玩家得先決定這場要保障哪個環節，並承擔佔用首手位置的代價。 |
 | [牌型作為行動條件](deckbuilding-poker-hand-requirements.md) | 牌組構築 | deckbuilding | 草稿 | 同一手牌可湊出多種牌型，玩家得挑一組去支付行動代價，並承擔剩餘牌是否還能使用的後果。 |
 | [獎勵選擇](deckbuilding-reward-choice.md) | 牌組構築 | deckbuilding | 草稿 | 每場勝利後，玩家從有限候選中挑一張牌，或刻意跳過以保住抽牌穩定。 |
 | [規則改變被動效果](deckbuilding-rule-changing-passives.md) | 牌組構築 | deckbuilding | 草稿 | 取得會改寫規則的被動之後，玩家必須重估手上與未來的牌，決定現在就吃新規則，還是先花幾場戰鬥改造牌組。 |
@@ -175,14 +175,14 @@
 | [數量門檻獎](incremental-quantity-milestones.md) | 收益與累積 | incremental | 草稿 | 玩家得在「加碼當前效率最高的一項」與「補齊只差一點就翻倍的另一項」之間取捨，換取跨過門檻的產量躍升。 |
 | [花費持有加成](incremental-spend-held-bonus.md) | 收益與累積 | incremental | 草稿 | 同一筆資源既是購買力也是收益來源，玩家要在升級花費與保留加成之間拿捏投入幅度與時機。 |
 | [花費時間提前結算](incremental-spend-time-advance.md) | 收益與累積 | incremental | 草稿 | 玩家要決定現在就用時間券跨過等待，還是等產量升級後再兌現，以及一次用掉幾張。 |
-| [相鄰關係驅動的組合加成](inventory-adjacency.md) | 背包與配置 | inventory | 草稿 | 讓物品價值由周圍關係決定，將背包升級為可讀的配置網路。 |
+| [相鄰關係驅動的組合加成](inventory-adjacency.md) | 背包與配置 | inventory | 草稿 | 物品除了佔格，還會因鄰接、方向或周邊類別觸發加成；戰鬥結果再用來判斷佈局強弱。 |
 | [死亡取回](inventory-death-retrieval.md) | 背包與配置 | inventory | 草稿 | 死亡把身上的資源留在原地，玩家得判斷值不值得再走一趟危險路線，並決定用什麼裝備去拿。 |
 | [牌組抽疏](inventory-deck-thinning.md) | 背包與配置 | inventory | 草稿 | 玩家要在有限的刪牌機會裡決定先砍哪張牌，讓核心組合更常被抽到，同時承受應對面變窄的風險。 |
 | [工具耐久與維護決策](inventory-durability.md) | 背包與配置 | inventory | 草稿 | 工具會磨損，玩家出發前得估算耐久夠不夠撐完行程，並決定帶不帶備用、提早回頭修理，還是賭下一處礦脈能撐到收工。 |
 | [裝備預算](inventory-equipment-budget.md) | 背包與配置 | inventory | 草稿 | 玩家在有限容量下挑選能力裝配，必須在少數強力招式與多個小招式之間取捨，並在實戰後回站重新調整配置。 |
 | [未知物品辨識](inventory-identification.md) | 背包與配置 | inventory | 草稿 | 撿到來路不明的道具時，玩家得在花費鑑定資源換取確定性，與冒險試用以搶時間之間做取捨。 |
 | [消耗型光源的存量](inventory-light-reserve.md) | 背包與配置 | inventory | 草稿 | 玩家必須決定手邊有限的火把要燒向未知深處，還是留給回程，並在照明變暗時選擇熟悉短路或冒險找補給。 |
-| [形狀式背包配置](inventory-shape-packing.md) | 背包與配置 | inventory | 草稿 | 用幾何形狀而不只是重量，讓攜帶選擇同時包含重排與取捨。 |
+| [形狀式背包配置](inventory-shape-packing.md) | 背包與配置 | inventory | 草稿 | 讓物品的輪廓決定能不能塞進格子，攜帶選擇包含重排與取捨。 |
 | [堆疊限制](inventory-stack-limits.md) | 背包與配置 | inventory | 草稿 | 同類物品可以疊在一起，但格子數量固定有限；玩家必須決定：最後一格要留給還沒出現的掉落、備用工具，還是把少數幾種材料堆滿。 |
 | [重量預算](inventory-weight-budget.md) | 背包與配置 | inventory | 草稿 | 負重上限把後勤成本搬上檯面，玩家得在探索收益、返程補給與是否多跑一趟之間做取捨。 |
 | [清除下方貨物](matching-clear-under-cargo.md) | 消除與合併 | matching | 草稿 | 目標貨物卡在出口上方，玩家得先拆掉它底下的支撐才能把它送進出口；每次消除都在權衡拆哪一層、走哪條路。 |
@@ -242,7 +242,7 @@
 | [重力決策](puzzles-gravity.md) | 解謎與位置 | puzzles | 草稿 | 重新定義哪個方向是「下方」，讓原本擋路的障礙變成可站立的落點，玩家要在翻轉時機與落點軌跡之間取捨。 |
 | [語言解碼](puzzles-language-decoding.md) | 解謎與位置 | puzzles | 草稿 | 玩家要在未知語言裡判斷某個詞形是人名、動作還是類別，並決定何時用還不確定的譯文繼續推進。 |
 | [聯動傳送門](puzzles-linked-portals.md) | 解謎與位置 | puzzles | 草稿 | 要在有限表面上配對出入口，玩家得決定先搶進入速度還是先貼近目標，並承擔改線後舊通路被切斷的風險。 |
-| [摺疊地形以連接路線](puzzles-paper-folding.md) | 解謎與位置 | puzzles | 草稿 | 玩家得在有限視野裡挑出要對折的兩塊地形，並決定先站上哪一塊，才能讓接起的通道通往下一步。 |
+| [摺疊地形以連接路線](puzzles-paper-folding.md) | 解謎與位置 | puzzles | 草稿 | 玩家沿允許的邊緣把分離的路徑折到一起，並決定角色站在哪，才能繼續前進。 |
 | [視角規則](puzzles-perspective-reality.md) | 解謎與位置 | puzzles | 草稿 | 玩家透過改變觀看位置，把看似相連的視覺關係變成真正可走的路，並在近處路徑與遠處捷徑之間取捨。 |
 | [現場推理](puzzles-scene-deduction.md) | 解謎與位置 | puzzles | 草稿 | 玩家要把散落的證詞、裝束、口音等線索拼成一套可被系統檢驗的解釋，並在矛盾浮現時決定回頭補觀察還是改寫推論。 |
 | [時間還原](puzzles-time-scrubbing.md) | 解謎與位置 | puzzles | 草稿 | 玩家要在時間軸上找出哪個關鍵瞬間值得重來，並判斷哪些物件不隨回撥復原，才能改變事件先後而非只換位置。 |
@@ -273,8 +273,8 @@
 | [分階環境事故](stealth-staged-accidents.md) | 潛行與身分 | stealth | 草稿 | 玩家得先讀懂巡邏與危險物件的關係，再決定是等目標自己走進視窗，還是主動引導，並承擔觸發後撤離的風險。 |
 | [同步動作](stealth-synchronized-actions.md) | 潛行與身分 | stealth | 草稿 | 玩家替多名隊員排好各自的位置與出手時機，再一次性處理互相照看的守衛，並承擔時序誤差的後果。 |
 | [均衡營養](survival-balanced-nutrition.md) | 生存需求 | survival | 草稿 | 玩家在背包與食量有限下，權衡補齊短缺營養或囤積高熱量食物，並替長途行動預留下一餐。 |
-| [失血分診](survival-bleeding-triage.md) | 生存需求 | survival | 草稿 | 玩家得在持續失血、追兵壓力與有限繃帶之間排出處理順序，決定何時停下來包紮，以及先放掉哪一道傷口。 |
-| [檢查身體找出問題](survival-body-inspection.md) | 生存需求 | survival | 草稿 | 玩家要在有限時間內決定先查最可能的部位還是全面排查，並判斷表面傷口之外是否還有別的毛病。 |
+| [失血分診](survival-bleeding-triage.md) | 生存需求 | survival | 草稿 | 玩家得在持續失血與有限包紮之間排出處理順序，決定何時停下來處理，以及先處理哪一道傷口。 |
+| [檢查身體找出問題](survival-body-inspection.md) | 生存需求 | survival | 草稿 | 玩家先找出哪裡出問題，再決定用什麼工具處理。檢查是否佔時間是可調的，免費檢查適合慢節奏診斷。 |
 | [競爭需求](survival-competing-needs.md) | 生存需求 | survival | 草稿 | 讓玩家在口渴與疲勞同時累積時，用有限時間決定先補哪一項，並承擔繞路或回營的代價。 |
 | [傳染控制](survival-contagion-control.md) | 生存需求 | survival | 草稿 | 玩家要在資訊不全的疫情初期，權衡停產追源或維持供給，並決定隔離個體還是改造共用設施。 |
 | [疲勞休息點](survival-fatigue-rest.md) | 生存需求 | survival | 草稿 | 把睡眠排進行程，玩家得在疲勞拖慢效率前決定何時收手返程，並在短睡續航與長睡換取完整狀態之間取捨。 |
@@ -283,6 +283,6 @@
 | [壓力值危機](survival-stress-crisis.md) | 生存需求 | survival | 草稿 | 玩家在壓力逼近失控前，得決定讓同一批人繼續硬撐還是換手，並在稀缺安撫資源與停工休息之間取捨。 |
 | [暫時緩解](survival-temporary-relief.md) | 生存需求 | survival | 草稿 | 症狀暫時被壓住，玩家得在有限的行動視窗裡決定：先趕路、先探索，還是回頭處理真正的傷勢。 |
 | [天候暴露](survival-weather-exposure.md) | 生存需求 | survival | 草稿 | 讓玩家在趕路與找火源之間排定順序：走捷徑淋雨，還是繞路先把自己烘乾。 |
-| [傷口清潔決策](survival-wound-cleanliness.md) | 生存需求 | survival | 草稿 | 傷口會隨時間惡化，玩家得在用品有限、任務未完的情況下決定何時停下清理、把資源留給哪道傷。 |
+| [傷口清潔決策](survival-wound-cleanliness.md) | 生存需求 | survival | 草稿 | 傷口在恢復期間仍會變化，玩家得在用品有限時決定何時清潔。後來可能出現感染，並非每道傷都必然惡化。 |
 
 欄位與維護方式見 [Metadata 指引](../METADATA.md)。來源對帳見 [完整度報表](../docs/coverage.md)。

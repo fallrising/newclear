@@ -6,12 +6,12 @@ the remaining sections are local analysis or an unverified prototype.
 
 The analysis sentences below are fixed templates. They are only a scaffold for a
 source entry that has no note yet, so a generated note is marked `pending`.
-The prototype bullets say what to build and what passing or failing looks like.
-They do not invent counts, durations, thresholds, or step-by-step numeric
-scenarios. Existing notes are never overwritten except that
-``replace_acceptance`` rewrites only the prototype section from the note's own
-loop. Notes stay `draft` until a person checks them. This tool never writes
-`reviewed`.
+The prototype says what to build and what passing or failing looks like.
+驗收 and 邊界驗收 are built from that entry's rule, test, pitfall, and
+decisions. They are not one sentence copied onto every note. They do not
+invent counts, durations, thresholds, or step-by-step numeric scenarios.
+``replace_acceptance`` rewrites only those two bullets. Notes stay `draft`
+until a person checks them. This tool never writes `reviewed`.
 """
 from __future__ import annotations
 
@@ -288,28 +288,62 @@ def failure_section(entry: dict) -> str:
     )
 
 
-def acceptance_text(steps: list[str]) -> str:
+# s2twp turns 连接 into 連線 and 通过 into 透過. s2t/s2tw still rewrite 只能 as 隻能.
+_CHECK_CONVERTER = OpenCC('s2tw')
+_CLAUSE_FIXES = (
+    ('隻能', '只能'),
+    ('隻有', '只有'),
+    ('隻剩', '只剩'),
+    ('隻是', '只是'),
+    ('隻要', '只要'),
+    ('不是隻', '不是只'),
+    ('還是隻', '還是只'),
+    ('別隻', '別只'),
+    ('，隻', '，只'),
+    ('反饋', '回饋'),
+    ('信息', '資訊'),
+)
+
+
+def _clause(text: str) -> str:
+    text = _CHECK_CONVERTER.convert(text).replace('里', '裡')
+    for src, dst in _CLAUSE_FIXES:
+        text = text.replace(src, dst)
+    return text.strip().rstrip('？?。；;')
+
+
+def acceptance_checks(entry: dict) -> tuple[str, str]:
+    """Pass and boundary lines from this entry's rule, test, pitfall, and decisions.
+
+    The pass/fail framing is local analysis. The quoted clauses are the source's
+    own wording. Nothing here is a sentence shared by every note.
+    """
+    rule = _clause(re.split(r'[。]', entry['rules']['zh'])[0])
+    test = _clause(entry['prototype']['test']['zh'])
+    pitfall = _clause(entry['prototype']['pitfall']['zh'])
+    first = _clause(entry['decisions'][0]['zh'])
+    second = _clause(entry['decisions'][1]['zh'])
+    passed = (
+        f'- 驗收：（本地分析）對照來源規則「{rule}」。通過要能滿足「{test}」，'
+        f'並分得出「{first}」。做不到就算失敗。'
+    )
+    boundary = (
+        f'- 邊界驗收：（本地分析）來源指出的邊界是「{pitfall}」。'
+        f'若「{second}」只剩一種走法，就不算測到這個邊界。'
+    )
+    return passed, boundary
+
+
+def acceptance_text(entry: dict) -> str:
     """Short local prototype. No invented counts, durations, or numeric walkthroughs."""
-    joined = '、'.join(f'「{step}」' for step in steps)
+    joined = '、'.join(f'「{step}」' for step in steps_of(entry))
+    passed, boundary = acceptance_checks(entry)
     return (
         '此原型尚未實玩驗證。這裡只說明要觀察的差異，不另設來源沒有寫出的數量。\n\n'
         f'- 最小範圍：做一個小場景，讓玩家依序經歷{joined}。只保留能分辨這些狀態的回饋，不加入來源沒有寫出的計數、時間或門檻。\n'
-        '- 驗收：玩家走完這個順序時，回饋要指出目前落在哪一步，以及下一步因此有什麼不同。若兩種做法看起來一樣，就不算通過。\n'
-        '- 邊界驗收：玩家跳過其中一步，或讓兩種做法得到同一種回饋時，結果必須與走完順序不同。若這時仍然看不出差異，這個原型就還沒測到取捨。\n'
+        f'{passed}\n'
+        f'{boundary}\n'
     )
-
-
-def loop_steps_from_body(body: str) -> list[str]:
-    summary = body.split('## 問題與情境', 1)[0]
-    match = re.search(r'(?:來源循環的順序是|核心循環)：(.+)', summary)
-    if not match:
-        raise ValueError('note summary has no loop')
-    steps = [part.strip() for part in re.split(r'\s*→\s*', match.group(1).strip().rstrip('。')) if part.strip()]
-    if len(steps) < 3:
-        raise ValueError('loop is too short')
-    if any(re.search(r'[0-9０-９]', step) for step in steps):
-        raise ValueError('loop step contains a number')
-    return steps
 
 
 _SCENARIO_LABEL = re.compile(r'^(?:最小範圍|驗收|邊界驗收|本地提案|基礎驗收)')
@@ -330,26 +364,46 @@ def kept_acceptance_lines(section: str) -> list[str]:
     return kept
 
 
-def acceptance_section(body: str) -> str:
-    steps = loop_steps_from_body(body)
-    old = body.split('## 最小原型與驗收（本地提案）\n', 1)[1].split('\n## 相關模式\n', 1)[0]
-    lines = [acceptance_text(steps).rstrip('\n')]
-    for line in kept_acceptance_lines(old):
-        if line not in lines[0]:
-            lines.append(line)
-    return '\n'.join(lines) + '\n'
+def replace_check_lines(section: str, entry: dict) -> str:
+    """Replace only 驗收 and 邊界驗收. Keep 最小範圍 and any non-numeric extra bullet."""
+    passed, boundary = acceptance_checks(entry)
+    lines = []
+    saw_pass = saw_boundary = False
+    for line in section.splitlines():
+        if line.startswith('- 驗收：'):
+            if not saw_pass:
+                lines.append(passed)
+                saw_pass = True
+            continue
+        if line.startswith('- 邊界驗收'):
+            if not saw_boundary:
+                lines.append(boundary)
+                saw_boundary = True
+            continue
+        lines.append(line)
+    if not saw_pass or not saw_boundary:
+        raise ValueError('prototype section is missing 驗收 or 邊界驗收')
+    if lines and lines[0] != '':
+        lines.insert(0, '')
+    text = '\n'.join(lines)
+    if not text.endswith('\n'):
+        text += '\n'
+    for line in kept_acceptance_lines(section):
+        if line not in text:
+            text = text.rstrip('\n') + '\n' + line + '\n'
+    return text
 
 
-def replace_acceptance(body: str) -> str:
+def replace_acceptance(body: str, entry: dict) -> str:
     start = '## 最小原型與驗收（本地提案）\n'
     end = '\n## 相關模式\n'
     head, rest = body.split(start, 1)
-    _old, tail = rest.split(end, 1)
-    return head + start + '\n' + acceptance_section(body) + end + tail
+    old, tail = rest.split(end, 1)
+    return head + start + replace_check_lines(old, entry) + end + tail
 
 
 def prototype_section(entry: dict) -> str:
-    return acceptance_text(steps_of(entry)).rstrip('\n')
+    return acceptance_text(entry).rstrip('\n')
 
 
 def render_new_with(entry: dict, titles: dict[str, str], by_id: dict[str, dict]) -> str:
@@ -451,7 +505,7 @@ def patch_preserved(path: Path, entry: dict, titles: dict[str, str]) -> None:
         summary = body.split('## 問題與情境', 1)[0]
         block = f'## 核心循環（本地分析）\n\n{core_from_existing(summary)}\n\n'
         body = body.replace('## 解法與取捨（本地分析）\n', block + '## 解法與取捨（本地分析）\n', 1)
-    body = replace_acceptance(body)
+    body = replace_acceptance(body, entry)
     if entry['id'] == 'commerce-price-discovery':
         body = body.replace(
             '原站的搜尋索引摘錄描述：玩家提出售價，觀察顧客是否接受與其反應，再調整報價。核心循環：估價 → 試價 → 觀察 → 更新下一次選擇。此筆僅核對搜尋摘錄，未取得完整互動頁。',

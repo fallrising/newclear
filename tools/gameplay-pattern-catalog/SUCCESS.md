@@ -5,7 +5,7 @@ kind: tool
 mainline: incomplete
 usable_tag: none
 reviewed: 2026-11-03
-source_commit: 451c492320cb732d923fe5c000eb65018d93f252
+source_commit: a332ae58886a2587f6fd19197d5b8151f00edd08
 ---
 
 # Gameplay Pattern Catalog — 驗收入口
@@ -22,7 +22,7 @@ flagged: 1
 pending: 0
 auto_checked: 280
 auto_check: present
-source_commit: 451c492320cb732d923fe5c000eb65018d93f252
+source_commit: a332ae58886a2587f6fd19197d5b8151f00edd08
 snapshot_id: atlas-public-2026-11-02
 
 `source_commit` 是筆記檔的 git tree SHA（不含 `patterns/README.md`），由檔案位元組算出，不是分支 commit。

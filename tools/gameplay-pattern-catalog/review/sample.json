@@ -4,6 +4,7 @@
   "seed": "atlas-public-2026-11-02",
   "count": 15,
   "ids": [
+    "commerce-haggling",
     "inventory-deck-thinning",
     "deckbuilding-poker-hand-requirements",
     "cooking-station-handoff",
@@ -16,8 +17,7 @@
     "inventory-equipment-budget",
     "progression-challenge-tiers",
     "commerce-auction-bidding",
-    "building-water-engineering",
-    "combat-simultaneous-orders",
-    "survival-contagion-control"
+    "progression-practice-based-growth",
+    "building-water-engineering"
   ]
 }

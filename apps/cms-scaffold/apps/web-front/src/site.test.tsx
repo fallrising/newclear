@@ -51,7 +51,7 @@ describe("Front shell, selector and routes (W3)", () => {
     expect(await screen.findByTestId("not-found-public")).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "回到相簿首頁" })).toHaveAttribute("href", "/album");
     expect(screen.getByTestId("site-brand")).toHaveTextContent("相簿");
-    expect(document.title).toBe("找不到這個頁面 · 相簿");
+    await waitFor(() => expect(document.title).toBe("找不到這個頁面 · 相簿"));
   });
 
   it("F-05 a site home's title is the site name; a detail page's is '<title> · <site>'", async () => {

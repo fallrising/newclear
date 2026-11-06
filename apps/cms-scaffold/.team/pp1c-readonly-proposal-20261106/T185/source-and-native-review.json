@@ -1,0 +1,57 @@
+{
+  "task": "T-185",
+  "atUtc": "2026-11-06T21:27:15.172827+00:00",
+  "beforeSha256": "db8e7a6ddd1e85b8f4980a7ee59d05c21e41236e2cbf5d17eaae6f42c795311d",
+  "afterSha256": "a6ef0440c7b1e159a4b0dfe03ed624cfc37c1c2244e3fce8e2dc3bd9d0125931",
+  "onlyChange": {
+    "removed": "    expect(document.title).toBe(\"找不到這個頁面 · 相簿\");",
+    "added": "    await waitFor(() => expect(document.title).toBe(\"找不到這個頁面 · 相簿\"));",
+    "addedRemovedLines": 2,
+    "waitForAlreadyImported": true,
+    "defaultWaitForTimeoutUnchanged": true,
+    "expectationExactAndUnchanged": true
+  },
+  "productionHook": "NotFoundPublic -> FrontTitle -> useDocumentTitle -> useEffect assignment; observed CI empty-title failure is consistent with an effect ordering race, an inference rather than independent reproduction",
+  "productionAndDependencyFilesRead": {
+    "packages/ui/src/patterns/document-title.ts": "80cfe4aa48ddf15161364fdbce618466141219ef3b0a72f0d256b286b1c50b99",
+    "apps/web-front/src/seo.ts": "8c37ce02845899f7931eab39808b773ebbadfad5b41b7d90c830f69a79323510",
+    "apps/web-front/src/states.tsx": "2e84150579dee74000083439c0db984b874715089b3b65119bcf3505038b06a3",
+    "apps/web-front/src/shell.tsx": "286c639af4be26e4166174021b8dc59d01643d63b0777aa07a34c3a7bb064a5a",
+    "apps/web-front/src/test-utils.tsx": "8d2fa98556bbfb32417a7064529dd1d9ce845f08c85fb519d266877331b74b59",
+    "apps/web-front/src/test-setup.ts": "afa818521d256b905ba360209c7bcfa65882557bf12a50a4db8a04e7dab74bb9",
+    "package.json": "61f554f789b93085219678c30bc88618ca69b201160bbbb008200fdcdadf042b",
+    "package-lock.json": "622a49a6415ec0b4f279136175a0d65da018121959bcca4a5742d14f990b6a46",
+    "apps/web-front/package.json": "a8e461d309c68e9d06761cfada8440a68f77c27966c70b482f122eb2f3cd2590"
+  },
+  "proposalAndNativeRootRelevantInputsMatch": true,
+  "nativeEvidence": [
+    {
+      "path": "/home/ckc/test/codex/wt/newclear/cms-pp1c-d-20261106/apps/cms-scaffold/.team/pp1c-d-20261106/ci-C04-focused-native.log",
+      "sha256": "f06cf0162234d61e2a9b3f8d65332f5f05405d52d8251fa9d37f9d9675feb3c9",
+      "summary": "focused17/17 4.51s"
+    },
+    {
+      "path": "/home/ckc/test/codex/wt/newclear/cms-pp1c-d-20261106/apps/cms-scaffold/.team/pp1c-d-20261106/ci-C04-front-full-native.log",
+      "sha256": "622d1d6bb1d3f4e7b02216940634279cd65baea814b7364abdebe466791fae9b",
+      "summary": "full147/147 16files 27.31s"
+    }
+  ],
+  "preservedCIError": {
+    "run": 42295764575,
+    "job": 128160454436,
+    "head": "d3f359cba6b421329f8993402c1ed176bb8f9920",
+    "url": "https://github.com/fallrising/newclear/actions/runs/42295764575",
+    "failedStep": "npm test",
+    "test": "C-04 an unknown path inside a site renders NotFoundPublic in that site's shell",
+    "line": "apps/web-front/src/site.test.tsx:54:28",
+    "expected": "找不到這個頁面 · 相簿",
+    "actual": "",
+    "frontSuite": {
+      "passed": 146,
+      "failed": 1
+    },
+    "source": "GitHub job logs read via connector; complete original failure retained in Actions"
+  },
+  "findings": [],
+  "gitNetworkRuntimeDelegation": false
+}

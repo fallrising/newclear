@@ -1,0 +1,10 @@
+Auto-merging apps/cms-scaffold/.team/PLAN.md
+CONFLICT (content): Merge conflict in apps/cms-scaffold/.team/PLAN.md
+Auto-merging apps/cms-scaffold/SUCCESS.md
+CONFLICT (content): Merge conflict in apps/cms-scaffold/SUCCESS.md
+Auto-merging apps/cms-scaffold/docs/tasks/BOARD.md
+CONFLICT (content): Merge conflict in apps/cms-scaffold/docs/tasks/BOARD.md
+Auto-merging apps/cms-scaffold/docs/v2/README.md
+CONFLICT (content): Merge conflict in apps/cms-scaffold/docs/v2/README.md
+Auto-merging apps/cms-scaffold/docs/v2/waves/PP1c.md
+Automatic merge failed; fix conflicts and then commit the result.

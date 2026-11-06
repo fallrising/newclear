@@ -1,0 +1,12 @@
+{
+  "routeTables": [
+    "52",
+    "local",
+    "main"
+  ],
+  "observedRoutes": 115,
+  "routeBytesSha256": "1b03fae8be29416fc273ff3630e707cc86f98ea09fe414e061690c0622bbc344",
+  "candidatePool": "192.168.240.0/20",
+  "overlap": [],
+  "scope": "actualrootreadonlyalltablecheck; runtimeprocguarddoesnotclaimallpolicytables"
+}

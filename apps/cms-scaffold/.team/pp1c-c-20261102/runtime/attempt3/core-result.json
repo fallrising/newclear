@@ -1,0 +1,498 @@
+{
+  "sourceRunId": "9d313b43bf8449f7a41859488a90fc20",
+  "targetRunId": "253fb0cfd262484ab2f2de4c5ba7e1d7",
+  "operationId": "41bae2d6-25de-4bc7-ae48-4a2a25e39377",
+  "bootstrapOperationId": "5785bcd6-1bc1-4362-af09-4c944d6c698a",
+  "startedAt": "2026-11-02T17:50:18.867Z",
+  "scope": "actual C core through SESSIONS_REVOKED only; no D startup/browser/proof or RTO acceptance",
+  "steps": [
+    {
+      "name": "true-tty-bootstrap",
+      "at": "2026-11-02T17:50:39.778Z",
+      "exitCode": 0,
+      "prompts": 2,
+      "success": true,
+      "code": null
+    },
+    {
+      "name": "synthetic-stream-observation-load",
+      "at": "2026-11-02T17:50:47.987Z",
+      "rows": 4096,
+      "syntheticPayloadBytes": 134217728,
+      "sqlSha256": "5e097112a0e4cf92498942db0155bfd4b2485bf26f9ea4eb54adc3c7191bf81e",
+      "note": "C test data before capture; no D fixture acceptance"
+    },
+    {
+      "name": "actual-session-config",
+      "at": "2026-11-02T17:50:52.117Z",
+      "sessionAbsoluteSeconds": "43200",
+      "sessionMaxSeconds": "604800"
+    },
+    {
+      "name": "source-orphan-created",
+      "at": "2026-11-02T17:50:54.481Z",
+      "fixedBytes": 12,
+      "helperId": "dae49071ce27059c1866efd560110069a8c0a6deb2cf748d93937bcb69ca423d"
+    },
+    {
+      "name": "fixed-annex-api-fixture",
+      "at": "2026-11-02T17:50:54.619Z",
+      "httpRequests": 66,
+      "pngSha256": {
+        "public": "c6bb61e535e53a5765dabdec9dc5351ccc0c9ce8a95da9c7d98e484f8b6419b0",
+        "replacement": "7ec4b28253dfd9b6d3ad4d3e747edb8098b735b52634534ab107c7cae7724e17",
+        "draft": "2d43c785f7857ba3bf378df2fda188ffb7137f95f3fa5683ed12912381bfcdb1",
+        "private": "62edc9f1676c2a31415b4dd713c00fab85d9c22cbd0ee101c799292b6d6451f1",
+        "deleted": "de872e9d55c29f03bd73e50549d929c56e0828f3815356be1a2ee11af733db30"
+      }
+    }
+  ],
+  "http": [
+    {
+      "method": "GET",
+      "path": "/api/v1/auth/csrf",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/auth/login",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/roles",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/principals",
+      "status": 201
+    },
+    {
+      "method": "PUT",
+      "path": "/api/v1/principals/:id/roles",
+      "status": 204
+    },
+    {
+      "method": "PUT",
+      "path": "/api/v1/roles/operator/permissions",
+      "status": 204
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/roles/operator/permissions",
+      "status": 200
+    },
+    {
+      "method": "PUT",
+      "path": "/api/v1/roles/anonymous/permissions",
+      "status": 204
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/roles/anonymous/permissions",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/media",
+      "status": 201
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/media/:id/file/original",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/media/:id/file/thumbnail",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/media/:id/file/web",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/media",
+      "status": 201
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/media/:id/file/original",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/media/:id/file/thumbnail",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/media/:id/file/web",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/media",
+      "status": 201
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/media/:id/file/original",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/media/:id/file/thumbnail",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/media/:id/file/web",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/media",
+      "status": 201
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/media/:id/file/original",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/media/:id/file/thumbnail",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/media/:id/file/web",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/media",
+      "status": 201
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/media/:id/file/original",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/media/:id/file/thumbnail",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/media/:id/file/web",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/media",
+      "status": 201
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/media/:id/file/original",
+      "status": 200
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/v1/media/:id",
+      "status": 204
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/media/:id/file/original",
+      "status": 410
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/content-types/album/entries",
+      "status": 201
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/entries/:id/publish",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/content-types/photo/entries",
+      "status": 201
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/entries/:id/publish",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/entries/:id/revisions",
+      "status": 200
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/v1/entries/:id",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/content-types/photo/entries",
+      "status": 201
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/content-types/photo/entries",
+      "status": 201
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/entries/:id/publish",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/entries/:id?include=refs",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/entries/:id/revisions",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public/content-types/photo/entries/:id",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public/content-types/photo/entries/:id",
+      "status": 404
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/auth/csrf",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/auth/login",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/entries/:id?include=refs",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public/media/:id/file/original",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public/media/:id/file/thumbnail",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public/media/:id/file/web",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public/media/:id/file/original",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/media/:id/file/original",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/media/:id/file/original",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/media/:id/file/original",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public/media/:id/file/original",
+      "status": 404
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public/media/:id/file/original",
+      "status": 404
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public/media/:id/file/original",
+      "status": 404
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public/media/:id/file/original",
+      "status": 404
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/auth/csrf",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/auth/login",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/auth/csrf",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/auth/login",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/auth/me",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/auth/me",
+      "status": 200
+    }
+  ],
+  "sourceBefore": [
+    {
+      "name": "cms_audit_event",
+      "count": "4113",
+      "hash": "1a2b2b619b1b50f584a91288fb00f577"
+    },
+    {
+      "name": "cms_audit_settings",
+      "count": "1",
+      "hash": "6f873e758f3126c1edb41e23cb1aaf89"
+    },
+    {
+      "name": "cms_content_type",
+      "count": "12",
+      "hash": "287ae8dfac30afff1664368fc2db5995"
+    },
+    {
+      "name": "cms_credential",
+      "count": "2",
+      "hash": "bf80d176ebe342e2b451b826072912c4"
+    },
+    {
+      "name": "cms_entry",
+      "count": "4",
+      "hash": "4b8348abd3aa7b20b512614a8fae8703"
+    },
+    {
+      "name": "cms_entry_index",
+      "count": "19",
+      "hash": "3f0f144b53932629afc28a0a314754b7"
+    },
+    {
+      "name": "cms_entry_ref",
+      "count": "6",
+      "hash": "764a04f3685e501c7c85cfd7a284ac23"
+    },
+    {
+      "name": "cms_entry_revision",
+      "count": "3",
+      "hash": "ca3b0394777a4080844f574697244c06"
+    },
+    {
+      "name": "cms_field",
+      "count": "71",
+      "hash": "cdcfd8005f7bf724bb629b7f70ab1ede"
+    },
+    {
+      "name": "cms_media",
+      "count": "6",
+      "hash": "41c44938f73790e20e5e727702cc5205"
+    },
+    {
+      "name": "cms_media_attachment",
+      "count": "4",
+      "hash": "04cba6f38aa2101a63a142889ad59159"
+    },
+    {
+      "name": "cms_media_settings",
+      "count": "1",
+      "hash": "6bfd372fc30c8e3c7c9ad1cb045cde6e"
+    },
+    {
+      "name": "cms_media_variant",
+      "count": "16",
+      "hash": "173fd281dd84fb9580f1f0dafcada086"
+    },
+    {
+      "name": "cms_navigation_menu",
+      "count": "0",
+      "hash": "d41d8cd98f00b204e9800998ecf8427e"
+    },
+    {
+      "name": "cms_permission",
+      "count": "19",
+      "hash": "cedf56e73126b2f360a83b0cec6e91de"
+    },
+    {
+      "name": "cms_principal",
+      "count": "2",
+      "hash": "7e56a3a8b4b0e3e38fa7f5db2c6aba9c"
+    },
+    {
+      "name": "cms_principal_role",
+      "count": "2",
+      "hash": "2bb17697da781967225ba158d2b26887"
+    },
+    {
+      "name": "cms_role",
+      "count": "5",
+      "hash": "1f722f024c54eb1c0306bf60bf5e5289"
+    },
+    {
+      "name": "cms_session",
+      "count": "4",
+      "hash": "0fa6eae03665014def5ba9588765fc23"
+    },
+    {
+      "name": "flyway_schema_history",
+      "count": "10",
+      "hash": "b6e19a07883e33b4b73d480099904477"
+    }
+  ],
+  "success": false,
+  "code": "RESTORE_FAILED",
+  "failureType": "OpsError",
+  "stopped": [
+    {
+      "runId": "9d313b43bf8449f7a41859488a90fc20",
+      "containerIds": [
+        "ec401fab5fad00040e38be045a16bb036b3876b92ecaef091ed41c42053a7bcf",
+        "1b5b96a691b2ecef793e06eab8b1497ba89683057327722d728db9e8e299e4d8",
+        "fae3fadab571939581898052eb3c6469cc8d2f625160b7fb933d36defe7f0a8b"
+      ]
+    }
+  ],
+  "endedAt": "2026-11-02T17:53:58.291Z"
+}

@@ -1,0 +1,21 @@
+.F..............
+======================================================================
+FAIL: test_catalog_generated_status_matches_the_notes (test_project_success.SuccessContractTests.test_catalog_generated_status_matches_the_notes)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/ckc/test/codex/wt/newclear/cms-pp1c-c-20261102/scripts/tests/test_project_success.py", line 127, in test_catalog_generated_status_matches_the_notes
+    self.assertEqual([], success.catalog_generated_status_errors(repo))
+AssertionError: Lists differ: [] != ['tools/gameplay-pattern-catalog: quote ch[61 chars]cks']
+
+Second list contains 1 additional elements.
+First extra element 0:
+'tools/gameplay-pattern-catalog: quote check failed: opencc is required for character-only display checks'
+
+- []
++ ['tools/gameplay-pattern-catalog: quote check failed: opencc is required for '
++  'character-only display checks']
+
+----------------------------------------------------------------------
+Ran 16 tests in 0.042s
+
+FAILED (failures=1)

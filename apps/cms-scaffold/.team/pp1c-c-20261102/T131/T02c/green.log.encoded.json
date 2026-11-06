@@ -1,0 +1,8 @@
+{
+  "version": 1,
+  "original": "T131/T02c/green.log",
+  "sha256": "7c57530a5d0dcb7f1e49cf64cba0d3f3fc08d7c1353e010a347db0186ef643eb",
+  "byteSize": "339",
+  "encoding": "utf-8",
+  "text": "✔ T131_T02_target_helper_PG_RESTORE_uses_child_identity (627.108882ms)\n✔ T131_T02_target_helper_INVENTORY_uses_child_identity (691.897307ms)\n✔ T131_T02_target_helper_REVOKE_SESSIONS_uses_child_identity (756.635289ms)\nℹ tests 3\nℹ suites 0\nℹ pass 3\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 2149.243945\n"
+}

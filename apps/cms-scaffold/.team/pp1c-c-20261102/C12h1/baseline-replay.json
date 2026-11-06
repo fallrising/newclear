@@ -1,0 +1,6 @@
+{
+  "kind": "regression baseline replay; implementation drafted before integration tests, not test-first claim",
+  "exitCode": 1,
+  "restoredDraftSha256": "75d319410378d0a1b5fe90afc7482777d699ec794274c96d2285ba3b15c9b43a",
+  "at": "2026-11-02T16:12:32.226571+00:00"
+}

@@ -1,0 +1,40 @@
+{
+  "losslessArtifacts": 288,
+  "checks": [
+    {
+      "file": ".team/tasks/T-151.md",
+      "exit": 0
+    },
+    {
+      "file": ".team/reports/T-151.md",
+      "exit": 0
+    },
+    {
+      "file": ".team/tasks/T-152.md",
+      "exit": 0
+    },
+    {
+      "file": ".team/reports/T-152.md",
+      "exit": 0
+    },
+    {
+      "file": ".team/tasks/T-153.md",
+      "exit": 0
+    },
+    {
+      "file": ".team/reports/T-153.md",
+      "exit": 0
+    },
+    {
+      "file": ".team/tasks/T-154.md",
+      "exit": 0
+    },
+    {
+      "file": ".team/reports/T-154.md",
+      "exit": 0
+    }
+  ],
+  "sourceFreeze": "source-freeze-after-bindings-and-capacity.json",
+  "fullNode": "751/751,0fail/cancel/skip,68932.156479ms",
+  "policyDecision": "stillpending"
+}

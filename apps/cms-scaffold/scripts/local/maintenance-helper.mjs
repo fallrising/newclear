@@ -528,42 +528,66 @@ async function mediaScriptHash(c) {
       &&named.ino===before.ino&&named.dev===before.dev&&after.nlink===1);return sha256(bytes);
   }finally{await handle.close();}
 }
-const helperRuns=new WeakMap();
+const helperRuns=new WeakMap(),inventoryResults=new WeakMap(),sessionCommits=new WeakMap();
+export function verifiedInventoryResult(token,result) {
+  const owned=inventoryResults.get(result);requirePolicy(owned?.token===token);
+  return owned.metadata;
+}
+export function verifiedSessionCommit(token,result) {
+  const owned=sessionCommits.get(result);requirePolicy(owned?.token===token);return owned.metadata;
+}
+export async function verifiedHelperProfile(token,deps={}) {
+  const state=helperRuns.get(token);requirePolicy(state?.profile);
+  requirePolicy(state.profileContext&&await mediaScriptHash(state.profileContext)===state.scriptHash);
+  return Object.freeze({...state.profile});
+}
 export async function runOwnedHelper(token,options,deps={}) {
-  requirePolicy(exactKeys(options,'side,kind')&&options.side==='source'&&['INVENTORY','PG_DUMP','MEDIA_PACK'].includes(options.kind));
+  requirePolicy(exactKeys(options,'side,kind')&&sides[options.kind]?.includes(options.side));
   const workflow=await import('./maintenance-workflow.mjs'),{side,kind}=options;
   const c=await workflow.reserveHelper(token,options,deps),env=helperEnvironment(deps.environment),command=deps.command??execute;
   const docker=async args=>{const result=await command('docker',['--host','unix:///var/run/docker.sock',...args],
     {env,shell:false,timeout:30000,maxBuffer:16*1024*1024});requirePolicy(result.code===undefined||result.code===0);return result.stdout;};
-  let registered,removed=false,pgpass=null,outputHandle,diagnosticHandle,primaryFailure;
+  let registered,removed=false,pgpass=null,outputHandle,diagnosticHandle,primaryFailure,restoreFile;
   try {
     const state=helperRuns.get(token)??{};
+    if(state.profileContext)requirePolicy(state.profileContext.cwd===c.cwd&&state.profileContext.uid===c.uid);
+    else state.profileContext=Object.freeze({cwd:c.cwd,uid:c.uid});
     const scriptHash=await mediaScriptHash(c);if(state.scriptHash)requirePolicy(state.scriptHash===scriptHash);else state.scriptHash=scriptHash;
     if(!state.profile)state.profile=await probeHelperProfile(c,deps);
     helperRuns.set(token,state);await workflow.assertWorkflow(token,{},deps);
-    const selected=c.target.images[kind==='INVENTORY'?'api':kind==='PG_DUMP'?'postgres':'node'];
+    const restoring=['PG_RESTORE','MEDIA_RESTORE'].includes(kind);
+    const revoking=kind==='REVOKE_SESSIONS';
+    const material=restoring||revoking?await(deps.restoreMaterial??(await import('../ops/local-recovery-verify.mjs')).restoreBundleMaterial)(token,deps):null;
+    if(revoking)requirePolicy(material.operationId===c.operationId&&fullId(material.rawProofSha256));
+    const selected=c.target.images[kind.startsWith('PG_')?'postgres':kind.startsWith('MEDIA_')?'node':'api'];
     const images=JSON.parse(await docker(['image','inspect',selected]));requirePolicy(images.length===1);
-    const policy=buildHelperPolicy({...c,image:images[0],side,kind}),policySha256=sha256(canonicalBytes(policy));
+    const policy=buildHelperPolicy({...c,image:images[0],side,kind,mediaUser:state.profile.mediaUser}),policySha256=sha256(canonicalBytes(policy));
     const volumes=JSON.parse(await docker(['volume','inspect',c.target.volumeNames['media-data']]));
     requirePolicy(volumes.length===1&&volumes[0].Name===c.target.volumeNames['media-data']);
     const expected={name:`cms-pp1c-${c.operationId}-${c.seq}`,labels:{...(images[0].Config.Labels??{}),
       'org.cms.pp1c.operation':c.operationId,'org.cms.pp1c.seq':c.seq,'org.cms.pp1c.kind':kind,'org.cms.pp1c.policy':policySha256},
       volumeMountpoints:{[volumes[0].Name]:volumes[0].Mountpoint},dataNetworkName:`${c.target.project}_data`,noneNetworkId:policy.networkId?null:await inspectNoneNetwork(docker)};
-    const request={version:1,mode:'INVENTORY',operationId:c.operationId,side,targetId:c.target.targetId,releaseId:c.target.images.api,
-      jdbcUrl:c.lease.sourceConnection.jdbcUrl,dbUser:'cms_local',passwordFile:'/run/secrets/spring.datasource.password',
-      mediaRoot:'/media',outputFile:'/run/pp1/output/inventory.json',backupId:null,rawProofSha256:null};
+    const request={version:1,mode:revoking?'REVOKE_SESSIONS':'INVENTORY',operationId:c.operationId,side,targetId:c.target.targetId,releaseId:`sha256:${c.target.apiBuild.jarSha256}`,
+      jdbcUrl:(c.connection??c.lease.sourceConnection).jdbcUrl,dbUser:'cms_local',passwordFile:'/run/secrets/spring.datasource.password',
+      mediaRoot:revoking?null:'/media',outputFile:revoking?null:'/run/pp1/output/inventory.json',
+      backupId:revoking?material.backupId:null,rawProofSha256:revoking?material.rawProofSha256:null};
     let path;
-    if(kind==='INVENTORY') {
+    if(kind==='INVENTORY'||revoking) {
       const bytes=canonicalBytes(request);requirePolicy(bytes.length<=65536);await privateBytes(join(c.helperRoot,'request.json'),bytes);
-      await mkdir(join(c.helperRoot,'output'),{mode:0o700});path=join(c.helperRoot,'output/inventory.json');
+      if(!revoking){await mkdir(join(c.helperRoot,'output'),{mode:0o700});path=join(c.helperRoot,'output/inventory.json');}
     }else {
-      path=join(c.helperRoot,kind==='PG_DUMP'?'db.dump':'media.package');outputHandle=await open(path,'wx',0o600);
-      if(kind==='PG_DUMP') {
+      if(restoring){
+        const name=kind==='PG_RESTORE'?'db.dump':'media.package',expected=material.manifest.artifacts.find(a=>a.path===name);
+        requirePolicy(expected&&material.operationId===c.operationId&&material.sourceRoot!==c.runRoot);
+        const input=join(material.path,name);restoreFile={...(await privateHandle(input)),path:input,expected};
+        requireHandshake(String(restoreFile.info.size)===expected.byteSize);
+      }else {path=join(c.helperRoot,kind==='PG_DUMP'?'db.dump':'media.package');outputHandle=await open(path,'wx',0o600);}
+      if(kind.startsWith('PG_')) {
         const secret=await privateHandle(join(c.runRoot,'secrets/spring.datasource.password'));
         try{requirePolicy(secret.info.size<=1048576);pgpass=await privateBytes(join(c.helperRoot,'pgpass'),pgpassBytes(await secret.handle.readFile()));}
         finally{await secret.handle.close();}
         diagnosticHandle=await open(join(c.helperRoot,'diagnostic'),'wx',0o600);
-      }else {
+      }else if(!restoring) {
         requirePolicy(state.inventory);const prior=await artifact(state.inventory.path,true);
         requirePolicy(prior.sha256===state.inventory.sha256);validateInventory(parseStrictJson(prior.bytes));
       }
@@ -578,8 +602,44 @@ export async function runOwnedHelper(token,options,deps={}) {
     const assertDraining=async()=>{await sourceCurrent();const value=await workflow.assertHelperDrain(token,deps);registered=value.lease.helper;return value;};
     const update=async patch=>{registered={...registered,...patch};await workflow.updateOwnedHelper(token,registered,deps);};
     const result=await executeHelperLifecycle(policy,expected,async(child,live)=>{
-      if(kind==='INVENTORY')return runJdbcHandshake(child,request,{address:registered.endpoint.address,assertCurrent,assertDraining,observe,
+      if(kind==='INVENTORY'||revoking)return runJdbcHandshake(child,request,{address:registered.endpoint.address,assertCurrent,assertDraining,observe,
         onReady:backend=>update({state:'READY',backend}),onPermitted:()=>update({state:'PERMITTED'})});
+      if(restoring) {
+        const hash=createHash('sha256');let size=0n;
+        const input=restoreFile.handle.createReadStream({autoClose:false});
+        const checkedInput=new Transform({transform(chunk,_encoding,done){size+=BigInt(chunk.length);hash.update(chunk);
+          done(size>BigInt(restoreFile.expected.byteSize)?new OpsError('RESTORE_FAILED'):null,chunk);}});
+        const transfer=pipeline(input,checkedInput);transfer.catch(()=>{});
+        try {
+          let receipt;
+          if(kind==='PG_RESTORE')receipt=await runPgTool(child,{policy,input:checkedInput,diagnostic:fileSink(diagnosticHandle),signal:live.signal,
+            operationId:c.operationId,address:registered.endpoint.address,observe,
+            assertCurrent:()=>registered.backend?assertDraining():assertCurrent(),onBackend:backend=>update({backend}),
+            inspectProcess:async()=>{
+              const lines=String(await docker(['top',live.id,'-eo','pid,args'])).trimEnd().split('\n');
+              requireHandshake(/^[ \t]*PID[ \t]+COMMAND[ \t]*$/.test(lines.shift()??''));
+              return lines.map(line=>{const match=/^\s*([1-9][0-9]*)\s+(.+)$/.exec(line);requireHandshake(match);return{pid:Number(match[1]),args:match[2].split(/\s+/)};});
+            }});
+          else {
+            const chunks=[];let bytes=0;
+            const stdout=new Writable({write(chunk,_encoding,done){bytes+=chunk.length;if(bytes<=16384)chunks.push(chunk);
+              done(bytes>16384?new OpsError('RESTORE_FAILED'):null);}});
+            const errors=fixedStderr(child.stderr);errors.catch(()=>{});
+            let drained=false;const completion=Promise.all([pipeline(checkedInput,child.stdin),pipeline(child.stdout,stdout)]).then(()=>{drained=true;});completion.catch(()=>{});
+            while(!drained){await assertDraining();await Promise.race([completion,pause(100)]);}
+            await completion;await assertDraining();requireHandshake((await errors)==='');
+            receipt=parseStrictJson(Buffer.concat(chunks));
+            requireHandshake(exactKeys(receipt,'version,operationId,fileCount,fileBytes,mediaHeaderSha256')&&receipt.version===1&&receipt.operationId===null
+              &&receipt.fileCount===material.manifest.inventory.fileCount&&receipt.fileBytes===material.manifest.inventory.fileBytes
+              &&receipt.mediaHeaderSha256===material.inventory.mediaHeaderSha256);
+          }
+          await transfer;
+          const after=await restoreFile.handle.stat(),named=await lstat(restoreFile.path),before=restoreFile.info;
+          requireHandshake(['dev','ino','size','mtimeMs','ctimeMs','mode','uid','gid','nlink'].every(key=>before[key]===after[key]&&before[key]===named[key])
+            &&String(size)===restoreFile.expected.byteSize&&hash.digest('hex')===restoreFile.expected.sha256);
+          return receipt;
+        }catch(error){input.destroy();checkedInput.destroy();await transfer.catch(()=>{});throw error;}
+      }
       const capacity=await statfs(c.helperRoot,{bigint:true}),available=capacity.bavail*capacity.bsize;
       const reserve=available/10n>536870912n?available/10n:536870912n;requireHandshake(available>reserve);let total=0n;
       const bound=new Transform({transform(chunk,_encoding,done){total+=BigInt(chunk.length);done(total>available-reserve?new OpsError('CAPTURE_FAILED'):null,chunk);}});
@@ -617,6 +677,14 @@ export async function runOwnedHelper(token,options,deps={}) {
     },onRemoved:async()=>{await workflow.clearOwnedHelper(token,deps);removed=true;}});
     if(outputHandle){await outputHandle.sync();await outputHandle.close();outputHandle=null;}
     if(diagnosticHandle){await diagnosticHandle.sync();await diagnosticHandle.close();diagnosticHandle=null;}
+    if(restoring){await assertCurrent();return Object.freeze({kind,side,receipt:result});}
+    if(revoking){
+      path=join(c.helperRoot,'commit-receipt.json');await privateBytes(path,canonicalBytes(result));
+      const checked=await artifact(path);await assertCurrent();
+      const finished=Object.freeze({kind,side,receipt:Object.freeze({...result})});
+      sessionCommits.set(finished,{token,metadata:Object.freeze({side,kind,seq:c.seq,operationId:c.operationId,targetId:c.target.targetId,
+        releaseId:`sha256:${c.target.apiBuild.jarSha256}`,...checked,requestSha256:sha256(canonicalBytes(request)),backupId:material.backupId,rawProofSha256:material.rawProofSha256})});return finished;
+    }
     await syncDirectory(dirname(path));const checked=await artifact(path,kind==='INVENTORY');await assertCurrent();
     if(kind==='INVENTORY') {
       const inventory=parseStrictJson(checked.bytes);validateInventory(inventory);
@@ -626,7 +694,9 @@ export async function runOwnedHelper(token,options,deps={}) {
       requireHandshake(result.inventorySha256===checked.sha256&&result.dbSnapshotSha256===inventory.dbSnapshotSha256
         &&Object.entries(counts).every(([key,value])=>result[key]===value));
       state.inventory={path,sha256:checked.sha256};const {bytes,...metadata}=checked;
-      return{kind,...metadata,inventory,inventorySha256:checked.sha256,receipt:result,profile:Object.fromEntries(['javaRuntimeVersion','pgDumpVersion','pgRestoreVersion','postgresServerVersion'].map(key=>[key,state.profile[key]]))};
+      const finished=Object.freeze({kind,...metadata,inventory,inventorySha256:checked.sha256,receipt:result,profile:Object.fromEntries(['javaRuntimeVersion','pgDumpVersion','pgRestoreVersion','postgresServerVersion'].map(key=>[key,state.profile[key]]))});
+      inventoryResults.set(finished,{token,metadata:Object.freeze({side,kind,seq:c.seq,operationId:c.operationId,targetId:c.target.targetId,
+        releaseId:`sha256:${c.target.apiBuild.jarSha256}`,path,sha256:checked.sha256,byteSize:checked.byteSize,requestSha256:sha256(canonicalBytes(request))})});return finished;
     }
     if(kind==='PG_DUMP')requireHandshake(result.sha256===checked.sha256&&result.byteSize===checked.byteSize);
     return{kind,...checked};
@@ -634,6 +704,7 @@ export async function runOwnedHelper(token,options,deps={}) {
     const code=error instanceof OpsError?error.code:'CAPTURE_FAILED';primaryFailure=new OpsError(code);
     await workflow.failWorkflow(token,code,deps);throw primaryFailure;
   }finally{
+    await restoreFile?.handle.close().catch(()=>{});
     await outputHandle?.close().catch(()=>{});await diagnosticHandle?.close().catch(()=>{});
     try{if(pgpass&&removed){const check=await privateHandle(pgpass);await check.handle.close();await unlink(pgpass);await syncDirectory(dirname(pgpass));}}
     catch{if(!primaryFailure){await workflow.failWorkflow(token,'CAPTURE_FAILED',deps);throw new OpsError('CAPTURE_FAILED');}}

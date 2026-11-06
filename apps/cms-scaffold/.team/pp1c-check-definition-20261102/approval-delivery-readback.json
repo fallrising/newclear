@@ -1,0 +1,25 @@
+{
+  "pr": 1012,
+  "head": "6359544f58b72dd4c8c33ac6538bdfd0bf2f6dd9",
+  "merge": "646b11189ced91016e1dc57306460cf890d1dee3",
+  "remoteMain": "646b11189ced91016e1dc57306460cf890d1dee3",
+  "cmsCi": {
+    "id": 42242685752,
+    "conclusion": "success",
+    "jobs": [
+      "java",
+      "java-integration",
+      "web"
+    ]
+  },
+  "contractsCi": {
+    "id": 42242685787,
+    "conclusion": "success"
+  },
+  "normalMerge": true,
+  "fullComponentDiffEmpty": true,
+  "readbackAt": "2026-11-06T15:30:48.200615+00:00",
+  "productImplemented": false,
+  "cAccepted": false,
+  "dStarted": false
+}

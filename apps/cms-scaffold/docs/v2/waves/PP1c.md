@@ -53,6 +53,8 @@
 | `services/cms-api/src/main/java/com/fallrising/cms/ops/RestoreSessionRevoker.java` | 新；RAW_VERIFIED後同DB transaction revoke＋AUTH audit adapter | C13/C14 |
 | `services/cms-api/src/test/java/com/fallrising/cms/ops/RestoreSessionRevokerTests.java` | 新；rollback/audit failure/only-session-delta contract | C13/C14 |
 | `services/cms-api/src/integrationTest/java/com/fallrising/cms/contract/RestoreSessionRevokerIntegrationTests.java` | 新；real PG atomic revoke/audit test | C13/C14 |
+| `services/cms-api/src/integrationTest/java/com/fallrising/cms/ops/RestoreSessionRevokerMainIntegrationTests.java` | C接線回歸；真PG同connection Ready/Permit/revoke/Result（root test-only路徑） | C13/C14整合 |
+| `scripts/ops/local-recovery.fixture.mjs` | 僅Node測試共用fixture，產品不import | C09–C12測試 |
 | `scripts/ops/local-recovery-verify.mjs` | 新；bundle/release preflight及post-start exact allowlist verifier | C09/C10/C15/C16 |
 | `scripts/ops/local-recovery-verify.test.mjs` | 新；altered/missing receipt、release drift、smoke failure | C09/C10/C15/C16 |
 | `e2e-pp1-local/recovery.spec.ts` | 新；T04 寫 browser journey；C17 只執行／收證據 | T04 |

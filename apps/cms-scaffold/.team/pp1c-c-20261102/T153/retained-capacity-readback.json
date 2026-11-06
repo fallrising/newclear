@@ -1,0 +1,66 @@
+{
+  "observedRetained": [
+    {
+      "attempt": 3,
+      "side": "source",
+      "recordSha256": "a4fe4c880630a304166c0f540f8ada1b4e21ead66b965cafb0cddfd9aff4f4b1",
+      "subnets": [
+        "192.168.241.0/24",
+        "192.168.240.0/24"
+      ]
+    },
+    {
+      "attempt": 3,
+      "side": "target",
+      "recordSha256": "969cc229fb8074bc4c41297b82fc9e5f410d90116164c3f89d4315acc6dc6a23",
+      "subnets": [
+        "192.168.243.0/24",
+        "192.168.242.0/24"
+      ]
+    },
+    {
+      "attempt": 4,
+      "side": "source",
+      "recordSha256": "2cf2325a0b05656f8eb1419c463cd55011c81484e64fec474e8ca43886278527",
+      "subnets": [
+        "192.168.245.0/24",
+        "192.168.244.0/24"
+      ]
+    },
+    {
+      "attempt": 4,
+      "side": "target",
+      "recordSha256": "8feb43837df25998deaee61edb8a21900d391217670d4f2ce148eacfab4c4770",
+      "subnets": [
+        "192.168.247.0/24",
+        "192.168.246.0/24"
+      ]
+    },
+    {
+      "attempt": 5,
+      "side": "source",
+      "recordSha256": "e32139f26dabaf7d63a36a129024a188b627cf48456fb74867e7810fc913f137",
+      "subnets": [
+        "192.168.249.0/24",
+        "192.168.248.0/24"
+      ]
+    },
+    {
+      "attempt": 5,
+      "side": "target",
+      "recordSha256": "1319dd0ea46595130551752243ad3a9e8f6ca8e802468db5e201b172c192b4aa",
+      "subnets": [
+        "192.168.251.0/24",
+        "192.168.250.0/24"
+      ]
+    }
+  ],
+  "pool": "192.168.240.0/20",
+  "candidateCount": 64,
+  "retained24Count": 12,
+  "unoccupied26CountFromRecordedInputs": 16,
+  "firstFree": "192.168.252.0/26",
+  "lastFree": "192.168.255.192/26",
+  "afterC4AndD6Remaining": 6,
+  "scope": "offline arithmetic over retained records, not a live Docker availability claim"
+}

@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.fallrising.cms.ops.RestoreSessionRevokerMainIntegrationTests" tests="5" skipped="0" failures="5" errors="0" timestamp="2026-11-02T14:38:33.732Z" hostname="hrv" time="78.675">
+  <properties/>
+  <testcase name="PP1c_actualPgWrongPermitNeverWrites()" classname="com.fallrising.cms.ops.RestoreSessionRevokerMainIntegrationTests" time="15.326">
+    <failure message="java.util.concurrent.TimeoutException" type="java.util.concurrent.TimeoutException">java.util.concurrent.TimeoutException
+	at java.base/java.util.concurrent.CompletableFuture.timedGet(CompletableFuture.java:1981)
+	at java.base/java.util.concurrent.CompletableFuture.get(CompletableFuture.java:2116)
+	at com.fallrising.cms.ops.RestoreSessionRevokerMainIntegrationTests.exercise(RestoreSessionRevokerMainIntegrationTests.java:99)
+	at com.fallrising.cms.ops.RestoreSessionRevokerMainIntegrationTests.PP1c_actualPgWrongPermitNeverWrites(RestoreSessionRevokerMainIntegrationTests.java:147)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+</failure>
+  </testcase>
+  <testcase name="PP1c_actualPgCommitResponseLostNoRollbackOrSqlRetry()" classname="com.fallrising.cms.ops.RestoreSessionRevokerMainIntegrationTests" time="15.459">
+    <failure message="java.util.concurrent.TimeoutException" type="java.util.concurrent.TimeoutException">java.util.concurrent.TimeoutException
+	at java.base/java.util.concurrent.CompletableFuture.timedGet(CompletableFuture.java:1981)
+	at java.base/java.util.concurrent.CompletableFuture.get(CompletableFuture.java:2116)
+	at com.fallrising.cms.ops.RestoreSessionRevokerMainIntegrationTests.exercise(RestoreSessionRevokerMainIntegrationTests.java:99)
+	at com.fallrising.cms.ops.RestoreSessionRevokerMainIntegrationTests.PP1c_actualPgCommitResponseLostNoRollbackOrSqlRetry(RestoreSessionRevokerMainIntegrationTests.java:149)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+</failure>
+  </testcase>
+  <testcase name="PP1c_actualPgReceiptFailureDoesNotRollbackCommittedChange()" classname="com.fallrising.cms.ops.RestoreSessionRevokerMainIntegrationTests" time="15.414">
+    <failure message="java.util.concurrent.TimeoutException" type="java.util.concurrent.TimeoutException">java.util.concurrent.TimeoutException
+	at java.base/java.util.concurrent.CompletableFuture.timedGet(CompletableFuture.java:1981)
+	at java.base/java.util.concurrent.CompletableFuture.get(CompletableFuture.java:2116)
+	at com.fallrising.cms.ops.RestoreSessionRevokerMainIntegrationTests.exercise(RestoreSessionRevokerMainIntegrationTests.java:99)
+	at com.fallrising.cms.ops.RestoreSessionRevokerMainIntegrationTests.PP1c_actualPgReceiptFailureDoesNotRollbackCommittedChange(RestoreSessionRevokerMainIntegrationTests.java:150)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+</failure>
+  </testcase>
+  <testcase name="PP1c_actualPgPhysicalBackendReplacementRejected()" classname="com.fallrising.cms.ops.RestoreSessionRevokerMainIntegrationTests" time="15.468">
+    <failure message="java.util.concurrent.TimeoutException" type="java.util.concurrent.TimeoutException">java.util.concurrent.TimeoutException
+	at java.base/java.util.concurrent.CompletableFuture.timedGet(CompletableFuture.java:1981)
+	at java.base/java.util.concurrent.CompletableFuture.get(CompletableFuture.java:2116)
+	at com.fallrising.cms.ops.RestoreSessionRevokerMainIntegrationTests.exercise(RestoreSessionRevokerMainIntegrationTests.java:99)
+	at com.fallrising.cms.ops.RestoreSessionRevokerMainIntegrationTests.PP1c_actualPgPhysicalBackendReplacementRejected(RestoreSessionRevokerMainIntegrationTests.java:148)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+</failure>
+  </testcase>
+  <testcase name="PP1c_actualPgSameBackendReadonlyReadyThenAtomicCommit()" classname="com.fallrising.cms.ops.RestoreSessionRevokerMainIntegrationTests" time="15.388">
+    <failure message="java.util.concurrent.TimeoutException" type="java.util.concurrent.TimeoutException">java.util.concurrent.TimeoutException
+	at java.base/java.util.concurrent.CompletableFuture.timedGet(CompletableFuture.java:1981)
+	at java.base/java.util.concurrent.CompletableFuture.get(CompletableFuture.java:2116)
+	at com.fallrising.cms.ops.RestoreSessionRevokerMainIntegrationTests.exercise(RestoreSessionRevokerMainIntegrationTests.java:99)
+	at com.fallrising.cms.ops.RestoreSessionRevokerMainIntegrationTests.PP1c_actualPgSameBackendReadonlyReadyThenAtomicCommit(RestoreSessionRevokerMainIntegrationTests.java:146)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+</failure>
+  </testcase>
+  <system-out><![CDATA[14:38:33.735 [Test worker] INFO tc.postgres:16-alpine -- Creating container for image: postgres:16-alpine
+14:38:33.897 [Test worker] INFO tc.postgres:16-alpine -- Container postgres:16-alpine is starting: 9e0d9c044b62a2e5663bd07dc01cdefbcdffb14672663c8e63d63c5e2d63fae2
+14:38:35.351 [Test worker] INFO tc.postgres:16-alpine -- Container postgres:16-alpine started in PT1.615584781S
+14:38:35.351 [Test worker] INFO tc.postgres:16-alpine -- Container is started (JDBC URL: jdbc:postgresql://localhost:33202/cms?loggerLevel=OFF)
+14:38:35.384 [Test worker] INFO org.flywaydb.core.FlywayExecutor -- Database: jdbc:postgresql://localhost:33202/cms?loggerLevel=OFF (PostgreSQL 16.15)
+14:38:35.394 [Test worker] INFO org.flywaydb.core.internal.schemahistory.JdbcTableSchemaHistory -- Schema history table "public"."flyway_schema_history" does not exist yet
+14:38:35.394 [Test worker] INFO org.flywaydb.core.internal.command.clean.CleanExecutor -- Successfully dropped pre-schema database level objects (execution time 00:00.000s)
+14:38:35.413 [Test worker] INFO org.flywaydb.core.internal.command.clean.CleanExecutor -- Successfully cleaned schema "public" (execution time 00:00.019s)
+14:38:35.422 [Test worker] INFO org.flywaydb.core.internal.command.clean.CleanExecutor -- Successfully cleaned schema "public" (execution time 00:00.008s)
+14:38:35.423 [Test worker] INFO org.flywaydb.core.internal.command.clean.CleanExecutor -- Successfully dropped post-schema database level objects (execution time 00:00.000s)
+14:38:35.452 [Test worker] INFO org.flywaydb.core.internal.schemahistory.JdbcTableSchemaHistory -- Schema history table "public"."flyway_schema_history" does not exist yet
+14:38:35.452 [Test worker] INFO org.flywaydb.core.internal.command.DbValidate -- Successfully validated 10 migrations (execution time 00:00.004s)
+14:38:35.459 [Test worker] INFO org.flywaydb.core.internal.schemahistory.JdbcTableSchemaHistory -- Creating Schema History table "public"."flyway_schema_history" ...
+14:38:35.478 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Current version of schema "public": << Empty Schema >>
+14:38:35.480 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "1 - wave a baseline"
+14:38:35.491 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "2 - identity"
+14:38:35.534 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "3 - content"
+14:38:35.571 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "4 - media"
+14:38:35.591 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "5 - type settings and field metadata"
+14:38:35.598 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "6 - entry index scope"
+14:38:35.615 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "7 - backfill entry index"
+14:38:35.620 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "8 - publish request and audit indexes"
+14:38:35.628 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "9 - audit retention"
+14:38:35.636 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "10 - index ref fields"
+14:38:35.640 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Successfully applied 10 migrations to schema "public", now at version v10 (execution time 00:00.122s)
+14:38:50.702 [Test worker] INFO org.flywaydb.core.FlywayExecutor -- Database: jdbc:postgresql://localhost:33202/cms?loggerLevel=OFF (PostgreSQL 16.15)
+14:38:50.716 [Test worker] INFO org.flywaydb.core.internal.command.clean.CleanExecutor -- Successfully dropped pre-schema database level objects (execution time 00:00.000s)
+14:38:50.869 [Test worker] INFO org.flywaydb.core.internal.command.clean.CleanExecutor -- Successfully cleaned schema "public" (execution time 00:00.151s)
+14:38:50.879 [Test worker] INFO org.flywaydb.core.internal.command.clean.CleanExecutor -- Successfully cleaned schema "public" (execution time 00:00.010s)
+14:38:50.879 [Test worker] INFO org.flywaydb.core.internal.command.clean.CleanExecutor -- Successfully dropped post-schema database level objects (execution time 00:00.000s)
+14:38:50.913 [Test worker] INFO org.flywaydb.core.internal.schemahistory.JdbcTableSchemaHistory -- Schema history table "public"."flyway_schema_history" does not exist yet
+14:38:50.914 [Test worker] INFO org.flywaydb.core.internal.command.DbValidate -- Successfully validated 10 migrations (execution time 00:00.006s)
+14:38:50.924 [Test worker] INFO org.flywaydb.core.internal.schemahistory.JdbcTableSchemaHistory -- Creating Schema History table "public"."flyway_schema_history" ...
+14:38:50.955 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Current version of schema "public": << Empty Schema >>
+14:38:50.958 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "1 - wave a baseline"
+14:38:50.973 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "2 - identity"
+14:38:51.018 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "3 - content"
+14:38:51.053 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "4 - media"
+14:38:51.072 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "5 - type settings and field metadata"
+14:38:51.079 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "6 - entry index scope"
+14:38:51.094 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "7 - backfill entry index"
+14:38:51.100 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "8 - publish request and audit indexes"
+14:38:51.107 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "9 - audit retention"
+14:38:51.115 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "10 - index ref fields"
+14:38:51.118 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Successfully applied 10 migrations to schema "public", now at version v10 (execution time 00:00.122s)
+14:39:06.166 [Test worker] INFO org.flywaydb.core.FlywayExecutor -- Database: jdbc:postgresql://localhost:33202/cms?loggerLevel=OFF (PostgreSQL 16.15)
+14:39:06.177 [Test worker] INFO org.flywaydb.core.internal.command.clean.CleanExecutor -- Successfully dropped pre-schema database level objects (execution time 00:00.000s)
+14:39:06.298 [Test worker] INFO org.flywaydb.core.internal.command.clean.CleanExecutor -- Successfully cleaned schema "public" (execution time 00:00.120s)
+14:39:06.311 [Test worker] INFO org.flywaydb.core.internal.command.clean.CleanExecutor -- Successfully cleaned schema "public" (execution time 00:00.012s)
+14:39:06.311 [Test worker] INFO org.flywaydb.core.internal.command.clean.CleanExecutor -- Successfully dropped post-schema database level objects (execution time 00:00.000s)
+14:39:06.340 [Test worker] INFO org.flywaydb.core.internal.schemahistory.JdbcTableSchemaHistory -- Schema history table "public"."flyway_schema_history" does not exist yet
+14:39:06.341 [Test worker] INFO org.flywaydb.core.internal.command.DbValidate -- Successfully validated 10 migrations (execution time 00:00.004s)
+14:39:06.348 [Test worker] INFO org.flywaydb.core.internal.schemahistory.JdbcTableSchemaHistory -- Creating Schema History table "public"."flyway_schema_history" ...
+14:39:06.367 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Current version of schema "public": << Empty Schema >>
+14:39:06.369 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "1 - wave a baseline"
+14:39:06.381 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "2 - identity"
+14:39:06.425 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "3 - content"
+14:39:06.466 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "4 - media"
+14:39:06.484 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "5 - type settings and field metadata"
+14:39:06.492 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "6 - entry index scope"
+14:39:06.507 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "7 - backfill entry index"
+14:39:06.513 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "8 - publish request and audit indexes"
+14:39:06.523 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "9 - audit retention"
+14:39:06.530 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "10 - index ref fields"
+14:39:06.533 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Successfully applied 10 migrations to schema "public", now at version v10 (execution time 00:00.126s)
+14:39:21.570 [Test worker] INFO org.flywaydb.core.FlywayExecutor -- Database: jdbc:postgresql://localhost:33202/cms?loggerLevel=OFF (PostgreSQL 16.15)
+14:39:21.585 [Test worker] INFO org.flywaydb.core.internal.command.clean.CleanExecutor -- Successfully dropped pre-schema database level objects (execution time 00:00.000s)
+14:39:21.730 [Test worker] INFO org.flywaydb.core.internal.command.clean.CleanExecutor -- Successfully cleaned schema "public" (execution time 00:00.143s)
+14:39:21.742 [Test worker] INFO org.flywaydb.core.internal.command.clean.CleanExecutor -- Successfully cleaned schema "public" (execution time 00:00.012s)
+14:39:21.743 [Test worker] INFO org.flywaydb.core.internal.command.clean.CleanExecutor -- Successfully dropped post-schema database level objects (execution time 00:00.000s)
+14:39:21.779 [Test worker] INFO org.flywaydb.core.internal.schemahistory.JdbcTableSchemaHistory -- Schema history table "public"."flyway_schema_history" does not exist yet
+14:39:21.779 [Test worker] INFO org.flywaydb.core.internal.command.DbValidate -- Successfully validated 10 migrations (execution time 00:00.004s)
+14:39:21.788 [Test worker] INFO org.flywaydb.core.internal.schemahistory.JdbcTableSchemaHistory -- Creating Schema History table "public"."flyway_schema_history" ...
+14:39:21.810 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Current version of schema "public": << Empty Schema >>
+14:39:21.812 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "1 - wave a baseline"
+14:39:21.827 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "2 - identity"
+14:39:21.876 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "3 - content"
+14:39:21.920 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "4 - media"
+14:39:21.942 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "5 - type settings and field metadata"
+14:39:21.951 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "6 - entry index scope"
+14:39:21.969 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "7 - backfill entry index"
+14:39:21.976 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "8 - publish request and audit indexes"
+14:39:21.985 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "9 - audit retention"
+14:39:21.994 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "10 - index ref fields"
+14:39:21.998 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Successfully applied 10 migrations to schema "public", now at version v10 (execution time 00:00.144s)
+14:39:37.040 [Test worker] INFO org.flywaydb.core.FlywayExecutor -- Database: jdbc:postgresql://localhost:33202/cms?loggerLevel=OFF (PostgreSQL 16.15)
+14:39:37.051 [Test worker] INFO org.flywaydb.core.internal.command.clean.CleanExecutor -- Successfully dropped pre-schema database level objects (execution time 00:00.000s)
+14:39:37.165 [Test worker] INFO org.flywaydb.core.internal.command.clean.CleanExecutor -- Successfully cleaned schema "public" (execution time 00:00.113s)
+14:39:37.176 [Test worker] INFO org.flywaydb.core.internal.command.clean.CleanExecutor -- Successfully cleaned schema "public" (execution time 00:00.010s)
+14:39:37.176 [Test worker] INFO org.flywaydb.core.internal.command.clean.CleanExecutor -- Successfully dropped post-schema database level objects (execution time 00:00.000s)
+14:39:37.208 [Test worker] INFO org.flywaydb.core.internal.schemahistory.JdbcTableSchemaHistory -- Schema history table "public"."flyway_schema_history" does not exist yet
+14:39:37.208 [Test worker] INFO org.flywaydb.core.internal.command.DbValidate -- Successfully validated 10 migrations (execution time 00:00.004s)
+14:39:37.215 [Test worker] INFO org.flywaydb.core.internal.schemahistory.JdbcTableSchemaHistory -- Creating Schema History table "public"."flyway_schema_history" ...
+14:39:37.235 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Current version of schema "public": << Empty Schema >>
+14:39:37.236 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "1 - wave a baseline"
+14:39:37.247 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "2 - identity"
+14:39:37.289 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "3 - content"
+14:39:37.324 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "4 - media"
+14:39:37.343 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "5 - type settings and field metadata"
+14:39:37.350 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "6 - entry index scope"
+14:39:37.367 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "7 - backfill entry index"
+14:39:37.373 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "8 - publish request and audit indexes"
+14:39:37.380 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "9 - audit retention"
+14:39:37.387 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "10 - index ref fields"
+14:39:37.390 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Successfully applied 10 migrations to schema "public", now at version v10 (execution time 00:00.120s)
+]]></system-out>
+  <system-err><![CDATA[INPUT_INVALID
+INPUT_INVALID
+INPUT_INVALID
+INPUT_INVALID
+INPUT_INVALID
+]]></system-err>
+</testsuite>

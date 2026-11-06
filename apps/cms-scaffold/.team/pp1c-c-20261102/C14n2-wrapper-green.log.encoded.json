@@ -1,0 +1,8 @@
+{
+  "version": 1,
+  "original": "C14n2-wrapper-green.log",
+  "sha256": "8eb7d2e713464031fd9bef7abbd2aea0b0a757decf81ba423828626c3c5fd3fc",
+  "byteSize": "214",
+  "encoding": "utf-8",
+  "text": "✔ PP1c_C14n2_real_registry_REVOKE_wrapper_uses_private_raw_material_and_authority (1861.46108ms)\nℹ tests 1\nℹ suites 0\nℹ pass 1\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 1937.44245\n"
+}

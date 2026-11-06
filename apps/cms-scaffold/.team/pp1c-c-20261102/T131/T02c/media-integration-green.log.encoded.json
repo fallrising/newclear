@@ -1,0 +1,8 @@
+{
+  "version": 1,
+  "original": "T131/T02c/media-integration-green.log",
+  "sha256": "7226f19044b9e7197829644151cc5ee577b158365f2ac23f660b3796c7484a5d",
+  "byteSize": "1534",
+  "encoding": "utf-8",
+  "text": "✔ T131_T02_target_media_requires_independently_cached_profile (873.472798ms)\n✖ T131_T02_target_media_uses_verified_profile_from_same_real_registry_token (1557.022151ms)\n✔ T131_T02_source_after_inventory_is_allowed_only_at_raw_verification (883.501575ms)\nℹ tests 3\nℹ suites 0\nℹ pass 2\nℹ fail 1\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 3403.437861\n\n✖ failing tests:\n\ntest at scripts/local/maintenance-workflow.test.mjs:778:1\n✖ T131_T02_target_media_uses_verified_profile_from_same_real_registry_token (1557.022151ms)\n  Error: QUIESCENCE_NOT_PROVEN\n      at fail (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-c-target-20261102/apps/cms-scaffold/scripts/local/maintenance-target.mjs:8:28)\n      at inspectTarget (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-c-target-20261102/apps/cms-scaffold/scripts/local/maintenance-target.mjs:205:13)\n      at async assertWorkflow (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-c-target-20261102/apps/cms-scaffold/scripts/local/maintenance-workflow.mjs:71:20)\n      at async Module.updateOwnedHelper (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-c-target-20261102/apps/cms-scaffold/scripts/local/maintenance-workflow.mjs:231:79)\n      at async TestContext.<anonymous> (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-c-target-20261102/apps/cms-scaffold/scripts/local/maintenance-workflow.test.mjs:783:3)\n      at async Test.run (node:internal/test_runner/test:1332:7)\n      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7)\n"
+}

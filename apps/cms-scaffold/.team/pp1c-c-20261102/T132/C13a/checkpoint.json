@@ -1,0 +1,11 @@
+{
+  "changedLines": 183,
+  "files": {
+    "services/cms-api/src/main/java/com/fallrising/cms/ops/RestoreSessionRevoker.java": 63,
+    "services/cms-api/src/integrationTest/java/com/fallrising/cms/contract/RestoreSessionRevokerIntegrationTests.java": 120
+  },
+  "sha256": {
+    "services/cms-api/src/main/java/com/fallrising/cms/ops/RestoreSessionRevoker.java": "10b298f8ed683a05c2ee85571423f75db6815e0386ef6b9e0c1fccff697f82c2",
+    "services/cms-api/src/integrationTest/java/com/fallrising/cms/contract/RestoreSessionRevokerIntegrationTests.java": "41660154fac595556e3b9e020c19731caa9d53e3be469d6601e1329b251ad95c"
+  }
+}

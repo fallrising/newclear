@@ -1,4 +1,8 @@
-# W5 frontend hardening
+# Current team delivery
+
+Desk T-0351 current PP1c C routing and acceptance: [C plan](pp1c-c-20261102/PLAN.md). Local implementation and C6 accepted by T143/T158; current-head CI/normal merge/remote readback remain publication gates. D begins after C delivery. All earlier plans below are historical.
+
+## Historical W5 frontend hardening
 
 Status: IN_PROGRESS — owner approved A–G (G on 2026-10-06); baseline W4 merge 3b7be596e32920268036d4eb91361972f52bc8ba. Historical T02 failure remains recorded below.
 

@@ -1,0 +1,10 @@
+{
+  "changedLines": 155,
+  "files": {
+    "services/cms-api/src/integrationTest/java/com/fallrising/cms/ops/RestoreSessionRevokerMainIntegrationTests.java": 155
+  },
+  "sha256": {
+    "services/cms-api/src/integrationTest/java/com/fallrising/cms/ops/RestoreSessionRevokerMainIntegrationTests.java": "f1959a2452957439cb20802e4bcb9aff07c10f265d7c965e7beb0ed906e7e2db"
+  },
+  "kind": "test-only verification of previously Green implementation; initial fixture URL failure preserved"
+}

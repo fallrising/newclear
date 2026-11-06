@@ -1,0 +1,25 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { prepareSmokeFixture } from './fixture-client.mjs';
+const id=n=>`00000000-0000-4000-8000-${String(n).padStart(12,'0')}`;
+function png(n){const b=Buffer.alloc(33);Buffer.from('89504e470d0a1a0a','hex').copy(b);b.writeUInt32BE(13,8);b.write('IHDR',12);b.writeUInt32BE(32,16);b.writeUInt32BE(16,20);b[24]=n;return b;}
+function fixture(){
+  const calls=[],state={cookies:0,principal:0},sourceRunId='a'.repeat(32),admin={username:'local-admin',password:'private-admin-password'};
+  const cookies=()=>[`cms_session=s${++state.cookies}; Path=/; Secure; HttpOnly; SameSite=Lax; Max-Age=604800`,`cms_csrf=c${state.cookies}; Path=/; Secure; SameSite=Lax; Max-Age=604800`];
+  const principal=role=>({id:id(role==='admin'?1:2),username:role==='admin'?admin.username:`pp1c-op-${sourceRunId.slice(0,16)}`,status:'active'});
+  const apiClient=async r=>{calls.push(r);
+    if(r.path==='/api/v1/auth/csrf')return{status:200,json:{csrfToken:'initial'},setCookies:['cms_csrf=initial; Path=/; Secure; SameSite=Lax; Max-Age=604800']};
+    if(r.path==='/api/v1/auth/login') {const role=r.json.username===admin.username?'admin':'operator',setCookies=cookies();return{status:200,json:{principal:principal(role),roles:[{code:role,contentTypeCodes:role==='admin'?[]:['album','photo']}],surfaces:['back','admin'],csrfToken:`c${state.cookies}`},setCookies};}
+    if(r.path==='/api/v1/roles')return{status:200,json:{items:[{code:'admin'},{code:'operator'},{code:'anonymous'}]}};
+    if(r.path==='/api/v1/principals'&&r.method==='POST')return{status:201,json:{...principal('operator'),temporaryPassword:r.json.temporaryPassword}};
+    if(r.path===`/api/v1/principals/${id(2)}/roles`)return{status:204};
+    if(r.path.includes('/permissions')){if(r.method==='PUT'){state[r.path]=r.json;return{status:204};}return{status:200,json:{items:state[r.path].map((p,i)=>({...p,id:id(i+50)}))}};}
+    throw new Error('MOCK_STOP_AFTER_IDENTITY');
+  };
+  return{calls,state,input:{sourceRunId,admin,operatorPassword:'private-operator-password',pngs:Object.fromEntries(['public','replacement','draft','private','deleted'].map((k,i)=>[k,png(i+1)])),sessionConfig:{sessionAbsoluteSeconds:'43200',sessionMaxSeconds:'604800'},apiClient,beforeFinalLogin:async()=>{calls.push({hook:'orphan'});}}};
+}
+test('T144_identity_uses_fixed_operator_and_anonymous_permissions_before_media',async()=>{
+  const f=fixture();await assert.rejects(prepareSmokeFixture(f.input),e=>e.code==='FIXTURE_HTTP_FAILED');
+  const permissions=f.calls.filter(r=>r.method==='PUT'&&r.path.includes('/permissions'));
+  assert.equal(permissions.length,2);assert.equal(permissions[0].json.length,4);assert.equal(permissions[1].json.length,2);
+});

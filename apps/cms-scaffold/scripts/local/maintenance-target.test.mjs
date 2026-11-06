@@ -222,3 +222,232 @@ test('PP1FM04 internal endpoints without default routes bind only the verified I
     f.state.networks[1] = original;
   }
 });
+
+test('T141 original capability is mandatory for observed settings', async t => {
+  const module = await import('./maintenance-target.mjs');
+  assert.equal(typeof module.observedSessionConfig, 'function');
+  const f = await fixture(t), inspection = await inspectTarget(f.root, f.deps, { apiState: 'running' });
+  for (const value of [{}, structuredClone(inspection)]) {
+    await assert.rejects(module.observedSessionConfig(value, f.deps), { code: 'ADAPTER_UNSEALED' });
+  }
+});
+
+const inheritedApiEnv = [
+  'PATH=/opt/java/openjdk/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin',
+  'JAVA_HOME=/opt/java/openjdk', 'LANG=en_US.UTF-8', 'LANGUAGE=en_US:en', 'LC_ALL=en_US.UTF-8', 'JAVA_VERSION=jdk-25.0.5+8'
+];
+async function sessionFixture(t) {
+  const f = await fixture(t), original = f.deps.command;
+  const launch = { Entrypoint: ['java', '-jar', '/app/app.jar'], Cmd: null, WorkingDir: '/app' };
+  Object.assign(f.state.containers[1].Config, structuredClone(launch));
+  Object.assign(f.state.containers[1], { Created: '2026-11-02T00:00:00Z', RestartCount: 0 });
+  Object.assign(f.state.containers[1].State, { StartedAt: '2026-11-02T00:00:01Z', FinishedAt: '0001-01-01T00:00:00Z', Status: 'running' });
+  f.state.containers[1].Config.Env.push(...inheritedApiEnv);
+  f.state.imageConfig = { ...launch, Env: [...inheritedApiEnv] };
+  f.deps.command = async (file, args, options) => {
+    const result = await original(file, args, options);
+    if (args[2] === 'image' && args.at(-1) === f.receipt.imageRefs.api) {
+      const images = JSON.parse(result.stdout); Object.assign(images[0].Config, f.state.imageConfig);
+      return { stdout: JSON.stringify(images), stderr: '' };
+    }
+    return result;
+  };
+  return f;
+}
+test('T141 exact source launcher and inherited environment refuse override channels', async t => {
+  const { observedSessionConfig } = await import('./maintenance-target.mjs');
+  for (const mutate of [
+    f => f.state.containers[1].Config.Env.push('JAVA_TOOL_OPTIONS=-Dcms.identity.session-max=PT1S'),
+    f => f.state.containers[1].Config.Env.push('JDK_JAVA_OPTIONS=-Dspring.config.location=/other'),
+    f => f.state.containers[1].Config.Env.push('_JAVA_OPTIONS=-Dcms.identity.session-max=PT1S'),
+    f => f.state.containers[1].Config.Env.push('cms.identity.session-max=PT1S'),
+    f => f.state.containers[1].Config.Env.push('spring_config_location=/other'),
+    f => { f.state.containers[1].Config.Cmd = ['--cms.identity.session-max=PT1S']; },
+    f => { f.state.containers[1].Config.Entrypoint = ['/bin/sh']; },
+    f => { f.state.containers[1].Config.WorkingDir = '/other'; },
+    f => f.state.imageConfig.Env.push('LD_PRELOAD=/other'),
+    f => { f.state.imageConfig.WorkingDir = '/other'; }
+  ]) {
+    const f = await sessionFixture(t); mutate(f);
+    const inspection = await inspectTarget(f.root, f.deps, { apiState: 'running' }), count = f.calls.length;
+    await assert.rejects(observedSessionConfig(inspection, f.deps), { code: 'ADAPTER_UNSEALED' });
+    assert.equal(f.calls.length, count);
+  }
+});
+function tarMembers(entries) {
+  const blocks = [];
+  for (const [name, data, type = '0'] of entries) {
+    const bytes = Buffer.from(data), header = Buffer.alloc(512);
+    header.write(name); header.write('0000600\0', 100); header.write('0000000\0', 108); header.write('0000000\0', 116);
+    header.write(bytes.length.toString(8).padStart(11, '0') + '\0', 124); header.fill(32, 148, 156);
+    header.write(type, 156); header.write('ustar\0', 257);
+    header.write(header.reduce((sum, byte) => sum + byte, 0).toString(8).padStart(6, '0') + '\0 ', 148);
+    blocks.push(header, bytes, Buffer.alloc((512 - bytes.length % 512) % 512));
+  }
+  return Buffer.concat([...blocks, Buffer.alloc(1024)]);
+}
+async function configFixture(t) {
+  const f = await sessionFixture(t), original = f.deps.command; f.state.copies = [];
+  f.state.copiedJar = tarMembers([['app.jar', 'jar']]);
+  f.state.secrets = tarMembers([['secrets/', '', '5'], ['secrets/spring.datasource.password', 'PRIVATE-CANARY']]);
+  f.deps.command = async (file, args, options) => {
+    if (file.endsWith('/bin/java')) { f.state.probeCalls = (f.state.probeCalls ?? 0) + 1; return { stdout: '{"sessionAbsoluteSeconds":"123","sessionMaxSeconds":"456"}\n', stderr: '' }; }
+    if (file === 'docker' && args[2] === 'cp') {
+      assert.equal(options.encoding, 'buffer'); assert.equal(options.shell, false);
+      assert.equal(args.length, 5); assert.equal(args[4], '-');
+      const prefix = `${full(2)}:`, path = args[3].slice(prefix.length); assert.ok(args[3].startsWith(prefix));
+      f.state.copies.push(path);
+      if (path === '/app/app.jar') return { stdout: f.state.copiedJar, stderr: Buffer.alloc(0) };
+      if (path === '/run/secrets') return { stdout: f.state.secrets, stderr: Buffer.alloc(0) };
+      if (f.state.external === path) return { stdout: tarMembers([['config/', '', '5']]), stderr: Buffer.alloc(0) };
+      return { code: f.state.missingCode ?? 1, stdout: Buffer.from(f.state.missingStdout ?? ''),
+        stderr: Buffer.from(f.state.missingStderr ?? `Error response from daemon: Could not find the file ${path} in container ${full(2)}\n`) };
+    }
+    return original(file, args, options);
+  };
+  return f;
+}
+test('T141 fixed read-only config observation covers both directories and prod variants', async t => {
+  const f = await configFixture(t), { observedSessionConfig } = await import('./maintenance-target.mjs');
+  const inspection = await inspectTarget(f.root, f.deps, { apiState: 'running' });
+  assert.deepEqual(await observedSessionConfig(inspection, f.deps), { sessionAbsoluteSeconds: '123', sessionMaxSeconds: '456' });
+  assert.equal(f.state.copies.length, 32); assert.ok(f.state.copies.includes('/app/application-prod.properties'));
+  assert.ok(f.state.copies.includes('/application-prod.yaml')); assert.equal(f.state.copies.at(-1), '/run/secrets');
+});
+test('T141 tar/config and exact missing diagnostics fail closed before settings probe', async t => {
+  const { observedSessionConfig } = await import('./maintenance-target.mjs');
+  for (const mutate of [
+    f => { f.state.copiedJar = tarMembers([['app.jar', 'wrong']]); },
+    f => { f.state.copiedJar = tarMembers([['../app.jar', 'jar']]); },
+    f => { f.state.copiedJar = tarMembers([['app.jar', 'jar', '2']]); },
+    f => { f.state.copiedJar = tarMembers([['app.jar', 'jar'], ['app.jar', 'jar']]); },
+    f => { f.state.copiedJar[20] ^= 1; },
+    f => { f.state.copiedJar = f.state.copiedJar.subarray(0, -512); },
+    f => { f.state.copiedJar = Buffer.concat([f.state.copiedJar, Buffer.from('tail')]); },
+    f => { f.state.secrets = tarMembers([['secrets', '', '5'], ['secrets/spring.datasource.password', 'PRIVATE-CANARY'], ['secrets/cms.identity.session-max', 'PT1S']]); },
+    f => { f.state.secrets = tarMembers([['secrets', '', '5'], ['secrets/spring.datasource.password', '', '2']]); },
+    f => { f.state.external = '/app/application-prod.properties'; },
+    f => { f.state.missingCode = 2; }, f => { f.state.missingStdout = 'unexpected'; },
+    f => { f.state.missingStderr = 'Error: no such file\n'; }
+  ]) {
+    const f = await configFixture(t); mutate(f);
+    const inspection = await inspectTarget(f.root, f.deps, { apiState: 'running' });
+    await assert.rejects(observedSessionConfig(inspection, f.deps), error => error.code === 'ADAPTER_UNSEALED' && !error.message.includes('CANARY'));
+    assert.ok(f.state.copies.length > 0); assert.equal(f.state.probeCalls ?? 0, 0);
+  }
+});
+test('T141 observed settings bind fresh identity and fixed scrubbed JDK probe', async t => {
+  const f = await configFixture(t), { observedSessionConfig } = await import('./maintenance-target.mjs');
+  const original = f.deps.command; f.state.probes = 0;
+  f.deps.command = async (file, args, options) => {
+    if (file.endsWith('/bin/java')) {
+      f.state.probes++; assert.equal(file, '/home/ckc/.cache/devbox/toolchains/jdk-25.0.5+8/bin/java');
+      assert.deepEqual(options.env, { LANG: 'C.UTF-8', TZ: 'UTC' }); assert.equal(options.shell, false);
+      assert.equal(args[1], f.jar); assert.equal(args[2], f.receipt.apiBuild.jarSha256);
+      const info = await (await import('node:fs/promises')).lstat(args[0]); assert.equal(info.mode & 0o7777, 0o600);
+      assert.ok(args[0].startsWith(`${f.root}/session-config-`));
+      return { stdout: '{"sessionAbsoluteSeconds":"123","sessionMaxSeconds":"456"}\n', stderr: '' };
+    }
+    return original(file, args, options);
+  };
+  const inspection = await inspectTarget(f.root, f.deps, { apiState: 'running' });
+  const result = await observedSessionConfig(inspection, f.deps);
+  assert.deepEqual(result, { sessionAbsoluteSeconds: '123', sessionMaxSeconds: '456' });
+  assert.ok(Object.isFrozen(result)); assert.equal(f.state.probes, 1);
+});
+test('T141 malformed probe output and post-observation drift cannot become settings', async t => {
+  const { observedSessionConfig } = await import('./maintenance-target.mjs');
+  const good = '{"sessionAbsoluteSeconds":"123","sessionMaxSeconds":"456"}\n';
+  for (const fault of ['extra', 'duplicate', 'zero', 'overflow', 'stderr', 'exit', 'signal', 'killed', 'jar', 'identity', 'env']) {
+    const f = await configFixture(t), original = f.deps.command;
+    f.deps.command = async (file, args, options) => {
+      if (!file.endsWith('/bin/java')) return original(file, args, options);
+      if (fault === 'jar') await writeFile(f.jar, 'changed');
+      if (fault === 'identity') f.state.oid = '16385\n';
+      if (fault === 'env') f.state.containers[1].Config.Env.push('cms.identity.session-max=PT1S');
+      const stdout = fault === 'extra' ? good + 'canary' : fault === 'duplicate' ? '{"sessionAbsoluteSeconds":"123","sessionAbsoluteSeconds":"456","sessionMaxSeconds":"456"}\n'
+        : fault === 'zero' ? good.replace('123', '0') : fault === 'overflow' ? good.replace('123', '9223372036854775808') : good;
+      return { stdout, stderr: fault === 'stderr' ? 'PRIVATE-CANARY' : '', code: fault === 'exit' ? 1 : 0, signal: fault === 'signal' ? 'SIGTERM' : null, killed: fault === 'killed' };
+    };
+    const inspection = await inspectTarget(f.root, f.deps, { apiState: 'running' });
+    await assert.rejects(observedSessionConfig(inspection, f.deps), error => error.code === 'ADAPTER_UNSEALED' && !error.message.includes('CANARY'));
+  }
+});
+
+test('T141 container file/config changes during getter observation are refused', async t => {
+  const { observedSessionConfig } = await import('./maintenance-target.mjs');
+  for (const fault of ['jar', 'external', 'secrets']) {
+    const f = await configFixture(t), original = f.deps.command;
+    f.deps.command = async (file, args, options) => {
+      const result = await original(file, args, options);
+      if (file.endsWith('/bin/java')) {
+        if (fault === 'jar') f.state.copiedJar = tarMembers([['app.jar', 'changed']]);
+        if (fault === 'external') f.state.external = '/application.yaml';
+        if (fault === 'secrets') f.state.secrets = tarMembers([['secrets', '', '5'], ['secrets/cms.identity.session-max', 'PT1S']]);
+      }
+      return result;
+    };
+    const inspection = await inspectTarget(f.root, f.deps, { apiState: 'running' });
+    await assert.rejects(observedSessionConfig(inspection, f.deps), { code: 'ADAPTER_UNSEALED' });
+    assert.equal(f.state.probeCalls, 1);
+  }
+});
+
+test('T141 same-container restart or missing lifecycle evidence is not fresh configuration', async t => {
+  const { observedSessionConfig } = await import('./maintenance-target.mjs');
+  for (const fault of ['missing', 'restarts', 'status', 'same-id-restarted']) {
+    const f = await configFixture(t), original = f.deps.command;
+    if (fault === 'missing') delete f.state.containers[1].State.StartedAt;
+    if (fault === 'restarts') f.state.containers[1].RestartCount = 1;
+    if (fault === 'status') f.state.containers[1].State.Status = 'created';
+    f.deps.command = async (file, args, options) => {
+      const result = await original(file, args, options);
+      if (file.endsWith('/bin/java') && fault === 'same-id-restarted') f.state.containers[1].State.StartedAt = '2026-11-02T00:00:02Z';
+      return result;
+    };
+    const inspection = await inspectTarget(f.root, f.deps, { apiState: 'running' });
+    await assert.rejects(observedSessionConfig(inspection, f.deps), { code: 'ADAPTER_UNSEALED' });
+  }
+});
+test('T141 stopped source capability observes the same sealed settings', async t => {
+  const f = await configFixture(t), { observedSessionConfig } = await import('./maintenance-target.mjs'), api = f.state.containers[1];
+  Object.assign(api.State, { Running: false, Status: 'exited', FinishedAt: '2026-11-02T00:00:02Z' });
+  for (const network of f.state.networks) { delete network.Containers[api.Id]; api.NetworkSettings.Networks[network.Name].IPAddress = ''; }
+  const inspection = await inspectTarget(f.root, f.deps, { apiState: 'stopped' });
+  assert.deepEqual(await observedSessionConfig(inspection, f.deps), { sessionAbsoluteSeconds: '123', sessionMaxSeconds: '456' });
+});
+test('T141d actual Docker omitted image Cmd is the same fixed no-command tuple', async t => {
+  const { observedSessionConfig } = await import('./maintenance-target.mjs');
+  for (const missing of ['image', 'container', 'both']) {
+    const f = await configFixture(t);
+    if (missing !== 'container') delete f.state.imageConfig.Cmd;
+    if (missing !== 'image') delete f.state.containers[1].Config.Cmd;
+    const inspection = await inspectTarget(f.root, f.deps, { apiState: 'running' });
+    assert.deepEqual(await observedSessionConfig(inspection, f.deps), { sessionAbsoluteSeconds: '123', sessionMaxSeconds: '456' });
+  }
+});
+test('T141d an actual image or container command is never an absent Cmd', async t => {
+  const { observedSessionConfig } = await import('./maintenance-target.mjs');
+  for (const scope of ['image', 'container']) for (const cmd of [[], ['--cms.identity.session-max=PT1S'], '', '--other']) {
+    const f = await configFixture(t);
+    (scope === 'image' ? f.state.imageConfig : f.state.containers[1].Config).Cmd = cmd;
+    const inspection = await inspectTarget(f.root, f.deps, { apiState: 'running' });
+    await assert.rejects(observedSessionConfig(inspection, f.deps), { code: 'ADAPTER_UNSEALED' });
+    assert.equal(f.state.copies.length, 0);
+  }
+});
+
+test('T147_source_inspection_allows_unrelated_created_empty_network_ID',async t=>{
+  const f=await fixture(t);f.state.containers.push({Id:full(0),Config:{Labels:{}},State:{Status:'created',Running:false},
+    NetworkSettings:{Networks:{unrelated_data:{NetworkID:'',IPAddress:'',EndpointID:''}}},Mounts:[]});
+  const result=await inspectTarget(f.root,f.deps,{apiState:'running'});assert.equal(result.target.runId,runId);
+});
+for(const shared of ['full-id','name','db-mount','media-mount'])test(`T147_source_inspection_rejects_shared_${shared}`,async t=>{
+  const f=await fixture(t),foreign={Id:full(0),Config:{Labels:{}},State:{Status:'created',Running:false},
+    NetworkSettings:{Networks:{unrelated_data:{NetworkID:''}}},Mounts:[]};
+  if(shared==='full-id')foreign.NetworkSettings.Networks.unrelated_data.NetworkID=f.state.networks[1].Id;
+  if(shared==='name')foreign.NetworkSettings.Networks={[f.state.networks[0].Name]:{NetworkID:''}};
+  if(shared.endsWith('mount')){const volume=f.state.volumes[shared==='db-mount'?0:1];
+    foreign.Mounts=[{Type:'volume',Name:volume.Name,Source:volume.Mountpoint,Destination:'/foreign',RW:true}];}
+  f.state.containers.push(foreign);await assert.rejects(inspectTarget(f.root,f.deps,{apiState:'running'}),/QUIESCENCE_NOT_PROVEN/);
+});

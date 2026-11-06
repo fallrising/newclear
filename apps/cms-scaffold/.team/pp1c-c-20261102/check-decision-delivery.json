@@ -1,0 +1,37 @@
+{
+  "recordedAt": "2026-11-02T18:59:45.187062+00:00",
+  "proposal": {
+    "pr": 1012,
+    "head": "d99347461a787eb6b4724d5bac93651253785d6c",
+    "isDraft": true,
+    "ownerDecision": "pending",
+    "cmsCI": 41503605360,
+    "contractsCI": 41503605251,
+    "allRequiredChecks": "SUCCESS",
+    "completeComponentRemoteDiff": "empty",
+    "T148": "proposal-ready only, not approval/C acceptance"
+  },
+  "desk": {
+    "pr": 413,
+    "head": "dc1994a8a0dd10dccc3dded662d0a85b59d9b6b6",
+    "ci": 41504783417,
+    "merge": "116936c23f9402db86547bec1cee5e79f08d31b6",
+    "mergedAt": "2026-11-02T18:57:26Z",
+    "exactTaskRemoteDiff": "empty"
+  },
+  "journal": {
+    "pr": 248,
+    "head": "6ba6b14c316feacef9884e988a31e6bb5be21069",
+    "ci": 41504790675,
+    "merge": "2bd475e8dea8ba77b17662a2fd3d4b09e8a03564",
+    "mergedAt": "2026-11-02T18:57:27Z",
+    "exactOwnRunRemoteDiff": "empty"
+  },
+  "T150": "DONE factual append only",
+  "C": "RAW_MISMATCH, uncommitted, no revoke accepted",
+  "D": "not started",
+  "transportNotes": [
+    "Initial branch fetch populated only FETCH_HEAD because repository refspec tracks main; explicit branch tracking fetch then exact diff passed.",
+    "gh pr edit body failed classic-project GraphQL deprecation; REST PATCH updated only decision link; same head unchanged."
+  ]
+}

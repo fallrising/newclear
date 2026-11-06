@@ -1,0 +1,11 @@
+{
+  "recordedAt": "2026-11-06T16:06:02.107156+00:00",
+  "archive": "/home/ckc/test/backup/cms-pp1c-c-20261106-verified/source-evidence.tar.gz",
+  "sha256": "5bb93a03fb6bb6b6a15ea7d6924c4d13f9de6c4f0d1bc69eba7691ba22131b4a",
+  "selectedFiles": 2781,
+  "tarEntries": 2783,
+  "allReadbackHashesMatched": true,
+  "sourceHead": "05dc0a28117d56ad7f9f2d7f0b5b441d8ca56885",
+  "productUncommitted": true,
+  "rawRuntimeExcludedAndRetained": true
+}

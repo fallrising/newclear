@@ -1,0 +1,50 @@
+{
+  "runId": "09860f34e2c9401faf34262917313412",
+  "root": "/home/ckc/test/codex/wt/newclear/cms-pp1c-c-20261102/apps/cms-scaffold/local/pp1/09860f34e2c9401faf34262917313412",
+  "project": "cms-pp1-local-09860f34e2c9401faf34262917313412",
+  "image": "sha256:c4190d14f3402afd40bfbfe5e44e7fa5e4eeb4515d8662c1e5261d7fe704c5d4",
+  "scope": "C controlled fresh isolated integration source; no D proof",
+  "startedAt": "2026-11-06T15:44:29.182958+00:00",
+  "preparedNetworks": {
+    "web": {
+      "id": "3bada33a134d537ba560b027bb73ef810dd9f7d0e65ac0cc50a3a691e528eff8",
+      "name": "cms-pp1-local-09860f34e2c9401faf34262917313412_web",
+      "subnet": "192.168.252.0/26",
+      "gateway": "192.168.252.1"
+    },
+    "data": {
+      "id": "c7400c76dab94df344f4d1f86b1c1f9855f7939be3d2d7dfa882c7c63482afdb",
+      "name": "cms-pp1-local-09860f34e2c9401faf34262917313412_data",
+      "subnet": "192.168.252.64/26",
+      "gateway": "192.168.252.65"
+    }
+  },
+  "prepared": true,
+  "composePreservedNetworkIds": true,
+  "healthy": true,
+  "controlledFreshLifecycle": true,
+  "containers": {
+    "ingress": {
+      "id": "a551b08bdbab39671718697e16991b52cf181db061cdeeee1f1d760d66dd2290",
+      "created": "2026-11-06T15:44:31.191443587Z",
+      "startedAt": "2026-11-06T15:44:40.475199786Z",
+      "restartCount": 0,
+      "image": "sha256:6a8ca4b22705adf7134d2220ab8aadff634a6b76c816dba55e0409f8e5c180dc"
+    },
+    "cms-api": {
+      "id": "ad6f3caec0602b86d0c2e437cc426e75dfec47194e5872bf3358a849bfec2326",
+      "created": "2026-11-06T15:44:31.175537427Z",
+      "startedAt": "2026-11-06T15:44:34.825783152Z",
+      "restartCount": 0,
+      "image": "sha256:c4190d14f3402afd40bfbfe5e44e7fa5e4eeb4515d8662c1e5261d7fe704c5d4"
+    },
+    "postgres": {
+      "id": "b75ba6eaa856c6ceb84fdeeacb35f7a55551a7972333e3a6188adc29f9863a20",
+      "created": "2026-11-06T15:44:31.157495826Z",
+      "startedAt": "2026-11-06T15:44:31.207431406Z",
+      "restartCount": 0,
+      "image": "sha256:6a2e324ebe59af6031c4c1cd96c1d5072c2ebc36563d2196365e43b8297c062d"
+    }
+  },
+  "endedAt": "2026-11-06T15:44:41.153390+00:00"
+}

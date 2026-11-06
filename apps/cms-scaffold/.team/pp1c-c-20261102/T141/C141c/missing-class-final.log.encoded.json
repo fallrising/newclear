@@ -1,0 +1,8 @@
+{
+  "version": 1,
+  "original": "T141/C141c/missing-class-final.log",
+  "sha256": "60029c54697fbe6ae649a9fb55a6444c52e586c79bdd3d1cdf902c4437e65a00",
+  "byteSize": "210",
+  "encoding": "utf-8",
+  "text": "✔ T141 actual installed JDK observes root pinned JAR through modeled Docker (1822.476343ms)\nℹ tests 1\nℹ suites 0\nℹ pass 1\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 1901.872502\n"
+}

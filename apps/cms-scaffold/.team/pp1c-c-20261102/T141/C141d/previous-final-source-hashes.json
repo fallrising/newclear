@@ -1,0 +1,45 @@
+{
+  "capturedAt": "2026-11-02T16:28:37.143200+00:00",
+  "files": {
+    "maintenance-target.mjs": {
+      "changedLines": 101,
+      "sha256": "5a3ace6d49b1a7e37dd698450cf54a49f0ee969a3cc195efc5d67c94807ae248"
+    },
+    "maintenance-target.test.mjs": {
+      "changedLines": 93,
+      "sha256": "809c6f16a2fa870696c34d91f73e84e907974ad81b26a45dff95c56bbd5c4e69"
+    }
+  },
+  "checkpoints": {
+    "C141a": {
+      "maintenance-target.mjs": {
+        "changedLines": 44,
+        "sha256": "4396c73c37ed8fa60655b4660cf3749cfb0f72c55e456e17d435f8b1e3f6973f"
+      },
+      "maintenance-target.test.mjs": {
+        "changedLines": 50,
+        "sha256": "49de07a5912885c438edcd42f980342ded2e710f4a154269748152d7bdf0f92f"
+      }
+    },
+    "C141b": {
+      "maintenance-target.mjs": {
+        "changedLines": 49,
+        "sha256": "0e4822f1fd22375414e3cbafdd68511760ca1063af9b47c34121cdf1b2110d51"
+      },
+      "maintenance-target.test.mjs": {
+        "changedLines": 61,
+        "sha256": "e004ab2fe91f2c1a955676f3c93f732edf665e43084c7db98c3a8830d2b29170"
+      }
+    },
+    "C141c": {
+      "maintenance-target.mjs": {
+        "changedLines": 101,
+        "sha256": "5a3ace6d49b1a7e37dd698450cf54a49f0ee969a3cc195efc5d67c94807ae248"
+      },
+      "maintenance-target.test.mjs": {
+        "changedLines": 93,
+        "sha256": "809c6f16a2fa870696c34d91f73e84e907974ad81b26a45dff95c56bbd5c4e69"
+      }
+    }
+  }
+}

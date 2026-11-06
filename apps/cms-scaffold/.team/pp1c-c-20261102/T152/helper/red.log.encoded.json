@@ -1,0 +1,8 @@
+{
+  "version": 1,
+  "original": "T152/helper/red.log",
+  "sha256": "2dbf74addea3a34465abc5aba648c100166aed0bed881900b1483c9e790ffa3d",
+  "byteSize": "405",
+  "encoding": "utf-8",
+  "text": "✔ scripts/local/maintenance-helper-session.test.mjs (70.274381ms)\n✖ scripts/local/maintenance-workflow.test.mjs (8016.843251ms)\nℹ tests 2\nℹ suites 0\nℹ pass 1\nℹ fail 1\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 8027.473636\n\n✖ failing tests:\n\ntest at scripts/local/maintenance-workflow.test.mjs:1:1\n✖ scripts/local/maintenance-workflow.test.mjs (8016.843251ms)\n  'test failed'\n"
+}

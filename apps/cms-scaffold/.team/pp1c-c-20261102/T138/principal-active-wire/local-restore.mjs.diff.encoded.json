@@ -1,0 +1,8 @@
+{
+  "version": 1,
+  "original": "T138/principal-active-wire/local-restore.mjs.diff",
+  "sha256": "8739b14546a3437421f27a87745ec4a9047203fb481516d724ab843e0127c263",
+  "byteSize": "949",
+  "encoding": "utf-8",
+  "text": "--- local-restore.mjs.before\n+++ local-restore.mjs.after\n@@ -56,7 +56,7 @@\n     const oldSessionIds={};\n     for(const role of ['admin','operator']) {\n       const actor=secrets[role],principal=one('cms_principal',p=>p.id===actor.principalId);\n-      ensure(principal.username===actor.username&&principal.status==='ACTIVE'&&principal.failed_login_count==='0'&&principal.locked_until===null&&principal.deleted_at===null);\n+      ensure(principal.username===actor.username&&principal.status==='active'&&principal.failed_login_count==='0'&&principal.locked_until===null&&principal.deleted_at===null);\n       const tokenHash='\\\\x'+sha256(Buffer.from(actor.oldSessionToken,'utf8'));\n       const session=one('cms_session',s=>s.principal_id===actor.principalId&&s.token_hash===tokenHash&&s.revoked_at===null&&instant(s.expires_at)>now.getTime());\n       ensure(uuid(session.id)&&instant(session.created_at)<=now.getTime());oldSessionIds[role]=session.id;\n"
+}

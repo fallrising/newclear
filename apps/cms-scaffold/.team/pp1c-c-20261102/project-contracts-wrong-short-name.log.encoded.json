@@ -1,0 +1,8 @@
+{
+  "version": 1,
+  "original": "project-contracts-wrong-short-name.log",
+  "sha256": "19ba61dd2c9d9516cb9389766b02a350938c88b8c7ecd43493a992c34dde23d6",
+  "byteSize": "37",
+  "encoding": "utf-8",
+  "text": "ERROR: unknown project: cms-scaffold\n"
+}

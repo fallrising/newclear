@@ -1,0 +1,8 @@
+{
+  "version": 1,
+  "original": "C10a2/maintenance-helper.mjs.diff",
+  "sha256": "c2a6787cf35aa01821cb12bf7d2f2f7d0b187fe29a00894b281bb99cc754b607",
+  "byteSize": "835",
+  "encoding": "utf-8",
+  "text": "--- scripts/local/maintenance-helper.mjs.before\n+++ scripts/local/maintenance-helper.mjs\n@@ -529,6 +529,13 @@\n   }finally{await handle.close();}\n }\n const helperRuns=new WeakMap();\n+export async function verifiedHelperProfile(token,deps={}) {\n+  const state=helperRuns.get(token);requirePolicy(state?.profile);\n+  const workflow=await import('./maintenance-workflow.mjs');\n+  const c=await workflow.assertWorkflow(token,{side:'source'},deps);\n+  requirePolicy(await mediaScriptHash(c)===state.scriptHash);\n+  return Object.freeze({...state.profile});\n+}\n export async function runOwnedHelper(token,options,deps={}) {\n   requirePolicy(exactKeys(options,'side,kind')&&options.side==='source'&&['INVENTORY','PG_DUMP','MEDIA_PACK'].includes(options.kind));\n   const workflow=await import('./maintenance-workflow.mjs'),{side,kind}=options;\n"
+}

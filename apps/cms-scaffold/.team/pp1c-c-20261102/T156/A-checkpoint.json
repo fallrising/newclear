@@ -1,0 +1,14 @@
+{
+  "changedLines": {
+    "local-recovery-verify.mjs": 38,
+    "local-recovery-verify.test.mjs": 82,
+    "local-recovery.fixture.mjs": 3
+  },
+  "total": 123,
+  "sha256": {
+    "local-recovery-verify.mjs": "6fc41628d4eafac391de214302553739fbf10c4b4ab630a918b977d24c34b70c",
+    "local-recovery-verify.test.mjs": "79130dd6f46a3e186085aa89b4c271a4eefe0e7d40e6da3229040b9d4e8fc858",
+    "local-recovery.fixture.mjs": "221f40105646a626f932ac0f53ca230bf9c4b1574d9a951699cbea5988fce96a"
+  },
+  "note": "One setup duplicate-helper identifier failure retained separately; behavioral Red2pass13fail, then Green15pass."
+}

@@ -1,0 +1,52 @@
+{
+  "reviewedAt": "2026-11-06T16:00:39.664691+00:00",
+  "actual20SourceTargetRowsExact": true,
+  "actualOtherSchemaFieldsExact": true,
+  "actualDistinctDirectedPairs": [
+    [
+      "cms_content_type",
+      "cms_content_type_slug_policy_chk"
+    ],
+    [
+      "cms_entry",
+      "cms_entry_state_chk"
+    ],
+    [
+      "cms_entry_index",
+      "cms_entry_index_kind_chk"
+    ],
+    [
+      "cms_entry_index",
+      "cms_entry_index_scope_chk"
+    ],
+    [
+      "cms_entry_ref",
+      "cms_entry_ref_kind_chk"
+    ],
+    [
+      "cms_field",
+      "cms_field_on_delete_chk"
+    ],
+    [
+      "cms_field",
+      "cms_field_visibility_chk"
+    ],
+    [
+      "cms_navigation_menu",
+      "cms_navigation_menu_state_chk"
+    ],
+    [
+      "cms_principal",
+      "cms_principal_status_chk"
+    ]
+  ],
+  "actualDifferingTables": 7,
+  "actualProfile": {
+    "postgresImageDigest": "sha256:6a2e324ebe59af6031c4c1cd96c1d5072c2ebc36563d2196365e43b8297c062d",
+    "postgresServerVersion": "16.15",
+    "pgDumpVersion": "16.15",
+    "pgRestoreVersion": "16.15"
+  },
+  "actualAssetsVariantsFilesExact": true,
+  "runtimeRerun": false
+}

@@ -1,0 +1,8 @@
+{
+  "version": 1,
+  "original": "T153/slot-refinement/red.log",
+  "sha256": "eb6d5efda00b2014a58b9b2a3da0a37bf313d58fcd5861affc67d68656c922b6",
+  "byteSize": "936",
+  "encoding": "utf-8",
+  "text": "✖ T153 retained twelve /24s still permit C four plus D six fresh private /26s (536.690498ms)\nℹ tests 1\nℹ suites 0\nℹ pass 0\nℹ fail 1\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 607.027027\n\n✖ failing tests:\n\ntest at scripts/local/prepare.test.mjs:283:1\n✖ T153 retained twelve /24s still permit C four plus D six fresh private /26s (536.690498ms)\n  Error: ADAPTER_UNSEALED\n      at createPreparedNetworks (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-c-revoke-20261102/apps/cms-scaffold/scripts/local/prepare.mjs:295:16)\n      at async TestContext.<anonymous> (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-c-revoke-20261102/apps/cms-scaffold/scripts/local/prepare.test.mjs:291:18)\n      at async Test.run (node:internal/test_runner/test:1332:7)\n      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:385:3) {\n    code: 'ADAPTER_UNSEALED',\n    phase: null,\n    operationId: null\n  }\n"
+}

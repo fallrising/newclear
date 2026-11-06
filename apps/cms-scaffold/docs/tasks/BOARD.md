@@ -35,9 +35,11 @@ CMS-R5/PR333 has explicit owner approval; required CI passed on28886f9d and norm
 | --- | --- | --- | --- | --- | --- | --- |
 | CMS-C-A | canonical protocol／readonly inventory／offline dispatch (9cards) | AC-05 / PP1-AC03 FM08/12 | done | 2026-11-01T16:49:21Z | 2026-11-01T17:44:55Z | 2026-11-01T17:44:55Z |
 | CMS-C-B | quiescence registry／owned helpers／capture (12cards) | AC-05 / PP1-AC03 FM08–12 | done | 2026-11-01T17:46:32.816742+00:00 | 2026-11-02T14:14:41Z | 2026-11-02T14:14:41Z |
-| CMS-C-C | blank target／artifact verification／restore (9cards) | AC-05 / PP1-AC03 FM08–12 | todo | — | — | 2026-11-01T16:49:21Z |
+| CMS-C-C | blank target／artifact verification／restore (9cards) | AC-05 / PP1-AC03 FM08–12 | done | 2026-11-02T14:25:15.705152+00:00 | 2026-11-06T16:05:33Z | 2026-11-06T16:05:33Z |
 | CMS-C-D | recovery proof／session/browser/restart／real drill (14cards) | AC-04/05 / PP1-AC03 FM08–12 | todo | — | — | 2026-11-01T16:49:21Z |
 
 B delivered via PR988/05dc0a28 after required CI and complete remote readback. PR956 endpoint/hash and PR975 PG-only read-only mask amendments are approved, merged and remotely verified (1bf6c506 and33a5498f). Current512Node/564Java/212actualPG and prior93mock/native frontend gates pass. Exact helper compatibility regressions are included; full actual capture and T129 independent acceptance now pass; publication is complete. Short-lived-tool and transient-backend refusals remain explicit. C/D are not started. [Evidence and retained failures](../../.team/pp1c-b-20261102/EVIDENCE.md); [bounded plan](../../.team/pp1c-b-20261101/PLAN.md).
 
 2026-11-02 B CLI correction: T136 fixed approved backup dispatch; T137 scoped independent review,45focused/537completeNode and actual native CLI capture pass. [Evidence](../../.team/pp1c-b-cli-20261102/EVIDENCE.md); required PR CI/normalmerge/readback pending. C in_progress in isolated branch; D pending.
+
+C implementation accepted locally after T143/T158:866Node, unchanged575Java/223PG/672frontend/93mock gates, fresh actual default-adapter20table+17file restore and exact2session/oneAUTH delta independently verified. Required current-head CI/normal merge/remote readback gate this branch delivery; evidence and source hashes are in [C report](../../.team/pp1c-c-20261102/EVIDENCE.md). Target apps never started; six containers stopped/data+locks retained. D startup/browser/restart/fullproof/recover remains todo, public restore/verifier CLI stays unsealed until D. OverallAC04/05/offsite/formalhost remain pending.

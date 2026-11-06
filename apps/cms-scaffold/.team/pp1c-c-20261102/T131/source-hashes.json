@@ -1,0 +1,27 @@
+[
+  {
+    "path": "scripts/local/prepare.mjs",
+    "sha256": "636ae173feada8f973509f1dce0a4c03d17a8addc1b71ac3d30aca925028a277",
+    "bytes": 13287
+  },
+  {
+    "path": "scripts/local/maintenance-target.mjs",
+    "sha256": "65727d56d6bb90d3969314827becc9cfde6b779d22e57f740a8efcbe518312c3",
+    "bytes": 21005
+  },
+  {
+    "path": "scripts/local/maintenance-workflow.mjs",
+    "sha256": "4978c280a56dbafb2440d08ec1ac1e8ed3448e00ac7a4eb0475ca93c7c6440fd",
+    "bytes": 23137
+  },
+  {
+    "path": "scripts/local/maintenance-workflow.test.mjs",
+    "sha256": "8dd97d188006a0bf4dedfb61fca8cc88858c8cdaf8fb2b9ab12d2ac6d9379bab",
+    "bytes": 66498
+  },
+  {
+    "path": "scripts/local/restore-target.mjs",
+    "sha256": "6adb229f69372085cfb7a978fe188c180d240c60e949c312f32c332f0f79b8c9",
+    "bytes": 8404
+  }
+]

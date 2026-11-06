@@ -1,0 +1,8 @@
+{
+  "version": 1,
+  "original": "T144/deleted-admin-410/fixture-client.mjs.diff",
+  "sha256": "28235f8a90d860c4e15e599f43fd2acee9abb29be9126cc3bef3305b3dc89e30",
+  "byteSize": "1410",
+  "encoding": "utf-8",
+  "text": "--- fixture-client.mjs.before\n+++ fixture-client.mjs.after\n@@ -33,7 +33,7 @@\n       requireValue(parts.some(p=>p.toLowerCase()===`max-age=${input.sessionConfig.sessionMaxSeconds}`),'FIXTURE_COOKIE_INVALID');\n       if(name==='cms_session')requireValue(parts.some(p=>p.toLowerCase()==='httponly'),'FIXTURE_COOKIE_INVALID');jar.set(name,value);\n     }\n-    if(status===204||status===404)return null;\n+    if(status===204||status===404||status===410)return null;\n     if(bytes){requireValue(Buffer.isBuffer(response.bytes)&&response.bytes.length>0,'FIXTURE_RESPONSE_INVALID');return response.bytes;}\n     requireValue(response.json&&typeof response.json==='object'&&!Array.isArray(response.json),'FIXTURE_RESPONSE_INVALID');return response.json;\n   }\n@@ -74,7 +74,7 @@\n     }\n   }\n   await request('admin','DELETE',`/api/v1/media/${media.deleted}`,{status:204});\n-  await request('admin','GET',`/api/v1/media/${media.deleted}/file/original`,{status:404});\n+  await request('admin','GET',`/api/v1/media/${media.deleted}/file/original`,{status:410});\n   const entry=async(type,payload,slug)=>{\n     const value=await request('admin','POST',`/api/v1/content-types/${type}/entries`,{status:201,json:{...(slug?{slug}:{}),payload}});\n     requireValue(uuid(value.id)&&Number.isInteger(value.version)&&value.version>0&&value.publicationState==='draft'&&same(value.payload,payload),'FIXTURE_ENTRY_INVALID');return value;\n"
+}

@@ -1,0 +1,8 @@
+{
+  "version": 1,
+  "original": "T146/D-compose-create/red.log",
+  "sha256": "259e453d5cbeb740a1eda72e873ac0fb08e4f87a3dba3b45b33520b23c9f4737",
+  "byteSize": "1541",
+  "encoding": "utf-8",
+  "text": "✖ T146d supported Compose create retains already-created dependencies and does not start apps (408.228246ms)\nℹ tests 1\nℹ suites 0\nℹ pass 0\nℹ fail 1\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 478.120745\n\n✖ failing tests:\n\ntest at scripts/local/maintenance-workflow.test.mjs:924:1\n✖ T146d supported Compose create retains already-created dependencies and does not start apps (408.228246ms)\n  Error: unknown flag: --no-deps\n      at f.deps.command (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-c-revoke-20261102/apps/cms-scaffold/scripts/local/maintenance-workflow.test.mjs:673:54)\n      at command (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-c-revoke-20261102/apps/cms-scaffold/scripts/local/restore-target.mjs:24:74)\n      at docker (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-c-revoke-20261102/apps/cms-scaffold/scripts/local/restore-target.mjs:25:24)\n      at create (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-c-revoke-20261102/apps/cms-scaffold/scripts/local/restore-target.mjs:42:69)\n      at async createRestoreTarget (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-c-revoke-20261102/apps/cms-scaffold/scripts/local/restore-target.mjs:53:5)\n      at async TestContext.<anonymous> (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-c-revoke-20261102/apps/cms-scaffold/scripts/local/maintenance-workflow.test.mjs:927:17)\n      at async Test.run (node:internal/test_runner/test:1332:7)\n      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:385:3) {\n    code: 1\n  }\n"
+}

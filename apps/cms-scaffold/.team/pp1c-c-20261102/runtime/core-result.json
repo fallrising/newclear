@@ -1,0 +1,826 @@
+{
+  "sourceRunId": "09860f34e2c9401faf34262917313412",
+  "targetRunId": "f7a78e84c0394c329a48ca1eca3ebfb4",
+  "operationId": "20e17004-08a1-48dc-a5ef-4f41637204f5",
+  "bootstrapOperationId": "701f33f8-1d3b-415e-8739-ff572e6eca17",
+  "startedAt": "2026-11-06T15:45:29.602Z",
+  "scope": "actual C core through SESSIONS_REVOKED only; no D startup/browser/proof or RTO acceptance",
+  "steps": [
+    {
+      "name": "true-tty-bootstrap",
+      "at": "2026-11-06T15:45:50.303Z",
+      "exitCode": 0,
+      "prompts": 2,
+      "success": true,
+      "code": null
+    },
+    {
+      "name": "synthetic-stream-observation-load",
+      "at": "2026-11-06T15:45:58.674Z",
+      "rows": 4096,
+      "syntheticPayloadBytes": 134217728,
+      "sqlSha256": "8ad7e65a633e311be69cbea4bad371f38313e05370665f161c9686fd725fd51a",
+      "note": "C test data before capture; no D fixture acceptance"
+    },
+    {
+      "name": "actual-session-config",
+      "at": "2026-11-06T15:46:02.803Z",
+      "sessionAbsoluteSeconds": "43200",
+      "sessionMaxSeconds": "604800"
+    },
+    {
+      "name": "source-orphan-created",
+      "at": "2026-11-06T15:46:05.210Z",
+      "fixedBytes": 12,
+      "helperId": "2aec2e141eb87fd52fde01744150f90f4009667910f09b3032757238d27863eb"
+    },
+    {
+      "name": "fixed-annex-api-fixture",
+      "at": "2026-11-06T15:46:05.421Z",
+      "httpRequests": 66,
+      "pngSha256": {
+        "public": "c6bb61e535e53a5765dabdec9dc5351ccc0c9ce8a95da9c7d98e484f8b6419b0",
+        "replacement": "7ec4b28253dfd9b6d3ad4d3e747edb8098b735b52634534ab107c7cae7724e17",
+        "draft": "2d43c785f7857ba3bf378df2fda188ffb7137f95f3fa5683ed12912381bfcdb1",
+        "private": "62edc9f1676c2a31415b4dd713c00fab85d9c22cbd0ee101c799292b6d6451f1",
+        "deleted": "de872e9d55c29f03bd73e50549d929c56e0828f3815356be1a2ee11af733db30"
+      }
+    },
+    {
+      "name": "actual-core-accepted",
+      "at": "2026-11-06T15:53:58.604Z",
+      "rawTables": 20,
+      "rawAuditRows": "4113",
+      "mediaFiles": "17",
+      "revokedCount": "2",
+      "targetAppStarted": false
+    }
+  ],
+  "http": [
+    {
+      "method": "GET",
+      "path": "/api/v1/auth/csrf",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/auth/login",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/roles",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/principals",
+      "status": 201
+    },
+    {
+      "method": "PUT",
+      "path": "/api/v1/principals/:id/roles",
+      "status": 204
+    },
+    {
+      "method": "PUT",
+      "path": "/api/v1/roles/operator/permissions",
+      "status": 204
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/roles/operator/permissions",
+      "status": 200
+    },
+    {
+      "method": "PUT",
+      "path": "/api/v1/roles/anonymous/permissions",
+      "status": 204
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/roles/anonymous/permissions",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/media",
+      "status": 201
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/media/:id/file/original",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/media/:id/file/thumbnail",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/media/:id/file/web",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/media",
+      "status": 201
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/media/:id/file/original",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/media/:id/file/thumbnail",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/media/:id/file/web",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/media",
+      "status": 201
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/media/:id/file/original",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/media/:id/file/thumbnail",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/media/:id/file/web",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/media",
+      "status": 201
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/media/:id/file/original",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/media/:id/file/thumbnail",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/media/:id/file/web",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/media",
+      "status": 201
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/media/:id/file/original",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/media/:id/file/thumbnail",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/media/:id/file/web",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/media",
+      "status": 201
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/media/:id/file/original",
+      "status": 200
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/v1/media/:id",
+      "status": 204
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/media/:id/file/original",
+      "status": 410
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/content-types/album/entries",
+      "status": 201
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/entries/:id/publish",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/content-types/photo/entries",
+      "status": 201
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/entries/:id/publish",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/entries/:id/revisions",
+      "status": 200
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/v1/entries/:id",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/content-types/photo/entries",
+      "status": 201
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/content-types/photo/entries",
+      "status": 201
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/entries/:id/publish",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/entries/:id?include=refs",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/entries/:id/revisions",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public/content-types/photo/entries/:id",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public/content-types/photo/entries/:id",
+      "status": 404
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/auth/csrf",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/auth/login",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/entries/:id?include=refs",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public/media/:id/file/original",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public/media/:id/file/thumbnail",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public/media/:id/file/web",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public/media/:id/file/original",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/media/:id/file/original",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/media/:id/file/original",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/media/:id/file/original",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public/media/:id/file/original",
+      "status": 404
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public/media/:id/file/original",
+      "status": 404
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public/media/:id/file/original",
+      "status": 404
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/public/media/:id/file/original",
+      "status": 404
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/auth/csrf",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/auth/login",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/auth/csrf",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/auth/login",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/auth/me",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/auth/me",
+      "status": 200
+    }
+  ],
+  "sourceBefore": [
+    {
+      "name": "cms_audit_event",
+      "count": "4113",
+      "hash": "bde6bec47dce719a2ead18b8bbd8f62a"
+    },
+    {
+      "name": "cms_audit_settings",
+      "count": "1",
+      "hash": "d486125ae7ae534034a609570ecd0b1b"
+    },
+    {
+      "name": "cms_content_type",
+      "count": "12",
+      "hash": "05af91e37f570be6ff8689ab35ca4938"
+    },
+    {
+      "name": "cms_credential",
+      "count": "2",
+      "hash": "6ce9a4b3f4e1e1d4e6e55f55f6fc41cc"
+    },
+    {
+      "name": "cms_entry",
+      "count": "4",
+      "hash": "5047130cdba20899f23d82725255f12b"
+    },
+    {
+      "name": "cms_entry_index",
+      "count": "19",
+      "hash": "895b68fb529bcbe3f3c7bcf85ba3aa3f"
+    },
+    {
+      "name": "cms_entry_ref",
+      "count": "6",
+      "hash": "b0f84bb0c267d3713602f63d6bd83a4f"
+    },
+    {
+      "name": "cms_entry_revision",
+      "count": "3",
+      "hash": "01ac5f5b02fab31833ca96320918e0da"
+    },
+    {
+      "name": "cms_field",
+      "count": "71",
+      "hash": "5ca76a69f69235f70035684e17b789c7"
+    },
+    {
+      "name": "cms_media",
+      "count": "6",
+      "hash": "13d8ada68e8a993e4b1eab63748a742d"
+    },
+    {
+      "name": "cms_media_attachment",
+      "count": "4",
+      "hash": "4f0e26ef8b6010128e13600b0b52534e"
+    },
+    {
+      "name": "cms_media_settings",
+      "count": "1",
+      "hash": "6ecb844bb055fb35043a285eeae281c8"
+    },
+    {
+      "name": "cms_media_variant",
+      "count": "16",
+      "hash": "8e8e245a33b13026e8470f1a8dae00e4"
+    },
+    {
+      "name": "cms_navigation_menu",
+      "count": "0",
+      "hash": "d41d8cd98f00b204e9800998ecf8427e"
+    },
+    {
+      "name": "cms_permission",
+      "count": "19",
+      "hash": "9ea09e07d831c9efa8a1e27630901795"
+    },
+    {
+      "name": "cms_principal",
+      "count": "2",
+      "hash": "ec9c1e332c6031713642ffb2957d97b1"
+    },
+    {
+      "name": "cms_principal_role",
+      "count": "2",
+      "hash": "04b0448989836e09104525fa45ed7517"
+    },
+    {
+      "name": "cms_role",
+      "count": "5",
+      "hash": "cbffa19aca3ea765959ae0b22a2ae4fd"
+    },
+    {
+      "name": "cms_session",
+      "count": "4",
+      "hash": "97e1728ddb8d59030d3844f14c443b00"
+    },
+    {
+      "name": "flyway_schema_history",
+      "count": "10",
+      "hash": "23fdea3d1cd043b60f0a40105bd457a4"
+    }
+  ],
+  "success": true,
+  "backupId": "pp1-20261106T154613835Z-7f113a04c944542e9f39342ed14ee324",
+  "phase": "SESSIONS_REVOKED",
+  "fixtureSha256": "307df447ef2f94c53a71e21358bf021a1f5b9e76198c14ef0cb1b1e9b68ca0d3",
+  "rawComparison": {
+    "version": 1,
+    "operationId": "20e17004-08a1-48dc-a5ef-4f41637204f5",
+    "backupId": "pp1-20261106T154613835Z-7f113a04c944542e9f39342ed14ee324",
+    "manifestSha256": "e5a9db63f652fd093745d4656ced41664e8eb4b5249845c71f5c1fd9d891cad9",
+    "releaseId": "sha256:c77db33818be74674006328f990531543584983cb2ffe13351b605eb60ecfc15",
+    "sourceTargetId": "pp1-local:09860f34e2c9401faf34262917313412",
+    "targetTargetId": "pp1-local:f7a78e84c0394c329a48ca1eca3ebfb4",
+    "sourceInventorySha256": "831e24ec14e25d8631c838821f73d133fe65ae40b58ec2f29cc58f8df8f37cad",
+    "targetInventorySha256": "fa9e2656d6e24a4955a2b42d26f222234a45d29873e74d1e923d823b17378d9b",
+    "sourceIdentitySha256": "ae3bf8b74a54cf8a7252f92a4d43601b3bea133ac4d7e9b74ea681f4337338f4",
+    "targetIdentitySha256": "9aa653a64ed018778792d25d2f0291a759d0d317d00bcd2cad205f6c82a543c6",
+    "schemaVersion": "pp1c-inventory-v1",
+    "comparedAt": "2026-11-06T15:51:46.511Z",
+    "tables": [
+      {
+        "tableName": "cms_audit_event",
+        "sourceSchemaSha256": "2a184aa69c17b2a01b830c781ff46f237749e596ecfb91796f743fd0778223b2",
+        "targetSchemaSha256": "2a184aa69c17b2a01b830c781ff46f237749e596ecfb91796f743fd0778223b2",
+        "sourceRowsSha256": "683e1f8bec4bc3f52a42854c27c36aba4ef75eb5df0fcac4c45e025a03bab172",
+        "targetRowsSha256": "683e1f8bec4bc3f52a42854c27c36aba4ef75eb5df0fcac4c45e025a03bab172",
+        "sourceRowCount": "4113",
+        "targetRowCount": "4113",
+        "schemaEqual": true,
+        "rowsEqual": true
+      },
+      {
+        "tableName": "cms_audit_settings",
+        "sourceSchemaSha256": "adeb458798d96c637395575f5c65004291830310b71eb91806daef98dc4da31f",
+        "targetSchemaSha256": "adeb458798d96c637395575f5c65004291830310b71eb91806daef98dc4da31f",
+        "sourceRowsSha256": "4aaccc87767e41fffe1e8cd39ad2f162a14f03d746dca297e28032d7569ca2b6",
+        "targetRowsSha256": "4aaccc87767e41fffe1e8cd39ad2f162a14f03d746dca297e28032d7569ca2b6",
+        "sourceRowCount": "1",
+        "targetRowCount": "1",
+        "schemaEqual": true,
+        "rowsEqual": true
+      },
+      {
+        "tableName": "cms_content_type",
+        "sourceSchemaSha256": "03fb17920d20c2da27343a0fb2af721beef7aeeb86049fd52f827e2f1b6c1a4c",
+        "targetSchemaSha256": "c6b034ad02ce94bbe58e03500f193f3dfccc251a74f6f90fa2f1684cee9da2a7",
+        "sourceRowsSha256": "b5c992667ade0615343d45cf57cdb041af9896819e0d044526e86d7965f7e343",
+        "targetRowsSha256": "b5c992667ade0615343d45cf57cdb041af9896819e0d044526e86d7965f7e343",
+        "sourceRowCount": "12",
+        "targetRowCount": "12",
+        "schemaEqual": true,
+        "rowsEqual": true
+      },
+      {
+        "tableName": "cms_credential",
+        "sourceSchemaSha256": "4417835b6e406d5c856be0789b565e11e50c8832242399ef58c391e746f872a2",
+        "targetSchemaSha256": "4417835b6e406d5c856be0789b565e11e50c8832242399ef58c391e746f872a2",
+        "sourceRowsSha256": "d4f482c53f0550c9c9dd97d01174af83ed23c940da185852ad01adc42b82dda5",
+        "targetRowsSha256": "d4f482c53f0550c9c9dd97d01174af83ed23c940da185852ad01adc42b82dda5",
+        "sourceRowCount": "2",
+        "targetRowCount": "2",
+        "schemaEqual": true,
+        "rowsEqual": true
+      },
+      {
+        "tableName": "cms_entry",
+        "sourceSchemaSha256": "acf8c338b198261f46764b36adb10f7c9d6671044aff3e8dad86004588b6eba3",
+        "targetSchemaSha256": "1eccec4262e606343c761393dc17eb4d4aef218f44add086065c1430afc96953",
+        "sourceRowsSha256": "26fb33afe3cfea0328280c9275325acfe183de49814e6332f82b436026ad8db1",
+        "targetRowsSha256": "26fb33afe3cfea0328280c9275325acfe183de49814e6332f82b436026ad8db1",
+        "sourceRowCount": "4",
+        "targetRowCount": "4",
+        "schemaEqual": true,
+        "rowsEqual": true
+      },
+      {
+        "tableName": "cms_entry_index",
+        "sourceSchemaSha256": "cf8c682bb755e0b8d9cd61450252c26711224613530b0368c936f8dbc3fc2eed",
+        "targetSchemaSha256": "81b099d94ffdea609139203e56e33d3201fc57fec089f7d1fa19873eda28fff3",
+        "sourceRowsSha256": "7893b352a01a5672ad12d01728933b128466df916fdb4dbd0a05de3d09745d5a",
+        "targetRowsSha256": "7893b352a01a5672ad12d01728933b128466df916fdb4dbd0a05de3d09745d5a",
+        "sourceRowCount": "19",
+        "targetRowCount": "19",
+        "schemaEqual": true,
+        "rowsEqual": true
+      },
+      {
+        "tableName": "cms_entry_ref",
+        "sourceSchemaSha256": "df8458fca37443c241fcf05fb03a3a38f8128f02c1ec0e67ea68d0d9e4338a77",
+        "targetSchemaSha256": "78860ffbd4379062a97492e0be7ca5a5a0c58ad4bc8b8a80fcbc18df0bd08790",
+        "sourceRowsSha256": "32d848e7db37cdf9bc043f2962db4647775e98885a30c662e22f77b1639d2c14",
+        "targetRowsSha256": "32d848e7db37cdf9bc043f2962db4647775e98885a30c662e22f77b1639d2c14",
+        "sourceRowCount": "6",
+        "targetRowCount": "6",
+        "schemaEqual": true,
+        "rowsEqual": true
+      },
+      {
+        "tableName": "cms_entry_revision",
+        "sourceSchemaSha256": "5e270ba2421ec92301866b227f71e2074211d18088afdbb159ef01d07a3f2af4",
+        "targetSchemaSha256": "5e270ba2421ec92301866b227f71e2074211d18088afdbb159ef01d07a3f2af4",
+        "sourceRowsSha256": "54bd2dd2ce1be6de27135393dc2c51d1fde1d76cea95c722b98d3d31b073eb27",
+        "targetRowsSha256": "54bd2dd2ce1be6de27135393dc2c51d1fde1d76cea95c722b98d3d31b073eb27",
+        "sourceRowCount": "3",
+        "targetRowCount": "3",
+        "schemaEqual": true,
+        "rowsEqual": true
+      },
+      {
+        "tableName": "cms_field",
+        "sourceSchemaSha256": "ec073220a47100c4e0b9eb859c75660f525d2a198652a4e12b338fd81b749358",
+        "targetSchemaSha256": "c8aaa0008c29557ffa4978c8bd565b8d38adb7e02174e062fb92bec830c45e5e",
+        "sourceRowsSha256": "6e8a1dfa7202d7306b8aae07f2bd3e1c251359698cc927ef8eb1ddee53d13e40",
+        "targetRowsSha256": "6e8a1dfa7202d7306b8aae07f2bd3e1c251359698cc927ef8eb1ddee53d13e40",
+        "sourceRowCount": "71",
+        "targetRowCount": "71",
+        "schemaEqual": true,
+        "rowsEqual": true
+      },
+      {
+        "tableName": "cms_media",
+        "sourceSchemaSha256": "eed7385a9721a1ff559175b4a836ec9ccdf78da0b3c8227a3f9bfbccf093062a",
+        "targetSchemaSha256": "eed7385a9721a1ff559175b4a836ec9ccdf78da0b3c8227a3f9bfbccf093062a",
+        "sourceRowsSha256": "e9fe40eb153c6fc80a36378ee671f3b083f95eaa8e2104d331f84af7c1033ae4",
+        "targetRowsSha256": "e9fe40eb153c6fc80a36378ee671f3b083f95eaa8e2104d331f84af7c1033ae4",
+        "sourceRowCount": "6",
+        "targetRowCount": "6",
+        "schemaEqual": true,
+        "rowsEqual": true
+      },
+      {
+        "tableName": "cms_media_attachment",
+        "sourceSchemaSha256": "4927aa6d93477216588b495be9e55bfbd6e1848308f80f0986653f8eb1acf591",
+        "targetSchemaSha256": "4927aa6d93477216588b495be9e55bfbd6e1848308f80f0986653f8eb1acf591",
+        "sourceRowsSha256": "91bbc5572705094673c8ea65647b2cb13692170abfb33a207abd88879901a46b",
+        "targetRowsSha256": "91bbc5572705094673c8ea65647b2cb13692170abfb33a207abd88879901a46b",
+        "sourceRowCount": "4",
+        "targetRowCount": "4",
+        "schemaEqual": true,
+        "rowsEqual": true
+      },
+      {
+        "tableName": "cms_media_settings",
+        "sourceSchemaSha256": "853893624ee064220c27787ee6e32fce6c2726a94d3ee1acdab51ef587726845",
+        "targetSchemaSha256": "853893624ee064220c27787ee6e32fce6c2726a94d3ee1acdab51ef587726845",
+        "sourceRowsSha256": "fa4c3c6ea9188c11831b42473bfda6536718a52255d7aedad5eb0b31da0ecaeb",
+        "targetRowsSha256": "fa4c3c6ea9188c11831b42473bfda6536718a52255d7aedad5eb0b31da0ecaeb",
+        "sourceRowCount": "1",
+        "targetRowCount": "1",
+        "schemaEqual": true,
+        "rowsEqual": true
+      },
+      {
+        "tableName": "cms_media_variant",
+        "sourceSchemaSha256": "6712e776a3a68ab94579eb1498fe3608fcf1d33a0068d2271daa5667aa63aff6",
+        "targetSchemaSha256": "6712e776a3a68ab94579eb1498fe3608fcf1d33a0068d2271daa5667aa63aff6",
+        "sourceRowsSha256": "09005cf0c283adf8e7c9fbe3193fbebf2ea69c225756c130b4d33bd550a74758",
+        "targetRowsSha256": "09005cf0c283adf8e7c9fbe3193fbebf2ea69c225756c130b4d33bd550a74758",
+        "sourceRowCount": "16",
+        "targetRowCount": "16",
+        "schemaEqual": true,
+        "rowsEqual": true
+      },
+      {
+        "tableName": "cms_navigation_menu",
+        "sourceSchemaSha256": "3748153f9a78297a213ea0be42515aab2592a4bd5cec4019768f4dca47918105",
+        "targetSchemaSha256": "22aeba19e0f6bed5316e977cb13d1b39950050bb419f3fa1f139870e2883d362",
+        "sourceRowsSha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570",
+        "targetRowsSha256": "37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570",
+        "sourceRowCount": "0",
+        "targetRowCount": "0",
+        "schemaEqual": true,
+        "rowsEqual": true
+      },
+      {
+        "tableName": "cms_permission",
+        "sourceSchemaSha256": "793ba9a9cffcd8e33abf0d7e4d80d708831588b872908aff506130f7f57469f1",
+        "targetSchemaSha256": "793ba9a9cffcd8e33abf0d7e4d80d708831588b872908aff506130f7f57469f1",
+        "sourceRowsSha256": "0d18b2922b44e5bfe478461596ef3f40fe8096b07db9500844f590791ec8a051",
+        "targetRowsSha256": "0d18b2922b44e5bfe478461596ef3f40fe8096b07db9500844f590791ec8a051",
+        "sourceRowCount": "19",
+        "targetRowCount": "19",
+        "schemaEqual": true,
+        "rowsEqual": true
+      },
+      {
+        "tableName": "cms_principal",
+        "sourceSchemaSha256": "7de11e8a54cc0170189bb35c8c3ceb6803f3e6ab92351f178a561864c628048f",
+        "targetSchemaSha256": "0a0c132a8f43b8a37549afb16c014e99a1af3dac3f379857d4c7d8dd6f6d59c3",
+        "sourceRowsSha256": "1e546a123915110e4683483c95037ef756ff9593e8860eb159b38108d8e6b853",
+        "targetRowsSha256": "1e546a123915110e4683483c95037ef756ff9593e8860eb159b38108d8e6b853",
+        "sourceRowCount": "2",
+        "targetRowCount": "2",
+        "schemaEqual": true,
+        "rowsEqual": true
+      },
+      {
+        "tableName": "cms_principal_role",
+        "sourceSchemaSha256": "bf9f7f070b1cb69ccfa5336f500750e2109ef727782bc975f3dddf314ed6f35d",
+        "targetSchemaSha256": "bf9f7f070b1cb69ccfa5336f500750e2109ef727782bc975f3dddf314ed6f35d",
+        "sourceRowsSha256": "018bc7978d74ab7798de8d6dbec901c288aecb1ea5d9edad92a6f469bf12bfa0",
+        "targetRowsSha256": "018bc7978d74ab7798de8d6dbec901c288aecb1ea5d9edad92a6f469bf12bfa0",
+        "sourceRowCount": "2",
+        "targetRowCount": "2",
+        "schemaEqual": true,
+        "rowsEqual": true
+      },
+      {
+        "tableName": "cms_role",
+        "sourceSchemaSha256": "f5da8c7375a951983b49f2ae7edb741350bcbee89410dfe27d45f73dc64bb1e9",
+        "targetSchemaSha256": "f5da8c7375a951983b49f2ae7edb741350bcbee89410dfe27d45f73dc64bb1e9",
+        "sourceRowsSha256": "92fc7d1d4db47a474b9a870a7af19e7c468076d2b05f14a2ca68a4ba0f40b679",
+        "targetRowsSha256": "92fc7d1d4db47a474b9a870a7af19e7c468076d2b05f14a2ca68a4ba0f40b679",
+        "sourceRowCount": "5",
+        "targetRowCount": "5",
+        "schemaEqual": true,
+        "rowsEqual": true
+      },
+      {
+        "tableName": "cms_session",
+        "sourceSchemaSha256": "70481d0268b138dfcb6e3aff738e64843d8526ae001825bca7b45d8be0953eeb",
+        "targetSchemaSha256": "70481d0268b138dfcb6e3aff738e64843d8526ae001825bca7b45d8be0953eeb",
+        "sourceRowsSha256": "5e8689f63f959ef26b50ebd3a24e37a7a0c2070cb8cf46cd6c17322ad944e169",
+        "targetRowsSha256": "5e8689f63f959ef26b50ebd3a24e37a7a0c2070cb8cf46cd6c17322ad944e169",
+        "sourceRowCount": "4",
+        "targetRowCount": "4",
+        "schemaEqual": true,
+        "rowsEqual": true
+      },
+      {
+        "tableName": "flyway_schema_history",
+        "sourceSchemaSha256": "ed5859d0ef5951d2afb635b83fc429ce50d76b04f1b853b4fba8fab7bf28f24b",
+        "targetSchemaSha256": "ed5859d0ef5951d2afb635b83fc429ce50d76b04f1b853b4fba8fab7bf28f24b",
+        "sourceRowsSha256": "7a65a085ba38f82c36d4f1d13e8c6a7133348e1bbb2b460daecc6f9d1c28450c",
+        "targetRowsSha256": "7a65a085ba38f82c36d4f1d13e8c6a7133348e1bbb2b460daecc6f9d1c28450c",
+        "sourceRowCount": "10",
+        "targetRowCount": "10",
+        "schemaEqual": true,
+        "rowsEqual": true
+      }
+    ],
+    "files": {
+      "sourceHeaderSha256": "224f92d2a57b05ae05db4a3e9225cefbdfc3729a316a1ec37c06cd561b11f592",
+      "targetHeaderSha256": "224f92d2a57b05ae05db4a3e9225cefbdfc3729a316a1ec37c06cd561b11f592",
+      "sourceCount": "17",
+      "targetCount": "17",
+      "sourceBytes": "14089",
+      "targetBytes": "14089",
+      "missingCount": "0",
+      "extraCount": "0",
+      "changedCount": "0",
+      "equal": true
+    },
+    "assetsEqual": true,
+    "variantsEqual": true,
+    "flywayEqual": true,
+    "equal": true
+  },
+  "sessionCommit": {
+    "auditEventId": "d3264fd8-fac8-41eb-9dd6-9219453d9229",
+    "backupId": "pp1-20261106T154613835Z-7f113a04c944542e9f39342ed14ee324",
+    "committed": true,
+    "operationId": "20e17004-08a1-48dc-a5ef-4f41637204f5",
+    "revokedCount": "2"
+  },
+  "targetIdentity": {
+    "version": 1,
+    "runId": "f7a78e84c0394c329a48ca1eca3ebfb4",
+    "targetId": "pp1-local:f7a78e84c0394c329a48ca1eca3ebfb4",
+    "project": "cms-pp1-local-f7a78e84c0394c329a48ca1eca3ebfb4",
+    "sourceCommit": "05dc0a28117d56ad7f9f2d7f0b5b441d8ca56885",
+    "apiBuild": {
+      "sourceCommit": "05dc0a28117d56ad7f9f2d7f0b5b441d8ca56885",
+      "jarSha256": "c77db33818be74674006328f990531543584983cb2ffe13351b605eb60ecfc15",
+      "baseImage": "sha256:1ad1f859e141f2296a7d49457414f84c2813ad8439e5b836cc0d9963ab491e09"
+    },
+    "images": {
+      "api": "sha256:c4190d14f3402afd40bfbfe5e44e7fa5e4eeb4515d8662c1e5261d7fe704c5d4",
+      "node": "sha256:6a8ca4b22705adf7134d2220ab8aadff634a6b76c816dba55e0409f8e5c180dc",
+      "postgres": "sha256:6a2e324ebe59af6031c4c1cd96c1d5072c2ebc36563d2196365e43b8297c062d"
+    },
+    "containerIds": {
+      "ingress": "3251728c2593e2ad33adfadb36014a4440e590a07dafe1cf1df59c310665d92e",
+      "cms-api": "4ddfcf834f97e3fc9dc10816640452f4c2f0abb9b4df5369d5dbd42288c0e35d",
+      "postgres": "f3aafd1cbff2a5f2f5943e746fc2904d5067e64692281e6f66f1fce8e1fc026b"
+    },
+    "networkIds": {
+      "web": "ffba0927c171ac3b01e713a39961c5eeb8860fe1247fff7c136a59e817f9943f",
+      "data": "4387523bf03b58d6df74d3a3733b204162867c7226c93a431f390b9dcd9b6896"
+    },
+    "volumeNames": {
+      "db-data": "cms-pp1-local-f7a78e84c0394c329a48ca1eca3ebfb4_db-data",
+      "media-data": "cms-pp1-local-f7a78e84c0394c329a48ca1eca3ebfb4_media-data"
+    },
+    "databaseOid": 16384,
+    "ingressScriptSha256": "9199408fe879b18ec7b302a5f22646600483acc82f1ec177270dccb4d9a880fa",
+    "nodeBinarySha256": "41a74efb34cbde5c7632cdac0cf8bd1a14d0b8d73dc1e82755014d9a9ce70f5c",
+    "mediaProbeSha256": "8a08d04de657b555a8fd77eaa72b50a26f42abf5a7164f4ec712841eaf6a5773"
+  },
+  "sourceAll20TablesUnchanged": true,
+  "media": {
+    "source": {
+      "equal": true,
+      "fileCount": "17",
+      "fileBytes": "14089",
+      "mediaHeaderSha256": "224f92d2a57b05ae05db4a3e9225cefbdfc3729a316a1ec37c06cd561b11f592"
+    },
+    "target": {
+      "equal": true,
+      "fileCount": "17",
+      "fileBytes": "14089",
+      "mediaHeaderSha256": "224f92d2a57b05ae05db4a3e9225cefbdfc3729a316a1ec37c06cd561b11f592"
+    }
+  },
+  "lockRetainedForUnsealedD": true,
+  "stopped": [
+    {
+      "runId": "09860f34e2c9401faf34262917313412",
+      "containerIds": [
+        "a551b08bdbab39671718697e16991b52cf181db061cdeeee1f1d760d66dd2290",
+        "ad6f3caec0602b86d0c2e437cc426e75dfec47194e5872bf3358a849bfec2326",
+        "b75ba6eaa856c6ceb84fdeeacb35f7a55551a7972333e3a6188adc29f9863a20"
+      ]
+    },
+    {
+      "runId": "f7a78e84c0394c329a48ca1eca3ebfb4",
+      "containerIds": [
+        "3251728c2593e2ad33adfadb36014a4440e590a07dafe1cf1df59c310665d92e",
+        "4ddfcf834f97e3fc9dc10816640452f4c2f0abb9b4df5369d5dbd42288c0e35d",
+        "f3aafd1cbff2a5f2f5943e746fc2904d5067e64692281e6f66f1fce8e1fc026b"
+      ]
+    }
+  ],
+  "endedAt": "2026-11-06T15:54:29.284Z"
+}

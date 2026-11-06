@@ -1,0 +1,8 @@
+{
+  "version": 1,
+  "original": "nov6-before-policy-runtime/observe-config-corrected.log",
+  "sha256": "64a14f10a6791ae424a1999bbcfd1d92eb0db4078eb58ad9043028a19b1550e1",
+  "byteSize": "44",
+  "encoding": "utf-8",
+  "text": "{\"success\":false,\"code\":\"ADAPTER_UNSEALED\"}\n"
+}

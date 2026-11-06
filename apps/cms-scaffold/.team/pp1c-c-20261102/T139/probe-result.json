@@ -1,0 +1,35 @@
+{
+  "jarPath": "/home/ckc/test/codex/wt/newclear/cms-pp1c-c-20261102/apps/cms-scaffold/services/cms-api/build/libs/cms-api-0.1.0-SNAPSHOT.jar",
+  "jarSha256": "c77db33818be74674006328f990531543584983cb2ffe13351b605eb60ecfc15",
+  "inputEntrySha256": {
+    "BOOT-INF/classes/com/fallrising/cms/identity/IdentityProperties.class": "ac1ca234b1279e39c70b65e07cb4cacdce2b8b029d077a6755245cb5c094c68c",
+    "BOOT-INF/classes/com/fallrising/cms/identity/domain/Surface.class": "54c09ac841cd621fde626d6a8b14ece9d3d3b7e2b431cb0040f8dc44670ff218",
+    "BOOT-INF/classes/application-prod.yaml": "20569e43b73f2780e9746337bc87a7550a095eaa93015983dbf7390c020fe137",
+    "BOOT-INF/classes/application.yaml": "7e10f4aacf8ec01d11a976cc113e5c1e830b45bfbac753aa1d86fe52046ac25f"
+  },
+  "configEntries": [
+    "BOOT-INF/classes/application-prod.yaml",
+    "BOOT-INF/classes/application.yaml"
+  ],
+  "compileCommand": [
+    "/home/ckc/.cache/devbox/toolchains/jdk-25.0.5+8/bin/javac",
+    "-d",
+    "/home/ckc/test/codex/wt/newclear/cms-pp1c-c-revoke-20261102/apps/cms-scaffold/.team/pp1c-c-20261102/T139",
+    "/home/ckc/test/codex/wt/newclear/cms-pp1c-c-revoke-20261102/apps/cms-scaffold/.team/pp1c-c-20261102/T139/SettingsProbe.java"
+  ],
+  "command": [
+    "/home/ckc/.cache/devbox/toolchains/jdk-25.0.5+8/bin/java",
+    "-cp",
+    "/home/ckc/test/codex/wt/newclear/cms-pp1c-c-revoke-20261102/apps/cms-scaffold/.team/pp1c-c-20261102/T139",
+    "SettingsProbe",
+    "/home/ckc/test/codex/wt/newclear/cms-pp1c-c-revoke-20261102/apps/cms-scaffold/.team/pp1c-c-20261102/T139/extracted"
+  ],
+  "environmentKeys": [
+    "LANG",
+    "TZ"
+  ],
+  "exit": 0,
+  "stdout": "{\"sessionAbsoluteSeconds\":\"43200\",\"sessionMaxSeconds\":\"604800\"}\n",
+  "stderr": "",
+  "scope": "actual constructor/getter observation; NOT effective Spring configuration"
+}

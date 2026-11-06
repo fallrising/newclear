@@ -1,0 +1,315 @@
+{
+  "at": "2026-11-02T17:51:39.550182+00:00",
+  "results": [
+    {
+      "command": [
+        "python3",
+        "/home/ckc/test/codex/agents/codex-team-superpowers/scripts/teamctl.py",
+        "validate-task",
+        ".team/tasks/T-130.md"
+      ],
+      "exit": 0,
+      "output": "validate-task validation passed: .team/tasks/T-130.md\n"
+    },
+    {
+      "command": [
+        "python3",
+        "/home/ckc/test/codex/agents/codex-team-superpowers/scripts/teamctl.py",
+        "validate-report",
+        ".team/reports/T-130.md"
+      ],
+      "exit": 0,
+      "output": "validate-report validation passed: .team/reports/T-130.md\n"
+    },
+    {
+      "command": [
+        "python3",
+        "/home/ckc/test/codex/agents/codex-team-superpowers/scripts/teamctl.py",
+        "validate-task",
+        ".team/tasks/T-131.md"
+      ],
+      "exit": 0,
+      "output": "validate-task validation passed: .team/tasks/T-131.md\n"
+    },
+    {
+      "command": [
+        "python3",
+        "/home/ckc/test/codex/agents/codex-team-superpowers/scripts/teamctl.py",
+        "validate-report",
+        ".team/reports/T-131.md"
+      ],
+      "exit": 0,
+      "output": "validate-report validation passed: .team/reports/T-131.md\n"
+    },
+    {
+      "command": [
+        "python3",
+        "/home/ckc/test/codex/agents/codex-team-superpowers/scripts/teamctl.py",
+        "validate-task",
+        ".team/tasks/T-132.md"
+      ],
+      "exit": 0,
+      "output": "validate-task validation passed: .team/tasks/T-132.md\n"
+    },
+    {
+      "command": [
+        "python3",
+        "/home/ckc/test/codex/agents/codex-team-superpowers/scripts/teamctl.py",
+        "validate-report",
+        ".team/reports/T-132.md"
+      ],
+      "exit": 0,
+      "output": "validate-report validation passed: .team/reports/T-132.md\n"
+    },
+    {
+      "command": [
+        "python3",
+        "/home/ckc/test/codex/agents/codex-team-superpowers/scripts/teamctl.py",
+        "validate-task",
+        ".team/tasks/T-134.md"
+      ],
+      "exit": 0,
+      "output": "validate-task validation passed: .team/tasks/T-134.md\n"
+    },
+    {
+      "command": [
+        "python3",
+        "/home/ckc/test/codex/agents/codex-team-superpowers/scripts/teamctl.py",
+        "validate-report",
+        ".team/reports/T-134.md"
+      ],
+      "exit": 0,
+      "output": "validate-report validation passed: .team/reports/T-134.md\n"
+    },
+    {
+      "command": [
+        "python3",
+        "/home/ckc/test/codex/agents/codex-team-superpowers/scripts/teamctl.py",
+        "validate-task",
+        ".team/tasks/T-135.md"
+      ],
+      "exit": 0,
+      "output": "validate-task validation passed: .team/tasks/T-135.md\n"
+    },
+    {
+      "command": [
+        "python3",
+        "/home/ckc/test/codex/agents/codex-team-superpowers/scripts/teamctl.py",
+        "validate-report",
+        ".team/reports/T-135.md"
+      ],
+      "exit": 0,
+      "output": "validate-report validation passed: .team/reports/T-135.md\n"
+    },
+    {
+      "command": [
+        "python3",
+        "/home/ckc/test/codex/agents/codex-team-superpowers/scripts/teamctl.py",
+        "validate-task",
+        ".team/tasks/T-136.md"
+      ],
+      "exit": 0,
+      "output": "validate-task validation passed: .team/tasks/T-136.md\n"
+    },
+    {
+      "command": [
+        "python3",
+        "/home/ckc/test/codex/agents/codex-team-superpowers/scripts/teamctl.py",
+        "validate-report",
+        ".team/reports/T-136.md"
+      ],
+      "exit": 0,
+      "output": "validate-report validation passed: .team/reports/T-136.md\n"
+    },
+    {
+      "command": [
+        "python3",
+        "/home/ckc/test/codex/agents/codex-team-superpowers/scripts/teamctl.py",
+        "validate-task",
+        ".team/tasks/T-137.md"
+      ],
+      "exit": 0,
+      "output": "validate-task validation passed: .team/tasks/T-137.md\n"
+    },
+    {
+      "command": [
+        "python3",
+        "/home/ckc/test/codex/agents/codex-team-superpowers/scripts/teamctl.py",
+        "validate-report",
+        ".team/reports/T-137.md"
+      ],
+      "exit": 0,
+      "output": "validate-report validation passed: .team/reports/T-137.md\n"
+    },
+    {
+      "command": [
+        "python3",
+        "/home/ckc/test/codex/agents/codex-team-superpowers/scripts/teamctl.py",
+        "validate-task",
+        ".team/tasks/T-138.md"
+      ],
+      "exit": 0,
+      "output": "validate-task validation passed: .team/tasks/T-138.md\n"
+    },
+    {
+      "command": [
+        "python3",
+        "/home/ckc/test/codex/agents/codex-team-superpowers/scripts/teamctl.py",
+        "validate-report",
+        ".team/reports/T-138.md"
+      ],
+      "exit": 0,
+      "output": "validate-report validation passed: .team/reports/T-138.md\n"
+    },
+    {
+      "command": [
+        "python3",
+        "/home/ckc/test/codex/agents/codex-team-superpowers/scripts/teamctl.py",
+        "validate-task",
+        ".team/tasks/T-139.md"
+      ],
+      "exit": 0,
+      "output": "validate-task validation passed: .team/tasks/T-139.md\n"
+    },
+    {
+      "command": [
+        "python3",
+        "/home/ckc/test/codex/agents/codex-team-superpowers/scripts/teamctl.py",
+        "validate-report",
+        ".team/reports/T-139.md"
+      ],
+      "exit": 0,
+      "output": "validate-report validation passed: .team/reports/T-139.md\n"
+    },
+    {
+      "command": [
+        "python3",
+        "/home/ckc/test/codex/agents/codex-team-superpowers/scripts/teamctl.py",
+        "validate-task",
+        ".team/tasks/T-140.md"
+      ],
+      "exit": 0,
+      "output": "validate-task validation passed: .team/tasks/T-140.md\n"
+    },
+    {
+      "command": [
+        "python3",
+        "/home/ckc/test/codex/agents/codex-team-superpowers/scripts/teamctl.py",
+        "validate-report",
+        ".team/reports/T-140.md"
+      ],
+      "exit": 0,
+      "output": "validate-report validation passed: .team/reports/T-140.md\n"
+    },
+    {
+      "command": [
+        "python3",
+        "/home/ckc/test/codex/agents/codex-team-superpowers/scripts/teamctl.py",
+        "validate-task",
+        ".team/tasks/T-141.md"
+      ],
+      "exit": 0,
+      "output": "validate-task validation passed: .team/tasks/T-141.md\n"
+    },
+    {
+      "command": [
+        "python3",
+        "/home/ckc/test/codex/agents/codex-team-superpowers/scripts/teamctl.py",
+        "validate-report",
+        ".team/reports/T-141.md"
+      ],
+      "exit": 0,
+      "output": "validate-report validation passed: .team/reports/T-141.md\n"
+    },
+    {
+      "command": [
+        "python3",
+        "/home/ckc/test/codex/agents/codex-team-superpowers/scripts/teamctl.py",
+        "validate-task",
+        ".team/tasks/T-142.md"
+      ],
+      "exit": 0,
+      "output": "validate-task validation passed: .team/tasks/T-142.md\n"
+    },
+    {
+      "command": [
+        "python3",
+        "/home/ckc/test/codex/agents/codex-team-superpowers/scripts/teamctl.py",
+        "validate-report",
+        ".team/reports/T-142.md"
+      ],
+      "exit": 0,
+      "output": "validate-report validation passed: .team/reports/T-142.md\n"
+    },
+    {
+      "command": [
+        "python3",
+        "/home/ckc/test/codex/agents/codex-team-superpowers/scripts/teamctl.py",
+        "validate-task",
+        ".team/tasks/T-143.md"
+      ],
+      "exit": 0,
+      "output": "validate-task validation passed: .team/tasks/T-143.md\n"
+    },
+    {
+      "command": [
+        "python3",
+        "/home/ckc/test/codex/agents/codex-team-superpowers/scripts/teamctl.py",
+        "validate-task",
+        ".team/tasks/T-144.md"
+      ],
+      "exit": 0,
+      "output": "validate-task validation passed: .team/tasks/T-144.md\n"
+    },
+    {
+      "command": [
+        "python3",
+        "/home/ckc/test/codex/agents/codex-team-superpowers/scripts/teamctl.py",
+        "validate-report",
+        ".team/reports/T-144.md"
+      ],
+      "exit": 0,
+      "output": "validate-report validation passed: .team/reports/T-144.md\n"
+    },
+    {
+      "command": [
+        "python3",
+        "/home/ckc/test/codex/agents/codex-team-superpowers/scripts/teamctl.py",
+        "validate-task",
+        ".team/tasks/T-145.md"
+      ],
+      "exit": 0,
+      "output": "validate-task validation passed: .team/tasks/T-145.md\n"
+    },
+    {
+      "command": [
+        "python3",
+        "/home/ckc/test/codex/agents/codex-team-superpowers/scripts/teamctl.py",
+        "validate-report",
+        ".team/reports/T-145.md"
+      ],
+      "exit": 0,
+      "output": "validate-report validation passed: .team/reports/T-145.md\n"
+    },
+    {
+      "command": [
+        "python3",
+        "/home/ckc/test/codex/agents/codex-team-superpowers/scripts/teamctl.py",
+        "validate-task",
+        ".team/tasks/T-146.md"
+      ],
+      "exit": 0,
+      "output": "validate-task validation passed: .team/tasks/T-146.md\n"
+    },
+    {
+      "command": [
+        "python3",
+        "/home/ckc/test/codex/agents/codex-team-superpowers/scripts/teamctl.py",
+        "validate-report",
+        ".team/reports/T-146.md"
+      ],
+      "exit": 0,
+      "output": "validate-report validation passed: .team/reports/T-146.md\n"
+    }
+  ]
+}

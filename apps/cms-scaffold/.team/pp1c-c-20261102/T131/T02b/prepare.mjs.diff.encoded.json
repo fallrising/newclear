@@ -1,0 +1,8 @@
+{
+  "version": 1,
+  "original": "T131/T02b/prepare.mjs.diff",
+  "sha256": "279b8fb4ba7d034af617da835dba851ec180756c02b3ac8dbc30546d23f65f93",
+  "byteSize": "606",
+  "encoding": "utf-8",
+  "text": "--- prepare.mjs.before\n+++ prepare.mjs.after\n@@ -176,6 +176,7 @@\n   const receipt=await prepareInternal({runId:context.target.runId,images:context.source.images},\n     {...deps,nodeBinary:context.nodeBinary},context);\n   const {syncDirectory}=await import('./maintenance-store.mjs');\n+  for(const name of await readdir(join(context.root,'tls'))){const handle=await open(join(context.root,'tls',name),'r');try{await handle.sync();}finally{await handle.close();}}\n   for(const dir of ['secrets','tls',''])await syncDirectory(join(context.root,dir));\n   await assertWorkflow(token,{},deps);return receipt;\n }\n"
+}

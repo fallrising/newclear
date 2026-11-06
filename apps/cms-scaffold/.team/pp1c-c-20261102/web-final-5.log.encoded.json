@@ -1,0 +1,8 @@
+{
+  "version": 1,
+  "original": "web-final-5.log",
+  "sha256": "5ac0cd55c8556d6ffca3121687a8a7c6aeb5569ef11ad4887993848a42695d0a",
+  "byteSize": "1328",
+  "encoding": "utf-8",
+  "text": "\n> measure:bundle\n> node --test scripts/measure-bundles.test.mjs && node scripts/measure-bundles.mjs\n\n✔ W5 bundle single entry (1.360205ms)\n✔ W5 bundle follows transitive static imports (0.11402ms)\n✔ W5 bundle deduplicates shared imports (0.089838ms)\n✔ W5 bundle handles cycles (0.080349ms)\n✔ W5 bundle excludes dynamicImports (0.08375ms)\n✔ W5 bundle includes manual chunks (0.066729ms)\n✔ W5 bundle rejects missing import key and missing entry (0.431867ms)\n✔ W5 bundle accepts exact limits (626.162569ms)\n✔ W5 bundle rejects one byte over and still writes complete JSON (233.122981ms)\n✔ W5 bundle rejects missing or stale build with exit 2 (76.561792ms)\nℹ tests 10\nℹ suites 0\nℹ pass 10\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 1000.490575\n| W5-BUNDLE-20261102-19 | 2026-11-02T18:01:11.207Z | 05dc0a28117d56ad7f9f2d7f0b5b441d8ca56885 | yes | front | 85209 | 92160 | -6951 | measure:bundle | bundle.json | passed |  |\n| W5-BUNDLE-20261102-20 | 2026-11-02T18:01:11.207Z | 05dc0a28117d56ad7f9f2d7f0b5b441d8ca56885 | yes | back | 130917 | 163840 | -32923 | measure:bundle | bundle.json | passed |  |\n| W5-BUNDLE-20261102-21 | 2026-11-02T18:01:11.207Z | 05dc0a28117d56ad7f9f2d7f0b5b441d8ca56885 | yes | admin | 136667 | 163840 | -27173 | measure:bundle | bundle.json | passed |  |\n"
+}

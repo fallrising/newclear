@@ -1,0 +1,6 @@
+{
+  "reason": "Tracked snapshot paths under local/ remain matched by ignore rules; default check-ignore omits tracked paths",
+  "correction": "Force-add only the exact reviewed publication whitelist; no rawlog/diff/class/cache/runtime path permitted",
+  "explicitPublicationPaths": 861,
+  "ignoreRuleMatchedPaths": 39
+}

@@ -1,0 +1,8 @@
+{
+  "version": 1,
+  "original": "nov6-before-policy-runtime/prepare-runtime-attempt2.log",
+  "sha256": "a7eb5c36a1d695374274cd1b7550a64545fa94da2d256aaa2ae1ac4abbb266f0",
+  "byteSize": "1415",
+  "encoding": "utf-8",
+  "text": "{\"runId\": \"da415cdd149c4d168b54c1a16700a409\", \"root\": \"/home/ckc/test/codex/wt/newclear/cms-pp1c-c-20261102/apps/cms-scaffold/local/pp1/da415cdd149c4d168b54c1a16700a409\", \"project\": \"cms-pp1-local-da415cdd149c4d168b54c1a16700a409\", \"image\": \"sha256:c4190d14f3402afd40bfbfe5e44e7fa5e4eeb4515d8662c1e5261d7fe704c5d4\", \"scope\": \"C controlled fresh isolated integration source; no D proof\", \"startedAt\": \"2026-11-02T17:05:42.705991+00:00\", \"prepared\": true, \"healthy\": true, \"controlledFreshLifecycle\": true, \"containers\": {\"ingress\": {\"id\": \"6fcfc4b407864b1f96c2ff7da2b9a451820046f250e03db0591a46531a9a18e0\", \"created\": \"2026-11-02T17:05:44.056854436Z\", \"startedAt\": \"2026-11-02T17:05:53.345664477Z\", \"restartCount\": 0, \"image\": \"sha256:6a8ca4b22705adf7134d2220ab8aadff634a6b76c816dba55e0409f8e5c180dc\"}, \"cms-api\": {\"id\": \"5ab66203f61c53794d64090eebfe2cf206b02ff77edff4de301df009e64c92cf\", \"created\": \"2026-11-02T17:05:44.045958185Z\", \"startedAt\": \"2026-11-02T17:05:47.703351774Z\", \"restartCount\": 0, \"image\": \"sha256:c4190d14f3402afd40bfbfe5e44e7fa5e4eeb4515d8662c1e5261d7fe704c5d4\"}, \"postgres\": {\"id\": \"94d0750cae1159b480e73ad59eae316a97ada2bb297f0d6a6cdb374f824cc1ec\", \"created\": \"2026-11-02T17:05:44.028331654Z\", \"startedAt\": \"2026-11-02T17:05:44.072228187Z\", \"restartCount\": 0, \"image\": \"sha256:6a2e324ebe59af6031c4c1cd96c1d5072c2ebc36563d2196365e43b8297c062d\"}}, \"endedAt\": \"2026-11-02T17:05:54.001624+00:00\"}\n"
+}

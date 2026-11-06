@@ -1,0 +1,8 @@
+{
+  "version": 1,
+  "original": "C10a1/initial-four-green.log",
+  "sha256": "3247ddaf2de2cfb5a010d350c30a424040357d7218a0ccb8ca525c6e8bb702e1",
+  "byteSize": "421",
+  "encoding": "utf-8",
+  "text": "✔ PP1c_C09_valid_private_bundle_verifies_without_target_mutation (153.800112ms)\n✔ PP1c_C09_changed_artifact_rejected_before_target_write (112.671009ms)\n✔ PP1c_C09_noncanonical_marker_rejected_before_target_write (97.896401ms)\n✔ PP1c_C09_symlink_artifact_rejected_before_target_write (106.965192ms)\nℹ tests 4\nℹ suites 0\nℹ pass 4\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 542.597559\n"
+}

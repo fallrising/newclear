@@ -1,0 +1,8 @@
+{
+  "version": 1,
+  "original": "runtime/prepare-runtime.log",
+  "sha256": "7f4e3292679c79922de58483428f57343cb555b59b67aeba17584065d8464a10",
+  "byteSize": "1413",
+  "encoding": "utf-8",
+  "text": "{\"runId\": \"710a1bcfea024de59f81cb4cfc6d6f20\", \"root\": \"/home/ckc/test/codex/wt/newclear/cms-pp1c-c-20261102/apps/cms-scaffold/local/pp1/710a1bcfea024de59f81cb4cfc6d6f20\", \"project\": \"cms-pp1-local-710a1bcfea024de59f81cb4cfc6d6f20\", \"image\": \"sha256:c4190d14f3402afd40bfbfe5e44e7fa5e4eeb4515d8662c1e5261d7fe704c5d4\", \"scope\": \"C controlled fresh isolated integration source; no D proof\", \"startedAt\": \"2026-11-02T16:36:45.957905+00:00\", \"prepared\": true, \"healthy\": true, \"controlledFreshLifecycle\": true, \"containers\": {\"ingress\": {\"id\": \"e88b042a7060c45fdb01e288a705041de54d222a0edcb908b0c7cde4a72da8b0\", \"created\": \"2026-11-02T16:36:47.076329568Z\", \"startedAt\": \"2026-11-02T16:36:56.354497339Z\", \"restartCount\": 0, \"image\": \"sha256:6a8ca4b22705adf7134d2220ab8aadff634a6b76c816dba55e0409f8e5c180dc\"}, \"cms-api\": {\"id\": \"f67b4cb091f0a53181eec3c5874ad554dfd16eccbe9a7bbd37e6cd40c53eae6f\", \"created\": \"2026-11-02T16:36:47.06476241Z\", \"startedAt\": \"2026-11-02T16:36:50.711099908Z\", \"restartCount\": 0, \"image\": \"sha256:c4190d14f3402afd40bfbfe5e44e7fa5e4eeb4515d8662c1e5261d7fe704c5d4\"}, \"postgres\": {\"id\": \"c63f74588e71ee0af75626ab29d36ee1cbda5f3c61293824549a9445237191bf\", \"created\": \"2026-11-02T16:36:47.043593214Z\", \"startedAt\": \"2026-11-02T16:36:47.09378348Z\", \"restartCount\": 0, \"image\": \"sha256:6a2e324ebe59af6031c4c1cd96c1d5072c2ebc36563d2196365e43b8297c062d\"}}, \"endedAt\": \"2026-11-02T16:36:57.010274+00:00\"}\n"
+}

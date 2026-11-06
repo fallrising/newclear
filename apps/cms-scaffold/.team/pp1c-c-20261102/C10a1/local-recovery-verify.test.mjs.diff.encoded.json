@@ -1,0 +1,8 @@
+{
+  "version": 1,
+  "original": "C10a1/local-recovery-verify.test.mjs.diff",
+  "sha256": "4bcd932123325737e44018d0a5831b8b5d66527f35a83fce5166bb93e164f764",
+  "byteSize": "1150",
+  "encoding": "utf-8",
+  "text": "--- local-recovery-verify.test.mjs.before\n+++ scripts/ops/local-recovery-verify.test.mjs\n@@ -1,6 +1,6 @@\n import test from 'node:test';\n import assert from 'node:assert/strict';\n-import { readFile, writeFile, rename, symlink } from 'node:fs/promises';\n+import { readFile, writeFile, rename, symlink, chmod } from 'node:fs/promises';\n import { join } from 'node:path';\n import { fixture } from './local-recovery.fixture.mjs';\n import { captureSource } from './local-bundle.mjs';\n@@ -23,3 +23,10 @@\n   await assert.rejects(verifyCapturedBundle(f.token,f.result.backupId,f.deps),e=>e.code===(scenario==='noncanonical_marker'?'INPUT_INVALID':'BUNDLE_MISMATCH'));\n   assert.ok(!f.calls.some(x=>x.includes('TARGET')));\n });\n+\n+for(const scenario of ['extra_bundle_file','public_bundle_directory'])test(`PP1c_C10a1_${scenario}_rejects_fixed_layout`,async t=>{\n+  const f=await captured(t);\n+  if(scenario==='extra_bundle_file')await writeFile(join(f.result.path,'unexpected'),'extra',{mode:0o600});\n+  else await chmod(f.result.path,0o755);\n+  await assert.rejects(verifyCapturedBundle(f.token,f.result.backupId,f.deps),e=>e.code==='BUNDLE_MISMATCH');\n+});\n"
+}

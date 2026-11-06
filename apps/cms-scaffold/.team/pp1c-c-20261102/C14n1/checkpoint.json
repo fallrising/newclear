@@ -1,0 +1,15 @@
+{
+  "handwrittenChangedLines": 81,
+  "files": {
+    "scripts/ops/local-recovery-verify.mjs": 38,
+    "scripts/ops/local-recovery-verify.test.mjs": 24,
+    "scripts/ops/local-recovery.fixture.mjs": 19
+  },
+  "sha256": {
+    "scripts/ops/local-recovery-verify.mjs": "1b15124fd6028577a2c0b1660b9b7e1c68923224269603a2973829f2fa75ab3f",
+    "scripts/ops/local-recovery-verify.test.mjs": "3eb16325ccc067d23781d9eb659af7c64b712c81835eb597ddd1a9640d23ce3f",
+    "scripts/ops/local-recovery.fixture.mjs": "7ce9772dafbe789360bed05868e3c2fadfa0cce9d4409dd72229e395182d8da1"
+  },
+  "checks": "42/42 focused pass; exactdelta behaviorRed retained; fullpayload comparison, no runtimeclaim",
+  "frozenAt": "2026-11-02T16:20:37.830269+00:00"
+}

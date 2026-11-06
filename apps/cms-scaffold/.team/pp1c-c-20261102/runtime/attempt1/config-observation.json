@@ -1,0 +1,528 @@
+{
+  "runId": "710a1bcfea024de59f81cb4cfc6d6f20",
+  "scope": "actual fixed session-config accessor on root-created controlled fresh C source",
+  "controlledFreshLifecycle": true,
+  "startedAt": "2026-11-02T16:44:55.624Z",
+  "commands": [
+    {
+      "tool": "docker",
+      "action": "ps",
+      "exitCode": 0,
+      "stdoutBytes": 3185,
+      "stderrBytes": 0,
+      "milliseconds": 27
+    },
+    {
+      "tool": "docker",
+      "action": "inspect",
+      "exitCode": 0,
+      "stdoutBytes": 644497,
+      "stderrBytes": 0,
+      "milliseconds": 48
+    },
+    {
+      "tool": "docker",
+      "action": "network",
+      "exitCode": 0,
+      "stdoutBytes": 4582,
+      "stderrBytes": 0,
+      "milliseconds": 22
+    },
+    {
+      "tool": "docker",
+      "action": "image",
+      "exitCode": 0,
+      "stdoutBytes": 3189,
+      "stderrBytes": 0,
+      "milliseconds": 18
+    },
+    {
+      "tool": "docker",
+      "action": "image",
+      "exitCode": 0,
+      "stdoutBytes": 4445,
+      "stderrBytes": 0,
+      "milliseconds": 17
+    },
+    {
+      "tool": "docker",
+      "action": "image",
+      "exitCode": 0,
+      "stdoutBytes": 4729,
+      "stderrBytes": 0,
+      "milliseconds": 16
+    },
+    {
+      "tool": "docker",
+      "action": "image",
+      "exitCode": 0,
+      "stdoutBytes": 3577,
+      "stderrBytes": 0,
+      "milliseconds": 16
+    },
+    {
+      "tool": "docker",
+      "action": "volume",
+      "exitCode": 0,
+      "stdoutBytes": 1328,
+      "stderrBytes": 0,
+      "milliseconds": 15
+    },
+    {
+      "tool": "docker",
+      "action": "exec",
+      "exitCode": 0,
+      "stdoutBytes": 6,
+      "stderrBytes": 0,
+      "milliseconds": 67
+    },
+    {
+      "tool": "docker",
+      "action": "ps",
+      "exitCode": 0,
+      "stdoutBytes": 3185,
+      "stderrBytes": 0,
+      "milliseconds": 29
+    },
+    {
+      "tool": "docker",
+      "action": "inspect",
+      "exitCode": 0,
+      "stdoutBytes": 644497,
+      "stderrBytes": 0,
+      "milliseconds": 53
+    },
+    {
+      "tool": "docker",
+      "action": "network",
+      "exitCode": 0,
+      "stdoutBytes": 4582,
+      "stderrBytes": 0,
+      "milliseconds": 24
+    },
+    {
+      "tool": "docker",
+      "action": "image",
+      "exitCode": 0,
+      "stdoutBytes": 3189,
+      "stderrBytes": 0,
+      "milliseconds": 21
+    },
+    {
+      "tool": "docker",
+      "action": "image",
+      "exitCode": 0,
+      "stdoutBytes": 4445,
+      "stderrBytes": 0,
+      "milliseconds": 22
+    },
+    {
+      "tool": "docker",
+      "action": "image",
+      "exitCode": 0,
+      "stdoutBytes": 4729,
+      "stderrBytes": 0,
+      "milliseconds": 22
+    },
+    {
+      "tool": "docker",
+      "action": "image",
+      "exitCode": 0,
+      "stdoutBytes": 3577,
+      "stderrBytes": 0,
+      "milliseconds": 21
+    },
+    {
+      "tool": "docker",
+      "action": "volume",
+      "exitCode": 0,
+      "stdoutBytes": 1328,
+      "stderrBytes": 0,
+      "milliseconds": 22
+    },
+    {
+      "tool": "docker",
+      "action": "exec",
+      "exitCode": 0,
+      "stdoutBytes": 6,
+      "stderrBytes": 0,
+      "milliseconds": 71
+    },
+    {
+      "tool": "docker",
+      "action": "cp",
+      "fixedPath": "/app/app.jar",
+      "exitCode": 0,
+      "stdoutBytes": 41551872,
+      "stderrBytes": 0,
+      "milliseconds": 133
+    },
+    {
+      "tool": "docker",
+      "action": "cp",
+      "fixedPath": "/app/config",
+      "exitCode": 1,
+      "stdoutBytes": 0,
+      "stderrBytes": 142,
+      "milliseconds": 23
+    },
+    {
+      "tool": "docker",
+      "action": "cp",
+      "fixedPath": "/app/application.yaml",
+      "exitCode": 1,
+      "stdoutBytes": 0,
+      "stderrBytes": 152,
+      "milliseconds": 19
+    },
+    {
+      "tool": "docker",
+      "action": "cp",
+      "fixedPath": "/app/application.yml",
+      "exitCode": 1,
+      "stdoutBytes": 0,
+      "stderrBytes": 151,
+      "milliseconds": 20
+    },
+    {
+      "tool": "docker",
+      "action": "cp",
+      "fixedPath": "/app/application.properties",
+      "exitCode": 1,
+      "stdoutBytes": 0,
+      "stderrBytes": 158,
+      "milliseconds": 19
+    },
+    {
+      "tool": "docker",
+      "action": "cp",
+      "fixedPath": "/app/application-prod.yaml",
+      "exitCode": 1,
+      "stdoutBytes": 0,
+      "stderrBytes": 157,
+      "milliseconds": 19
+    },
+    {
+      "tool": "docker",
+      "action": "cp",
+      "fixedPath": "/app/application-prod.yml",
+      "exitCode": 1,
+      "stdoutBytes": 0,
+      "stderrBytes": 156,
+      "milliseconds": 19
+    },
+    {
+      "tool": "docker",
+      "action": "cp",
+      "fixedPath": "/app/application-prod.properties",
+      "exitCode": 1,
+      "stdoutBytes": 0,
+      "stderrBytes": 163,
+      "milliseconds": 19
+    },
+    {
+      "tool": "docker",
+      "action": "cp",
+      "fixedPath": "/config",
+      "exitCode": 1,
+      "stdoutBytes": 0,
+      "stderrBytes": 138,
+      "milliseconds": 19
+    },
+    {
+      "tool": "docker",
+      "action": "cp",
+      "fixedPath": "/application.yaml",
+      "exitCode": 1,
+      "stdoutBytes": 0,
+      "stderrBytes": 148,
+      "milliseconds": 19
+    },
+    {
+      "tool": "docker",
+      "action": "cp",
+      "fixedPath": "/application.yml",
+      "exitCode": 1,
+      "stdoutBytes": 0,
+      "stderrBytes": 147,
+      "milliseconds": 19
+    },
+    {
+      "tool": "docker",
+      "action": "cp",
+      "fixedPath": "/application.properties",
+      "exitCode": 1,
+      "stdoutBytes": 0,
+      "stderrBytes": 154,
+      "milliseconds": 19
+    },
+    {
+      "tool": "docker",
+      "action": "cp",
+      "fixedPath": "/application-prod.yaml",
+      "exitCode": 1,
+      "stdoutBytes": 0,
+      "stderrBytes": 153,
+      "milliseconds": 19
+    },
+    {
+      "tool": "docker",
+      "action": "cp",
+      "fixedPath": "/application-prod.yml",
+      "exitCode": 1,
+      "stdoutBytes": 0,
+      "stderrBytes": 152,
+      "milliseconds": 20
+    },
+    {
+      "tool": "docker",
+      "action": "cp",
+      "fixedPath": "/application-prod.properties",
+      "exitCode": 1,
+      "stdoutBytes": 0,
+      "stderrBytes": 159,
+      "milliseconds": 19
+    },
+    {
+      "tool": "docker",
+      "action": "cp",
+      "fixedPath": "/run/secrets",
+      "exitCode": 0,
+      "stdoutBytes": 2560,
+      "stderrBytes": 0,
+      "milliseconds": 19
+    },
+    {
+      "tool": "jdk25",
+      "action": "source-probe",
+      "exitCode": 0,
+      "stdoutBytes": 64,
+      "stderrBytes": 0,
+      "milliseconds": 1583
+    },
+    {
+      "tool": "docker",
+      "action": "cp",
+      "fixedPath": "/app/app.jar",
+      "exitCode": 0,
+      "stdoutBytes": 41551872,
+      "stderrBytes": 0,
+      "milliseconds": 174
+    },
+    {
+      "tool": "docker",
+      "action": "cp",
+      "fixedPath": "/app/config",
+      "exitCode": 1,
+      "stdoutBytes": 0,
+      "stderrBytes": 142,
+      "milliseconds": 41
+    },
+    {
+      "tool": "docker",
+      "action": "cp",
+      "fixedPath": "/app/application.yaml",
+      "exitCode": 1,
+      "stdoutBytes": 0,
+      "stderrBytes": 152,
+      "milliseconds": 32
+    },
+    {
+      "tool": "docker",
+      "action": "cp",
+      "fixedPath": "/app/application.yml",
+      "exitCode": 1,
+      "stdoutBytes": 0,
+      "stderrBytes": 151,
+      "milliseconds": 34
+    },
+    {
+      "tool": "docker",
+      "action": "cp",
+      "fixedPath": "/app/application.properties",
+      "exitCode": 1,
+      "stdoutBytes": 0,
+      "stderrBytes": 158,
+      "milliseconds": 28
+    },
+    {
+      "tool": "docker",
+      "action": "cp",
+      "fixedPath": "/app/application-prod.yaml",
+      "exitCode": 1,
+      "stdoutBytes": 0,
+      "stderrBytes": 157,
+      "milliseconds": 28
+    },
+    {
+      "tool": "docker",
+      "action": "cp",
+      "fixedPath": "/app/application-prod.yml",
+      "exitCode": 1,
+      "stdoutBytes": 0,
+      "stderrBytes": 156,
+      "milliseconds": 26
+    },
+    {
+      "tool": "docker",
+      "action": "cp",
+      "fixedPath": "/app/application-prod.properties",
+      "exitCode": 1,
+      "stdoutBytes": 0,
+      "stderrBytes": 163,
+      "milliseconds": 23
+    },
+    {
+      "tool": "docker",
+      "action": "cp",
+      "fixedPath": "/config",
+      "exitCode": 1,
+      "stdoutBytes": 0,
+      "stderrBytes": 138,
+      "milliseconds": 24
+    },
+    {
+      "tool": "docker",
+      "action": "cp",
+      "fixedPath": "/application.yaml",
+      "exitCode": 1,
+      "stdoutBytes": 0,
+      "stderrBytes": 148,
+      "milliseconds": 28
+    },
+    {
+      "tool": "docker",
+      "action": "cp",
+      "fixedPath": "/application.yml",
+      "exitCode": 1,
+      "stdoutBytes": 0,
+      "stderrBytes": 147,
+      "milliseconds": 27
+    },
+    {
+      "tool": "docker",
+      "action": "cp",
+      "fixedPath": "/application.properties",
+      "exitCode": 1,
+      "stdoutBytes": 0,
+      "stderrBytes": 154,
+      "milliseconds": 29
+    },
+    {
+      "tool": "docker",
+      "action": "cp",
+      "fixedPath": "/application-prod.yaml",
+      "exitCode": 1,
+      "stdoutBytes": 0,
+      "stderrBytes": 153,
+      "milliseconds": 27
+    },
+    {
+      "tool": "docker",
+      "action": "cp",
+      "fixedPath": "/application-prod.yml",
+      "exitCode": 1,
+      "stdoutBytes": 0,
+      "stderrBytes": 152,
+      "milliseconds": 26
+    },
+    {
+      "tool": "docker",
+      "action": "cp",
+      "fixedPath": "/application-prod.properties",
+      "exitCode": 1,
+      "stdoutBytes": 0,
+      "stderrBytes": 159,
+      "milliseconds": 32
+    },
+    {
+      "tool": "docker",
+      "action": "cp",
+      "fixedPath": "/run/secrets",
+      "exitCode": 0,
+      "stdoutBytes": 2560,
+      "stderrBytes": 0,
+      "milliseconds": 33
+    },
+    {
+      "tool": "docker",
+      "action": "ps",
+      "exitCode": 0,
+      "stdoutBytes": 3185,
+      "stderrBytes": 0,
+      "milliseconds": 37
+    },
+    {
+      "tool": "docker",
+      "action": "inspect",
+      "exitCode": 0,
+      "stdoutBytes": 644497,
+      "stderrBytes": 0,
+      "milliseconds": 77
+    },
+    {
+      "tool": "docker",
+      "action": "network",
+      "exitCode": 0,
+      "stdoutBytes": 4582,
+      "stderrBytes": 0,
+      "milliseconds": 29
+    },
+    {
+      "tool": "docker",
+      "action": "image",
+      "exitCode": 0,
+      "stdoutBytes": 3189,
+      "stderrBytes": 0,
+      "milliseconds": 23
+    },
+    {
+      "tool": "docker",
+      "action": "image",
+      "exitCode": 0,
+      "stdoutBytes": 4445,
+      "stderrBytes": 0,
+      "milliseconds": 25
+    },
+    {
+      "tool": "docker",
+      "action": "image",
+      "exitCode": 0,
+      "stdoutBytes": 4729,
+      "stderrBytes": 0,
+      "milliseconds": 24
+    },
+    {
+      "tool": "docker",
+      "action": "image",
+      "exitCode": 0,
+      "stdoutBytes": 3577,
+      "stderrBytes": 0,
+      "milliseconds": 26
+    },
+    {
+      "tool": "docker",
+      "action": "volume",
+      "exitCode": 0,
+      "stdoutBytes": 1328,
+      "stderrBytes": 0,
+      "milliseconds": 34
+    },
+    {
+      "tool": "docker",
+      "action": "exec",
+      "exitCode": 0,
+      "stdoutBytes": 6,
+      "stderrBytes": 0,
+      "milliseconds": 86
+    }
+  ],
+  "settings": {
+    "sessionAbsoluteSeconds": "43200",
+    "sessionMaxSeconds": "604800"
+  },
+  "success": true,
+  "targetId": "pp1-local:710a1bcfea024de59f81cb4cfc6d6f20",
+  "jarSha256": "c77db33818be74674006328f990531543584983cb2ffe13351b605eb60ecfc15",
+  "endedAt": "2026-11-02T16:45:00.310Z"
+}

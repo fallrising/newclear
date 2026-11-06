@@ -1,0 +1,22 @@
+{
+  "executor": "root",
+  "readOnlyReviewedBy": "T146 worker",
+  "path": "/home/ckc/test/codex/wt/newclear/cms-pp1c-c-20261102/apps/cms-scaffold/.team/pp1c-c-20261102/full-node-after-compose-create.log",
+  "sha256": "b8cf72af99dc44b6460b87718b1a4e446328e02dc284ff2ea85ef51e940f0759",
+  "summary": [
+    "\u2139 tests 717",
+    "\u2139 suites 0",
+    "\u2139 pass 717",
+    "\u2139 fail 0",
+    "\u2139 cancelled 0",
+    "\u2139 skipped 0",
+    "\u2139 todo 0",
+    "\u2139 duration_ms 59598.871974"
+  ],
+  "sourceHashesMatchRoot": {
+    "prepare.mjs": true,
+    "prepare.test.mjs": true,
+    "restore-target.mjs": true,
+    "maintenance-workflow.test.mjs": true
+  }
+}

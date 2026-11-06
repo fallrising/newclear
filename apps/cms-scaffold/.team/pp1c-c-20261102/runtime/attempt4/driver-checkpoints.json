@@ -1,0 +1,78 @@
+{
+  "runtime-prepare": {
+    "addedHandwrittenLines": 198,
+    "files": {
+      "build-runtime-image.py": {
+        "lines": 35,
+        "sha256": "44db23b65d77232d56d8e3c9d1fe35006de45e045ba6e2625c9381dfd89370cd"
+      },
+      "prepare-runtime.py": {
+        "lines": 61,
+        "sha256": "63d4cf3fbd9954f8d84aa83937a2d57371107772f84e19ca8ca33a2d37ea31ea"
+      },
+      "runtime/bootstrap.py": {
+        "lines": 60,
+        "sha256": "fdaf2adb19f18b07e622a3c606f26d4b5d045a5a71bfa9c7d19b11520630c9ef"
+      },
+      "runtime/observe-config.mjs": {
+        "lines": 25,
+        "sha256": "48b55019dcea7cfdf3173dbae1934fd399eb6f9a3927d099d5df59145db7fc03"
+      },
+      "runtime/FixtureImages.java": {
+        "lines": 17,
+        "sha256": "de4ac8e831152c573fec714835574c1c62e3bb967ef5afd325cc274b73b8755a"
+      }
+    }
+  },
+  "runtime-core": {
+    "addedHandwrittenLines": 185,
+    "files": {
+      "runtime/run-core.mjs": {
+        "lines": 157,
+        "sha256": "4ae448f7e82b08f9735e2f8b27bdbb9ac3529d31242477525031ef1cca2872ac"
+      },
+      "runtime/check-media.py": {
+        "lines": 28,
+        "sha256": "519cc9b10182ca94d1631292d41681848430fa4789f8ae71742ed57f22d7bf9f"
+      }
+    }
+  },
+  "attempt3-current-inputs": {
+    "recordedAt": "2026-11-02T17:49:54.425839+00:00",
+    "note": "Exact delta unavailable without previous source snapshot. Upper bound counts full old+new prepare-runtime replacement plus all new private adapter lines; remains below400. No estimate reported as measured.",
+    "files": {
+      "prepare-runtime.py": {
+        "lines": 73,
+        "sha256": "26d54929c30e9066b6324d2665c4851ffff9451a3738beed75df79443f3838e6"
+      },
+      "runtime/prepare-source.mjs": {
+        "lines": 10,
+        "sha256": "43b10f5b4c97a3c7e6a2c5f6731a151bac97f212375760349d1c1e0e047597d6"
+      },
+      "runtime/run-core.mjs": {
+        "lines": 157,
+        "sha256": "4ae448f7e82b08f9735e2f8b27bdbb9ac3529d31242477525031ef1cca2872ac"
+      },
+      "runtime/check-media.py": {
+        "lines": 28,
+        "sha256": "519cc9b10182ca94d1631292d41681848430fa4789f8ae71742ed57f22d7bf9f"
+      },
+      "T144/fixture-client.mjs": {
+        "lines": 127,
+        "sha256": "3426c9143d99dad9a8690c60856a99b861dcd3c12e46733f48de75b34dd58477"
+      }
+    },
+    "preparationDeltaLines": null,
+    "conservativePreparationDeltaUpperBound": 144
+  },
+  "web-validation-driver": {
+    "addedHandwrittenLines": 47,
+    "sha256": "7fc9db0f5b40083ef02c9641507b53067ee126457b78242d4417481d6d475e12",
+    "runtimeExecution": "pending; npm ci first"
+  },
+  "mock-validation-driver": {
+    "addedHandwrittenLines": 48,
+    "sha256": "ac05ac2cddb2727b39cd400c7bd6f295dc4fd3eabece68f50bb3623d28891611",
+    "note": "same pinned network-none browser/deps and copied source as B mock gate, current C-only private fixture staging; not executed while actual C core runs"
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "version": 1,
+  "original": "C09/initial-sandbox-runner.log",
+  "sha256": "69e5b670f4a63e8575d026c7f066d570be3d87bcf061fe35c3cd737cabcc6cd5",
+  "byteSize": "331",
+  "encoding": "utf-8",
+  "text": "✖ scripts/ops/local-recovery-verify.test.mjs (131.432119ms)\nℹ tests 1\nℹ suites 0\nℹ pass 0\nℹ fail 1\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 143.515187\n\n✖ failing tests:\n\ntest at scripts/ops/local-recovery-verify.test.mjs:1:1\n✖ scripts/ops/local-recovery-verify.test.mjs (131.432119ms)\n  'test failed'\n"
+}

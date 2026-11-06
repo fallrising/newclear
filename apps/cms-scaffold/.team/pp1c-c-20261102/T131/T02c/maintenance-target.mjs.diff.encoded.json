@@ -1,0 +1,8 @@
+{
+  "version": 1,
+  "original": "T131/T02c/maintenance-target.mjs.diff",
+  "sha256": "6137c1980f838a5543a6e93788b2294f9d1de9e1e9419444bac765cffaa31693",
+  "byteSize": "1115",
+  "encoding": "utf-8",
+  "text": "--- maintenance-target.mjs.before\n+++ maintenance-target.mjs.after\n@@ -162,6 +162,8 @@\n           && network.Containers[c.Id]?.IPv4Address === `${endpoint.IPAddress}/${endpoint.IPPrefixLen}`);\n       }\n       const resolved = await list(['image', 'inspect', receipt.imageRefs[kind]]); ensure(resolved.length === 1 && resolved[0].Id === c.Image && resolved[0].Os === 'linux');\n+      if(restore){const command=name==='ingress'?{Entrypoint:['/opt/pp1-node'],Cmd:['/tool/ingress.mjs','--config','/config/ingress.json']}:resolved[0].Config;\n+        ensure(equal(c.Config.Entrypoint??null,command.Entrypoint??null)&&equal(c.Config.Cmd??null,command.Cmd??null));}\n       if (name === 'cms-api') { const labels = resolved[0].Config?.Labels; ensure(labels && labels['org.cms.pp1.source-commit'] === build.sourceCommit && labels['org.cms.pp1.jar-sha256'] === build.jarSha256 && labels['org.cms.pp1.base-image'] === build.baseImage); }\n       ensure(Array.isArray(c.Mounts)); const m = new Map(c.Mounts.map(v => [v.Destination, v])); ensure(m.size === c.Mounts.length); mounts.set(name, m);\n       if (name !== 'ingress') {\n"
+}

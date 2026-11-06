@@ -1,0 +1,61 @@
+{
+  "capturedAt": "2026-11-02T17:38:59.170794+00:00",
+  "files": {
+    "prepare.mjs": {
+      "changedLines": 4,
+      "sha256": "29cc7dbf1bc0bbd326dd2b7dcb448fbae7c598eaa5cd4a4f0e9949eaa392cbb8"
+    },
+    "prepare.test.mjs": {
+      "changedLines": 68,
+      "sha256": "4a2b94b1253678916f7746726786c78e13c8d3e7b6cd6d495154e23c57d74ef7"
+    },
+    "restore-target.mjs": {
+      "changedLines": 0,
+      "sha256": "d3afe4d7bab1a6c1a9936cbc7b2c87a5f90379ee73fbb5baeb9ab2e91733e79b"
+    },
+    "maintenance-workflow.test.mjs": {
+      "changedLines": 1,
+      "sha256": "5a89d3e54b974b91359d090d42c0e38000ec0b897cfba4be1de33513e24d784c"
+    }
+  },
+  "checkpoints": {
+    "A": {
+      "prepare.mjs": {
+        "changedLines": 116,
+        "sha256": "d7cb1be956a56a5d79d301116c21b6a7e94d5ea3b7658b9c9a848dcbc1dac9de"
+      },
+      "prepare.test.mjs": {
+        "changedLines": 56,
+        "sha256": "b336a1b932dab0f30f6a5cf787629bc42a80b4ce61d23d348785c2e02250523c"
+      }
+    },
+    "B": {
+      "restore-target.mjs": {
+        "changedLines": 19,
+        "sha256": "d3afe4d7bab1a6c1a9936cbc7b2c87a5f90379ee73fbb5baeb9ab2e91733e79b"
+      },
+      "maintenance-workflow.test.mjs": {
+        "changedLines": 43,
+        "sha256": "18b998ca03fbc41602108976b21cdc1410419294f137c415cfb2705125aac93f"
+      }
+    },
+    "C": {
+      "prepare.mjs": {
+        "changedLines": 4,
+        "sha256": "29cc7dbf1bc0bbd326dd2b7dcb448fbae7c598eaa5cd4a4f0e9949eaa392cbb8"
+      },
+      "prepare.test.mjs": {
+        "changedLines": 68,
+        "sha256": "4a2b94b1253678916f7746726786c78e13c8d3e7b6cd6d495154e23c57d74ef7"
+      },
+      "restore-target.mjs": {
+        "changedLines": 0,
+        "sha256": "d3afe4d7bab1a6c1a9936cbc7b2c87a5f90379ee73fbb5baeb9ab2e91733e79b"
+      },
+      "maintenance-workflow.test.mjs": {
+        "changedLines": 1,
+        "sha256": "5a89d3e54b974b91359d090d42c0e38000ec0b897cfba4be1de33513e24d784c"
+      }
+    }
+  }
+}

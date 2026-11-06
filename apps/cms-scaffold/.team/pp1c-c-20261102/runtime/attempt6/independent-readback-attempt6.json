@@ -1,0 +1,12 @@
+{
+  "command": [
+    "python3",
+    ".team/pp1c-c-20261102/runtime/readback-core.py"
+  ],
+  "startedAt": "2026-11-06T15:56:27.350201+00:00",
+  "timeoutSeconds": 900,
+  "sourceRunId": "09860f34e2c9401faf34262917313412",
+  "exitCode": 0,
+  "elapsedSeconds": 20.204689785139635,
+  "endedAt": "2026-11-06T15:56:47.554914+00:00"
+}

@@ -1,0 +1,213 @@
+{
+  "sourceRunId": "710a1bcfea024de59f81cb4cfc6d6f20",
+  "targetRunId": "55b82670d48f4fc7a96e08133eeefa6d",
+  "operationId": "df6defa6-ca5d-4b8a-be7f-a06f66a861da",
+  "bootstrapOperationId": "941f446d-7e6e-4ed9-83dd-722e1943df46",
+  "startedAt": "2026-11-02T16:59:29.484Z",
+  "scope": "actual C core through SESSIONS_REVOKED only; no D startup/browser/proof or RTO acceptance",
+  "steps": [
+    {
+      "name": "true-tty-bootstrap",
+      "at": "2026-11-02T16:59:49.941Z",
+      "exitCode": 0,
+      "prompts": 2,
+      "success": true,
+      "code": null
+    },
+    {
+      "name": "synthetic-stream-observation-load",
+      "at": "2026-11-02T16:59:58.148Z",
+      "rows": 4096,
+      "syntheticPayloadBytes": 134217728,
+      "sqlSha256": "24f0a3cd26c97ed4d9d8ed2a39f5c01b5f032aefd4627835b2e6cf8e913fa90b",
+      "note": "C test data before capture; no D fixture acceptance"
+    },
+    {
+      "name": "actual-session-config",
+      "at": "2026-11-02T17:00:02.244Z",
+      "sessionAbsoluteSeconds": "43200",
+      "sessionMaxSeconds": "604800"
+    }
+  ],
+  "http": [
+    {
+      "method": "GET",
+      "path": "/api/v1/auth/csrf",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/auth/login",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/roles",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/principals",
+      "status": 201
+    },
+    {
+      "method": "PUT",
+      "path": "/api/v1/principals/:id/roles",
+      "status": 204
+    },
+    {
+      "method": "PUT",
+      "path": "/api/v1/roles/operator/permissions",
+      "status": 204
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/roles/operator/permissions",
+      "status": 200
+    },
+    {
+      "method": "PUT",
+      "path": "/api/v1/roles/anonymous/permissions",
+      "status": 204
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/roles/anonymous/permissions",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/media",
+      "status": 201
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/media/:id/file/original",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/media/:id/file/thumbnail",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/media/:id/file/web",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/media",
+      "status": 201
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/media/:id/file/original",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/media/:id/file/thumbnail",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/media/:id/file/web",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/media",
+      "status": 201
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/media/:id/file/original",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/media/:id/file/thumbnail",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/media/:id/file/web",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/media",
+      "status": 201
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/media/:id/file/original",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/media/:id/file/thumbnail",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/media/:id/file/web",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/media",
+      "status": 201
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/media/:id/file/original",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/media/:id/file/thumbnail",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/media/:id/file/web",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/media",
+      "status": 201
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/media/:id/file/original",
+      "status": 200
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/v1/media/:id",
+      "status": 204
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/media/:id/file/original",
+      "status": 410
+    }
+  ],
+  "success": false,
+  "code": "FIXTURE_HTTP_STATUS",
+  "failureType": "Error",
+  "stopped": [
+    {
+      "runId": "710a1bcfea024de59f81cb4cfc6d6f20",
+      "containerIds": [
+        "e88b042a7060c45fdb01e288a705041de54d222a0edcb908b0c7cde4a72da8b0",
+        "f67b4cb091f0a53181eec3c5874ad554dfd16eccbe9a7bbd37e6cd40c53eae6f",
+        "c63f74588e71ee0af75626ab29d36ee1cbda5f3c61293824549a9445237191bf"
+      ]
+    }
+  ],
+  "endedAt": "2026-11-02T17:00:33.342Z"
+}

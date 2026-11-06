@@ -1,0 +1,30 @@
+{
+  "desk": {
+    "path": "tasks/T-0351-cms-scaffold/task.md",
+    "reviewedSha256": "2a1700a9b7492438ac98ea5007ed7be4c5cf8711cbf7f56f42c4f1ac236470cb",
+    "appendOnlyExceptDeskSpecPointer": true,
+    "originalFrontmatterPreservedExceptDeskSpecPointer": true
+  },
+  "journal": {
+    "path": "runs/newclear/cms-scaffold/2026/11/20261102T111245Z-1a0926f4-6632-4381-9963-7c6121c0d20b/run.md",
+    "reviewedSha256": "4f117b5bd80d55cff6e9af3d08779ea3d9fccc1168e23ef69df467193e2de6be",
+    "appendOnlyExceptDeskSpecPointer": true,
+    "originalFrontmatterPreservedExceptDeskSpecPointer": true
+  },
+  "delivery": {
+    "head": "6359544f58b72dd4c8c33ac6538bdfd0bf2f6dd9",
+    "merge": "646b11189ced91016e1dc57306460cf890d1dee3",
+    "parents": [
+      "6ee1901c0a4672174b9c4b9ecf8c7bb9576f845b",
+      "6359544f58b72dd4c8c33ac6538bdfd0bf2f6dd9"
+    ],
+    "fullComponentDiffEmptyIndependentlyChecked": true,
+    "mergeAncestorChecked": true,
+    "rootReceiptSha256": "d8406a4d8cb82c9387f938ba1f2a6645bb545c4bcab0a1afa55b636fd2df27c8"
+  },
+  "nativeLogsSha256": {
+    "desk-check.txt": "c00f4f7125a6064b3e301afaf75c17c31d034fbd928759debcb17b9616068e8b",
+    "journal-check.txt": "29b1f69544964a4969e8bd42a15fac5728f18fab05c55c9619d86454789ec522",
+    "journal-tests.txt": "c4e9610305731cca517da457d52b0c40b9e6435534188452b6cff3ae28606f05"
+  }
+}

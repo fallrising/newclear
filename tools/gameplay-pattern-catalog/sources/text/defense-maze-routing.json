@@ -1,0 +1,120 @@
+{
+  "id": "defense-maze-routing",
+  "system": "defense",
+  "edition": 2,
+  "name": {
+    "zh": "造迷宫延长敌人路线",
+    "en": "Build a longer enemy route"
+  },
+  "summary": {
+    "zh": "花有限的建筑资源，让敌人多走几步、多挨几轮攻击。",
+    "en": "Spend limited building resources to make enemies walk farther under fire."
+  },
+  "rules": {
+    "zh": "玩家在允许建造的地面放置障碍或防御塔，改变地面敌人前往目标的路线。既要留下可通行的道路，又要让敌人尽量多次经过火力覆盖区；路径预览和实际行军轨迹告诉玩家布局是否有效。",
+    "en": "Place obstacles or towers on buildable ground to change the route ground enemies take to their objective. Leave a legal route while increasing time spent under fire. A path preview and actual enemy movement reveal whether the layout works."
+  },
+  "loop": [
+    {
+      "zh": "查看入口与出口",
+      "en": "Locate entrances and exits"
+    },
+    {
+      "zh": "放障碍拉长路线",
+      "en": "Place obstacles to extend the route"
+    },
+    {
+      "zh": "让敌人经过火力区",
+      "en": "Send enemies through firing zones"
+    },
+    {
+      "zh": "根据漏怪位置改布局",
+      "en": "Revise the layout where enemies escaped"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "用钱增加路程，还是直接买火力？路再长，伤害不足也守不住。",
+      "en": "Spend on a longer route or another weapon? Extra walking time does little without damage."
+    },
+    {
+      "zh": "把所有敌人汇到一个窄口很省塔，但也更依赖这一个位置。",
+      "en": "A single choke saves towers but concentrates the defense into one vulnerable location."
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "障碍成本",
+        "en": "Obstacle cost"
+      },
+      "effect": {
+        "zh": "成本低时鼓励反复改路；成本高时每个拐弯都要证明价值。",
+        "en": "Cheap obstacles encourage route experiments; expensive ones must justify every detour."
+      }
+    },
+    {
+      "name": {
+        "zh": "允许的通路宽度",
+        "en": "Required passage width"
+      },
+      "effect": {
+        "zh": "宽通路减少极端绕路，更强调火力覆盖；窄通路更强调迷宫布局。",
+        "en": "Wide passages reduce extreme detours and emphasize coverage; narrow ones reward maze planning."
+      }
+    }
+  ],
+  "tags": [
+    "spatial",
+    "planning",
+    "optimization"
+  ],
+  "related": [
+    "building-access-network",
+    "building-service-coverage",
+    "defense-ammunition-supply",
+    "defense-target-priority"
+  ],
+  "contrast": {
+    "zh": "前者主要通过塔阵延长敌人的受击时间；后者还要留出玩家移动和射击的位置。",
+    "en": "Defense Grid mainly stretches exposure to towers; Sanctum also needs room for the player to move and shoot."
+  },
+  "combination": {
+    "zh": "组合提案：把迷宫墙接入模块拼装，同一堵墙可以旋转成两种走向，让玩家用少量部件修补漏洞。",
+    "en": "Design proposal: connect maze walls to modular construction, letting each piece rotate between two routes to repair gaps with few components."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "一个入口和出口之间只有直路，敌人很快跑出去。",
+      "en": "A straight path connects the entrance to the exit, so enemies cross quickly."
+    },
+    "action": {
+      "zh": "用三块墙围出一个U形弯，在弯心放一座箭塔。",
+      "en": "Use three walls to form a U-turn and place an arrow tower inside it."
+    },
+    "result": {
+      "zh": "同一批敌人在射程内停留更久，但三块墙花掉了买第二座塔的钱。",
+      "en": "The same enemies stay in range longer, but the walls consume money for a second tower."
+    },
+    "next": {
+      "zh": "观察是路程不够还是伤害不够，再决定下一笔钱投哪里。",
+      "en": "Check whether travel time or damage is insufficient before the next investment."
+    }
+  },
+  "prototype": {
+    "scope": "medium",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "用二维方格、一个入口、一个出口、两种建筑做出可预览的寻路。",
+      "en": "Use a 2D grid with one entrance, one exit and two building types; show the calculated route."
+    },
+    "pitfall": {
+      "zh": "先不做多层地图和飞行敌人；必须先处理彻底堵路时的反馈。",
+      "en": "Defer multilevel maps and flying enemies; first make blocked routes give clear feedback."
+    },
+    "test": {
+      "zh": "测试者能否说清一块墙为何值得放在这里，并根据漏怪主动改路？",
+      "en": "Can a tester explain why a wall belongs here and reroute after a leak?"
+    }
+  }
+}

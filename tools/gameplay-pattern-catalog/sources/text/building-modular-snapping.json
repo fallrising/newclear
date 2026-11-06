@@ -1,0 +1,120 @@
+{
+  "id": "building-modular-snapping",
+  "system": "building",
+  "edition": 1,
+  "name": {
+    "zh": "模块吸附拼装",
+    "en": "Modular snap construction"
+  },
+  "summary": {
+    "zh": "把墙、地板等部件对齐接口，快速拼出可编辑结构。",
+    "en": "Align walls and floors at snap points to assemble editable structures."
+  },
+  "rules": {
+    "zh": "玩家选择、旋转并吸附部件，用有限模块组合建筑。尺寸与接口方向限制拼接；预览和碰撞反馈帮助修正位置。",
+    "en": "Players select, rotate and snap components into structures. Dimensions and connector direction constrain joins; previews and collision feedback guide placement."
+  },
+  "loop": [
+    {
+      "zh": "选择模块",
+      "en": "Choose a module"
+    },
+    {
+      "zh": "预览接口",
+      "en": "Preview a connector"
+    },
+    {
+      "zh": "旋转放置",
+      "en": "Rotate and place"
+    },
+    {
+      "zh": "检查连接外形",
+      "en": "Inspect joints and shape"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "用现成模块快速拼好，还是多转几次方向，为门洞和通路留出更合适的位置？",
+      "en": "Assemble quickly with standard pieces, or adjust orientations to improve doors and passages?"
+    },
+    {
+      "zh": "沿用手头部件会占更多空间，是否值得换另一种模块来减少接缝和绕路？",
+      "en": "Existing pieces use more space; is another module worth using to reduce awkward joints and detours?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "吸附强度",
+        "en": "Snap assistance"
+      },
+      "effect": {
+        "zh": "强吸附更快，弱吸附适合细调但容易错位。",
+        "en": "Strong snapping is faster; weak snapping enables detail but risks misalignment."
+      }
+    },
+    {
+      "name": {
+        "zh": "模块尺寸",
+        "en": "Module scale"
+      },
+      "effect": {
+        "zh": "小部件支持细节，大部件减少重复操作。",
+        "en": "Small parts support detail; large parts reduce repetition."
+      }
+    }
+  ],
+  "tags": [
+    "spatial",
+    "creativity",
+    "precision"
+  ],
+  "related": [
+    "building-terrain-shaping",
+    "building-vertical-stacking",
+    "building-access-network",
+    "building-room-requirements"
+  ],
+  "contrast": {
+    "zh": "Valheim用部件接点构造外形；Satisfactory常以地基网格统一工业布局。",
+    "en": "Valheim uses piece connectors for shape; Satisfactory often uses foundation grids for industrial layouts."
+  },
+  "combination": {
+    "zh": "探险者只携带少数模块，遇到不同断桥要重新组合，而不是不断解锁更长桥梁。",
+    "en": "Give explorers a small kit to recombine for different crossings instead of unlocking longer bridges."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "你要接上一面墙，但门洞朝向与现有走廊不一致。",
+      "en": "You want to add a wall, but its doorway faces the wrong direction for the corridor."
+    },
+    "action": {
+      "zh": "你旋转模块，观察吸附预览，再确认落位。",
+      "en": "Rotate the module, inspect the snap preview and confirm placement."
+    },
+    "result": {
+      "zh": "接口对齐后墙体连上；碰撞或接口不合时显示无法放置。",
+      "en": "Matching interfaces connect; collisions or incompatible joints show an invalid placement."
+    },
+    "next": {
+      "zh": "检查通路没有被堵，再挑选下一块模块。",
+      "en": "Check that the passage remains open before selecting the next module."
+    }
+  },
+  "prototype": {
+    "scope": "medium",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "做墙、地板和门3种模块，固定几个吸附点，并让预览与实际落位完全一致。",
+      "en": "Use wall, floor and door modules with a few fixed snap points, keeping preview and placement identical."
+    },
+    "pitfall": {
+      "zh": "任意角度、自由缩放和大量接口会增加组合测试，先限制尺寸与旋转档位。",
+      "en": "Arbitrary rotation, scaling and many joints multiply combinations; constrain sizes and rotation steps first."
+    },
+    "test": {
+      "zh": "玩家能否不靠反复撤销就把门接到预期位置，并知道某次放置为何无效？",
+      "en": "Can players place a door as intended without repeated undoing and explain an invalid placement?"
+    }
+  }
+}

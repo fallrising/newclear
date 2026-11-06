@@ -1,0 +1,120 @@
+{
+  "id": "ecology-parent-trait-selection",
+  "system": "ecology",
+  "edition": 2,
+  "name": {
+    "zh": "挑选亲本保留后代性状",
+    "en": "Select parents for offspring traits"
+  },
+  "summary": {
+    "zh": "繁殖之前看双方特点，繁殖之后检查哪些特点传给了下一代。",
+    "en": "Inspect both parents before breeding and check which traits the offspring inherits."
+  },
+  "rules": {
+    "zh": "玩家根据目标选择一对亲本，后代按公开或可研究的遗传规则获得性状。结果通常有不确定性，玩家要决定留下谁继续繁殖，而不是只让数量增加。",
+    "en": "Choose a pair for a target, then generate offspring under visible or learnable inheritance rules. Uncertain results require choosing which offspring to retain for further breeding, not simply increasing numbers."
+  },
+  "loop": [
+    {
+      "zh": "确定需要的后代特点",
+      "en": "Set the desired offspring trait"
+    },
+    {
+      "zh": "比较并配对亲本",
+      "en": "Compare and pair parents"
+    },
+    {
+      "zh": "检查后代的实际结果",
+      "en": "Inspect the offspring’s result"
+    },
+    {
+      "zh": "留下合适个体进行下一代",
+      "en": "Retain suitable offspring for another generation"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "选当前数值最高的两个，还是选特点互补的一对？",
+      "en": "Choose the two strongest individuals or a complementary pair?"
+    },
+    {
+      "zh": "已有合适后代时停止，还是继续繁殖争取稀有组合？",
+      "en": "Stop at a useful offspring or keep trying for a rare combination?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "遗传信息可见度",
+        "en": "Inheritance visibility"
+      },
+      "effect": {
+        "zh": "只显示外观会鼓励试验；显示潜在基因能支持更明确的配对推理。",
+        "en": "Visible appearance encourages trials; hidden-gene information supports more deliberate pairing."
+      }
+    },
+    {
+      "name": {
+        "zh": "育种占用成本",
+        "en": "Breeding capacity cost"
+      },
+      "effect": {
+        "zh": "后代占用空间和照料资源，才能让“再试一次”成为真实选择。",
+        "en": "Offspring must occupy space or care resources for another attempt to be a meaningful choice."
+      }
+    }
+  ],
+  "tags": [
+    "planning",
+    "randomness",
+    "progression"
+  ],
+  "related": [
+    "ecology-genetic-diversity",
+    "ecology-animal-taming",
+    "ecology-breeding-conditions",
+    "ecology-habitat-capacity"
+  ],
+  "contrast": {
+    "zh": "Niche把后代性状直接连接野外生存能力；动物园之星把亲本选择放在动物展示、照料和经营的长期安排中。",
+    "en": "Niche ties inherited traits to survival in the wild; Planet Zoo embeds mate selection in long-term care and zoo management."
+  },
+  "combination": {
+    "zh": "设计提案：先通过观察或检测揭示亲本隐藏性状，再决定把有限繁殖位留给哪一对。",
+    "en": "Design proposal: reveal hidden parental traits through inspection before allocating a limited breeding slot."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "演示设定：下一张地图寒冷，三只候选亲本分别擅长耐寒、速度和采集。",
+      "en": "Example: the next map is cold; three candidates favor cold resistance, speed and gathering."
+    },
+    "action": {
+      "zh": "选择耐寒亲本与采集亲本配对。",
+      "en": "Pair the cold-resistant creature with the gatherer."
+    },
+    "result": {
+      "zh": "后代保留耐寒，但采集能力普通。",
+      "en": "The offspring retains cold resistance but has ordinary gathering ability."
+    },
+    "next": {
+      "zh": "保留它作为迁移成员，再决定是否用第二个繁殖位补采集能力。",
+      "en": "Keep it for migration, then decide whether a second breeding slot should improve gathering."
+    }
+  },
+  "prototype": {
+    "scope": "medium",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "用两项性状、三个亲本和一个可解释的遗传表做三代实验。",
+      "en": "Build a three-generation experiment with two traits, three parents and an explainable inheritance table."
+    },
+    "pitfall": {
+      "zh": "不要先做几十种外观和复杂家谱；先让配对能改变后代选择。",
+      "en": "Avoid dozens of appearances and a complex pedigree initially; first make pairings change offspring decisions."
+    },
+    "test": {
+      "zh": "让玩家连续选择两代亲本，看其能否依据后代结果修改下一次配对。",
+      "en": "Watch two generations of choices and see whether offspring results change the next pairing."
+    }
+  }
+}

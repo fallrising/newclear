@@ -1,0 +1,120 @@
+{
+  "id": "combat-pause-orders",
+  "system": "combat",
+  "edition": 2,
+  "name": {
+    "zh": "暂停战斗再分配指令",
+    "en": "Pausing to issue orders"
+  },
+  "summary": {
+    "zh": "事情同时发生太多时，暂停一下，把队伍安排明白。",
+    "en": "Pause simultaneous problems long enough to organize the team."
+  },
+  "rules": {
+    "zh": "战斗平时实时进行，玩家随时暂停观察局面，并给不同角色或系统下令。解除暂停后命令在实时环境中执行；出现新的伤情、目标或故障，再暂停调整。暂停不自动解决问题，关键是它允许玩家处理并行任务。",
+    "en": "Combat runs in real time, but players can pause to inspect and order several units or systems. Orders execute after resuming; new injuries, targets or failures prompt another pause. Pausing supports parallel decisions rather than solving them automatically."
+  },
+  "loop": [
+    {
+      "zh": "发现同时发生的问题",
+      "en": "Notice simultaneous problems"
+    },
+    {
+      "zh": "暂停并确定优先级",
+      "en": "Pause and prioritize"
+    },
+    {
+      "zh": "分配多个指令",
+      "en": "Assign several orders"
+    },
+    {
+      "zh": "继续时间检查效果",
+      "en": "Resume and inspect the result"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "先救危险队员，还是先打断敌人的下一次攻击？",
+      "en": "Rescue a threatened ally or interrupt the next enemy attack?"
+    },
+    {
+      "zh": "指令已经够用，要继续时间验证，还是还要调整其他角色？",
+      "en": "Are the orders ready to test, or does another unit need attention?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "自动暂停事件",
+        "en": "Auto-pause events"
+      },
+      "effect": {
+        "zh": "关键事件自动暂停能降低漏看风险，过多则会切碎节奏。",
+        "en": "Auto-pausing on key events prevents missed threats; too many interruptions fragment pacing."
+      }
+    },
+    {
+      "name": {
+        "zh": "指令队列深度",
+        "en": "Order queue depth"
+      },
+      "effect": {
+        "zh": "一次只能给一条更直观；多条队列提升规划能力也增加修改成本。",
+        "en": "Single orders are clear; longer queues enable planning but are harder to revise."
+      }
+    }
+  ],
+  "tags": [
+    "planning",
+    "information",
+    "time"
+  ],
+  "related": [
+    "combat-simultaneous-orders",
+    "combat-intent-preview",
+    "automation-item-filtering",
+    "combat-action-points"
+  ],
+  "contrast": {
+    "zh": "《超越光速》调度的是船员与整艘船的系统；《龙腾世纪：起源》主要协调小队角色的位置和能力。",
+    "en": "FTL coordinates crew and ship systems; Dragon Age: Origins coordinates party positions and abilities."
+  },
+  "combination": {
+    "zh": "把船内供电预算接入暂停调度：切断生产设备，短暂把电力转给护盾。",
+    "en": "Connect power allocation to tactical pause: shut down production briefly to power shields."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "船舱着火，同时敌方武器即将蓄能完成。",
+      "en": "A room is burning while an enemy weapon nears a full charge."
+    },
+    "action": {
+      "zh": "暂停：派一人灭火，另一人维修护盾，并把自己的武器瞄准敌方武器室。",
+      "en": "Pause: send one crew member to extinguish the fire, another to repair shields, and aim at the enemy weapon room."
+    },
+    "result": {
+      "zh": "恢复后各任务一起执行，你观察哪处问题仍未解决。",
+      "en": "After resuming, tasks proceed together and you inspect what remains unresolved."
+    },
+    "next": {
+      "zh": "有人受伤时再暂停，把他换到安全位置继续修理。",
+      "en": "Pause again when someone is injured and move them somewhere safer."
+    }
+  },
+  "prototype": {
+    "scope": "medium",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "用三个房间、两名角色、火灾和维修两类任务，先验证暂停下令到恢复执行。",
+      "en": "Use three rooms, two characters, fires and repairs to test pause-order-resume."
+    },
+    "pitfall": {
+      "zh": "暂停期间的目标变化或旧指令覆盖不清，会让玩家以为命令没生效。",
+      "en": "Unclear target changes or order replacement can look like ignored commands."
+    },
+    "test": {
+      "zh": "让试玩者处理两个同时发生的事件，检查他能否说清每个人恢复后会做什么。",
+      "en": "Give testers two simultaneous events and ask what each unit will do after resuming."
+    }
+  }
+}

@@ -1,0 +1,120 @@
+{
+  "id": "movement-run-walk-control",
+  "system": "movement",
+  "edition": 3,
+  "name": {
+    "zh": "切换快慢，控制跨越与落点",
+    "en": "Switch speed to control reach and landing"
+  },
+  "summary": {
+    "zh": "跑得快能跨远处，走得慢才容易对准窄路。",
+    "en": "Running reaches farther; walking makes narrow approaches easier to control."
+  },
+  "rules": {
+    "zh": "玩家能在较快和较慢的移动状态之间切换。快移动扩大横向跨越距离，却缩短接近危险时的反应时间；慢移动让边缘和窄落点更容易对准，玩家要在同一段路上反复改变速度。",
+    "en": "Switch between faster and slower movement. Speed extends horizontal reach but reduces reaction time near danger. Slower movement makes edges and narrow landings easier to align, so a single route calls for repeated speed changes."
+  },
+  "loop": [
+    {
+      "zh": "判断路面宽度与间隙",
+      "en": "Read surface width and gaps"
+    },
+    {
+      "zh": "选择跑或走",
+      "en": "Choose running or walking"
+    },
+    {
+      "zh": "通过宽缝或窄路",
+      "en": "Cross the gap or narrow section"
+    },
+    {
+      "zh": "为下个障碍调整速度",
+      "en": "Change speed for the next obstacle"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "宽坑前要不要提速，还是先慢走到更靠近边缘的位置？",
+      "en": "Build speed before a wide gap, or first walk closer to its edge?"
+    },
+    {
+      "zh": "落点附近有陷阱，继续跑能赶时间，但是否先切慢速确认安全？",
+      "en": "Running saves time near a trapped landing, but should you slow down to verify the approach?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "快慢速度差",
+        "en": "Speed difference"
+      },
+      "effect": {
+        "zh": "差距越大，切换的价值越清楚，但窄路上误用快跑的代价也更大。",
+        "en": "A larger difference makes switching matter more, while increasing the cost of running on narrow paths."
+      }
+    },
+    {
+      "name": {
+        "zh": "速度切换的过渡时间",
+        "en": "Transition time"
+      },
+      "effect": {
+        "zh": "立即变化便于精确调整，缓慢变化则要求更早判断下一处障碍。",
+        "en": "Immediate changes support precise adjustment; gradual changes require reading the next obstacle earlier."
+      }
+    }
+  ],
+  "tags": [
+    "precision",
+    "timing",
+    "risk"
+  ],
+  "related": [
+    "movement-auto-forward",
+    "movement-downward-slam",
+    "movement-ledge-catch",
+    "movement-short-retry"
+  ],
+  "contrast": {
+    "zh": "《超级食肉男孩》的快跑主要服务连续跨越挑战；《洞穴探险2》还要求玩家结合陷阱、可拾物和未知地形判断何时放慢。",
+    "en": "Super Meat Boy uses running to support continuous traversal challenges; Spelunky 2 also asks players to slow down around traps, pickups and unfamiliar terrain."
+  },
+  "combination": {
+    "zh": "设计提案：随机拼接宽坑与带陷阱的窄路，入口先展示一小段前路，让玩家边观察边切换快慢，而非全程按住奔跑。",
+    "en": "Design proposal: recombine wide gaps and narrow trapped paths, showing a short preview from each entrance so players read ahead and adjust speed."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "教学示例：前半段是 4 格宽坑，落点后紧接一条 1 格宽的安全路。",
+      "en": "Teaching example: a four-tile gap is followed by a one-tile-wide safe approach."
+    },
+    "action": {
+      "zh": "你先跑跳过坑，接近落点时切换慢速。",
+      "en": "Run and jump across the gap, then switch to slower movement as you approach the landing."
+    },
+    "result": {
+      "zh": "横向距离足够，落地后也没有继续冲向路边的危险。",
+      "en": "You cover the distance and avoid rushing into the hazard beyond the landing."
+    },
+    "next": {
+      "zh": "下一处间隙更短，可以继续慢速通过，或为更远的支路重新加速。",
+      "en": "The next gap is shorter: stay slow or accelerate toward a farther branch."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "制作一条 20 格长的测试路：宽坑、窄落点、贴边陷阱各一处，只提供跑走切换和跳跃。",
+      "en": "Build a twenty-tile route with one wide gap, one narrow landing and one edge hazard; provide only run/walk switching and jumping."
+    },
+    "pitfall": {
+      "zh": "如果快跑能无代价解决所有障碍，慢走按钮就没有选择价值。",
+      "en": "If running solves every obstacle without a tradeoff, walking has no decision value."
+    },
+    "test": {
+      "zh": "记录每段采用的速度；确认同一位玩家会主动在宽坑前提速、窄路前降速。",
+      "en": "Record speed choices by section; check that the same player intentionally speeds up before the gap and slows before the narrow path."
+    }
+  }
+}

@@ -1,0 +1,120 @@
+{
+  "id": "cooking-meal-loadout",
+  "system": "cooking",
+  "edition": 1,
+  "name": {
+    "zh": "餐前增益搭配",
+    "en": "Meal buff loadouts"
+  },
+  "summary": {
+    "zh": "根据下一段活动配餐，而不是永远吃数值最高的一道。",
+    "en": "Choose meals for the next activity rather than always eating the biggest number."
+  },
+  "rules": {
+    "zh": "不同食物提供不同持续增益，且同时生效数量或覆盖规则有限制。玩家预测接下来的战斗、奔跑或采集需求，选餐并管理持续时间；换餐有材料和机会成本。",
+    "en": "Foods provide different timed effects with limits on stacking or replacement. Players anticipate combat, travel or gathering needs, choose meals and manage duration; switching costs resources and opportunities."
+  },
+  "loop": [
+    {
+      "zh": "确定下次行动",
+      "en": "Choose the next activity"
+    },
+    {
+      "zh": "比较增益与时长",
+      "en": "Compare effects and duration"
+    },
+    {
+      "zh": "搭配并食用",
+      "en": "Select and eat"
+    },
+    {
+      "zh": "行动后评估配餐",
+      "en": "Review the loadout afterward"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "需要更高生命保命，还是更多耐力支持操作？",
+      "en": "Prioritize health for survival or stamina for action?"
+    },
+    {
+      "zh": "现在补充更适合的食物，是否覆盖了尚未用完的增益？",
+      "en": "Will eating now replace a useful effect that still has time left?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "同时生效上限",
+        "en": "Concurrent-effect limit"
+      },
+      "effect": {
+        "zh": "较少槽位迫使取舍；无限叠加会把选择变成材料囤积。",
+        "en": "Few slots force trade-offs; unlimited stacking becomes stockpiling."
+      }
+    },
+    {
+      "name": {
+        "zh": "效果持续时间",
+        "en": "Effect duration"
+      },
+      "effect": {
+        "zh": "短效果鼓励临场选择；长效果让出发前计划更重要。",
+        "en": "Short effects reward situational use; long effects emphasize preparation."
+      }
+    }
+  ],
+  "tags": [
+    "planning",
+    "progression",
+    "optimization"
+  ],
+  "related": [
+    "cooking-ingredient-substitution",
+    "cooking-preparation-chain",
+    "combat-combat-deck-cycle",
+    "combat-part-destruction"
+  ],
+  "contrast": {
+    "zh": "英灵神殿强调三个食物位置之间的配置；星露谷强调食物与饮料的覆盖规则和当日任务匹配。",
+    "en": "Valheim emphasizes configuring three food slots; Stardew emphasizes replacement rules and matching the day’s task."
+  },
+  "combination": {
+    "zh": "组合创意：远征队共享一锅饭，各职业对同一种食材有不同收益，让配餐成为队伍配置问题。",
+    "en": "Design proposal: an expedition shares one stew, but each profession benefits differently from its ingredients."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "你只能同时吃两种食物，接下来要攀爬很久，途中还有敌人。",
+      "en": "You can maintain two food effects; a long climb with enemies lies ahead."
+    },
+    "action": {
+      "zh": "你选一份耐力餐和一份生命餐，放弃纯攻击加成。",
+      "en": "Choose a stamina meal and a health meal, giving up a pure damage bonus."
+    },
+    "result": {
+      "zh": "移动预算增加，也保留受击余量，但战斗结束得未必更快。",
+      "en": "You gain travel capacity and a safety buffer, but may not finish fights faster."
+    },
+    "next": {
+      "zh": "到下一处休息点，再按新的路线和剩余时长换餐。",
+      "en": "At the next rest stop, reconsider meals against the route and remaining duration."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "做3种食物、2个生效槽和两种需求不同的短关卡，效果与持续时间都直接可见。",
+      "en": "Use three foods, two active slots and two short encounters with different demands; display effects and duration."
+    },
+    "pitfall": {
+      "zh": "不要让一份食物同时在所有指标上更强，否则配餐会退化成按等级替换。",
+      "en": "An item that wins on every stat turns meal planning into a simple tier upgrade."
+    },
+    "test": {
+      "zh": "把同一玩家从长跑关切换到危险战斗关，检查他是否主动换配餐。",
+      "en": "Move a player from a long traversal to a dangerous battle and see whether the meal choice changes."
+    }
+  }
+}

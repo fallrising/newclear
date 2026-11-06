@@ -1,0 +1,120 @@
+{
+  "id": "projectiles-charged-release",
+  "system": "projectiles",
+  "edition": 3,
+  "name": {
+    "zh": "蓄力后选择放手时机",
+    "en": "Charge, then choose when to release"
+  },
+  "summary": {
+    "zh": "多等一会儿能换强力一击，也可能把安全出手机会等没了。",
+    "en": "Waiting builds a stronger shot but can cost the safe chance to fire."
+  },
+  "rules": {
+    "zh": "按住攻击进入蓄力状态，松开后发射；蓄力改变伤害、射程或其他效果，并通过音效、光效或进度显示。玩家需要估计敌人的接近速度，在快速弱击与等待强击之间选择。",
+    "en": "Hold to charge and release to fire. Charge changes damage, range or another effect and is shown through sound or a visible cue. Judge an approaching enemy and choose a quick weak shot or a stronger delayed one."
+  },
+  "loop": [
+    {
+      "zh": "估计安全等待时间",
+      "en": "Estimate the safe waiting time"
+    },
+    {
+      "zh": "开始蓄力并保持瞄准",
+      "en": "Charge while maintaining aim"
+    },
+    {
+      "zh": "选择时机释放",
+      "en": "Choose a release moment"
+    },
+    {
+      "zh": "根据命中和敌人位置再准备",
+      "en": "Prepare again from the hit result and new positions"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "弱敌是否值得蓄满，还是快速射击更节省暴露时间？",
+      "en": "Does a weak enemy justify a full charge, or is a quick shot safer?"
+    },
+    {
+      "zh": "快蓄满时目标离开射线，是放弃这次蓄力还是继续追踪？",
+      "en": "If the target leaves the firing line near full charge, abandon it or keep tracking?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "蓄力收益曲线",
+        "en": "Charge payoff curve"
+      },
+      "effect": {
+        "zh": "前期就有明显收益便于灵活出手；收益集中在末段会鼓励冒险等满。",
+        "en": "Early gains support flexible releases; back-loaded gains encourage risky full charges."
+      }
+    },
+    {
+      "name": {
+        "zh": "蓄力时移动限制",
+        "en": "Movement while charging"
+      },
+      "effect": {
+        "zh": "减速越多，蓄力越依赖提前选位；完全自由则更强调跟瞄。",
+        "en": "Greater slowdown makes setup position matter; free movement emphasizes tracking."
+      }
+    }
+  ],
+  "tags": [
+    "timing",
+    "risk",
+    "precision"
+  ],
+  "related": [
+    "projectiles-spread-recovery",
+    "combat-timed-parry",
+    "projectiles-active-reload",
+    "projectiles-graze-reward"
+  ],
+  "contrast": {
+    "zh": "Hades 的弓加入了精准释放的时间窗口；M1000 的聚焦射击还把弹药投入放进取舍。",
+    "en": "Hades adds a precise release window; the M1000 also makes ammunition spent per shot part of the decision."
+  },
+  "combination": {
+    "zh": "组合提案：短射积累失衡，长蓄力消耗失衡条造成击退；玩家要先铺垫，再判断是否有时间完成终结一击。",
+    "en": "Design proposal: quick shots build stagger while a charged shot consumes it for knockback, asking players to prepare the opening before committing."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "敌人将在两秒后冲到近身，蓄满需要一秒。",
+      "en": "An enemy will reach melee range in two seconds; full charge takes one."
+    },
+    "action": {
+      "zh": "玩家先蓄满一发，而没有立刻轻射。",
+      "en": "The player commits to a full charge instead of tapping immediately."
+    },
+    "result": {
+      "zh": "强击将敌人击退，重新创造了一段距离。",
+      "en": "The stronger hit pushes the enemy back and creates room."
+    },
+    "next": {
+      "zh": "根据新距离决定再蓄一发，还是转身离开。",
+      "en": "Use the new distance to decide on another charge or a retreat."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "先做两档威力、一个接近目标和清楚的蓄满提示。",
+      "en": "Build two power levels, one approaching target and a clear full-charge signal."
+    },
+    "pitfall": {
+      "zh": "如果满蓄力在所有场合都最好，轻射会失去意义。",
+      "en": "If full charge is best in every situation, quick shots cease to matter."
+    },
+    "test": {
+      "zh": "面对慢目标和突然贴近的目标，玩家会不会主动切换蓄力长度？",
+      "en": "Do players vary charge length between slow targets and sudden close threats?"
+    }
+  }
+}

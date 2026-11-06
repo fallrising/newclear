@@ -1,0 +1,120 @@
+{
+  "id": "defense-target-priority",
+  "system": "defense",
+  "edition": 2,
+  "name": {
+    "zh": "设置自动攻击优先级",
+    "en": "Set automatic target priorities"
+  },
+  "summary": {
+    "zh": "塔会自己开火，玩家决定它先解决哪一种威胁。",
+    "en": "The tower fires automatically; the player decides which threat it addresses first."
+  },
+  "rules": {
+    "zh": "玩家为防御单位选择目标规则，例如优先打最前面的敌人或最强的敌人。规则持续生效，直到玩家更改；射线、目标标记和漏怪结果帮助判断分工。目标选择仍受射程、攻击类型和是否能发现目标限制。",
+    "en": "Choose a target rule, such as the enemy closest to escaping or the strongest enemy. The rule persists until changed; projectiles, target markers and leaks show its effects. Range, attack type and detection still constrain eligible targets."
+  },
+  "loop": [
+    {
+      "zh": "观察队列里的不同威胁",
+      "en": "Inspect the different threats in the line"
+    },
+    {
+      "zh": "给塔设置目标规则",
+      "en": "Assign a targeting rule"
+    },
+    {
+      "zh": "查看火力实际分配",
+      "en": "Watch where firepower goes"
+    },
+    {
+      "zh": "按漏怪情况调整分工",
+      "en": "Revise priorities after a leak"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "先清掉出口前的小怪，还是让重火力持续打高血量敌人？",
+      "en": "Remove small enemies near the exit or keep heavy weapons on a durable target?"
+    },
+    {
+      "zh": "所有塔打同一个强敌可能浪费伤害，分工又可能让强敌活着走出射程。",
+      "en": "All towers focusing one threat can waste damage; splitting them may let it leave their range alive."
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "切换成本",
+        "en": "Switching cost"
+      },
+      "effect": {
+        "zh": "免费切换鼓励临场指挥；有冷却时更重视波次前的判断。",
+        "en": "Free switching rewards active direction; a cooldown emphasizes decisions before a wave."
+      }
+    },
+    {
+      "name": {
+        "zh": "优先级种类",
+        "en": "Number of priorities"
+      },
+      "effect": {
+        "zh": "先给少量能看出差异的规则，过多细分会增加理解和操作负担。",
+        "en": "Start with a few visibly different rules; many subtle rules raise reading and control costs."
+      }
+    }
+  ],
+  "tags": [
+    "information",
+    "planning",
+    "optimization"
+  ],
+  "related": [
+    "automation-item-filtering",
+    "defense-ammunition-supply",
+    "defense-maze-routing",
+    "defense-resistance-counters"
+  ],
+  "contrast": {
+    "zh": "气球塔防把优先级叠在猴塔的既有升级上；宝石争霸还把它与宝石效果搭配，使控制效果的投放对象也很重要。",
+    "en": "Bloons layers priorities onto tower upgrades; GemCraft also couples them to gem effects, making the recipient of control effects matter."
+  },
+  "combination": {
+    "zh": "组合提案：让库存传感器控制塔的策略，弹药少时优先拦截出口附近的敌人，库存恢复后再处理重甲目标。",
+    "en": "Design proposal: let an inventory sensor switch tower priorities: intercept imminent leaks when ammunition is low, then target armored threats after resupply."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "一只慢速大怪在后面，三只小怪快到出口。",
+      "en": "One slow large enemy follows three small enemies nearing the exit."
+    },
+    "action": {
+      "zh": "让速射塔打最前面的敌人，让重炮继续打大怪。",
+      "en": "Set the rapid-fire tower to the first enemy and leave the cannon on the strongest."
+    },
+    "result": {
+      "zh": "小怪被及时清理，重炮没有浪费大伤害去补最后一点血。",
+      "en": "Small enemies are intercepted without wasting heavy shots on nearly dead targets."
+    },
+    "next": {
+      "zh": "下一波换成成群小怪，再检查这套分工是否还合适。",
+      "en": "Reassess the division of labor when the next wave is a swarm."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "先做一条路、两座塔和“最前/最高血量”两个规则。",
+      "en": "Start with one lane, two towers and two rules: furthest along and highest health."
+    },
+    "pitfall": {
+      "zh": "目标标记和射程必须清楚，否则玩家会以为塔没有听指令。",
+      "en": "Make target markers and range explicit, or players may think the tower ignored them."
+    },
+    "test": {
+      "zh": "同一布局只换优先级，玩家能否预测哪类敌人更容易漏掉？",
+      "en": "Can a player predict which enemies escape when only the priorities change?"
+    }
+  }
+}

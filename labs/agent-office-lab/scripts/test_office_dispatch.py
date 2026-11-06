@@ -63,6 +63,32 @@ class DispatchTest(unittest.TestCase):
                 self.assertNotIn('--keep-open', argv)
                 self.assertNotIn('--budget-multiplier', argv)
 
+    def test_resume_check_is_local_exclusive_and_requires_runtime_not_credentials(self):
+        plan=dispatch.plan('pi',check_resume=True)
+        self.assertFalse(plan['remote']);self.assertEqual(plan['limits']['provider_request_cap'],0)
+        self.assertEqual(plan['command'][2:],['run','pi','--execute','--check-resume'])
+        with patch.object(dispatch,'detect') as detect, patch.object(os,'execve') as execute:
+            for provider,remote,options in [('grok',False,{}),('pi',True,{}),('pi',False,{'check_cancel':True}),('pi',False,{'check_failure':429}),('pi',False,{'check_crash':True}),('pi',False,{'keep_open':True})]:
+                with self.assertRaises(SlotError):dispatch.launch(provider,remote,self.lab,check_resume=True,**options)
+            detect.assert_not_called();execute.assert_not_called()
+        check={'cli_compatible':True,'runtime':{'office_build':True},'launch_prerequisites_present':False}
+        with patch.object(dispatch,'detect',return_value=check), patch.object(os,'execve',side_effect=OSError('no launch')) as execute:
+            with self.assertRaises(OSError):dispatch.launch('pi',False,self.lab,check_resume=True)
+            self.assertEqual(execute.call_args.args[1][2:],['--check-resume'])
+
+    def test_host_restart_check_is_local_exclusive_and_requires_runtime_not_credentials(self):
+        plan=dispatch.plan('pi',check_host_restart=True)
+        self.assertFalse(plan['remote']);self.assertEqual(plan['limits']['provider_request_cap'],0)
+        self.assertEqual(plan['command'][2:],['run','pi','--execute','--check-host-restart'])
+        with patch.object(dispatch,'detect') as detect, patch.object(os,'execve') as execute:
+            for provider,remote,options in [('grok',False,{}),('pi',True,{}),('pi',False,{'check_resume':True}),('pi',False,{'check_cancel':True}),('pi',False,{'check_failure':429}),('pi',False,{'check_crash':True}),('pi',False,{'keep_open':True})]:
+                with self.assertRaises(SlotError):dispatch.launch(provider,remote,self.lab,check_host_restart=True,**options)
+            detect.assert_not_called();execute.assert_not_called()
+        check={'cli_compatible':True,'runtime':{'office_build':True},'launch_prerequisites_present':False}
+        with patch.object(dispatch,'detect',return_value=check), patch.object(os,'execve',side_effect=OSError('no launch')) as execute:
+            with self.assertRaises(OSError):dispatch.launch('pi',False,self.lab,check_host_restart=True)
+            self.assertEqual(execute.call_args.args[1][2:],['--check-host-restart'])
+
     def test_status_is_read_only_and_does_not_probe_or_launch(self):
         with patch.object(dispatch,'LAB',self.lab), patch.object(dispatch,'detect') as detect, patch.object(os,'execve') as execute:
             with contextlib.redirect_stdout(io.StringIO()) as output:
@@ -204,7 +230,8 @@ class DispatchTest(unittest.TestCase):
         cases += [(dispatch.SPECS['pi'], ['--check-failure', '401']),
                   (dispatch.SPECS['pi'], ['--check-failure=429']),
                   (dispatch.SPECS['pi'], ['--check-crash']),
-                  (dispatch.SPECS['pi'], ['--check-cancel'])]
+                  (dispatch.SPECS['pi'], ['--check-cancel']),
+                  (dispatch.SPECS['pi'], ['--check-resume'])]
         for spec, args in cases:
             # Replace probes with a tripwire; even a broken gate cannot issue a model request.
             code = f'''import sys,runpy,types

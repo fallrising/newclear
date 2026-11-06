@@ -1,0 +1,120 @@
+{
+  "id": "fishing-habitat-search",
+  "system": "fishing",
+  "edition": 1,
+  "name": {
+    "zh": "鱼种栖息地搜索",
+    "en": "Finding fish habitats"
+  },
+  "summary": {
+    "zh": "把“去哪钓”做成有证据可推断的探索问题。",
+    "en": "Make where to fish an exploration problem that can be reasoned through."
+  },
+  "rules": {
+    "zh": "玩家根据鱼种的地点、时间和环境条件寻找合适钓点，再用捕获结果更新认知。只提高操作熟练度无法弥补错误环境；图鉴和线索把反复试探变成知识积累。",
+    "en": "Use location, timing and environment to locate a target species, then update knowledge from catches. Better execution cannot compensate for the wrong habitat; clues and a journal turn trials into knowledge."
+  },
+  "loop": [
+    {
+      "zh": "选择目标鱼种",
+      "en": "Choose a target species"
+    },
+    {
+      "zh": "整理环境线索",
+      "en": "Collect habitat clues"
+    },
+    {
+      "zh": "前往匹配地点试钓",
+      "en": "Test a matching location"
+    },
+    {
+      "zh": "记录结果并缩小范围",
+      "en": "Record results and narrow the search"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "等待已知的正确时间，还是先探查未知水域，形成确定性与发现的取舍。",
+      "en": "Wait for a known favourable time, or investigate an unknown body of water?"
+    },
+    {
+      "zh": "连续没钓到目标时，是继续投入时间，还是根据地点、天气或时段换一个条件试试？",
+      "en": "After repeated misses, keep investing time or change the location, weather or time condition?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "条件组合数",
+        "en": "Number of conditions"
+      },
+      "effect": {
+        "zh": "地点、天气、时段叠加越多，规划越复杂，也越需要清晰记录。",
+        "en": "More location, weather and time requirements deepen planning but need clearer records."
+      }
+    },
+    {
+      "name": {
+        "zh": "失败信息量",
+        "en": "Information from failure"
+      },
+      "effect": {
+        "zh": "明确反馈不符条件可减少盲试，完全随机则更难学习。",
+        "en": "Clear mismatch feedback reduces blind trial; opaque randomness makes learning harder."
+      }
+    }
+  ],
+  "tags": [
+    "discovery",
+    "information",
+    "planning"
+  ],
+  "related": [
+    "exploration-earned-map",
+    "building-room-requirements",
+    "exploration-ability-gates",
+    "exploration-fast-travel-network"
+  ],
+  "contrast": {
+    "zh": "星露谷强调季节与天气中的出行安排；守墓人还把同一钓点划分成可选择的抛投区域。",
+    "en": "Stardew emphasizes trips around seasons and weather; Graveyard Keeper also divides a single spot into selectable cast zones."
+  },
+  "combination": {
+    "zh": "设计提案：玩家通过修复湿地恢复鱼类栖息地，图鉴完成度来自环境改造，而不只是重复抛竿。",
+    "en": "Design proposal: restore wetlands to return fish species, making journal completion depend on habitat repair rather than repeated casts."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "图鉴说目标鱼喜欢雨天河流，你今天在晴天湖边一直没钓到。",
+      "en": "The journal says the target likes rainy rivers; you have had no luck at a sunny lake."
+    },
+    "action": {
+      "zh": "你记录本次条件，等下雨后换到河边。",
+      "en": "Record the failed conditions and try the river when it rains."
+    },
+    "result": {
+      "zh": "新渔获支持或否定猜测，图鉴逐渐补全条件。",
+      "en": "New catches support or challenge the hypothesis and add to your habitat knowledge."
+    },
+    "next": {
+      "zh": "带着新的线索规划下一次出行，减少盲目试钓。",
+      "en": "Use the new clue to plan the next trip with less blind trial and error."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "先做3个钓点、2种天气和少量鱼种条件，用地点选择页即可测试。",
+      "en": "Use three fishing locations, two weather states and a few species rules, tested through a location-selection screen."
+    },
+    "pitfall": {
+      "zh": "不要同时隐藏太多条件；玩家需要能把捕获结果归因到某个可观察变化。",
+      "en": "Do not hide too many conditions at once; catches should be explainable through observable changes."
+    },
+    "test": {
+      "zh": "给两次失败记录后，玩家能否提出明确的新钓点或新时段，而非继续原地重复？",
+      "en": "After two failures, can players suggest a different place or time instead of repeating the same attempt?"
+    }
+  }
+}

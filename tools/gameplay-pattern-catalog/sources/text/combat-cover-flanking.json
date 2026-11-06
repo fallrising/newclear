@@ -1,0 +1,120 @@
+{
+  "id": "combat-cover-flanking",
+  "system": "combat",
+  "edition": 1,
+  "name": {
+    "zh": "掩体与侧翼包抄",
+    "en": "Cover and flanking"
+  },
+  "summary": {
+    "zh": "安全不是一个地点，而是相对于敌人射线的关系。",
+    "en": "Safety depends on enemy firing angles, not simply occupying a spot."
+  },
+  "rules": {
+    "zh": "单位借助掩体降低被命中的风险，再移动到敌人没有掩护的一侧。移动花费行动机会，且新站位可能被其他敌人反包抄；界面用掩体与命中信息反馈风险。",
+    "en": "Units use cover to reduce exposure, then seek angles that bypass enemy protection. Movement spends action opportunities and can expose the mover to another enemy; cover and accuracy indicators communicate the tradeoff."
+  },
+  "loop": [
+    {
+      "zh": "读取双方射线",
+      "en": "Read firing angles"
+    },
+    {
+      "zh": "寻找侧翼路线",
+      "en": "Find a flank route"
+    },
+    {
+      "zh": "付出行动移动",
+      "en": "Spend actions to move"
+    },
+    {
+      "zh": "攻击后重建保护",
+      "en": "Attack and restore protection"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "绕远路取得好角度，还是在原地低命中率射击？",
+      "en": "Spend movement for a better angle or take a low-probability shot now?"
+    },
+    {
+      "zh": "一个掩体能防正面，却未必能防第二名敌人。",
+      "en": "Cover against one opponent may offer no protection from another."
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "掩体强度",
+        "en": "Cover strength"
+      },
+      "effect": {
+        "zh": "保护越强，绕侧和破坏掩体的价值越高。",
+        "en": "Stronger protection increases the value of flanking and destruction."
+      }
+    },
+    {
+      "name": {
+        "zh": "移动行动成本",
+        "en": "Movement cost"
+      },
+      "effect": {
+        "zh": "低成本鼓励机动，高成本让一次冲刺更需要团队配合。",
+        "en": "Cheap movement encourages mobility; costly advances require stronger team support."
+      }
+    }
+  ],
+  "tags": [
+    "spatial",
+    "planning",
+    "risk"
+  ],
+  "related": [
+    "combat-destructible-cover",
+    "combat-forced-movement",
+    "combat-friendly-fire",
+    "combat-overwatch"
+  ],
+  "contrast": {
+    "zh": "《幽浮2》的回合行动约束让移动后出手很关键；《战争机器：战术小队》用更灵活的行动点分配鼓励连续进攻。",
+    "en": "XCOM 2 makes the move-then-shoot commitment central; Gears Tactics uses more flexible action-point allocation to encourage aggressive sequences."
+  },
+  "combination": {
+    "zh": "设计提案：让玩家在战前搬动少量家具作为掩体，战斗验证布置，但敌人也能绕侧。",
+    "en": "Design proposal: allow limited furniture placement before combat, then let enemy flanks test the plan."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "敌人躲在矮墙后，你有两次行动，可以射击或移动。",
+      "en": "An enemy is behind a low wall; you have two actions to move or fire."
+    },
+    "action": {
+      "zh": "你花一次行动绕到侧面，再从没有遮挡的方向开火。",
+      "en": "Spend one action moving to the side, then fire from an uncovered angle."
+    },
+    "result": {
+      "zh": "这次射击更有利，但新位置暴露在第二名敌人面前。",
+      "en": "The shot is stronger, but the new position exposes you to a second enemy."
+    },
+    "next": {
+      "zh": "下回合决定撤回掩体，还是继续推进争取先击倒威胁。",
+      "en": "Next turn, return to cover or push forward to eliminate the threat first."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "先做小格子地图、两名敌人、方向性掩体和每回合两点行动。",
+      "en": "Start with a small grid, two enemies, directional cover, and two actions per turn."
+    },
+    "pitfall": {
+      "zh": "先把侧翼判定画清楚，再考虑复杂地形和多层建筑。",
+      "en": "Make flanking rules visible before adding complex terrain or multiple floors."
+    },
+    "test": {
+      "zh": "让玩家预判移动后的安全性，检查图标是否足以解释不同射线的风险。",
+      "en": "Ask players to predict safety after moving and check whether indicators explain threats from different angles."
+    }
+  }
+}

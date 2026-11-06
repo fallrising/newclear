@@ -1,0 +1,120 @@
+{
+  "id": "incremental-allocate-progress-capacity",
+  "system": "incremental",
+  "edition": 3,
+  "name": {
+    "zh": "把有限产能分给持续项目",
+    "en": "Allocate capacity across ongoing projects"
+  },
+  "summary": {
+    "zh": "投入不会立刻消失，但被一个项目占用，就不能同时加速另一个。",
+    "en": "Assigned capacity is not immediately consumed, but one project cannot use capacity committed elsewhere."
+  },
+  "rules": {
+    "zh": "玩家把有限的可分配资源投入多个持续推进的项目。投入越多通常越快，但单项可能存在速度上限；资源可抽回再分配。玩家比较进度条和收益，决定集中冲完一项，还是让多项同时推进。",
+    "en": "Assign a limited pool of capacity to ongoing projects. More allocation usually speeds progress, but individual projects may have a speed cap. Capacity can be withdrawn and reassigned. Compare progress and rewards to choose focused completion or parallel growth."
+  },
+  "loop": [
+    {
+      "zh": "查看可分配总量",
+      "en": "Check available capacity"
+    },
+    {
+      "zh": "分给几个持续项目",
+      "en": "Allocate it to ongoing projects"
+    },
+    {
+      "zh": "观察速度和进度上限",
+      "en": "Observe speed and caps"
+    },
+    {
+      "zh": "抽回多余投入重新分配",
+      "en": "Withdraw excess and reassign"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "把所有资源投给短期急需的项目，还是让长期项目也不停工？",
+      "en": "Concentrate on an urgent project or keep long-term projects progressing?"
+    },
+    {
+      "zh": "某项已经达到最快速度，继续留资源是省操作，还是浪费机会？",
+      "en": "If a project is already at maximum speed, is leaving capacity there convenient or wasteful?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "投入与速度曲线",
+        "en": "Allocation-to-speed curve"
+      },
+      "effect": {
+        "zh": "线性关系容易估计；有上限或递减收益会鼓励重新分配。",
+        "en": "A linear relationship is easy to estimate; caps or diminishing returns encourage reassignment."
+      }
+    },
+    {
+      "name": {
+        "zh": "调配成本",
+        "en": "Reassignment cost"
+      },
+      "effect": {
+        "zh": "自由调配支持随时优化；冷却或进度损失会让承诺更重要。",
+        "en": "Free reassignment supports continuous optimization; cooldowns or lost progress make commitment matter."
+      }
+    }
+  ],
+  "tags": [
+    "planning",
+    "optimization",
+    "time"
+  ],
+  "related": [
+    "incremental-escalating-copy-price",
+    "incremental-limited-team-dispatch",
+    "incremental-offline-window",
+    "incremental-spend-held-bonus"
+  ],
+  "contrast": {
+    "zh": "NGU把可分配能力用于多种长期功能；放置成神把它表现成可派遣分身，并用训练速度上限提示多余投入。",
+    "en": "NGU distributes capacity across many long-term features; Idling to Rule the Gods represents it as clones and exposes training caps that reveal excess allocation."
+  },
+  "combination": {
+    "zh": "组合提案：允许设置“此项目完成后，把产能转到下一项”的条件，先让玩家手动理解分配，再解锁自动交接。",
+    "en": "Design proposal: let players set a condition that moves capacity to the next project on completion, after they first understand manual allocation."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "有10点产能，项目A差20进度完成，项目B刚开始；每点产能每轮加1进度。",
+      "en": "Ten capacity points are available. A needs twenty progress; B has just begun. Each point adds one progress per round."
+    },
+    "action": {
+      "zh": "先把10点都投给A。",
+      "en": "Assign all ten points to A."
+    },
+    "result": {
+      "zh": "两轮后A完成，10点产能释放。",
+      "en": "A completes after two rounds, releasing all ten points."
+    },
+    "next": {
+      "zh": "把产能转给B，或为新解锁的项目C留一部分。",
+      "en": "Move capacity to B or reserve some for newly unlocked C."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "做两条进度条、一个总量固定的资源池和加减分配按钮。",
+      "en": "Build two progress bars, one fixed capacity pool and allocation controls."
+    },
+    "pitfall": {
+      "zh": "要清楚区分“消耗掉”和“暂时占用”，否则玩家不敢调整。",
+      "en": "Clearly distinguish spent resources from temporarily assigned capacity so players feel able to reallocate."
+    },
+    "test": {
+      "zh": "玩家是否会在项目接近上限或完成时主动回收多余产能？",
+      "en": "Do players reclaim excess capacity near a cap or completion?"
+    }
+  }
+}

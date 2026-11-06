@@ -1,0 +1,120 @@
+{
+  "id": "inventory-adjacency",
+  "system": "inventory",
+  "edition": 1,
+  "name": {
+    "zh": "物品邻接增益",
+    "en": "Item adjacency bonuses"
+  },
+  "summary": {
+    "zh": "同一件道具，换个邻居就能改变价值。",
+    "en": "An item’s value changes with its neighbors."
+  },
+  "rules": {
+    "zh": "物品除了占格，还根据邻接、方向或周边类别触发加成。玩家在有限空间内搭出有效连接，战斗结果再反馈布局强弱；这里只讨论物品之间的空间关系。",
+    "en": "Items trigger bonuses from adjacency, direction or nearby categories. Arrange useful connections within a limited bag, then use battle outcomes to assess the layout."
+  },
+  "loop": [
+    {
+      "zh": "读出物品作用范围",
+      "en": "Read the effect footprint"
+    },
+    {
+      "zh": "摆放目标邻居",
+      "en": "Place compatible neighbors"
+    },
+    {
+      "zh": "检验加成连接",
+      "en": "Check active connections"
+    },
+    {
+      "zh": "根据结果调整布局",
+      "en": "Rearrange after results"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "把核心道具围满，还是让多个次级引擎分散运作？",
+      "en": "Surround one core item or support several smaller engines?"
+    },
+    {
+      "zh": "更强单件若破坏已有连接，是否还值得换入？",
+      "en": "Is a stronger item worth breaking existing connections?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "作用方向",
+        "en": "Effect direction"
+      },
+      "effect": {
+        "zh": "仅某一侧生效会增加朝向解题；全邻接更自由。",
+        "en": "One-sided effects add orientation puzzles; all-sided effects allow flexibility."
+      }
+    },
+    {
+      "name": {
+        "zh": "加成叠加",
+        "en": "Stacking"
+      },
+      "effect": {
+        "zh": "可叠加会形成集中投资；上限则鼓励分散布局。",
+        "en": "Stacking favors concentration; caps reward distributed layouts."
+      }
+    }
+  ],
+  "tags": [
+    "spatial",
+    "optimization",
+    "planning"
+  ],
+  "related": [
+    "inventory-shape-packing",
+    "inventory-deck-thinning",
+    "inventory-equipment-budget",
+    "inventory-stack-limits"
+  ],
+  "contrast": {
+    "zh": "前者在地牢冒险中逐步改包；后者把商店购买与每轮摆放反复绑定。",
+    "en": "The former evolves a bag during dungeon exploration; the latter repeatedly couples shopping with between-round arrangement."
+  },
+  "combination": {
+    "zh": "组合提案：药剂背包里冷却石保护相邻药瓶，火药却会破坏同一区域的稳定性。",
+    "en": "Design proposal: cooling stones preserve adjacent potions while gunpowder destabilizes the same area."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "背包里的宝石能增强相邻武器，但武器旁边放着药水。",
+      "en": "A gem boosts adjacent weapons, but potions occupy the space beside your weapon."
+    },
+    "action": {
+      "zh": "你移动药水，把宝石贴到武器边上。",
+      "en": "Move the potions and place the gem next to the weapon."
+    },
+    "result": {
+      "zh": "武器预览伤害上升，同时背包另一处出现难利用的空隙。",
+      "en": "The weapon preview improves, but an awkward gap appears elsewhere."
+    },
+    "next": {
+      "zh": "拿到新物品后，重新比较单件强度与已有连接。",
+      "en": "With the next pickup, compare its individual strength with existing connections."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "做六种物品和两种邻接规则，用连线即时显示哪些效果正在生效。",
+      "en": "Build six items and two adjacency rules with lines showing active effects."
+    },
+    "pitfall": {
+      "zh": "先限制效果触发顺序；相邻、斜角、方向和连锁同时加入容易解释不清。",
+      "en": "Limit resolution order before mixing adjacency, diagonals, direction, and chained effects."
+    },
+    "test": {
+      "zh": "让玩家在放置前预测加成，检查实际结果是否符合其理解。",
+      "en": "Ask players to predict a bonus before placing an item and compare with the actual result."
+    }
+  }
+}

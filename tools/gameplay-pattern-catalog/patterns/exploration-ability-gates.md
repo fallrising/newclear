@@ -1,16 +1,18 @@
 ---
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "id": "exploration-ability-gates",
   "title": "能力解鎖與回訪",
   "title_en": "Ability-gated backtracking",
   "category": "exploration",
+  "source_category": "exploration",
   "tags": [
     "capability-gate",
     "backtracking",
     "world-connectivity"
   ],
-  "summary": "讓新能力重新解釋舊場景，而不只是打開下一張線性地圖。",
+  "summary": "先看到去不了的地方，再用新能力重新理解旧地图。",
+  "note_status": "draft",
   "related": [
     "gathering-tool-hardness",
     "puzzles-box-pushing"
@@ -26,33 +28,77 @@
 }
 ---
 
-## 來源摘要
+## 摘要
 
-原站描述先遇見不可通過的障礙，獲得能力後返回，開啟房間或新的連通路線。核心循環：辨識障礙 → 記住位置 → 取得能力 → 回訪並改變路網。
+「先看到去不了的地方，再用新能力重新理解旧地图。」
+出處：`sources/text/exploration-ability-gates.json` 字元 185-208 `summary.zh`
+顯示：先看到去不了的地方，再用新能力重新理解舊地圖。
 
-## 問題與情境（本地分析）
+## 規則
 
-適用於希望玩家累積空間記憶的探索遊戲。進度的回報可以是世界連通性改變，而非只有數值成長。
+「地图用跳跃距离、墙面、特殊障碍等限制通行。获得能力后，玩家回忆旧障碍并重访；真正的奖励不仅是新房间，还包括原有空间连接方式的改变。」
+出處：`sources/text/exploration-ability-gates.json` 字元 318-383 `rules.zh`
+顯示：地圖用跳躍距離、牆面、特殊障礙等限制通行。獲得能力後，玩家回憶舊障礙並重訪；真正的獎勵不僅是新房間，還包括原有空間連接方式的改變。
 
-## 解法與取捨（本地分析）
+## 核心循環
 
-- 以能力需求標記世界圖的邊，讓新能力同時影響多條可理解的路徑。
-- 提供地圖標記或可辨識地標，降低純記憶負擔；回訪應帶來新路線而非只跑長路。
+「发现当前无法通过的路」
+出處：`sources/text/exploration-ability-gates.json` 字元 624-634 `loop[0].zh`
+顯示：發現當前無法通過的路
 
-## 可調參數（本地分析）
+「记住位置与障碍特征」
+出處：`sources/text/exploration-ability-gates.json` 字元 706-715 `loop[1].zh`
+顯示：記住位置與障礙特徵
 
-- 每項能力影響的障礙數、回訪距離、捷徑密度、障礙提示程度。
-- 能力能否組合，以及取得能力前是否允許技巧性提早通過。
+「获取对应能力」
+出處：`sources/text/exploration-ability-gates.json` 字元 789-795 `loop[2].zh`
+顯示：獲取對應能力
 
-## 失敗模式（本地分析）
+「返回并打开新连接」
+出處：`sources/text/exploration-ability-gates.json` 字元 865-873 `loop[3].zh`
+顯示：返回並打開新連接
 
-- 升級後玩家不知道哪裡改變，回訪就變成逐格掃地圖。
-- 所有障礙只開一扇新門，會退化為換皮鑰匙鏈。
+## 玩家取捨
 
-## 最小原型與驗收（本地提案）
+「继续寻找主路，还是为可疑支路做标记？玩家在未知收益间分配注意力。」
+出處：`sources/text/exploration-ability-gates.json` 字元 966-998 `decisions[0].zh`
+顯示：繼續尋找主路，還是爲可疑支路做標記？玩家在未知收益間分配注意力。
 
-- 本地提案：六個房間、一項位移能力、兩個舊障礙與一條可回接捷徑。
-- 驗收：Given 未取得能力，When 計算可達區域，Then 兩處障礙不可通過；取得後兩處都可通過，並形成更短的回訪路線。
+「新能力到手后，先推进还是回收旧区域，形成节奏选择。」
+出處：`sources/text/exploration-ability-gates.json` 字元 1142-1167 `decisions[1].zh`
+顯示：新能力到手後，先推進還是回收舊區域，形成節奏選擇。
+
+## 可調參數
+
+「障碍可辨识度」
+出處：`sources/text/exploration-ability-gates.json` 字元 1319-1325 `parameters[0].name.zh`
+顯示：障礙可辨識度
+
+「视觉语言越清楚，玩家越容易记住需要哪种能力。」
+出處：`sources/text/exploration-ability-gates.json` 字元 1403-1425 `parameters[0].effect.zh`
+顯示：視覺語言越清楚，玩家越容易記住需要哪種能力。
+
+「回访距离」
+出處：`sources/text/exploration-ability-gates.json` 字元 1567-1571 `parameters[1].name.zh`
+顯示：回訪距離
+
+「距离太长会变成跑腿；捷径可让回访保留发现感。」
+出處：`sources/text/exploration-ability-gates.json` 字元 1651-1673 `parameters[1].effect.zh`
+顯示：距離太長會變成跑腿；捷徑可讓回訪保留髮現感。
+
+## 原型
+
+「做五个相连房间、一项移动能力和两处明显但暂时无法通过的障碍。」
+出處：`sources/text/exploration-ability-gates.json` 字元 3161-3191 `prototype.firstStep.zh`
+顯示：做五個相連房間、一項移動能力和兩處明顯但暫時無法通過的障礙。
+
+「取得能力后不给任务标记，观察玩家能否主动想起至少一处旧障碍。」
+出處：`sources/text/exploration-ability-gates.json` 字元 3506-3536 `prototype.test.zh`
+顯示：取得能力後不給任務標記，觀察玩家能否主動想起至少一處舊障礙。
+
+「地图没形成值得回访的连接时，增加能力只会增加找路负担。」
+出處：`sources/text/exploration-ability-gates.json` 字元 3326-3353 `prototype.pitfall.zh`
+顯示：地圖沒形成值得回訪的連接時，增加能力只會增加找路負擔。
 
 ## 相關模式
 

@@ -1,0 +1,120 @@
+{
+  "id": "matching-combine-power-pieces",
+  "system": "matching",
+  "edition": 3,
+  "name": {
+    "zh": "把两个特殊块合成一次大效果",
+    "en": "Combine two power pieces into one effect"
+  },
+  "summary": {
+    "zh": "两个道具各自使用很方便，留到相遇时可能改变整盘。",
+    "en": "Using tools separately is convenient; saving them until they meet may transform the board."
+  },
+  "rules": {
+    "zh": "玩家先获得带特殊效果的物件，再让两个物件相邻并组合触发。组合结果可以扩大范围或把一种效果传播到另一批目标，而不是简单播放两次原有效果；准备组合期间必须承担占位和等待成本。",
+    "en": "Obtain two power pieces, bring them together and trigger their combined effect. The result can expand a range or spread an effect to other targets rather than merely activating both independently. Preparing the combination costs space and time."
+  },
+  "loop": [
+    {
+      "zh": "获得两个可组合工具",
+      "en": "Obtain two compatible tools"
+    },
+    {
+      "zh": "保护并让它们靠近",
+      "en": "Preserve and bring them together"
+    },
+    {
+      "zh": "预览并触发组合效果",
+      "en": "Preview and trigger the combined effect"
+    },
+    {
+      "zh": "处理被重新打开的棋盘",
+      "en": "Work with the newly opened board"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "现在用一个工具解决紧急目标，还是把它留给更强的组合？",
+      "en": "Spend one tool on an urgent goal or save it for a stronger combination?"
+    },
+    {
+      "zh": "为了把两块移到一起花掉数步，最终收益是否仍比单独使用高？",
+      "en": "Does bringing the pieces together justify the moves compared with separate use?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "组合效果差异",
+        "en": "Distinctness of combinations"
+      },
+      "effect": {
+        "zh": "组合只是数值变大时易懂；产生新作用方式时更有发现感，也更需要预览。",
+        "en": "Larger numbers are simple to understand; a new behavior adds discovery but requires better previews."
+      }
+    },
+    {
+      "name": {
+        "zh": "准备成本",
+        "en": "Setup cost"
+      },
+      "effect": {
+        "zh": "移动受限或位置相隔较远会提高等待风险，不能让所有组合都无脑优于单用。",
+        "en": "Restricted movement or separation increases waiting risk; combinations should not automatically dominate separate use."
+      }
+    }
+  ],
+  "tags": [
+    "planning",
+    "risk",
+    "optimization"
+  ],
+  "related": [
+    "matching-complete-lines",
+    "matching-merge-three-upgrade",
+    "matching-pattern-creates-power",
+    "matching-slide-board-merge"
+  ],
+  "contrast": {
+    "zh": "糖果传奇通过交换相邻特殊糖果形成组合；Toon Blast把点团生成的特殊物件再接入组合链。工具的获得方式改变准备过程。",
+    "en": "Candy Crush combines special candies through adjacent swaps; Toon Blast feeds power pieces made by group tapping into combinations. Acquisition changes the setup process."
+  },
+  "combination": {
+    "zh": "组合提案：把特殊块组合拆成可排序的两段效果，例如先染色再清色，或先清色再染色。相同工具因顺序不同而服务不同目标。",
+    "en": "Design proposal: make the combined effect a two-step sequence, such as recolor then clear a color versus clear then recolor. The same tools serve different goals depending on order."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "棋盘有一颗炸弹和一枚火箭，二者之间隔着一列普通块。",
+      "en": "A bomb and a rocket are separated by a column of ordinary blocks."
+    },
+    "action": {
+      "zh": "玩家先清掉阻隔，让两个工具在补位后相邻。",
+      "en": "The player removes the divider so refill brings the tools together."
+    },
+    "result": {
+      "zh": "组合预览显示更宽的清除范围，可以同时覆盖两个目标。",
+      "en": "The combined preview shows a wider clear that reaches two objectives."
+    },
+    "next": {
+      "zh": "玩家决定立即使用，还是等一个新目标进入范围。",
+      "en": "The player decides whether to trigger now or wait for another target to enter the range."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "做两种工具和三种组合结果，在确认前高亮受影响格子。",
+      "en": "Build two tool types and three pair combinations, highlighting affected cells before confirmation."
+    },
+    "pitfall": {
+      "zh": "不要依赖玩家背组合表；效果预览应能解释为什么组合值得等。",
+      "en": "Do not require memorizing a combination table; previews should explain why waiting is worthwhile."
+    },
+    "test": {
+      "zh": "玩家能否比较“分开用”和“组合用”的具体收益？",
+      "en": "Can players compare the concrete benefit of separate use with combined use?"
+    }
+  }
+}

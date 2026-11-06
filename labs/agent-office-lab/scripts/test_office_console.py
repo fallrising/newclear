@@ -40,6 +40,17 @@ class ConsoleTests(unittest.TestCase):
             response=connection.getresponse();return response.status,response.read(),dict(response.getheaders())
         finally:connection.close()
 
+    def test_project_file_list_requires_authorization_and_known_registration(self):
+        project=self.lab/'project';project.mkdir();(project/'file.py').write_text('private source text')
+        self.app.projects['project-1']=project.resolve()
+        status,raw,_=self.request('/api/project',{'project':'project-1'})
+        self.assertEqual(status,200);self.assertEqual(json.loads(raw)['files'][0]['name'],'file.py')
+        self.assertNotIn(b'private source text',raw)
+        for headers in [{'Authorization':'wrong'},{'Origin':'http://attacker.invalid'}]:
+            self.assertEqual(self.request('/api/project',{'project':'project-1'},headers)[0],403)
+        self.assertEqual(self.request('/api/project',{'project':'unknown'})[0],409)
+        self.assertEqual(self.request('/api/project',{'project':'project-1','path':'/etc'})[0],404)
+
     def test_auth_origin_host_and_body_boundaries(self):
         for path,body,headers in [('/api/state',None,{'Authorization':'wrong'}),('/api/state',None,{'Host':'attacker.invalid'}),
                                   ('/api/plan',{'provider':'pi','mode':'http_429'},{'Origin':'http://attacker.invalid'}),
@@ -160,6 +171,22 @@ class ConsoleTests(unittest.TestCase):
             with self.assertRaisesRegex(console.ConsoleError,'execution_state_unavailable'):self.app.execute(key)
             spawn.assert_not_called()
         self.assertEqual(journal.read_text(),'broken')
+
+    def test_pi_resume_console_plan_is_fixed_and_local(self):
+        code,raw,_=self.request('/api/plan',{'provider':'pi','mode':'resume'})
+        self.assertEqual(code,200);plan=json.loads(raw);self.assertTrue(plan['executable'])
+        self.assertEqual(plan['plan']['command'][2:],['run','pi','--execute','--check-resume'])
+        self.assertFalse(plan['plan']['remote']);self.assertTrue(plan['plan']['native_resume_check'])
+        key,job,commands=self.launch_helper({'provider':'pi','mode':'resume'},'pass');self.wait_job(job)
+        self.assertEqual(commands[0][2:],['run','pi','--execute','--check-resume'])
+
+    def test_pi_host_restart_console_plan_is_fixed_and_local(self):
+        code,raw,_=self.request('/api/plan',{'provider':'pi','mode':'host_restart'})
+        self.assertEqual(code,200);plan=json.loads(raw);self.assertTrue(plan['executable'])
+        self.assertEqual(plan['plan']['command'][2:],['run','pi','--execute','--check-host-restart'])
+        self.assertFalse(plan['plan']['remote']);self.assertTrue(plan['plan']['native_host_restart_check'])
+        key,job,commands=self.launch_helper({'provider':'pi','mode':'host_restart'},'pass');self.wait_job(job)
+        self.assertEqual(commands[0][2:],['run','pi','--execute','--check-host-restart'])
 
     def test_pi_cancel_console_plan_is_fixed_local_and_single_use(self):
         code, raw, _ = self.request('/api/plan', {'provider':'pi','mode':'cancel'})

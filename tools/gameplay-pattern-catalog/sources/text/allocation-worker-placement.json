@@ -1,0 +1,119 @@
+{
+  "id": "allocation-worker-placement",
+  "system": "allocation",
+  "edition": 3,
+  "name": {
+    "zh": "派人占住一次行动位置",
+    "en": "Commit a worker to occupy an action"
+  },
+  "summary": {
+    "zh": "先去的位置能做事，也会暂时挡住别人。",
+    "en": "An occupied action serves you and temporarily blocks others."
+  },
+  "rules": {
+    "zh": "玩家把有限工人放到公开行动位，支付要求并获得效果；多数位置被占后本轮不能再放人。玩家要安排先后顺序，既完成自己的计划，也判断哪个位置等不到下一次；轮末收回工人后重新争夺。",
+    "en": "Place limited workers on public action spaces, pay requirements and gain the effect. Most spaces become unavailable for the round. Sequence actions around urgent needs and likely competition, then retrieve workers for the next round."
+  },
+  "loop": [
+    {
+      "zh": "查看空位与行动条件",
+      "en": "Inspect free spaces and requirements"
+    },
+    {
+      "zh": "派一个工人执行行动",
+      "en": "Commit a worker to an action"
+    },
+    {
+      "zh": "位置被占，更新备选方案",
+      "en": "Update plans after spaces fill"
+    },
+    {
+      "zh": "收回工人开始下一轮",
+      "en": "Retrieve workers for the next round"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "先拿资源再建造，还是先抢快被占的关键行动？",
+      "en": "Gather first to build later, or secure a contested action now?"
+    },
+    {
+      "zh": "为阻止对手占一个自己收益较低的位置，划算吗？",
+      "en": "Is taking a low-value space worthwhile just to deny an opponent?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "每轮工人数",
+        "en": "Workers per round"
+      },
+      "effect": {
+        "zh": "工人越少，每次占位越像不可回头的承诺。",
+        "en": "Fewer workers make each placement a stronger commitment."
+      }
+    },
+    {
+      "name": {
+        "zh": "位置容量",
+        "en": "Space capacity"
+      },
+      "effect": {
+        "zh": "允许多人但提高后续成本，可缓和完全被堵死的挫败。",
+        "en": "Multiple slots with increasing costs can soften total exclusion."
+      }
+    }
+  ],
+  "tags": [
+    "planning",
+    "economy"
+  ],
+  "related": [
+    "allocation-area-majority",
+    "allocation-follow-phase",
+    "allocation-public-goal-race",
+    "allocation-public-pick"
+  ],
+  "contrast": {
+    "zh": "沙丘还用手牌限制可去地点；深水城的建筑与特殊效果改变可用位置和占位例外。",
+    "en": "Dune gates destinations through cards; Waterdeep’s buildings and special effects alter available spaces and exceptions."
+  },
+  "combination": {
+    "zh": "组合提案：建筑材料与施工许可分别占行动位，玩家须先排好施工顺序，同时准备关键位置被抢后的替代工程。",
+    "en": "Design proposal: materials and construction permits require separate action spaces, linking build order to backup projects when a space is taken."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "你有两名工人，建桥需要木材；伐木位和造桥位都只剩一个空位。",
+      "en": "You have two workers; a bridge needs wood, and logging and bridge construction each have one free space."
+    },
+    "action": {
+      "zh": "先占伐木位。",
+      "en": "Take the logging space first."
+    },
+    "result": {
+      "zh": "得到木材，但对手随后占了造桥位。",
+      "en": "You gain wood, but an opponent then takes bridge construction."
+    },
+    "next": {
+      "zh": "改做仓库，或把木材留到下轮抢先造桥。",
+      "en": "Build storage instead or save the wood for an early bridge next round."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "competitive",
+    "firstStep": {
+      "zh": "三名本地玩家各两枚工人，五个固定行动位，只做一轮占位与回收。",
+      "en": "Give three local players two workers and five fixed action spaces for one round."
+    },
+    "pitfall": {
+      "zh": "过多访问条件和例外会掩盖占位的基本冲突。",
+      "en": "Too many access conditions and exceptions obscure the core conflict."
+    },
+    "test": {
+      "zh": "关键位置被占后，玩家能否马上理解原因并找到备选行动？",
+      "en": "Can players explain a blocked space and find an alternative immediately?"
+    }
+  }
+}

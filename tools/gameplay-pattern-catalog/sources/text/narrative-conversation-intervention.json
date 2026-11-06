@@ -1,0 +1,120 @@
+{
+  "id": "narrative-conversation-intervention",
+  "system": "narrative",
+  "edition": 3,
+  "name": {
+    "zh": "在对方说完前介入",
+    "en": "Intervene before the other person finishes"
+  },
+  "summary": {
+    "zh": "何时开口或行动，也能改变正在发生的对话。",
+    "en": "When to speak or act can change a conversation already in progress."
+  },
+  "rules": {
+    "zh": "对方说话或事件演出期间出现短暂的介入机会。玩家可以立即插话或行动，改变正在进行的场景；也可以放过机会，听完或让原进程继续。它关注是否打断当前行为，而非只是轮到自己时选一句回答。",
+    "en": "A brief opportunity appears while someone speaks or an event unfolds. Intervene with a line or action to alter the scene, or let the opportunity pass and hear or see the original continuation. The choice is whether to interrupt, not merely what to answer on your turn."
+  },
+  "loop": [
+    {
+      "zh": "观察正在发生的言行",
+      "en": "Observe the ongoing speech or action"
+    },
+    {
+      "zh": "识别可介入的机会",
+      "en": "Notice an intervention opportunity"
+    },
+    {
+      "zh": "打断或让过程继续",
+      "en": "Interrupt or let it continue"
+    },
+    {
+      "zh": "处理改变后的对话局面",
+      "en": "Handle the changed conversation"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "现在制止能避免风险，但是否会漏听重要信息？",
+      "en": "Intervening now may avert a risk, but could it cut off useful information?"
+    },
+    {
+      "zh": "用行动表达立场，还是让对方把话说完再决定？",
+      "en": "Show a stance through action or hear the person out before deciding?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "介入提示的预告量",
+        "en": "Advance warning"
+      },
+      "effect": {
+        "zh": "有足够预告才能让玩家做判断；突然闪一下更像反应测试。",
+        "en": "Enough warning allows judgment; a sudden flash behaves more like a reflex test."
+      }
+    },
+    {
+      "name": {
+        "zh": "放弃介入的后续",
+        "en": "Continuation without intervention"
+      },
+      "effect": {
+        "zh": "不介入也应产生可理解的剧情，而不总是直接失败。",
+        "en": "Letting it pass should produce a readable continuation rather than always failing."
+      }
+    }
+  ],
+  "tags": [
+    "timing",
+    "narrative",
+    "information"
+  ],
+  "related": [
+    "narrative-background-dialogue-access",
+    "narrative-deliberate-silence",
+    "narrative-evidence-rebuttal",
+    "narrative-perspective-handoff"
+  ],
+  "contrast": {
+    "zh": "质量效应2的介入常表现为明确的行动提示；Oxenfree 把介入融入连续的口语交流。",
+    "en": "Mass Effect 2 often presents a discrete action prompt; Oxenfree embeds intervention in continuous spoken conversation."
+  },
+  "combination": {
+    "zh": "组合提案：谈判中提前显示对方即将采取的行动，让玩家决定打断劝阻，还是等他说完以获取更多动机。",
+    "en": "Design proposal: preview a negotiator’s imminent action, letting the player interrupt to stop it or wait for more information about the motive."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "守卫边说话边伸手去拉警铃，出现介入提示。",
+      "en": "A guard reaches for an alarm while speaking, and an intervention prompt appears."
+    },
+    "action": {
+      "zh": "玩家立即打断，出示通行证。",
+      "en": "The player interrupts immediately and presents a pass."
+    },
+    "result": {
+      "zh": "拉铃动作停止，但守卫没说完关于失踪货物的线索。",
+      "en": "The alarm is stopped, but a clue about missing cargo is cut short."
+    },
+    "next": {
+      "zh": "玩家需要在后续对话中另找机会补问。",
+      "en": "The player must find another opening to ask about it later."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "写一段可中断的台词和两条后续；先用字幕和按钮验证，不制作复杂演出。",
+      "en": "Write one interruptible line and two continuations, using text and a button before complex presentation."
+    },
+    "pitfall": {
+      "zh": "必须处理被打断台词、字幕和动作的状态，不让角色同时说两句话。",
+      "en": "Handle interrupted dialogue, subtitles and actions so characters do not speak two lines at once."
+    },
+    "test": {
+      "zh": "玩家能否清楚说明自己选择了介入时机，而非误以为必须抢按？",
+      "en": "Can players explain the chosen intervention time rather than assuming they must press every prompt?"
+    }
+  }
+}

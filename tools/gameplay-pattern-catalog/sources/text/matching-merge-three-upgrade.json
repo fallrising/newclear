@@ -1,0 +1,120 @@
+{
+  "id": "matching-merge-three-upgrade",
+  "system": "matching",
+  "edition": 3,
+  "name": {
+    "zh": "把同级物件合成更高一级",
+    "en": "Merge matching items into the next tier"
+  },
+  "summary": {
+    "zh": "合并既带来升级，也把多个占位缩成一个。",
+    "en": "Merging upgrades an item while compressing several occupied cells into one."
+  },
+  "rules": {
+    "zh": "玩家把足够数量的同级物件聚在一起，消耗它们生成更高一级物件。升级产物继续占据棋盘，并能参与下一层合并；玩家要为当前素材、未来产物和暂时无法合并的零散物件分配空间。",
+    "en": "Gather enough matching items of the same tier and consume them to create a higher-tier item. The result stays on the board and can enter the next merge. Space must be shared among ingredients, future outputs and temporarily unmatched pieces."
+  },
+  "loop": [
+    {
+      "zh": "收集同级素材",
+      "en": "Collect matching ingredients"
+    },
+    {
+      "zh": "为合并安排位置",
+      "en": "Arrange space for the merge"
+    },
+    {
+      "zh": "生成高一级物件",
+      "en": "Create the next-tier item"
+    },
+    {
+      "zh": "围绕产物准备下一组合",
+      "en": "Prepare the next group around the result"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "马上合并腾空间，还是多等几个素材争取更好的批量收益？",
+      "en": "Merge now to free space or wait for more ingredients and a better batch yield?"
+    },
+    {
+      "zh": "把产物留在中央方便下一次合并，还是放边缘减少挡路？",
+      "en": "Keep the result central for another merge or near an edge to reduce obstruction?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "每次消耗数量",
+        "en": "Inputs per merge"
+      },
+      "effect": {
+        "zh": "需要更多素材会增加占位压力，也让腾出空间的瞬间更明显。",
+        "en": "More inputs increase storage pressure and the amount of space released by a merge."
+      }
+    },
+    {
+      "name": {
+        "zh": "批量合并奖励",
+        "en": "Batch bonus"
+      },
+      "effect": {
+        "zh": "批量奖励鼓励等待，但过大时会让小规模合并失去价值。",
+        "en": "Batch bonuses reward waiting, but excessive bonuses make small merges feel pointless."
+      }
+    }
+  ],
+  "tags": [
+    "planning",
+    "spatial",
+    "optimization"
+  ],
+  "related": [
+    "matching-complete-lines",
+    "matching-pattern-creates-power",
+    "matching-swap-to-align",
+    "matching-tap-connected-group"
+  ],
+  "contrast": {
+    "zh": "Triple Town把合并位置和不断填满的城镇绑在一起；Merge Dragons明确用五合二奖励较大的批量。",
+    "en": "Triple Town couples merge placement to an increasingly occupied town; Merge Dragons explicitly rewards a larger batch with five-to-two conversion."
+  },
+  "combination": {
+    "zh": "组合提案：三株成熟作物可合成一株多年生作物，但等待成熟期间都占田地。玩家要比较短期收割收入与长期节省的种植空间。",
+    "en": "Design proposal: merge three mature crops into one perennial, while all ingredients occupy farmland as they grow. Compare immediate harvest income with long-term space savings."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "棋盘只剩两个空格，已有四株同级幼苗。",
+      "en": "Only two cells remain empty, and four same-tier seedlings are already stored."
+    },
+    "action": {
+      "zh": "玩家先把其中三株合成一株树苗。",
+      "en": "The player merges three seedlings into one sapling."
+    },
+    "result": {
+      "zh": "损失等待五合二的机会，但立刻多出两个空格。",
+      "en": "The player gives up a five-item batch opportunity but immediately frees two cells."
+    },
+    "next": {
+      "zh": "腾出的空间能接收新素材，再决定是否保存到下一批。",
+      "en": "The freed cells accept new ingredients, allowing another choice about saving for a batch."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "做四乘四棋盘、三个物件等级和固定的三合一规则。",
+      "en": "Build a four-by-four board with three item tiers and a fixed three-to-one rule."
+    },
+    "pitfall": {
+      "zh": "不要一开始就加入几十条升级链；先验证空间压力是否足以形成选择。",
+      "en": "Do not start with dozens of merge chains; first test whether space pressure creates meaningful choices."
+    },
+    "test": {
+      "zh": "玩家是否能说出自己这次合并主要为了升级，还是为了腾位置？",
+      "en": "Can players say whether a merge was primarily for an upgrade or for space?"
+    }
+  }
+}

@@ -1,0 +1,120 @@
+{
+  "id": "automation-production-chain",
+  "system": "automation",
+  "edition": 1,
+  "name": {
+    "zh": "多级生产链",
+    "en": "Multi-stage production chains"
+  },
+  "summary": {
+    "zh": "把上一道工序的产出变成下一道的输入，逐级制造复杂物品。",
+    "en": "Turn one process output into another input to manufacture complex products."
+  },
+  "rules": {
+    "zh": "玩家从最终产品倒推中间材料，配置机器配方并连接供料。任何前置缺失都会让后段停机；产线完成后可持续输出目标产品。",
+    "en": "Players work backward from a target product, configure recipes and connect supply. Missing prerequisites stall downstream machines; a complete chain continuously produces the target."
+  },
+  "loop": [
+    {
+      "zh": "选定目标产品",
+      "en": "Choose a target"
+    },
+    {
+      "zh": "拆解配方依赖",
+      "en": "Trace recipe dependencies"
+    },
+    {
+      "zh": "建设前后工序",
+      "en": "Build the stages"
+    },
+    {
+      "zh": "试产并补齐短板",
+      "en": "Run and repair missing links"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "集中生产通用零件便于复用，但会形成共享瓶颈。",
+      "en": "Shared intermediates are reusable but create shared bottlenecks."
+    },
+    {
+      "zh": "提前扩建上游有余量，却占用眼前稀缺的材料。",
+      "en": "Expanding upstream early builds headroom at an immediate material cost."
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "依赖深度",
+        "en": "Dependency depth"
+      },
+      "effect": {
+        "zh": "层级增多会放大规划感，也增加定位停机原因的难度。",
+        "en": "Deeper chains increase planning and make failures harder to trace."
+      }
+    },
+    {
+      "name": {
+        "zh": "中间品复用率",
+        "en": "Intermediate reuse"
+      },
+      "effect": {
+        "zh": "复用越高，局部扩产越容易影响其他产品。",
+        "en": "Higher reuse makes local expansion more likely to affect other products."
+      }
+    }
+  ],
+  "tags": [
+    "planning",
+    "progression",
+    "optimization"
+  ],
+  "related": [
+    "automation-aerial-logistics",
+    "automation-belt-routing",
+    "automation-blueprint-reuse",
+    "automation-byproduct-loop"
+  ],
+  "contrast": {
+    "zh": "Factorio把机器间搬运作为独立环节；Satisfactory用机器端口减少这一层，突出空间布局。",
+    "en": "Factorio makes insertion a separate layer; Satisfactory uses machine ports and emphasizes layout."
+  },
+  "combination": {
+    "zh": "订单只公布最终产品和交付日期，玩家可复用现有半成品产线，也可为急单搭建临时链。",
+    "en": "Reveal only a final product and deadline, letting players choose between shared intermediates and a temporary dedicated chain."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "目标是做齿轮，机器需要铁板，而铁板还要先由矿石熔炼。",
+      "en": "The goal is gears, which require plates made by smelting ore."
+    },
+    "action": {
+      "zh": "你从齿轮配方往前补齐熔炉、矿石输入与中间运输。",
+      "en": "Work backward from gears to add smelting, ore input and intermediate transport."
+    },
+    "result": {
+      "zh": "只要前置环节持续供料，最终机器便开始稳定出货。",
+      "en": "The final machine produces steadily once all prerequisite stages keep supplying it."
+    },
+    "next": {
+      "zh": "查看哪一段最常停工，把下一份投资用在瓶颈处。",
+      "en": "Find the stage that stalls most and invest there next."
+    }
+  },
+  "prototype": {
+    "scope": "medium",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "先做矿石→铁板→齿轮三步，每步一种机器，显示输入缺口和每轮产量。",
+      "en": "Start with ore-to-plate-to-gear, one machine per stage, showing missing inputs and output per round."
+    },
+    "pitfall": {
+      "zh": "配方树、物流和机器速度会互相放大调试成本，先固定其中两项再改第三项。",
+      "en": "Recipes, logistics and machine rates compound debugging; hold two fixed while varying the third."
+    },
+    "test": {
+      "zh": "当最终机器断料时，玩家是否沿依赖关系追到真正短缺的上游环节？",
+      "en": "When the final machine starves, can players trace the dependency to the actual upstream shortage?"
+    }
+  }
+}

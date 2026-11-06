@@ -1,0 +1,120 @@
+{
+  "id": "deckbuilding-rule-changing-passives",
+  "system": "deckbuilding",
+  "edition": 2,
+  "name": {
+    "zh": "拿到改规则的被动后重组玩法",
+    "en": "Rebuilding around rule-changing passives"
+  },
+  "summary": {
+    "zh": "新被动不只加数值，还改变哪些组合成立、哪些牌值得留下。",
+    "en": "A passive changes which combinations are valid and which cards are worth keeping."
+  },
+  "rules": {
+    "zh": "少量被动直接修改基础规则，例如降低组合门槛或改变回合末处理方式。获得它之后，玩家重新评价现有牌和未来奖励；核心不是装满槽位，而是用新的规则组织整套打法。",
+    "en": "A few passives rewrite a base rule, such as pattern requirements or end-of-turn handling. After acquiring one, reassess the deck and future rewards around the changed rule."
+  },
+  "loop": [
+    {
+      "zh": "理解被改写的规则",
+      "en": "Understand the changed rule"
+    },
+    {
+      "zh": "检查现有牌的价值变化",
+      "en": "Reassess existing cards"
+    },
+    {
+      "zh": "补齐适配的新组件",
+      "en": "Acquire supporting pieces"
+    },
+    {
+      "zh": "利用新规则形成循环",
+      "en": "Build a loop around the exception"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "这项新规则现在就能利用，还是要先花几场战斗改造牌组？",
+      "en": "Can the new rule pay off now, or does it require several encounters of rebuilding?"
+    },
+    {
+      "zh": "原本有用的抽牌效果会不会因为不再自动弃牌而堵手？",
+      "en": "Could useful draw effects become hand-clogging under a new retention rule?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "规则改动范围",
+        "en": "Rule-change scope"
+      },
+      "effect": {
+        "zh": "只改一个明确规则更易理解，连改多条容易让旧经验失效过多。",
+        "en": "One clear exception is easier to understand than several simultaneous rewrites."
+      }
+    },
+    {
+      "name": {
+        "zh": "适配组件可获得性",
+        "en": "Support availability"
+      },
+      "effect": {
+        "zh": "规则有趣但缺少配套牌时，会变成无从使用的承诺。",
+        "en": "An interesting rule without accessible supporting cards remains an empty promise."
+      }
+    }
+  ],
+  "tags": [
+    "discovery",
+    "planning",
+    "creativity"
+  ],
+  "related": [
+    "deckbuilding-dice-allocation",
+    "deckbuilding-discard-redraw",
+    "deckbuilding-dual-use-cards",
+    "deckbuilding-duplicate-investment"
+  ],
+  "contrast": {
+    "zh": "前者放宽组合成立的条件；后者改变资源何时离开手中，重新塑造抽牌与费用管理。",
+    "en": "One relaxes pattern requirements; the other changes when cards leave the hand, reshaping draw and cost management."
+  },
+  "combination": {
+    "zh": "设计提案：让一个被动允许仓库隔一格也算相邻，玩家拿到它后必须重新排货以利用新的连线。",
+    "en": "Design proposal: A passive lets storage items count as adjacent across one empty tile, prompting a new packing arrangement."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "编辑示例：原先必须五张同色才能点亮祭坛，玩家常常只凑到四张。",
+      "en": "Editorial example: an altar requires five matching colors, and the player often reaches only four."
+    },
+    "action": {
+      "zh": "玩家选取把门槛降为四张的被动。",
+      "en": "Choose a passive reducing that requirement to four."
+    },
+    "result": {
+      "zh": "原本无法使用的手牌现在可以启动祭坛。",
+      "en": "A previously invalid hand now activates the altar."
+    },
+    "next": {
+      "zh": "下一次奖励不再盲目加抽牌，而开始补祭坛触发后的收益。",
+      "en": "Future rewards can support altar payoffs instead of only adding more draw."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "先做一个基础规则和一个明确例外，让同一手牌在获得被动前后可直接对比。",
+      "en": "Implement one base rule and one exception so the same hand can be compared before and after acquisition."
+    },
+    "pitfall": {
+      "zh": "不要把各种加伤害词条都叫改规则；首版必须改变至少一种合法行动。",
+      "en": "Do not label ordinary damage bonuses rule changes; alter at least one legal action."
+    },
+    "test": {
+      "zh": "玩家获得被动后会改变下一次选牌，并能指出新规则允许了什么。",
+      "en": "Players change the next card choice and explain what became possible."
+    }
+  }
+}

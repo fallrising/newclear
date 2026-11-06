@@ -1,0 +1,120 @@
+{
+  "id": "stealth-body-concealment",
+  "system": "stealth",
+  "edition": 2,
+  "name": {
+    "zh": "搬运与藏匿身体",
+    "en": "Moving and hiding bodies"
+  },
+  "summary": {
+    "zh": "放倒守卫只是前半步，还得决定把留下的证据放哪儿。",
+    "en": "Taking down a guard is only half the task; the body still needs a destination."
+  },
+  "rules": {
+    "zh": "倒地人物留在场景里，其他人发现后会改变警戒。玩家可花时间拖走或放入藏匿点，但搬运时更难迅速脱身；先选处置位置，往往比先动手更重要。",
+    "en": "Downed characters remain in the level and can change alert behavior when found. Moving or concealing them costs time and makes escape harder; choosing a destination before a takedown matters."
+  },
+  "loop": [
+    {
+      "zh": "观察其他人的巡逻",
+      "en": "Check other patrols"
+    },
+    {
+      "zh": "选好放倒位置",
+      "en": "Choose the takedown spot"
+    },
+    {
+      "zh": "把身体移到遮蔽处",
+      "en": "Move the body out of sight"
+    },
+    {
+      "zh": "重新检查通路",
+      "en": "Recheck the route"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "就地绕过身体节省时间，还是搬走以免稍后的巡逻发现？",
+      "en": "Leave the body and save time, or move it before a later patrol arrives?"
+    },
+    {
+      "zh": "近处藏点方便但会绕远出口，远处藏点是否值得更长搬运？",
+      "en": "A nearby hiding spot may pull you away from the exit; is a longer carry worthwhile?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "搬运速度",
+        "en": "Carry speed"
+      },
+      "effect": {
+        "zh": "速度差越大，放倒地点越重要，也越需要规划第二个人的视线。",
+        "en": "A larger speed penalty makes takedown location and other guards’ sightlines more important."
+      }
+    },
+    {
+      "name": {
+        "zh": "藏匿容量",
+        "en": "Hiding capacity"
+      },
+      "effect": {
+        "zh": "有限容量迫使玩家分散行动地点，而非反复堆在同一处。",
+        "en": "Limited capacity spreads takedowns across the level instead of encouraging one dumping spot."
+      }
+    }
+  ],
+  "tags": [
+    "planning",
+    "spatial",
+    "risk"
+  ],
+  "related": [
+    "stealth-disguise-access",
+    "stealth-knockout-window",
+    "stealth-peeking",
+    "stealth-synchronized-actions"
+  ],
+  "contrast": {
+    "zh": "《杀手》的容器形成明确收纳点；《赏金奇兵3》把搬运放进俯视视野与多角色调度中。",
+    "en": "HITMAN uses explicit containers; Desperados III integrates carrying with overhead sightlines and squad positioning."
+  },
+  "combination": {
+    "zh": "设计提案：救援任务中，背着伤员会占满负重；必须先丢弃战利品，才能把同伴安全带走。",
+    "en": "Design proposal: in a rescue mission, carrying a wounded ally fills the weight budget; abandon loot to bring the ally home."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "守卫每隔一圈会经过楼梯，楼梯旁有一处灌木。",
+      "en": "A patrol circles past a staircase beside a bush."
+    },
+    "action": {
+      "zh": "你在楼梯口放倒另一名守卫，立即把他拖入灌木。",
+      "en": "Down another guard by the stairs and drag him into the bush."
+    },
+    "result": {
+      "zh": "巡逻回来时没有看到身体，但你因搬运错过了开门时机。",
+      "en": "The patrol returns without seeing the body, but carrying made you miss the door opening."
+    },
+    "next": {
+      "zh": "下一次先把目标引近藏点，再开始行动。",
+      "en": "Next time lure the target closer to concealment before acting."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "做两名守卫、一条巡逻线、一个可拖动身体与一个藏匿区。",
+      "en": "Build two guards, one patrol route, a draggable body and one concealment zone."
+    },
+    "pitfall": {
+      "zh": "避免身体碰撞与动画先耗尽工期；原型用一个可拖动标记验证路线成本即可。",
+      "en": "Do not start with complex body physics and animation; a draggable token can test route costs."
+    },
+    "test": {
+      "zh": "玩家第二次尝试时，会不会先看藏点再决定在哪里放倒守卫？",
+      "en": "On the second attempt, do players check hiding locations before choosing the takedown spot?"
+    }
+  }
+}

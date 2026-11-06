@@ -1,0 +1,120 @@
+{
+  "id": "building-construction-sequencing",
+  "system": "building",
+  "edition": 1,
+  "name": {
+    "zh": "施工顺序与优先级",
+    "en": "Construction sequencing"
+  },
+  "summary": {
+    "zh": "先画计划，再让工人按资源、通路和紧急程度落地。",
+    "en": "Plan first, then build according to resources, access and urgency."
+  },
+  "rules": {
+    "zh": "玩家下达施工任务而非立刻生成成品。工人搬运材料并建造，缺料或不可达会阻塞；分阶段施工和优先级避免任务卡死。",
+    "en": "Players issue build tasks rather than instantly creating structures. Workers deliver materials and build; missing supplies or access block progress, making phases and priorities important."
+  },
+  "loop": [
+    {
+      "zh": "放置施工计划",
+      "en": "Place plans"
+    },
+    {
+      "zh": "确保材料通路",
+      "en": "Ensure supplies and access"
+    },
+    {
+      "zh": "安排优先级",
+      "en": "Set priorities"
+    },
+    {
+      "zh": "检查阻塞任务",
+      "en": "Inspect blocked tasks"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "同时开很多项目会分散工人和材料。",
+      "en": "Many projects divide workers and supplies."
+    },
+    {
+      "zh": "先修应急设施更稳，但可能需要后续拆改。",
+      "en": "Emergency solutions improve safety but may need rebuilding."
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "施工耗时",
+        "en": "Build duration"
+      },
+      "effect": {
+        "zh": "长工期让顺序影响生存，短工期更偏布局创作。",
+        "en": "Long builds make order affect survival; short builds emphasize layout."
+      }
+    },
+    {
+      "name": {
+        "zh": "优先级粒度",
+        "en": "Priority granularity"
+      },
+      "effect": {
+        "zh": "细分可精确调度，也可能变成繁琐排队。",
+        "en": "Fine priorities offer control but can become tedious scheduling."
+      }
+    }
+  ],
+  "tags": [
+    "planning",
+    "time",
+    "optimization"
+  ],
+  "related": [
+    "building-access-network",
+    "building-service-coverage",
+    "building-room-requirements",
+    "building-structural-support"
+  ],
+  "contrast": {
+    "zh": "两者都把设计交给角色施工；RimWorld强调工作分工，缺氧的紧凑空间让通路规划尤其重要。",
+    "en": "Both delegate plans to workers; RimWorld foregrounds assignments while ONI makes compact access planning prominent."
+  },
+  "combination": {
+    "zh": "暴风前扩建避难所，先保留撤离通道，再决定抢修屋顶还是供暖。",
+    "en": "Expand a shelter before a storm, preserving escape routes while choosing roofs or heating first."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "你同时下了墙和室内设备的订单，先建墙可能把材料路线堵住。",
+      "en": "You queue a wall and indoor equipment; building the wall first may block material access."
+    },
+    "action": {
+      "zh": "你把室内设备设为优先，最后再补封闭墙段。",
+      "en": "Prioritise the interior equipment and complete the enclosing wall last."
+    },
+    "result": {
+      "zh": "工人能先送进材料，施工顺利完成，最后再封好房间。",
+      "en": "Workers deliver materials first, complete the equipment and then close the room."
+    },
+    "next": {
+      "zh": "遇到缺料或应急任务时，重新排序而不必删掉全部计划。",
+      "en": "Reprioritise when materials run short or emergencies arise without deleting the entire plan."
+    }
+  },
+  "prototype": {
+    "scope": "medium",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "做一名工人、材料堆、三项施工任务和优先级，显示任务等待原因。",
+      "en": "Use one worker, a stockpile, three jobs and priorities, displaying why each job waits."
+    },
+    "pitfall": {
+      "zh": "多工人抢任务、搬运预约和中途改计划都需要状态处理，先让单工人完整跑通。",
+      "en": "Job competition, reservations and interrupted plans require extra state handling; make one worker reliable first."
+    },
+    "test": {
+      "zh": "出现因封路卡住的施工时，玩家能否通过改顺序或留通道自行恢复？",
+      "en": "When a build is blocked by enclosure, can players recover through sequencing or leaving access?"
+    }
+  }
+}

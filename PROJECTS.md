@@ -15,7 +15,7 @@
 | [examples/bite-pi](examples/bite-pi/SUCCESS.md) | examples | 保留 Pi 驅動基礎平台產生器與 9router 接線示範 | 參考／封存 | 尚無已核准標記 | 2026-09-24 |
 | [gateways/edge-relay](gateways/edge-relay/SUCCESS.md) | gateways | 以可替換的反向通道與通知 adapters 安全連接受授權的本機服務 | 未完成／待驗收 | 尚無已核准標記 | 2026-11-02 |
 | [gateways/pokercase](gateways/pokercase/SUCCESS.md) | gateways | 以 thinrouter 提供個人訂閱憑證的多協定 LLM gateway | 未完成／待驗收 | 尚無已核准標記 | 2026-10-11 |
-| [labs/agent-office-lab](labs/agent-office-lab/SUCCESS.md) | labs | 驗證本地優先的 OpenCode、Grok、Pi、Cursor 四工位 Agent Office | 未完成／待驗收 | 尚無已核准標記 | 2026-11-02 |
+| [labs/agent-office-lab](labs/agent-office-lab/SUCCESS.md) | labs | 驗證本地優先的 OpenCode、Grok、Pi、Cursor 四工位 Agent Office | 未完成／待驗收 | 尚無已核准標記 | 2026-11-06 |
 | [labs/aweshore](labs/aweshore/SUCCESS.md) | labs | 保存個人筆記與 avatar LLM 的早期 PKM 實驗 | 參考／封存 | 尚無已核准標記 | 2026-09-27 |
 | [labs/bee-swarm](labs/bee-swarm/SUCCESS.md) | labs | 保存以 GitHub 角色協作及 SimPy 探索流程的概念框架 | 參考／封存 | 尚無已核准標記 | 2026-09-24 |
 | [labs/browser-fingerprint](labs/browser-fingerprint/SUCCESS.md) | labs | 觀測瀏覽器設備訊號與任務操作事件以比較測試環境 | 完成 | 尚無已核准標記 | 2026-10-03 |
@@ -60,6 +60,6 @@
 | [systems/wotar](systems/wotar/SUCCESS.md) | systems | 以自管金鑰在 MQTT 上提供端到端加密的發布與訂閱 | 完成 | [usable/wotar/v0.1.0](https://github.com/fallrising/newclear/tree/usable/wotar/v0.1.0/systems/wotar) | 2026-09-24 |
 | [tools/cc-quota](tools/cc-quota/SUCCESS.md) | tools | 保存已封存 Claude 額度採集與通知來源，後繼為 Agent Usage | 參考／封存 | 尚無已核准標記 | 2026-09-27 |
 | [tools/codex-usage](tools/codex-usage/SUCCESS.md) | tools | 統一唯讀查詢多工具額度與使用狀態並保留 Codex 採集相容性 | 未完成／待驗收 | 尚無已核准標記 | 2026-10-18 |
-| [tools/gameplay-pattern-catalog](tools/gameplay-pattern-catalog/SUCCESS.md) | tools | 以逐篇來源與結構化 metadata 整理可瀏覽的遊戲設計模式筆記 | 未完成／待驗收 | 尚無已核准標記 | 2026-11-02 |
+| [tools/gameplay-pattern-catalog](tools/gameplay-pattern-catalog/SUCCESS.md) | tools | 以可追溯的 Gameplay Atlas 來源快照整理可瀏覽的繁中設計模式筆記 | 未完成／待驗收 | 尚無已核准標記 | 2026-11-03 |
 | [tools/motion-prompt](tools/motion-prompt/SUCCESS.md) | tools | 以繁中與英文動態示範辨認術語並複製 AI 提示詞 | 未完成／待驗收 | 尚無已核准標記 | 2026-10-28 |
 | [tools/streaming-converter](tools/streaming-converter/SUCCESS.md) | tools | 保留 FFmpeg 多畫質 HLS 轉檔與網頁播放的歷史工具 | 參考／封存 | 尚無已核准標記 | 2026-09-27 |

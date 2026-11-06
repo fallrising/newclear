@@ -1,0 +1,120 @@
+{
+  "id": "fishing-target-tracking",
+  "system": "fishing",
+  "edition": 1,
+  "name": {
+    "zh": "追踪鱼标",
+    "en": "Tracking a moving fish"
+  },
+  "summary": {
+    "zh": "持续把控制区覆盖在鱼标上，累积捕获进度。",
+    "en": "Keep a controlled zone over a moving fish to build catch progress."
+  },
+  "rules": {
+    "zh": "玩家通过按住与松开按钮移动控制条，使鱼标尽量留在条内。重力或惯性阻止瞬间精确定位，鱼又会改变位置；覆盖时进度增长，离开时倒退，考验持续纠偏。",
+    "en": "Press and release to move a controlled bar over a fish icon. Gravity or inertia prevents instant positioning while the fish moves. Overlap builds progress; separation loses it, testing continual correction."
+  },
+  "loop": [
+    {
+      "zh": "读取鱼标移动方向",
+      "en": "Read the fish's movement"
+    },
+    {
+      "zh": "短按或持续按压调整控制条",
+      "en": "Tap or hold to position the bar"
+    },
+    {
+      "zh": "保持覆盖累积进度",
+      "en": "Maintain overlap to gain progress"
+    },
+    {
+      "zh": "补救偏离并完成捕获",
+      "en": "Recover from errors and complete the catch"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "追着鱼的当前位置跑容易过冲，预判转向更有效。",
+      "en": "Chasing the current position can overshoot; anticipating direction changes is more effective."
+    },
+    {
+      "zh": "稳定在鱼的常用区域，还是积极追每次跳动，取决于进度损失速度。",
+      "en": "Holding a likely zone or chasing every movement depends on how quickly progress drains."
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "控制条宽度",
+        "en": "Control-zone size"
+      },
+      "effect": {
+        "zh": "更宽提高容错，更窄强化精准控制。",
+        "en": "A larger zone increases tolerance; a smaller zone emphasizes precision."
+      }
+    },
+    {
+      "name": {
+        "zh": "控制惯性",
+        "en": "Control inertia"
+      },
+      "effect": {
+        "zh": "惯性越大越需要预判，越小越像直接跟随光标。",
+        "en": "More inertia demands prediction; less feels like direct cursor tracking."
+      }
+    }
+  ],
+  "tags": [
+    "dexterity",
+    "precision",
+    "timing"
+  ],
+  "related": [
+    "fishing-bite-window",
+    "fishing-line-tension",
+    "combat-combo-variation",
+    "combat-invulnerable-dodge"
+  ],
+  "contrast": {
+    "zh": "两个例子共享连续追踪原型，差异主要落在控制手感、鱼行为和外围装备系统。",
+    "en": "Both share a continuous-tracking prototype; differentiation comes from control response, fish behavior and surrounding equipment systems."
+  },
+  "combination": {
+    "zh": "设计提案：魔法鱼会制造短暂假鱼标，玩家需要记住真实轨迹，而不只是追随最亮的目标。",
+    "en": "Design proposal: magical fish create brief decoys, requiring memory of the real trajectory rather than following the brightest marker."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "鱼标开始向上移动，你的控制条仍在下方。",
+      "en": "The fish marker moves upward while your control bar is below it."
+    },
+    "action": {
+      "zh": "你先长按追上，再改成短按，避免控制条冲过头。",
+      "en": "Hold to catch up, then use short presses to avoid overshooting."
+    },
+    "result": {
+      "zh": "鱼标留在条内时进度增加，离开后进度下降。",
+      "en": "Progress increases while the marker stays inside the bar and falls outside it."
+    },
+    "next": {
+      "zh": "鱼一转向就调整按压节奏，直到捕获条填满。",
+      "en": "Adjust your presses when the fish changes direction until capture progress fills."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "做一条纵向轨道、受重力影响的控制条和一种往返鱼标运动，不需要水面场景。",
+      "en": "Build one vertical track, a gravity-driven control bar and one moving-marker pattern; no fishing scene is required."
+    },
+    "pitfall": {
+      "zh": "大量突然反向或高速跳动会掩盖控制学习；先让一种运动模式稳定可读。",
+      "en": "Frequent abrupt reversals hide control learning; make one movement pattern consistently readable first."
+    },
+    "test": {
+      "zh": "同一条鱼重复试玩时，玩家是否减少过冲，并学会用短按维持位置？",
+      "en": "On repeated attempts, do players overshoot less and learn short presses to maintain position?"
+    }
+  }
+}

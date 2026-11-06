@@ -1,0 +1,120 @@
+{
+  "id": "cooking-heat-window",
+  "system": "cooking",
+  "edition": 1,
+  "name": {
+    "zh": "出锅时机窗口",
+    "en": "Cooking completion windows"
+  },
+  "summary": {
+    "zh": "熟了不等于完成：必须在过火之前取走。",
+    "en": "Food must be removed after cooking but before it burns."
+  },
+  "rules": {
+    "zh": "食物放入热源后随时间变化，进入可取出的熟成窗口，继续加热则烧焦或引发事故。玩家需要离开做别的事，同时记住回来的时机；声音、颜色或进度条承担提醒。",
+    "en": "Food changes over time on a heat source, enters a ready window, and burns or causes trouble if left longer. Players multitask while remembering when to return, supported by sound, color or progress cues."
+  },
+  "loop": [
+    {
+      "zh": "放入生食",
+      "en": "Place raw food"
+    },
+    {
+      "zh": "等待同时做其他事",
+      "en": "Work on another task"
+    },
+    {
+      "zh": "辨认完成反馈",
+      "en": "Notice the ready cue"
+    },
+    {
+      "zh": "及时取出",
+      "en": "Remove it in time"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "守着炉子保证成功，还是利用等待时间处理其他工作？",
+      "en": "Guard the stove or use the waiting time productively?"
+    },
+    {
+      "zh": "两锅同时完成时先救哪一锅？",
+      "en": "Which pot should be rescued when two finish together?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "安全窗口",
+        "en": "Safe window"
+      },
+      "effect": {
+        "zh": "窗口更短提高注意切换压力；更长适合轻松的营地节奏。",
+        "en": "Short windows increase attention pressure; long ones suit relaxed camp routines."
+      }
+    },
+    {
+      "name": {
+        "zh": "烧焦代价",
+        "en": "Burn penalty"
+      },
+      "effect": {
+        "zh": "损失材料促使谨慎；连锁火灾会把个人失误变成团队危机。",
+        "en": "Lost ingredients reward caution; spreading fire turns one mistake into a team crisis."
+      }
+    }
+  ],
+  "tags": [
+    "timing",
+    "risk",
+    "time"
+  ],
+  "related": [
+    "cooking-order-triage",
+    "cooking-food-preservation",
+    "automation-byproduct-loop",
+    "automation-power-budget"
+  ],
+  "contrast": {
+    "zh": "英灵神殿用单份材料损失提醒照看火候；胡闹厨房把过火升级为会阻塞流程的公共事故。",
+    "en": "Valheim uses ingredient loss; Overcooked turns overcooking into a shared disruption."
+  },
+  "combination": {
+    "zh": "组合创意：自动炉能保证不烧焦，但手动掌握窄窗口可获得额外品质，让自动化与手艺各有价值。",
+    "en": "Design proposal: automatic ovens prevent burning, while manual timing earns quality bonuses."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "汤还要等一会儿才熟，旁边有菜需要切。",
+      "en": "The soup needs more time while vegetables still need chopping."
+    },
+    "action": {
+      "zh": "你趁等待切菜，听到熟成提示后立刻回来取锅。",
+      "en": "Chop while waiting, then return when the ready signal sounds."
+    },
+    "result": {
+      "zh": "在可取窗口内出锅成功；拖太久则过火损失食材。",
+      "en": "Removing it within the ready window succeeds; waiting too long burns the ingredients."
+    },
+    "next": {
+      "zh": "下一锅开火前，按上次的耗时重新安排并行工作。",
+      "en": "Use the previous timing to schedule parallel work before starting the next pot."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "只做一个炉灶、一道有生／熟／焦三态的菜，再配一个耗时短任务。",
+      "en": "Start with one stove, raw/ready/burnt food states and one short competing task."
+    },
+    "pitfall": {
+      "zh": "过早做复杂物理搬运会掩盖时间取舍；先保证熟成提示可靠且可被发现。",
+      "en": "Complex physical handling can obscure timing choices; first make readiness cues reliable and noticeable."
+    },
+    "test": {
+      "zh": "玩家能否离开炉灶去做事，并根据提示及时返回，而不是一直原地等？",
+      "en": "Can players leave to work elsewhere and return on cue instead of staring at the stove?"
+    }
+  }
+}

@@ -482,6 +482,7 @@ migration; implementation waits for owner D1. UI, Done validity, Impact, provide
 | ID | Task | AC | Status | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
 | HROPP | Propose and review ReopenWorkItem and Ready-with-history dispatch contract | ROP-PLAN-01..03 | done | 2026-11-02T12:16:09Z | 2026-11-02T14:02:35Z | 2026-11-02T14:02:35Z |
+| HROP | Implement approved ReopenWorkItem and Ready-with-history dispatch guard | ROP-AC-01..04; H02 support | done | 2026-11-02T14:05:38Z | 2026-11-02T16:08:08Z | 2026-11-02T16:08:08Z |
 
 ROP-PLAN-01 maps the Done dead end to source. ROP-PLAN-02 fixes ROP-01..04, ROP-AC-01..04 and the minimal owner
 decision. ROP-PLAN-03 disposes Claude review, passes document checks and completes Git/CI/readback/ledger delivery.
@@ -491,3 +492,35 @@ decision. ROP-PLAN-03 disposes Claude review, passes document checks and complet
 Reviewed head `f4489a75` passed HAI CI 41443961362 (backend 13m16s, web) and Project success 41443961645; remote HAI files
 match the reviewed head. HROPP end uses the merge time. Merging does not approve the contract: implementation (HROP)
 waits for owner D1, including the public `WorkItemReopenedResult` OpenAPI amendment. T-0339 stays in_progress.
+
+2026-11-02T14:05Z: owner replied 「批准。」 to D1, including the public `WorkItemReopenedResult` amendment; the waiting point above is
+historical. [Normative contract](../sdd/reopen-work-item.md) governs HROP. Source 19fdeb4f plus BOARD closeout #987; root-only
+implementation, no worker; Claude code review plus at most one follow-up on actual revisions. No migration, dependency,
+UI, provider, release or deploy.
+
+2026-11-02T16:08:08Z: [#1001](https://github.com/fallrising/newclear/pull/1001) merged normally as `97a50a36f8da697973963b593ba8a59daacaba0e`.
+Reviewed head `6ae7298d` passed HAI CI 41475810749 (backend 13m31s, web) and Project success 41475810954; remote HAI files
+match the reviewed head. HROP end uses the merge time. ROP-AC-01..04 accepted for this backend slice
+([evidence](../evidence/reopen-work-item-20261102.md)); completion UI, Done validity, whole-M2 and SUCCESS AC-02..04
+remain open. T-0339 stays in_progress.
+
+## T-0339 — AddBlocker / ResolveBlocker contract
+
+Owner asked to continue after HROP. Source 0c5177fd; no open HAI PR at intake. Blockers are enforced on dispatch and on
+the Done predicate and projected on board/detail, but the declared `AddBlocker` / `ResolveBlocker` operations have no
+command, service, transaction or HTTP branch, so blockers exist only through raw SQL in tests. HBLKP proposes the
+contract with no migration; implementation waits for owner D1/D2. UI, Question/Decision, Attention, providers and release
+stay out of scope.
+
+| ID | Task | AC | Status | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| HBLKP | Propose and review AddBlocker / ResolveBlocker command contract | BLK-PLAN-01..03 | done | 2026-11-02T16:16:24Z | 2026-11-02T16:33:49Z | 2026-11-02T16:33:49Z |
+
+BLK-PLAN-01 maps the unreachable blocker lifecycle to source. BLK-PLAN-02 fixes BLK-01..04, BLK-AC-01..04 and the
+minimal owner decision. BLK-PLAN-03 disposes Claude review, passes document checks and completes Git/CI/readback/ledger
+delivery. [Proposal](../plans/blocker-commands-20261102.md); [review evidence](../evidence/blocker-commands-plan-20261102.md).
+
+2026-11-02T16:33:49Z: proposal [#1005](https://github.com/fallrising/newclear/pull/1005) merged normally as `b66257fde9a7095f0f83e3842f358dbe00d51642`.
+Reviewed head `692c6339` passed HAI CI 41480926957 and Project success 41480926678; remote HAI files match the reviewed
+head. HBLKP end uses the merge time. Merging does not approve the contract: implementation (HBLK) waits for owner D1
+(slice and public OpenAPI amendment) and D2 (AddBlocker phases; D2-a recommended). T-0339 stays in_progress.

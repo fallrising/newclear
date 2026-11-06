@@ -1,0 +1,120 @@
+{
+  "id": "fishing-bait-loadout",
+  "system": "fishing",
+  "edition": 1,
+  "name": {
+    "zh": "鱼饵选择",
+    "en": "Bait loadouts"
+  },
+  "summary": {
+    "zh": "钓鱼前的消耗品选择，改变等待、命中与目标分布。",
+    "en": "Pre-cast consumables change waiting, catch odds and target selection."
+  },
+  "rules": {
+    "zh": "玩家准备并装上鱼饵，用持续消耗换取更快或更定向的渔获。不同鱼饵作用不同，成本需要按整次出行计算；玩家通过等待时间与捕获构成判断是否值得继续使用。",
+    "en": "Prepare and equip bait, spending a consumable for faster or more targeted catches. Different bait types have different effects and trip-wide costs; wait time and catch composition reveal their value."
+  },
+  "loop": [
+    {
+      "zh": "确定本次钓鱼目标",
+      "en": "Set the trip's target"
+    },
+    {
+      "zh": "挑选并携带鱼饵",
+      "en": "Choose and pack bait"
+    },
+    {
+      "zh": "试钓并观察效果",
+      "en": "Fish and observe results"
+    },
+    {
+      "zh": "更换鱼饵或补充库存",
+      "en": "Change bait or restock"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "贵鱼饵能省时间，但普通目标未必值得消耗稀缺材料。",
+      "en": "Expensive bait saves time, but an ordinary target may not justify scarce materials."
+    },
+    {
+      "zh": "这次更需要缩短等待，还是提高目标鱼种的机会？该为哪一种效果付费？",
+      "en": "Is shorter waiting or a better chance of the target species more valuable on this trip? Which effect is worth its cost?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "消耗概率",
+        "en": "Consumption probability"
+      },
+      "effect": {
+        "zh": "必定消耗便于算成本，概率消耗增加库存不确定性。",
+        "en": "Guaranteed consumption is predictable; probabilistic use creates stock uncertainty."
+      }
+    },
+    {
+      "name": {
+        "zh": "目标选择强度",
+        "en": "Targeting strength"
+      },
+      "effect": {
+        "zh": "强定向减少无用渔获，弱定向保留意外发现。",
+        "en": "Strong targeting reduces unwanted catches; weak targeting preserves surprises."
+      }
+    }
+  ],
+  "tags": [
+    "economy",
+    "planning",
+    "randomness"
+  ],
+  "related": [
+    "fishing-pond-production",
+    "fishing-cast-placement",
+    "fishing-equipment-access",
+    "fishing-habitat-search"
+  ],
+  "contrast": {
+    "zh": "星露谷用不同鱼饵区分提速与定向目标；守墓人把鱼饵与鱼竿、区域组合用于选择候选渔获。",
+    "en": "Stardew separates speed and targeting roles by bait type; Graveyard Keeper combines bait, rod and zone to determine potential catches."
+  },
+  "combination": {
+    "zh": "设计提案：各地区昆虫可制成鱼饵，白天采集路线决定夜间能专门寻找哪些鱼。",
+    "en": "Design proposal: regional insects become bait, so daytime gathering routes determine which fish can be targeted at night."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "你要找一种稀有鱼，背包里有便宜通用饵和昂贵定向饵。",
+      "en": "You seek a rare fish and carry cheap general bait plus costly targeted bait."
+    },
+    "action": {
+      "zh": "先确认钓点合适，再用定向饵减少无关渔获。",
+      "en": "Confirm the location is suitable, then use targeted bait to reduce unwanted catches."
+    },
+    "result": {
+      "zh": "每次尝试消耗鱼饵，渔获分布显示投入是否有效。",
+      "en": "Each attempt spends bait; the catch distribution reveals whether it helps."
+    },
+    "next": {
+      "zh": "目标到手后换回便宜饵，把稀缺饵留到下次。",
+      "en": "Switch back to cheap bait once the target is caught and save the rare bait."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "做两种效果清楚的鱼饵、可见库存和一组钓鱼结果记录，先不用操作小游戏。",
+      "en": "Use two clearly differentiated baits, visible stock and a catch log; omit the timing minigame initially."
+    },
+    "pitfall": {
+      "zh": "只增加成功率容易变成单线升级；不同鱼饵应服务不同目标并有可见成本。",
+      "en": "A pure success-rate ladder becomes a linear upgrade; bait types need different purposes and visible costs."
+    },
+    "test": {
+      "zh": "切换“随便赚钱”和“找特定鱼”两个目标，玩家是否会换鱼饵？",
+      "en": "Do players change bait when the goal switches from earning money to catching a particular fish?"
+    }
+  }
+}

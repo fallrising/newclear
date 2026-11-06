@@ -1,0 +1,120 @@
+{
+  "id": "ecology-breeding-conditions",
+  "system": "ecology",
+  "edition": 2,
+  "name": {
+    "zh": "先布置条件再触发繁殖",
+    "en": "Prepare conditions that enable breeding"
+  },
+  "summary": {
+    "zh": "选对一对亲本还不够，时间、环境和育幼条件也要到位。",
+    "en": "The right parents are only a start; timing, surroundings and nursery conditions matter too."
+  },
+  "rules": {
+    "zh": "繁殖结果需要亲本之外的特定条件。玩家读线索、调整环境并尝试，看到结果后判断缺了什么；成功后还要给新生个体准备合适的照料。",
+    "en": "Breeding requires conditions beyond the parents. Read clues, adjust the environment and test, then use feedback to diagnose missing requirements; successful births also need appropriate care."
+  },
+  "loop": [
+    {
+      "zh": "读取目标的繁殖线索",
+      "en": "Read the target’s breeding clues"
+    },
+    {
+      "zh": "布置亲本与环境条件",
+      "en": "Prepare parents and conditions"
+    },
+    {
+      "zh": "尝试并观察是否触发",
+      "en": "Attempt and observe the trigger"
+    },
+    {
+      "zh": "照料新生个体并记录条件",
+      "en": "Care for the young and record conditions"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "改变环境让这一对成功，还是选择更适合现有环境的另一对？",
+      "en": "Change conditions for this pair or choose another pair suited to the current setup?"
+    },
+    {
+      "zh": "等天气或时段自然满足，还是投入资源主动创造条件？",
+      "en": "Wait for a natural time or weather window or spend resources to create it?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "条件数量与提示",
+        "en": "Conditions and clues"
+      },
+      "effect": {
+        "zh": "条件越多越需要逐项反馈；只告诉玩家“失败”无法支持合理试验。",
+        "en": "More conditions require clearer feedback; a bare failure message cannot support informed experiments."
+      }
+    },
+    {
+      "name": {
+        "zh": "育幼负担",
+        "en": "Nursery burden"
+      },
+      "effect": {
+        "zh": "成功后的额外照料能形成下一步，但不能在毫无预告时惩罚成功。",
+        "en": "Extra care after success creates a next step but should be forecast rather than punish success unexpectedly."
+      }
+    }
+  ],
+  "tags": [
+    "information",
+    "discovery",
+    "planning"
+  ],
+  "related": [
+    "ecology-genetic-diversity",
+    "ecology-plant-crossbreeding",
+    "ecology-animal-taming",
+    "ecology-habitat-capacity"
+  ],
+  "contrast": {
+    "zh": "APICO把环境条件作为发现新蜂种的实验线索；Megaquarium扩展把繁殖条件与养育幼体连接成后续管理任务。",
+    "en": "APICO uses environmental clues to discover bees; Megaquarium’s expansion connects breeding requirements to juvenile care."
+  },
+  "combination": {
+    "zh": "设计提案：用植物生长改变蜂箱附近条件，让种植安排参与新品种的繁殖实验。",
+    "en": "Design proposal: growing plants changes conditions around a hive, connecting cultivation to breeding experiments."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "演示设定：记录提示一组亲本需要夜间和遮蔽，当前只有夜间条件满足。",
+      "en": "Example: notes say a pair needs night and shelter; only the night condition is met."
+    },
+    "action": {
+      "zh": "把蜂箱移到屋檐下，保持亲本组合不变。",
+      "en": "Move the hive under a roof while keeping the same parents."
+    },
+    "result": {
+      "zh": "下一次尝试出现新品种，记录页标记条件已满足。",
+      "en": "The next attempt produces a new species and marks the conditions in the journal."
+    },
+    "next": {
+      "zh": "为新蜂种准备另一个箱子，决定下一次只改变天气还是花种。",
+      "en": "Prepare a separate hive and choose whether the next experiment changes weather or flowers."
+    }
+  },
+  "prototype": {
+    "scope": "medium",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "用两组亲本、昼夜和有无遮挡两项条件，以及逐项通过提示。",
+      "en": "Use two parent pairs, day/night and shelter conditions, and separate feedback for each requirement."
+    },
+    "pitfall": {
+      "zh": "避免第一版同时加入真实天气模拟和大量隐藏配方；先检验玩家能否隔离变量。",
+      "en": "Avoid realistic weather and many hidden recipes initially; first test whether players can change one variable at a time."
+    },
+    "test": {
+      "zh": "给一次缺少单项条件的失败，看玩家能否只改相关条件并重复成功。",
+      "en": "Cause a failure missing one condition and see whether players change that condition and reproduce success."
+    }
+  }
+}

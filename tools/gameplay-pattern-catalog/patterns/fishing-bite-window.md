@@ -1,16 +1,18 @@
 ---
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "id": "fishing-bite-window",
   "title": "訊號辨識與反應窗口",
   "title_en": "Bite timing",
   "category": "fishing",
+  "source_category": "fishing",
   "tags": [
     "signal-reading",
     "timing",
     "risk-reward"
   ],
-  "summary": "用可辨識訊號與有限操作窗口，把等待變成觀察和判斷。",
+  "summary": "从试探动作中识别真咬钩，在短窗口内提竿。",
+  "note_status": "draft",
   "related": [
     "combat-stamina-budget"
   ],
@@ -25,33 +27,76 @@
 }
 ---
 
-## 來源摘要
+## 摘要
 
-原站以魚訊為例：拋竿後辨識真正的咬鉤，在窗口內收竿；太早與太晚都可能失敗。核心循環：開始等待 → 辨識訊號 → 決定出手時機 → 取得結果再嘗試。
+「从试探动作中识别真咬钩，在短窗口内提竿。」
+出處：`sources/text/fishing-bite-window.json` 字元 159-179 `summary.zh`
+顯示：從試探動作中識別真咬鉤，在短窗口內提竿。
 
-## 問題與情境（本地分析）
+## 規則
 
-適用於需要短時注意力而非長指令序列的互動。設計問題是如何讓成功來自讀懂回饋，而不只是背誦固定倒數。
+「玩家抛出鱼钩后等待信号，在真正咬钩时按键提竿。等待时间并不固定，过早或过晚行动可能空竿；浮标、音效或提示符把不可见的水下状态转成可判断的信息。」
+出處：`sources/text/fishing-bite-window.json` 字元 279-350 `rules.zh`
+顯示：玩家拋出魚鉤後等待信號，在真正咬鉤時按鍵提竿。等待時間並不固定，過早或過晚行動可能空竿；浮標、音效或提示符把不可見的水下狀態轉成可判斷的信息。
 
-## 解法與取捨（本地分析）
+## 核心循環
 
-- 等待長度可變，但有效訊號必須一致；用視覺與聲音的冗餘提示降低單一感官門檻。
-- 失敗結果要區分「過早」與「過晚」，讓玩家知道該修正哪個決策。
+「把鱼钩投入水中」
+出處：`sources/text/fishing-bite-window.json` 字元 605-612 `loop[0].zh`
+顯示：把魚鉤投入水中
 
-## 可調參數（本地分析）
+「等待并辨认信号」
+出處：`sources/text/fishing-bite-window.json` 字元 671-678 `loop[1].zh`
+顯示：等待並辨認信號
 
-- 等待時間分布、假訊號數量、反應窗口長度、失敗後的重試成本。
-- 無障礙模式可放寬窗口，保持辨識問題而降低純反射門檻。
+「在窗口内提竿」
+出處：`sources/text/fishing-bite-window.json` 字元 750-756 `loop[2].zh`
+顯示：在窗口內提竿
 
-## 失敗模式（本地分析）
+「进入收线或重新抛竿」
+出處：`sources/text/fishing-bite-window.json` 字元 824-833 `loop[3].zh`
+顯示：進入收線或重新拋竿
 
-- 真假訊號沒有可辨差異，會讓學習失去意義。
-- 輸入延遲或動畫時間與判定窗口不一致，會造成不公平感。
+## 玩家取捨
 
-## 最小原型與驗收（本地提案）
+「浮标只是轻晃，还是已经真正下沉？现在提竿能抢到机会，也可能太早空竿。」
+出處：`sources/text/fishing-bite-window.json` 字元 919-953 `decisions[0].zh`
+顯示：浮標只是輕晃，還是已經真正下沉？現在提竿能搶到機會，也可能太早空竿。
 
-- 本地提案：一個按鈕、兩種訊號、可調判定窗口；先不做魚種與裝備。
-- 驗收：Given 已出現有效訊號，When 在窗口內按鍵，Then 成功；邊界外需給出可區別的提前或逾時原因。
+「已经出现咬钩信号，要立即提竿，还是再等一瞬确认并承担错过窗口的风险？」
+出處：`sources/text/fishing-bite-window.json` 字元 1097-1131 `decisions[1].zh`
+顯示：已經出現咬鉤信號，要立即提竿，還是再等一瞬確認並承擔錯過窗口的風險？
+
+## 可調參數
+
+「有效窗口」
+出處：`sources/text/fishing-bite-window.json` 字元 1308-1312 `parameters[0].name.zh`
+
+「窄窗口强调反应，宽窗口更适合休闲与辅助操作。」
+出處：`sources/text/fishing-bite-window.json` 字元 1389-1411 `parameters[0].effect.zh`
+顯示：窄窗口強調反應，寬窗口更適合休閒與輔助操作。
+
+「信号差异」
+出處：`sources/text/fishing-bite-window.json` 字元 1551-1555 `parameters[1].name.zh`
+顯示：信號差異
+
+「真假信号越接近越需要注意力，也越容易令人疲劳。」
+出處：`sources/text/fishing-bite-window.json` 字元 1632-1655 `parameters[1].effect.zh`
+顯示：真假信號越接近越需要注意力，也越容易令人疲勞。
+
+## 原型
+
+「做“等待／试探／真咬钩／逃走”四态和一个按键，让真假信号有可学习差异。」
+出處：`sources/text/fishing-bite-window.json` 字元 3015-3050 `prototype.firstStep.zh`
+顯示：做“等待／試探／真咬鉤／逃走”四態和一個按鍵，讓真假信號有可學習差異。
+
+「试玩几轮后，玩家能否说出自己是按早了还是按晚了，并提高成功率？」
+出處：`sources/text/fishing-bite-window.json` 字元 3382-3413 `prototype.test.zh`
+顯示：試玩幾輪後，玩家能否說出自己是按早了還是按晚了，並提高成功率？
+
+「先别增加鱼种与装备；如果失败原因不清楚，更多内容只会放大猜测感。」
+出處：`sources/text/fishing-bite-window.json` 字元 3202-3234 `prototype.pitfall.zh`
+顯示：先別增加魚種與裝備；如果失敗原因不清楚，更多內容只會放大猜測感。
 
 ## 相關模式
 

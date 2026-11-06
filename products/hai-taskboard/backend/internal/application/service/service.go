@@ -268,17 +268,18 @@ func (service *Service) CompleteWorkItem(ctx context.Context, principal domain.A
 		})
 }
 
-// redispatchAllowed applies the Developing redispatch guards before the domain
-// transition. Ready dispatch is unchanged; every other phase is not a dispatch
-// source, after the domain's version-first precedence.
+// redispatchAllowed applies the settled and strict-order guards whenever the
+// WorkItem already has Runs (Developing redispatch, or Ready after reopen).
+// Ready without Runs is unchanged; every other phase is not a dispatch source,
+// after the domain's version-first precedence.
 func redispatchAllowed(material port.CompletionMaterial, expectedVersion uint64, now time.Time) error {
 	item := material.WorkItem
 	switch {
-	case item.Phase() == domain.PhaseReady:
+	case item.Phase() == domain.PhaseReady && material.Runs.Count == 0:
 		return nil
 	case item.Version() != expectedVersion:
 		return domain.Rejection{Code: domain.CodeVersionConflict}
-	case item.Phase() != domain.PhaseDeveloping:
+	case item.Phase() != domain.PhaseDeveloping && item.Phase() != domain.PhaseReady:
 		return domain.Rejection{Code: domain.CodeInvalidTransition}
 	case material.Runs.Count == 0 || !material.Runs.AllSettled:
 		return command.NewError(command.CodeLifecycleRejected, "every existing Run must be settled before redispatch", false, nil, nil)

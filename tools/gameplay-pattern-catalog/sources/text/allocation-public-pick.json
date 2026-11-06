@@ -1,0 +1,119 @@
+{
+  "id": "allocation-public-pick",
+  "system": "allocation",
+  "edition": 3,
+  "name": {
+    "zh": "按顺序从公共池选走一个",
+    "en": "Take one option from a shared pool"
+  },
+  "summary": {
+    "zh": "自己拿走的东西，也会从别人的选择里消失。",
+    "en": "Your pick disappears from everyone else’s options."
+  },
+  "rules": {
+    "zh": "所有人面对同一批公开物品，轮到自己时选走一个，再从剩下的内容继续选择。玩家既考虑自身需要，也观察别人最缺什么；先选的优势、后选时的剩余物与补货时机共同改变价值。",
+    "en": "Players choose from one public pool. A taken item is unavailable to others, so each choice considers personal needs and opponents’ priorities. Pick order, remaining items and replenishment timing change an option’s value."
+  },
+  "loop": [
+    {
+      "zh": "查看公共选项",
+      "en": "Inspect the shared options"
+    },
+    {
+      "zh": "比较自己与他人的需要",
+      "en": "Compare competing needs"
+    },
+    {
+      "zh": "选走一个并更新余量",
+      "en": "Take one and update the pool"
+    },
+    {
+      "zh": "根据剩余内容调整计划",
+      "en": "Adapt to what remains"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "先拿最适合自己的，还是先拿对手只差的那一件？",
+      "en": "Take your best fit or deny the one piece an opponent needs?"
+    },
+    {
+      "zh": "某个普通选项很多，是否可以留到下一次再拿？",
+      "en": "Can a common option safely wait until your next pick?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "补货频率",
+        "en": "Replenishment frequency"
+      },
+      "effect": {
+        "zh": "每人选择后立即补货减弱抢夺，整轮结束才补货强化先后顺序。",
+        "en": "Immediate replacement softens competition; round-end replacement emphasizes order."
+      }
+    },
+    {
+      "name": {
+        "zh": "选择约束",
+        "en": "Pick constraints"
+      },
+      "effect": {
+        "zh": "放置或使用条件会让同一件物品对不同玩家价值不同。",
+        "en": "Placement or use requirements give the same item different values for different players."
+      }
+    }
+  ],
+  "tags": [
+    "planning",
+    "information"
+  ],
+  "related": [
+    "allocation-follow-phase",
+    "allocation-area-majority",
+    "allocation-public-goal-race",
+    "allocation-shared-stock"
+  ],
+  "contrast": {
+    "zh": "璀璨玻璃是逐个回合选骰并立即放置；云顶之弈的共享选秀按释放顺序竞争，价值还包含英雄与装备的组合。",
+    "en": "Sagrada resolves individual die-picking turns with immediate placement; TFT’s shared draft uses release order and packages a champion with an item."
+  },
+  "combination": {
+    "zh": "组合提案：战斗奖励改为全队公开轮选，选到的牌进入个人牌组；需要提前判断队友会拿走哪张，保留第二方案。",
+    "en": "Design proposal: draft battle rewards from a shared pool into personal decks, anticipating which cards teammates take and keeping a backup choice."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "三人面对两把剑和一面盾，你的队伍缺防护，对手也只有攻击装备。",
+      "en": "Three players see two swords and one shield; you lack defense and an opponent has only weapons."
+    },
+    "action": {
+      "zh": "先拿唯一的盾。",
+      "en": "Take the only shield."
+    },
+    "result": {
+      "zh": "自己补足防护，对手只能从两把剑中选择。",
+      "en": "You gain protection and the opponent must choose between swords."
+    },
+    "next": {
+      "zh": "下一轮对手可能优先抢防具，你要观察新池再决定。",
+      "en": "The opponent may prioritize defense next round, so inspect the new pool."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "competitive",
+    "firstStep": {
+      "zh": "用三名本地玩家、六张公开牌与两个不同收集目标做一轮轮选。",
+      "en": "Use three local players, six public cards and two collection goals for one draft."
+    },
+    "pitfall": {
+      "zh": "不要让所有玩家永远按同一张强度表拿牌。",
+      "en": "Avoid a universal ranking that dictates every pick."
+    },
+    "test": {
+      "zh": "玩家是否会查看别人的需求，并因此改变自己的选择？",
+      "en": "Do players change their picks after checking others’ needs?"
+    }
+  }
+}

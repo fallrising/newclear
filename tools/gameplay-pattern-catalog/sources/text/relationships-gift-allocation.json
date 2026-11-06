@@ -1,0 +1,120 @@
+{
+  "id": "relationships-gift-allocation",
+  "system": "relationships",
+  "edition": 1,
+  "name": {
+    "zh": "送礼偏好与分配",
+    "en": "Gift preferences and allocation"
+  },
+  "summary": {
+    "zh": "把有限礼物送给合适的人，换取关系或实用回馈。",
+    "en": "Allocate scarce gifts to characters for affection or practical rewards."
+  },
+  "rules": {
+    "zh": "玩家从礼物库存中选择对象和物品。接收者的偏好、赠送次数限制或剧情门槛改变收益；台词、关系记录或回礼让玩家修正下一次分配。",
+    "en": "Choose a recipient and an item. Preferences, gift limits or story gates determine the benefit; dialogue, relationship records and return gifts inform the next allocation."
+  },
+  "loop": [
+    {
+      "zh": "了解对象",
+      "en": "Learn preferences"
+    },
+    {
+      "zh": "获得礼物",
+      "en": "Acquire gifts"
+    },
+    {
+      "zh": "分配并赠送",
+      "en": "Allocate and give"
+    },
+    {
+      "zh": "记录反应",
+      "en": "Record reactions"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "稀有礼物给最喜欢的角色，还是给能立即提供能力的人？",
+      "en": "Give a rare gift to a favorite character or someone offering immediate utility?"
+    },
+    {
+      "zh": "未知偏好值得试错，还是重复已知的安全选择？",
+      "en": "Test an unknown preference or repeat a safe choice?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "偏好差异",
+        "en": "Preference spread"
+      },
+      "effect": {
+        "zh": "差异越大，记住人物细节越有价值。",
+        "en": "Larger differences reward remembering individual traits."
+      }
+    },
+    {
+      "name": {
+        "zh": "赠送上限",
+        "en": "Gift allowance"
+      },
+      "effect": {
+        "zh": "上限越低，单次分配越重要，也越容易形成等待。",
+        "en": "Lower limits make allocation meaningful but add waiting."
+      }
+    }
+  ],
+  "tags": [
+    "planning",
+    "progression",
+    "information"
+  ],
+  "related": [
+    "relationships-dynastic-marriage",
+    "combat-intent-preview",
+    "combat-part-destruction",
+    "combat-pause-orders"
+  ],
+  "contrast": {
+    "zh": "星露谷强调物品与人物的匹配；哈迪斯更强调同一资源在人物之间的分配。",
+    "en": "Stardew emphasizes matching items to people; Hades emphasizes allocating one resource across people."
+  },
+  "combination": {
+    "zh": "组合创意：采集物既能制作装备，也能赠给教练换取招式；每种关系投资都放弃一部分装备进度。",
+    "en": "Design proposal: gathering materials can become gear or gifts that unlock a trainer’s moves; relationship investment sacrifices equipment progress."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "你只有一枚稀有果实，两位角色都值得维持关系，但偏好不同。",
+      "en": "You have one rare fruit and two relationships to maintain, with different preferences."
+    },
+    "action": {
+      "zh": "你把果实送给已经确认喜欢它的人，把普通礼物留给另一位。",
+      "en": "Give the fruit to the person known to like it and reserve a common gift for the other."
+    },
+    "result": {
+      "zh": "对方的反应验证了偏好，关系进度增加，稀有礼物也消耗掉了。",
+      "en": "Their response confirms the preference and raises the relationship, consuming the rare gift."
+    },
+    "next": {
+      "zh": "根据反馈补充偏好记录，安排下一批礼物给谁。",
+      "en": "Update your preference notes and allocate the next set of gifts."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "做三位角色、六种礼物和可记录的喜欢、普通、讨厌三种反应。",
+      "en": "Build three characters, six gifts, and recorded liked, neutral, and disliked reactions."
+    },
+    "pitfall": {
+      "zh": "不必先写大量台词；先让偏好能被观察与记忆，避免纯试错查表。",
+      "en": "Defer extensive dialogue; make preferences observable and memorable instead of pure trial-and-error lookup."
+    },
+    "test": {
+      "zh": "礼物不足时，观察玩家是否依据偏好和目标分配，而非每人机械送一份。",
+      "en": "With too few gifts, see whether players allocate by preference and goals rather than routine equal distribution."
+    }
+  }
+}

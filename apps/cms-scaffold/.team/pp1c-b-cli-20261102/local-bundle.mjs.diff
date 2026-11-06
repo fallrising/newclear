@@ -1,0 +1,74 @@
+--- local-bundle.mjs.before
+
++++ scripts/ops/local-bundle.mjs
+
+@@ -4,8 +4,10 @@
+
+ import * as helpers from '../local/maintenance-helper.mjs';
+ import { directory, syncDirectory, read } from '../local/maintenance-store.mjs';
+ import { constants } from 'node:fs';
+-import { open, mkdir, lstat, rename, statfs } from 'node:fs/promises';
+-import { join, dirname } from 'node:path';
++import { open, mkdir, lstat, rename, statfs, readFile } from 'node:fs/promises';
++import { join, dirname, resolve } from 'node:path';
++import { fileURLToPath, pathToFileURL } from 'node:url';
++import { inspectTarget } from '../local/maintenance-target.mjs';
+ import { randomBytes, createHash } from 'node:crypto';
+ import { createInflate } from 'node:zlib';
+ import { Readable, Writable } from 'node:stream';
+@@ -262,3 +264,54 @@
+
+     throw error;
+   }
+ }
++
++// Fixed host CLI. Dependency overrides are internal test seams, never argv options.
++export function parseArgs(argv) {
++  ensure(Array.isArray(argv) && argv.length === 4 && argv.every(v => typeof v === 'string'), 'INPUT_INVALID');
++  const values = new Map();
++  for (let i = 0; i < argv.length; i += 2) {
++    ensure(['--run-id', '--operation-id'].includes(argv[i]) && !values.has(argv[i]), 'INPUT_INVALID');
++    values.set(argv[i], argv[i + 1]);
++  }
++  const runId = values.get('--run-id'), operationId = values.get('--operation-id');
++  ensure(/^[a-f0-9]{32}$/.test(runId) && /^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/.test(operationId), 'INPUT_INVALID');
++  return Object.freeze({ runId, operationId });
++}
++export async function run(argv, deps = {}) {
++  let operationId = null, backupId = null, phase = null, code = null, exitCode = 0;
++  try {
++    const options = parseArgs(argv); operationId = options.operationId;
++    const component = fileURLToPath(new URL('../../', import.meta.url)), cwd = resolve(deps.cwd ?? process.cwd());
++    ensure(deps.cwd !== undefined || cwd === resolve(component), 'INPUT_INVALID');
++    ensure(process.versions.node.split('.')[0] === '24', 'ADAPTER_UNSEALED');
++    const root = join(cwd, 'local', 'pp1', options.runId), inspect = deps.inspectTarget ?? inspectTarget;
++    let inspection;
++    for (const apiState of ['running', 'stopped']) {
++      try {
++        const candidate = await inspect(root, deps, { apiState });
++        ensure(candidate.target.runId === options.runId && candidate.target.targetId === `pp1-local:${options.runId}`, 'TARGET_NOT_OWNED');
++        inspection = candidate; break;
++      } catch { /* Only a complete strict inspection can establish original state. */ }
++    }
++    ensure(inspection, 'TARGET_NOT_OWNED');
++    ensure(sha256(await readFile(process.execPath)) === inspection.target.nodeBinarySha256, 'ADAPTER_UNSEALED');
++    const result = await (deps.captureLocal ?? captureLocal)(inspection, {
++      operationId, purpose: 'BACKUP_LOCAL', completionPolicy: 'RESTORE_ORIGINAL', targetRunId: null, incidentStartedAt: null
++    }, deps);
++    ensure(typeof result?.backupId === 'string' && /^pp1-\d{8}T\d{9}Z-[a-f0-9]{32}$/.test(result.backupId), 'CAPTURE_FAILED');
++    backupId = result.backupId; phase = 'COMPLETE';
++  } catch (error) {
++    let failure = new OpsError('CAPTURE_FAILED');
++    if (error instanceof OpsError) {
++      try { failure = new OpsError(error.code, error.phase); } catch { /* Do not emit unrecognized mutable error fields. */ }
++    }
++    code = failure.code; phase = failure.phase; exitCode = failure.exitCode;
++  }
++  try { (deps.stdout ?? process.stdout).write(canonicalBytes({ operationId, backupId, phase, code, exitCode })); }
++  catch { return 5; }
++  return exitCode;
++}
++if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1])).href) {
++  process.stdout.on('error', () => { process.exitCode = 5; });
++  process.exitCode = await run(process.argv.slice(2));
++}

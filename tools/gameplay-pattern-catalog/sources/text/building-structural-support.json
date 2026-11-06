@@ -1,0 +1,120 @@
+{
+  "id": "building-structural-support",
+  "system": "building",
+  "edition": 1,
+  "name": {
+    "zh": "结构支撑与坍塌",
+    "en": "Structural support and collapse"
+  },
+  "summary": {
+    "zh": "建得高、伸得远之前，先找到能够承受结构的支点。",
+    "en": "Find adequate support before building taller or extending farther."
+  },
+  "rules": {
+    "zh": "玩家搭建墙、梁和地板，结构必须满足支撑规则。悬挑或远离稳固支点会降低安全余量，失去支撑可能坍塌；根据提示加固后继续扩建。",
+    "en": "Players place walls, beams and floors subject to support rules. Long spans or weak support can collapse; feedback guides reinforcement."
+  },
+  "loop": [
+    {
+      "zh": "建立稳固支点",
+      "en": "Create solid supports"
+    },
+    {
+      "zh": "向外扩展结构",
+      "en": "Extend the structure"
+    },
+    {
+      "zh": "读取稳定性提示",
+      "en": "Read stability feedback"
+    },
+    {
+      "zh": "加固或改变形状",
+      "en": "Reinforce or reshape"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "更多柱子更安全，却占据活动空间。",
+      "en": "Extra pillars improve safety but occupy usable space."
+    },
+    {
+      "zh": "更强材料允许大胆形状，但需要额外探索或加工。",
+      "en": "Stronger materials enable larger spans at a processing cost."
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "支撑距离",
+        "en": "Support reach"
+      },
+      "effect": {
+        "zh": "更长跨度放松工程约束，鼓励造型。",
+        "en": "Longer supported spans loosen engineering constraints."
+      }
+    },
+    {
+      "name": {
+        "zh": "坍塌损失",
+        "en": "Collapse loss"
+      },
+      "effect": {
+        "zh": "材料可回收鼓励试验，连锁损坏会要求先做小原型。",
+        "en": "Recoverable materials encourage experiments; cascading damage encourages prototypes."
+      }
+    }
+  ],
+  "tags": [
+    "spatial",
+    "risk",
+    "planning"
+  ],
+  "related": [
+    "building-water-engineering",
+    "building-access-network",
+    "building-room-requirements",
+    "building-service-coverage"
+  ],
+  "contrast": {
+    "zh": "Valheim沿部件连接传播稳定性；RimWorld以屋顶与墙柱的支持关系限制大房间。",
+    "en": "Valheim propagates stability through connected pieces; RimWorld constrains large rooms through roof support from walls and columns."
+  },
+  "combination": {
+    "zh": "设计可撤退的山谷桥梁，既承担队伍通行，也可切断指定支点阻止追兵。",
+    "en": "Build a retreat bridge that carries the party but can lose a selected support to stop pursuers."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "你正在搭长廊，最远一块地板已离承重柱太远。",
+      "en": "You extend a walkway; its outermost floor is too far from the support column."
+    },
+    "action": {
+      "zh": "你在下方补一根柱，再继续向外搭。",
+      "en": "Add a column below before extending farther."
+    },
+    "result": {
+      "zh": "稳定性提示改善；拆掉关键支点则会让依赖它的部分失稳。",
+      "en": "The stability indicator improves; removing a key support destabilises dependent pieces."
+    },
+    "next": {
+      "zh": "每次扩建或拆改前，重新检查支撑路径。",
+      "en": "Recheck support paths before each extension or demolition."
+    }
+  },
+  "prototype": {
+    "scope": "medium",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "先用二维格子与“离地基的连接距离”判定支撑，不用真实刚体坍塌。",
+      "en": "Start with a two-dimensional grid and support based on connection distance from foundations, without rigid-body collapse."
+    },
+    "pitfall": {
+      "zh": "结构分析、破坏传播和物理碎块是不同成本，先把安全提示与规则做一致。",
+      "en": "Structural evaluation, failure propagation and physics debris are separate costs; first align rules with safety feedback."
+    },
+    "test": {
+      "zh": "看到危险提示后，玩家能否推断该加固哪里，并预测拆除某支点的影响？",
+      "en": "Can players infer where to reinforce and predict what removing a support will affect?"
+    }
+  }
+}

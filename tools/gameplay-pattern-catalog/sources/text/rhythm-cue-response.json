@@ -1,0 +1,130 @@
+{
+  "id": "rhythm-cue-response",
+  "system": "rhythm",
+  "edition": 3,
+  "name": {
+    "zh": "听完提示，在指定拍回应",
+    "en": "Answer a cue on its target beat"
+  },
+  "summary": {
+    "zh": "不是听到声音就按，而是认出提示后等到该你回应的那一拍。",
+    "en": "Do not press at every sound: identify the cue and wait for the response beat."
+  },
+  "rules": {
+    "zh": "系统先给声音或动作提示，玩家根据已学会的规则推算回应时机，再用简短操作接上节奏。不同提示可以要求不同间隔；判定后立即反馈早了、晚了或正好。本条关注提示与回应的对应关系，不要求每拍都做动作。",
+    "en": "A sound or animation cues a response. Use the learned pattern to work out when to act, then join the rhythm with a short input. Different cues may imply different delays; feedback reports early, late or accurate timing. This concerns the cue-response relationship, without requiring an action on every beat."
+  },
+  "loop": [
+    {
+      "zh": "辨认刚出现的提示",
+      "en": "Recognize the cue"
+    },
+    {
+      "zh": "按提示规则等待或数拍",
+      "en": "Wait or count according to its pattern"
+    },
+    {
+      "zh": "在目标拍执行回应",
+      "en": "Respond on the target beat"
+    },
+    {
+      "zh": "利用反馈接住下一次提示",
+      "en": "Use feedback to catch the next cue"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "这段提示要求立刻接上，还是留出几拍再回应？",
+      "en": "Does this cue call for an immediate answer or a delay of several beats?"
+    },
+    {
+      "zh": "两个提示接连出现时，哪一次回应先到，怎样避免被后一个提示带乱？",
+      "en": "When cues overlap, which response is due first, and how can you avoid losing it to the newer cue?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "提示到回应的间隔",
+        "en": "Cue-to-response interval"
+      },
+      "effect": {
+        "zh": "间隔越长，越依赖保持节拍；间隔变化应先用清楚提示教会。",
+        "en": "Longer gaps rely more on keeping time; changing gaps need clear teaching cues."
+      }
+    },
+    {
+      "name": {
+        "zh": "提示种类",
+        "en": "Cue variety"
+      },
+      "effect": {
+        "zh": "一种提示适合建立规则，多种提示会增加识别与切换负担。",
+        "en": "One cue establishes the rule; multiple cues add recognition and switching demands."
+      }
+    },
+    {
+      "name": {
+        "zh": "提示重叠量",
+        "en": "Cue overlap"
+      },
+      "effect": {
+        "zh": "前一个回应还未结束就给新提示，会把简单反应变成多条节奏的协调。",
+        "en": "Issuing another cue before the first response resolves turns a simple reaction into coordination across patterns."
+      }
+    }
+  ],
+  "tags": [
+    "timing",
+    "information",
+    "precision"
+  ],
+  "related": [
+    "rhythm-hidden-beats",
+    "rhythm-sustain-notes",
+    "puzzles-time-scrubbing",
+    "rhythm-onbeat-actions"
+  ],
+  "contrast": {
+    "zh": "节奏医生的经典拍以第七拍为明确目标；节奏天国把提示与回应包装成不同的短动作场景。",
+    "en": "Rhythm Doctor’s classic pattern gives a specific seventh-beat target; Rhythm Heaven expresses cue-response timing through varied short action scenes."
+  },
+  "combination": {
+    "zh": "组合提案：三种机器图案搭配提示音，分别代表隔一拍、隔两拍或连续两次敲击；先给可反复试的短例子，再让玩家识别并回应混合提示。",
+    "en": "Design proposal: three machine symbols paired with sounds mean a one-beat wait, a two-beat wait, or two consecutive strikes. Teach them with repeatable examples before mixing the cues."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "教学示例：两声短铃代表“再等两拍后敲击”，每拍相隔一秒。",
+      "en": "Teaching example: two short chimes mean “strike after two more beats,” with one second between beats."
+    },
+    "action": {
+      "zh": "玩家听完后默数两拍，再按空格。",
+      "en": "The player counts two beats after the cue and presses space."
+    },
+    "result": {
+      "zh": "机器亮绿灯并回放正确时点，确认这次回应没有抢早。",
+      "en": "The machine lights green and replays the target time, confirming the response was not early."
+    },
+    "next": {
+      "zh": "下一次换成一声长铃，玩家需要套用另一种等待规则。",
+      "en": "A long chime arrives next, requiring a different response delay."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "用一个键、两种音色提示和两个固定等待间隔，提供可重复的练习段与早晚反馈。",
+      "en": "Use one key, two cue sounds and two fixed delays, with a repeatable practice section and early/late feedback."
+    },
+    "pitfall": {
+      "zh": "用几乎相同的音色表示完全不同的回应，会让失误来自辨认困难，而非节奏挑战。",
+      "en": "Nearly identical sounds for very different responses can make cue recognition, rather than timing, the obstacle."
+    },
+    "test": {
+      "zh": "不看说明重试时，玩家能否预测下一次应该在哪一拍按？",
+      "en": "On a retry without the instructions, can players predict the beat on which they should press?"
+    }
+  }
+}

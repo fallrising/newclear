@@ -1,0 +1,120 @@
+{
+  "id": "deckbuilding-dice-allocation",
+  "system": "deckbuilding",
+  "edition": 2,
+  "name": {
+    "zh": "把掷出的结果分配给行动",
+    "en": "Allocating rolled outcomes"
+  },
+  "summary": {
+    "zh": "骰子先告诉你这回合有什么，再由你决定把它们用在哪里。",
+    "en": "Roll first, then decide where each available result will do the most good."
+  },
+  "rules": {
+    "zh": "每回合先掷出一组结果，再由玩家分配给可接受的行动或目标。行动可能要求特定点数、奇偶或效果类型；可用结果有限，玩家要把不理想的骰子也安排出用途。",
+    "en": "Roll a pool before assigning results to eligible actions or targets. Requirements may involve numbers, parity or effect types; a limited pool makes even awkward results worth considering."
+  },
+  "loop": [
+    {
+      "zh": "掷出本回合骰子",
+      "en": "Roll the turn’s pool"
+    },
+    {
+      "zh": "查看能用的槽位或目标",
+      "en": "Check eligible slots or targets"
+    },
+    {
+      "zh": "分配与修正结果",
+      "en": "Allocate and modify results"
+    },
+    {
+      "zh": "结算后准备下一轮",
+      "en": "Resolve and prepare the next roll"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "把高点数给大伤害，还是留给最低点数有要求的辅助行动？",
+      "en": "Spend a high roll on damage or reserve it for a demanding utility slot?"
+    },
+    {
+      "zh": "先重掷坏结果，还是接受它并利用一个有代价的效果？",
+      "en": "Reroll an awkward result or use a costly effect it enables?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "结果可调次数",
+        "en": "Result manipulation budget"
+      },
+      "effect": {
+        "zh": "重掷和改面越多，随机性越低，但计算选择会增多。",
+        "en": "More rerolls and conversions reduce randomness while increasing calculation."
+      }
+    },
+    {
+      "name": {
+        "zh": "行动限制的交叉程度",
+        "en": "Overlapping requirements"
+      },
+      "effect": {
+        "zh": "多个行动争用同一类结果时，分配才会产生取舍。",
+        "en": "Trade-offs appear when multiple actions compete for the same kind of result."
+      }
+    }
+  ],
+  "tags": [
+    "randomness",
+    "planning",
+    "optimization"
+  ],
+  "related": [
+    "deckbuilding-reward-choice",
+    "deckbuilding-discard-redraw",
+    "deckbuilding-duplicate-investment",
+    "deckbuilding-opening-hand-control"
+  ],
+  "contrast": {
+    "zh": "《骰子地下城》侧重数字与装备槽位的匹配；《Astrea》侧重效果种类及其目标，不是所有骰子构筑都靠点数大小。",
+    "en": "Dicey Dungeons matches numbers to equipment slots; Astrea assigns effect types to targets rather than merely valuing high rolls."
+  },
+  "combination": {
+    "zh": "设计提案：用骰子代表当日食材状态，把合适的点数分给切、煮、烤步骤，坏点数也可转成备料。",
+    "en": "Design proposal: Represent ingredient conditions with dice assigned to cutting, boiling or baking, with awkward values usable for preparation."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "编辑示例：掷出二、四、六；盾牌收偶数，重击至少要五。",
+      "en": "Editorial example: roll two, four and six; a shield needs an even number and a heavy strike needs at least five."
+    },
+    "action": {
+      "zh": "玩家把六给重击，四给盾牌。",
+      "en": "Assign six to the strike and four to the shield."
+    },
+    "result": {
+      "zh": "攻击与防守都成功，剩下的二还能支付一个小治疗。",
+      "en": "Both actions work, leaving two for a minor heal."
+    },
+    "next": {
+      "zh": "下一轮重新掷骰，不能照抄这一轮分配。",
+      "en": "The next roll requires a fresh allocation."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "用三颗六面骰和四件带简单条件的装备做单场战斗。",
+      "en": "Use three six-sided dice and four items with simple requirements in one encounter."
+    },
+    "pitfall": {
+      "zh": "首版只做一种改点能力；大量重掷、复制和锁骰会让穷举变成负担。",
+      "en": "Start with one manipulation effect; many rerolls, copies and locks can overwhelm the decision."
+    },
+    "test": {
+      "zh": "玩家能找到高点数之外的用途，并会为紧缺槽位保留合适骰子。",
+      "en": "Players find uses beyond high values and reserve dice for constrained slots."
+    }
+  }
+}

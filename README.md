@@ -57,7 +57,7 @@
 | [`platform/agent-workforce`](platform/agent-workforce/) | 跨產品數位工作者：M1 離線核心與有界 M2 原生 adapter；完整 M2／跨產品整合仍有缺口 | Python、SQLite；可替換 adapters | A |
 | [`platform/dim-gate`](platform/dim-gate/) | CMDB 核心企業運維自助平台前端（demo） | React, TypeScript | A |
 | [`platform/spring-pool`](platform/spring-pool/) | 單人版本化腳本庫與 runbook 編排；不執行腳本（開發中） | Hono, Rust/Wasm；Workers, D1 | A |
-| [`platform/cloud-lab`](platform/cloud-lab/) | 個人CF工具整合入口：固定node-health歷史閉環、Access看板與bot；既有工具盤點及重複判定已整理，下一項為唯讀inventory報告adapter。主線未完成、當前授權另見元件SUCCESS | Workers Web APIs、D1、Python、原生網頁 | 未分級 |
+| [`platform/cloud-lab`](platform/cloud-lab/) | 個人CF工具整合入口：固定node-health歷史閉環、Access看板與bot；既有工具盤點及重複判定已整理，inventory報告adapter已上線，4個Worker用途已對照；多VPS唯讀agent來源與設計已整理。主線未完成、當前授權另見元件SUCCESS | Workers Web APIs、D1、Python、原生網頁 | 未分級 |
 | [`platform/edge-ops`](platform/edge-ops/) | Cloudflare 主機監控、受控作業與可選初始化（SDD + M0 契約層，無部署） | TypeScript, Go；Workers, D1, DO, R2, React（規劃） | A |
 | [`platform/signal-hub`](platform/signal-hub/) | 個人事件中樞／戰情室：CloudEvents 事件庫、規則生成指標看板、訂閱投遞（M3 runtime） | Go, SQLite, React | A |
 | [`platform/ice-maker`](platform/ice-maker/) | Local-first 個人工程知識編譯器 | Python | A |
@@ -68,7 +68,7 @@
 | [`apps/cloudform`](apps/cloudform/) | Terraform-schema-driven cloud provisioning form designer | TypeScript, Java | D |
 | [`apps/cms-scaffold`](apps/cms-scaffold/) | 可重複使用的 CMS kernel（API + Front/Back/Admin） | Java, React, PostgreSQL | C |
 | [`tools/codex-usage`](tools/codex-usage/) | Agent Usage 統一唯讀總覽：重用 Codex／Claude 來源，分清訂閱額度、本機統計與 API 支出 | Python, Codex App Server | A |
-| [`tools/gameplay-pattern-catalog`](tools/gameplay-pattern-catalog/) | Gameplay Atlas metadata 指引與 14 篇附來源的設計模式筆記；靜態網站、搜尋與分類（Draft，未部署） | Python、原生 JavaScript | 未分級 |
+| [`tools/gameplay-pattern-catalog`](tools/gameplay-pattern-catalog/) | 以 Gameplay Atlas 公開快照為分母的繁中設計模式筆記、來源 manifest 與靜態網站（Draft，未部署） | Python、原生 JavaScript | 未分級 |
 | [`tools/motion-prompt`](tools/motion-prompt/) | 繁中／英文動態術語圖鑑：固定 120 項來源與驗收規格，網站待整合 | 原生 JavaScript, Canvas | 未分級 |
 | [`tools/streaming-converter`](tools/streaming-converter/) | FFmpeg HLS conversion 與 web player | Bash, FFmpeg | D |
 

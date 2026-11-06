@@ -1,0 +1,120 @@
+{
+  "id": "relationships-daily-contact",
+  "system": "relationships",
+  "edition": 1,
+  "name": {
+    "zh": "日常交流节奏",
+    "en": "Daily contact rhythm"
+  },
+  "summary": {
+    "zh": "用每日有限的交流收益，让“顺路看看朋友”成为路线选择。",
+    "en": "Limited daily conversation rewards turn checking on friends into a routing decision."
+  },
+  "rules": {
+    "zh": "玩家找到角色并交谈；同一天重复互动通常不会反复刷同样的收益。新台词和关系变化提供反馈，行程时间则是隐形成本。",
+    "en": "Find a character and talk. Repeating the same interaction usually cannot farm its daily benefit; dialogue and affinity provide feedback while travel consumes time."
+  },
+  "loop": [
+    {
+      "zh": "查看今日行程",
+      "en": "Check today’s route"
+    },
+    {
+      "zh": "找到角色",
+      "en": "Find a character"
+    },
+    {
+      "zh": "完成一次交流",
+      "en": "Have a conversation"
+    },
+    {
+      "zh": "安排下一站",
+      "en": "Plan the next stop"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "为了一个人绕远路，还是兼顾几位顺路的朋友？",
+      "en": "Detour for one person or visit several nearby friends?"
+    },
+    {
+      "zh": "把时间留给挣钱，还是维持熟悉的人际关系？",
+      "en": "Keep time for income or maintain relationships?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "每日收益次数",
+        "en": "Daily reward limit"
+      },
+      "effect": {
+        "zh": "限一次可抑制刷对话，但需要足够丰富的日常内容。",
+        "en": "A once-daily limit prevents grinding but needs varied dialogue."
+      }
+    },
+    {
+      "name": {
+        "zh": "角色可达性",
+        "en": "Character accessibility"
+      },
+      "effect": {
+        "zh": "分散的日程增加路线规划，固定集合点更轻松。",
+        "en": "Dispersed schedules add routing; gathering places reduce friction."
+      }
+    }
+  ],
+  "tags": [
+    "time",
+    "planning",
+    "narrative"
+  ],
+  "related": [
+    "relationships-date-itinerary",
+    "relationships-bond-scenes",
+    "relationships-dynastic-marriage",
+    "commerce-timed-contracts"
+  ],
+  "contrast": {
+    "zh": "星露谷的维系还涉及衰减例外；波西亚让聊天成为多种日常社交动作中的低成本选项。",
+    "en": "Stardew adds maintenance and decay exceptions; Portia places chat among several low-cost daily social actions."
+  },
+  "combination": {
+    "zh": "组合创意：经营送货路线时可顺路拜访老顾客；只在真实完成一次交流后获得关系，不把经过门口当成打卡。",
+    "en": "Design proposal: a delivery route can include visits to regular customers; affinity requires an actual conversation rather than merely passing a doorway."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "今天只剩一段空闲时间，一位朋友顺路，另一位在较远的码头。",
+      "en": "One free period remains today; one friend is on your route and another is at a distant dock."
+    },
+    "action": {
+      "zh": "你选择先拜访码头那位，放弃今天多采一次材料。",
+      "en": "Visit the distant friend and skip another gathering trip today."
+    },
+    "result": {
+      "zh": "获得一次交流与新的台词，但当天的生产时间减少了。",
+      "en": "You get a conversation and new dialogue at the cost of production time."
+    },
+    "next": {
+      "zh": "明天根据人物行程重新安排拜访顺序。",
+      "en": "Tomorrow, plan visits around the characters’ schedules again."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "做三个有固定行程的角色、一天三个时段与每人每日一次有效交流。",
+      "en": "Use three characters with fixed schedules, three daily periods, and one meaningful daily interaction per person."
+    },
+    "pitfall": {
+      "zh": "如果只是每天点同一句话，关系会变签到；先加入可见的日程或对话变化。",
+      "en": "Repeating identical lines turns relationships into check-ins; add visible schedule or dialogue variation."
+    },
+    "test": {
+      "zh": "观察玩家是否调整自己的路线照顾关系，而非交流收益只靠反复点击。",
+      "en": "See whether players adjust routes for relationships instead of gaining progress through repeated clicking."
+    }
+  }
+}

@@ -1,0 +1,120 @@
+{
+  "id": "deckbuilding-dual-use-cards",
+  "system": "deckbuilding",
+  "edition": 2,
+  "name": {
+    "zh": "同一张牌，两种用途",
+    "en": "Two competing uses for one card"
+  },
+  "summary": {
+    "zh": "把攻击和移动放在同一张牌上，选一个用途就放弃另一个。",
+    "en": "Put two useful actions on one card so using one sacrifices the other."
+  },
+  "rules": {
+    "zh": "每张牌提供两种互相竞争的用途，例如射击或移动、攻击或防守。玩家决定用哪一面，并按规则消耗或暂时失去另一面的机会；场景要经常同时需要这两种功能。",
+    "en": "Each card offers competing uses, such as shooting versus movement or attacking versus defending. Choosing one spends or defers the other, and encounters should regularly create demand for both."
+  },
+  "loop": [
+    {
+      "zh": "观察行动与位置需求",
+      "en": "Read action and positioning needs"
+    },
+    {
+      "zh": "比较一张牌的两种用途",
+      "en": "Compare both uses"
+    },
+    {
+      "zh": "执行其中一种",
+      "en": "Commit to one"
+    },
+    {
+      "zh": "用其他牌补剩余缺口",
+      "en": "Cover the missing role with another card"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "用枪消灭敌人，还是丢掉枪换一次越过障碍的移动？",
+      "en": "Shoot an enemy or discard the weapon for traversal?"
+    },
+    {
+      "zh": "把强攻击牌用于普通移动，能否换来更好的下一回合位置？",
+      "en": "Is sacrificing a strong attack for movement worth the next turn’s position?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "两用途强度差",
+        "en": "Power gap between uses"
+      },
+      "effect": {
+        "zh": "一面长期明显更强时，二选一会退化成假选择。",
+        "en": "If one use dominates, the choice becomes cosmetic."
+      }
+    },
+    {
+      "name": {
+        "zh": "使用后的恢复规则",
+        "en": "Recovery after use"
+      },
+      "effect": {
+        "zh": "永久失去、休息取回和下轮抽回，会改变玩家舍不得用的程度。",
+        "en": "Permanent loss, rest recovery and normal cycling create different commitment levels."
+      }
+    }
+  ],
+  "tags": [
+    "spatial",
+    "planning",
+    "risk"
+  ],
+  "related": [
+    "deckbuilding-discard-redraw",
+    "deckbuilding-exhaust-for-burst",
+    "deckbuilding-dice-allocation",
+    "deckbuilding-duplicate-investment"
+  ],
+  "contrast": {
+    "zh": "《霓虹白客》把选择放进即时跑酷；《幽港迷城》先选两张，再在回合中分配上下半部行动。",
+    "en": "Neon White makes the trade-off during real-time traversal; Gloomhaven allocates two card halves in turn-based planning."
+  },
+  "combination": {
+    "zh": "设计提案：在小型遗迹里让火焰卡既能烧敌人也能点燃机关，玩家要带着有限用途安排路线。",
+    "en": "Design proposal: Make a fire card either damage enemies or ignite route-opening mechanisms in a compact ruin."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "编辑示例：一张风牌可以射击，也可以弃掉后跳过沟壑。",
+      "en": "Editorial example: a wind card can shoot or be discarded to leap a gap."
+    },
+    "action": {
+      "zh": "玩家选择弃牌跨沟，绕到守卫背后。",
+      "en": "Discard it to cross the gap behind a guard."
+    },
+    "result": {
+      "zh": "位置变好，但手里少了一次射击手段。",
+      "en": "Position improves, but one shooting resource is gone."
+    },
+    "next": {
+      "zh": "玩家用剩余近战牌收尾，再找下一张移动资源。",
+      "en": "Finish with a remaining melee card and seek another traversal resource."
+    }
+  },
+  "prototype": {
+    "scope": "medium",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "做一个网格小房间，两种卡各有攻击和移动用途；先用回合制验证取舍。",
+      "en": "Build one grid room with two card types that each offer attack and movement; test turn-based first."
+    },
+    "pitfall": {
+      "zh": "同时制作高速跑酷、复杂敌人和大量卡牌会掩盖核心二选一。",
+      "en": "Fast platforming, complex enemies and a large card pool can obscure the basic trade-off."
+    },
+    "test": {
+      "zh": "同一张牌在不同布局中被用于不同用途，玩家能解释放弃了什么。",
+      "en": "Players use the same card differently across layouts and explain the sacrifice."
+    }
+  }
+}

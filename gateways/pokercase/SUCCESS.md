@@ -10,6 +10,14 @@ source_commit: 95fdf5f8ef4e548e6854f8838385913dff4877b2
 
 # pokercase 成功契約
 
+## T-0426 — Renewed dynamic Claude trial
+
+Owner approved [RD-1–RD-3](docs/tasks/T-0426-dynamic-renewed.md), a fresh3/300/60/no-retry repeat after probablecapacityreport. Samepinnedruntime/CLI/runner; old429/unusedslotsclosed. Actual3/3HTTP200 in7.673s passed distinctinline markers, sameprocess andmatchingSIDnative restart,3durableusage rows/history andownedcleanup. All3admissionsconsumed/closed,no retries; limitedterminalMessages tuple, no overallproduct/cache/account guarantee.
+
+## T-0426 — Approved dynamic Claude live acceptance
+
+Owner approved [LD-1–LD-3](docs/tasks/T-0426-dynamic-live.md): new3gatewayrequests/300seconds/60seconds each, no retries, using the reviewed dynamic-context runtime and retained officialTUI. First response, appended inline instruction continuation, restart/native reuse and usage readback; no broader client/cache/account or whole-product claim. Actual attempt stopped at firstHTTP429:1/3admissions,total2.811s,no retry; dynamic continuation and restart cases notrun. Ownedcleanup passed; this allowance and prior budgets are closed.
+
 ## T-0426 — Ordered dynamic instruction continuation
 
 Owner approved [DC-1–DC-4](docs/tasks/T-0426-dynamic-context.md) after the tool-context correction. Preserve Messages top-level versus inline instruction provenance/order, add bounded idle/saved user continuation, and retain strict fresh fallback for new context alongside tool results. No instruction stripping, other-protocol contract relaxation, real trial or whole-product acceptance. Claim397 merged; original17AC remain unchanged.

@@ -11,7 +11,7 @@ required acceptance decision. `Candidate` means executed worker evidence still a
 | HAI-BOUNDARY-001..004 | SDD §3 | architecture/package dependency tests; Fake capability tests | NotRun |
 | HAI-AUTH-001..006 | SDD §4, ADR-001/005 | transaction, import, artifact, migration, backup tests | Passing bounded command/artifact transaction subset (T-090); backup and full group remain NotRun |
 | HAI-DOMAIN-001..005 | SDD §5, ADR-002 | domain identity, immutability, blocker, version/idempotency tests | Passing bounded version/current-subject subset (T-090); full group remains NotRun |
-| HAI-STATE-001..007 | SDD §5 | table-driven WorkItem transition tests; UI parity tests | Passing bounded HAI-STATE-005/007 rework/redispatch subset (HRWK); full group and UI parity remain NotRun |
+| HAI-STATE-001..008 | SDD §5 | table-driven WorkItem transition tests; UI parity tests | Passing bounded HAI-STATE-005/007 rework/redispatch subset (HRWK) and HAI-STATE-008 reopen subset (HROP); full group and UI parity remain NotRun |
 | HAI-DONE-001..004 | SDD §5, ADR-002 | positive and exhaustive negative completion tests | Passing bounded lawful HAI-DONE-002/004 rework subset (HRWK); exhaustive group remains NotRun |
 | HAI-EXEC-001..008 | SDD §6, ADR-003 | outbox, fencing, cancel, expiry, stale publisher, Fake tests | Passing bounded Fake/manual vertical and persistent polling subsets (T-073/T-089/T-099); restore remains NotRun |
 | HAI-RECON-001..007 | SDD §7, ADR-004 | DAG/cycle, old+new closure, stale-plan, reuse tests | Passing bounded pure kernel (T-024); durable import/activation remains NotRun |
@@ -552,3 +552,13 @@ rework A→B, consumed Approval, fixture-only rows on a second item, acceptance 
 `TestWorkItemDetail_AttributionCorruption` (AC-04) and `TestWorkItemDetail_SnapshotCapacityCorruption`
 (AC-05, real WAL concurrent writer). [Evidence](evidence/work-item-detail-20261102.md) records Red,
 mutation, gates and review. No coverage, Done validity, completion UI or whole-M2 acceptance is inferred.
+
+## 2026-11-02 ReopenWorkItem (HROP)
+
+[Accepted ROP-01..03](sdd/reopen-work-item.md) implements HAI-STATE-008 and the domain-and-gates `ReopenWorkItem` row,
+and applies the HAI-STATE-007 settled/strict-order guards to Ready dispatch with Run history. Named oracles:
+`TestReopenWorkItem_GuardsAndHistory` (ROP-AC-01), `TestDispatchRun_FromReadyWithRunHistory` (ROP-AC-02) and
+`TestReopen_SecondCompletionUsesOnlyNewCandidate` (ROP-AC-03, real SQLite/Fake/HTTP: complete A, reopen, second
+Candidate, second CompletionRecord, restart) ([evidence](evidence/reopen-work-item-20261102.md)). The pure
+`TestCompleteWorkItem_PreservesHistoryOnReopenAndStale` stays domain-only; Done-Stale
+(`TestDoneStale_PreservesCompletionAndBlocksDownstreamReadiness`) stays M4. No Done validity, completion UI or SUCCESS AC-02..04 claim.

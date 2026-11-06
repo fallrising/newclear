@@ -1,20 +1,24 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "title": "Gameplay Atlas",
   "url": "https://gameplayatlas.loopyhop.com/",
   "accessed": "2026-11-02",
   "resource_type": "game-mechanic-reference",
   "catalog_language": "zh-Hant",
   "source_language_read": "en",
-  "coverage": "curated-subset",
-  "curated_count": 14,
-  "reported_counts": {
-    "mechanics": 280,
-    "groups": 28
+  "coverage": {
+    "basis": "source-snapshot",
+    "snapshot_id": "atlas-public-2026-11-02",
+    "claim": "partial",
+    "denominator": "sources/manifest.json"
   },
-  "selection": "12 homepage-linked mechanics plus inventory adjacency and price discovery",
-  "verification_boundary": "13 public page-text excerpts; price discovery from a search-index excerpt. No gameplay execution or full-site crawl.",
-  "reuse_boundary": "Independent short paraphrases and original design analysis; no upstream images, full text, code or assets copied. Upstream rights are not relicensed.",
-  "count_source": "https://gameplayatlas.loopyhop.com/",
+  "homepage_observation": {
+    "mechanics": 280,
+    "groups": 28,
+    "count_source": "https://gameplayatlas.loopyhop.com/"
+  },
+  "selection": "對帳後公開快照中的每一個機制，包含先前 14 篇精選筆記。",
+  "verification_boundary": "來源 manifest 與來源摘要對照本次快照的公開機制頁與內嵌條目。各篇本地分析由模型依該篇來源摘要起草，狀態為 draft，尚未經人工審閱；不是獨立審查，不是實玩，也不表示原站之後不會變。",
+  "reuse_boundary": "只保留短篇改寫與獨立設計分析；不複製原站圖片、全文、程式或素材。上游權利不因引用而改成 MIT。",
   "policy_source": "https://gameplayatlas.loopyhop.com/about/"
 }

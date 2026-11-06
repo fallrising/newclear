@@ -1,0 +1,120 @@
+{
+  "id": "matching-tap-connected-group",
+  "system": "matching",
+  "edition": 3,
+  "name": {
+    "zh": "点掉一整团相邻同色块",
+    "en": "Clear a connected group with one tap"
+  },
+  "summary": {
+    "zh": "先改变周围排列，把小团接成大团，再选择何时收掉。",
+    "en": "Rearrange the surroundings to join small groups, then decide when to collect them."
+  },
+  "rules": {
+    "zh": "玩家点击一团横纵相连的同色块，只要达到数量门槛，整团就会消失。空位让其他块移动，原本分开的同色块可能接到一起；因此点击位置既决定眼前收益，也决定下一团会长在哪里。",
+    "en": "Tap an orthogonally connected group of matching blocks that meets the minimum size to clear the whole group. Other blocks move into gaps, potentially joining previously separated groups. The chosen group changes both immediate rewards and future connections."
+  },
+  "loop": [
+    {
+      "zh": "找到相连的同色团",
+      "en": "Find a connected color group"
+    },
+    {
+      "zh": "比较当前清除与后续连通",
+      "en": "Compare immediate clearing with future connections"
+    },
+    {
+      "zh": "点击整团并结算",
+      "en": "Tap the group to resolve it"
+    },
+    {
+      "zh": "利用移动后的新团",
+      "en": "Use the groups formed by movement"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "先清一小团把两侧的大团接起来，还是马上消掉已有的大团？",
+      "en": "Clear a small divider to connect two large groups or collect an existing group now?"
+    },
+    {
+      "zh": "大团离目标很远，靠目标的小团是否更值得这一步？",
+      "en": "Is a small group beside the objective worth more than a distant large group?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "最低团块大小",
+        "en": "Minimum group size"
+      },
+      "effect": {
+        "zh": "较低门槛减少卡死；较高门槛更强调先改变周围布局。",
+        "en": "A lower threshold reduces dead ends; a higher one emphasizes preparing the surroundings."
+      }
+    },
+    {
+      "name": {
+        "zh": "空位移动规则",
+        "en": "Gap movement"
+      },
+      "effect": {
+        "zh": "只向下落和整列横向压缩会形成不同的后续连通关系。",
+        "en": "Downward fall and horizontal column compression create different future connections."
+      }
+    }
+  ],
+  "tags": [
+    "planning",
+    "spatial",
+    "optimization"
+  ],
+  "related": [
+    "matching-complete-lines",
+    "matching-merge-three-upgrade",
+    "matching-pattern-creates-power",
+    "matching-swap-to-align"
+  ],
+  "contrast": {
+    "zh": "Toon Blast把大团连接到特殊物件的生成；Pet Rescue Saga把清除价值连接到宠物救援。相同点击动作可以服务不同目标。",
+    "en": "Toon Blast ties larger groups to special-item creation; Pet Rescue Saga ties clearing to pet rescue. The same input can serve different objectives."
+  },
+  "combination": {
+    "zh": "组合提案：扫描器显示哪些色块下藏有矿物。玩家可以为开采目标先清小团，也可以先接大团减少开采次数。",
+    "en": "Design proposal: a scanner reveals minerals under colored blocks. Clear a small group to reach a deposit now, or join a larger group to reduce extraction actions."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "上下两团红块被中间的两块蓝色分开，右下角还有一个收集目标。",
+      "en": "Upper and lower red groups are separated by two blue blocks, with a collection target at the lower right."
+    },
+    "action": {
+      "zh": "先点掉中间蓝块，让红块在补位后接起来。",
+      "en": "Clear the blue divider so the red groups meet after movement."
+    },
+    "result": {
+      "zh": "下一步能整团清除更多红块，并接近收集目标。",
+      "en": "The next action can clear a larger red group and approach the target."
+    },
+    "next": {
+      "zh": "玩家要决定立即收掉，还是再接入旁边的小红团。",
+      "en": "The player chooses whether to collect now or connect a nearby smaller red group first."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "做一个五乘六棋盘，点团后只向下补位，显示点击将影响的整团。",
+      "en": "Build a five-by-six board with downward refill and a preview of the whole tapped group."
+    },
+    "pitfall": {
+      "zh": "不要只奖励团块数量；给一个位置目标，才能观察玩家是否会规划。",
+      "en": "Add a positional objective rather than rewarding group size alone, so planning can be observed."
+    },
+    "test": {
+      "zh": "玩家是否愿意先消少量物件，为下一步创造更有用的大团？",
+      "en": "Will players clear a small group to prepare a more useful larger one?"
+    }
+  }
+}

@@ -1,0 +1,120 @@
+{
+  "id": "driving-slipstream",
+  "system": "driving",
+  "edition": 3,
+  "name": {
+    "zh": "跟在前车后借势超越",
+    "en": "Follow a lead vehicle to gain speed"
+  },
+  "summary": {
+    "zh": "先保持追随位置取得速度优势，再找机会侧移超车。",
+    "en": "Hold a following position to gain speed, then move aside to pass."
+  },
+  "rules": {
+    "zh": "前车后方形成有利的跟随区域，后车进入并保持位置，便可降低阻力或触发短时加速。玩家随后选择继续跟随，还是趁速度差侧移超越。不同实现可能采用连续的空气阻力变化，也可能采用计时后发放的加速奖励。",
+    "en": "A favorable zone behind a lead vehicle reduces drag or grants a timed boost to a follower that stays in position. The follower then chooses between staying behind and moving out to pass. Implementations can use continuous drag reduction or a boost awarded after following for a while."
+  },
+  "loop": [
+    {
+      "zh": "找到前车的跟随区域",
+      "en": "Find the following zone"
+    },
+    {
+      "zh": "保持距离与对齐",
+      "en": "Hold distance and alignment"
+    },
+    {
+      "zh": "观察速度差和前方空间",
+      "en": "Read the speed gap and road ahead"
+    },
+    {
+      "zh": "侧移超车或继续跟随",
+      "en": "Pull out to pass or keep following"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "继续跟随积累优势，还是在路变窄前立刻超车？",
+      "en": "Keep following for an advantage or pass before the road narrows?"
+    },
+    {
+      "zh": "前车将要刹车，还值得紧跟吗？",
+      "en": "Is staying close worth it when the lead car is about to brake?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "有效跟随范围",
+        "en": "Following zone"
+      },
+      "effect": {
+        "zh": "范围越窄越考验对齐；过宽会让跟随几乎无需操作。",
+        "en": "A narrow zone demands alignment; a very wide zone requires little input."
+      }
+    },
+    {
+      "name": {
+        "zh": "收益形成方式",
+        "en": "How the gain develops"
+      },
+      "effect": {
+        "zh": "持续减阻鼓励长期选位；延时加速会制造等待完成再超车的节点。",
+        "en": "Continuous drag reduction rewards positioning; a delayed boost creates a clear moment to pass."
+      }
+    }
+  ],
+  "tags": [
+    "spatial",
+    "timing",
+    "risk"
+  ],
+  "related": [
+    "driving-air-stunt",
+    "driving-drift-boost",
+    "cooperation-downed-revival",
+    "cooperation-synchronized-triggers"
+  ],
+  "contrast": {
+    "zh": "马力欧卡丁车把跟随变成可感知的短时加速；跑车浪漫旅以减阻形成的速度差解释超车机会。",
+    "en": "Mario Kart turns following into an explicit temporary boost; Gran Turismo explains the passing opportunity through reduced drag and a speed difference."
+  },
+  "combination": {
+    "zh": "组合提案：双人配送车由一人驾驶、一人观察前方和侧后方，在跟随与超车之间协商；先用同屏验证分工。",
+    "en": "Design proposal: in a two-person delivery vehicle, one player drives while another watches the road and nearby traffic, coordinating when to follow and pass on a shared screen."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "教学原型中，前车正在直道行驶，后车略慢，弯道将近。",
+      "en": "In the teaching prototype, a slightly slower follower approaches a lead car on a straight before a bend."
+    },
+    "action": {
+      "zh": "玩家把车对准前车尾部，保持短距离跟随。",
+      "en": "Align behind the lead car and hold a short following distance."
+    },
+    "result": {
+      "zh": "后车取得速度优势，但继续直行即将追撞前车。",
+      "en": "The follower gains speed, but staying directly behind would cause contact."
+    },
+    "next": {
+      "zh": "玩家选择侧移超越，或先减速放弃这次机会。",
+      "en": "Pull aside to pass or slow down and give up the opportunity."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "用两条车道、一辆固定速度的前车和一个跟随区域，不必先做完整竞速对手。",
+      "en": "Use two lanes, one fixed-speed lead car and a following zone before building racing opponents."
+    },
+    "pitfall": {
+      "zh": "前车减速与碰撞距离必须清楚，否则跟随失败会显得随机。",
+      "en": "Make lead-car slowing and collision distance legible so failures do not feel random."
+    },
+    "test": {
+      "zh": "玩家是否会为超车时机主动离开最佳跟随位置？",
+      "en": "Do players deliberately leave the best following position when choosing a passing moment?"
+    }
+  }
+}

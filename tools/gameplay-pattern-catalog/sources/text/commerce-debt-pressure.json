@@ -1,0 +1,120 @@
+{
+  "id": "commerce-debt-pressure",
+  "system": "commerce",
+  "edition": 1,
+  "name": {
+    "zh": "债务与现金流压力",
+    "en": "Debt and cash-flow pressure"
+  },
+  "summary": {
+    "zh": "用持续偿债目标区分“赚到钱”和“真正能支配的钱”。",
+    "en": "Use debt obligations to separate earnings from money actually available to spend."
+  },
+  "rules": {
+    "zh": "玩家经营或劳动取得收入，但必须先覆盖既有债务与持续费用。剩余资金可投资提高效率；过度投资可能让下一轮现金不足。",
+    "en": "Earn income through business or work, then cover debt and continuing costs. Surplus can improve efficiency, but overinvestment may leave too little cash for the next cycle."
+  },
+  "loop": [
+    {
+      "zh": "查看负债与费用",
+      "en": "Review debt and costs"
+    },
+    {
+      "zh": "执行赚钱活动",
+      "en": "Earn revenue"
+    },
+    {
+      "zh": "结算净收入",
+      "en": "Settle net income"
+    },
+    {
+      "zh": "选择还债或投资",
+      "en": "Repay or invest"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "把收入立即用于升级，还是留钱保障下次结算？",
+      "en": "Upgrade immediately or reserve cash for settlement?"
+    },
+    {
+      "zh": "做安全的低收益工作，还是承担高风险争取提前脱身？",
+      "en": "Take safe work or riskier jobs to escape debt sooner?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "偿还节奏",
+        "en": "Repayment cadence"
+      },
+      "effect": {
+        "zh": "固定期限形成冲刺，持续扣费形成长期效率压力。",
+        "en": "Fixed deadlines create sprints; ongoing fees create efficiency pressure."
+      }
+    },
+    {
+      "name": {
+        "zh": "破产后果",
+        "en": "Bankruptcy consequence"
+      },
+      "effect": {
+        "zh": "可恢复的失败鼓励试策略，重置进度容易放大重复劳动。",
+        "en": "Recoverable failure supports experiments; resets amplify repeated work."
+      }
+    }
+  ],
+  "tags": [
+    "economy",
+    "risk",
+    "progression"
+  ],
+  "related": [
+    "commerce-auction-bidding",
+    "commerce-dynamic-market",
+    "commerce-haggling",
+    "commerce-price-discovery"
+  ],
+  "contrast": {
+    "zh": "露塞提娅用明确还款节点施压；碎舰师把债务作为长期劳动与成长的框架。",
+    "en": "Recettear applies pressure through repayment milestones; Shipbreaker uses debt to frame long-term labor and progression."
+  },
+  "combination": {
+    "zh": "组合创意：修理店的设备贷款允许提前还款或升级工具，玩家需要用订单记录判断哪种选择更快改善现金流。",
+    "en": "Design proposal: a repair shop can repay equipment loans early or upgrade tools, using order history to judge which better improves cash flow."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "三天后要还 100，你现在有 80，升级设备要花 50。",
+      "en": "A payment of 100 is due in three days; you have 80 and an upgrade costs 50."
+    },
+    "action": {
+      "zh": "你先留住还款准备金，选择能稳定赚钱的小订单。",
+      "en": "Reserve cash for repayment and take reliable smaller jobs."
+    },
+    "result": {
+      "zh": "增长慢了一点，但结算日能够偿付，没有因现金不足中断经营。",
+      "en": "Growth is slower, but you meet the deadline without a cash shortage."
+    },
+    "next": {
+      "zh": "还款后再估计下一期现金需要，决定何时升级。",
+      "en": "After payment, estimate the next cash requirement before upgrading."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "做七天日历、一笔到期债务、两种工作和一项提高产能的投资。",
+      "en": "Build a seven-day calendar, one debt deadline, two jobs, and one productivity investment."
+    },
+    "pitfall": {
+      "zh": "先让收入、支出和到期时间清晰可见；隐藏收费只会让计划失去依据。",
+      "en": "Make income, costs, and due dates visible; hidden charges undermine planning."
+    },
+    "test": {
+      "zh": "观察玩家是否区分总收益与可立即支付的钱，并为到期日留现金。",
+      "en": "Check whether players distinguish total earnings from spendable cash and reserve funds for deadlines."
+    }
+  }
+}

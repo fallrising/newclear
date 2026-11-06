@@ -1,0 +1,119 @@
+{
+  "id": "survival-wound-cleanliness",
+  "system": "survival",
+  "edition": 2,
+  "name": {
+    "zh": "伤口清洁与感染预防",
+    "en": "Wound hygiene and infection prevention"
+  },
+  "summary": {
+    "zh": "今天省下的护理，可能变成明天的新麻烦。",
+    "en": "Skipped care today can become tomorrow’s complication."
+  },
+  "rules": {
+    "zh": "伤口在恢复期间仍有状态变化。玩家清洁伤口、选择敷料并检查是否需要更换；即时目标是控制风险，反馈则是伤口状态和后来是否出现感染。",
+    "en": "Wounds keep changing during recovery. Clean them, select dressings and check replacements. The immediate goal is risk control; wound labels and later complications provide feedback."
+  },
+  "loop": [
+    {
+      "zh": "检查伤口和敷料状态",
+      "en": "Check the wound and dressing"
+    },
+    {
+      "zh": "选择清洁或更换",
+      "en": "Clean or replace the dressing"
+    },
+    {
+      "zh": "消耗用品并继续活动",
+      "en": "Spend supplies and resume activity"
+    },
+    {
+      "zh": "过一段时间复查",
+      "en": "Recheck later"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "把最后一份清洁用品用于旧伤，还是留给下一次意外？",
+      "en": "Use the last clean supply now or reserve it for another injury?"
+    },
+    {
+      "zh": "立即停下工作复查伤口，还是等这轮任务结束再处理？",
+      "en": "Interrupt work to recheck the wound or wait until the current task ends?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "感染提示延迟",
+        "en": "Complication delay"
+      },
+      "effect": {
+        "zh": "延迟反馈让预防重要，也需要日志说明原因，避免像随机惩罚。",
+        "en": "Delayed consequences make prevention matter but need causal logs."
+      }
+    },
+    {
+      "name": {
+        "zh": "敷料消耗速度",
+        "en": "Dressing wear"
+      },
+      "effect": {
+        "zh": "过快会变成重复家务；适中速度能形成出发前检查。",
+        "en": "Excessive wear becomes busywork; moderate wear supports departure checks."
+      }
+    }
+  ],
+  "tags": [
+    "planning",
+    "risk"
+  ],
+  "related": [
+    "survival-bleeding-triage",
+    "survival-competing-needs",
+    "survival-fatigue-rest",
+    "survival-limb-impairment"
+  ],
+  "contrast": {
+    "zh": "僵尸毁灭工程强调敷料在持续恢复中的状态；绿色地狱更强调辨认伤口并匹配处理方式。",
+    "en": "Project Zomboid emphasizes dressing condition during recovery; Green Hell emphasizes recognizing and matching wound care."
+  },
+  "combination": {
+    "zh": "设计提案：护理箱格数有限，玩家在多带干净敷料与携带其他物资之间做准备。",
+    "en": "Design proposal: a slot-limited medical kit trades spare clean dressings against other supplies."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "演示设定：一处旧伤的敷料变脏，背包只有一份干净敷料。",
+      "en": "Example: an old dressing is dirty and only one clean spare remains."
+    },
+    "action": {
+      "zh": "先换敷料，再缩短本次外出路线。",
+      "en": "Replace it and shorten the outing."
+    },
+    "result": {
+      "zh": "旧伤风险降低，但新受伤时没有备用。",
+      "en": "The old wound is safer, but there is no spare for a new injury."
+    },
+    "next": {
+      "zh": "回来补充用品后再进行长途探索。",
+      "en": "Restock before the next long expedition."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "做清洁、脏污、感染三种可见状态；只需一类伤口和两种物资。",
+      "en": "Use visible clean, dirty and infected states, one wound type and two supplies."
+    },
+    "pitfall": {
+      "zh": "不要把现实医疗知识作为玩家必备条件；道具提示应说明游戏内用途。",
+      "en": "Do not require real medical knowledge; item text should explain in-game use."
+    },
+    "test": {
+      "zh": "让玩家不查攻略处理两次伤口，检查是否理解状态变化。",
+      "en": "Have players handle two wounds without a guide and explain state changes."
+    }
+  }
+}

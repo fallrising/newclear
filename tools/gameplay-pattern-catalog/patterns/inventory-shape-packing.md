@@ -1,16 +1,18 @@
 ---
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "id": "inventory-shape-packing",
   "title": "形狀式背包配置",
   "title_en": "Shape-based packing",
   "category": "inventory",
+  "source_category": "inventory",
   "tags": [
     "spatial-budget",
     "packing",
     "opportunity-cost"
   ],
-  "summary": "用幾何形狀而不只是重量，讓攜帶選擇同時包含重排與取捨。",
+  "summary": "让物品的轮廓决定能带走什么。",
+  "note_status": "draft",
   "related": [
     "inventory-adjacency",
     "allocation-shop-reservation"
@@ -26,33 +28,77 @@
 }
 ---
 
-## 來源摘要
+## 摘要
 
-原站描述在有限格子內旋轉與移動不同形狀的物品，避免重疊；留白也會影響後續戰利品。核心循環：看物品形狀 → 重排 → 決定取捨 → 確認攜帶配置。
+「让物品的轮廓决定能带走什么。」
+出處：`sources/text/inventory-shape-packing.json` 字元 173-187 `summary.zh`
+顯示：讓物品的輪廓決定能帶走什麼。
 
-## 問題與情境（本地分析）
+## 規則
 
-適用於希望整理本身就是決策的戰利品系統。問題不是把背包填滿，而是讓玩家在幾何效率、戰術用途與未來空間間選擇。
+「玩家旋转、移动不同尺寸的物品，将它们塞入有限格子；物品不能重叠或越界。空隙是否能容纳下一件战利品，会直接改变保留和丢弃的选择。」
+出處：`sources/text/inventory-shape-packing.json` 字元 273-336 `rules.zh`
+顯示：玩家旋轉、移動不同尺寸的物品，將它們塞入有限格子；物品不能重疊或越界。空隙是否能容納下一件戰利品，會直接改變保留和丟棄的選擇。
 
-## 解法與取捨（本地分析）
+## 核心循環
 
-- 將幾何合法性與物品效益分開：放得下不等於值得留。
-- 拖曳時預覽碰撞、旋轉與放置結果；整理應可撤銷，避免操作失誤冒充策略代價。
+「查看新物品形状」
+出處：`sources/text/inventory-shape-packing.json` 字元 542-549 `loop[0].zh`
+顯示：查看新物品形狀
 
-## 可調參數（本地分析）
+「旋转并重排背包」
+出處：`sources/text/inventory-shape-packing.json` 字元 614-621 `loop[1].zh`
+顯示：旋轉並重排揹包
 
-- 格子尺寸、是否允許旋轉、異形邊界、丟棄或暫存成本。
-- 物品形狀與功能的相關性；不要讓最大長方形永遠是最佳解。
+「取舍无法容纳的物品」
+出處：`sources/text/inventory-shape-packing.json` 字元 685-694 `loop[2].zh`
+顯示：取捨無法容納的物品
 
-## 失敗模式（本地分析）
+「确认携带方案」
+出處：`sources/text/inventory-shape-packing.json` 字元 761-767 `loop[3].zh`
+顯示：確認攜帶方案
 
-- 只需每次按自動整理即可得到同一最優解，選擇會失去意義。
-- 觸控拖曳沒有足夠回饋，會把空間謎題變成操作困難。
+## 玩家取捨
 
-## 最小原型與驗收（本地提案）
+「先放大件还是先保留关键物品？几何最优不一定是战术最优。」
+出處：`sources/text/inventory-shape-packing.json` 字元 850-877 `decisions[0].zh`
+顯示：先放大件還是先保留關鍵物品？幾何最優不一定是戰術最優。
 
-- 本地提案：5×4 背包、四種形狀、六件功能不同的物品；不做戰鬥或隨機掉落。
-- 驗收：Given 已佔用格子，When 旋轉或移動物品，Then 重疊與越界放置被拒絕且原配置不變；觀察玩家是否主動為下一件物品留空。
+「为未来留空位，还是立刻把收益装满？」
+出處：`sources/text/inventory-shape-packing.json` 字元 1025-1042 `decisions[1].zh`
+顯示：爲未來留空位，還是立刻把收益裝滿？
+
+## 可調參數
+
+「背包形状」
+出處：`sources/text/inventory-shape-packing.json` 字元 1185-1189 `parameters[0].name.zh`
+顯示：揹包形狀
+
+「凹凸边界增加局部难题；规则矩形更容易比较方案。」
+出處：`sources/text/inventory-shape-packing.json` 字元 1260-1283 `parameters[0].effect.zh`
+顯示：凹凸邊界增加局部難題；規則矩形更容易比較方案。
+
+「物品旋转」
+出處：`sources/text/inventory-shape-packing.json` 字元 1445-1449 `parameters[1].name.zh`
+顯示：物品旋轉
+
+「允许旋转降低卡死概率，禁止旋转会强化提前规划。」
+出處：`sources/text/inventory-shape-packing.json` 字元 1519-1542 `parameters[1].effect.zh`
+顯示：允許旋轉降低卡死概率，禁止旋轉會強化提前規劃。
+
+## 原型
+
+「用一个小格子背包和五种固定形状物品，实现拖动、旋转与冲突提示。」
+出處：`sources/text/inventory-shape-packing.json` 字元 2954-2985 `prototype.firstStep.zh`
+顯示：用一個小格子揹包和五種固定形狀物品，實現拖動、旋轉與衝突提示。
+
+「观察玩家是否为了保留重要物品主动重排，而非每次直接丢掉最大件。」
+出處：`sources/text/inventory-shape-packing.json` 字元 3289-3320 `prototype.test.zh`
+顯示：觀察玩家是否爲了保留重要物品主動重排，而非每次直接丟掉最大件。
+
+「先别加装备属性；最基本的拾取、旋转和放回必须顺手。」
+出處：`sources/text/inventory-shape-packing.json` 字元 3124-3149 `prototype.pitfall.zh`
+顯示：先別加裝備屬性；最基本的拾取、旋轉和放回必須順手。
 
 ## 相關模式
 

@@ -60,18 +60,34 @@ def main():
                         text = text.replace('</body>', '<script>' + (output / 'app.js').read_text() + '</script></body>')
                     page.set_content(text, wait_until='domcontentloaded')
                 load(page, 'index.html')
-                assert page.locator('.card:visible').count() == 14
+                catalog = __import__('json').loads((output / 'catalog.json').read_text())
+                total = len(catalog['patterns'])
+                inventory = sum(item['category'] == 'inventory' for item in catalog['patterns'])
+                assert page.locator('.card:visible').count() == total
                 page.locator('#category').select_option('inventory')
-                assert page.locator('.card:visible').count() == 2
+                assert page.locator('.card:visible').count() == inventory
                 page.locator('#search').fill('shape')
                 assert page.locator('.card:visible').count() == 1
                 page.locator('#search').fill('沒有這個模式xyz')
                 assert page.locator('.card:visible').count() == 0
                 assert page.locator('#empty').is_visible()
                 page.locator('button[type=reset]').click()
-                assert page.locator('.card:visible').count() == 14
+                assert page.locator('.card:visible').count() == total
+                page.locator('#status').select_option('pending')
+                assert page.locator('.card:visible').count() == 0
+                assert page.locator('#empty').is_visible()
+                page.locator('button[type=reset]').click()
+                page.get_by_role('link', name='完整度', exact=True).click()
+                assert page.locator('h1').inner_text() == '完整度報表'
+                if args.render_only:
+                    load(page, 'index.html')
+                else:
+                    page.get_by_role('link', name='GAMEPLAY / PATTERNS', exact=True).click()
+                page.locator('#search').fill('stamina')
+                ascii_count = page.locator('.card:visible').count()
                 page.locator('#search').fill('ＳＴＡＭＩＮＡ')
-                assert page.locator('.card:visible').count() == 1
+                assert ascii_count >= 1
+                assert page.locator('.card:visible').count() == ascii_count
                 page.locator('button[type=reset]').click()
                 print('PASS: search, category, empty state, reset and NFKC', flush=True)
                 screenshots = os.environ.get('SCREENSHOT_DIR')
@@ -106,7 +122,7 @@ def main():
                 no_js = browser.new_context(java_script_enabled=False)
                 no_js_page = no_js.new_page()
                 load(no_js_page, 'index.html')
-                assert no_js_page.locator('.card').count() == 14
+                assert no_js_page.locator('.card').count() == total
                 if args.render_only:
                     load(no_js_page, 'patterns/inventory-shape-packing.html')
                 else:

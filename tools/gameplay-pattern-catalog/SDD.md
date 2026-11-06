@@ -1,30 +1,47 @@
 # Gameplay Pattern Catalog — SDD
 
-## 授權與目的
+## 已關閉的精選里程碑
 
-依 owner 於 2026-11-02 的直接指示：在 newclear 建立 Gameplay Atlas 的網站 metadata 指引，抽取為 design pattern catalog，每篇 pattern 筆記末尾保留參考網址。本次交付工作分支與 Draft PR；不 merge、deploy 或 release。
+2026-11-02 的第一階段交付 14 篇精選筆記、網站 metadata 與靜態網站，驗收是 AC-01 至 AC-04，已由 PR #960 合併。該階段明確不把原站全量當成完成。那些 AC 保留為歷史，不能拿來宣稱本次全量完成。
+
+## 本次授權與目的
+
+依 owner 於 2026-11-02 的直接指示：把精選 catalog 擴充為「以一次可追溯的 Gameplay Atlas 公開來源快照為分母」的完整 catalog。交付工作分支與 Draft PR。不 merge、deploy、release 或打 tag。
+
+完整指蓋過該快照裡的每個獨立機制，不是蓋過一切遊戲設計模式，也不是持續同步原站。
 
 ## 範圍
 
-建立零第三方依賴的靜態網站產生器、網站 metadata 指引與結構化 pattern 契約。首批收錄 14 個已查閱來源的代表性機制；原站首頁聲稱 280 個機制／28 類，此數字僅作來源快照，不能宣稱已完整匯入。以繁體中文撰寫獨立筆記，保留英文名稱與 canonical URL。
+沿用 Markdown frontmatter、Python 標準函式庫與原生 JavaScript。來源 manifest 負責盤點；筆記負責設計內容。原站分類 `source_category` 與本地分類 `category` 分開。取得狀態與筆記狀態分開。
 
-每篇分開標示來源摘要及本地原創分析：問題／情境、核心循環、取捨、解法、可調參數、失敗模式、最小原型、觀察問題、相關 pattern。來源摘要簡短改寫，不鏡像全文、圖片、原站程式或遊戲素材；不推定外部內容適用本 repo MIT。
+每篇保留繁中名稱、英文原名、短篇來源摘要、問題與情境、核心循環、解法與取捨、可調參數、失敗模式、未驗證的最小原型、相關模式，以及文末的實際機制頁。最小原型用短句描述要觀察的差異，不寫來源沒有的數量。來源事實、本地分析、未驗證提案必須分開。未確認再發布授權，所以不鏡像全文、圖片、案例素材或原站程式。
 
 ## AC
 
-- AC-01：Given 網站 metadata 與 pattern 筆記，When 執行驗證，Then 必填欄位、ID 唯一性、HTTPS 來源、查閱日期、相關 ID 及來源末節一致性均可檢查，並有維護指南。
-- AC-02：Given 已查閱的 14 個機制，When 閱讀每篇 Markdown／HTML，Then 可區別來源摘要與原創分析，每篇最後有實際條目網址，不捏造遊戲規則或來源日期。
-- AC-03：Given Python 3.11+ 且沒有網路，When 建置並開啟靜態網站，Then 可看索引及獨立 pattern 頁；啟用 JavaScript 可搜尋與分類；無 JavaScript 仍能導航；支援相對路徑部署。
-- AC-04：Given 本次 candidate，When 執行專案測試與 repo CI，Then 來源／連結／輸出安全性／重複建置及索引契約通過，保存真實證據；未執行項目明列，不以 mock 當瀏覽器驗收。
+- AC-F01：Given 已對帳的公開入口，When 檢查來源 manifest，Then 沒有重複的 canonical ID／URL，總數與分類可對帳，差異有證據，而且完整度不是由筆記篇數反推。
+- AC-F02：Given 這份 manifest，When 對到本地筆記，Then 沒有未說明的缺漏；只有實質 reviewed 筆記計入完成，pending、blocked 與占位不算。
+- AC-F03：Given 一篇 reviewed 筆記，When 讀到最後，Then 有實際機制頁網址，frontmatter 與文末引用一致，來源事實、本地分析與未驗證提案分開，而且對照紀錄可回到快照雜湊。
+- AC-F04：Given catalog 契約，When 執行驗證，Then ID、分類、日期、URL、狀態與 related 都被檢查，沒有懸空關聯、自我引用，或把既有 ID 改掉的遷移。
+- AC-F05：Given 全量靜態站，When 用真實瀏覽器操作，Then 搜尋、分類、詳情、相關模式、來源連結、空結果、重設、手機寬度、子路徑與無 JavaScript 導航都可用。
+- AC-F06：Given 離線環境，When 重複建置並跑負向測試，Then 輸出確定、HTML 會跳脫、危險 URL 被拒、輸出目錄受保護，而且完整度與狀態轉移的負向案例會失敗。
+- AC-F07：Given 這次變更，When 從 repo root 執行元件測試與專案檢查，Then `check_project_success.py --write-index` 與 `check_indexes.py` 的結果被如實保留，索引只改到實際受影響的項目。
+
+機器可檢查的 SUCCESS 列號是 AC-05 至 AC-11，內容與 AC-F01 至 AC-F07 相同。
 
 ## 非目標
 
-不完整爬取 280 篇、不下載圖片、不自動同步、不呼叫模型、不建立帳號／資料庫、不部署網站、不自動合併。資料可供人與 Agent 查閱，不宣稱等於原遊戲的完整規格或已實玩驗證。
+不建立資料庫、大型前端框架、帳號、自動排程或模型服務。不把 HTTP 200 或檔案數量當成內容已核對。不部署、不合併、不打 usable tag。後續來源變動不併入這次快照。
 
-## 實作計畫
+## 忠實度檢查與產生的狀態
 
-Markdown frontmatter 為筆記權威，metadata JSON 宣告來源站與收錄範圍；Python 標準函式庫驗證並產生靜態 HTML／機器可讀索引，少量原生 JavaScript 負責索引過濾。CI 只測試與建置，read-only permissions，不部署。
+忠實度由 `check_quotes.py` 決定。每個內容片段必須是所引 `sources/text/<id>.json` 在標明字元位置上的原文。沒有出處的內容行、對不上的字、空的必填欄，檢查都失敗。顯示行若存在，只能是 OpenCC `s2t` 的逐字結果。這支檢查不呼叫模型。
+
+`review/auto_check.py` 與 `review/pi_review.py` 仍留在目錄裡，validate 不讀它們的結果，CI 也不執行。模型的 pass 不是 reviewed。
+
+人工升格仍是 `review/promote.py --apply`。這不把 catalog 標成 complete，也不滿足 AC-F02 的「全部 reviewed」。
+
+total、draft、reviewed、quoted_spans、quote_check 與 `source_commit` 由 `status.py` 從筆記檔與引文檢查產生，寫進 SUCCESS、inventory 的 catalog 列，以及可貼上 PR 描述的片段。`source_commit` 是筆記檔的 git tree SHA。檢查失敗表示這三處與重算結果不一致，不是筆記已審閱。
 
 ## 驗證計畫
 
-單元測試涵蓋壞 metadata、重複 ID、失效關聯、危險 URL、來源末節、HTML escaping 與確定性輸出；本地 HTTP smoke 與可用瀏覽器測試。更新 inventory、README 與 PROJECTS 導航；執行 check_project_success／check_indexes，無完整 checkout 時由遠端 CI 執行並保留限制。
+單元測試覆蓋壞 metadata、重複來源、缺筆記、blocked、pending、搜尋索引摘錄不能 reviewed、危險 URL、來源末節、跳脫與確定性輸出。瀏覽器 smoke 讀實際建置結果。離線測試不要求原站在線。

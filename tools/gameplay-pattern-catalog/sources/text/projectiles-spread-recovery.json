@@ -1,0 +1,120 @@
+{
+  "id": "projectiles-spread-recovery",
+  "system": "projectiles",
+  "edition": 3,
+  "name": {
+    "zh": "短暂停火，让弹着重新收拢",
+    "en": "Pause fire to tighten the spread"
+  },
+  "summary": {
+    "zh": "连射换来更多子弹，也可能让后续射击偏得更远。",
+    "en": "Sustained fire sends more rounds but may scatter later shots farther."
+  },
+  "rules": {
+    "zh": "连续射击会累积散布或后坐偏移，停火后逐步恢复。玩家观察准星扩张和弹着，决定一直压住扳机，还是分成短点射；远近距离会改变哪种节奏更划算。",
+    "en": "Repeated firing builds spread or recoil, which recovers after a pause. Read the reticle and impacts to choose continuous fire or short bursts; distance changes which rhythm is useful."
+  },
+  "loop": [
+    {
+      "zh": "估计目标距离和大小",
+      "en": "Estimate target size and distance"
+    },
+    {
+      "zh": "打一小段观察弹着",
+      "en": "Fire briefly and inspect impacts"
+    },
+    {
+      "zh": "继续连射或松开恢复",
+      "en": "Continue firing or release to recover"
+    },
+    {
+      "zh": "准度恢复后重新瞄准",
+      "en": "Re-aim as accuracy returns"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "近处大目标可以承受较大散布；远处小目标是否值得少打几发换准度？",
+      "en": "A large nearby target tolerates spread; is a small distant target worth firing fewer, tighter shots at?"
+    },
+    {
+      "zh": "等准星收拢时，敌人是否会先走进掩体？",
+      "en": "Will the enemy reach cover while you wait for the reticle to tighten?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "每发累积与恢复速度",
+        "en": "Build-up and recovery speed"
+      },
+      "effect": {
+        "zh": "累积快、恢复慢会鼓励短点射；恢复太快会让停火几乎没有代价。",
+        "en": "Fast build-up and slow recovery favor short bursts; instant recovery makes pauses nearly free."
+      }
+    },
+    {
+      "name": {
+        "zh": "准星反馈",
+        "en": "Reticle feedback"
+      },
+      "effect": {
+        "zh": "让准星大小对应可能落点，玩家才能把偏差归因于规则而非运气。",
+        "en": "A reticle that reflects possible impacts lets players understand misses instead of attributing them only to luck."
+      }
+    }
+  ],
+  "tags": [
+    "precision",
+    "timing",
+    "risk"
+  ],
+  "related": [
+    "projectiles-charged-release",
+    "combat-timed-parry",
+    "projectiles-active-reload",
+    "projectiles-graze-reward"
+  ],
+  "contrast": {
+    "zh": "深岩银河的例子突出散布累积与恢复；SYNTHETIK 还把移动状态纳入准确度取舍。",
+    "en": "The DRG example highlights spread recovery; SYNTHETIK also makes movement state part of the accuracy trade-off."
+  },
+  "combination": {
+    "zh": "组合提案：敌人抬枪前显示短暂射击提示，玩家利用对方准备阶段停火恢复，在敌人开枪前完成一轮精准点射。",
+    "en": "Design proposal: telegraph an enemy shot, letting players recover accuracy during its preparation and fire a precise burst before it attacks."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "远处有一个小目标，连射三发后准星已变大。",
+      "en": "A small distant target remains after three shots widen the reticle."
+    },
+    "action": {
+      "zh": "松开扳机半秒，等准星缩小后再射击。",
+      "en": "Release briefly, wait for the reticle to shrink, then fire."
+    },
+    "result": {
+      "zh": "第二轮更集中，但目标也向出口移动了一段。",
+      "en": "The next burst is tighter, but the target has moved closer to the exit."
+    },
+    "next": {
+      "zh": "重新判断是否还来得及等待下一次恢复。",
+      "en": "Decide whether there is time for another recovery pause."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "做一个固定靶、可视准星和随射击增加、随时间下降的散布值。",
+      "en": "Build a fixed target, a visible reticle and one spread value that rises with shots and decays over time."
+    },
+    "pitfall": {
+      "zh": "随机散布过强会掩盖玩家输入；先保留明确的近距离命中范围。",
+      "en": "Excessive randomness hides player control; preserve a clearly reliable close range."
+    },
+    "test": {
+      "zh": "把靶子移远后，玩家是否自发缩短连射长度？",
+      "en": "Do players shorten their bursts when the target moves farther away?"
+    }
+  }
+}

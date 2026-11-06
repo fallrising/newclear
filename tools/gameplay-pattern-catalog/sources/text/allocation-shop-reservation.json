@@ -1,0 +1,119 @@
+{
+  "id": "allocation-shop-reservation",
+  "system": "commerce",
+  "edition": 3,
+  "name": {
+    "zh": "留住商品等下一轮再买",
+    "en": "Reserve a shop item for a later purchase"
+  },
+  "summary": {
+    "zh": "暂时买不起，也可以先保住这次机会。",
+    "en": "Keep a useful offer even when you cannot afford it yet."
+  },
+  "rules": {
+    "zh": "玩家标记商店中的某个物品，使它在刷新或下一轮补货时保留，未保留的格子继续更新。保留能等待资金或组合条件，却占掉发现新商品的位置；解除保留会重新开放这个位置。",
+    "en": "Mark an offer to persist through rerolls or restocking while unmarked slots refresh. Reservation buys time for money or a combination, but occupies space that could reveal new options. Releasing it restores that slot."
+  },
+  "loop": [
+    {
+      "zh": "找到暂时无法购买的目标",
+      "en": "Find an offer you cannot use yet"
+    },
+    {
+      "zh": "标记保留并刷新其他格",
+      "en": "Reserve it and refresh other slots"
+    },
+    {
+      "zh": "获得资金或改变需求",
+      "en": "Gain resources or revise your needs"
+    },
+    {
+      "zh": "购买目标或解除保留",
+      "en": "Buy it or release the slot"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "为未来组合保留一件，会不会错过本轮更实用的新货？",
+      "en": "Will reserving a future combo piece hide more useful immediate offers?"
+    },
+    {
+      "zh": "资金够了，但需求已经变化，是否承认沉没成本并放弃？",
+      "en": "Once you can afford it, should changed needs make you release it anyway?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "可保留格数",
+        "en": "Reservation capacity"
+      },
+      "effect": {
+        "zh": "格数多降低错失焦虑，格数少让信息空间成为真实成本。",
+        "en": "More reserved slots reduce fear of missing out; fewer make shop space costly."
+      }
+    },
+    {
+      "name": {
+        "zh": "保留持续范围",
+        "en": "Persistence"
+      },
+      "effect": {
+        "zh": "只跨一次刷新适合轻决策，跨回合保留鼓励更长计划。",
+        "en": "One-reroll persistence supports short choices; multi-round persistence supports longer plans."
+      }
+    }
+  ],
+  "tags": [
+    "planning",
+    "economy"
+  ],
+  "related": [
+    "commerce-regional-arbitrage",
+    "commerce-shop-display",
+    "commerce-timed-contracts",
+    "commerce-trade-route-programming"
+  ],
+  "contrast": {
+    "zh": "背包乱斗还要考虑物品能否装进背包；超级自动宠物主要考虑宠物队伍、升级与食物用途。",
+    "en": "Backpack Battles adds physical inventory fit; Super Auto Pets emphasizes the team, pet upgrades and food effects."
+  },
+  "combination": {
+    "zh": "组合提案：保留一件异形装备后，玩家在下一轮腾挪背包为它留空；若腾出的空间代价太高，可以取消预留改买小件。",
+    "en": "Design proposal: reserving an oddly shaped item creates a packing goal for the next round, with the option to release it when making room costs too much."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "商店有一把六币大剑，你只有四币，下一轮能多拿三币。",
+      "en": "A six-coin sword appears while you have four coins and expect three next round."
+    },
+    "action": {
+      "zh": "保留大剑，只刷新其他格子。",
+      "en": "Reserve the sword and reroll only the other slots."
+    },
+    "result": {
+      "zh": "大剑仍在，但少一个格子展示新物品。",
+      "en": "The sword remains, but one fewer slot reveals new items."
+    },
+    "next": {
+      "zh": "下轮钱够了，再比较买剑与解除保留找其他装备。",
+      "en": "Next round, compare buying the sword with releasing it to seek alternatives."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "四格商店、刷新按钮、金币和保留标记，先做两轮即可。",
+      "en": "Build a four-slot shop, reroll button, coins and reservation markers across two rounds."
+    },
+    "pitfall": {
+      "zh": "保留和购买必须有明确区分，避免误以为已经拥有物品。",
+      "en": "Visually distinguish reservation from ownership."
+    },
+    "test": {
+      "zh": "玩家是否会主动解除不再需要的保留，而非永远占着格子？",
+      "en": "Do players release obsolete reservations rather than hold every slot forever?"
+    }
+  }
+}

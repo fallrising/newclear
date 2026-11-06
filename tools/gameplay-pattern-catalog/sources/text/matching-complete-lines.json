@@ -1,0 +1,120 @@
+{
+  "id": "matching-complete-lines",
+  "system": "matching",
+  "edition": 3,
+  "name": {
+    "zh": "填满整行来释放空间",
+    "en": "Complete a line to reclaim space"
+  },
+  "summary": {
+    "zh": "落下或放入的形状占地方，凑满一行才能把空间拿回来。",
+    "en": "Placed shapes consume room; completing a line returns that room to the player."
+  },
+  "rules": {
+    "zh": "玩家把给定形状放进有限棋盘，填满规定的整行、整列或区域后，这些格子一起清空。每次放置都会占用未来空间，因此要兼顾眼前能清的线、留下的洞以及下一块能否放下。",
+    "en": "Place supplied shapes on a limited board. Filling a required row, column or region clears those cells. Every placement consumes future space, so immediate clears must be balanced against holes and room for the next piece."
+  },
+  "loop": [
+    {
+      "zh": "查看当前形状和空缺",
+      "en": "Inspect the piece and open cells"
+    },
+    {
+      "zh": "选择朝向与放置位置",
+      "en": "Choose orientation and placement"
+    },
+    {
+      "zh": "清除填满的线或区域",
+      "en": "Clear completed lines or regions"
+    },
+    {
+      "zh": "用腾出的空间接下一块",
+      "en": "Fit the next piece into the reclaimed space"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "先清一行保住空间，还是积攒结构争取一次清多行？",
+      "en": "Clear one line to stay safe or build toward a larger simultaneous clear?"
+    },
+    {
+      "zh": "贴边放置更整齐，但会不会留下以后难以补上的洞？",
+      "en": "A tidy edge placement may leave a hole that later pieces cannot fill."
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "形状预告数量",
+        "en": "Piece preview count"
+      },
+      "effect": {
+        "zh": "知道更多后续形状，玩家就能规划多步；无预告更重视通用空位。",
+        "en": "More preview supports multi-step plans; little preview favors flexible empty space."
+      }
+    },
+    {
+      "name": {
+        "zh": "清除条件",
+        "en": "Clear conditions"
+      },
+      "effect": {
+        "zh": "只清整行更集中；同时允许整列或小区域，会出现交叉清除机会。",
+        "en": "Rows alone focus planning; columns or regions add intersecting clear opportunities."
+      }
+    }
+  ],
+  "tags": [
+    "planning",
+    "spatial",
+    "optimization"
+  ],
+  "related": [
+    "matching-merge-three-upgrade",
+    "matching-pattern-creates-power",
+    "matching-swap-to-align",
+    "matching-tap-connected-group"
+  ],
+  "contrast": {
+    "zh": "Tetris Effect用持续下落压缩决策时间；Blockudoku允许静态摆放，并增加区域清除条件。",
+    "en": "Tetris Effect compresses decision time through falling pieces; Blockudoku allows static placement and adds region completion."
+  },
+  "combination": {
+    "zh": "组合提案：补给箱既是异形物品，也是可消行的拼图。填满一行会消耗该行补给，换来一次团队治疗，玩家要在囤货与腾空间之间取舍。",
+    "en": "Design proposal: supplies occupy shaped inventory cells. Completing a row consumes those supplies for team healing, creating a choice between storage and reclaiming space."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "最底行还缺两格，手里有一个两格长条，下一块是方形。",
+      "en": "The bottom row has a two-cell gap; the current piece is a domino and the next is a square."
+    },
+    "action": {
+      "zh": "把长条填进缺口。",
+      "en": "Place the domino in the gap."
+    },
+    "result": {
+      "zh": "整行被清空，棋盘重新获得可用空间。",
+      "en": "The completed row clears, returning usable space."
+    },
+    "next": {
+      "zh": "观察新的边界，决定方形放在哪里才不会产生孤立小洞。",
+      "en": "Inspect the new boundary and place the square without creating isolated holes."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "先用六乘六静态棋盘、三种形状和整行清除，不加实时下落。",
+      "en": "Start with a static six-by-six board, three shapes and row clearing, without real-time fall."
+    },
+    "pitfall": {
+      "zh": "形状旋转、预告和随机发牌会显著改变难度，先固定其中两项。",
+      "en": "Rotation, previews and random piece supply all affect difficulty; hold two of them fixed initially."
+    },
+    "test": {
+      "zh": "玩家能否在放置前指出这一步会留下哪种难填空缺？",
+      "en": "Can players identify the awkward gap a placement would leave before committing?"
+    }
+  }
+}

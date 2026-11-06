@@ -1,0 +1,120 @@
+{
+  "id": "cooperation-shared-vehicle",
+  "system": "cooperation",
+  "edition": 2,
+  "name": {
+    "zh": "共同操控一辆载具",
+    "en": "Crew a shared vehicle"
+  },
+  "summary": {
+    "zh": "同一艘船的转向、防守与维修都要人做，队员必须不断商量谁先忙什么。",
+    "en": "A shared vessel needs steering, defense and maintenance, so the crew keeps reallocating jobs."
+  },
+  "rules": {
+    "zh": "多名玩家共享载具的移动与损伤状态，但不同功能需要分别操作。岗位数量或突发任务超过人手时，玩家必须换岗；一个岗位的决定会改变其他岗位面对的局面。",
+    "en": "Players share a vehicle’s movement and damage state while operating different functions. When stations or urgent jobs outnumber the crew, they must switch roles; decisions at one station change the others’ situation."
+  },
+  "loop": [
+    {
+      "zh": "观察航路与危险",
+      "en": "Read the route and threats"
+    },
+    {
+      "zh": "分配眼下的岗位",
+      "en": "Assign current jobs"
+    },
+    {
+      "zh": "操作并报告变化",
+      "en": "Operate and report changes"
+    },
+    {
+      "zh": "遇到新情况换岗",
+      "en": "Reassign as conditions change"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "继续驾驶绕开危险，还是离开驾驶位先修漏水？",
+      "en": "Keep steering around danger or leave the helm to repair a leak?"
+    },
+    {
+      "zh": "让熟练的人固定岗位，还是交换岗位应对离谁更近的急事？",
+      "en": "Keep specialists at fixed stations or send the nearest player to an urgent job?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "岗位与人数之比",
+        "en": "Stations per player"
+      },
+      "effect": {
+        "zh": "岗位多于玩家才能产生换岗取舍，太多则容易顾不过来。",
+        "en": "Extra stations create trade-offs; too many overwhelm the crew."
+      }
+    },
+    {
+      "name": {
+        "zh": "换岗距离",
+        "en": "Travel between stations"
+      },
+      "effect": {
+        "zh": "距离越远，提前沟通和安排顺路任务越重要。",
+        "en": "Longer travel rewards planning and combining nearby jobs."
+      }
+    }
+  ],
+  "tags": [
+    "cooperation",
+    "planning",
+    "timing"
+  ],
+  "related": [
+    "cooperation-complementary-abilities",
+    "cooperation-downed-revival",
+    "cooperation-split-information",
+    "cooperation-synchronized-triggers"
+  ],
+  "contrast": {
+    "zh": "前者把岗位放在紧凑的侧面剖视图里；后者把工作分散在可走动的船上，航海与抢修互相抢人手。",
+    "en": "The first presents compact stations in a cutaway; the second spreads work across a walkable ship, with sailing and damage control competing for crew time."
+  },
+  "combination": {
+    "zh": "设计提案：让玩家自己摆放潜艇岗位；最短通道能缩短换岗时间，却可能把危险集中在一起。",
+    "en": "Design proposal: let players place submarine stations; short paths speed role changes but may concentrate hazards."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "编辑示例：两人驾驶一艘有驾驶、炮台、维修三个岗位的船，前方有岩石，右侧开始漏水。",
+      "en": "Editorial example: two players crew a ship with helm, gun and repair stations; rocks lie ahead and a leak opens on the right."
+    },
+    "action": {
+      "zh": "A留在驾驶位绕石头，B放弃开炮去堵漏。",
+      "en": "A steers around the rocks while B abandons the gun to fix the leak."
+    },
+    "result": {
+      "zh": "船保住速度和生命，但敌人暂时没有受到攻击。",
+      "en": "The ship keeps moving and survives, but the enemy goes unchallenged."
+    },
+    "next": {
+      "zh": "漏水停止后B回到炮台，A报出下一次转向。",
+      "en": "B returns to the gun after repairs, while A announces the next turn."
+    }
+  },
+  "prototype": {
+    "scope": "medium",
+    "interaction": "cooperative",
+    "firstStep": {
+      "zh": "先做同屏二维小船、两个角色和三个按钮岗位：移动、防守、维修。",
+      "en": "Start with a local 2D ship, two characters and three button stations: movement, defense and repair."
+    },
+    "pitfall": {
+      "zh": "真实海洋、复杂船体和联网同步都先放后；第一版只验证岗位之间是否互相需要。",
+      "en": "Defer ocean simulation, detailed hulls and networking; first test whether the jobs depend on each other."
+    },
+    "test": {
+      "zh": "两个试玩者会主动喊换岗，并能说清一次没人操作某岗位造成的后果。",
+      "en": "Two testers call for a role switch and can explain the consequence of leaving one station unattended."
+    }
+  }
+}

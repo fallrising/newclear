@@ -1,0 +1,120 @@
+{
+  "id": "puzzles-perspective-reality",
+  "system": "puzzles",
+  "edition": 1,
+  "name": {
+    "zh": "把视觉关系变成实体",
+    "en": "Turning visual relationships into geometry"
+  },
+  "summary": {
+    "zh": "改变观看方式，就能改变可行走的空间。",
+    "en": "Change how you see a scene to change its usable space."
+  },
+  "rules": {
+    "zh": "玩家调整视角或摆放图像，让二维看到的关系改变三维场景。随后亲自移动验证尺度、连接和遮挡是否可用；看起来成立与实际走得通的差别构成谜题。",
+    "en": "Adjust a viewpoint or place an image so a visual relationship changes three-dimensional space. Move through the result to test scale, connections and obstruction."
+  },
+  "loop": [
+    {
+      "zh": "发现可用视觉关系",
+      "en": "Find a useful visual relationship"
+    },
+    {
+      "zh": "调整位置或朝向",
+      "en": "Adjust position or orientation"
+    },
+    {
+      "zh": "让结果实体化",
+      "en": "Materialize the result"
+    },
+    {
+      "zh": "测试能否通过",
+      "en": "Test traversability"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "连接远处平台的视角会牺牲哪些近处路径？",
+      "en": "Will joining distant platforms sacrifice a nearby route?"
+    },
+    {
+      "zh": "放大物体当楼梯，还是缩小后穿过狭缝？",
+      "en": "Enlarge a prop as a step or shrink it to fit a gap?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "结果预览",
+        "en": "Result preview"
+      },
+      "effect": {
+        "zh": "清晰预览减少试错；部分未知增加惊喜但需要便捷撤销。",
+        "en": "Clear previews reduce trial and error; uncertainty needs easy undo."
+      }
+    },
+    {
+      "name": {
+        "zh": "可修改对象",
+        "en": "Editable objects"
+      },
+      "effect": {
+        "zh": "限制对象便于教学；自由修改扩大解法空间。",
+        "en": "Restricted objects help teaching; free editing expands solutions."
+      }
+    }
+  ],
+  "tags": [
+    "spatial",
+    "creativity",
+    "discovery"
+  ],
+  "related": [
+    "puzzles-paper-folding",
+    "building-modular-snapping",
+    "building-terrain-shaping",
+    "building-vertical-stacking"
+  ],
+  "contrast": {
+    "zh": "前者改变既有物体尺度；后者把整张图像转换为空间。",
+    "en": "The former changes object scale; the latter converts whole pictures into space."
+  },
+  "combination": {
+    "zh": "组合提案：用照片补齐微缩城市的桥梁，但照片会覆盖道路，需要先规划角度。",
+    "en": "Design proposal: photos complete miniature-city bridges but overwrite roads, requiring camera planning."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "两个远处平台错开，手里的一张图却画着连接它们的走道。",
+      "en": "Two distant platforms are separated; a picture depicts a walkway that could connect them."
+    },
+    "action": {
+      "zh": "你移动视角和图像，让画中的走道与眼前边缘对齐后确认。",
+      "en": "Adjust the view and picture until the depicted walkway aligns with the visible edges, then confirm."
+    },
+    "result": {
+      "zh": "图像变成可走的空间，但也覆盖了原场景的一部分。",
+      "en": "The picture becomes walkable space while replacing part of the original scene."
+    },
+    "next": {
+      "zh": "亲自走过去验证连接，再选择下一次需要改变的空间关系。",
+      "en": "Walk through to verify the connection, then choose another spatial relationship to change."
+    }
+  },
+  "prototype": {
+    "scope": "large",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "先做一个固定视角与一张预制桥面图，只验证一次图像变实体的规则。",
+      "en": "Use one fixed viewpoint and one authored bridge image to validate a single image-to-space transformation."
+    },
+    "pitfall": {
+      "zh": "任意图像转三维、遮挡与碰撞都很重；最初应严格限制可用视角和素材。",
+      "en": "Arbitrary image-to-3D conversion, occlusion, and collision are costly; constrain viewpoints and assets initially."
+    },
+    "test": {
+      "zh": "观察玩家能否预测新通路以及会被覆盖的区域，并在变化后辨认自己的位置。",
+      "en": "Check whether players predict the new route and overwritten area, then retain spatial orientation."
+    }
+  }
+}

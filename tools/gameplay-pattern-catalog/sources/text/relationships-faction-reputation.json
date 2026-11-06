@@ -1,0 +1,120 @@
+{
+  "id": "relationships-faction-reputation",
+  "system": "relationships",
+  "edition": 1,
+  "name": {
+    "zh": "阵营声望记账",
+    "en": "Faction reputation"
+  },
+  "summary": {
+    "zh": "把各方对玩家的评价分开记录，让同一行动产生不同后果。",
+    "en": "Track separate faction opinions so one action can have conflicting consequences."
+  },
+  "rules": {
+    "zh": "玩家完成任务、帮助或伤害某个群体；各方独立记录态度。称号、敌对、对话或特殊能力反馈关系变化，玩家据此选择继续站队或维持灰色空间。",
+    "en": "Complete tasks, help or harm groups, each tracking a separate attitude. Titles, hostility, dialogue and abilities signal changes and influence future allegiance."
+  },
+  "loop": [
+    {
+      "zh": "识别利益相关方",
+      "en": "Identify factions"
+    },
+    {
+      "zh": "选择帮助对象",
+      "en": "Choose whom to help"
+    },
+    {
+      "zh": "更新多方评价",
+      "en": "Update reputations"
+    },
+    {
+      "zh": "利用或承受新待遇",
+      "en": "Use or face new treatment"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "拿眼前奖励是否会封掉另一方的长期机会？",
+      "en": "Will an immediate reward close another faction’s opportunities?"
+    },
+    {
+      "zh": "同时积累敬畏和信任，比单纯讨好更适合角色吗？",
+      "en": "Does mixed fear and respect fit better than simple approval?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "评价维度",
+        "en": "Reputation dimensions"
+      },
+      "effect": {
+        "zh": "双维度可保留矛盾评价，单轴更易读。",
+        "en": "Two dimensions preserve mixed attitudes; one axis is easier to read."
+      }
+    },
+    {
+      "name": {
+        "zh": "跨阵营影响",
+        "en": "Cross-faction effects"
+      },
+      "effect": {
+        "zh": "连带影响越强，站队越有战略重量。",
+        "en": "Stronger spillovers make allegiance more strategic."
+      }
+    }
+  ],
+  "tags": [
+    "narrative",
+    "economy",
+    "risk"
+  ],
+  "related": [
+    "relationships-companion-approval",
+    "relationships-persuasion-checks",
+    "relationships-relationship-commitment",
+    "relationships-secrets-leverage"
+  ],
+  "contrast": {
+    "zh": "新维加斯强调世界如何接纳或敌视玩家；暴君进一步把关系方向接到能力奖励上。",
+    "en": "New Vegas emphasizes social access and hostility; Tyranny also connects relationship directions to ability rewards."
+  },
+  "combination": {
+    "zh": "组合创意：同一批货卖给军方会抬高商会戒心；声望改变市场渠道，迫使玩家选择长期客户。",
+    "en": "Design proposal: selling supplies to the army worries the merchants’ guild; reputation changes market access and forces long-term customer choices."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "商会与走私者都想要同一批货，帮助一方会影响另一方的态度。",
+      "en": "A guild and smugglers both want the shipment; helping one affects the other’s attitude."
+    },
+    "action": {
+      "zh": "你把货交给商会，获得报酬，同时放弃走私者给的路线情报。",
+      "en": "Deliver to the guild for payment, giving up the smugglers’ route information."
+    },
+    "result": {
+      "zh": "两方各自记录你的行为，后续报价或通行机会发生变化。",
+      "en": "Both groups record the action independently, changing later prices or access."
+    },
+    "next": {
+      "zh": "面对下一项任务，结合当前关系决定继续站队还是修复另一方。",
+      "en": "For the next task, decide whether to commit further or repair the other relationship."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "做两个阵营、三次有连带影响的任务和两个由关系改变的后续选项。",
+      "en": "Create two factions, three consequential tasks, and two later options affected by reputation."
+    },
+    "pitfall": {
+      "zh": "先确保后果可追溯；太多阵营与隐藏数值会让关系变化难以归因。",
+      "en": "Keep consequences traceable; too many factions and hidden numbers obscure cause and effect."
+    },
+    "test": {
+      "zh": "观察玩家是否把未来通行或交易机会纳入当前任务选择。",
+      "en": "See whether players consider future access or trade opportunities when choosing the current task."
+    }
+  }
+}

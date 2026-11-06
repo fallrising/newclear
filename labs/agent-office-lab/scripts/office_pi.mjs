@@ -6,6 +6,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createRequire } from 'node:module';
+import {readPiSession} from './pi_session_evidence.mjs';
 import { onePiTask } from './pi_office_policy.mjs';
 
 const lab = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -13,18 +14,20 @@ const [out] = process.argv.slice(2);
 assert(out?.startsWith(lab + '/runs/'));
 const workspace = path.join(out, 'workspace');
 const startup = process.argv.includes('--check-startup');
+const reconnect = process.argv.includes('--check-resume');
 const cancel = process.argv.includes('--check-cancel');
 const crash = process.argv.includes('--check-crash');
 const failureIndex = process.argv.indexOf('--check-failure');
 const failure = failureIndex >= 0 ? Number(process.argv[failureIndex + 1]) : undefined;
 assert(failure === undefined || [401, 429].includes(failure));
-assert(Number(cancel) + Number(startup) + Number(crash) + Number(failure !== undefined) <= 1);
+assert(Number(reconnect) + Number(cancel) + Number(startup) + Number(crash) + Number(failure !== undefined) <= 1);
 const require = createRequire(path.join(lab, 'vendor/agent-office/package.json'));
 const WebSocket = require('ws');
 const report = { status: 'starting', provider: 'pi', model: 'deepseek/deepseek-flash',
   cloud_fallback: false, model_inference_verified: false, states: [], authenticated_hooks: [] };
 const save = () => fs.writeFileSync(path.join(out, 'office-result.json'), JSON.stringify(report, null, 2) + '\n');
 let office, ws, worker, closing;
+const reconnectGates = [], hookTokens = new Set();
 const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 const events = () => fs.existsSync(path.join(out, 'pi-events.jsonl')) ? fs.readFileSync(path.join(out, 'pi-events.jsonl'), 'utf8').trim().split('\n').filter(Boolean).map(s => JSON.parse(s)) : [];
 async function until(check, ms, reason, allowExpectedError = false, allowExit = false) {
@@ -68,10 +71,11 @@ try {
   cfg.port = 0;
   office = await startServer(cfg);
   for (const floor of office.floors()) {
-    onePiTask(floor);
+    reconnectGates.push(onePiTask(floor, {allowReconnect:reconnect}));
     const native = floor.workers.handleProviderHook.bind(floor.workers);
     floor.workers.handleProviderHook = (route, id, token, event, payload) => {
       const accepted = native(route, id, token, event, payload);
+      if (route === 'pi' && accepted) hookTokens.add(token);
       if (route === 'pi' && accepted) report.authenticated_hooks.push({ type: payload.type, status: payload.status, session: payload.sessionId });
       return accepted;
     };
@@ -94,11 +98,49 @@ try {
   await until(() => welcomed, 10000, 'Office welcome missing');
   const prompt = startup ? undefined : 'Read input.json using read. Write result.json using write with exactly {"marker": the input marker, "total": the sum of input values}. Do not use other paths or tools. Then briefly confirm completion.';
   ws.send(JSON.stringify({ t: 'worker.spawn', deskId: 'desk-1', provider: 'pi', model: report.model, prompt, worktree: false }));
-  await until(() => worker && events().some(e => e.type === 'session_start') && report.authenticated_hooks.some(e => e.type === 'session' && e.status === 'starting'), 30000, 'Native Pi session did not start', failure !== undefined);
+  await until(() => worker && events().some(e => e.type === 'session_start') && report.authenticated_hooks.some(e => e.type === 'session' && e.status === 'starting'), 30000, 'Native Pi session did not start', failure !== undefined || reconnect);
   report.startup_verified = true;
   assert(worker.sessionId);
   report.session_id = worker.sessionId;
-  if (cancel) {
+  if (reconnect) {
+    await until(() => worker.status === 'needs_input' && events().some(e => e.type === 'assistant_end' && e.stopReason === 'error')
+      && events().some(e => e.type === 'agent_settled'), 30000, 'Native Pi error history missing', true);
+    const session = worker.sessionId, workerId = worker.id;
+    const before = readPiSession(workspace, workerId, session);
+    const owners = office.floors().flatMap(f => f.workers.owners()).filter(o => o.workerId === workerId && o.agent && o.cwd === workspace);
+    assert.equal(owners.length, 1);assert(Number.isInteger(owners[0].pid)&&owners[0].pid>1);
+    fs.writeFileSync(path.join(out,'.resume-target.tmp'),JSON.stringify({pid:owners[0].pid,session,status:worker.status}),{flag:'wx',mode:0o600});
+    fs.renameSync(path.join(out,'.resume-target.tmp'),path.join(out,'resume-target.json'));
+    await until(() => worker.status === 'exited',15000,'Original Pi CLI did not exit',true,true);
+    await sleep(3000);
+    assert.equal(events().filter(e=>e.type==='session_start').length,1);
+    assert.equal(worker.sessionId,session);assert.equal(worker.status,'exited');
+    assert.equal(typeof office.floors()[0].workers.resume(workerId),'string'); // Unarmed reconnect is denied.
+    assert(reconnectGates[0].armReconnect(workerId,session));
+    const hookCount=report.authenticated_hooks.length;
+    ws.send(JSON.stringify({t:'worker.resume',workerId}));
+    await until(() => worker.status==='idle' && worker.sessionId===session
+      && events().filter(e=>e.type==='session_start').length===2
+      && report.authenticated_hooks.slice(hookCount).some(e=>e.type==='session'&&e.status==='starting'),30000,'Same-session Pi reconnect missing',true,true);
+    const resumed = office.floors().flatMap(f=>f.workers.owners()).filter(o=>o.workerId===workerId&&o.agent&&o.cwd===workspace);
+    assert.equal(resumed.length,1);assert.notEqual(resumed[0].pid,owners[0].pid);
+    assert.equal(hookTokens.size,2);report.native_token_rotated=true;
+    ws.send(JSON.stringify({t:'worker.resume',workerId})); // Duplicate cannot spawn a third process/session.
+    await sleep(3000);
+    const recorded=events(),after=readPiSession(workspace,workerId,session);
+    assert.equal(recorded.filter(e=>e.type==='session_start').length,2);
+    assert(recorded.every(e=>e.session===session&&e.provider==='deepseek'&&e.model==='deepseek-flash'));
+    assert(report.authenticated_hooks.every(e=>e.session===session));
+    assert.equal(recorded.filter(e=>e.type==='assistant_end').length,1);
+    assert(!recorded.some(e=>e.type==='tool_call')&&!report.states.includes('done'));
+    assert(after.bytes.subarray(0,before.bytes.length).equals(before.bytes));
+    assert(worker.status==='idle'&&worker.sessionId===session);
+    assert(!fs.existsSync(path.join(workspace,'result.json')));
+    report.native_resume_verified=true;report.session_history_preserved=true;
+    report.history_prefix_sha256=before.sha256;report.history_entries_before=before.entries;
+    report.history_entries_after=after.entries;report.new_process_same_session=true;
+    report.no_automatic_replay_observation_ms=3000;report.status='stopped';
+  } else if (cancel) {
     await until(() => worker.status === 'working' && report.authenticated_hooks.some(e => e.status === 'working')
       && fs.existsSync(path.join(out, 'cancel-ready.json')), 30000, 'Pi did not reach held request');
     const session = worker.sessionId, workerId = worker.id;
@@ -182,7 +224,7 @@ try {
     report.artifact_sha256 = createHash('sha256').update(artifact).digest('hex');
     report.file_task_passed = true; report.agent_settled_verified = true;
   }
-  if (failure === undefined && !crash && !cancel) report.status = 'completed';
+  if (failure === undefined && !crash && !cancel && !reconnect) report.status = 'completed';
 } catch (error) {
   report.status = 'failed'; report.error = String(error); process.exitCode = 1;
 } finally {
@@ -193,4 +235,4 @@ try {
 // All native shutdown checks and report writes have completed. Do not let unrelated
 // upstream timers keep this bounded cancellation harness alive; the parent still
 // verifies every observed descendant before releasing the execution slot.
-if (cancel) process.exit(process.exitCode || 0);
+if (cancel || reconnect) process.exit(process.exitCode || 0);

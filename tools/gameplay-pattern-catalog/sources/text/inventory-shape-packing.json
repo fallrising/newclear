@@ -1,0 +1,120 @@
+{
+  "id": "inventory-shape-packing",
+  "system": "inventory",
+  "edition": 1,
+  "name": {
+    "zh": "异形背包拼装",
+    "en": "Shape-based packing"
+  },
+  "summary": {
+    "zh": "让物品的轮廓决定能带走什么。",
+    "en": "Let item silhouettes determine what fits."
+  },
+  "rules": {
+    "zh": "玩家旋转、移动不同尺寸的物品，将它们塞入有限格子；物品不能重叠或越界。空隙是否能容纳下一件战利品，会直接改变保留和丢弃的选择。",
+    "en": "Rotate and move differently sized items into a finite grid without overlap. Whether a remaining gap fits the next reward changes what you keep or discard."
+  },
+  "loop": [
+    {
+      "zh": "查看新物品形状",
+      "en": "Inspect the new shape"
+    },
+    {
+      "zh": "旋转并重排背包",
+      "en": "Rotate and rearrange"
+    },
+    {
+      "zh": "取舍无法容纳的物品",
+      "en": "Choose what cannot stay"
+    },
+    {
+      "zh": "确认携带方案",
+      "en": "Commit the loadout"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "先放大件还是先保留关键物品？几何最优不一定是战术最优。",
+      "en": "Pack large items first or protect essential tools? Geometric efficiency need not mean tactical strength."
+    },
+    {
+      "zh": "为未来留空位，还是立刻把收益装满？",
+      "en": "Reserve space for future finds or maximize immediate value?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "背包形状",
+        "en": "Bag shape"
+      },
+      "effect": {
+        "zh": "凹凸边界增加局部难题；规则矩形更容易比较方案。",
+        "en": "Irregular boundaries create local puzzles; rectangles make alternatives easier to compare."
+      }
+    },
+    {
+      "name": {
+        "zh": "物品旋转",
+        "en": "Rotation"
+      },
+      "effect": {
+        "zh": "允许旋转降低卡死概率，禁止旋转会强化提前规划。",
+        "en": "Rotation reduces dead ends; fixed orientation rewards foresight."
+      }
+    }
+  ],
+  "tags": [
+    "spatial",
+    "planning",
+    "optimization"
+  ],
+  "related": [
+    "inventory-adjacency",
+    "inventory-deck-thinning",
+    "inventory-equipment-budget",
+    "inventory-stack-limits"
+  ],
+  "contrast": {
+    "zh": "《背包英雄》让装包服务于持续构筑；《安全屋》把固定物品集合做成有终点的逻辑题。",
+    "en": "Backpack Hero supports an evolving build; Save Room turns a fixed item set into a finite logic puzzle."
+  },
+  "combination": {
+    "zh": "组合提案：考古探险中完整文物占异形大格，拆解能省空间却损失研究价值。",
+    "en": "Design proposal: intact artifacts occupy awkward shapes; dismantling saves space but sacrifices research value."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "背包剩一个 L 形空隙，新捡到的长剑占三格。",
+      "en": "An L-shaped space remains in your bag; a new sword occupies three cells."
+    },
+    "action": {
+      "zh": "你旋转长剑，再把两瓶药移到角落试着腾出直线空间。",
+      "en": "Rotate the sword and move two potions into a corner to create a straight space."
+    },
+    "result": {
+      "zh": "长剑终于放下，但原本留给下一件战利品的空位消失了。",
+      "en": "The sword fits, but the space reserved for the next item is gone."
+    },
+    "next": {
+      "zh": "遇到新物品时，再比较价值、形状与必须携带的用品。",
+      "en": "At the next pickup, compare value, shape, and essential supplies again."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "用一个小格子背包和五种固定形状物品，实现拖动、旋转与冲突提示。",
+      "en": "Use a small grid and five item shapes with dragging, rotation, and overlap feedback."
+    },
+    "pitfall": {
+      "zh": "先别加装备属性；最基本的拾取、旋转和放回必须顺手。",
+      "en": "Defer equipment stats until picking up, rotating, and putting items back feels reliable."
+    },
+    "test": {
+      "zh": "观察玩家是否为了保留重要物品主动重排，而非每次直接丢掉最大件。",
+      "en": "See whether players rearrange to preserve essentials instead of always discarding the largest item."
+    }
+  }
+}

@@ -1,0 +1,120 @@
+{
+  "id": "cooperation-synchronized-triggers",
+  "system": "cooperation",
+  "edition": 2,
+  "name": {
+    "zh": "分头就位，同步触发",
+    "en": "Reach separate controls and synchronize"
+  },
+  "summary": {
+    "zh": "两处开关必须同时满足，走到位置之后还得对上行动时机。",
+    "en": "Two separate controls must be active together, making timing matter after everyone reaches position."
+  },
+  "rules": {
+    "zh": "目标由分散的多个条件共同开启，单人无法在同一时刻满足全部条件。玩家先分路到位，再确认准备状态，通过倒数、信号或持续按住来形成重叠的有效时间。",
+    "en": "A goal requires separated conditions to overlap, preventing one player from activating everything at once. Players split up, confirm readiness and coordinate a countdown, signal or sustained hold."
+  },
+  "loop": [
+    {
+      "zh": "找到需要同时满足的条件",
+      "en": "Identify simultaneous conditions"
+    },
+    {
+      "zh": "分头到达各自位置",
+      "en": "Reach separate positions"
+    },
+    {
+      "zh": "确认准备并同步执行",
+      "en": "Confirm readiness and synchronize"
+    },
+    {
+      "zh": "检查结果再进入下一段",
+      "en": "Check success and continue"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "我先按住等伙伴，还是等双方准备好再倒数？",
+      "en": "Hold my control while waiting or start a countdown after both are ready?"
+    },
+    {
+      "zh": "谁去更难到达的位置，谁负责最后发出信号？",
+      "en": "Who takes the harder route and who gives the final signal?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "允许重叠时间",
+        "en": "Timing tolerance"
+      },
+      "effect": {
+        "zh": "窗口宽适合交流解谜，窗口窄更考验默契与操作。",
+        "en": "Wide tolerance supports communication puzzles; narrow tolerance tests execution."
+      }
+    },
+    {
+      "name": {
+        "zh": "等待期间的压力",
+        "en": "Pressure while waiting"
+      },
+      "effect": {
+        "zh": "安全等待便于商量，持续危险会要求更好的到达顺序。",
+        "en": "Safe waiting permits planning; ongoing danger makes arrival order matter."
+      }
+    }
+  ],
+  "tags": [
+    "cooperation",
+    "timing",
+    "spatial"
+  ],
+  "related": [
+    "cooperation-downed-revival",
+    "cooperation-physical-tether",
+    "cooperation-shared-vehicle",
+    "cooperation-split-information"
+  ],
+  "contrast": {
+    "zh": "《传送门2》把同步做成解谜步骤；《Among Us》把同步救急放入存在隐藏敌人的局面。",
+    "en": "Portal 2 uses synchronization as a puzzle step; Among Us makes it an emergency inside a group with hidden enemies."
+  },
+  "combination": {
+    "zh": "设计提案：两人通过不同传送门到达两端开关，先安排路线，再用共同倒数开启出口。",
+    "en": "Design proposal: two players use different portals to reach opposite switches, planning their routes before a shared countdown opens the exit."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "编辑示例：房间两端各有一块踏板，两块同时踩住两秒才开门。",
+      "en": "Editorial example: two floor plates on opposite sides must stay pressed together for two seconds."
+    },
+    "action": {
+      "zh": "A先到左边并报告就位，B绕过障碍到右边，再一起数到三。",
+      "en": "A reaches the left plate and reports readiness; B clears an obstacle to the right, then they count to three."
+    },
+    "result": {
+      "zh": "两人踩住后门亮绿灯；B提前离开则进度归零。",
+      "en": "Holding both turns the door light green; if B leaves early, progress resets."
+    },
+    "next": {
+      "zh": "成功后交换路线，面对下一组距离不同的踏板。",
+      "en": "After succeeding, they swap routes for another pair at different distances."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "cooperative",
+    "firstStep": {
+      "zh": "先做同屏两个可移动方块、两块踏板和一个显示重叠时间的门。",
+      "en": "Build two local moving squares, two plates and a door that displays overlap time."
+    },
+    "pitfall": {
+      "zh": "先让失败原因可见；新增机关种类之前，要分清是没到位、没同时按，还是保持时间不够。",
+      "en": "Make failure visible before adding devices: distinguish wrong position, poor synchronization and insufficient hold time."
+    },
+    "test": {
+      "zh": "试玩者第一次失败后能指出缺少哪个条件，并用倒数或等待成功一次。",
+      "en": "After one failure, testers identify the missing condition and succeed using a countdown or waiting."
+    }
+  }
+}

@@ -1,0 +1,120 @@
+{
+  "id": "defense-tower-upgrade-budget",
+  "system": "defense",
+  "edition": 2,
+  "name": {
+    "zh": "有限塔位的集中升级",
+    "en": "Upgrade deeply or build wider"
+  },
+  "summary": {
+    "zh": "同样的钱，是把一个好位置变强，还是在另一处增加覆盖？",
+    "en": "Spend the same money on a stronger position or on coverage somewhere else."
+  },
+  "rules": {
+    "zh": "塔位、道路覆盖和资金都有限，玩家需要在新建与升级之间分配资源。升级保留已有位置并提高能力，新建增加覆盖或分工；敌人的种类与行进路线决定哪一种投入更有用，防线表现随波次被检验。",
+    "en": "Tower positions, coverage and money are limited, so divide resources between construction and upgrades. Upgrading improves an existing position; a new tower adds coverage or another role. Enemy types and routes determine which investment helps, and each wave tests the choice."
+  },
+  "loop": [
+    {
+      "zh": "找出当前防线的瓶颈",
+      "en": "Identify the current bottleneck"
+    },
+    {
+      "zh": "比较升级和新建收益",
+      "en": "Compare upgrading with building"
+    },
+    {
+      "zh": "把钱投入一个选择",
+      "en": "Commit the available budget"
+    },
+    {
+      "zh": "观察覆盖或输出是否改善",
+      "en": "Check whether coverage or damage improved"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "好位置上的高等级塔能充分开火，但钱集中在一处会照顾不到新路线。",
+      "en": "A high-level tower at a good spot may fire constantly, but concentrating funds can neglect a new route."
+    },
+    {
+      "zh": "为当前波次买便宜塔更稳，攒钱升级则可能在后续更有效。",
+      "en": "A cheap tower may stabilize the current wave, while saving for an upgrade may serve later waves better."
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "升级性价比曲线",
+        "en": "Upgrade efficiency curve"
+      },
+      "effect": {
+        "zh": "后级越划算，越鼓励集中投资；边际收益下降则鼓励铺开布局。",
+        "en": "More efficient higher tiers encourage concentration; diminishing returns encourage wider layouts."
+      }
+    },
+    {
+      "name": {
+        "zh": "有效塔位数量",
+        "en": "Number of useful positions"
+      },
+      "effect": {
+        "zh": "优质位置稀少时升级更关键；位置丰富时新建的空间选择更重要。",
+        "en": "Scarce strong positions increase the value of upgrades; abundant positions increase the importance of expansion."
+      }
+    }
+  ],
+  "tags": [
+    "economy",
+    "spatial",
+    "optimization"
+  ],
+  "related": [
+    "defense-ammunition-supply",
+    "defense-maze-routing",
+    "commerce-dynamic-market",
+    "commerce-shop-display"
+  ],
+  "contrast": {
+    "zh": "王国保卫战在固定塔位上加入专精选择；防御阵型还把新塔的位置与地面敌人的通路组织连在一起。",
+    "en": "Kingdom Rush adds specialization to fixed tower spots; Defense Grid also connects new tower positions to the organization of ground routes."
+  },
+  "combination": {
+    "zh": "组合提案：允许借钱提前升级炮塔，但每波结算要先还一笔债。玩家要判断这次升级能否守住更多奖励，以及下一波是否还留得出补塔的钱。",
+    "en": "Design proposal: let players borrow to upgrade a tower early, then deduct a repayment after every wave. They must judge whether the upgrade protects enough rewards and still leaves cash to reinforce the next wave."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "一座塔始终有敌人可打，另一条支路却偶尔漏掉快怪。",
+      "en": "One tower always has a target, while a side route occasionally leaks fast enemies."
+    },
+    "action": {
+      "zh": "放弃把主塔升一级，先在支路补一座便宜塔。",
+      "en": "Skip one upgrade on the main tower and add a cheap tower on the side route."
+    },
+    "result": {
+      "zh": "总伤害增幅不大，但原本无覆盖的路段得到了拦截。",
+      "en": "Total damage rises only slightly, but the previously uncovered segment gains an interception point."
+    },
+    "next": {
+      "zh": "支路稳定后，再把后续收入投入主塔升级。",
+      "en": "After stabilizing the side route, invest later income in the main tower."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "做三个固定塔位和两级升级，让一波敌人走主路、一波走支路。",
+      "en": "Use three fixed tower spots and two upgrade tiers; send one wave down the main route and another down a branch."
+    },
+    "pitfall": {
+      "zh": "不用先做几十种塔；重点是两种花钱方式都在某种情况下值得选。",
+      "en": "Do not begin with dozens of towers; make both spending options useful in different situations."
+    },
+    "test": {
+      "zh": "能否找到至少两种来敌安排，使“升级”和“新建”分别成为合理答案？",
+      "en": "Can two enemy schedules make upgrading and building each a reasonable answer?"
+    }
+  }
+}

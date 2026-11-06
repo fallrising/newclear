@@ -1,0 +1,119 @@
+{
+  "id": "survival-contagion-control",
+  "system": "survival",
+  "edition": 2,
+  "name": {
+    "zh": "切断疾病传播路线",
+    "en": "Interrupt disease transmission"
+  },
+  "summary": {
+    "zh": "处理病人之外，还要找出问题通过接触、食物或空气怎样传过去。",
+    "en": "Beyond treating a sick character, trace transmission through contact, food or air."
+  },
+  "rules": {
+    "zh": "疾病按明确路径传播，隔离或清洁只对对应路径有效。玩家先定位传播链，再改变接触、物流或设施安排，并等待后续病例验证措施是否有效。",
+    "en": "Disease follows defined routes, and isolation or cleaning works only on relevant routes. Players identify the chain, change contact or infrastructure, then watch later cases to judge success."
+  },
+  "loop": [
+    {
+      "zh": "发现病例并追踪共同接触",
+      "en": "Find cases and shared exposure"
+    },
+    {
+      "zh": "判断实际传播路径",
+      "en": "Identify the transmission route"
+    },
+    {
+      "zh": "隔离接触或清洁污染链",
+      "en": "Separate contacts or clean the chain"
+    },
+    {
+      "zh": "监测新病例并调整",
+      "en": "Monitor new cases and revise"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "先暂停生产找源头，还是维持供给并保护关键人员？",
+      "en": "Pause production to trace the source or maintain supply while protecting key workers?"
+    },
+    {
+      "zh": "有限空间用来隔离个体，还是改造共用设施？",
+      "en": "Use scarce space for isolation or rebuild shared facilities?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "传播路径数量",
+        "en": "Route count"
+      },
+      "effect": {
+        "zh": "一条可解释路径就能成立；增加路径必须提供可追踪证据。",
+        "en": "One understandable route is enough; extra routes require traceable evidence."
+      }
+    },
+    {
+      "name": {
+        "zh": "症状延迟",
+        "en": "Symptom delay"
+      },
+      "effect": {
+        "zh": "延迟让追踪更有挑战，但过长且无日志会使玩家无法建立因果。",
+        "en": "Delay makes tracing harder, but long delays without logs obscure cause and effect."
+      }
+    }
+  ],
+  "tags": [
+    "information",
+    "planning"
+  ],
+  "related": [
+    "building-room-requirements",
+    "survival-balanced-nutrition",
+    "survival-bleeding-triage",
+    "survival-body-inspection"
+  ],
+  "contrast": {
+    "zh": "缺氧要求追踪环境和物资中的病菌；Niche把问题压缩到成员之间的空间接触。",
+    "en": "Oxygen Not Included traces germs through infrastructure and supplies; Niche focuses on spatial contact among creatures."
+  },
+  "combination": {
+    "zh": "设计提案：为清洁区和隔离区安排不同入口，让设施布局直接影响传播机会。",
+    "en": "Design proposal: give clean and isolation areas separate entrances so layout affects exposure."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "演示设定：三个角色用同一张餐桌，已经有一个出现症状。",
+      "en": "Example: three characters share a table and one shows symptoms."
+    },
+    "action": {
+      "zh": "查看日志发现问题来自同一批食物，停用该批库存。",
+      "en": "A log links the cases to one food batch; withdraw that stock."
+    },
+    "result": {
+      "zh": "后续进食不再产生新病例，现有病人仍需要恢复。",
+      "en": "Later meals produce no new cases while existing patients still need recovery."
+    },
+    "next": {
+      "zh": "为食物加工处增加清洁步骤，再恢复供餐。",
+      "en": "Add a cleaning step at food preparation before restoring service."
+    }
+  },
+  "prototype": {
+    "scope": "medium",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "先做五个角色、一条经食物传播的路径和可查看的接触日志。",
+      "en": "Start with five characters, one foodborne route and an exposure log."
+    },
+    "pitfall": {
+      "zh": "不要同时模拟空气、接触、潜伏与变异；先证明玩家能找出一条传播链。",
+      "en": "Do not begin with airborne, contact, latency and mutation systems at once; prove one traceable chain."
+    },
+    "test": {
+      "zh": "给一次污染事件，观察玩家能否找对源头，并用后续无新病例验证措施。",
+      "en": "Introduce one contamination event and see whether players identify its source and verify control through later cases."
+    }
+  }
+}

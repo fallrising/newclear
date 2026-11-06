@@ -40,8 +40,8 @@
     },
     {
       "path": "labs/agent-office-lab",
-      "last_source_update": "2026-11-02T12:44:43Z",
-      "source_commit": "ef238c7ea95eb3d6d20ad0fc66f56513a185ec4d"
+      "last_source_update": "2026-11-06T15:22:30Z",
+      "source_commit": "716dbd977d4089d6e991256b051d4f25e002d4cc"
     },
     {
       "path": "labs/aweshore",
@@ -265,8 +265,8 @@
     },
     {
       "path": "tools/gameplay-pattern-catalog",
-      "last_source_update": "2026-11-02T09:37:46Z",
-      "source_commit": "fffc1c84ff94f4d8bdf94e9ecf1705c09e759f32"
+      "last_source_update": "2026-11-03T01:44:52Z",
+      "source_commit": "1cef7d4d657067f133da55c41092c37df80a220f"
     },
     {
       "path": "tools/motion-prompt",

@@ -1,0 +1,120 @@
+{
+  "id": "relationships-relationship-commitment",
+  "system": "relationships",
+  "edition": 1,
+  "name": {
+    "zh": "关系身份转换",
+    "en": "Relationship commitment"
+  },
+  "summary": {
+    "zh": "让表白、交往与分手成为明确动作，而不只是好感数字增长。",
+    "en": "Make confession, dating and separation explicit actions beyond affinity growth."
+  },
+  "rules": {
+    "zh": "玩家先积累关系，再通过特定互动提出身份改变。条件满足不必等于自动成功；明确的接受或拒绝改变可用互动，玩家需要为这次推进做准备。",
+    "en": "Build affinity, then initiate a specific relationship transition. Eligibility need not guarantee acceptance; a clear response changes available interactions and makes commitment deliberate."
+  },
+  "loop": [
+    {
+      "zh": "建立关系基础",
+      "en": "Build affinity"
+    },
+    {
+      "zh": "准备承诺条件",
+      "en": "Prepare commitment"
+    },
+    {
+      "zh": "提出身份改变",
+      "en": "Propose a transition"
+    },
+    {
+      "zh": "适应新的互动规则",
+      "en": "Adapt to new rules"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "继续维持熟悉的关系，还是冒拒绝风险更进一步？",
+      "en": "Maintain a familiar bond or risk rejection to progress?"
+    },
+    {
+      "zh": "需要稀缺物品的承诺，应该在什么时候完成？",
+      "en": "When is a commitment worth its scarce item cost?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "成功确定性",
+        "en": "Acceptance certainty"
+      },
+      "effect": {
+        "zh": "明确门槛降低挫败，概率接受增加犹豫与等待。",
+        "en": "Clear thresholds reduce frustration; probabilistic acceptance adds uncertainty."
+      }
+    },
+    {
+      "name": {
+        "zh": "身份独占性",
+        "en": "Exclusivity"
+      },
+      "effect": {
+        "zh": "排他关系提高承诺重量，也会限制自由探索角色故事。",
+        "en": "Exclusivity adds weight but limits exploring multiple stories."
+      }
+    }
+  ],
+  "tags": [
+    "narrative",
+    "progression",
+    "risk"
+  ],
+  "related": [
+    "relationships-bond-scenes",
+    "relationships-companion-approval",
+    "relationships-dynastic-marriage",
+    "relationships-faction-reputation"
+  ],
+  "contrast": {
+    "zh": "星露谷的关键物品像明确的阶段开关；波西亚在表白中保留接受的不确定性。",
+    "en": "Stardew’s key items act as milestone switches; Portia retains uncertainty in confession acceptance."
+  },
+  "combination": {
+    "zh": "组合创意：伙伴正式加入远征前，需要一起完成一顿纪念晚餐；把关系升级做成一次共同准备的行动。",
+    "en": "Design proposal: a companion formally joins an expedition after preparing a commemorative dinner together, turning a relationship transition into shared action."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "你与角色已经熟悉，但正式交往还需要准备一件特殊物品。",
+      "en": "You know the character well, but a formal commitment requires a special item."
+    },
+    "action": {
+      "zh": "你准备物品，在合适时机提出关系升级。",
+      "en": "Prepare the item and propose the new relationship at an appropriate moment."
+    },
+    "result": {
+      "zh": "接受或拒绝得到明确回应；成功后新的互动入口出现。",
+      "en": "An explicit acceptance or rejection follows; success opens new interactions."
+    },
+    "next": {
+      "zh": "按新的关系身份继续相处，决定下一步投入多少时间。",
+      "en": "Continue under the new relationship status and decide how much time to invest next."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "做两种关系身份、一个提议动作、一项前置条件与接受拒绝反馈。",
+      "en": "Build two relationship statuses, one proposal action, one prerequisite, and clear acceptance or refusal."
+    },
+    "pitfall": {
+      "zh": "先确保身份变化真的改变互动；仅把数值换称呼难以体现承诺。",
+      "en": "Ensure status changes available interactions; a renamed meter alone conveys little commitment."
+    },
+    "test": {
+      "zh": "观察玩家是否清楚何时仍是普通关系，以及提出承诺会改变什么。",
+      "en": "Check whether players understand the current status and what the proposal would change."
+    }
+  }
+}

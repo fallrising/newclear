@@ -1,5 +1,13 @@
 # 開發交接
 
+T-0023：完成 [Pi Office host 重啟驗收](docs/PI-HOST-RESTART.md)。真實 Pi 本機 429／六筆歷史後，對已追蹤 Office 主程序注入 SIGKILL；新 host 停泊工位為 interrupted，再次重啟與 Chrome 刷新不自動派工。明確一次性無 prompt 重新連接使用新 PID／同 session、保留六筆歷史，沒有追加請求或產物。195 tests、操作台及 63 筆結果回歸通過；首輪 runner 41.06 秒、三代 host、外層 83 個程序全退出、鎖釋放。正常關閉後兩個已追蹤背景程序經身分核對送 SIGTERM，再確認全退出。一次本機 429、零模型推論／外部請求。完成 AC-08／09／11 子集；不代表進行中的遠端串流恢復、任務續做或完整 MVP／安全驗收。[證據](docs/evidence/pi-host-restart-2026-11-06.json)，交付見[任務板](docs/tasks/BOARD.md)。
+
+T-0022：完成[本地單檔修改提案](docs/LOCAL-FILE-PROPOSAL.md)。可選擇已登記專案中的檔案、輸入修改需求，先讀取目標後產生完整替代內容；結果重新核對原文／提案 hash、計算差異並以原檔名下載。190 tests、真實 Strata 修正與 Chrome 選檔／差異／下載、62 筆結果回歸通過。測試將 add 的減法修正為加法，獨立 AST 核對通過、未執行生成程式；原目錄及快照保留。runner 42.92 秒、外層 73 個程序全退出、鎖釋放、swap 增量 44.19 MiB，guard 未觸發。離線命名衝突及測試暫存路徑問題於實測前修正，原限制未放寬；零遠端模型呼叫。提案仍需人工審閱，沒有自動套用或一般程式測試；完整 MVP／安全邊界仍 pending。[證據](docs/evidence/local-file-proposal-2026-11-03.json)，交付見[任務板](docs/tasks/BOARD.md)。
+
+T-0021：完成[本地文字任務](docs/LOCAL-TEXT-TASK.md)。可登記工作目錄、輸入要求，以 OpenCode／Strata 讀取有界文字快照並產生 output.md，在頁面查看及下載；原目錄不變。184 tests、真實本地推論及 61 筆結果回歸通過。最終獨立 HOME 任務 43.12 秒，Chrome 關閉／重開仍為同一工作，產物與下載 hash 一致，外層 71 個程序全部退出、鎖釋放、swap 增量 0。首次完整流程亦通過；中間兩次 swap guard 停止保留且全部清理，未放寬模型或資源限制。另保留啟動前路徑／選單測試失敗與唯讀文字換行斷言修正。僅完成本地文字流程；一般程式修改、遠端工位與完整安全驗收仍 pending。沒有使用 Claude 或遠端付費模型。[證據](docs/evidence/local-text-task-2026-11-02.json)，交付見[任務板](docs/tasks/BOARD.md)。
+
+T-0020：完成 [Pi 同 session 重新連接](docs/PI-RESUME.md)。真實 Pi 保存本機 429 的六筆歷史後，核對所屬 CLI 身分並停止；一次性原生 resume 以新 PID 接回相同 session、更新 hook token，保留原始歷史且無追加請求。177 tests、Chrome 操作台及 57 筆結果回歸通過；最終 runner 17.72 秒、外層 30 個程序全部退出、鎖釋放。首輪瀏覽器欄位筆誤失敗保留，修正後通過；兩輪原生檢查皆通過、零模型推論與付費呼叫。任務保持 stopped，原任務未完成；這是既有 Office host 內 CLI 重新連接子集，host crash／任務續做及完整 MVP 仍待驗。[證據](docs/evidence/pi-resume-2026-11-02.json)，交付見[任務板](docs/tasks/BOARD.md)。
+
 T-0019：完成[操作台跨入口與重啟狀態](docs/CONSOLE.md)。同一 checkout 的共用鎖區分 available／busy／cleanup_unconfirmed／unavailable；頁面提示阻擋原因，API 在啟動 runner 前重查，dispatcher 保留最終互斥。新增唯讀 `office_dispatch.py status`。171 tests 與 Chrome／真實 helper 程序驗收通過：另一入口持鎖、SIGKILL 後中斷、兩次操作台啟動、刷新與舊計畫拒絕、journal 位元組／修改時間不變、明確核對後歸檔及損壞狀態阻擋。所有 helper 全退出；沒有執行 provider、模型或付費請求。[證據](docs/evidence/console-restart-2026-11-02.json)，交付見[任務板](docs/tasks/BOARD.md)。這是控制層 AC-08／11 子集，不代表原生 provider crash／session 恢復通過；不接管、不自動解鎖或重跑。
 
 T-0018：完成 [Pi 原生取消與操作台驗收](docs/CANCEL.md)。真實 Pi 的第一個請求留在本機，確認 working／同 session 後走原生 worker.kill；worker.remove／原生 PID 退出 102 ms，整體取消清理 3.521 秒。最終外層追蹤 29 個程序全退出、執行鎖釋放；163 tests、55 筆結果及操作台／唯讀頁的取消分類、刷新、防重複與拒絕重試通過。任務為 cancelled，零本地／遠端模型推論或付費呼叫。首輪清理約 20.09 秒、第二輪背景子程序殘留均保留；修正後只對本次已追蹤且身分相符的後代送 SIGTERM，完整清理才解鎖。[證據](docs/evidence/pi-cancel-2026-11-02.json)，交付見[任務板](docs/tasks/BOARD.md)。Grok／Cursor 取消、Pi 權限／恢復、遠端端到端與完整安全驗收仍待完成。
@@ -12,7 +20,7 @@ T-0015：完成 [Pi CLI crash 與明確重新啟動](docs/CRASH.md)。真實 Pi 
 
 T-0014：完成[Pi 原生 401／429 故障驗收](docs/FAILURES.md)。本機注入錯誤，真實 Pi 呈現 needs_input／error 且從未 done；各一次本機請求、零外部模型請求、無產物或推論成功。發現並修正 Pi 過早判定清理：最終兩次 runner 與外層觀察均確認所屬程序全退出、鎖釋放；原兩次清理證據不足紀錄保留。結果頁標示注入來源，任務仍為失敗。135 tests 與 40 筆結果的瀏覽器核對通過。[證據](docs/evidence/pi-failures-2026-11-01.json)，交付狀態見[任務板](docs/tasks/BOARD.md)。完整 AC-07、其他 provider 及 MVP 仍 pending。
 
-模型使用說明：T-0013／17 執行本地 OpenCode／Strata；T-0014／15／16／18 僅執行原生 Pi CLI 與本機故障，未載入 Strata 或進行任何模型推論。MVP 必要 AC 共 11 項，四種 provider 的原受測合成任務 4 項通過，另外 7 項已有子集但保持 pending；不能以測試數換算產品完成率。本地 UI 派工／終端／結果子集已通過；下一階段補遠端入口整合、跨 provider 生命週期與完整安全驗收。
+模型使用說明：T-0013／17／21／22 執行本地 OpenCode／Strata；T-0014／15／16／18／20 僅執行原生 Pi CLI 與本機故障，未載入 Strata 或進行任何模型推論。MVP 必要 AC 共 11 項，四種 provider 的原受測合成任務 4 項通過，另外 7 項已有子集但保持 pending；不能以測試數換算產品完成率。本地 UI 派工／終端／結果子集已通過；下一階段補遠端入口整合、跨 provider 生命週期與完整安全驗收。
 
 目前剩餘主線：遠端新入口真實任務；跨 provider 權限、取消與恢復；其他 provider 的 CLI crash／故障與有界重試流程；遠端 UI 派工到結果；完整安全邊界驗收。Strata GitHub tool-loop 為獨立非 MVP 阻塞研究。
 

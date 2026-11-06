@@ -1,0 +1,120 @@
+{
+  "id": "cooperation-temporary-alliance",
+  "system": "cooperation",
+  "edition": 2,
+  "name": {
+    "zh": "暂时合作与背叛时机",
+    "en": "Temporary alliances and betrayal"
+  },
+  "summary": {
+    "zh": "眼前需要彼此，最后却只想自己赢：每次合作都要重新判断是否可信。",
+    "en": "Players need each other now but pursue their own victory, so cooperation is repeatedly renegotiated."
+  },
+  "rules": {
+    "zh": "玩家有独立得分目标，也有共同危险或共同对手。帮助他人能带来眼前收益，却可能壮大竞争者；承诺不保证执行，玩家根据行动、筹码和剩余机会决定继续合作、退出或背叛。",
+    "en": "Players pursue separate scores while facing shared danger or a common rival. Help can yield immediate value but strengthen a competitor; promises are not binding, so actions and remaining opportunities determine whether to cooperate, leave or betray."
+  },
+  "loop": [
+    {
+      "zh": "发现暂时共同的利益",
+      "en": "Find a temporary shared interest"
+    },
+    {
+      "zh": "商量并投入有限帮助",
+      "en": "Negotiate and commit limited help"
+    },
+    {
+      "zh": "观察对方是否兑现",
+      "en": "Watch whether promises are kept"
+    },
+    {
+      "zh": "继续、退出或转而竞争",
+      "en": "Continue, withdraw or compete"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "先帮别人压制领先者，会不会只是把新对手扶到第一？",
+      "en": "Will helping stop the leader merely create a new leader?"
+    },
+    {
+      "zh": "现在背叛能拿更多，但后面还需要对方一起过险关吗？",
+      "en": "Betray for more now, or preserve help for a later danger?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "共同危险强度",
+        "en": "Shared danger"
+      },
+      "effect": {
+        "zh": "危险太弱没人需要合作，太强则背叛几乎没有空间。",
+        "en": "Weak danger removes the need to cooperate; overwhelming danger leaves little room to betray."
+      }
+    },
+    {
+      "name": {
+        "zh": "合作收益与个人收益",
+        "en": "Shared versus personal reward"
+      },
+      "effect": {
+        "zh": "合作有真实好处，背叛也有机会成本，双方才需要判断。",
+        "en": "Cooperation needs real value and betrayal needs a cost for the decision to matter."
+      }
+    }
+  ],
+  "tags": [
+    "cooperation",
+    "risk",
+    "economy"
+  ],
+  "related": [
+    "cooperation-downed-revival",
+    "cooperation-hidden-role",
+    "commerce-auction-bidding",
+    "commerce-debt-pressure"
+  ],
+  "contrast": {
+    "zh": "《阿门罗》围绕王位形成临时利益；《冒险公社》把合作判断与是否继续冒险、何时带钱离开绑在一起。",
+    "en": "Armello forms temporary interests around the throne; Journey of Greed ties trust to continuing the expedition and leaving with money."
+  },
+  "combination": {
+    "zh": "设计提案：商队成员共同出资修桥，但各自交货拿分；先约定谁出多少，再观察有人会不会搭便车或临时抢单。",
+    "en": "Design proposal: caravan members fund a bridge together but score their own deliveries, creating room for limited deals, free riding and last-minute competition."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "编辑示例：三人各有五枚金币，过桥要合付三枚，桥后奖励按到达顺序分配。",
+      "en": "Editorial example: three players each have five coins; the bridge costs three in total and rewards beyond it depend on arrival order."
+    },
+    "action": {
+      "zh": "A与B各承诺出一枚，C同意补最后一枚；A也可临时不付，把压力推给别人。",
+      "en": "A and B promise one coin each; C agrees to cover the last, while A could withhold payment and pressure the others."
+    },
+    "result": {
+      "zh": "这次三人都付款过桥，但B看到A犹豫，下轮不愿先垫钱。",
+      "en": "All three pay this time, but B notices A’s hesitation and will not advance money next round."
+    },
+    "next": {
+      "zh": "下一座桥前重新谈条件，既看现有金币，也看上次有没有守约。",
+      "en": "At the next bridge, they renegotiate using both current funds and the history of promises kept."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "competitive",
+    "firstStep": {
+      "zh": "先用三人纸面竞分、三轮共同费用和不强制执行的口头约定，测合作是否会自然出现。",
+      "en": "Use a three-player paper score race, three rounds of shared costs and nonbinding spoken deals to test whether alliances emerge."
+    },
+    "pitfall": {
+      "zh": "别先做自动谈判AI或复杂外交条约；先找到合作和背叛各有合理时机的收益结构。",
+      "en": "Defer negotiation AI and elaborate treaties; first make the payoffs support sensible moments for both cooperation and betrayal."
+    },
+    "test": {
+      "zh": "同一组试玩者至少有一次主动合作，也有一次因局势变化拒绝合作，并能解释原因。",
+      "en": "The same group cooperates once and later declines because circumstances changed, explaining both choices."
+    }
+  }
+}

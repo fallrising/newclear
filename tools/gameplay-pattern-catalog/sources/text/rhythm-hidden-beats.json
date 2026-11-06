@@ -1,0 +1,130 @@
+{
+  "id": "rhythm-hidden-beats",
+  "system": "rhythm",
+  "edition": 3,
+  "name": {
+    "zh": "提示消失后仍然接准拍子",
+    "en": "Keep time when the cues disappear"
+  },
+  "summary": {
+    "zh": "先让玩家听懂节奏，再拿掉一部分提示，检验能否自己把拍子续下去。",
+    "en": "Establish the rhythm, then remove some cues and ask the player to carry it forward."
+  },
+  "rules": {
+    "zh": "一段稳定节奏先建立参照，随后部分声音或画面提示暂时消失，但判定时间仍照常前进。玩家要在心里保持间隔，在不可见或无声的目标拍回应；提示回来后可以重新校准。本条新增的约束是缺少外部参照，而不是多记一串按钮。",
+    "en": "A stable rhythm establishes a reference, then some sound or visual cues disappear while timing continues. Keep the interval internally and respond on a hidden or silent target beat; returning cues allow recalibration. The added constraint is missing external timing information, rather than memorizing more buttons."
+  },
+  "loop": [
+    {
+      "zh": "用完整提示建立拍感",
+      "en": "Establish timing from complete cues"
+    },
+    {
+      "zh": "发现哪些提示被拿掉",
+      "en": "Notice which cues disappear"
+    },
+    {
+      "zh": "在空白段继续计拍并输入",
+      "en": "Keep counting and act through the gap"
+    },
+    {
+      "zh": "对照回来的提示修正节奏",
+      "en": "Recalibrate when cues return"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "画面干扰与原节奏不一致时，要跟着变化追赶，还是守住原来的间隔？",
+      "en": "When a visual distraction conflicts with the rhythm, follow it or preserve the original interval?"
+    },
+    {
+      "zh": "空白段结束后发现偏快，要从哪个新提示重新对齐，避免越按越乱？",
+      "en": "If you emerge from the gap ahead of the beat, which returning cue should anchor your correction?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "空白段长度",
+        "en": "Cue-free duration"
+      },
+      "effect": {
+        "zh": "空白越长，微小误差越容易积累；短空白更适合第一次教学。",
+        "en": "Long gaps accumulate small timing errors; brief gaps work better for an introduction."
+      }
+    },
+    {
+      "name": {
+        "zh": "保留的参照",
+        "en": "Remaining references"
+      },
+      "effect": {
+        "zh": "保留音乐、动画或部分拍点会提供不同程度的帮助，不能把全部关闭当成唯一加难方法。",
+        "en": "Music, animation or occasional pulses offer different levels of support; removing everything is only one way to raise difficulty."
+      }
+    },
+    {
+      "name": {
+        "zh": "重新对齐的机会",
+        "en": "Re-entry opportunities"
+      },
+      "effect": {
+        "zh": "规律出现的强提示能让一次漂移有机会恢复，不必失败到段落结束。",
+        "en": "Periodic strong cues let players recover from drift before the section ends."
+      }
+    }
+  ],
+  "tags": [
+    "timing",
+    "information",
+    "precision"
+  ],
+  "related": [
+    "rhythm-cue-response",
+    "rhythm-sustain-notes",
+    "rhythm-onbeat-actions",
+    "rhythm-streak-multiplier"
+  ],
+  "contrast": {
+    "zh": "节奏医生以指定拍静音制造缺口；节奏天国会用多种提示变化或消失打乱外部参照。",
+    "en": "Rhythm Doctor creates gaps by silencing selected beats; Rhythm Heaven varies or removes several kinds of external cue."
+  },
+  "combination": {
+    "zh": "组合提案：黑暗走廊的机关按固定节奏开合，点亮灯具才能看到拍点提示，但灯油有限；玩家可熄灯靠内在节拍通过，或消耗灯油重新对齐。",
+    "en": "Design proposal: corridor traps open on a fixed rhythm. A lamp reveals timing cues but consumes limited fuel; players can proceed by internal timing in darkness or spend fuel to resynchronize."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "教学示例：先响四次等间隔鼓点，接下来四拍静音，第八拍仍要求敲击。",
+      "en": "Teaching example: four evenly spaced drumbeats are followed by four silent beats, with a required strike on beat eight."
+    },
+    "action": {
+      "zh": "玩家在静音段继续默数五、六、七、八，并在八时按键。",
+      "en": "The player silently counts five, six, seven, eight and presses on eight."
+    },
+    "result": {
+      "zh": "系统显示晚了半拍，并在下一组首拍重新给出强鼓点。",
+      "en": "Feedback reports a half-beat delay, then a strong drumbeat marks the next phrase’s start."
+    },
+    "next": {
+      "zh": "玩家用新的首拍重建间隔，再挑战下一段静音。",
+      "en": "The player resets their timing from the new first beat and attempts another silent section."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "做八拍循环，只隐藏中间两拍，仍给出命中目标与误差；熟悉后再扩大缺口。",
+      "en": "Build an eight-beat loop with only two middle cues hidden, retaining the target and timing error; expand the gap after it is understood."
+    },
+    "pitfall": {
+      "zh": "提示消失时若实际拍速也偷偷变化，玩家无法从已有信息推算正确答案。",
+      "en": "Changing the actual tempo without a cue during the gap makes the correct timing impossible to infer from the established pattern."
+    },
+    "test": {
+      "zh": "玩家是否能在提示回来时主动校正，而不是只能重新开始整关？",
+      "en": "Can players deliberately resynchronize when cues return instead of restarting the entire level?"
+    }
+  }
+}

@@ -1,0 +1,120 @@
+{
+  "id": "commerce-timed-contracts",
+  "system": "commerce",
+  "edition": 1,
+  "name": {
+    "zh": "限时委托交付",
+    "en": "Timed delivery contracts"
+  },
+  "summary": {
+    "zh": "在接单之前判断能力，把生产计划与交付承诺绑定。",
+    "en": "Assess capacity before accepting an order that binds planning to a deadline."
+  },
+  "rules": {
+    "zh": "玩家从委托中选择一项，确认数量、质量或收集条件及期限。完成制作和交付领取报酬；接得太满可能让材料、设备或日程互相冲突。",
+    "en": "Choose an order with quantity, quality or collection conditions and a deadline. Produce and deliver for payment; overcommitment creates conflicts in materials, equipment or schedules."
+  },
+  "loop": [
+    {
+      "zh": "比较报酬与要求",
+      "en": "Compare reward and demands"
+    },
+    {
+      "zh": "确认产能后接单",
+      "en": "Accept within capacity"
+    },
+    {
+      "zh": "安排生产采集",
+      "en": "Schedule production"
+    },
+    {
+      "zh": "期限内交付",
+      "en": "Deliver before the deadline"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "高报酬难单和低风险小单，哪个更适合当前产能？",
+      "en": "Take a lucrative challenge or a safe small order?"
+    },
+    {
+      "zh": "为赶单买材料，会不会让利润消失？",
+      "en": "Will buying materials to rush erase the margin?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "期限宽裕度",
+        "en": "Deadline slack"
+      },
+      "effect": {
+        "zh": "短期限强调排程，长期限强调跨日资源配置。",
+        "en": "Short deadlines emphasize scheduling; long ones emphasize resource allocation."
+      }
+    },
+    {
+      "name": {
+        "zh": "违约代价",
+        "en": "Failure cost"
+      },
+      "effect": {
+        "zh": "只损失机会鼓励尝试，扣信誉则要求更谨慎接单。",
+        "en": "Lost opportunity encourages trying; reputation penalties demand caution."
+      }
+    }
+  ],
+  "tags": [
+    "planning",
+    "time",
+    "economy"
+  ],
+  "related": [
+    "allocation-shop-reservation",
+    "commerce-regional-arbitrage",
+    "commerce-shop-display",
+    "commerce-trade-route-programming"
+  ],
+  "contrast": {
+    "zh": "波西亚将订单接到工坊成长；星露谷特别订单常改变一段时间里的活动重点。",
+    "en": "Portia connects contracts to workshop growth; Stardew’s Special Orders redirect activities over a period."
+  },
+  "combination": {
+    "zh": "组合创意：接受节日烟花订单后必须安排多段生产，若早交可让居民提前布置街区，反馈不只是一笔钱。",
+    "en": "Design proposal: a festival fireworks order requires several production stages; early delivery lets residents decorate sooner, offering visible feedback beyond money."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "委托要求两天内交六把工具，你每天只能做四把，还缺部分材料。",
+      "en": "A contract needs six tools in two days; daily capacity is four and some materials are missing."
+    },
+    "action": {
+      "zh": "你先算材料与生产时间，确认能完成后接单并安排采购。",
+      "en": "Check materials and production time, then accept and schedule purchases."
+    },
+    "result": {
+      "zh": "生产占用了设备，但交付后获得报酬；其他订单必须等待。",
+      "en": "Production occupies equipment, while delivery pays out and other jobs wait."
+    },
+    "next": {
+      "zh": "结算剩余材料与可用时间，再选择下一张订单。",
+      "en": "Review remaining materials and time before selecting the next contract."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "做两台设备、三张不同期限订单和可查看的每日生产表。",
+      "en": "Build two machines, three deadlines, and a visible daily production schedule."
+    },
+    "pitfall": {
+      "zh": "别靠突然改变期限制造难度；让玩家接单前就能看到主要约束。",
+      "en": "Avoid surprise deadline changes; expose the main constraints before acceptance."
+    },
+    "test": {
+      "zh": "提供一张报酬高但做不完的订单，观察玩家是否主动拒绝。",
+      "en": "Offer a lucrative but infeasible contract and see whether players reject it."
+    }
+  }
+}

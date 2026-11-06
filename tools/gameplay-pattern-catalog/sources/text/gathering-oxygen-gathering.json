@@ -1,0 +1,120 @@
+{
+  "id": "gathering-oxygen-gathering",
+  "system": "gathering",
+  "edition": 1,
+  "name": {
+    "zh": "氧气采集预算",
+    "en": "Oxygen-budgeted gathering"
+  },
+  "summary": {
+    "zh": "每多拿一件东西，都在压缩安全返程时间。",
+    "en": "Every extra pickup consumes part of the safe return window."
+  },
+  "rules": {
+    "zh": "水下或无空气区域的采集持续消耗氧气。玩家在目标价值、往返距离和剩余氧气之间权衡，必须及时回到补给点；升级供氧装备改变能触及的采集半径。",
+    "en": "Gathering underwater or without breathable air consumes oxygen. Players weigh resource value against travel distance and remaining air, returning to a refill point before it runs out; equipment changes practical range."
+  },
+  "loop": [
+    {
+      "zh": "补满氧气并选路线",
+      "en": "Fill oxygen and choose a route"
+    },
+    {
+      "zh": "沿路采集",
+      "en": "Gather along the route"
+    },
+    {
+      "zh": "预留返程余量",
+      "en": "Reserve enough for the return"
+    },
+    {
+      "zh": "返回补氧",
+      "en": "Return and refill"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "继续搜一个角落，还是带着已有收获安全返回？",
+      "en": "Search one more corner or return safely with current gains?"
+    },
+    {
+      "zh": "多带氧气设备，是否挤占其他装备选择？",
+      "en": "Does extra oxygen equipment displace other useful gear?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "消耗速度",
+        "en": "Depletion rate"
+      },
+      "effect": {
+        "zh": "快消耗制造短促往返；慢消耗允许长路线但降低紧迫感。",
+        "en": "Fast depletion creates short sorties; slow depletion permits long routes with less urgency."
+      }
+    },
+    {
+      "name": {
+        "zh": "补氧点密度",
+        "en": "Refill density"
+      },
+      "effect": {
+        "zh": "密集补给降低迷路惩罚；稀疏补给强调路线记忆。",
+        "en": "Dense refills reduce navigation penalties; sparse ones reward route memory."
+      }
+    }
+  ],
+  "tags": [
+    "risk",
+    "time",
+    "planning"
+  ],
+  "related": [
+    "gathering-depth-targeting",
+    "gathering-gathering-quota",
+    "gathering-renewable-forage-route",
+    "gathering-salvage-dismantling"
+  ],
+  "contrast": {
+    "zh": "深海迷航强调三维返程导航与移动供氧点；戴夫把氧气同时接到受伤压力与单次出海收获上。",
+    "en": "Subnautica emphasizes 3D return navigation and mobile air sources; Dave connects oxygen with damage pressure and each dive’s haul."
+  },
+  "combination": {
+    "zh": "组合创意：海藻能临时补氧但也是订单材料，采下后吃掉保命还是带回出售成为途中决策。",
+    "en": "Design proposal: harvested seaweed restores oxygen but is also an order ingredient, forcing a mid-dive survival-versus-income choice."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "氧气还剩40秒，回补给点要20秒，旁边一处矿要花10秒采。",
+      "en": "You have forty seconds of oxygen, need twenty to return and ten to mine a nearby deposit."
+    },
+    "action": {
+      "zh": "你只采这一处，放弃更远的资源，并立刻返程。",
+      "en": "Take only this deposit, skip the farther resource and immediately return."
+    },
+    "result": {
+      "zh": "带回了材料，也留下少量余量应对绕路。",
+      "en": "You return with materials and a small buffer for an unexpected detour."
+    },
+    "next": {
+      "zh": "补满氧气后，用已知路线重新安排下一趟半径。",
+      "en": "Refill oxygen and use the known route to plan the next trip’s range."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "先做节点地图、固定行动耗氧和一个补给点，把返程消耗清楚显示。",
+      "en": "Use a node map, fixed oxygen costs per action and one refill point, clearly displaying the return cost."
+    },
+    "pitfall": {
+      "zh": "隐藏返程成本或氧气变化会制造突兀死亡；先让玩家能判断自己为何冒险。",
+      "en": "Hidden return costs or oxygen changes create abrupt deaths; first make the risk understandable."
+    },
+    "test": {
+      "zh": "剩余氧气变少时，玩家是否主动放弃眼前收益，且能解释安全余量？",
+      "en": "As oxygen falls, do players voluntarily abandon loot and explain their safety margin?"
+    }
+  }
+}

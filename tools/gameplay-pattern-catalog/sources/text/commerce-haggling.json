@@ -1,0 +1,120 @@
+{
+  "id": "commerce-haggling",
+  "system": "commerce",
+  "edition": 1,
+  "name": {
+    "zh": "讨价还价",
+    "en": "Haggling"
+  },
+  "summary": {
+    "zh": "在成交前主动改变报价，用反应、时机或让步换取更好条件。",
+    "en": "Improve a deal before closing through reactions, timing or concessions."
+  },
+  "rules": {
+    "zh": "双方围绕同一件货物反复调整交易条件。玩家要在追加收益与交易破裂之间停手；即时反馈告诉玩家当前占优程度。",
+    "en": "Adjust terms around a specific item. The player must stop between gaining more value and losing the deal; immediate feedback indicates negotiation progress."
+  },
+  "loop": [
+    {
+      "zh": "确认基础报价",
+      "en": "Establish a quote"
+    },
+    {
+      "zh": "尝试争取优势",
+      "en": "Seek an advantage"
+    },
+    {
+      "zh": "判断继续或收手",
+      "en": "Continue or stop"
+    },
+    {
+      "zh": "确认成交",
+      "en": "Close the deal"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "已经有利润时继续压价，是否值得冒失败风险？",
+      "en": "Push for more when the deal is already profitable?"
+    },
+    {
+      "zh": "以稳妥方式尽快成交，还是投入更多操作争取上限？",
+      "en": "Close safely or invest more effort for a better result?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "谈判容错",
+        "en": "Negotiation tolerance"
+      },
+      "effect": {
+        "zh": "低容错让每次让步更紧张；高容错鼓励摸索。",
+        "en": "Low tolerance raises tension; high tolerance supports experimentation."
+      }
+    },
+    {
+      "name": {
+        "zh": "操作要求",
+        "en": "Execution demand"
+      },
+      "effect": {
+        "zh": "节奏判定强调手感，回合报价强调读人和估值。",
+        "en": "Timing emphasizes dexterity; turn-based offers emphasize reading and valuation."
+      }
+    }
+  ],
+  "tags": [
+    "economy",
+    "timing",
+    "risk"
+  ],
+  "related": [
+    "commerce-auction-bidding",
+    "commerce-debt-pressure",
+    "commerce-dynamic-market",
+    "commerce-price-discovery"
+  ],
+  "contrast": {
+    "zh": "药剂工艺把议价做成操作挑战；当铺人生2把重点放在估价与顾客判断。",
+    "en": "Potion Craft turns negotiation into execution; Dealer’s Life 2 emphasizes appraisal and reading customers."
+  },
+  "combination": {
+    "zh": "组合创意：餐厅与供应商议价时，可用未来稳定订单换折扣；一次便宜采购会绑定之后几天的菜单。",
+    "en": "Design proposal: a restaurant bargains for discounts by promising future orders, tying today’s cheap purchase to later menus."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "卖家开价 100，你估计货物价值 120，但还想留钱买其他东西。",
+      "en": "The seller asks 100 for an item you value at 120, but you need cash for other purchases."
+    },
+    "action": {
+      "zh": "你先报价 80，看到对方不满后让步到 90。",
+      "en": "Offer 80, then raise it to 90 after a negative response."
+    },
+    "result": {
+      "zh": "卖家愿意成交；继续压价可能省钱，也可能失去交易。",
+      "en": "The seller is willing to close; pressing further might save money or lose the deal."
+    },
+    "next": {
+      "zh": "决定接受或退出，把剩余预算带到下一笔交易。",
+      "en": "Accept or leave, then carry the remaining budget into the next transaction."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "用固定卖家底价、有限耐心和三种报价动作做一场短谈判。",
+      "en": "Build a short negotiation with a seller’s minimum price, limited patience, and three offer actions."
+    },
+    "pitfall": {
+      "zh": "让反馈能反映接近底线的程度，别把结果藏在完全不可见的随机数后面。",
+      "en": "Let feedback indicate proximity to a limit instead of hiding outcomes behind opaque randomness."
+    },
+    "test": {
+      "zh": "观察玩家在已获折扣时能否主动停手，并说明继续谈的风险。",
+      "en": "See whether players voluntarily close after a discount and explain the risk of continuing."
+    }
+  }
+}

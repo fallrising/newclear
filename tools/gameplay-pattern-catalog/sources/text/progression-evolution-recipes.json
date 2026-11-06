@@ -1,0 +1,120 @@
+{
+  "id": "progression-evolution-recipes",
+  "system": "progression",
+  "edition": 2,
+  "name": {
+    "zh": "凑齐条件升级成新武器",
+    "en": "Complete a weapon evolution recipe"
+  },
+  "summary": {
+    "zh": "一路保留配套零件，等条件满足后把武器变成新形态。",
+    "en": "Keep the required pieces until a weapon can transform."
+  },
+  "rules": {
+    "zh": "某件武器达到要求后，还要持有指定搭配并触发合成，才能变成新形态。玩家要为未来的组合预留位置，也要承受配套零件暂时不够有用的阶段；合成成功应明显改变攻击方式。",
+    "en": "A weapon must reach its required state, be paired with specified items and trigger a fusion to transform. Reserve space for the future combination while surviving with pieces that may be weak alone. Completion should visibly change the attack."
+  },
+  "loop": [
+    {
+      "zh": "确认目标配方",
+      "en": "Identify a recipe"
+    },
+    {
+      "zh": "收集并升级必要部件",
+      "en": "Acquire and improve its parts"
+    },
+    {
+      "zh": "满足条件后触发合成",
+      "en": "Trigger fusion when ready"
+    },
+    {
+      "zh": "用新形态调整战斗",
+      "en": "Adapt to the new form"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "拿眼下更强的零件，还是留下能完成未来配方的位置？",
+      "en": "Take a stronger immediate item or reserve the slot for a recipe component?"
+    },
+    {
+      "zh": "继续等缺少的配件，还是放弃已投入的路线解决当前危险？",
+      "en": "Wait for the missing piece or abandon the investment to survive now?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "配方提示程度",
+        "en": "Recipe visibility"
+      },
+      "effect": {
+        "zh": "提前知道条件能规划；只给线索会增加发现感，也可能让失败像浪费。",
+        "en": "Visible recipes support planning; clues add discovery but can make failed attempts feel wasted."
+      }
+    },
+    {
+      "name": {
+        "zh": "部件独立价值",
+        "en": "Value before fusion"
+      },
+      "effect": {
+        "zh": "配件越弱，完成组合前的风险越大，成型收益也要更清楚。",
+        "en": "Weak standalone components increase risk before completion and need a clear payoff."
+      }
+    }
+  ],
+  "tags": [
+    "planning",
+    "progression",
+    "discovery"
+  ],
+  "related": [
+    "progression-challenge-tiers",
+    "progression-death-loses-training",
+    "progression-knowledge-gates",
+    "progression-practice-based-growth"
+  ],
+  "contrast": {
+    "zh": "《吸血鬼幸存者》的许多配方是武器加被动道具，再由宝箱触发；HoloCure 的联动把两件升满武器带到金砧合成。",
+    "en": "Many Vampire Survivors recipes pair a weapon with a passive and use a chest trigger; HoloCure collaborations fuse two max-level weapons at a Golden Anvil."
+  },
+  "combination": {
+    "zh": "设计提案：武器栏仅三格，两把普通武器合成后变成一把并空出一格，让收集配方也改变后续装备空间。",
+    "en": "Design proposal: two ordinary weapons fuse into one within a three-slot loadout, freeing space and changing later equipment choices."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "你拿着 3 级火棒，配方要求 4 级火棒加风轮，背包只剩一格。",
+      "en": "You hold a level-3 fire rod; the recipe needs level 4 plus a wind wheel, and one slot remains."
+    },
+    "action": {
+      "zh": "你先拿风轮，再把火棒升到 4 级。",
+      "en": "Take the wind wheel, then upgrade the rod to level 4."
+    },
+    "result": {
+      "zh": "到合成台后两件变成火旋风，攻击由直线变成环绕。",
+      "en": "At the forge, they become a fire cyclone whose attack circles instead of traveling straight."
+    },
+    "next": {
+      "zh": "腾出的空位可以做下一个组合，但要先观察新攻击哪里还有盲区。",
+      "en": "Use the freed slot for another recipe after checking the new attack’s blind spots."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "做四件部件、两条固定配方和一个合成台，每种成品有明显不同的攻击轨迹。",
+      "en": "Build four components, two fixed recipes and a forge, with a distinct attack path for each result."
+    },
+    "pitfall": {
+      "zh": "先别做复杂配方百科；如果成品只是数值更高，等待过程很难形成期待。",
+      "en": "Avoid a large recipe catalogue while every result is only a numeric upgrade."
+    },
+    "test": {
+      "zh": "玩家是否会为尚未完成的配方保留位置，并在合成后改变站位？",
+      "en": "Do players reserve a slot for an incomplete recipe and change positioning after fusion?"
+    }
+  }
+}

@@ -229,3 +229,47 @@ Owner 指示繼續開發；本輪使用真實程序與瀏覽器，不執行模�
 | T-0019-02 | 唯讀邊界、派工重新檢查與頁面阻擋提示 | AC-11 子集 | done | 2026-11-02T12:36:43Z | 2026-11-02T12:47:03Z | 2026-11-02T12:47:29Z |
 
 T-0019 結案：[PR #982](https://github.com/fallrising/newclear/pull/982) 已合併，commit `e0cdbfba39927aad33d5088c78fe84c7f3bc0952`，offline／validate 兩項 CI success。已回讀主線證據：171 tests、真實 helper 程序與 Chrome 持鎖／SIGKILL／兩次操作台啟動／刷新驗收；中斷 journal 內容與修改時間不變，舊計畫被阻擋，明確核對退出後歸檔保留原紀錄，損壞狀態不洩漏且不放行。新增唯讀 status CLI；不建立狀態檔、不接管程序、不自動解鎖或重跑。所有測試程序退出，零 provider／模型啟動與付費呼叫。完成控制層 AC-08／11 子集，原生 provider host restart／session 恢復、遠端整合及完整安全驗收仍 pending，沒有 release／deploy／usable tag。
+
+## T-0020：Pi 原生同 session 明確重新連接
+
+Owner 指示繼續；使用真實 Pi、本機 429，不載入 owner key 或呼叫模型。
+
+| ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| T-0020-01 | 原生 CLI 退出後同 session 明確重新連接、歷史保留與不重跑 | AC-08 子集 | done | 2026-11-02T14:04:20Z | 2026-11-02T14:20:43Z | 2026-11-02T14:21:23Z |
+| T-0020-02 | 一次性恢復 gate、派工／結果整合與程序清理 | AC-09／11 子集 | done | 2026-11-02T14:04:20Z | 2026-11-02T14:20:43Z | 2026-11-02T14:21:23Z |
+
+T-0020 結案：[PR #990](https://github.com/fallrising/newclear/pull/990) 已合併，commit `ff1ac79b08d2c4253353256917205a32f893bb69`，offline／validate 兩項 CI success。已回讀主線證據：177 tests、真實 Pi 1.4.0 及 Chrome 驗收通過。原生 CLI 退出後，一次性無 prompt resume 以新 PID 接回相同 session、更新 hook token、保留六筆歷史，無自動重送；結果保持 stopped、原任務未完成。最終 runner 17.72 秒、外層 30 個程序全退出、鎖釋放；57 筆結果頁回歸通過。首輪瀏覽器欄位名稱筆誤保留，修正後完整重驗通過；兩輪原生檢查皆通過、零模型推論與付費呼叫。完成 AC-08／09／11 子集；Office host crash、任務續做、其他 provider 與完整 MVP 仍待驗，沒有 release／deploy／usable tag。
+
+## T-0021：本地文字任務與專案選擇
+
+Owner 指示繼續，Claude 額度 23:50 重置前先做其他工作；本輪只用本地 OpenCode／Strata。
+
+| ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| T-0021-01 | 登記工作目錄、自訂文字任務、產物查看與下載 | AC-01／09 子集 | done | 2026-11-02T15:22:39Z | 2026-11-02T15:49:49Z | 2026-11-02T15:50:27Z |
+| T-0021-02 | 文字快照／工具邊界、一次性執行與來源不變驗收 | AC-11 子集 | done | 2026-11-02T15:22:39Z | 2026-11-02T15:49:49Z | 2026-11-02T15:50:27Z |
+
+T-0021 結案：[PR #999](https://github.com/fallrising/newclear/pull/999) 已合併，commit `be2e1923ae6c48cc039c68d87857255c3873999e`，offline／validate 兩項 CI success。已回讀主線證據：184 tests、真實 OpenCode／Strata 文字任務與 Chrome 操作／下載、61 筆結果回歸通過。最終獨立 HOME 任務 43.12 秒，來源目錄與快照保留、工具僅 read／write、產物與下載 hash 一致；關閉／重開瀏覽器沒有重跑，外層 71 個程序全退出、鎖釋放、swap 增量 0。首輪完整流程通過，中間兩次資源 guard 停止與啟動前測試失敗均保留，沒有放寬限制。完成本地 AC-01／09／11 子集；原目錄不寫回，內容仍需確認，一般程式修改、遠端工位與完整隔離／MVP 仍 pending。未使用 Claude 或遠端模型，沒有 release／deploy／usable tag。
+
+## T-0022：本地單檔修改提案
+
+Owner 指示繼續開發；以本地 Strata 產生可審閱的單檔替代內容，不自動寫回來源。
+
+| ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| T-0022-01 | 專案選檔、自訂修改、差異預覽與替代檔下載 | AC-01／09 子集 | done | 2026-11-02T16:14:53Z | 2026-11-02T16:32:04Z | 2026-11-02T16:32:42Z |
+| T-0022-02 | 目標／快照邊界、原檔保留及提案重算驗收 | AC-11 子集 | done | 2026-11-02T16:14:53Z | 2026-11-02T16:32:04Z | 2026-11-02T16:32:42Z |
+
+T-0022 結案：[PR #1008](https://github.com/fallrising/newclear/pull/1008) 已合併，commit `ea6e429c994d4637e1b40a6f4304ac02d9a38db5`，offline／validate 兩項 CI success。已回讀主線證據：190 tests、真實 OpenCode／Strata 單檔修改提案與 Chrome 選檔／差異／下載、62 筆結果回歸通過。測試提案將減法修正為加法，獨立 AST 核對通過但未執行生成程式；原目錄與快照不變。runner 42.92 秒、外層 73 個程序全部退出、鎖釋放、swap 增量 44.19 MiB，資源限制未放寬。離線變數命名與測試暫存路徑問題於原生驗收前修正；零遠端模型呼叫。完成 AC-01／09／11 子集；提案仍須人工審閱，多檔修改、自動測試／套用、遠端入口及完整 MVP／安全驗收仍 pending，沒有 release／deploy／usable tag。
+
+## T-0023：Pi Office host 重啟
+
+Owner 指示繼續開發；真實 Pi、本機 429，零模型呼叫。
+
+| ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| T-0023-01 | Host crash、重複重啟、明確同 session 重新連接 | AC-08 子集 | done | 2026-11-06T15:16:20Z | 2026-11-06T15:25:51Z | 2026-11-06T15:26:30Z |
+| T-0023-02 | 一次性 gate、結果與瀏覽器、歷史及程序清理驗收 | AC-09／11 子集 | done | 2026-11-06T15:16:20Z | 2026-11-06T15:25:51Z | 2026-11-06T15:26:30Z |
+
+T-0023 結案：[PR #1033](https://github.com/fallrising/newclear/pull/1033) 已合併，commit `03edf45eb3593064ef74a643201389862d1cba9f`，offline／validate 兩項 CI success。已回讀主線證據：195 tests、真實 Pi 1.4.0／三代 Office host／Chrome 首輪驗收，以及 63 筆結果回歸通過。一次本機 429 後對已核對所屬 host 注入 SIGKILL，重啟後保持 interrupted，重複重啟與刷新不重跑；明確一次性無 prompt 重連到相同 session、新 PID，六筆歷史保留。runner 41.06 秒，外層 83 個程序全退出、鎖釋放；正常關閉後兩個已追蹤背景程序經身分核對送 SIGTERM，確認無殘留。零模型推論與外部請求，任務保持 stopped。完成 AC-08／09／11 子集；進行中遠端串流恢復、任務續做、其他 provider 與完整安全／MVP 仍 pending，沒有 release／deploy／usable tag。

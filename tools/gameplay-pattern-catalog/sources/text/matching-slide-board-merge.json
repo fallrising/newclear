@@ -1,0 +1,120 @@
+{
+  "id": "matching-slide-board-merge",
+  "system": "matching",
+  "edition": 3,
+  "name": {
+    "zh": "推动整盘，让数字相遇合并",
+    "en": "Slide the whole board to merge numbers"
+  },
+  "summary": {
+    "zh": "一次方向输入会影响多排物件，不能只盯着眼前的一对。",
+    "en": "One directional input affects many pieces, so one attractive pair cannot be considered alone."
+  },
+  "rules": {
+    "zh": "玩家选择一个方向，让棋盘上的可移动物件一起滑动；满足配对条件的物件相遇后合并。有效移动还会加入新物件，因此每次腾出的空间也在被重新消耗，玩家必须维持整盘的可操作性。",
+    "en": "Choose a direction to slide every movable piece. Compatible pieces merge when they meet, and a successful move introduces a new piece. Reclaimed space is continually consumed, so the player must preserve useful movement across the whole board."
+  },
+  "loop": [
+    {
+      "zh": "预测整盘滑动结果",
+      "en": "Predict the whole-board shift"
+    },
+    {
+      "zh": "选择一个方向",
+      "en": "Choose a direction"
+    },
+    {
+      "zh": "结算合并与新物件",
+      "en": "Resolve merges and the incoming piece"
+    },
+    {
+      "zh": "检查下一步仍能移动吗",
+      "en": "Check which moves remain available"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "合并眼前的大数字，是否会把小数字夹在角落无法配对？",
+      "en": "Would merging a large pair trap small unmatched numbers in a corner?"
+    },
+    {
+      "zh": "要先腾出一格，还是维持整齐的数字顺序等待下一块？",
+      "en": "Free a cell now or preserve an ordered arrangement for the next tile?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "单次滑动距离",
+        "en": "Distance per input"
+      },
+      "effect": {
+        "zh": "滑到尽头变化大；只走一格更容易做细微调整，但新物件会更快挤占空间。",
+        "en": "Sliding to the edge changes more at once; one-cell movement allows finer adjustments while incoming pieces consume room."
+      }
+    },
+    {
+      "name": {
+        "zh": "新物件预告",
+        "en": "Incoming-piece preview"
+      },
+      "effect": {
+        "zh": "预告让玩家能安排入口；完全未知时需要保留更多通用空位。",
+        "en": "Preview supports planning around the entry; unknown pieces require more flexible free space."
+      }
+    }
+  ],
+  "tags": [
+    "planning",
+    "spatial",
+    "risk"
+  ],
+  "related": [
+    "matching-clear-under-cargo",
+    "matching-combine-power-pieces",
+    "matching-complete-lines",
+    "matching-gravity-cascade"
+  ],
+  "contrast": {
+    "zh": "2048的整段滑动让一次操作大幅重排棋盘；Threes的一格移动和1、2配对规则，让入口与小数字管理更重要。",
+    "en": "2048 makes large board shifts per input; Threes emphasizes entry management and low-value pairing through one-cell movement and its 1-plus-2 rule."
+  },
+  "combination": {
+    "zh": "组合提案：把棋盘当搬运箱，相同零件合并后共用包装、减轻总重量。新货同时增加占位和重量，玩家要在更高等级与可搬走的负重之间取舍。",
+    "en": "Design proposal: treat the board as a shipping crate. Merging equal parts shares packaging and lowers weight, while incoming cargo adds both weight and occupied cells."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "一行从左到右是2、空、2、4，其余行也有数字。",
+      "en": "One row reads 2, empty, 2, 4, while other rows contain tiles too."
+    },
+    "action": {
+      "zh": "玩家向左推动整盘。",
+      "en": "The player slides the board left."
+    },
+    "result": {
+      "zh": "这一行的两个2合成4，其他行也移动，随后加入新块。",
+      "en": "The two 2s merge into a 4; other rows also shift, then a new tile enters."
+    },
+    "next": {
+      "zh": "玩家必须看整个棋盘，而不只是刚合成的4，选择下一次方向。",
+      "en": "The next direction must account for the whole board rather than only the new 4."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "做四乘四数字棋盘，使用固定的新块序列，先比较四个方向的可读性。",
+      "en": "Build a four-by-four number board with a fixed incoming sequence to test the readability of all four directions."
+    },
+    "pitfall": {
+      "zh": "同一回合新合成的物件能否再次合并必须明确，否则预测和结算会不一致。",
+      "en": "Specify whether a newly merged tile can merge again that turn, or prediction and resolution will disagree."
+    },
+    "test": {
+      "zh": "玩家能否在输入前预测至少两排会如何变化？",
+      "en": "Can players predict changes in at least two rows before an input?"
+    }
+  }
+}

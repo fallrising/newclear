@@ -1,0 +1,120 @@
+{
+  "id": "combat-simultaneous-orders",
+  "system": "combat",
+  "edition": 2,
+  "name": {
+    "zh": "双方先排指令再同时执行",
+    "en": "Simultaneous planned orders"
+  },
+  "summary": {
+    "zh": "先排好几秒动作，再观看双方计划撞在一起。",
+    "en": "Plan a few seconds of action, then watch both plans collide."
+  },
+  "rules": {
+    "zh": "战斗分成规划与执行两段。规划时为单位安排移动、瞄准或攻击；确认后双方在同一时间段一起执行，过程中不能随时改令。执行完重新观察，再规划下一段。敌方计划可隐藏，也可部分公开，难点随之变化。",
+    "en": "Combat alternates planning and execution. Queue movement, aim or attacks, then commit both sides to the same time interval without continuous intervention. Reassess afterward. Enemy plans may be hidden or partly revealed, changing the central challenge."
+  },
+  "loop": [
+    {
+      "zh": "观察当前局面",
+      "en": "Inspect the situation"
+    },
+    {
+      "zh": "安排动作及时间",
+      "en": "Schedule actions and timing"
+    },
+    {
+      "zh": "确认后同时执行",
+      "en": "Commit and resolve together"
+    },
+    {
+      "zh": "复盘再规划",
+      "en": "Review and plan again"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "先停下瞄准，还是抢先穿过对手射线？",
+      "en": "Stop to aim or cross a firing line early?"
+    },
+    {
+      "zh": "按最可能的敌方计划下注，还是牺牲效率防住多个可能？",
+      "en": "Bet on the likeliest enemy plan or trade efficiency for robustness?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "执行片段长度",
+        "en": "Execution interval"
+      },
+      "effect": {
+        "zh": "片段越长，承诺越重，也越难看懂失误发生在哪一刻。",
+        "en": "Longer intervals increase commitment and make mistakes harder to diagnose."
+      }
+    },
+    {
+      "name": {
+        "zh": "敌方计划可见度",
+        "en": "Enemy plan visibility"
+      },
+      "effect": {
+        "zh": "隐藏计划偏预测博弈，公开计划偏时间和空间排程。",
+        "en": "Hidden plans favor prediction; visible plans favor temporal and spatial scheduling."
+      }
+    }
+  ],
+  "tags": [
+    "planning",
+    "time",
+    "information"
+  ],
+  "related": [
+    "combat-pause-orders",
+    "combat-intent-preview",
+    "combat-action-points",
+    "combat-combat-deck-cycle"
+  ],
+  "contrast": {
+    "zh": "《冰封触点》侧重对手计划未知时的预测；《幻影旅团》把可见未来变成时间轴上的避让和反击。",
+    "en": "Frozen Synapse emphasizes prediction under hidden plans; Phantom Brigade turns visible future actions into scheduling and counters."
+  },
+  "combination": {
+    "zh": "加入有限次数的时间回退，让玩家修正一次计划，同时保留其他单位已经发生的结果。",
+    "en": "Add limited rewinds that revise one plan while preserving the consequences for other units."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "两名队员需要穿过同一条射线，敌人会在第2秒开火。",
+      "en": "Two allies must cross one firing line; the enemy fires at second 2."
+    },
+    "action": {
+      "zh": "安排第一人第1秒通过，第二人等到第3秒再走。",
+      "en": "Schedule the first crossing at second 1 and the second at second 3."
+    },
+    "result": {
+      "zh": "执行时两人避开射击窗口，等待也成为有效动作。",
+      "en": "Both avoid the firing window; waiting proves useful."
+    },
+    "next": {
+      "zh": "下一段敌人转向，你要根据新时间表再次排动作。",
+      "en": "The enemy turns in the next interval, requiring a new schedule."
+    }
+  },
+  "prototype": {
+    "scope": "large",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "先用两名单位、离散时间格和固定敌方计划做一个房间，不做自由物理或联网。",
+      "en": "Start with two units, discrete time slots and fixed enemy plans in one room, without free physics or networking."
+    },
+    "pitfall": {
+      "zh": "规划预览与实际执行若使用不同规则，玩家无法信任时间轴。",
+      "en": "If preview and execution use different rules, players cannot trust the timeline."
+    },
+    "test": {
+      "zh": "检查玩家能否从回放指出哪一秒出错，并修改那一段获得不同结果。",
+      "en": "Check whether players can locate a mistaken second in replay and revise that interval."
+    }
+  }
+}

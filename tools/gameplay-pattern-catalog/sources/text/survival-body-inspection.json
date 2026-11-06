@@ -1,0 +1,119 @@
+{
+  "id": "survival-body-inspection",
+  "system": "survival",
+  "edition": 2,
+  "name": {
+    "zh": "检查身体定位问题",
+    "en": "Inspecting the body to find problems"
+  },
+  "summary": {
+    "zh": "先找出哪里出问题，才能用对处理方法。",
+    "en": "Find what is wrong before choosing treatment."
+  },
+  "rules": {
+    "zh": "系统先给出疼痛或异常提示，玩家打开身体视图逐部位检查，再选择相应工具处理。信息不是一次全部弹出；发现的位置和外观决定下一步操作。",
+    "en": "A warning signals pain or trouble. Open a body view, inspect regions and choose tools for the issue found. Location and appearance guide action instead of one all-purpose heal button."
+  },
+  "loop": [
+    {
+      "zh": "察觉异常提示",
+      "en": "Notice a warning"
+    },
+    {
+      "zh": "查看具体身体部位",
+      "en": "Inspect body regions"
+    },
+    {
+      "zh": "辨认问题并选择工具",
+      "en": "Identify the issue and choose a tool"
+    },
+    {
+      "zh": "处理后重新检查",
+      "en": "Treat and inspect again"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "先快速检查最可能的部位，还是全面排查？",
+      "en": "Inspect the likeliest region first or check everything?"
+    },
+    {
+      "zh": "看到表面伤口后还要不要查找其他问题？",
+      "en": "After finding one wound, should you keep checking?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "线索精确度",
+        "en": "Clue precision"
+      },
+      "effect": {
+        "zh": "提示越模糊越强调观察，但必须有可辨认的外观或部位线索。",
+        "en": "Vague warnings emphasize observation but need legible visual or location clues."
+      }
+    },
+    {
+      "name": {
+        "zh": "检查成本",
+        "en": "Inspection cost"
+      },
+      "effect": {
+        "zh": "检查占用时间会带来时机取舍；免费检查更适合慢节奏诊断。",
+        "en": "Timed inspection creates urgency; free inspection supports slower diagnosis."
+      }
+    }
+  ],
+  "tags": [
+    "information",
+    "discovery"
+  ],
+  "related": [
+    "puzzles-language-decoding",
+    "puzzles-scene-deduction",
+    "puzzles-visual-rule-learning",
+    "survival-contagion-control"
+  ],
+  "contrast": {
+    "zh": "绿色地狱让玩家亲眼寻找局部异常；僵尸毁灭工程把定位信息集中到部位列表，读信息的成本更低。",
+    "en": "Green Hell makes players visually find issues; Project Zomboid centralizes locations in a readable body-part list."
+  },
+  "combination": {
+    "zh": "设计提案：用伤口位置和环境线索推断刚才触发了什么危险，并为下一次路线选择提供依据。",
+    "en": "Design proposal: combine wound location with scene clues to infer the hazard and revise the next route."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "演示设定：行走后出现异常提示，但没有说明原因。",
+      "en": "Example: a warning appears after walking without stating its cause."
+    },
+    "action": {
+      "zh": "检查左腿，发现附着的小虫。",
+      "en": "Inspect the left leg and find a parasite."
+    },
+    "result": {
+      "zh": "移除后警告消失，状态停止恶化。",
+      "en": "Removing it clears the warning and stops deterioration."
+    },
+    "next": {
+      "zh": "记住这片水域，下次穿越后主动检查。",
+      "en": "Remember the water crossing and inspect after using it again."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "先用一张二维身体图、四个检查区域和两种异常实现完整循环。",
+      "en": "Use one 2D body diagram, four inspection regions and two conditions."
+    },
+    "pitfall": {
+      "zh": "第一版无需可旋转三维人体；关键是线索、位置和处理动作对应清楚。",
+      "en": "A rotating 3D body is unnecessary; match clues, locations and treatments clearly."
+    },
+    "test": {
+      "zh": "不给答案提示，看玩家能否通过检查找到并处理异常。",
+      "en": "Without answer hints, see whether inspection leads to the correct treatment."
+    }
+  }
+}

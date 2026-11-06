@@ -2091,6 +2091,14 @@
     },
     {
       "version": 1,
+      "original": "main-merge-preserved-20261106/apps/cms-scaffold/.team/pp1c-b-cli-20261102/local-bundle.mjs.diff",
+      "sha256": "ca247e4fc78f0451b6fda0a3b519227f17158b41f73717922f9f408fe7b5bd27",
+      "byteSize": "3868",
+      "encoding": "utf-8",
+      "published": "main-merge-preserved-20261106/apps/cms-scaffold/.team/pp1c-b-cli-20261102/local-bundle.mjs.diff.encoded.json"
+    },
+    {
+      "version": 1,
       "original": "mock-attempt1/mock-final-driver.log",
       "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
       "byteSize": "0",

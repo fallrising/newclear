@@ -1,0 +1,120 @@
+{
+  "id": "relationships-date-itinerary",
+  "system": "relationships",
+  "edition": 1,
+  "name": {
+    "zh": "共同活动安排",
+    "en": "Shared-activity itineraries"
+  },
+  "summary": {
+    "zh": "把约会或聚会设计成有限时间内的一组活动选择。",
+    "en": "Plan a sequence of shared activities within a limited budget."
+  },
+  "rules": {
+    "zh": "玩家邀请可互动的角色，选择地点和活动。偏好、可用时间与活动预算限制安排；即时反应与结算关系让玩家判断这次相处是否合拍。",
+    "en": "Invite an eligible character and choose places and activities. Preferences, time and activity budgets constrain the itinerary; reactions and relationship outcomes reveal compatibility."
+  },
+  "loop": [
+    {
+      "zh": "邀请并约定时间",
+      "en": "Invite and schedule"
+    },
+    {
+      "zh": "选择活动组合",
+      "en": "Choose activities"
+    },
+    {
+      "zh": "执行并观察反应",
+      "en": "Act and observe"
+    },
+    {
+      "zh": "结算本次相处",
+      "en": "Resolve the outing"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "选对方喜欢的安全项目，还是尝试新活动？",
+      "en": "Choose a known favorite or try something new?"
+    },
+    {
+      "zh": "把预算集中到一项活动，还是安排多种小体验？",
+      "en": "Concentrate the budget or plan several small experiences?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "活动预算",
+        "en": "Activity budget"
+      },
+      "effect": {
+        "zh": "预算紧促使取舍，预算宽更像自由闲逛。",
+        "en": "Tight budgets create trade-offs; generous ones favor wandering."
+      }
+    },
+    {
+      "name": {
+        "zh": "偏好线索",
+        "en": "Preference clues"
+      },
+      "effect": {
+        "zh": "明确线索奖励观察；完全隐藏容易变成查表。",
+        "en": "Clear clues reward observation; opaque preferences encourage lookup tables."
+      }
+    }
+  ],
+  "tags": [
+    "planning",
+    "time",
+    "narrative"
+  ],
+  "related": [
+    "relationships-daily-contact",
+    "relationships-bond-scenes",
+    "relationships-dynastic-marriage",
+    "cooking-food-preservation"
+  ],
+  "contrast": {
+    "zh": "波西亚突出多项活动中的行动点分配；星露谷电影院把相处简化为影片、零食与人物偏好的匹配。",
+    "en": "Portia emphasizes allocating action points across activities; Stardew’s cinema focuses on matching movies and snacks to individual preferences."
+  },
+  "combination": {
+    "zh": "组合创意：约朋友野餐需要先选择路线，再用沿途采集物做料理；活动好坏由准备和路线共同决定。",
+    "en": "Design proposal: plan a picnic route and cook with ingredients gathered along the way; both preparation and routing shape the outing."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "约会还剩两个时段，对方喜欢安静，你预算只能选两个普通活动或一个昂贵活动。",
+      "en": "Two date periods remain; your partner likes quiet, and the budget buys two ordinary activities or one costly one."
+    },
+    "action": {
+      "zh": "你先安排公园散步，再根据反馈决定要不要去热闹餐厅。",
+      "en": "Start with a park walk, then use the response to decide whether to visit a busy restaurant."
+    },
+    "result": {
+      "zh": "活动反馈透露偏好，时间和预算同步减少。",
+      "en": "The response reveals preferences while consuming time and budget."
+    },
+    "next": {
+      "zh": "调整剩余安排，结束后记录下次值得保留的活动。",
+      "en": "Adjust the remaining itinerary and remember useful choices for the next outing."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "做一位角色、四种活动、有限时段与预算，以及每项活动后的明确反应。",
+      "en": "Build one character, four activities, limited time and budget, and clear feedback after each activity."
+    },
+    "pitfall": {
+      "zh": "先不要给每个地点做完整小游戏；先验证安排顺序和偏好信息是否形成选择。",
+      "en": "Defer bespoke minigames for every venue; test itinerary order and preference information first."
+    },
+    "test": {
+      "zh": "在第一次反馈后，观察玩家是否修改原计划，并能解释原因。",
+      "en": "After the first response, see whether players revise the plan and explain why."
+    }
+  }
+}

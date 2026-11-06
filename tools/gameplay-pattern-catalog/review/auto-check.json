@@ -1,0 +1,1472 @@
+{
+  "schema_version": 1,
+  "snapshot_id": "atlas-public-2026-11-02",
+  "llm": "command",
+  "model": null,
+  "generated_at": "2026-11-04T13:05:42Z",
+  "notes": [
+    {
+      "id": "allocation-area-majority",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "allocation-follow-phase",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "allocation-public-goal-race",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "allocation-public-pick",
+      "verdict": "flag",
+      "issues": [
+        {
+          "kind": "missing-key-point",
+          "detail": "來源的參數「選擇約束 / Pick constraints」效果是「放置或使用條件會讓同一件物品對不同玩家價值不同」。筆記在〈可調參數（本地分析）〉把它改寫成「限制每次可取件數或可取類型／放寬限制後……」，用取用數量與類型的限制替換了來源參數的原意，等於丟掉了來源關於放置與使用條件的關鍵規則，並把改寫後的說法安到同名參數上。"
+        }
+      ]
+    },
+    {
+      "id": "allocation-route-denial",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "allocation-savings-interest",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "allocation-shared-stock",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "allocation-shop-reservation",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "allocation-snake-order",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "allocation-worker-placement",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "automation-aerial-logistics",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "automation-belt-routing",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "automation-blueprint-reuse",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "automation-byproduct-loop",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "automation-conditional-control",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "automation-flow-splitting",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "automation-fluid-routing",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "automation-item-filtering",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "automation-power-budget",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "automation-production-chain",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "building-access-network",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "building-construction-sequencing",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "building-modular-snapping",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "building-room-requirements",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "building-service-coverage",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "building-structural-support",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "building-terrain-shaping",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "building-thermal-zoning",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "building-vertical-stacking",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "building-water-engineering",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "combat-action-points",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "combat-combat-deck-cycle",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "combat-combo-variation",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "combat-cover-flanking",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "combat-destructible-cover",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "combat-forced-movement",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "combat-friendly-fire",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "combat-intent-preview",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "combat-invulnerable-dodge",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "combat-overwatch",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "combat-part-destruction",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "combat-pause-orders",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "combat-posture-break",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "combat-simultaneous-orders",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "combat-stamina-budget",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "combat-surface-reactions",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "combat-timed-parry",
+      "verdict": "flag",
+      "issues": [
+        {
+          "kind": "missing-key-point",
+          "detail": "來源規則與失敗保底參數都明講：過早輸入可能只是普通格擋、過晚才受傷；筆記的來源摘要只留成功效果，核心循環又把失手寫成防禦被打開／受傷／掉架勢，沒有保留「早按仍可格擋」這條關鍵保底規則。"
+        }
+      ]
+    },
+    {
+      "id": "combat-weakpoint-aim",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "command-focus-fire",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "command-frontline-shielding",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "command-initiative-order",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "command-interrupt-action",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "command-prebattle-formation",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "command-scout-current-vision",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "command-split-objectives",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "command-threat-redirection",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "command-trait-thresholds",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "command-workers-or-soldiers",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "commerce-auction-bidding",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "commerce-debt-pressure",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "commerce-dynamic-market",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "commerce-haggling",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "commerce-interpret-orders",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "commerce-price-discovery",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "commerce-regional-arbitrage",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "commerce-shop-display",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "commerce-timed-contracts",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "commerce-trade-route-programming",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "cooking-food-preservation",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "cooking-heat-window",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "cooking-ingredient-substitution",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "cooking-judged-flavor",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "cooking-meal-loadout",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "cooking-measurement-precision",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "cooking-order-triage",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "cooking-preparation-chain",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "cooking-recipe-learning",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "cooking-station-handoff",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "cooperation-complementary-abilities",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "cooperation-discussion-vote",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "cooperation-downed-revival",
+      "verdict": "flag",
+      "issues": [
+        {
+          "kind": "missing-key-point",
+          "detail": "來源規則明說「救回的人恢復隊伍能力，救援者倒下則會擴大危機」。筆記的來源摘要與規則轉寫只保留「救援會佔用時間和位置，周圍威脅仍在」，略去「救援者倒下會擴大危機」這項核心代價；失敗模式僅以「整隊瓦解」模糊帶過，未把它當作來源規則陳述。"
+        }
+      ]
+    },
+    {
+      "id": "cooperation-hidden-role",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "cooperation-physical-tether",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "cooperation-shared-vehicle",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "cooperation-split-information",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "cooperation-synchronized-triggers",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "cooperation-temporary-alliance",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "deckbuilding-card-upgrade",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "deckbuilding-dice-allocation",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "deckbuilding-discard-redraw",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "deckbuilding-dual-use-cards",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "deckbuilding-duplicate-investment",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "deckbuilding-exhaust-for-burst",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "deckbuilding-opening-hand-control",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "deckbuilding-poker-hand-requirements",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "deckbuilding-reward-choice",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "deckbuilding-rule-changing-passives",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "deckbuilding-temporary-generation",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "deckbuilding-trigger-order",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "defense-ammunition-supply",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "defense-day-night-investment",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "defense-early-wave-call",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "defense-maze-routing",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "defense-mobile-defender",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "defense-resistance-counters",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "defense-target-priority",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "defense-tower-upgrade-budget",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "defense-trap-sequence",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "driving-air-balance",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "driving-air-stunt",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "driving-drift-boost",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "driving-slipstream",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "driving-start-charge",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "ecology-animal-taming",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "ecology-breeding-conditions",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "ecology-genetic-diversity",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "ecology-habitat-capacity",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "ecology-parent-trait-selection",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "ecology-plant-crossbreeding",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "ecology-population-limits",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "ecology-species-compatibility",
+      "verdict": "flag",
+      "issues": [
+        {
+          "kind": "missing-key-point",
+          "detail": "來源規則的後半句「一個新住戶可能改變其他住戶的安全與收益，因此要評估組合，而不是逐只獨立評分」被略去：筆記的來源摘要只截取「檢查相互威脅、群居偏好或同住收益」的前半，核心循環與失敗模式也沒有明確保留「不能逐只獨立評分、必須評估組合」這條關鍵規則，而它正是這個機制成立的核心。"
+        }
+      ]
+    },
+    {
+      "id": "exploration-ability-gates",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "exploration-air-action-refill",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "exploration-climbing-rest-route",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "exploration-earned-map",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "exploration-fast-travel-network",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "exploration-gliding-descent",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "exploration-grapple-swing",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "exploration-procedural-route-reading",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "exploration-stealth-awareness",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "exploration-wall-jump",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "farming-crop-protection",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "farming-fertilizer-tradeoff",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "farming-growth-care",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "farming-irrigation-layout",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "farming-livestock-care",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "farming-orchard-investment",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "farming-regrowth-crops",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "farming-season-window",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "farming-seed-reinvestment",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "farming-substrate-match",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "fishing-bait-loadout",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "fishing-bite-window",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "fishing-cast-placement",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "fishing-equipment-access",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "fishing-habitat-search",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "fishing-line-tension",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "fishing-passive-traps",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "fishing-pond-production",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "fishing-target-tracking",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "fishing-timed-contest",
+      "verdict": "flag",
+      "issues": [
+        {
+          "kind": "missing-key-point",
+          "detail": "來源規則明確說計分會決定玩家追求數量、目標魚種或稀有度；筆記的來源摘要與計分參數只對比數量／連續入網加成與稀有度，漏掉「目標魚種」計分這一關鍵規則。"
+        }
+      ]
+    },
+    {
+      "id": "gathering-depth-targeting",
+      "verdict": "flag",
+      "issues": [
+        {
+          "kind": "missing-key-point",
+          "detail": "Source rules state mining is constrained by time, supplies, and return distance; the note only covers supplies/return and omits the time constraint."
+        }
+      ]
+    },
+    {
+      "id": "gathering-gathering-quota",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "gathering-hidden-deposit-clues",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "gathering-oxygen-gathering",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "gathering-renewable-forage-route",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "gathering-resource-detection",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "gathering-salvage-dismantling",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "gathering-supply-mining",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "gathering-tool-hardness",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "gathering-volumetric-excavation",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "incremental-allocate-progress-capacity",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "incremental-escalating-copy-price",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "incremental-farm-or-push",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "incremental-limited-team-dispatch",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "incremental-manual-to-passive",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "incremental-offline-window",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "incremental-overlap-income-bursts",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "incremental-quantity-milestones",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "incremental-spend-held-bonus",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "incremental-spend-time-advance",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "inventory-adjacency",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "inventory-death-retrieval",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "inventory-deck-thinning",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "inventory-durability",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "inventory-equipment-budget",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "inventory-identification",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "inventory-light-reserve",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "inventory-shape-packing",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "inventory-stack-limits",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "inventory-weight-budget",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "matching-clear-under-cargo",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "matching-combine-power-pieces",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "matching-complete-lines",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "matching-gravity-cascade",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "matching-merge-three-upgrade",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "matching-pattern-creates-power",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "matching-slide-board-merge",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "matching-swap-to-align",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "matching-tap-connected-group",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "matching-trace-color-chain",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "movement-auto-forward",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "movement-carry-object",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "movement-downward-slam",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "movement-ledge-catch",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "movement-low-slide",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "movement-moving-platform",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "movement-run-walk-control",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "movement-short-retry",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "movement-target-bounce",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "movement-variable-jump",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "narrative-background-dialogue-access",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "narrative-conversation-intervention",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "narrative-delayed-choice-consequences",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "narrative-deliberate-silence",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "narrative-evidence-rebuttal",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "narrative-investigation-time-slots",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "narrative-loop-event-schedule",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "narrative-perspective-handoff",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "narrative-service-as-response",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "narrative-timed-response",
+      "verdict": "flag",
+      "issues": [
+        {
+          "kind": "missing-key-point",
+          "detail": "The source rules say that after the response window closes, the system advances using a pre-written default response instead of waiting indefinitely, and that silence is only one possible default, not equivalent to all silence mechanics. The note's source summary only states that the player must choose a stance before the window closes, dropping this timeout/default-response rule; its local loop then substitutes a different \"pause interpreted by the other character\" timeout model without preserv"
+        }
+      ]
+    },
+    {
+      "id": "progression-challenge-tiers",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "progression-death-loses-training",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "progression-evolution-recipes",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "progression-knowledge-gates",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "progression-permanent-run-currency",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "progression-practice-based-growth",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "progression-prestige-reset",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "progression-random-level-choices",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "progression-research-prerequisites",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "progression-respec-investment",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "progression-specialization-branches",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "progression-successor-selection",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "projectiles-active-reload",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "projectiles-ballistic-arc",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "projectiles-charged-release",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "projectiles-graze-reward",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "projectiles-heat-pacing",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "projectiles-independent-aim",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "projectiles-maintain-lock",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "projectiles-piercing-line",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "projectiles-spread-recovery",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "projectiles-wall-ricochet",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "puzzles-beam-routing",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "puzzles-box-pushing",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "puzzles-gravity",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "puzzles-language-decoding",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "puzzles-linked-portals",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "puzzles-paper-folding",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "puzzles-perspective-reality",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "puzzles-scene-deduction",
+      "verdict": "flag",
+      "issues": [
+        {
+          "kind": "over-inference",
+          "detail": "核心循環把「系統指出哪一項事實對不上」與「玩家讀到具體矛盾點，而不是籠統分數」寫成固定回饋；來源只說驗證會以證據檢驗解釋、矛盾會促使再次回訪，且來源的驗證粒度參數明確允許成組確認，因此不一定會逐條指出矛盾事實。"
+        },
+        {
+          "kind": "missing-key-point",
+          "detail": "可調參數一節沒有保留來源陳述的兩個效果：逐項回饋可減少卡關，成組確認可抑制枚舉／暴力嘗試；筆記改寫成提交前檢查變多、被駁回次數變多等，遺漏了來源的關鍵取捨。"
+        },
+        {
+          "kind": "over-inference",
+          "detail": "筆記稱驗證粒度往粗調會使「籠統的故事容易過關」，這與來源所說成組確認「抑制枚舉」的方向相反，且屬未經來源支持的推論。"
+        }
+      ]
+    },
+    {
+      "id": "puzzles-time-scrubbing",
+      "verdict": "flag",
+      "issues": [
+        {
+          "kind": "over-inference",
+          "detail": "The note's local analysis of the '可回撥物件' parameter reverses the source's stated effect: it says including more rewindable objects creates richer causal combinations and narrowing to a few makes solutions narrower/easier to read. The snapshot says universal rewind is readable, while selective rewind creates causal combinations."
+        }
+      ]
+    },
+    {
+      "id": "puzzles-visual-rule-learning",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "relationships-bond-scenes",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "relationships-companion-approval",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "relationships-daily-contact",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "relationships-date-itinerary",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "relationships-dynastic-marriage",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "relationships-faction-reputation",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "relationships-gift-allocation",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "relationships-persuasion-checks",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "relationships-relationship-commitment",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "relationships-secrets-leverage",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "rhythm-cue-response",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "rhythm-hidden-beats",
+      "verdict": "flag",
+      "issues": [
+        {
+          "kind": "broken-example-logic",
+          "detail": "「邊界驗收」說要直接測試來源的失敗：「提示消失時若實際拍速也偷偷變化，玩家無法從已有信息推算正確答案」，並說通過是這個失敗有清楚、可預期的處理。但來源把這種情況列為應避免的設計陷阱：拍速暗中改變會讓玩家無法推算正確答案，因此單靠「處理這個失敗」不能算通過，除非不再暗中改變拍速或把變化明確告知玩家，而這已不是原本的前提。"
+        }
+      ]
+    },
+    {
+      "id": "rhythm-onbeat-actions",
+      "verdict": "flag",
+      "issues": [
+        {
+          "kind": "missing-key-point",
+          "detail": "來源規則明確界定：本條只處理每次行動的時機，連續多次成功如何累積倍率屬於另一條規則；筆記未保留這條範圍界線，讀者可能把連續合拍與倍率累積混為一談。"
+        }
+      ]
+    },
+    {
+      "id": "rhythm-streak-multiplier",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "rhythm-sustain-notes",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "stealth-body-concealment",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "stealth-disguise-access",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "stealth-hiding-spots",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "stealth-knockout-window",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "stealth-light-shadow",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "stealth-peeking",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "stealth-security-network",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "stealth-sound-lures",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "stealth-staged-accidents",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "stealth-synchronized-actions",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "survival-balanced-nutrition",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "survival-bleeding-triage",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "survival-body-inspection",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "survival-competing-needs",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "survival-contagion-control",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "survival-fatigue-rest",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "survival-limb-impairment",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "survival-safe-water",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "survival-stress-crisis",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "survival-temporary-relief",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "survival-weather-exposure",
+      "verdict": "pass",
+      "issues": []
+    },
+    {
+      "id": "survival-wound-cleanliness",
+      "verdict": "pass",
+      "issues": []
+    }
+  ]
+}

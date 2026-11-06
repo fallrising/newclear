@@ -1,16 +1,18 @@
 ---
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "id": "inventory-adjacency",
   "title": "相鄰關係驅動的組合加成",
   "title_en": "Item adjacency bonuses",
   "category": "inventory",
+  "source_category": "inventory",
   "tags": [
     "spatial-synergy",
     "dependency-graph",
     "composition"
   ],
-  "summary": "讓物品價值由周圍關係決定，將背包升級為可讀的配置網路。",
+  "summary": "同一件道具，换个邻居就能改变价值。",
+  "note_status": "draft",
   "related": [
     "inventory-shape-packing",
     "automation-belt-routing"
@@ -26,33 +28,76 @@
 }
 ---
 
-## 來源摘要
+## 摘要
 
-原站描述相鄰位置、方向或鄰近物品類型會觸發效果；玩家查看有效連結再依結果調整。核心循環：理解作用範圍 → 安排鄰居 → 檢查連結 → 依結果重排。
+「同一件道具，换个邻居就能改变价值。」
+出處：`sources/text/inventory-adjacency.json` 字元 172-189 `summary.zh`
+顯示：同一件道具，換個鄰居就能改變價值。
 
-## 問題與情境（本地分析）
+## 規則
 
-適用於要讓配置方式影響效益的背包或盤面系統。玩家需要能預測局部變動如何影響整體，而不是只能事後讀到總戰力。
+「物品除了占格，还根据邻接、方向或周边类别触发加成。玩家在有限空间内搭出有效连接，战斗结果再反馈布局强弱；这里只讨论物品之间的空间关系。」
+出處：`sources/text/inventory-adjacency.json` 字元 277-344 `rules.zh`
+顯示：物品除了佔格，還根據鄰接、方向或周邊類別觸發加成。玩家在有限空間內搭出有效連接，戰鬥結果再反饋佈局強弱；這裏只討論物品之間的空間關係。
 
-## 解法與取捨（本地分析）
+## 核心循環
 
-- 用可視連結或格子高亮顯示生效條件；區分基礎數值、加成來源與最終數值。
-- 先採無循環的規則或固定結算次序；若允許相互增幅，需定義上限與收斂方式。
+「读出物品作用范围」
+出處：`sources/text/inventory-adjacency.json` 字元 561-569 `loop[0].zh`
+顯示：讀出物品作用範圍
 
-## 可調參數（本地分析）
+「摆放目标邻居」
+出處：`sources/text/inventory-adjacency.json` 字元 638-644 `loop[1].zh`
+顯示：擺放目標鄰居
 
-- 四向或八向鄰接、影響半徑、方向、種類相容性、疊加上限。
-- 放入新物品後是局部重算還是全盤重算，應產生一致結果。
+「检验加成连接」
+出處：`sources/text/inventory-adjacency.json` 字元 714-720 `loop[2].zh`
+顯示：檢驗加成連接
 
-## 失敗模式（本地分析）
+「根据结果调整布局」
+出處：`sources/text/inventory-adjacency.json` 字元 788-796 `loop[3].zh`
+顯示：根據結果調整佈局
 
-- 無上限的相互加成可能導致數值爆炸。
-- 介面只顯示總分，不顯示斷掉的連結，會阻礙學習。
+## 玩家取捨
 
-## 最小原型與驗收（本地提案）
+「把核心道具围满，还是让多个次级引擎分散运作？」
+出處：`sources/text/inventory-adjacency.json` 字元 884-906 `decisions[0].zh`
+顯示：把核心道具圍滿，還是讓多個次級引擎分散運作？
 
-- 本地提案：4×4 盤面、五個物品、一條供能與一條分類加成；不加入戰鬥。
-- 驗收：Given 相鄰加成已生效，When 將其中一件移出範圍，Then 連線與增益同步消失；觀察玩家能否在放置前預測結果。
+「更强单件若破坏已有连接，是否还值得换入？」
+出處：`sources/text/inventory-adjacency.json` 字元 1008-1028 `decisions[1].zh`
+顯示：更強單件若破壞已有連接，是否還值得換入？
+
+## 可調參數
+
+「作用方向」
+出處：`sources/text/inventory-adjacency.json` 字元 1167-1171 `parameters[0].name.zh`
+
+「仅某一侧生效会增加朝向解题；全邻接更自由。」
+出處：`sources/text/inventory-adjacency.json` 字元 1249-1270 `parameters[0].effect.zh`
+顯示：僅某一側生效會增加朝向解題；全鄰接更自由。
+
+「加成叠加」
+出處：`sources/text/inventory-adjacency.json` 字元 1421-1425 `parameters[1].name.zh`
+顯示：加成疊加
+
+「可叠加会形成集中投资；上限则鼓励分散布局。」
+出處：`sources/text/inventory-adjacency.json` 字元 1495-1516 `parameters[1].effect.zh`
+顯示：可疊加會形成集中投資；上限則鼓勵分散佈局。
+
+## 原型
+
+「做六种物品和两种邻接规则，用连线即时显示哪些效果正在生效。」
+出處：`sources/text/inventory-adjacency.json` 字元 2917-2946 `prototype.firstStep.zh`
+顯示：做六種物品和兩種鄰接規則，用連線即時顯示哪些效果正在生效。
+
+「让玩家在放置前预测加成，检查实际结果是否符合其理解。」
+出處：`sources/text/inventory-adjacency.json` 字元 3249-3275 `prototype.test.zh`
+顯示：讓玩家在放置前預測加成，檢查實際結果是否符合其理解。
+
+「先限制效果触发顺序；相邻、斜角、方向和连锁同时加入容易解释不清。」
+出處：`sources/text/inventory-adjacency.json` 字元 3075-3107 `prototype.pitfall.zh`
+顯示：先限制效果觸發順序；相鄰、斜角、方向和連鎖同時加入容易解釋不清。
 
 ## 相關模式
 

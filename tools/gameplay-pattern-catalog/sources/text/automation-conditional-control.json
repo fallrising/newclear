@@ -1,0 +1,120 @@
+{
+  "id": "automation-conditional-control",
+  "system": "automation",
+  "edition": 1,
+  "name": {
+    "zh": "传感器条件控制",
+    "en": "Sensor-driven control"
+  },
+  "summary": {
+    "zh": "让机器根据温度、库存或其他信号自动启停。",
+    "en": "Make machines start and stop in response to temperature, stock or other signals."
+  },
+  "rules": {
+    "zh": "玩家读取传感器数值，设定阈值或逻辑，再把输出连到设备。条件满足时机器改变状态；观察振荡、延迟或误触发，再调整规则。",
+    "en": "Players read sensor values, choose thresholds or logic, and connect signals to equipment. Machines change state when conditions match; oscillation, lag and false triggers guide tuning."
+  },
+  "loop": [
+    {
+      "zh": "选择要监测的量",
+      "en": "Choose a measured value"
+    },
+    {
+      "zh": "设置条件",
+      "en": "Set a condition"
+    },
+    {
+      "zh": "接线到执行器",
+      "en": "Wire the actuator"
+    },
+    {
+      "zh": "制造边界情况并调试",
+      "en": "Test edge cases and tune"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "把启停阈值设得很接近能紧贴目标，但是否会让设备在边界反复开关？",
+      "en": "Close start and stop thresholds track the target closely, but will the machine toggle repeatedly near the boundary?"
+    },
+    {
+      "zh": "只按库存控制，还是再加一个电量条件？多一个条件值得增加多少调试工作？",
+      "en": "Control only by stock, or also require enough power? Is that extra condition worth the debugging work?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "信号延迟",
+        "en": "Signal delay"
+      },
+      "effect": {
+        "zh": "延迟增大会让提前量和安全余量变得必要。",
+        "en": "More delay demands anticipation and safety margins."
+      }
+    },
+    {
+      "name": {
+        "zh": "逻辑复杂度",
+        "en": "Logic complexity"
+      },
+      "effect": {
+        "zh": "简单条件适合入门；组合逻辑支持玩家自制控制器。",
+        "en": "Simple conditions aid learning; combined logic enables custom controllers."
+      }
+    }
+  ],
+  "tags": [
+    "information",
+    "optimization",
+    "creativity"
+  ],
+  "related": [
+    "automation-blueprint-reuse",
+    "automation-fluid-routing",
+    "automation-item-filtering",
+    "cooking-judged-flavor"
+  ],
+  "contrast": {
+    "zh": "Factorio适合以产量和库存为中心的控制；缺氧把环境状态直接变成自动化输入。",
+    "en": "Factorio lends itself to production and inventory controls; ONI directly turns environmental conditions into control inputs."
+  },
+  "combination": {
+    "zh": "玩家设计孵化室控制器，在温度与耗电之间找到稳定区间，再用更复杂物种检验同一控制逻辑。",
+    "en": "Design a hatchery controller that balances temperature and power, then test it with species requiring different conditions."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "仓库只需维持5到10份零件，机器一直生产会把仓库塞满。",
+      "en": "The warehouse only needs five to ten parts, but continuous production fills it completely."
+    },
+    "action": {
+      "zh": "你设定低于5份开机、达到10份停机，并连接到生产设备。",
+      "en": "Set production to start below five and stop at ten, then connect the control to the machine."
+    },
+    "result": {
+      "zh": "库存消耗后自动补货，到目标时停下，减少频繁手动开关。",
+      "en": "Stock is replenished automatically after use and production stops at the target."
+    },
+    "next": {
+      "zh": "改变消耗速度，观察规则会不会反复切换或来不及补货。",
+      "en": "Change consumption speed and check for repeated toggling or late replenishment."
+    }
+  },
+  "prototype": {
+    "scope": "medium",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "做一个库存传感器、一个开关设备和可调阈值，持续展示读数与开关原因。",
+      "en": "Use one inventory sensor, one switched machine and adjustable thresholds, displaying readings and switching reasons."
+    },
+    "pitfall": {
+      "zh": "复杂逻辑门和大量传感器会让故障难定位，先保证一条控制链可以逐步追踪。",
+      "en": "Many gates and sensors make faults hard to locate; ensure a single chain can be traced first."
+    },
+    "test": {
+      "zh": "玩家能否通过改变阈值消除来回启停，并说明每次开关由什么触发？",
+      "en": "Can players remove rapid toggling by adjusting thresholds and explain each switching event?"
+    }
+  }
+}

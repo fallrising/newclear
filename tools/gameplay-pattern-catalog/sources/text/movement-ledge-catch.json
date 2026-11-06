@@ -1,0 +1,120 @@
+{
+  "id": "movement-ledge-catch",
+  "system": "movement",
+  "edition": 3,
+  "name": {
+    "zh": "抓住边沿，决定上去还是松手",
+    "en": "Catch a ledge, then climb up or let go"
+  },
+  "summary": {
+    "zh": "没跳到台面也能抓住边缘，把一次坠落变成新的选择。",
+    "en": "Missing the top can still leave you hanging from its edge with a new choice."
+  },
+  "rules": {
+    "zh": "角色靠近可抓的台沿时进入悬挂状态，暂停直接下坠。玩家可以上翻、跳离或松手到下方；这条玩法关注边缘处的一次停顿与转移，不是沿整面墙持续消耗体力攀爬。",
+    "en": "Reaching a grabbable lip puts the character into a hanging state instead of continuing to fall. Climb up, jump away or drop below. The decision is a pause and transfer at an edge, rather than a sustained stamina climb across a wall."
+  },
+  "loop": [
+    {
+      "zh": "朝可抓台沿移动",
+      "en": "Approach a grabbable lip"
+    },
+    {
+      "zh": "抓住并稳定位置",
+      "en": "Catch and stabilize"
+    },
+    {
+      "zh": "观察台上与下方",
+      "en": "Check above and below"
+    },
+    {
+      "zh": "上翻、跳离或松手",
+      "en": "Climb, jump away or release"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "台上有危险，是马上上翻，还是先挂住观察？",
+      "en": "A hazard is above: climb immediately or hang briefly to inspect it?"
+    },
+    {
+      "zh": "下方有较低落点，松手绕行是否比继续往上更稳？",
+      "en": "A lower landing is available: would dropping onto it be safer than continuing upward?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "抓边判定宽容度",
+        "en": "Catch tolerance"
+      },
+      "effect": {
+        "zh": "更宽的判定能挽救差一点的跳跃；过宽会让距离判断失去意义。",
+        "en": "More tolerance rescues near misses; too much makes distance judgments meaningless."
+      }
+    },
+    {
+      "name": {
+        "zh": "悬挂后的可用动作",
+        "en": "Actions while hanging"
+      },
+      "effect": {
+        "zh": "只允许上翻会减少选择；加入松手或跳离可以形成向上与向下的路线。",
+        "en": "Climb-only hanging offers fewer choices; dropping and jumping away create upward and downward routes."
+      }
+    }
+  ],
+  "tags": [
+    "spatial",
+    "precision",
+    "risk"
+  ],
+  "related": [
+    "exploration-climbing-rest-route",
+    "movement-carry-object",
+    "movement-downward-slam",
+    "movement-run-walk-control"
+  ],
+  "contrast": {
+    "zh": "《洞穴探险2》用明确的悬挂、上跳与松手输入形成离散选择；《消逝的光芒2》把抓边放进连续的第一人称建筑穿越。",
+    "en": "Spelunky 2 presents explicit hanging, jumping-up and dropping choices; Dying Light 2 integrates catching into continuous first-person traversal across buildings."
+  },
+  "combination": {
+    "zh": "设计提案：高台上的守卫提前亮出攻击范围，玩家先抓住边沿，再决定等攻击过去上翻，或松手走下层。",
+    "en": "Design proposal: a guard on a ledge telegraphs its attack area. Hang below it, then climb after the attack or release onto a lower route."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "教学示例：你差半格够不到高台顶部，但手能够到边沿；下面另有一小块安全平台。",
+      "en": "Teaching example: you fall half a tile short of the upper surface, but can catch its lip; a small safe platform lies below."
+    },
+    "action": {
+      "zh": "你抓住边沿，看到上方障碍正经过，暂时不往上翻。",
+      "en": "Catch the lip and wait while an obstacle passes above."
+    },
+    "result": {
+      "zh": "下坠被中断，你有机会看清两条可选路线。",
+      "en": "The fall stops, giving you a chance to inspect two routes."
+    },
+    "next": {
+      "zh": "障碍移开后可以上翻，也可以松手落到下层继续绕行。",
+      "en": "Climb once the obstacle clears or drop to the lower platform and continue around it."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "制作三个高度不同的台沿，只做接近抓边、上翻和松手三种状态，给出明确的可抓边缘样式。",
+      "en": "Build three ledges at different heights with catch, climb-up and release states; mark grabbable lips consistently."
+    },
+    "pitfall": {
+      "zh": "自动抓边如果发生在玩家想下落时，会像输入失灵；需要明确的松手与禁止抓取条件。",
+      "en": "Automatic catches during an intended drop can feel unresponsive; define clear release and no-catch conditions."
+    },
+    "test": {
+      "zh": "让玩家先上台再下到低层，检查是否能主动使用松手，而不是反复跳离边缘碰运气。",
+      "en": "Ask players to ascend and then reach a lower ledge; check whether they deliberately release rather than repeatedly jumping away at random."
+    }
+  }
+}

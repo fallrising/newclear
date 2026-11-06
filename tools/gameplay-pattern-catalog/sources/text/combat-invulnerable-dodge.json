@@ -1,0 +1,120 @@
+{
+  "id": "combat-invulnerable-dodge",
+  "system": "combat",
+  "edition": 1,
+  "name": {
+    "zh": "无敌帧闪避",
+    "en": "Invulnerability-window dodging"
+  },
+  "summary": {
+    "zh": "不只离开危险区，也能在正确瞬间穿过攻击。",
+    "en": "Avoid damage by timing a brief safe window, not only by moving away."
+  },
+  "rules": {
+    "zh": "闪避动作在部分时间内不受特定伤害，动作结束后仍可能落在危险位置。玩家需要同时判断按键时机、移动方向和落点，反馈来自擦身而过与反击窗口。",
+    "en": "An evasive action grants a limited window against certain damage. Its destination can still be unsafe, so the player must judge timing, direction and landing position together."
+  },
+  "loop": [
+    {
+      "zh": "读取攻击轨迹",
+      "en": "Read the attack path"
+    },
+    {
+      "zh": "选定安全落点",
+      "en": "Choose the exit position"
+    },
+    {
+      "zh": "对齐闪避窗口",
+      "en": "Align the dodge window"
+    },
+    {
+      "zh": "回到可进攻距离",
+      "en": "Return to attack range"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "向外撤退更安全，穿过敌人可能更快进入背后反击位置。",
+      "en": "Retreating can be safer; passing through an enemy can reach a faster counterattack position."
+    },
+    {
+      "zh": "连续闪避能脱险，却可能把自己送进下一组危险。",
+      "en": "Repeated evasions can escape one threat while moving into the next."
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "无敌时段占比",
+        "en": "Safe-window fraction"
+      },
+      "effect": {
+        "zh": "占比增大会降低精确时机要求，但落点仍可保持挑战。",
+        "en": "A larger fraction reduces timing difficulty while landing hazards can preserve challenge."
+      }
+    },
+    {
+      "name": {
+        "zh": "冷却与连用次数",
+        "en": "Cooldown and chains"
+      },
+      "effect": {
+        "zh": "更长冷却迫使玩家预判，短冷却适合密集弹幕。",
+        "en": "Long cooldowns demand anticipation; short ones support dense projectile patterns."
+      }
+    }
+  ],
+  "tags": [
+    "timing",
+    "dexterity",
+    "spatial"
+  ],
+  "related": [
+    "combat-combo-variation",
+    "combat-action-points",
+    "combat-cover-flanking",
+    "combat-destructible-cover"
+  ],
+  "contrast": {
+    "zh": "《哈迪斯》重视俯视空间中的连续位移；《死亡细胞》还让同一动作兼任穿过敌人和钻洞。",
+    "en": "Hades emphasizes chaining movement across a top-down arena; Dead Cells also uses the action to pass enemies and enter low passages."
+  },
+  "combination": {
+    "zh": "设计提案：让安全落点激活短时压力板，闪避不仅用于保命，还决定下一次环境连锁的起点。",
+    "en": "Design proposal: make a safe dodge landing activate a short-lived pressure plate, turning evasion into the start of an environmental chain."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "一道横扫正在逼近，你背后是墙，敌人身后有空位。",
+      "en": "A sweeping attack approaches; a wall is behind you and space is behind the enemy."
+    },
+    "action": {
+      "zh": "你迎着攻击翻滚，在短暂无伤时段穿过横扫。",
+      "en": "Roll toward the attack and pass through it during the brief protected interval."
+    },
+    "result": {
+      "zh": "横扫没有造成伤害，但翻滚结束的位置决定你是否会挨下一击。",
+      "en": "The sweep misses, but your landing position determines exposure to the next strike."
+    },
+    "next": {
+      "zh": "从新位置选择反击或继续拉开距离。",
+      "en": "Choose whether to counter or create more distance from the new position."
+    }
+  },
+  "prototype": {
+    "scope": "medium",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "用一个圆形角色、一种横扫和可显示的闪避保护时段做测试场。",
+      "en": "Use a simple character, one sweeping attack, and a visible dodge-protection interval."
+    },
+    "pitfall": {
+      "zh": "先解决角色碰撞与落点，避免玩家明明躲过攻击却卡在敌人身体里。",
+      "en": "Resolve collision and landing before adding attacks, so successful dodges do not trap players inside enemies."
+    },
+    "test": {
+      "zh": "观察玩家是否同时改变翻滚时机和方向，而非只反复按闪避。",
+      "en": "Check whether players adjust both timing and direction instead of repeatedly pressing dodge."
+    }
+  }
+}

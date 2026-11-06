@@ -1,0 +1,120 @@
+{
+  "id": "automation-aerial-logistics",
+  "system": "automation",
+  "edition": 1,
+  "name": {
+    "zh": "无人运输网络",
+    "en": "Autonomous aerial logistics"
+  },
+  "summary": {
+    "zh": "把重复搬运交给飞行单位，再围绕覆盖、能源和吞吐重新规划。",
+    "en": "Delegate hauling to flying units, then plan around coverage, energy and throughput."
+  },
+  "rules": {
+    "zh": "玩家设置供给点、需求点与运输设施，让飞行单位搬运物品。覆盖或航线、充能和装卸能力限制效率；运输队列与缺货提示需要扩容的位置。",
+    "en": "Players configure supply, demand and transport facilities so flying units move items. Coverage or routes, energy and handling capacity limit throughput; queues and shortages show where to expand."
+  },
+  "loop": [
+    {
+      "zh": "建立供需端点",
+      "en": "Set supply and demand endpoints"
+    },
+    {
+      "zh": "部署飞行运力",
+      "en": "Deploy flying transport"
+    },
+    {
+      "zh": "补充能源",
+      "en": "Provide energy"
+    },
+    {
+      "zh": "观察拥堵并扩容",
+      "en": "Inspect queues and expand"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "飞行可以绕开地形，但长距离与频繁小批量可能拖低效率。",
+      "en": "Flight bypasses terrain, but distance and small frequent loads can reduce efficiency."
+    },
+    {
+      "zh": "集中枢纽易管理，分散节点更接近消费者。",
+      "en": "Central hubs are easy to manage; distributed nodes sit closer to consumers."
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "单次载量",
+        "en": "Payload"
+      },
+      "effect": {
+        "zh": "载量增大适合大宗运输，载量小会放大往返成本。",
+        "en": "Larger payloads favor bulk transport; small payloads amplify round-trip cost."
+      }
+    },
+    {
+      "name": {
+        "zh": "补能约束",
+        "en": "Energy constraint"
+      },
+      "effect": {
+        "zh": "充能点稀疏会让节点位置比直线距离更关键。",
+        "en": "Sparse charging or fuel points can matter more than straight-line distance."
+      }
+    }
+  ],
+  "tags": [
+    "planning",
+    "spatial",
+    "optimization"
+  ],
+  "related": [
+    "automation-belt-routing",
+    "automation-flow-splitting",
+    "automation-blueprint-reuse",
+    "automation-byproduct-loop"
+  ],
+  "contrast": {
+    "zh": "前者是覆盖区域内的请求网络；后者围绕港口之间的指定往返路线。",
+    "en": "Factorio uses requests within network coverage; Satisfactory uses designated trips between ports."
+  },
+  "combination": {
+    "zh": "为雪山研究站运送物资：玩家可修昂贵的道路，也可建设受天气窗口限制的无人机港。",
+    "en": "Supply mountain research stations by choosing expensive roads or drone ports constrained by weather windows."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "两座工坊需要零件，唯一运输机总在远处往返，近处也开始缺货。",
+      "en": "Two workshops need parts; the only drone keeps making long trips while the nearby workshop runs dry."
+    },
+    "action": {
+      "zh": "你增加一个中转库存，调整需求量，让运输机成批补货。",
+      "en": "Add a buffer stock and adjust requests so the drone delivers useful batches."
+    },
+    "result": {
+      "zh": "小批量往返减少，但新增节点也需要能源与维护。",
+      "en": "Tiny repeated trips decrease, though the added node still needs energy and upkeep."
+    },
+    "next": {
+      "zh": "看队列与缺货记录，再决定添运力还是改节点位置。",
+      "en": "Inspect queues and shortages before adding capacity or moving nodes."
+    }
+  },
+  "prototype": {
+    "scope": "medium",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "用地图节点、固定航程时间和一架带充电状态的运输机，先不用自由飞行寻路。",
+      "en": "Use map nodes, fixed travel times and one drone with a charge state; omit free-flight pathfinding initially."
+    },
+    "pitfall": {
+      "zh": "大量自主单位、碰撞和动态航线容易带来性能问题，先验证订单分配规则。",
+      "en": "Large autonomous fleets, collisions and dynamic routes can create performance problems; test dispatch rules first."
+    },
+    "test": {
+      "zh": "在远近需求同时出现时，玩家是否能通过改库存或线路减少缺货等待？",
+      "en": "With near and far requests active, can players reduce shortages by changing buffers or routes?"
+    }
+  }
+}

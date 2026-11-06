@@ -1,0 +1,120 @@
+{
+  "id": "defense-resistance-counters",
+  "system": "defense",
+  "edition": 2,
+  "name": {
+    "zh": "为不同敌人准备克制手段",
+    "en": "Prepare answers to enemy resistances"
+  },
+  "summary": {
+    "zh": "火力很高也可能打不动，先判断敌人需要哪一种处理方式。",
+    "en": "High damage can still be useless; first identify what kind of answer the enemy requires."
+  },
+  "rules": {
+    "zh": "敌人带有护甲、伤害抗性、隐蔽或飞行等属性，使部分攻击无效或收益降低。玩家读懂来敌信息后，配置可以发现、命中并有效伤害它们的防御；受击反馈和漏怪提示暴露防线的缺项。",
+    "en": "Enemies have armor, damage resistance, concealment or flight that reduces or prevents some attacks. Read the incoming threats and provide defenses that can detect, hit and meaningfully damage them. Hit feedback and leaks expose missing answers."
+  },
+  "loop": [
+    {
+      "zh": "识别敌人的防御属性",
+      "en": "Identify defensive traits"
+    },
+    {
+      "zh": "检查现有防线缺什么",
+      "en": "Find the missing answer"
+    },
+    {
+      "zh": "补充克制单位或升级",
+      "en": "Add a counter or upgrade"
+    },
+    {
+      "zh": "用实际命中结果复核",
+      "en": "Check the result against actual hits"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "为少量特殊敌人专门买一座塔，还是升级已有塔扩大适用范围？",
+      "en": "Buy a dedicated tower for a few special enemies or broaden an existing tower with an upgrade?"
+    },
+    {
+      "zh": "单一伤害类型效率高，但下一波换敌人后是否会整条线失效？",
+      "en": "One damage type may be efficient now but leave the entire lane ineffective against the next wave."
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "抗性程度",
+        "en": "Resistance strength"
+      },
+      "effect": {
+        "zh": "完全免疫会形成明确门槛；部分减伤允许玩家用高投入硬撑，但克制感较弱。",
+        "en": "Immunity creates a clear gate; partial resistance allows brute force at greater cost but weakens the counter relationship."
+      }
+    },
+    {
+      "name": {
+        "zh": "预告提前量",
+        "en": "Preview lead time"
+      },
+      "effect": {
+        "zh": "提前预告给玩家准备空间；突然出现则需要保留应急资源。",
+        "en": "Early previews allow preparation; surprise threats demand emergency reserves."
+      }
+    }
+  ],
+  "tags": [
+    "information",
+    "planning",
+    "risk"
+  ],
+  "related": [
+    "defense-day-night-investment",
+    "defense-mobile-defender",
+    "defense-target-priority",
+    "defense-ammunition-supply"
+  ],
+  "contrast": {
+    "zh": "气球塔防常通过是否能侦测或击破某层形成明确条件；王国保卫战还用减伤差异鼓励不同塔型分担敌人。",
+    "en": "Bloons often uses explicit detection and popping conditions; Kingdom Rush also uses damage reduction to divide enemy roles among towers."
+  },
+  "combination": {
+    "zh": "组合提案：把未知道具鉴定用在敌人抗性上，玩家先派低成本攻击探测，再决定投入哪类防御。",
+    "en": "Design proposal: apply identification to enemy resistance: use a cheap probe attack before committing to a defensive damage type."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "下一波提示有金属外壳敌人，而现有两座塔都只射普通飞镖。",
+      "en": "The next wave includes metal-shelled enemies, but both current towers fire ordinary darts."
+    },
+    "action": {
+      "zh": "把有限资金用来增加一种能破壳的攻击。",
+      "en": "Spend the reserve on an attack capable of breaking the shell."
+    },
+    "result": {
+      "zh": "破壳塔负责打开防护，其余塔继续清理普通目标。",
+      "en": "The counter breaks protection while the other towers handle ordinary targets."
+    },
+    "next": {
+      "zh": "下一波若换成隐蔽敌人，就要重新检查侦测而非继续堆破壳伤害。",
+      "en": "If the next wave is concealed, check detection instead of merely buying more shell damage."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "先做两种敌人和两种攻击，用明确图标显示一种减伤关系。",
+      "en": "Start with two enemies and two attacks, using clear icons for one resistance relationship."
+    },
+    "pitfall": {
+      "zh": "先不要叠加十几种颜色、护甲和状态；优先验证玩家能否理解一次无效攻击。",
+      "en": "Do not stack numerous colors, armors and statuses; first make one ineffective attack understandable."
+    },
+    "test": {
+      "zh": "遇到打不动的敌人时，玩家能否找到缺少的手段，而非误以为伤害系统出错？",
+      "en": "Can players identify the missing counter instead of assuming the damage system is broken?"
+    }
+  }
+}

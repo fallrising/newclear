@@ -1,0 +1,120 @@
+{
+  "id": "stealth-knockout-window",
+  "system": "stealth",
+  "edition": 2,
+  "name": {
+    "zh": "昏迷倒计时与看守",
+    "en": "Knockout timers and pinning"
+  },
+  "summary": {
+    "zh": "没杀死的守卫会醒来，你要花人手看住他，还是赶快离开？",
+    "en": "An unconscious guard may recover: assign someone to hold them, or leave quickly?"
+  },
+  "rules": {
+    "zh": "非致命制服只买到有限时间，倒地目标可能恢复行动。玩家可以看守、束缚或在醒来前撤离；控制一个守卫的收益，要与占用队员、时间及工具的成本比较。",
+    "en": "A nonlethal takedown buys time rather than permanent removal. Guard, restrain or escape before recovery; compare temporary control with the agent time and tools needed to maintain it."
+  },
+  "loop": [
+    {
+      "zh": "短暂制服目标",
+      "en": "Temporarily subdue a target"
+    },
+    {
+      "zh": "确认剩余昏迷时间",
+      "en": "Read remaining recovery time"
+    },
+    {
+      "zh": "分配看守或束缚",
+      "en": "Assign a guard or restraint"
+    },
+    {
+      "zh": "完成目标后撤离",
+      "en": "Finish the objective and leave"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "留一名队员看守可以延长安全，但少一人是否拖慢开门和搬运？",
+      "en": "Pinning extends safety, but does losing an active agent slow the objective?"
+    },
+    {
+      "zh": "用有限工具长期控制，还是接受几回合后守卫醒来的风险？",
+      "en": "Spend a limited restraint or accept the risk of recovery in a few turns?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "恢复时长",
+        "en": "Recovery duration"
+      },
+      "effect": {
+        "zh": "越短越强调迅速推进；越长越接近永久清场，弱化看守决策。",
+        "en": "Short timers reward momentum; long timers resemble permanent removal and weaken pinning choices."
+      }
+    },
+    {
+      "name": {
+        "zh": "维持控制的成本",
+        "en": "Cost of maintaining control"
+      },
+      "effect": {
+        "zh": "需要占住队员还是消耗物品，会产生不同的队伍与物资取舍。",
+        "en": "Requiring an agent versus a consumable creates different staffing and supply decisions."
+      }
+    }
+  ],
+  "tags": [
+    "time",
+    "planning",
+    "risk"
+  ],
+  "related": [
+    "cooking-order-triage",
+    "stealth-body-concealment",
+    "stealth-disguise-access",
+    "stealth-peeking"
+  ],
+  "contrast": {
+    "zh": "《隐形公司》让控制持续占用站位；《赏金奇兵3》让后续束缚依赖队员能力搭配。",
+    "en": "Invisible, Inc. uses ongoing positional commitment; Desperados III uses complementary character abilities for restraint."
+  },
+  "combination": {
+    "zh": "设计提案：让开锁者与看守者能交接工作，倒计时迫使玩家安排谁先完成任务、谁接替看守。",
+    "en": "Design proposal: allow a lockpicker and watcher to hand off duties, making the timer determine who finishes first and who takes over."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "守卫还会昏迷两回合，保险柜需要三回合才能打开。",
+      "en": "A guard will recover in two turns; opening the safe takes three."
+    },
+    "action": {
+      "zh": "你让一名队员留在守卫旁压制，另一人开锁。",
+      "en": "Leave one agent pinning the guard while another works on the safe."
+    },
+    "result": {
+      "zh": "倒计时停住了，但看守者无法去拿走廊里的额外战利品。",
+      "en": "The timer stops, but the watcher cannot collect the extra loot in the corridor."
+    },
+    "next": {
+      "zh": "保险柜打开后，两人一起撤离，再决定是否冒险取额外物品。",
+      "en": "After opening the safe, withdraw together and decide whether extra loot is worth another risk."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "做两个角色、一个昏迷计数器和一个需要多回合的目标；站在旁边时暂停计数。",
+      "en": "Build two agents, one knockout counter and a multi-turn objective; nearby pinning pauses the counter."
+    },
+    "pitfall": {
+      "zh": "醒来时机必须可预测；不要让计时器在玩家无法理解的动作中突然跳过。",
+      "en": "Keep recovery timing predictable; do not advance the counter on unexplained actions."
+    },
+    "test": {
+      "zh": "玩家是否主动计算“任务还要多久、守卫多久会醒”，并分配看守？",
+      "en": "Do players compare objective duration with recovery time and assign someone to pin the guard?"
+    }
+  }
+}

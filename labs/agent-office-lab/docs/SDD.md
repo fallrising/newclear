@@ -161,3 +161,13 @@ T-0019 補 [操作台跨入口／重啟狀態](CONSOLE.md)：共用鎖與中斷�
 - 尚未取得四種 CLI 的本機實際版本與 provider 登入成功證據。
 - 預設執行沙箱無法取得 Metal；本次已對具體 runner 命令取得批准，成功使用 Metal／loopback／sysctl。模型工具本身仍使用 workspace-write 沙箱。
 - 已有 SDD、調研、可重跑的 Strata 檔案／程式修復驗證，以及固定 Office 基底與本機預覽 launcher；不宣稱雲端 API 或三個 CLI 已整合完成。
+
+T-0020 的 [Pi 同 session 重新連接](PI-RESUME.md) 已驗證：本機 429 歷史持久化、所屬 CLI 退出、明確一次性無 prompt resume、新 PID／同 session／hook token 更新與歷史保留。結果維持 stopped，不自動請求或重試；Office host 持續存在，不將此結果視為完整 host crash 恢復或任務續做成功。
+
+T-0021 新增[本地文字任務](LOCAL-TEXT-TASK.md)：明確登記來源目錄、選擇專案與自訂要求、不可變快照、單次本地執行、純文字產物查看與下載。來源目錄不被修改，完成狀態只驗證原生事件／工具／檔案與清理，內容仍需使用者確認；一般程式修改及遠端入口仍 pending。
+
+T-0022 新增[單檔修改提案](LOCAL-FILE-PROPOSAL.md)：指定快照內既有檔案、先讀目標後產生完整替代內容，結果重算原文／提案差異並以原檔名下載。原檔不寫回，不執行生成程式；此為可審閱的本地修改流程子集，多檔修改、自動測試與安全套用仍 pending。
+
+T-0023：Pi Office host 重啟與明確同 session 重新連接。以本機 429 建立真實 Pi 的未完成歷史，核對所屬 Office 主程序後注入 SIGKILL；新 host 將工位停泊為 interrupted，重複重啟及瀏覽器刷新均不自動派工。明確一次性無 prompt resume 接回相同 session，保留歷史且不追加模型請求。
+
+驗證計畫：離線恢復政策／一次性 gate／模式互斥／結果分類，真實 Pi 與三代 Office 主程序、歷史 hash、Chrome 中斷提示／刷新、零外部請求及完整程序清理。完成 AC-08／09／11 子集；不宣稱中斷任務續做、遠端服務或其他 provider 通過。

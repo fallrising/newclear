@@ -1,0 +1,119 @@
+{
+  "id": "farming-growth-care",
+  "system": "farming",
+  "edition": 1,
+  "name": {
+    "zh": "播种与生长照料",
+    "en": "Planting and crop care"
+  },
+  "summary": {
+    "zh": "把一次播种变成一串有节奏的投入，成熟后回收产物。",
+    "en": "Turn a seed into a schedule of care, then collect the mature crop."
+  },
+  "rules": {
+    "zh": "玩家整理土地、播种并供水，使作物达到可收获状态。成长由时间与照料条件共同推进，缺少照料会推迟收益；芽、成熟外观和收获物让进度可见。",
+    "en": "Prepare land, sow and supply water to reach harvest. Time and care requirements advance growth; missed care delays the payout. Sprouts, mature visuals and harvested items communicate progress."
+  },
+  "loop": [
+    {
+      "zh": "准备土地与种子",
+      "en": "Prepare soil and seeds"
+    },
+    {
+      "zh": "播种并满足供水条件",
+      "en": "Plant and meet watering requirements"
+    },
+    {
+      "zh": "安排等待期间的活动",
+      "en": "Use the growth interval"
+    },
+    {
+      "zh": "收获并决定下一轮",
+      "en": "Harvest and choose the next crop"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "地种得越多，日常照料越重：扩张必须匹配行动预算。",
+      "en": "More plots mean more upkeep: expansion must fit the action budget."
+    },
+    {
+      "zh": "把成熟时间错开，可以平滑收入；集中成熟则适合一次性加工。",
+      "en": "Stagger harvests for steady income or synchronize them for batch processing."
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "照料频率",
+        "en": "Care frequency"
+      },
+      "effect": {
+        "zh": "频率越高，越强调日程；降低频率会释放探索时间。",
+        "en": "More frequent care emphasizes routine; less frequent care frees time for exploration."
+      }
+    },
+    {
+      "name": {
+        "zh": "成长时长",
+        "en": "Growth duration"
+      },
+      "effect": {
+        "zh": "长周期放大前期选择的重要性，短周期鼓励试错。",
+        "en": "Long cycles make early choices consequential; short cycles invite experiments."
+      }
+    }
+  ],
+  "tags": [
+    "planning",
+    "time"
+  ],
+  "related": [
+    "farming-orchard-investment",
+    "farming-regrowth-crops",
+    "farming-season-window",
+    "farming-crop-protection"
+  ],
+  "contrast": {
+    "zh": "前者把照料嵌入每日行程；后者适合探索途中往返基地收获。",
+    "en": "The first integrates care into a daily schedule; the second fits trips back to base between expeditions."
+  },
+  "combination": {
+    "zh": "设计提案：远征前种下食材，回城时收获；探索路线长度决定下次补给是否准备好。",
+    "en": "Design proposal: plant expedition ingredients before departure; route length determines whether the next supply is ready on return."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "你有4块田、4粒种子，每天只能照料3块田。",
+      "en": "You have four plots and four seeds, but can tend only three plots each day."
+    },
+    "action": {
+      "zh": "先种3块并浇水，把剩余行动留给找材料。",
+      "en": "Plant and water three plots; save the remaining activities for gathering materials."
+    },
+    "result": {
+      "zh": "浇过水的作物推进一天，成熟后变成可收获状态。",
+      "en": "Watered crops advance a day and eventually become ready to harvest."
+    },
+    "next": {
+      "zh": "收获后看每日是否还有余力，再决定要不要种满。",
+      "en": "After harvesting, check your daily workload before filling the last plot."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "先做4块田、1种作物和“播种／浇水／过一天”三个按钮，用颜色表示成长阶段。",
+      "en": "Start with four plots, one crop, and Plant, Water and Next Day buttons. Show growth through colour."
+    },
+    "pitfall": {
+      "zh": "先验证照料是否有取舍；过早加入几十种作物只会增加配表与检查量。",
+      "en": "Test the care trade-off before adding dozens of crops and their balancing requirements."
+    },
+    "test": {
+      "zh": "让试玩者自己决定种几块田，观察他会不会为了留出别的行动而主动少种。",
+      "en": "Watch whether players voluntarily leave a plot empty to preserve time for another activity."
+    }
+  }
+}

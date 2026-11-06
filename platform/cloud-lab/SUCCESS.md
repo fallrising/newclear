@@ -34,7 +34,7 @@ M0知識樹與介面已完成；M1固定node-health profile已實作／部署並
 ## 現況與缺口
 
 - 已有一個Worker/D1控制面、一個non-root runner、一種固定健康recipe、15分鐘schedule、看板、獨立bot工具；沒有任意shell或通用recipe registry。
-- human／bot短窗口已過期；最後保存的resident政策截止2026-11-05T07:24:25Z。本次方向審查未查live或續權。
+- ML上線後human讀取／盤點上傳至2026-12-02T12:00:00Z；bot仍過期，resident政策仍截止2026-11-05T07:24:25Z。配置回讀不等於真人登入或程序存活證明。
 - [CF工具目錄](docs/tool-catalog.md)已核對64個連線可見repo並比較Edge Ops；這是文件導航，尚無runtime工具目錄、來源搬遷、重複退役或agent平台adapter。
 - 保留Access/HMAC/scoped grants、unknown不重播、單一writer、journal與既有測試。暫停新增授權層、provider API接線、Event/seq、active failover與模板平台。
 - 先交付日常使用方案、CF來源處置目錄、第二種有用的唯讀能力；各自範圍與停止條件以[近期計畫](docs/direction-review.md)為準。
@@ -64,3 +64,11 @@ Owner繼續開發第二種能力：既有CF inventory JSON→有界D1快照→�
 ## 本輪真實盤點接入（MC）
 
 MC-01：現有MCP固定GET收集，原producer重用既有比較與分頁驗證，保留收集時間與unknown。MC-02：真實報告通過既有consumer驗證與本機隔離保存／讀回，不公開私人資源明細。MC-03：查核原部署及授權，準備可審查的live變更／回退與日常授權提案。來源接入與本機驗證完成，見[T868報告](../../.team/reports/T-868.md)；live發布、schema或grant變更尚未執行。[上線提案](docs/inventory-activation.md)已列出候選與人類scope／期限。
+
+## 本輪盤點上線（ML）
+
+Owner已明確「批准上線」：ML-01核對已審候選與原部署、保留bindings/Access/secrets/Cron；ML-02原D1新增快照表並匯入重新收集的真實報告；ML-03發布原Worker／資產並CAS設定human讀取／盤點上傳至2026-12-02T12:00:00Z；ML-04回讀與公開／私人證據收尾。其他grants與期限不變，不新增付費方案。ML-01～04操作與回讀通過，見[上線證據](docs/evidence/inventory-live.md)及[T869報告](../../.team/reports/T-869.md)；獨立證據審查ACCEPT、文件檢查通過；Git交付見任務板。歷史MC／IR未部署敘述只描述各自里程碑。
+
+## 本輪工具目錄與多VPS agent設計（CA）
+
+Owner要求繼續把已盤點CF資源對應用途／入口／觸發／來源，並查核active repo中可沿用的主機agent設計。CA-01保存部署資源與來源對照及未確認項，私人細節不進公開Git；CA-02以連線可見未封存repo為active候選，核對真實runner存活與候選實作／設計成熟度；CA-03提出多VPS最小接入方案、權責與可驗收切片。CA-01完成[部署用途對照](docs/service-catalog.md)與私人精確入口清單；CA-02確認原runner運行並查核11個active候選及具名agent程式；CA-03交付[多VPS設計](docs/host-agent-design.md)。此輪只有來源查核與文件設計，不批量安裝、改權限／live schema、開付費服務或搬遷／封存；獨立審查修正時鐘邊界後ACCEPT、文件檢查通過，證據見[T871](../../.team/reports/T-871.md)，Git交付見任務板。

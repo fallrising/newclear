@@ -1,0 +1,120 @@
+{
+  "id": "automation-power-budget",
+  "system": "automation",
+  "edition": 1,
+  "name": {
+    "zh": "电力供需平衡",
+    "en": "Power supply balancing"
+  },
+  "summary": {
+    "zh": "让发电、储能与负载保持匹配，避免扩产拖垮整座工厂。",
+    "en": "Match generation, storage and load so expansion does not cripple the factory."
+  },
+  "rules": {
+    "zh": "玩家接通机器并建设电源，观察总需求与可用供给。用电高峰或燃料中断造成减速或停机；预留余量、储能和分区是不同的应对方法。",
+    "en": "Players wire machines and generators, comparing demand with available supply. Peaks or fuel loss cause slowdowns or outages; spare capacity, storage and separate grids are alternatives."
+  },
+  "loop": [
+    {
+      "zh": "估算新增负载",
+      "en": "Estimate added load"
+    },
+    {
+      "zh": "增加电源或储能",
+      "en": "Add generation or storage"
+    },
+    {
+      "zh": "接入新设备",
+      "en": "Connect machines"
+    },
+    {
+      "zh": "观察峰值与故障",
+      "en": "Watch peaks and failures"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "提前铺大发电设施更稳，却推迟其他生产投资。",
+      "en": "Overbuilding power improves resilience but delays other investments."
+    },
+    {
+      "zh": "独立电网能隔离故障，但不能直接共享所有余量。",
+      "en": "Separate grids isolate faults but cannot freely share all spare capacity."
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "峰谷差",
+        "en": "Demand variation"
+      },
+      "effect": {
+        "zh": "波动大时，储能与启动顺序比平均功率更重要。",
+        "en": "Large swings make storage and startup order more important than average power."
+      }
+    },
+    {
+      "name": {
+        "zh": "缺电惩罚",
+        "en": "Shortage behavior"
+      },
+      "effect": {
+        "zh": "减速给玩家恢复时间；全网跳闸会强化预警与备用方案。",
+        "en": "Slowdowns allow recovery time; total trips emphasize warnings and backups."
+      }
+    }
+  ],
+  "tags": [
+    "planning",
+    "risk",
+    "optimization"
+  ],
+  "related": [
+    "automation-byproduct-loop",
+    "automation-aerial-logistics",
+    "automation-belt-routing",
+    "automation-blueprint-reuse"
+  ],
+  "contrast": {
+    "zh": "降速型反馈允许带病运行；跳闸型反馈把供电余量变成更紧迫的约束。",
+    "en": "Slowdown allows degraded operation; tripping makes power headroom a sharper constraint."
+  },
+  "combination": {
+    "zh": "让远征队回城后集中充电，玩家需在夜间生产和次日探索续航之间安排负载。",
+    "en": "Have returning expedition teams charge at once, forcing a choice between overnight production and next-day exploration range."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "电网最多供10单位电，现有机器用8单位，新机器启动还要4单位。",
+      "en": "The grid supplies ten power units, existing machines use eight, and a new one needs four."
+    },
+    "action": {
+      "zh": "你先关闭一台非必要机器，再筹材料扩大发电。",
+      "en": "Switch off a nonessential machine while gathering materials for more generation."
+    },
+    "result": {
+      "zh": "关键机器恢复稳定，但被关闭工序暂时停止产出。",
+      "en": "Essential machines stabilise, but the disabled process stops producing."
+    },
+    "next": {
+      "zh": "扩容完成后恢复负载，并留出下一次高峰的余量。",
+      "en": "Restore loads after expansion and reserve capacity for the next peak."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "做总供给、三台不同负载和开关，明确显示超载如何影响设备。",
+      "en": "Use total supply, three different loads and switches, clearly showing how overload affects equipment."
+    },
+    "pitfall": {
+      "zh": "先决定断电规则；一会儿全停、一会儿随机停且无解释，会破坏可预测性。",
+      "en": "Choose a clear outage rule; unexplained switching between total and random failures undermines planning."
+    },
+    "test": {
+      "zh": "供电不足时，玩家是否能选出暂时停掉的工序，并解释保留哪些产出？",
+      "en": "During a shortage, can players choose a process to pause and explain the outputs they preserve?"
+    }
+  }
+}

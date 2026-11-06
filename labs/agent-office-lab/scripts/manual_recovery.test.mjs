@@ -37,8 +37,9 @@ test('malformed and duplicate journal records fail closed', t => {
     writeFileSync(s.file, body); assert.throws(() => new RecoveryJournal(s.file)); assert.equal(readFileSync(s.file, 'utf8'), body);
   }
 });
-function manager(t) {
+function manager(t, provider = 'opencode') {
   const s = setup(t, 'working', false); s.journal.capture(s.map); s.worker.info.status = 'offline'; s.worker.saved = { ptyId: 'owned-pty' };
+  s.worker.info.provider = provider;
   let exited;
   class Manager {
     constructor() {
@@ -56,7 +57,7 @@ function manager(t) {
     prompt() {}
     resume(id) { this.launches++; this.workers.get(id).info.status = 'idle'; }
   }
-  installManualRecovery(Manager, s.dir, model);
+  installManualRecovery(Manager, s.dir, model, {provider});
   const instance = new Manager(); t.after(() => { try { instance.shutdown(); } finally { rmSync(s.dir, { recursive: true, force: true }); } });
   return { ...s, manager: instance };
 }
@@ -108,4 +109,15 @@ test('another native action or session switch cancels queued continuation', t =>
   s.gate.queue(s.worker, 'continue'); s.worker.info.sessionId = 'other';
   s.gate.hook(s.worker, { type: 'usage', sessionId: 'session' }, true);
   assert.equal(s.sent.length, 0); assert.equal(s.gate.pending.size, 0);
+});
+
+test('Pi host restart parks history and explicit resume never sends a continuation prompt', async t => {
+  const s = manager(t, 'pi'); await s.manager.start();
+  assert.equal(s.manager.launches, 0); assert.equal(s.worker.info.labTaskState, 'interrupted');
+  assert.match(s.manager.resume('fixture', 'continue'), /no prompt/);
+  assert.equal(s.manager.launches, 0);
+  s.manager.prompt = () => assert.fail('Pi must not receive a continuation');
+  assert.equal(s.manager.resume('fixture'), undefined);
+  assert.equal(s.manager.launches, 1); assert.equal(s.worker.interrupted, false);
+  assert.equal(s.worker.info.sessionId, 'session');
 });

@@ -1,0 +1,119 @@
+{
+  "id": "survival-temporary-relief",
+  "system": "survival",
+  "edition": 2,
+  "name": {
+    "zh": "暂时压住症状再撤离",
+    "en": "Temporary symptom relief"
+  },
+  "summary": {
+    "zh": "处理症状可以争取行动窗口，但并不等于伤势已经恢复。",
+    "en": "Relieving symptoms buys a window to act without necessarily repairing the injury."
+  },
+  "rules": {
+    "zh": "症状和根本伤势分开记录。临时处理减轻某项惩罚，效果结束后问题可能仍在；玩家需要利用窗口返回安全点或完成真正的恢复。",
+    "en": "Symptoms and underlying injuries are tracked separately. Temporary relief reduces a penalty, while the cause may remain afterward; players use the window to reach safety or complete recovery."
+  },
+  "loop": [
+    {
+      "zh": "确认症状限制了什么",
+      "en": "Identify the symptom’s limitation"
+    },
+    {
+      "zh": "决定是否使用临时缓解",
+      "en": "Choose whether to use relief"
+    },
+    {
+      "zh": "在有效期内行动",
+      "en": "Act during the relief window"
+    },
+    {
+      "zh": "结束前安排后续处理",
+      "en": "Arrange follow-up before it ends"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "现在缓解症状赶回营地，还是留给更危险的路段？",
+      "en": "Use relief to return now or save it for a worse stretch?"
+    },
+    {
+      "zh": "趁暂时能行动继续探索，还是优先解决伤势？",
+      "en": "Explore while able or prioritize recovery?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "有效窗口",
+        "en": "Relief duration"
+      },
+      "effect": {
+        "zh": "窗口要足以完成一个明确行动，过短会沦为反复补药。",
+        "en": "The window should enable a meaningful action; too short becomes repeated maintenance."
+      }
+    },
+    {
+      "name": {
+        "zh": "症状与伤势提示",
+        "en": "Symptom versus cause feedback"
+      },
+      "effect": {
+        "zh": "界面应同时保留伤势和缓解倒计时，避免让玩家误以为已经治愈。",
+        "en": "Keep both the injury and relief timer visible so relief is not mistaken for a cure."
+      }
+    }
+  ],
+  "tags": [
+    "timing",
+    "risk"
+  ],
+  "related": [
+    "survival-bleeding-triage",
+    "survival-competing-needs",
+    "survival-fatigue-rest",
+    "survival-limb-impairment"
+  ],
+  "contrast": {
+    "zh": "僵尸毁灭工程把疼痛作为影响行动的独立症状；漫漫长夜明确区分扭伤处理和疼痛缓解。",
+    "en": "Project Zomboid treats pain as a separate impairment; The Long Dark distinguishes sprain treatment from pain relief."
+  },
+  "combination": {
+    "zh": "设计提案：急救包只装得下临时缓解品和一种治疗材料，出发前要决定自己能应对什么。",
+    "en": "Design proposal: a small aid kit holds relief plus one treatment material, defining which setbacks it can handle."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "演示设定：腿伤让每次移动多花一轮，营地还有三步。",
+      "en": "Example: a leg injury adds a turn to each move, with camp three steps away."
+    },
+    "action": {
+      "zh": "使用持续三步的临时缓解物品。",
+      "en": "Use an item that relieves the penalty for three moves."
+    },
+    "result": {
+      "zh": "按正常速度回营，但腿伤图标仍保留。",
+      "en": "Reach camp at normal speed while the injury icon remains."
+    },
+    "next": {
+      "zh": "在效果结束前开始休息治疗。",
+      "en": "Begin proper recovery before relief expires."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "用一个伤势、一个独立症状和一枚可见倒计时做出撤离场景。",
+      "en": "Build one evacuation with an injury, a separate symptom and a visible timer."
+    },
+    "pitfall": {
+      "zh": "缓解与治愈若使用同一种反馈会误导玩家；让症状图标变化，伤势图标保留。",
+      "en": "Identical feedback for relief and healing misleads players; change the symptom icon while retaining the injury icon."
+    },
+    "test": {
+      "zh": "观察玩家是否能说清“现在能行动”与“伤已经好了”的区别。",
+      "en": "Check whether players distinguish being able to act from being healed."
+    }
+  }
+}

@@ -1,0 +1,120 @@
+{
+  "id": "exploration-gliding-descent",
+  "system": "movement",
+  "edition": 1,
+  "name": {
+    "zh": "滑翔与落点选择",
+    "en": "Gliding and landing choice"
+  },
+  "summary": {
+    "zh": "把高度兑换成水平距离，并在途中寻找续航机会。",
+    "en": "Convert altitude into horizontal travel and look for ways to extend it."
+  },
+  "rules": {
+    "zh": "从高处展开滑翔或缓降能力，控制方向并预测落点。高度通常会逐渐损失，有些作品加入体力与上升气流；玩家需要在路线长度、目标高度和补给点之间取舍。",
+    "en": "Deploy a glide or slow-fall ability from height, steer and predict the landing. Altitude usually decreases; some games add stamina and updrafts, making route length, destination elevation and replenishment compete."
+  },
+  "loop": [
+    {
+      "zh": "选择起跳高点",
+      "en": "Choose a launch height"
+    },
+    {
+      "zh": "展开滑翔",
+      "en": "Deploy the glide"
+    },
+    {
+      "zh": "修正方向或借上升气流",
+      "en": "Steer or catch an updraft"
+    },
+    {
+      "zh": "安全落地继续探索",
+      "en": "Land safely and continue"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "直接飞向目标，还是绕到能延长航程的气流？",
+      "en": "Fly straight to the target or detour through an updraft?"
+    },
+    {
+      "zh": "更高起点能延长距离，但爬上去本身也有成本。",
+      "en": "A higher launch point extends range, but reaching it has a cost."
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "下降速度",
+        "en": "Descent rate"
+      },
+      "effect": {
+        "zh": "下降慢更适合观景与探索，下降快更重视起跳判断。",
+        "en": "Slow descent favors sightseeing and exploration; fast descent emphasizes launch planning."
+      }
+    },
+    {
+      "name": {
+        "zh": "空中恢复来源",
+        "en": "Airborne replenishment"
+      },
+      "effect": {
+        "zh": "固定气流能组织路线，随机气流则增加临场调整。",
+        "en": "Fixed updrafts organize routes; variable ones demand adaptation."
+      }
+    }
+  ],
+  "tags": [
+    "spatial",
+    "planning",
+    "discovery"
+  ],
+  "related": [
+    "exploration-air-action-refill",
+    "exploration-climbing-rest-route",
+    "movement-carry-object",
+    "movement-moving-platform"
+  ],
+  "contrast": {
+    "zh": "《沙贝》侧重安全缓降与自由观察；《消逝的光芒2》通过体力与风口把滑翔做成续航规划。",
+    "en": "Sable emphasizes safe descent and observation; Dying Light 2 adds endurance planning through stamina and vents."
+  },
+  "combination": {
+    "zh": "设计提案：高空采集物只能在滑翔时拾取，收集后增加下降速度，让贪多直接改变返航落点。",
+    "en": "Design proposal: airborne collectibles add weight and increase descent speed, so collecting more changes the return landing."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "从塔顶能看到目的地，但中间一座低山可能挡住下降路线。",
+      "en": "From a tower you can see the destination, but a low ridge may block your descent."
+    },
+    "action": {
+      "zh": "你选择先绕向上升气流，获得高度后再飞向目标。",
+      "en": "Detour toward an updraft, regain height, then head for the target."
+    },
+    "result": {
+      "zh": "飞行时间增加，却保留了跨过山脊所需的高度。",
+      "en": "The flight takes longer but preserves enough altitude to clear the ridge."
+    },
+    "next": {
+      "zh": "看当前高度选择继续前进，或提前在安全地点降落。",
+      "en": "Use current altitude to choose between continuing and landing somewhere safe."
+    }
+  },
+  "prototype": {
+    "scope": "medium",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "做固定下沉速度、方向控制、一处上升气流和三个不同高度的落点。",
+      "en": "Implement fixed descent, steering, one updraft, and three landing elevations."
+    },
+    "pitfall": {
+      "zh": "先让高度损失容易估计；过强惯性和复杂风场会让新玩家无法判断距离。",
+      "en": "Make altitude loss predictable before adding strong inertia or complex wind fields."
+    },
+    "test": {
+      "zh": "起飞前请玩家指出预计落点，观察实际结果与其预期是否接近。",
+      "en": "Ask players to name a landing before takeoff and compare the result with their expectation."
+    }
+  }
+}

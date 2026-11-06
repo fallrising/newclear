@@ -20,3 +20,5 @@ Runner 完整清理所屬程序後才釋放共用鎖。原生 host 關閉後仍�
 [實測證據](evidence/pi-resume-2026-11-02.json)：177 項離線測試、真實 Pi、操作台及 57 筆唯讀結果驗收通過。最終 runner 17.72 秒，六筆歷史保留，外層追蹤 30 個程序全部退出、鎖釋放；一次本機 429、零外部請求。首輪原生驗收通過，但瀏覽器測試欄位名稱筆誤造成斷言失敗，原紀錄保留；修正後整輪重驗通過。
 
 這是同一個 Office host 內的 CLI 重新連接子集，不代表 Office host crash 恢復、中斷任務續做、遠端推論或完整 AC-08／11 通過。Grok／Cursor 恢復、Pi 權限互動與完整四工位流程仍待驗。沒有 release、部署或 usable tag。
+
+後續 T-0023 已另驗證 [Office host 重啟與無 prompt 重新連接](PI-HOST-RESTART.md)；本頁保留同 host 內 CLI 退出的驗收範圍。

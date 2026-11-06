@@ -262,3 +262,12 @@ Owner 指示繼續開發；以本地 Strata 產生可審閱的單檔替代內容
 | T-0022-02 | 目標／快照邊界、原檔保留及提案重算驗收 | AC-11 子集 | done | 2026-11-02T16:14:53Z | 2026-11-02T16:32:04Z | 2026-11-02T16:32:42Z |
 
 T-0022 結案：[PR #1008](https://github.com/fallrising/newclear/pull/1008) 已合併，commit `ea6e429c994d4637e1b40a6f4304ac02d9a38db5`，offline／validate 兩項 CI success。已回讀主線證據：190 tests、真實 OpenCode／Strata 單檔修改提案與 Chrome 選檔／差異／下載、62 筆結果回歸通過。測試提案將減法修正為加法，獨立 AST 核對通過但未執行生成程式；原目錄與快照不變。runner 42.92 秒、外層 73 個程序全部退出、鎖釋放、swap 增量 44.19 MiB，資源限制未放寬。離線變數命名與測試暫存路徑問題於原生驗收前修正；零遠端模型呼叫。完成 AC-01／09／11 子集；提案仍須人工審閱，多檔修改、自動測試／套用、遠端入口及完整 MVP／安全驗收仍 pending，沒有 release／deploy／usable tag。
+
+## T-0023：Pi Office host 重啟
+
+Owner 指示繼續開發；真實 Pi、本機 429，零模型呼叫。
+
+| ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| T-0023-01 | Host crash、重複重啟、明確同 session 重新連接 | AC-08 子集 | in_progress | 2026-11-06T15:16:20Z | — | 2026-11-06T15:22:30Z |
+| T-0023-02 | 一次性 gate、結果與瀏覽器、歷史及程序清理驗收 | AC-09／11 子集 | in_progress | 2026-11-06T15:16:20Z | — | 2026-11-06T15:22:30Z |

@@ -118,7 +118,8 @@ async function stopAdopted(adopted) {
   });
 }
 
-export function installManualRecovery(WorkerManager, workspace, model) {
+export function installManualRecovery(WorkerManager, workspace, model, {provider = 'opencode'} = {}) {
+  assert(['opencode', 'pi'].includes(provider), 'Unsupported recovery provider');
   if (installed.has(WorkerManager)) return;
   installed.add(WorkerManager);
   const nativeStart = WorkerManager.prototype.start;
@@ -172,11 +173,13 @@ export function installManualRecovery(WorkerManager, workspace, model) {
           park(worker); this.emitUpdate(worker); this.persist();
           return 'Interrupted — resume manually';
         }
-        if (info.kind !== 'agent' || info.provider !== 'opencode' || info.model !== model || info.worktree || info.repos?.length) return 'Only the local synthetic OpenCode session may resume';
+        if (info.kind !== 'agent' || info.provider !== provider || info.model !== model || info.worktree || info.repos?.length) return 'Only the local synthetic configured session may resume';
         if (info.labTaskState === 'interrupted' && !info.sessionId) return 'Interrupted task has no saved session; submit a new task';
+        if (provider === 'pi' && (prompt !== undefined || !info.sessionId)) return 'Pi reconnect requires a saved session and no prompt';
         const previous = journal.records.get(id);
         if (previous?.task) info.task = previous.task;
-        const deferred = info.sessionId && (prompt || (worker.interrupted ? CONTINUE : undefined));
+        const deferred = provider === 'opencode' && info.sessionId && (prompt || (worker.interrupted ? CONTINUE : undefined));
+        if (provider === 'pi') worker.interrupted = false; // Native resume must not synthesize a continuation prompt.
         if (deferred) worker.interrupted = false;
         info.labTaskState = 'starting';
         const error = nativeResume(id, deferred ? undefined : prompt);

@@ -184,3 +184,27 @@ D01用已批准image/Node工具；不pull、不安裝、不擴host permissions�
 Owner已確認PR333整份PP1c施工圖：沿同一maintenance registry新增strict LeaseV2/journal/ProofV1與PP1CMEDIA1，採本附約D01工具/私有pgpass/UID向量、D02完整raw receipt、D03四frame socket與具名authdelta；按44卡分A/B/C/D四個依序子波（9/12/9/14，每波≤30）施工。不是再次詢問一般commit/push/PR權限。T0351明訂新規格先審查批准，desk運作方法§0也保留SDD重審；本次批准將範圍接續至四子波實作；截至此批准紀錄，尚未執行新backup/restore protocol。
 
 Root依本次批准，在必要CI與審查通過下正常合併施工圖、同步DOC_READY並按已授權範圍安排implementation。仍保留父媒體完整性、同交易全session撤銷、原RTO起點及local不等於offsite；不改v1/Java Operation/六欄Result，不擴dependency、host權限、正式部署或舊資料清理。未來真probe/PG/browser失敗須修正或回報，不因規格批准而豁免。
+
+## 7 Read-only inventory observation（尚未批准提案）
+
+**PROPOSED — 此新增機制尚未獲 owner 批准，不因舊施工圖／其他修訂已批准而生效。先完成明確批准、規格獨立審查、必要 CI、正常合併及遠端核對，再實作。** [具體決策提案](../decisions/pp1c-readonly-observation-20261106.md)記錄缺口、唯一建議與待決狀態；第三 CLI 在未完成封板前仍 ADAPTER_UNSEALED。
+
+1. 入口須完整重驗已 released 的 restore proof、原 request、兩份完整 bundle 與固定 source identity/release/connection；source API 已停止、沒有 operation lock／未完成 operation，也沒有其他 client backend，否則拒絕。全程不得停止／啟動 source，不 attach recover/account/workflow，不建立 operation，不寫 lease/journal/locator/lock。第三 CLI operationId 保持原 restoreOperationId。
+2. host 只在記憶體建立一次性 private observation token，綁定上述已驗 material、固定 Node/JAR/image 與本次依序核身的 helper full IDs；同時只允一個 owned helper，最後只有一個 INVENTORY。JSON／clone／舊 token 不構成 authority；此 token 無持久帳本狀態，不可轉作 capture/restore/recover/account 權限。
+3. scratch 唯一路徑是 source `maintenance/verification/<restoreOperationId>/<nonce>/`：nonce 恰 host randomBytes(16) 的32 lowercase hex，helper seq 恰 host randomBytes(6) 轉非零十進位 safe integer，名稱沿 `cms-pp1c-<restoreOperationId>-<seq>`。目錄0700／CREATE_NEW；request/inventory/必要 sanitized receipts0600／canonical／fsync；任何碰撞拒絕，不認領舊 helper、不重用 scratch。不能接受 caller 指定 path/hash/seq/policy。
+4. 沿 §1 的原 INVENTORY request/Ready/Permit/result、精確 Java/JAR argv、image、只讀 media/secret mounts、numeric UID/GID、network、deadline 與 log-driver=none，無新 SQL／Java Operation／CLI flags／runtime dependency／網段／host 權限。獨立 private token 只讓 inspector 在當前步驟暫時承認該唯一 active helper 的完整 ID/policy/endpoint/backend，不能排除其他 writer、mount holder 或 network member。
+5. request/Ready/Permit 逐次重驗原 restoreOperationId、target/release/JDBC、canonical hashes與完整 container/network/IP/backend tuple，同一唯讀 transaction、同 PID/epoch。helper/backend 已結束才讀完延遲 result/EOF；重驗全部20表/schema/Flyway/rows和每一實體 media byte，須與原 source capture 完全相等。9組 CHECK 的 source→target RAW 例外不可用於 source→source 比較。
+6. 觀察前後重新 inspect identity/release/零其他 backend，並重驗所有 proof/bundle bytes。差異、額外 writer、錯 fullID/endpoint/backend、token/path/policy 替換、未知退出一律失敗，不產生新 proof。僅可在 fresh fullID/policy 再核身後，依原 helper lifecycle 清理本次已擁有的 ephemeral helper；身分不明則保留，所有 scratch／失敗證據留存，不清舊 runtime/volumes/locks，不修改 host HOME/auth/trust。
+7. 真正 recover 繼續在全新 operation lock 內，以正常 registry/helper capability 做第二次 fresh 完整 source INVENTORY/revalidation，之後才 ACCOUNT。不得用 observation token、舊 inventory 或第三 CLI 成功布林取代此寫入授權；Java V2 guard、原 argv 與六欄 Result 不變。
+
+必要 named regressions（含真實 registry/token）：第三 CLI 前後 lease/journal/lock/locator bytes 完全不變；JSON/clone token、外來 proof/source/helper identity/endpoint/backend、額外 writer、scratch/path/policy 替換均拒絕；JDBC／容器先結束而 result/EOF 延遲讀完仍須正確核對；20表任一 row/schema 或實體 media byte 改變失敗。C17 真 PG/Docker 的第三 CLI 與新 lock recover revalidation 分開取證；不可用只讀舊 inventory、inspect/OID 或單純 hash/boolean 冒充 current-source 完整驗證。
+
+### 7.1 固定 preflight、連續唯讀與 C17 順序（同一待決提案）
+
+為免「唯一 helper」被理解成省略 fresh preflight，本提案明確授權的序列只包含原 D01 的六個 network-none 探針，隨後一個 INVENTORY；每一個皆 fresh create／完整 ID-policy inspect／exit／同 ID cleanup，前一個證明移除後才進下一個，同時最多一個 active helper。六個探針恰為：API image 上原固定 Java `Profile`（JRE/JDBC/ImageIO/private IO/唯讀 media），Node image 上原固定 Node private-IO/UID/fsync Profile，PG image 上固定 `pg_dump --version`、`pg_restore --version`，API image default user 上固定 `id -u`、`id -g`。role 僅沿原 PROFILE／PG_DUMP_VERSION／PG_RESTORE_VERSION，保留原 exact argv/env/image/user/mount/network-none/PGDATA-only tmpfs/profile-policy preimages；不能增加 probe kind 或命令。
+
+原 host `javac --release 25` 編譯及既有 `SHOW server_version`／`SHOW server_version_num` 唯讀檢查也保留，不能增加 SQL、連線例外或權限。每個 verification scratch 用一個前述隨機非零 seq；探針名稱保持原 `cms-pp1c-<restoreOperationId>-<seq>-profile-<1..6>`，最後 INVENTORY 保持原無 profile suffix 名稱。任一碰撞拒絕。Profile.java/input/classes/compile/probe records/合成 output 只進本次0700 scratch，檔案權限沿原 D01；request/inventory/必要 receipts 仍0600。不能拿舊 cached profile 取代此次六個 fresh 探針。獨立 private token 僅逐步承認這些固定角色的當前 full ID，沒有 registry lease/journal 寫入。
+
+入口保存原 lease、相關 journal/request 集合與 locator 的完整私有 bytes／固定檔案身分與 lock 缺席證據；無 active lock／無未完成 operation 的前提要持續到每個 preflight、INVENTORY Ready/Permit/result、清理後重驗與成功輸出。任何新出現或替換的 lock、任一 registry/operation 集合或固定 bytes 變化、未知 helper、額外 backend 都立即使 memory token 失效並拒絕成功；observer 不 acquire／刪除／改寫 lock 或 registry 來強制前提，失敗保留所有資料。
+
+C17 明確順序：先以真正第三 CLI 完成全部 current source rows/files 驗證，核對 source/registry 前後不變與成功 receipt；之後才啟動全新 RECOVER operation/lock，在該新 lock 內以正常 registry 再做獨立 fresh 完整 source revalidation，通過後才 ACCOUNT。第三 CLI token／成功布林不授權 recover。不能先改 credential/audit，再用變動後的 source 冒充原 restore proof 的 current-raw 驗證；兩個 gate 分開留證。

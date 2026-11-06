@@ -239,6 +239,12 @@ bundle CLI 固定 BACKUP_LOCAL/RESTORE_ORIGINAL；restore CLI 固定 RESTORE_VER
 
 restore environment 永遠 isolated-drill；incidentStartedAt 必填、不可晚於命令 startedAt，也不在 retry 時改寫；純演練由 root 在 capture/取回流程開始前提供。RTO math 與超時 exit11 完整採父 §5.4；不以 `Date.now()-restoreStart` 假裝事故 RTO。source/target/bundle/artifact 路徑全部由 runId、backupId 與固定 PP1a private root 推導。
 
+### 4.2d.1 第三 verifier 唯讀觀察補充提案（尚未批准）
+
+**PROPOSED：本節是待 owner 決定的具體差異，先前任何批准不涵蓋；owner 明確批准、必要審查／CI、正常合併及遠端核對前，不生效、不實作、不封板第三 CLI。** [決策提案](../decisions/pp1c-readonly-observation-20261106.md)與[附約 §7](../contracts/PP1c-local-adapters.md)補足既有完整 current-source 驗證與唯讀 registry 邊界之間的機制缺口，沒有縮小原驗收。
+
+提案採 host 記憶體的一次性不可序列化 observation token，只在已停止 source、無 operation lock／未完成 operation／其他 client backend 的情況下，先依序完成原 D01 六個固定 fresh profile 探針，再以原 INVENTORY／H02 向量重驗全部20表與實體 media；同時只允一個 owned helper。只寫固定 private verification scratch，不 stop/start source、不 attach workflow/account、不建立 operation、不寫 lease/journal/locator/lock；原 restoreOperationId 仍作第三 CLI receipt operationId。真正 recover 仍須新 operation lock 內用原 registry/helper token 再做完整 source revalidation，不能用 observation token 或第三 CLI 成功布林授權寫入。
+
 ### 4.2e 既有 guard script 的 v2 dispatch 候選
 
 `maintenance-guard.mjs` 仍是 Java 唯一固定 entrypoint；Java 不改呼叫 `maintenance-workflow.mjs`。guard 先驗合法 runId/op，再讀對應 lease.version：v1 進原 strict schema／原 exports；v2 進 L02/L04/L05 的完整 validator，不得先取不存在的 `lease.runId`，改由 `lease.source.runId`，且與 CLI runId 相等。unknown version／partial JSON／非法 prior terminal 不回退成 v1。L01 必須保留既有 raw-byte fixtures，包括非排序 v1 keys；six-field result 不轉 canonical。

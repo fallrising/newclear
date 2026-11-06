@@ -102,7 +102,7 @@ PR952 merged as `a69ff34ec173ee36284aceebcb417e560438569c` after finalhead967727
 
 | ID | Task | AC | Status | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| M3-U | Original recovery/automated journey accepted; readonly gate pre-live accepted; 等owner私人連線／操作 | FN04/FN07, U01–07 | in_progress | 2026-11-02T11:16:02Z | — | 2026-11-02T15:38:40Z |
+| M3-U | Saved reviewed gate source snapshot; 等owner重啟後重新核對操作前置 | FN04/FN07, U01–07 | in_progress | 2026-11-02T11:16:02Z | — | 2026-11-06T15:19:05Z |
 
 Original SQLite now positively confirmed; U01–06 and automated U07 independently
 accepted on86350871/PR983. Same-Web Claude→Codex first-roundaccept, exact restart

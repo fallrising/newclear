@@ -1,0 +1,13 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {allowed} from './policy.mjs';
+const run='9c20ec74-f940-46fd-81e6-064b9dee93eb';
+const artifact='018ff3ab-1277-7000-8000-000000000001';
+test('owner can log in, reopen existing writer/reviewer and download immutable results',()=>{
+ for(const path of ['/', '/assets/isolated.js','/assets/candidate.js','/assets/p0.css','/favicon.ico','/api/v1/session','/api/v1/projects','/api/v1/agent-profiles','/api/v1/runtime','/api/v1/submissions','/api/v1/tasks',`/api/v1/runs/${run}`,`/api/v1/runs/${run}/result.diff`,`/api/v1/runs/${run}/artifacts`,`/api/v1/runs/${run}/artifacts/${artifact}`]) assert.equal(allowed('GET',path),true,path);
+ assert.equal(allowed('POST','/api/v1/session'),true);assert.equal(allowed('DELETE','/api/v1/session'),true);
+});
+test('all execution mutations, unknown runs and noncanonical URL forms fail closed',()=>{
+ for(const method of ['POST','PUT','PATCH','DELETE','OPTIONS','CONNECT'])for(const path of ['/api/v1/tasks',`/api/v1/runs/${run}/reviews`,`/api/v1/runs/${run}/rework`,`/api/v1/runs/${run}/actions`,`/api/v1/submissions/${artifact}/reconcile`])assert.equal(allowed(method,path),false,method+' '+path);
+ for(const path of ['/api/v1/session?x=1','/api/v1/%73ession','//api/v1/session','http://localhost/api/v1/session','/api/v1/runs/'+artifact,'/api/v1/session/','/api/v1/../session','/assets/../../private','/api/v1/session#x'])assert.equal(allowed('GET',path),false,path);
+});

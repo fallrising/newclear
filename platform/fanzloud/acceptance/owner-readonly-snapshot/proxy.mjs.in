@@ -1,0 +1,27 @@
+import {createServer} from 'node:https';
+import {request} from 'node:http';
+import {readFileSync,appendFileSync} from 'node:fs';
+import {createHash} from 'node:crypto';
+import {allowed} from './policy.mjs';
+const root=process.argv[2], c=JSON.parse(readFileSync(root+'/state.json','utf8'));
+const certificate='@PRIVATE_WORKSPACE@/.local/fanz-executor-20261031/tls';
+const record=value=>appendFileSync(root+'/proxy-receipts.jsonl',JSON.stringify(value)+'\n',{mode:0o600});
+const server=createServer({key:readFileSync(certificate+'.key'),cert:readFileSync(certificate+'.crt'),maxHeaderSize:16384},(req,res)=>{
+ const audit={method:req.method,kind:req.url==='/api/v1/session'?'session':req.url?.includes('/artifacts')?'archive':req.url?.endsWith('/result.diff')?'diff':'read',at:new Date().toISOString()};
+ if(Date.now()>=c.cleanup_wall_ms||!allowed(req.method,req.url)){audit.status=403;audit.blocked=true;record(audit);res.writeHead(403,{'content-type':'application/json','cache-control':'no-store'});res.end('{"error":"read_only_window"}');return;}
+ const archive=req.method==='GET'&&(/\/artifacts\/[0-9a-f-]{36}$/.test(req.url)||req.url.endsWith('/result.diff'));
+ const hash=createHash('sha256');let bytes=0;
+ const upstream=request({hostname:'127.0.0.1',port:18449,method:req.method,path:req.url,headers:req.headers,timeout:5000},response=>{
+  audit.status=response.statusCode;res.writeHead(response.statusCode,response.headers);
+  response.on('data',part=>{if(archive){hash.update(part);bytes+=part.length;}});
+  response.on('end',()=>{if(archive&&response.statusCode===200){audit.bytes=bytes;audit.sha256=hash.digest('hex');}record(audit);});response.pipe(res);
+ });
+ upstream.on('timeout',()=>upstream.destroy());upstream.on('error',()=>{if(!res.headersSent)res.writeHead(502,{'cache-control':'no-store'});res.end();});
+ req.on('aborted',()=>upstream.destroy());req.pipe(upstream);
+});
+server.requestTimeout=10000;server.headersTimeout=10000;
+const close=()=>{server.close();server.closeAllConnections();setTimeout(()=>process.exit(0),100).unref();};
+process.on('SIGINT',close);process.on('SIGTERM',close);
+server.on('error',()=>{record({error_type:'proxy_listener_error'});process.exit(1);});
+setTimeout(close,Math.max(1,c.cleanup_wall_ms-Date.now()));
+server.listen(18447,'127.0.0.1',()=>record({proxy_ready:true,at:new Date().toISOString()}));

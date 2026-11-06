@@ -102,6 +102,21 @@ class OfficeResultsTest(unittest.TestCase):
         self.assertNotIn('PRIVATE', json.dumps(rows))
         self.assertNotIn(str(self.root), json.dumps(rows))
 
+    def test_remote_authorization_and_usage_are_strictly_whitelisted(self):
+        run, report = self.make_run('pi')
+        report['authorization']={'kind':'server_grant','fingerprint':'abcdef123456'}
+        report['remote_usage']={'requests':2,'output_tokens':123}
+        report['secret_authorization_id']='f'*32
+        (run/'result.json').write_text(json.dumps(report))
+        row=self.read()[0]
+        self.assertEqual(row['authorization'], report['authorization'])
+        self.assertEqual(row['remote_usage'], report['remote_usage'])
+        self.assertNotIn('secret_authorization_id', json.dumps(row))
+        report['authorization']['fingerprint']='not-safe'; report['remote_usage']['requests']=9
+        (run/'result.json').write_text(json.dumps(report))
+        row=self.read()[0]
+        self.assertNotIn('authorization', row); self.assertNotIn('remote_usage', row)
+
     def test_failure_stop_startup_and_incomplete_never_complete(self):
         for index, (status, startup, expected) in enumerate([
             ('failed', False, 'failed'), ('stopped', False, 'stopped'), ('cancelled', False, 'cancelled'),

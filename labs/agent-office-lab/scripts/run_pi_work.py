@@ -9,6 +9,7 @@ import os
 from pathlib import Path
 import secrets
 import shutil
+import re
 import signal
 import subprocess
 import sys
@@ -57,7 +58,11 @@ def main():
     group.add_argument('--check-cancel', action='store_true', help='Cancel the working Pi through native Office with a held loopback request; no model calls')
     group.add_argument('--check-resume', action='store_true', help='Reconnect the same persisted Pi session after a local error and owned CLI exit; no model calls')
     group.add_argument('--check-host-restart', action='store_true', help='Crash and restart the native Office host; reconnect Pi without a prompt or model calls')
+    parser.add_argument('--authorization-ref', help='Server-side remote grant reference; only valid with --allow-remote')
     args = parser.parse_args()
+    if args.authorization_ref is not None and (not args.allow_remote or not re.fullmatch(r'[0-9a-f]{32}', args.authorization_ref)):
+        raise ValueError('Invalid authorization reference')
+    authorization_fingerprint = hashlib.sha256(args.authorization_ref.encode()).hexdigest()[:12] if args.authorization_ref else None
     if not args.allow_remote and not args.check_startup and args.check_failure is None and not args.check_crash and not args.check_cancel and not args.check_resume and not args.check_host_restart:
         print(json.dumps({'mode': 'plan', 'command': 'python3 scripts/run_pi_work.py --allow-remote',
                           'provider': 'pi', 'model': 'deepseek-flash', 'max_requests': MAX_REQUESTS,
@@ -88,6 +93,8 @@ def main():
     process = None; owned = {}
     report = {'status': 'starting', 'startup_only': args.check_startup, 'provider': 'pi', 'model': 'deepseek-flash',
               'model_inference_verified': False, 'cleanup_errors': [], 'cloud_fallback': False}
+    if authorization_fingerprint:
+        report['authorization'] = {'kind':'server_grant','fingerprint':authorization_fingerprint}
     if args.check_failure is not None:
         report.update(fault_injection={'source': 'loopback', 'http_status': args.check_failure}, failure_check_passed=False)
     if args.check_crash:
@@ -211,6 +218,11 @@ def main():
             if not office.get('file_task_passed') or not office.get('agent_settled_verified'): raise ValueError('Missing native evidence')
             report['model_inference_verified'] = True
         if args.check_failure is None and not args.check_crash and not args.check_cancel and not args.check_resume and not args.check_host_restart: report['status'] = 'completed'
+    except InterruptedError:
+        if args.allow_remote:
+            report['status'] = 'stopped'; report['reason'] = 'operator_interrupt'
+        else:
+            report['status'] = 'failed'; report['reason'] = 'bounded_pi_acceptance_failed'
     except (OSError, ValueError, subprocess.SubprocessError):
         report['status'] = 'failed'; report['reason'] = 'bounded_pi_acceptance_failed'
     finally:
@@ -233,6 +245,10 @@ def main():
         relay.close()
         if (out / 'office-result.json').is_file(): report['office'] = json.loads((out / 'office-result.json').read_text())
         report['requests'] = relay.records
+        report['remote_usage'] = {'requests': relay.external_requests,
+            'output_tokens': (sum(r['output_tokens'] for r in relay.records)
+                if relay.external_requests and all(type(r.get('output_tokens')) is int for r in relay.records)
+                else None if relay.external_requests else 0)}
         report['client_requests'] = relay.client_requests
         report['external_requests'] = relay.external_requests
         report['elapsed_s'] = time.monotonic() - started

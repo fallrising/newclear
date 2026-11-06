@@ -18,7 +18,7 @@ python3 scripts/office_console.py
 - Pi [同 session 重新連接檢查](PI-RESUME.md)、[原生取消檢查](CANCEL.md)、本機 401／429／CLI crash 檢查，以及已有有效 lineage 的本機故障重試。
 - 執行狀態、四 provider 歷史結果、已核對產物與 SHA-256。
 
-Grok、Pi 正常任務與 Cursor 的遠端計畫可查看，但 HTTP API 不接受任何付費執行；仍使用 [DISPATCH](DISPATCH.md) 的 CLI 及當次授權流程。本地文字模式接受自訂要求與已登記來源；目前不支援直接修改任意專案或遠端付費派工。
+Grok、Cursor 及 Pi 遠端重試仍使用 [DISPATCH](DISPATCH.md) 的 CLI 與當次授權流程。Pi 固定新任務可依[一次性遠端授權](REMOTE-GRANT.md)先由 CLI 建立 grant，再以 `--accept-remote-grant pi` 啟動操作台；預設啟動仍拒絕遠端執行。本地文字模式接受自訂要求與已登記來源；不支援直接修改任意專案。
 
 「合成任務＋保留原生終端」會持續載入本地模型，直到按「停止執行」。原生終端沿用固定 Office 的 lite 頁面與本地 provider 限制；首次開啟需填顯示名稱。操作台不代理終端 keystroke 或原始日誌；互動交由既有原生 Office。終端可繼續操作合成 workspace，仍不能據此宣稱任意檔案／網路邊界已完整驗收。
 
@@ -30,7 +30,7 @@ Grok、Pi 正常任務與 Cursor 的遠端計畫可查看，但 HTTP API 不接�
 
 API 要求 bearer token、精確 Host；寫入另外要求相同 Origin 與 JSON，拒絕跨站、過大 body、重複 JSON key、任意 argv／路徑及其他未定義欄位。靜態頁面與 API 使用 no-store、CSP、no-referrer，沒有外部資源或 CORS 授權。結果沿用 descriptor-relative／no-follow 的白名單讀取。原始 runner 輸出只留在私有 `state/console/`，不透過 HTTP 傳回。
 
-每份計畫有效五分鐘，只能執行一次；執行時重新檢查，尤其不能用過期的重試計畫開新分支。操作台同時只啟動一個 job，既有 dispatcher／直接 runner 的共用執行鎖仍是最後一道 gate。任意 HTTP 請求不能選 shell、任意模型或改寫費用授權。
+每份計畫最多有效五分鐘，遠端計畫另受 grant 到期時間限制，只能執行一次；執行時重新檢查，尤其不能用過期的重試計畫開新分支。操作台同時只啟動一個 job，既有 dispatcher／直接 runner 的共用執行鎖仍是最後一道 gate。任意 HTTP 請求不能選 shell、任意模型或改寫費用授權。
 
 瀏覽器與 job 清單不是持久化排程。操作台重啟不接管／重跑舊 job，磁碟 run 紀錄仍可讀取；強制終止操作台或 runner 的清理未確認時，沿用 `cleanup_unconfirmed` 阻擋與人工核對流程。正常關閉等待最多 45 秒；若 runner 尚未退出會提示清理未確認，不按名稱批量 kill 或自動解除鎖。
 

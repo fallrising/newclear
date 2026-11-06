@@ -1,5 +1,7 @@
 # 開發交接
 
+T-0024：完成 [Pi 遠端操作台一次性授權](docs/REMOTE-GRANT.md)。實際由 Claude Opus 5.5 指導，兩個 Pi CLI worker（OpenAI GPT-5.5）在獨立工作區平行實作；後端達 24 次請求上限後停止，主導 agent 補齊審查與整合。授權先由 CLI 建立、操作台明示接受，綁定固定任務與來源，消耗後不退還；重啟不重置、遠端重試保持 CLI。218 tests、五組 Chrome 測試替身流程、真實 Pi 本機 429／取消及 65 筆結果回歸通過。取消清理 3.521 秒；測試替身／429／取消分別追蹤 94／46／29 個程序，全部退出、鎖釋放。開發 agent 有遠端 API 用量；產品驗收零模型推論、零遠端請求、未建立真實付費 grant。遠端 UI 到 DeepSeek 產物仍待另次批准驗收，完整 MVP／安全驗收保持 pending。[證據](docs/evidence/remote-grant-2026-11-07.json)，交付見[任務板](docs/tasks/BOARD.md)。
+
 T-0023：完成 [Pi Office host 重啟驗收](docs/PI-HOST-RESTART.md)。真實 Pi 本機 429／六筆歷史後，對已追蹤 Office 主程序注入 SIGKILL；新 host 停泊工位為 interrupted，再次重啟與 Chrome 刷新不自動派工。明確一次性無 prompt 重新連接使用新 PID／同 session、保留六筆歷史，沒有追加請求或產物。195 tests、操作台及 63 筆結果回歸通過；首輪 runner 41.06 秒、三代 host、外層 83 個程序全退出、鎖釋放。正常關閉後兩個已追蹤背景程序經身分核對送 SIGTERM，再確認全退出。一次本機 429、零模型推論／外部請求。完成 AC-08／09／11 子集；不代表進行中的遠端串流恢復、任務續做或完整 MVP／安全驗收。[證據](docs/evidence/pi-host-restart-2026-11-06.json)，交付見[任務板](docs/tasks/BOARD.md)。
 
 T-0022：完成[本地單檔修改提案](docs/LOCAL-FILE-PROPOSAL.md)。可選擇已登記專案中的檔案、輸入修改需求，先讀取目標後產生完整替代內容；結果重新核對原文／提案 hash、計算差異並以原檔名下載。190 tests、真實 Strata 修正與 Chrome 選檔／差異／下載、62 筆結果回歸通過。測試將 add 的減法修正為加法，獨立 AST 核對通過、未執行生成程式；原目錄及快照保留。runner 42.92 秒、外層 73 個程序全退出、鎖釋放、swap 增量 44.19 MiB，guard 未觸發。離線命名衝突及測試暫存路徑問題於實測前修正，原限制未放寬；零遠端模型呼叫。提案仍需人工審閱，沒有自動套用或一般程式測試；完整 MVP／安全邊界仍 pending。[證據](docs/evidence/local-file-proposal-2026-11-03.json)，交付見[任務板](docs/tasks/BOARD.md)。

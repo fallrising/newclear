@@ -1,6 +1,6 @@
-# 待決：只接受九組既有 CHECK 的已觀察表示配對
+# 已批准：只接受九組既有 CHECK 的已觀察表示配對
 
-狀態：PROPOSAL / NOT APPROVED。Desk T-0351。產品仍fail closed，C未完成，D未開始。
+狀態：APPROVED（2026-11-06）；必要審查／CI、正常合併與遠端核對尚待完成。Desk T-0351。產品仍fail closed，C未完成，D未開始。
 
 第五次真實還原的20表rows、全部columns/indexes與其餘constraint metadata、Flyway、assets/variants及17檔14089bytes都相等；9個CHECK字串在7表不同，因此RAW_MISMATCH，revoke從未開始。source d435e35966614c69863c11fbaa3502e6、target2556a8dbd8e547beb2ad87bcd4fc47cd、operation9a58a51f-2234-4e57-92b6-13c9801faf92。兩組6容器均已停止，target API/ingress從未啟動，全部volumes、bundle、raw inventories、鎖與失敗證據保留。
 
@@ -27,3 +27,11 @@ PostgreSQL官方說明該函式回傳的是反編譯重建文字；官方郵件�
 替代選擇是維持原字串完全相等；目前這個預設migration→同PG16 dump/restore會持續RAW_MISMATCH，C/D不能宣稱完成。沒有修改migration、重寫source schema或忽略CHECK的建議。
 
 批准後仍先正式文件／獨立審查／CI／正常合併與遠端核對，再實作固定pair比較與validator回歸、fresh實機raw/revoke、C交付，之後D。未批准前Draft不合併、產品不實作新政策。新runtime、全部舊runtime/volumes/locks保留；不release/deploy或擴權。完整provider/tool/token/cost/active-wait統計unknown/null。
+
+## 2026-11-06 owner 決定
+
+Owner最新原話「批准。」明確回覆上一輪PR1012九組CHECK配對與target RAW snapshot完整提案。精確發言時間未知；本輪首次決定記錄 2026-11-06T15:19:35Z（2026-11-06 23:19:35 SGT）。批准來源是本session user訊息；不是換session或Git持續授權推論。
+
+批准的proposal head為d99347461a787eb6b4724d5bac93651253785d6c，原fixture SHA321c4c27feb93fe4118f72785e79f6df720d0bc825d4d2a2c96f53bf343012d1保留。fixture只將status改APPROVED；九組definitions、metadata、方向及四項PG profile逐值未變。現行批准fixture SHA256：`f25157feb8a0c027f1b8930c4fad64fe7e0291e0745702d2e2a3b727533e856a`。
+
+2026-11-02提案及失敗敘述為歷史；本次批准不宣稱C成功、未開始D。先完成批准狀態獨立審查、新head必要CI、正常合併與完整遠端bytes核對，再進行有界實作及fresh實機C。所有未提交來源、ignored scripts/local、原始證據與舊runtime/volumes/locks保留；不release/deploy或擴權。

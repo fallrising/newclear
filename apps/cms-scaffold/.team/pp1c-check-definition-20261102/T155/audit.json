@@ -1,0 +1,37 @@
+{
+  "reviewedProposalHead": "d99347461a787eb6b4724d5bac93651253785d6c",
+  "proposalFixtureSha256": "321c4c27feb93fe4118f72785e79f6df720d0bc825d4d2a2c96f53bf343012d1",
+  "approvedFixtureSha256": "f25157feb8a0c027f1b8930c4fad64fe7e0291e0745702d2e2a3b727533e856a",
+  "fixturePayloadEqualExceptStatus": true,
+  "ninePairs": 9,
+  "profile": {
+    "postgresImageDigest": "sha256:6a2e324ebe59af6031c4c1cd96c1d5072c2ebc36563d2196365e43b8297c062d",
+    "postgresServerVersion": "16.15",
+    "pgDumpVersion": "16.15",
+    "pgRestoreVersion": "16.15"
+  },
+  "originalSourceHashesPreserved": true,
+  "changedTrackedPaths": [
+    "apps/cms-scaffold/.team/pp1c-check-definition-20261102/DECISION.md",
+    "apps/cms-scaffold/.team/pp1c-check-definition-20261102/PLAN.md",
+    "apps/cms-scaffold/.team/pp1c-check-definition-20261102/check-proposal.py",
+    "apps/cms-scaffold/.team/pp1c-check-definition-20261102/source-hashes.json",
+    "apps/cms-scaffold/docs/v2/contracts/PP1-recovery.md",
+    "apps/cms-scaffold/docs/v2/contracts/PP1c-local-adapters.md",
+    "apps/cms-scaffold/docs/v2/contracts/fixtures/pp1c-check-definition-pairs-v1.json",
+    "apps/cms-scaffold/docs/v2/waves/PP1c.md"
+  ],
+  "approvalRecord": {
+    "status": "APPROVED",
+    "ownerQuote": "批准。",
+    "exactUtteranceAt": null,
+    "firstRecordedAt": "2026-11-06T15:19:35Z",
+    "firstRecordedAtSingapore": "2026-11-06 23:19:35 SGT",
+    "proposalHead": "d99347461a787eb6b4724d5bac93651253785d6c",
+    "proposalFixtureSha256": "321c4c27feb93fe4118f72785e79f6df720d0bc825d4d2a2c96f53bf343012d1",
+    "approvedFixtureSha256": "f25157feb8a0c027f1b8930c4fad64fe7e0291e0745702d2e2a3b727533e856a",
+    "implementationEnabled": false,
+    "cAccepted": false
+  },
+  "checkerSha256": "67ba1e3a80402a9eddacbbe4db288d7acfb96c4fb2be474245e7ef8c08795193"
+}

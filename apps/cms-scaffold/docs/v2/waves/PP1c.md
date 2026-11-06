@@ -253,7 +253,7 @@ DB必須恰為以下20個relation，缺失/額外relation或column均`SCHEMA_UNS
 
 附約§1以bounded no-network probe驗證既有approved image的JRE/JDBC/ImageIO及numeric UID，明確區分U:G私有檔與M:Gm新media；不能由舊image推論未來新build可用。每次實作run重驗同一profile。unsupported UID/GID/PG text edge/host filesystem link identity即 `ADAPTER_UNSEALED`，不得加權限或動態放寬allowlist。
 
-**待決窄幅修訂（未生效）：** [local adapters§2.1](../contracts/PP1c-local-adapters.md#21-待-owner-決定pg1615-九組-check-deparse-配對)提出僅PG16.15固定映像、9組具名CHECK原始definition定向配對；Inventory仍完全保留原字串與原hash，其他schema/rows/files/source-before/after仍exact。RawComparison可保留不同的原始schema/inventory hashes而在此有限政策下判schemaEqual；restore receipt改明訂target RAW_VERIFIED完整raw DB snapshot hash（[父契約§12](../contracts/PP1-recovery.md#12-待決pg1615-check-配對與-target-raw-snapshot)）。這是新的owner決定，舊PR956／975批准不涵蓋；未批准及正常合併前仍按原嚴格schema/hash相等政策拒絕，不能繼續C revoke或D。
+**已批准窄幅修訂（2026-11-06；必要審查／CI、正常合併與遠端核對後生效）：** [local adapters§2.1](../contracts/PP1c-local-adapters.md#21-已批准pg1615-九組-check-deparse-配對)提出僅PG16.15固定映像、9組具名CHECK原始definition定向配對；Inventory仍完全保留原字串與原hash，其他schema/rows/files/source-before/after仍exact。RawComparison可保留不同的原始schema/inventory hashes而在此有限政策下判schemaEqual；restore receipt改明訂target RAW_VERIFIED完整raw DB snapshot hash（[父契約§12](../contracts/PP1-recovery.md#12-已批准pg1615-check-配對與-target-raw-snapshot)）。Owner本次原話「批准。」接受PR1012於d9934746的完整九組配對與target hash定義；舊PR956／975批准沒有回溯擴張。正式文件交付後才實作新政策及fresh C驗證，再續D。
 
 ### 4.4 Local capture與restore phase
 

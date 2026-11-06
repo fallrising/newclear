@@ -13,7 +13,7 @@ profile = {key: proposal[key] for key in profile_keys}
 actual_profile = json.loads((evidence / 'pg-profile-observation.json').read_text())
 assert {key: actual_profile[key] for key in profile_keys} == profile
 assert actual_profile['targetPostgresImage'] == profile['postgresImageDigest']
-assert proposal['status'] == 'PROPOSAL_NOT_APPROVED' and proposal['pairCount'] == len(proposal['pairs']) == 9
+assert proposal['status'] == 'APPROVED' and proposal['pairCount'] == len(proposal['pairs']) == 9
 assert len({(p['tableName'], p['constraintName']) for p in proposal['pairs']}) == 9
 
 def accepts_schema(table, source, target, observed_profile=profile):

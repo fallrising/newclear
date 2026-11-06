@@ -175,10 +175,10 @@ Java tests用@TempDir与explicitrecords；ImageIO生成32×16 PNG original，既
 
 **2026-11-02 hash preimage 明訂（owner 已批准；PR956 正常合併及遠端核對後生效）：** `rawSnapshotSha256` 是 RAW_VERIFIED 時由完整 20-table rows/schema 重新計算並確認來源與 target 相等的 `Inventory.dbSnapshotSha256`；它不是整份 inventory artifact hash，也不是 raw-comparison receipt hash。`mediaInventorySha256` 是相同 RAW_VERIFIED 時點的 `SHA256(canonicalBytes({version:1,files:Inventory.files}))`，即重新核對實體檔案後的 `Inventory.mediaHeaderSha256`；files 按 objectKey 排序，包含全部 referenced/orphan/deleted 檔案的 objectKey、byteSize、sha256、classification。兩欄各自綁 DB 與媒體，只有完整比較已通過才可輸出。canonical bytes 含尾 LF；既有欄位/schema、manifest binding、session 撤銷、smoke、RTO 起算與 offsite 政策不變。此提案不把只驗 hash 形狀的 A validator 宣稱為已驗還原證明。
 
-## 12 待決：PG16.15 CHECK 配對與 target raw snapshot
+## 12 已批准：PG16.15 CHECK 配對與 target raw snapshot
 
-**PROPOSAL / NOT APPROVED（2026-11-02）**。本節是§11「確認來源與target相等」假設的窄幅修訂提案；在owner明確批准、必要審查／CI及正常合併／遠端核對前不生效。不能引用舊PR956的hash批准推論本提案也已批准。
+**APPROVED（2026-11-06）**。Owner本次原話「批准。」接受PR1012於d9934746的完整提案。本節窄幅修訂§11「確認來源與target相等」假設；必要審查／CI及正常合併／遠端核對後生效。原PR956批准與2026-11-02待決歷史不改寫。
 
-只容許 [local adapters§2.1](PP1c-local-adapters.md#21-待-owner-決定pg1615-九組-check-deparse-配對) 完整列出的9組具名CHECK定向deparse配對。完整原始catalog definitions與所有20表／schema/rows hashes照舊保存、重算；不做通用SQL正規化，source-before/source-after仍byte-exact。其他schema、rows、檔案及既有release/Flyway/隔離/停止gate不變。
+只容許 [local adapters§2.1](PP1c-local-adapters.md#21-已批准pg1615-九組-check-deparse-配對) 完整列出的9組具名CHECK定向deparse配對。完整原始catalog definitions與所有20表／schema/rows hashes照舊保存、重算；不做通用SQL正規化，source-before/source-after仍byte-exact。其他schema、rows、檔案及既有release/Flyway/隔離/停止gate不變。
 
-若採本提案，`restore-verified.json.rawSnapshotSha256` 固定取target在RAW_VERIFIED、revoke之前那份完整原始Inventory的dbSnapshotSha256：仍是canonical 20-table `{tableName,schemaSha256,rowsSha256,rowCount}` summary的SHA256，不改preimage或省略constraint。此hash可以與manifest的source dbSnapshotSha256不同；兩端raw inventory完整file hashes由RawComparison分別綁定，proof／recover必重算兩端payload及有限配對，不得把target hash冒充source、填造相等hash或只驗boolean。mediaInventorySha256依§11仍對完整raw media header計算，並要求來源／target相等。session撤銷、startup/restart零差異、browser具名差異、RTO與offsite政策皆不變。
+依本次批准，`restore-verified.json.rawSnapshotSha256` 固定取target在RAW_VERIFIED、revoke之前那份完整原始Inventory的dbSnapshotSha256：仍是canonical 20-table `{tableName,schemaSha256,rowsSha256,rowCount}` summary的SHA256，不改preimage或省略constraint。此hash可以與manifest的source dbSnapshotSha256不同；兩端raw inventory完整file hashes由RawComparison分別綁定，proof／recover必重算兩端payload及有限配對，不得把target hash冒充source、填造相等hash或只驗boolean。mediaInventorySha256依§11仍對完整raw media header計算，並要求來源／target相等。session撤銷、startup/restart零差異、browser具名差異、RTO與offsite政策皆不變。

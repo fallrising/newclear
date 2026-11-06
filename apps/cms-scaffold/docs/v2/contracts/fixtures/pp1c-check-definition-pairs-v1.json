@@ -1,5 +1,5 @@
 {
-  "status": "PROPOSAL_NOT_APPROVED",
+  "status": "APPROVED",
   "scope": "only nine directed exact original->restored CHECK definition pairs; no generic SQL normalization",
   "pairCount": 9,
   "pairs": [

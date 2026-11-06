@@ -58,6 +58,20 @@ class OfficeResultsTest(unittest.TestCase):
             self.assertNotIn('PRIVATE',json.dumps(row))
         report['fault_injection']={};(run/'result.json').write_text(json.dumps(report));self.assertEqual(self.read()[0]['status'],'invalid')
 
+    def test_pi_host_restart_never_claims_task_completion_and_requires_history_and_cleanup(self):
+        run,report=self.make_run('pi');(run/'workspace/result.json').unlink()
+        report.update(status='stopped',model_inference_verified=False,host_restart_check={'source':'loopback','http_status':429,'signal':'SIGKILL'},
+                      host_restart_check_passed=True,host_target_verified=True,client_requests=1,external_requests=0,remaining_owned_processes=0)
+        report['office'].update(status='stopped',native_resume_verified=True,session_history_preserved=True,new_process_same_session=True,crash_recovery_verified=True,repeated_restart_preserved=True,old_processes_exited=True,distinct_host_processes=True,browser_interrupted_visible=True,browser_refresh_without_replay=True,host_generations=3,no_automatic_replay_observation_ms=3000)
+        baseline=json.loads(json.dumps(report))
+        for mutation in (lambda r:None,lambda r:r.update(external_requests=1),lambda r:r.update(client_requests=2),
+                         lambda r:r['office'].update(session_history_preserved=False),lambda r:r['office'].update(repeated_restart_preserved=False),
+                         lambda r:r.update(cleanup_errors=['remaining']),lambda r:r.update(status='completed')):
+            report=json.loads(json.dumps(baseline));mutation(report);(run/'result.json').write_text(json.dumps(report));row=self.read()[0]
+            self.assertEqual(row['host_restart_check_passed'],report==baseline);self.assertEqual(row['status'],'stopped' if report==baseline else 'unverified')
+            self.assertNotIn('PRIVATE',json.dumps(row))
+        report['fault_injection']={};(run/'result.json').write_text(json.dumps(report));self.assertEqual(self.read()[0]['status'],'invalid')
+
     def test_pi_cancel_requires_native_cleanup_timing_and_no_inference(self):
         run, report = self.make_run('pi')
         (run/'workspace/result.json').unlink()

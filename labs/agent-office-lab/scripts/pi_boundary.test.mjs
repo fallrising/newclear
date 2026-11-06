@@ -51,3 +51,15 @@ test('Pi reconnect stays disabled by default and consumes permission even on nat
   const floor=make(),gate=onePiTask(floor,{allowReconnect:true});assert(gate.armReconnect('fixture','saved'));
   assert.throws(()=>floor.workers.resume('fixture'),/native failure/);assert.equal(typeof floor.workers.resume('fixture'),'string');
 });
+
+test('restored Pi reconnect requires explicit opt-in, one arm, matching session and no live terminal', () => {
+ const w={info:{id:'fixture',kind:'agent',provider:'pi',model:'deepseek/deepseek-flash',sessionId:'saved',status:'offline',labTaskState:'interrupted'},interrupted:true};
+ const calls=[],make=()=>({project:{},workers:{officeDefault:{provider:'pi'},workers:new Map([['fixture',w]]),spawn(){assert.fail('restored host cannot spawn extra task');},resume(...a){calls.push(a);}}});
+ assert.equal(onePiTask(make(),{allowReconnect:true}).armReconnect('fixture','saved'),false);
+ const floor=make(),gate=onePiTask(floor,{allowReconnect:true,allowRestoredReconnect:true});
+ assert.equal(typeof floor.workers.spawn(),'string');assert.equal(gate.armReconnect('fixture','wrong'),false);
+ w.pty={};assert.equal(gate.armReconnect('fixture','saved'),false);delete w.pty;
+ assert(gate.armReconnect('fixture','saved'));assert.equal(typeof floor.workers.resume('fixture','continue'),'string');
+ assert.equal(floor.workers.resume('fixture'),undefined);assert.deepEqual(calls,[['fixture']]);
+ assert.equal(gate.armReconnect('fixture','saved'),false);assert.equal(typeof floor.workers.resume('fixture'),'string');
+});

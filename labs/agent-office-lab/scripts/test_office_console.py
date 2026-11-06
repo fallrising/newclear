@@ -180,6 +180,14 @@ class ConsoleTests(unittest.TestCase):
         key,job,commands=self.launch_helper({'provider':'pi','mode':'resume'},'pass');self.wait_job(job)
         self.assertEqual(commands[0][2:],['run','pi','--execute','--check-resume'])
 
+    def test_pi_host_restart_console_plan_is_fixed_and_local(self):
+        code,raw,_=self.request('/api/plan',{'provider':'pi','mode':'host_restart'})
+        self.assertEqual(code,200);plan=json.loads(raw);self.assertTrue(plan['executable'])
+        self.assertEqual(plan['plan']['command'][2:],['run','pi','--execute','--check-host-restart'])
+        self.assertFalse(plan['plan']['remote']);self.assertTrue(plan['plan']['native_host_restart_check'])
+        key,job,commands=self.launch_helper({'provider':'pi','mode':'host_restart'},'pass');self.wait_job(job)
+        self.assertEqual(commands[0][2:],['run','pi','--execute','--check-host-restart'])
+
     def test_pi_cancel_console_plan_is_fixed_local_and_single_use(self):
         code, raw, _ = self.request('/api/plan', {'provider':'pi','mode':'cancel'})
         self.assertEqual(code,200);plan=json.loads(raw)

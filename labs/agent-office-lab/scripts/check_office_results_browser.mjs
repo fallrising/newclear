@@ -63,7 +63,7 @@ try {
   }
   await page.selectOption('#provider', 'pi');
   await page.selectOption('#status', 'failed');
-  for (const run of data.runs.filter(r => r.test_scenario && !['native_pi_cancel','native_pi_resume'].includes(r.test_scenario) && r.status === 'failed')) {
+  for (const run of data.runs.filter(r => r.test_scenario && !['native_pi_cancel','native_pi_resume','native_pi_host_restart'].includes(r.test_scenario) && r.status === 'failed')) {
     await page.locator('#runs tr').filter({hasText:run.id}).getByRole('button').click();
     const detail = await page.locator('#detail').innerText();
     assert(detail.includes(run.test_scenario === 'injected_cli_crash' ? '本機注入 CLI crash' : `本機注入 HTTP ${run.test_scenario.slice(-3)}`));
@@ -81,6 +81,13 @@ try {
     await page.locator('#runs tr').filter({hasText:run.id}).getByRole('button').click();
     const detail=await page.locator('#detail').innerText();
     assert(detail.includes(run.resume_check_passed?'重新連接驗收通過；原任務未完成。':'重新連接驗收未通過。'));
+  }
+  for (const run of data.runs.filter(r => r.test_scenario === 'native_pi_host_restart')) {
+    await page.selectOption('#status',run.status);
+    await page.locator('#runs tr').filter({hasText:run.id}).getByRole('button').click();
+    const detail=await page.locator('#detail').innerText();
+    assert(detail.includes('Pi Office 重啟檢查（沒有模型推論）'));
+    assert(detail.includes(run.host_restart_check_passed?'Office 重啟驗收通過；歷史保留、無自動重跑，原任務未完成。':'Office 重啟驗收未通過。'));
   }
   await page.selectOption('#status', 'startup_only');
   const startup = data.runs.filter(r => r.provider === 'pi' && r.status === 'startup_only');

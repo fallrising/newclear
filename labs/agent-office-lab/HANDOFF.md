@@ -1,5 +1,7 @@
 # 開發交接
 
+T-0023：完成 [Pi Office host 重啟驗收](docs/PI-HOST-RESTART.md)。真實 Pi 本機 429／六筆歷史後，對已追蹤 Office 主程序注入 SIGKILL；新 host 停泊工位為 interrupted，再次重啟與 Chrome 刷新不自動派工。明確一次性無 prompt 重新連接使用新 PID／同 session、保留六筆歷史，沒有追加請求或產物。195 tests、操作台及 63 筆結果回歸通過；首輪 runner 41.06 秒、三代 host、外層 83 個程序全退出、鎖釋放。正常關閉後兩個已追蹤背景程序經身分核對送 SIGTERM，再確認全退出。一次本機 429、零模型推論／外部請求。完成 AC-08／09／11 子集；不代表進行中的遠端串流恢復、任務續做或完整 MVP／安全驗收。[證據](docs/evidence/pi-host-restart-2026-11-06.json)，交付見[任務板](docs/tasks/BOARD.md)。
+
 T-0022：完成[本地單檔修改提案](docs/LOCAL-FILE-PROPOSAL.md)。可選擇已登記專案中的檔案、輸入修改需求，先讀取目標後產生完整替代內容；結果重新核對原文／提案 hash、計算差異並以原檔名下載。190 tests、真實 Strata 修正與 Chrome 選檔／差異／下載、62 筆結果回歸通過。測試將 add 的減法修正為加法，獨立 AST 核對通過、未執行生成程式；原目錄及快照保留。runner 42.92 秒、外層 73 個程序全退出、鎖釋放、swap 增量 44.19 MiB，guard 未觸發。離線命名衝突及測試暫存路徑問題於實測前修正，原限制未放寬；零遠端模型呼叫。提案仍需人工審閱，沒有自動套用或一般程式測試；完整 MVP／安全邊界仍 pending。[證據](docs/evidence/local-file-proposal-2026-11-03.json)，交付見[任務板](docs/tasks/BOARD.md)。
 
 T-0021：完成[本地文字任務](docs/LOCAL-TEXT-TASK.md)。可登記工作目錄、輸入要求，以 OpenCode／Strata 讀取有界文字快照並產生 output.md，在頁面查看及下載；原目錄不變。184 tests、真實本地推論及 61 筆結果回歸通過。最終獨立 HOME 任務 43.12 秒，Chrome 關閉／重開仍為同一工作，產物與下載 hash 一致，外層 71 個程序全部退出、鎖釋放、swap 增量 0。首次完整流程亦通過；中間兩次 swap guard 停止保留且全部清理，未放寬模型或資源限制。另保留啟動前路徑／選單測試失敗與唯讀文字換行斷言修正。僅完成本地文字流程；一般程式修改、遠端工位與完整安全驗收仍 pending。沒有使用 Claude 或遠端付費模型。[證據](docs/evidence/local-text-task-2026-11-02.json)，交付見[任務板](docs/tasks/BOARD.md)。

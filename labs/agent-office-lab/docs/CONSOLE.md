@@ -74,3 +74,5 @@ python3 scripts/office_dispatch.py acknowledge-interruption --confirm-all-owned-
 本輪 [真實驗收證據](evidence/console-2026-11-02.json)：159 項離線測試、Chrome 完整本地流程及 52 筆結果回讀通過；包含第一次表單等待失敗、第二次資源 guard 停止與最終成功紀錄。最終追蹤的 107 個程序全退出、鎖釋放，零付費呼叫。
 
 完整四 provider UI 派工、跨 provider 權限／取消／恢復、一般程式修改及完整安全驗收仍待完成；本輪不建立 usable tag 或部署。
+
+[Pi Office host 重啟驗收](PI-HOST-RESTART.md)：中斷工位保留、明確同 session 重連與零模型請求檢查。

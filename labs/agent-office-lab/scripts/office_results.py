@@ -151,6 +151,26 @@ def _normalize(run_fd, run_id):
         row['content_review_required'] = True
         return dict(row,status='completed' if verified else report['status'] if report.get('status') in ('failed','cancelled') else 'unverified',reason=report['task']+'_task')
     row['artifact'] = artifact(run_fd, office.get('artifact_sha256'))
+    if 'host_restart_check' in report:
+        if (provider != 'pi' or report['host_restart_check'] != {'source':'loopback','http_status':429,'signal':'SIGKILL'}
+                or any(k in report for k in ('resume_check','cancellation_check','fault_injection','crash_injection'))):
+            return dict(row,status='invalid',reason='invalid_host_restart_metadata')
+        row['test_scenario'] = 'native_pi_host_restart'
+        observation = office.get('no_automatic_replay_observation_ms')
+        row['host_restart_check_passed'] = (report.get('host_restart_check_passed') is True
+            and report.get('status') == 'stopped' and office.get('status') == 'stopped'
+            and row['cleanup_verified'] and model_matches and report.get('model_inference_verified') is False
+            and report.get('host_target_verified') is True
+            and all(office.get(k) is True for k in ('crash_recovery_verified','repeated_restart_preserved','old_processes_exited',
+                'session_history_preserved','native_resume_verified','new_process_same_session','distinct_host_processes',
+                'browser_interrupted_visible','browser_refresh_without_replay'))
+            and type(office.get('host_generations')) is int and office['host_generations'] == 3
+            and type(observation) in (int,float) and 3000 <= observation < 10**7
+            and type(report.get('client_requests')) is int and report['client_requests'] == 1
+            and type(report.get('external_requests')) is int and report['external_requests'] == 0
+            and type(report.get('remaining_owned_processes')) is int and report['remaining_owned_processes'] == 0
+            and row['artifact']['status'] == 'unavailable')
+        return dict(row,status='stopped' if row['host_restart_check_passed'] else 'failed' if report.get('status') == 'failed' else 'unverified',reason='native_host_restart_check')
     if 'resume_check' in report:
         if (provider != 'pi' or report['resume_check'] != {'source':'loopback','http_status':429}
                 or any(k in report for k in ('cancellation_check','fault_injection','crash_injection'))):

@@ -1,0 +1,4 @@
+{
+  "initialAuditAssertion": "Expected18 with default unified_diff; actual22 due automatic junk matching removes/readds two unchanged blank lines. Stable SequenceMatcher(autojunk=False) gives18. Corrected counting only; no source mutation or semantic issue.",
+  "skillContractResolution": "Skill relative .agents/docs/specs/initial-plugin.md absent; read maintained /home/ckc/test/codex/agents/codex-team-superpowers/docs/specs/initial-plugin.md instead."
+}

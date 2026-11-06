@@ -1,0 +1,66 @@
+--- reviewed-proposal/docs/v2/decisions/pp1c-readonly-observation-20261106.md
++++ approved-status/docs/v2/decisions/pp1c-readonly-observation-20261106.md
+@@ -1,7 +1,7 @@
+ # PP1c D：第三 verifier CLI 的唯讀觀察機制提案
+ 
+ Desk-Task: T-0351
+-Status: PROPOSED — 尚未批准；先前「批准」不適用此新提案。
++Status: APPROVED — owner 最新明確批准 PR #1038 的完整提案；必要審查／CI、正常合併與遠端核對後生效。
+ 
+ ## 實際缺口
+ 
+@@ -27,12 +27,12 @@
+ 
+ ## Owner 決定
+ 
+-待 owner 明確批准本提案；若不批准，保留第三 CLI 未封板及 D 未完成，另提相容設計，不能私自縮小 current-source 檢查。
++Owner 本 session 最新原話「批准。」接受 Draft PR #1038 head a52da0b672a543c704696f4fa9bdff42a8a462b4 的完整提案，包含以下獨立審查補明。精確發言時間未知；首次續作記錄為 2026-11-06T21:14:25.173548+00:00。批准僅涵蓋此唯讀觀察機制；不包含尚未提出請求的失敗 runtime 回收提案。必要文件審查／CI、正常合併及遠端核對完成前不實作 adapter，第三 CLI 仍 ADAPTER_UNSEALED，D 未完成。
+ 
+-## 獨立文件審查補明（仍待 owner 批准）
++## 獨立文件審查補明（包含在本次批准範圍）
+ 
+ 本提案包含附約 §7.1 明列的原 D01 六個 fresh network-none profile 探針（Java Profile、Node Profile、pg_dump --version、pg_restore --version、id -u、id -g），前一個移除後才到下一個，最後才一個 INVENTORY；固定角色、原名稱 suffix、argv/env/mount/UID/PGDATA tmpfs 皆沿原向量，編譯／合成 profile artifacts 只進本次 private scratch，不用舊 cached profile 代替。不新增 SQL（保留原 SHOW 兩項）、network、dependency、host 權限或 registry mutation。
+ 
+ 無 lock／無未完成 operation／無其他 client 與原 lease/journal/request 集合/locator bytes 身分的連續不變，是每個 preflight、Ready/Permit/result 到 final success 的前提；新 lock、registry 變動或未知 helper/backend 即失效，不為達成前提而建立、移除或改寫 lock。
+ 
+-C17 先第三 CLI 實際驗 current rows/files 成功且 registry/source 不變，再以全新 recover lock、正常 registry fresh revalidation 通過後才 ACCOUNT。此先後次序保存原 proof 的 current-source 驗收，不把 observation token 或布林成功當 account authority。以上均是本 Draft PR 供 owner 決定的明確內容，沒有自動批准或實作。
++C17 先第三 CLI 實際驗 current rows/files 成功且 registry/source 不變，再以全新 recover lock、正常 registry fresh revalidation 通過後才 ACCOUNT。此先後次序保存原 proof 的 current-source 驗收，不把 observation token 或布林成功當 account authority。以上均屬 owner 本次明確批准的 PR #1038 內容；實作及實機驗收仍為後續獨立關卡。
+--- reviewed-proposal/docs/v2/waves/PP1c.md
++++ approved-status/docs/v2/waves/PP1c.md
+@@ -239,9 +239,9 @@
+ 
+ restore environment 永遠 isolated-drill；incidentStartedAt 必填、不可晚於命令 startedAt，也不在 retry 時改寫；純演練由 root 在 capture/取回流程開始前提供。RTO math 與超時 exit11 完整採父 §5.4；不以 `Date.now()-restoreStart` 假裝事故 RTO。source/target/bundle/artifact 路徑全部由 runId、backupId 與固定 PP1a private root 推導。
+ 
+-### 4.2d.1 第三 verifier 唯讀觀察補充提案（尚未批准）
+-
+-**PROPOSED：本節是待 owner 決定的具體差異，先前任何批准不涵蓋；owner 明確批准、必要審查／CI、正常合併及遠端核對前，不生效、不實作、不封板第三 CLI。** [決策提案](../decisions/pp1c-readonly-observation-20261106.md)與[附約 §7](../contracts/PP1c-local-adapters.md)補足既有完整 current-source 驗證與唯讀 registry 邊界之間的機制缺口，沒有縮小原驗收。
++### 4.2d.1 第三 verifier 唯讀觀察補充（已批准）
++
++**APPROVED（2026-11-06）：owner 最新原話「批准。」接受 PR #1038 於 a52da0b6 的完整提案及審查補明；必要審查／CI、正常合併及遠端核對後生效，實作／實機驗收完成前第三 CLI 仍未封板。** [決策提案](../decisions/pp1c-readonly-observation-20261106.md)與[附約 §7](../contracts/PP1c-local-adapters.md)補足既有完整 current-source 驗證與唯讀 registry 邊界之間的機制缺口，沒有縮小原驗收。
+ 
+ 提案採 host 記憶體的一次性不可序列化 observation token，只在已停止 source、無 operation lock／未完成 operation／其他 client backend 的情況下，先依序完成原 D01 六個固定 fresh profile 探針，再以原 INVENTORY／H02 向量重驗全部20表與實體 media；同時只允一個 owned helper。只寫固定 private verification scratch，不 stop/start source、不 attach workflow/account、不建立 operation、不寫 lease/journal/locator/lock；原 restoreOperationId 仍作第三 CLI receipt operationId。真正 recover 仍須新 operation lock 內用原 registry/helper token 再做完整 source revalidation，不能用 observation token 或第三 CLI 成功布林授權寫入。
+ 
+--- reviewed-proposal/docs/v2/contracts/PP1c-local-adapters.md
++++ approved-status/docs/v2/contracts/PP1c-local-adapters.md
+@@ -185,9 +185,9 @@
+ 
+ Root依本次批准，在必要CI與審查通過下正常合併施工圖、同步DOC_READY並按已授權範圍安排implementation。仍保留父媒體完整性、同交易全session撤銷、原RTO起點及local不等於offsite；不改v1/Java Operation/六欄Result，不擴dependency、host權限、正式部署或舊資料清理。未來真probe/PG/browser失敗須修正或回報，不因規格批准而豁免。
+ 
+-## 7 Read-only inventory observation（尚未批准提案）
+-
+-**PROPOSED — 此新增機制尚未獲 owner 批准，不因舊施工圖／其他修訂已批准而生效。先完成明確批准、規格獨立審查、必要 CI、正常合併及遠端核對，再實作。** [具體決策提案](../decisions/pp1c-readonly-observation-20261106.md)記錄缺口、唯一建議與待決狀態；第三 CLI 在未完成封板前仍 ADAPTER_UNSEALED。
++## 7 Read-only inventory observation（已批准）
++
++**APPROVED（2026-11-06）— owner 最新原話「批准。」接受 PR #1038 於 a52da0b6 的完整新增機制與 §7.1 補明。必要規格獨立審查、CI、正常合併及遠端核對完成後，才實作。** [具體決策提案](../decisions/pp1c-readonly-observation-20261106.md)記錄缺口、唯一變更與批准來源；第三 CLI 在未完成封板前仍 ADAPTER_UNSEALED。
+ 
+ 1. 入口須完整重驗已 released 的 restore proof、原 request、兩份完整 bundle 與固定 source identity/release/connection；source API 已停止、沒有 operation lock／未完成 operation，也沒有其他 client backend，否則拒絕。全程不得停止／啟動 source，不 attach recover/account/workflow，不建立 operation，不寫 lease/journal/locator/lock。第三 CLI operationId 保持原 restoreOperationId。
+ 2. host 只在記憶體建立一次性 private observation token，綁定上述已驗 material、固定 Node/JAR/image 與本次依序核身的 helper full IDs；同時只允一個 owned helper，最後只有一個 INVENTORY。JSON／clone／舊 token 不構成 authority；此 token 無持久帳本狀態，不可轉作 capture/restore/recover/account 權限。
+@@ -199,7 +199,7 @@
+ 
+ 必要 named regressions（含真實 registry/token）：第三 CLI 前後 lease/journal/lock/locator bytes 完全不變；JSON/clone token、外來 proof/source/helper identity/endpoint/backend、額外 writer、scratch/path/policy 替換均拒絕；JDBC／容器先結束而 result/EOF 延遲讀完仍須正確核對；20表任一 row/schema 或實體 media byte 改變失敗。C17 真 PG/Docker 的第三 CLI 與新 lock recover revalidation 分開取證；不可用只讀舊 inventory、inspect/OID 或單純 hash/boolean 冒充 current-source 完整驗證。
+ 
+-### 7.1 固定 preflight、連續唯讀與 C17 順序（同一待決提案）
++### 7.1 固定 preflight、連續唯讀與 C17 順序（同一批准範圍）
+ 
+ 為免「唯一 helper」被理解成省略 fresh preflight，本提案明確授權的序列只包含原 D01 的六個 network-none 探針，隨後一個 INVENTORY；每一個皆 fresh create／完整 ID-policy inspect／exit／同 ID cleanup，前一個證明移除後才進下一個，同時最多一個 active helper。六個探針恰為：API image 上原固定 Java `Profile`（JRE/JDBC/ImageIO/private IO/唯讀 media），Node image 上原固定 Node private-IO/UID/fsync Profile，PG image 上固定 `pg_dump --version`、`pg_restore --version`，API image default user 上固定 `id -u`、`id -g`。role 僅沿原 PROFILE／PG_DUMP_VERSION／PG_RESTORE_VERSION，保留原 exact argv/env/image/user/mount/network-none/PGDATA-only tmpfs/profile-policy preimages；不能增加 probe kind 或命令。
+ 

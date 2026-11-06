@@ -185,9 +185,9 @@ Owner已確認PR333整份PP1c施工圖：沿同一maintenance registry新增stri
 
 Root依本次批准，在必要CI與審查通過下正常合併施工圖、同步DOC_READY並按已授權範圍安排implementation。仍保留父媒體完整性、同交易全session撤銷、原RTO起點及local不等於offsite；不改v1/Java Operation/六欄Result，不擴dependency、host權限、正式部署或舊資料清理。未來真probe/PG/browser失敗須修正或回報，不因規格批准而豁免。
 
-## 7 Read-only inventory observation（尚未批准提案）
+## 7 Read-only inventory observation（已批准）
 
-**PROPOSED — 此新增機制尚未獲 owner 批准，不因舊施工圖／其他修訂已批准而生效。先完成明確批准、規格獨立審查、必要 CI、正常合併及遠端核對，再實作。** [具體決策提案](../decisions/pp1c-readonly-observation-20261106.md)記錄缺口、唯一建議與待決狀態；第三 CLI 在未完成封板前仍 ADAPTER_UNSEALED。
+**APPROVED（2026-11-06）— owner 最新原話「批准。」接受 PR #1038 於 a52da0b6 的完整新增機制與 §7.1 補明。必要規格獨立審查、CI、正常合併及遠端核對完成後，才實作。** [具體決策提案](../decisions/pp1c-readonly-observation-20261106.md)記錄缺口、唯一變更與批准來源；第三 CLI 在未完成封板前仍 ADAPTER_UNSEALED。
 
 1. 入口須完整重驗已 released 的 restore proof、原 request、兩份完整 bundle 與固定 source identity/release/connection；source API 已停止、沒有 operation lock／未完成 operation，也沒有其他 client backend，否則拒絕。全程不得停止／啟動 source，不 attach recover/account/workflow，不建立 operation，不寫 lease/journal/locator/lock。第三 CLI operationId 保持原 restoreOperationId。
 2. host 只在記憶體建立一次性 private observation token，綁定上述已驗 material、固定 Node/JAR/image 與本次依序核身的 helper full IDs；同時只允一個 owned helper，最後只有一個 INVENTORY。JSON／clone／舊 token 不構成 authority；此 token 無持久帳本狀態，不可轉作 capture/restore/recover/account 權限。
@@ -199,7 +199,7 @@ Root依本次批准，在必要CI與審查通過下正常合併施工圖、同�
 
 必要 named regressions（含真實 registry/token）：第三 CLI 前後 lease/journal/lock/locator bytes 完全不變；JSON/clone token、外來 proof/source/helper identity/endpoint/backend、額外 writer、scratch/path/policy 替換均拒絕；JDBC／容器先結束而 result/EOF 延遲讀完仍須正確核對；20表任一 row/schema 或實體 media byte 改變失敗。C17 真 PG/Docker 的第三 CLI 與新 lock recover revalidation 分開取證；不可用只讀舊 inventory、inspect/OID 或單純 hash/boolean 冒充 current-source 完整驗證。
 
-### 7.1 固定 preflight、連續唯讀與 C17 順序（同一待決提案）
+### 7.1 固定 preflight、連續唯讀與 C17 順序（同一批准範圍）
 
 為免「唯一 helper」被理解成省略 fresh preflight，本提案明確授權的序列只包含原 D01 的六個 network-none 探針，隨後一個 INVENTORY；每一個皆 fresh create／完整 ID-policy inspect／exit／同 ID cleanup，前一個證明移除後才進下一個，同時最多一個 active helper。六個探針恰為：API image 上原固定 Java `Profile`（JRE/JDBC/ImageIO/private IO/唯讀 media），Node image 上原固定 Node private-IO/UID/fsync Profile，PG image 上固定 `pg_dump --version`、`pg_restore --version`，API image default user 上固定 `id -u`、`id -g`。role 僅沿原 PROFILE／PG_DUMP_VERSION／PG_RESTORE_VERSION，保留原 exact argv/env/image/user/mount/network-none/PGDATA-only tmpfs/profile-policy preimages；不能增加 probe kind 或命令。
 

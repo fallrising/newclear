@@ -1,7 +1,7 @@
 # PP1c D：第三 verifier CLI 的唯讀觀察機制提案
 
 Desk-Task: T-0351
-Status: PROPOSED — 尚未批准；先前「批准」不適用此新提案。
+Status: APPROVED — owner 最新明確批准 PR #1038 的完整提案；必要審查／CI、正常合併與遠端核對後生效。
 
 ## 實際缺口
 
@@ -27,12 +27,12 @@ Status: PROPOSED — 尚未批准；先前「批准」不適用此新提案。
 
 ## Owner 決定
 
-待 owner 明確批准本提案；若不批准，保留第三 CLI 未封板及 D 未完成，另提相容設計，不能私自縮小 current-source 檢查。
+Owner 本 session 最新原話「批准。」接受 Draft PR #1038 head a52da0b672a543c704696f4fa9bdff42a8a462b4 的完整提案，包含以下獨立審查補明。精確發言時間未知；首次續作記錄為 2026-11-06T21:14:25.173548+00:00。批准僅涵蓋此唯讀觀察機制；不包含尚未提出請求的失敗 runtime 回收提案。必要文件審查／CI、正常合併及遠端核對完成前不實作 adapter，第三 CLI 仍 ADAPTER_UNSEALED，D 未完成。
 
-## 獨立文件審查補明（仍待 owner 批准）
+## 獨立文件審查補明（包含在本次批准範圍）
 
 本提案包含附約 §7.1 明列的原 D01 六個 fresh network-none profile 探針（Java Profile、Node Profile、pg_dump --version、pg_restore --version、id -u、id -g），前一個移除後才到下一個，最後才一個 INVENTORY；固定角色、原名稱 suffix、argv/env/mount/UID/PGDATA tmpfs 皆沿原向量，編譯／合成 profile artifacts 只進本次 private scratch，不用舊 cached profile 代替。不新增 SQL（保留原 SHOW 兩項）、network、dependency、host 權限或 registry mutation。
 
 無 lock／無未完成 operation／無其他 client 與原 lease/journal/request 集合/locator bytes 身分的連續不變，是每個 preflight、Ready/Permit/result 到 final success 的前提；新 lock、registry 變動或未知 helper/backend 即失效，不為達成前提而建立、移除或改寫 lock。
 
-C17 先第三 CLI 實際驗 current rows/files 成功且 registry/source 不變，再以全新 recover lock、正常 registry fresh revalidation 通過後才 ACCOUNT。此先後次序保存原 proof 的 current-source 驗收，不把 observation token 或布林成功當 account authority。以上均是本 Draft PR 供 owner 決定的明確內容，沒有自動批准或實作。
+C17 先第三 CLI 實際驗 current rows/files 成功且 registry/source 不變，再以全新 recover lock、正常 registry fresh revalidation 通過後才 ACCOUNT。此先後次序保存原 proof 的 current-source 驗收，不把 observation token 或布林成功當 account authority。以上均屬 owner 本次明確批准的 PR #1038 內容；實作及實機驗收仍為後續獨立關卡。

@@ -1,0 +1,8 @@
+{
+  "version": 1,
+  "original": "T147/final-checks.log",
+  "sha256": "50bfa12952e13992a0582bde5281c1ee70e3394641f90f6aabbb693b59801729",
+  "byteSize": "705",
+  "encoding": "utf-8",
+  "text": "validate-task validation passed: .team/tasks/T-147.md\nvalidate-report validation passed: .team/reports/T-147.md\nPASS hash/snapshot/narrow-diff/syntax/whitespace scripts/local/maintenance-target.mjs\nPASS hash/snapshot/narrow-diff/syntax/whitespace scripts/local/maintenance-target.test.mjs\nPASS hash/snapshot/narrow-diff/syntax/whitespace scripts/local/maintenance-workflow.test.mjs\nPASS unchanged readonly input scripts/local/prepare.mjs\nPASS unchanged readonly input scripts/local/restore-target.mjs\nPASS unchanged readonly input scripts/local/maintenance-workflow.mjs\nPASS unchanged readonly input scripts/local/maintenance-helper.mjs\nPASS unchanged readonly input scripts/ops/local-recovery-verify.mjs\n"
+}

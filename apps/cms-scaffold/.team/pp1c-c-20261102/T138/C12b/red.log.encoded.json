@@ -1,0 +1,8 @@
+{
+  "version": 1,
+  "original": "T138/C12b/red.log",
+  "sha256": "c2e3f1e13f62e845253468117bd10cb17fcddd6999cd4e41dea375860e03ff96",
+  "byteSize": "997",
+  "encoding": "utf-8",
+  "text": "✖ T138_C12_public_restore_cli_is_explicitly_unsealed_without_partial_dispatch (52.766871ms)\nℹ tests 1\nℹ suites 0\nℹ pass 0\nℹ fail 1\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 122.750001\n\n✖ failing tests:\n\ntest at scripts/ops/local-restore.test.mjs:120:1\n✖ T138_C12_public_restore_cli_is_explicitly_unsealed_without_partial_dispatch (52.766871ms)\n  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n  \n  0 !== 7\n  \n      at TestContext.<anonymous> (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-c-target-20261102/apps/cms-scaffold/scripts/ops/local-restore.test.mjs:121:46)\n      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)\n      at async Test.run (node:internal/test_runner/test:1332:7)\n      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:385:3) {\n    generatedMessage: true,\n    code: 'ERR_ASSERTION',\n    actual: 0,\n    expected: 7,\n    operator: 'strictEqual',\n    diff: 'simple'\n  }\n"
+}

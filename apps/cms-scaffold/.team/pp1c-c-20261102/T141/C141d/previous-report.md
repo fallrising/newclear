@@ -1,0 +1,40 @@
+STATUS: DONE
+
+## Summary
+
+Completed the explicitly bounded T141 accessor implementation in the isolated revoke worktree. Only `scripts/local/maintenance-target.mjs`, `scripts/local/maintenance-target.test.mjs`, and own T141 evidence/report were written. Prior T132 work remains preserved. Root owns actual Docker, lifecycle provenance, independent review, full C acceptance and publication.
+
+Export: `observedSessionConfig(inspection, deps = {})` returns a frozen object with exactly `sessionAbsoluteSeconds` and `sessionMaxSeconds`, both positive decimal strings. An original WeakMap-registered inspection is mandatory; failures become fixed `OpsError('ADAPTER_UNSEALED')`. No public path, flag, protocol, helperkind, HTTP endpoint or dependency was added.
+
+The accessor binds fresh full inspection before/after to the original target, API state and private image/config/lifecycle snapshot. It requires the approved image and container Java entrypoint, null Cmd, `/app` working directory, exact inherited environment plus existing fixed compose environment, and zero restart count. Same-container restart timestamp drift is rejected. It validates the actual container JAR against the target SHA, rejects all fourteen fixed external default/prod configuration paths, and accepts only the single password configtree entry. These fixed full-ID Docker cp observations run before and after the getter probe. Bounded ustar parsing rejects links, extensions, duplicates, unsafe paths, corrupt checksums, nonzero padding, excess entries and incomplete/trailing data; absence requires the exact root-observed code1 diagnostic. Secret payloads are neither logged nor persisted.
+
+The fixed installed JDK25 source-mode probe runs with only LANG/TZ, fixed argv, no shell/Boot/DB/HTTP, and exclusive 0700/0600 files under a new owned runRoot `session-config-` directory. It checks the pinned host JAR SHA before/after, exactly approved packaged application/prod config hashes, absence of other application/bootstrap configuration including nested libraries, and loads only the actual IdentityProperties/Surface classes through a platform-parent URLClassLoader. Returned durations come from actual getters, not literal duration defaults. Unknown packaged config fails closed.
+
+## Verification
+
+- C141a original missing-accessor named Red was observed, followed by capability/launch/environment Green; 94 added+removed lines, 14/14 tests. Evidence `.team/pp1c-c-20261102/T141/C141a/{red.log,green.log,checkpoint.json}` preserves both outcomes — passed
+- C141b missing fixed file-observation named Red was observed, followed by bounded tar/config/absence Green; 110 changed lines, 16/16 tests. Evidence `T141/C141b/{red.log,green.log,checkpoint.json}`. These intermediate checkpoints were explicitly incomplete; they were not effective-config acceptance — passed
+- C141c missing getter success named Red was observed, followed by final complete accessor Green; 194 changed lines. Exact final command `/home/ckc/.local/bin/node --test scripts/local/maintenance-target.test.mjs` passed 21/21, zero failures/skips, 1134.168103ms, in `T141/C141c/final-source-green.log`. Coverage includes clone/path/JAR/tar/config/env/argv faults, exact missing diagnostics, positive running/stopped capabilities, canonical output, signal/error redaction, pre/post identity/JAR/environment/container-file drift and same-ID restart rejection — passed
+- Actual installed JDK positive probe against root C JAR SHA `c77db33818be74674006328f990531543584983cb2ffe13351b605eb60ecfc15` returned exactly `{"sessionAbsoluteSeconds":"43200","sessionMaxSeconds":"604800"}\n`, exit0, no signal, stderr0. Evidence `T141/C141c/actual-jdk-final.log`, `actual-jdk-final-result.json`, and preserved `actual-probe.test.mjs`; all Docker replies were modeled, not actual runtime acceptance — passed
+- Three actual installed-JDK negative probes independently rejected altered packaged config content, an extra classpath configuration entry, and a missing required class. Each used a newly hashed local JAR variant bound to modeled receipt/container bytes, so rejection did not rely on a stale outer SHA. Evidence `T141/C141c/{config-content,extra-config,missing-class}-final.log`, corresponding result JSON, and `actual-jar-variants.json` — passed
+- Task validator `python3 /home/ckc/test/codex/agents/codex-team-superpowers/scripts/teamctl.py validate-task .team/tasks/T-141.md` passed. Python trailing-whitespace check passed on both product files; final source/snapshot hashes and changed-line counts recorded in `T141/final-source-hashes.json` — passed
+- Report validator `python3 /home/ckc/test/codex/agents/codex-team-superpowers/scripts/teamctl.py validate-report .team/reports/T-141.md` passed — passed
+
+Reproduce the actual probe from this component with `T141_JAR=<root-C-built-JAR> T141_JAVA_RESULT=<own-result-json> /home/ckc/.local/bin/node --test --test-name-pattern='T141 actual installed' .team/pp1c-c-20261102/T141/C141c/actual-probe.test.mjs`. For each preserved negative JAR use `T141_EXPECT_REJECT=1` plus its path. The test invokes the real fixed installed Java executable and records only status/signal/stderr byte count and settings stdout. Focused checks use native Node child-process permission; there were no Docker/network/Git operations.
+
+## Documentation
+
+Root approved the three checkpoint estimates, exact image Env/argv vector, fixed additional prod config paths, and exact missing-path diagnostic before those edits. Report/evidence cover this worker scope; root owns task/PLAN/spec/status integration. Frozen source hashes:
+
+- maintenance-target.mjs: `5a3ace6d49b1a7e37dd698450cf54a49f0ee969a3cc195efc5d67c94807ae248`
+- maintenance-target.test.mjs: `809c6f16a2fa870696c34d91f73e84e907974ad81b26a45dff95c56bbd5c4e69`
+
+## Risks and Follow-ups
+
+This is complete accessor implementation and focused/native-JDK evidence, not C delivery or actual Docker acceptance. Root must run the actual controlled fresh source/target flow and independent review. No actual Docker commands were executed by this worker. Target restore workflow composition remains root integration evidence; focused tests separately establish running/stopped inspection accessor behavior.
+
+Current file absence and stable snapshots cannot prove that a mutable process had not loaded an override at startup and removed it earlier. Root must establish fresh controlled lifecycle provenance; this accessor is not acceptance of arbitrary mutable production sources. Programmatic configuration trust still relies on the approved pinned source/JAR build. No new durable history seal or protocol was invented.
+
+The approved installed JDK path/base-image environment and packaged config hashes are deliberately exact. A different toolchain/image/config requires proof/update, not fallback. Newly generated private probe artifacts remain for owner-controlled retention; this worker performs no old runtime/volume/lock cleanup. Negative JAR fixtures add approximately125MiB under own evidence and are not proposed publication payloads. Before creating them, disk check observed25GiB free.
+
+T141 active effort approximately20minutes of the new45minute scope, including report; exact elapsed active accounting and provider/tool request totals are unknown. Prior T139 (~8), T132 (~23), T136 (~12) and historical B assignments retain their separate usage and were not reset. One initial Red per checkpoint, followed by bounded implementation/refinement; no repeated unexplained failure loop.

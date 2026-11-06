@@ -281,7 +281,7 @@ for(const exited of [false,true,'reappearing']) test(`PP1C_H02b1_real_token_JDBC
   const f=await jdbcFixture(t),child={stdin:new PassThrough(),stdout:new PassThrough(),stderr:new PassThrough()};
   t.after(()=>{for(const stream of Object.values(child))stream.destroy();});
   const request={version:1,mode:'INVENTORY',operationId,side:'source',targetId:f.context.target.targetId,
-    releaseId:f.context.target.images.api,jdbcUrl:f.context.lease.sourceConnection.jdbcUrl,dbUser:'cms_local',
+    releaseId:`sha256:${f.context.target.apiBuild.jarSha256}`,jdbcUrl:f.context.lease.sourceConnection.jdbcUrl,dbUser:'cms_local',
     passwordFile:'/run/secrets/spring.datasource.password',mediaRoot:'/media',outputFile:'/run/pp1/output/inventory.json',backupId:null,rawProofSha256:null};
   const ready={version:1,operationId,side:'source',mode:'INVENTORY',requestSha256:sha256(canonicalBytes(request)),backend:f.backend,readOnly:true};
   const result={version:1,operationId,mode:'INVENTORY',inventorySha256:'a'.repeat(64),dbSnapshotSha256:'b'.repeat(64),
@@ -343,6 +343,7 @@ test('PP1C_H02b1_endpoint_cannot_be_invented_before_start_or_replaced',async t=>
 import { EventEmitter } from 'node:events';
 import { readFileSync } from 'node:fs';
 import { runOwnedHelper } from './maintenance-helper.mjs';
+import * as helperModule from './maintenance-helper.mjs';
 function emptyInventory() {
   const java=readFileSync(new URL('../../services/cms-api/src/main/java/com/fallrising/cms/ops/RecoveryInventory.java',import.meta.url),'utf8');
   const tables=[...java.matchAll(/Map.entry\("([^"]+)", List.of\((.*?)\)\)/g)].map(([,tableName,values])=>{
@@ -352,8 +353,8 @@ function emptyInventory() {
   }).sort((a,b)=>a.tableName.localeCompare(b.tableName));
   return{version:1,files:[],tables,assets:[],variants:[],dbSnapshotSha256:sha256(canonicalBytes(tables.map(({tableName,schemaSha256,rowsSha256,rowCount})=>({tableName,schemaSha256,rowsSha256,rowCount})))),mediaHeaderSha256:sha256(canonicalBytes({version:1,files:[]}))};
 }
-async function ownedFixture(t,fault=null) {
-  const f=await capturePhase(t),original=f.deps.command;f.inventory=emptyInventory();f.permits=0;let counter=10;
+async function ownedFixture(t,fault=null,restore=false) {
+  const f=await capturePhase(t,restore),original=f.deps.command;f.inventory=emptyInventory();f.permits=0;f.requests=[];f.permitRecords=[];f.closedBeforeReceipt=0;let counter=10;
   await mkdir(join(f.cwd,'scripts/ops'),{recursive:true});
   await writeFile(join(f.cwd,'scripts/ops/local-media.mjs'),readFileSync(new URL('../ops/local-media.mjs',import.meta.url)));
 
@@ -362,10 +363,11 @@ async function ownedFixture(t,fault=null) {
   const setState=(c,state)=>{
     c.State={Status:state,Running:state==='running',ExitCode:0};
     if(c.HostConfig.NetworkMode!=='none') {
-      const network=f.state.networks.find(n=>n.Id===c.HostConfig.NetworkMode);
-      c.NetworkSettings.Networks[network.Name]={NetworkID:state==='running'?network.Id:'',IPAddress:state==='running'?'172.31.0.9':'',EndpointID:''};
-      if(state==='running')network.Containers[c.Id]={IPv4Address:'172.31.0.9/16'};else delete network.Containers[c.Id];
-    }else c.NetworkSettings.Networks={none:{NetworkID:state==='created'?'':'9'.repeat(64),EndpointID:state==='running'?'8'.repeat(64):'',IPAddress:''}};
+      const network=[...f.state.networks,...(f.childState?.networks??[])].find(n=>n.Id===c.HostConfig.NetworkMode);
+      const address=network.Name.startsWith(project)?'172.31.0.9':'172.29.0.9';
+      c.NetworkSettings.Networks[network.Name]={NetworkID:state==='running'?network.Id:'',IPAddress:state==='running'?address:'',EndpointID:''};
+      if(state==='running')network.Containers[c.Id]={IPv4Address:`${address}/16`};else delete network.Containers[c.Id];
+    }else c.NetworkSettings.Networks={none:{NetworkID:state==='created'?'':f.noneId??'9'.repeat(64),EndpointID:state==='running'?'8'.repeat(64):'',IPAddress:''}};
   };
   f.deps.command=async(file,args,options)=>{
     if(file==='javac'||file.endsWith('/javac')) {
@@ -374,7 +376,7 @@ async function ownedFixture(t,fault=null) {
     }
     const a=args.slice(2),find=key=>a.find(v=>v.startsWith(key+'='))?.slice(key.length+1);f.calls.push(args);
     if(a[0]==='image') {const r=await original(file,args,options),images=JSON.parse(r.stdout);images.forEach(x=>Object.assign(x.Config,{Env:[],User:'',Volumes:x.Id===f.receipt.images.postgres?{'/var/lib/postgresql/data':{}}:null}));return{stdout:JSON.stringify(images)};}
-    if(a[0]==='network'&&a[2]==='none')return{stdout:JSON.stringify([{Id:'9'.repeat(64),Name:'none',Driver:'null',Scope:'local'}])};
+    if(a[0]==='network'&&a[2]==='none')return{stdout:JSON.stringify([{Id:f.noneId??'9'.repeat(64),Name:'none',Driver:'null',Scope:'local'}])};
     if(a[0]==='volume')return{stdout:JSON.stringify(f.state.volumes.filter(v=>a.slice(2).includes(v.Name)))};
     if(a[0]==='create') {
       const labels=a.includes(f.receipt.images.api)?{...f.state.apiLabels}:{};for(let i=0;i<a.length;i++)if(a[i]==='--label'){const text=a[++i],n=text.indexOf('=');labels[text.slice(0,n)]=text.slice(n+1);}
@@ -384,7 +386,7 @@ async function ownedFixture(t,fault=null) {
       const policy={imageId:a[entry+1],user:find('--user'),entrypoint:find('--entrypoint'),args:a.slice(entry+2),env:[],mounts,networkId:find('--network')==='none'?null:find('--network')};
       for(let i=0;i<a.length;i++)if(a[i]==='--env')policy.env.push(a[++i]);policy.env.sort();
       const expected={fullContainerId:(counter++).toString(16).padStart(64,'0'),name:a[a.indexOf('--name')+1],labels};
-      const c=helperContainer(policy,expected,Object.fromEntries(f.state.volumes.map(v=>[v.Name,v.Mountpoint])));
+      const c=helperContainer(policy,expected,Object.fromEntries([...f.state.volumes,...(f.childState?.volumes??[])].map(v=>[v.Name,v.Mountpoint])));
       if(policy.networkId)setState(c,'created');f.state.containers.push(c);return{stdout:c.Id+'\n'};
     }
     if(a[0]==='inspect'&&a.length===2&&a[1]!=='--format') {
@@ -418,25 +420,41 @@ async function ownedFixture(t,fault=null) {
   f.deps.spawn=(_file,args)=>{
     const c=helperList().find(x=>x.Id===args.at(-1));setState(c,'running');
     const child=Object.assign(new EventEmitter(),{stdin:new PassThrough(),stdout:new PassThrough(),stderr:new PassThrough()});
-    const close=()=>{f.state.backends=[];setState(c,'exited');child.stdout.end();child.stderr.end();child.emit('close',0,null);};
+    const target=c.HostConfig.NetworkMode===f.childState?.networks[1].Id;
+    const backendState=target?f.childState:f.state,address=target?'172.29.0.9':'172.31.0.9';
+    const close=()=>{backendState.backends=[];setState(c,'exited');child.stdout.end();child.stderr.end();child.emit('close',0,null);};
     const requestPath=c.Mounts.find(m=>m.Destination==='/run/pp1/request.json')?.Source;
     if(requestPath) {
-      const request=JSON.parse(readFileSync(requestPath)),backend={pid:91,backendStartEpoch:'1770000000.123',db:'cms',role:'cms_local',clientAddr:'172.31.0.9',applicationName:operationId};
-      f.state.backends=[{pid:91,backend_start_epoch:backend.backendStartEpoch,datname:'cms',usename:'cms_local',client_addr:backend.clientAddr,application_name:operationId,state:'idle in transaction'}];
-      child.stdout.write(canonicalBytes({version:1,operationId,side:'source',mode:'INVENTORY',requestSha256:sha256(canonicalBytes(request)),backend,readOnly:true}));
+      const request=JSON.parse(readFileSync(requestPath)),backend={pid:91,backendStartEpoch:'1770000000.123',db:'cms',role:'cms_local',clientAddr:address,applicationName:operationId};
+      backendState.backends=[{pid:91,backend_start_epoch:backend.backendStartEpoch,datname:'cms',usename:'cms_local',client_addr:backend.clientAddr,application_name:operationId,state:'idle in transaction'}];
+      f.requests.push(request);
+      const readyRequest=f.readyImageRelease?{...request,releaseId:f.receipt.images.api}:request;
+      child.stdout.write(canonicalBytes({version:1,operationId,side:request.side,mode:request.mode,requestSha256:sha256(canonicalBytes(readyRequest)),backend,readOnly:true}));
+      child.stdin.on('data',bytes=>f.permitRecords.push(JSON.parse(bytes)));
       child.stdin.on('finish',async()=>{
+        if(request.mode==='REVOKE_SESSIONS'){
+          f.permits++;f.receivedRevokeRequest=request;backendState.backends=[];setState(c,'exited');
+          setTimeout(()=>{if(!backendState.backends.length&&!c.State.Running)f.closedBeforeReceipt++;child.stdout.write(canonicalBytes({operationId,backupId:request.backupId,revokedCount:'0',auditEventId:'40000000-0000-4000-8000-000000000004',committed:true}));close();},120);return;
+        }
         f.permits++;const output=join(c.Mounts.find(m=>m.Destination==='/run/pp1/output').Source,'inventory.json');
-        await writeFile(output,canonicalBytes(f.inventory),{mode:fault==='output-mode'?0o644:0o600});f.state.backends=[];setState(c,'exited');
-        setTimeout(()=>{child.stdout.write(canonicalBytes({version:1,operationId,mode:'INVENTORY',inventorySha256:fault==='receipt-hash'?'0'.repeat(64):sha256(canonicalBytes(f.inventory)),dbSnapshotSha256:f.inventory.dbSnapshotSha256,
+        await writeFile(output,canonicalBytes(f.inventory),{mode:fault==='output-mode'?0o644:0o600});backendState.backends=[];setState(c,'exited');
+        setTimeout(()=>{if(!backendState.backends.length&&!c.State.Running)f.closedBeforeReceipt++;child.stdout.write(canonicalBytes({version:1,operationId,mode:'INVENTORY',inventorySha256:fault==='receipt-hash'?'0'.repeat(64):sha256(canonicalBytes(f.inventory)),dbSnapshotSha256:f.inventory.dbSnapshotSha256,
           assetCount:'0',referencedFileCount:'0',orphanFileCount:'0',fileCount:'0',fileBytes:'0'}));close();},120);
       });
+    }else if(c.Config.Entrypoint[0].endsWith('/pg_restore')) {
+      backendState.backends=[{pid:91,backend_start_epoch:'1770000000.123',datname:'cms',usename:'cms_local',client_addr:address,application_name:operationId,state:'active'}];
+      const chunks=[];child.stdin.on('data',chunk=>chunks.push(chunk));child.stdin.on('finish',()=>{f.receivedRestore=Buffer.concat(chunks);});
+      f.pendingTargetPg=()=>{backendState.backends=[];setState(c,'exited');setTimeout(close,120);};
     }else if(c.Config.Entrypoint[0].endsWith('/pg_dump')) {
-      f.state.backends=[{pid:91,backend_start_epoch:'1770000000.123',datname:'cms',usename:'cms_local',client_addr:'172.31.0.9',application_name:operationId,state:'active'}];
+      backendState.backends=[{pid:91,backend_start_epoch:'1770000000.123',datname:'cms',usename:'cms_local',client_addr:address,application_name:operationId,state:'active'}];
       f.pendingPg=()=>{child.stdout.write(Buffer.from('PGDMP-synthetic'));
         if(fault==='pg-exit-before-drain'){f.state.backends=[];setState(c,'exited');setTimeout(close,250);}else close();};
     }else {
       const input=[];child.stdin.on('data',bytes=>input.push(bytes));
       child.stdin.on('finish',()=>{
+        if(c.Config.Cmd.at(-1)==='restore'){
+          f.receivedRestore=Buffer.concat(input);child.stdout.write(canonicalBytes({version:1,operationId:null,fileCount:'0',fileBytes:'0',mediaHeaderSha256:f.inventory.mediaHeaderSha256}));close();return;
+        }
         assert.deepEqual(Buffer.concat(input),canonicalBytes(f.inventory));
         const header=canonicalBytes({version:1,files:f.inventory.files}),length=Buffer.alloc(8);length.writeBigUInt64BE(BigInt(header.length));
         child.stdout.write(Buffer.concat([Buffer.from('PP1CMEDIA1\n'),length,header]));
@@ -591,3 +609,400 @@ for(const fault of ['id','name','driver','scope','forged-expected'])test(`T126_n
   f.deps.command=async(file,args,options)=>args[2]==='network'&&args[4]==='none'?{stdout:JSON.stringify([network])}:original(file,args,options);
   await assert.rejects(workflow.registerOwnedHelper(f.token,f.helper,f.policy,f.expected,f.deps));
 });
+
+async function reservedTargetFixture(t,base=null) {
+  const f=base??await capturePhase(t,true);await workflow.endPhase(f.token,{},f.deps);
+  await workflow.beginPhase(f.token,'LOCAL_VERIFIED',{},f.deps);await workflow.endPhase(f.token,{},f.deps);
+  f.child=await workflow.reserveRestoreTarget(f.token,{runId:f.r.targetRunId},f.deps);
+  const original=f.deps.command,tags=new Map();f.preparationCalls=[];f.tags=tags;
+  f.deps.nodeVersion='v24.18.0';f.deps.portAvailable=()=>assert.fail('private preparation must not probe8443');
+  f.deps.command=async(file,args,options)=>{
+    if(file==='openssl') {for(const flag of ['-out','-keyout'])if(args.includes(flag))await writeFile(args[args.indexOf(flag)+1],'synthetic',{mode:0o600});return{stdout:''};}
+    assert.notEqual(file,'git','restore preparation binds existing source provenance');
+    const a=args.slice(2);f.preparationCalls.push(a);
+    if(a[0]==='compose'&&a[1]==='version')return{stdout:'5.6.0'};
+    if(a[0]==='image'&&a[1]==='tag'){tags.set(a[3],a[2]);return{stdout:''};}
+    if(a[0]==='image'&&a[1]==='inspect'&&a[2].startsWith(f.child.target.project)) {
+      if(tags.has(a[2]))return{stdout:JSON.stringify([{Id:tags.get(a[2])}])};
+      throw Object.assign(new Error('No such image'),{code:1});
+    }
+    if(a.includes('--filter')&&a.some(x=>x.includes(f.child.target.project)))return{stdout:''};
+    return original(file,args,options??{shell:false,timeout:30000});
+  };return f;
+}
+test('T131_T01_private_prepare_binds_source_without_port_or_service_start',async t=>{
+  const f=await reservedTargetFixture(t),{prepareRestore}=await import('./prepare.mjs');
+  const receipt=await prepareRestore(f.token,f.deps);
+  assert.equal(receipt.runId,f.r.targetRunId);assert.deepEqual(receipt.apiBuild,f.receipt.apiBuild);
+  assert.deepEqual(receipt.images,f.receipt.images);
+  assert.ok(!f.preparationCalls.some(a=>['start','up','run','pull'].includes(a[0])));
+  await assert.rejects(prepareRestore(f.token,f.deps));
+  await assert.rejects(prepareRestore({},f.deps));
+  await assert.rejects(inspectTarget(f.child.root,f.deps,{apiState:'stopped'}));
+});
+
+async function childRuntimeFixture(t,prepared=true,base=null) {
+  const f=await reservedTargetFixture(t,base),{prepareRestore}=await import('./prepare.mjs');if(prepared)await prepareRestore(f.token,f.deps);
+  const replacement=value=>JSON.parse(JSON.stringify(value).replaceAll(project,f.child.target.project).replaceAll(f.root,f.child.root));
+  const containers=replacement(f.state.containers),networks=replacement(f.state.networks),volumes=replacement(f.state.volumes);
+  const ids=new Map(f.state.containers.map((c,i)=>[c.Id,String(i+4).repeat(64)]));
+  networks.forEach((n,i)=>{n.Id=['c','d'][i].repeat(64);n.Containers={};n.IPAM.Config=[prepared?{Subnet:`172.${28+i}.0.0/16`,Gateway:`172.${28+i}.0.1`}:{Subnet:`192.168.240.${i*64}/26`,Gateway:`192.168.240.${i*64+1}`}];});
+  const pgAddress=prepared?'172.29.0.2':'192.168.240.66',prefix=prepared?16:26;
+  containers.forEach((c,i)=>{
+    if(i===2){c.Config.Entrypoint=['/opt/pp1-node'];c.Config.Cmd=['/tool/ingress.mjs','--config','/config/ingress.json'];}
+    c.Id=ids.get(c.Id);c.State={Status:i===0?'running':'created',Running:i===0,Health:{Status:'healthy'}};
+    for(const [name,endpoint] of Object.entries(c.NetworkSettings.Networks)) {
+      const network=networks.find(n=>n.Name===name);endpoint.NetworkID=i===0?network.Id:'';endpoint.IPAddress=i===0?pgAddress:'';
+      endpoint.Gateway='';endpoint.EndpointID='';endpoint.IPPrefixLen=i===0?prefix:0;
+      if(i===0)network.Containers[c.Id]={IPv4Address:`${pgAddress}/${prefix}`};
+    }
+  });
+  const original=f.deps.command;f.childState={containers,networks,volumes,relations:'0',empty:true,backends:[],visible:new Set(prepared?services:[])};
+  if(!prepared)for(const network of f.state.networks)network.IPAM.Driver='default';
+  f.childState.networkCreated=new Set(prepared?['web','data']:[]);f.deps.readRoutes=async()=> 'Iface Destination Gateway Flags RefCnt Use Metric Mask MTU Window IRTT\n';
+  f.targetCalls=[];await writeFile(join(f.cwd,'compose.pp1-local.yaml'),await readFile(new URL('../../compose.pp1-local.yaml',import.meta.url)));
+  if(!prepared){containers[0].State={Status:'created',Running:false,Health:{Status:'healthy'}};
+    for(const network of networks)network.Containers={};containers[0].NetworkSettings.Networks[networks[1].Name]={...containers[0].NetworkSettings.Networks[networks[1].Name],NetworkID:'',IPAddress:'',IPPrefixLen:0};}
+  f.deps.command=async(file,args,options)=>{
+    const a=args.slice(2);if(file!=='docker')return original(file,args,options);
+    const visible=containers.filter(c=>f.childState.visible.has(c.Config.Labels['com.docker.compose.service']));
+    if(a[0]==='network'&&a[1]==='ls'&&!a.includes('--filter'))return{stdout:[...f.state.networks,...networks.filter(n=>f.childState.networkCreated.has(n.Labels['com.docker.compose.network']))].map(n=>n.Id).join('\n')};
+    if(a[0]==='network'&&a[1]==='create'){const name=a.at(-1),n=networks.find(n=>n.Name===name);assert.ok(n);f.targetCalls.push(a);
+      assert.equal(a[a.indexOf('--subnet')+1],n.IPAM.Config[0].Subnet);assert.equal(a[a.indexOf('--gateway')+1],n.IPAM.Config[0].Gateway);
+      Object.assign(n,{Scope:'local',EnableIPv6:false,Attachable:false,Ingress:false,Options:{}});n.IPAM.Driver='default';n.IPAM.Options=null;n.Labels['com.docker.compose.version']='5.6.0';
+      f.childState.networkCreated.add(n.Labels['com.docker.compose.network']);return{stdout:n.Id+'\n'};}
+    if(a[0]==='network'&&a[1]==='inspect'&&a.slice(2).every(fullId=>/^[a-f0-9]{64}$/.test(fullId)))return{stdout:JSON.stringify([...f.state.networks,...networks.filter(n=>f.childState.networkCreated.has(n.Labels['com.docker.compose.network']))].filter(n=>a.includes(n.Id)))};
+    if(a[0]==='compose'&&a.includes('create')){
+      if(a.includes('--no-deps'))throw Object.assign(new Error('unknown flag: --no-deps'),{code:1});
+      assert.ok(a.includes('--no-recreate'));f.targetCalls.push(a);f.childState.visible.add(a.at(-1));return{stdout:''};}
+    if(a[0]==='start'&&a[1]===containers[0].Id){f.targetCalls.push(a);const c=containers[0],n=networks[1];c.State={Status:'running',Running:true,Health:{Status:'healthy'}};
+      Object.assign(c.NetworkSettings.Networks[n.Name],{NetworkID:n.Id,IPAddress:pgAddress,IPPrefixLen:prefix});n.Containers[c.Id]={IPv4Address:`${pgAddress}/${prefix}`};return{stdout:c.Id};}
+    if(a[0]==='ps'&&!a.includes('--filter'))return{stdout:[...f.state.containers,...visible].map(c=>c.Id).join('\n')};
+    if(a[0]==='inspect'&&!a.includes('--format')){
+      const rows=[...f.state.containers,...visible].filter(c=>a.includes(c.Id)||a.includes(c.Name.slice(1)));
+      if(rows.length)return{stdout:JSON.stringify(rows)};
+    }
+    if(a[0]==='network'&&a[1]==='inspect'&&a.slice(2).some(n=>n.startsWith(f.child.target.project)))return{stdout:JSON.stringify(networks.filter(n=>a.includes(n.Name)))};
+    if(a[0]==='volume'&&a[1]==='inspect'&&a.slice(2).some(n=>n.startsWith(f.child.target.project)))return{stdout:JSON.stringify(volumes.filter(n=>a.includes(n.Name)))};
+    if(a[0]==='image'&&a[1]==='inspect'&&a[2].startsWith(f.child.target.project)&&f.tags.has(a[2])) {
+      const kind=kinds.find(k=>a[2]===`${f.child.target.project}-${k}:verified`);
+      return{stdout:JSON.stringify([{Id:f.receipt.images[kind],Os:'linux',Config:{Labels:kind==='api'?f.state.apiLabels:{}}}])};
+    }
+    if(a[0]==='exec'&&a[1]===containers[0].Id){if(a.at(-1).includes('pg_class'))f.targetCalls.push(['blank-query']);return{stdout:a.at(-1).includes('pg_stat_activity')?JSON.stringify(f.childState.backends):a.at(-1).includes('pg_class')?f.childState.relations:'16385'};}
+    if(a[0]==='run'&&a.includes(`${f.child.target.project}-media-probe-${operationId}`))return{stdout:f.childState.empty?'EMPTY\n':'NOT_EMPTY\n'};
+    return original(file,args,options);
+  };return f;
+}
+test('T131_T02_reserved_child_inspection_is_token_bound_and_stopped',async t=>{
+  const f=await childRuntimeFixture(t);
+  const child=await inspectTarget(f.child.root,f.deps,{apiState:'stopped',workflow:f.token});
+  assert.equal(child.target.runId,f.r.targetRunId);assert.notDeepEqual(child.target.networkIds,f.receipt.networkIds);
+  await assert.rejects(inspectTarget(f.child.root,f.deps,{apiState:'stopped'}));
+  await assert.rejects(inspectTarget(f.child.root,f.deps,{apiState:'stopped',workflow:{}}));
+});
+
+async function sealChild(f) {
+  const inspection=await inspectTarget(f.child.root,f.deps,{apiState:'stopped',workflow:f.token});
+  const preparation={receipt:JSON.parse(await readFile(join(f.child.root,'receipt.json'))),artifacts:JSON.parse(await readFile(join(f.child.root,'artifacts.json')))};
+  const resources={containerIds:inspection.target.containerIds,networkIds:inspection.target.networkIds,volumeNames:inspection.target.volumeNames};
+  return workflow.sealRestoreTarget(f.token,inspection,{preparationSha256:sha256(canonicalBytes(preparation)),createdResourceSetSha256:sha256(canonicalBytes(resources))},f.deps);
+}
+test('T131_T02_seals_fresh_blank_target_and_keeps_source_identity',async t=>{
+  const f=await childRuntimeFixture(t),context=await sealChild(f);
+  assert.equal(context.target.runId,f.r.targetRunId);assert.equal(context.lease.phase,'TARGET_BLANK');
+  assert.equal(context.connection.jdbcUrl,'jdbc:postgresql://172.29.0.2:5432/cms');assert.equal(context.runRoot,f.child.root);
+  assert.equal(context.lease.target.creationPhase,'BLANK_VERIFIED');assert.equal(context.lease.source.runId,runId);
+  await assert.rejects(workflow.sealRestoreTarget({},context.inspection,{},f.deps));
+  f.childState.containers[1].State.Running=true;await assert.rejects(workflow.assertWorkflow(f.token,{side:'target'},f.deps));
+});
+for(const fault of ['relations','media','shared-volume','same-container','started-ingress','unknown-container']) {
+  test(`T131_T02_rejects_${fault}_before_restore`,async t=>{
+    const f=await childRuntimeFixture(t);
+    if(fault==='relations')f.childState.relations='1';
+    if(fault==='media')f.childState.empty=false;
+    if(fault==='shared-volume')f.childState.volumes[1].Mountpoint=f.state.volumes[1].Mountpoint;
+    if(fault==='same-container')f.childState.containers[0].Id=f.state.containers[0].Id;
+    if(fault==='started-ingress')f.childState.containers[2].State.Running=true;
+    if(fault==='unknown-container')f.childState.containers.push({...structuredClone(f.childState.containers[0]),Id:'e'.repeat(64)});
+    await assert.rejects(sealChild(f));
+    assert.ok(!f.preparationCalls.some(a=>a[0]==='start'));
+  });
+}
+
+test('T131_T02_factory_creates_PG_first_and_only_after_blank_creates_stopped_services',async t=>{
+  const f=await childRuntimeFixture(t,false),{createRestoreTarget}=await import('./restore-target.mjs');
+  const context=await createRestoreTarget(f.token,f.deps);
+  assert.equal(context.lease.target.creationPhase,'BLANK_VERIFIED');assert.equal(context.lease.phase,'TARGET_BLANK');
+  const creates=f.targetCalls.filter(a=>a[0]==='compose'&&a.includes('create')).map(a=>a.at(-1));assert.deepEqual(creates,['postgres','cms-api','ingress']);
+  const blank=f.targetCalls.findIndex(a=>a[0]==='blank-query'),api=f.targetCalls.findIndex(a=>a.at(-1)==='cms-api');assert.ok(blank<api);
+  assert.deepEqual(f.targetCalls.filter(a=>a[0]==='start'),[['start',f.childState.containers[0].Id]]);
+  assert.equal(f.childState.containers[1].State.Running,false);assert.equal(f.childState.containers[2].State.Running,false);
+});
+for(const fault of ['relations','compose-drift','pg-started','pg-command','pg-mount','pg-network','pg-port']) {
+  test(`T131_T02_factory_rejects_${fault}_without_starting_application`,async t=>{
+    const f=await childRuntimeFixture(t,false),{createRestoreTarget}=await import('./restore-target.mjs');
+    if(fault==='relations')f.childState.relations='1';
+    if(fault==='compose-drift')await writeFile(join(f.cwd,'compose.pp1-local.yaml'),'unknown compose');
+    if(fault==='pg-started')f.childState.containers[0].State.Running=true;
+    if(fault==='pg-command')f.childState.containers[0].Config.Cmd=['sh','-c','unknown'];
+    if(fault==='pg-mount')f.childState.containers[0].Mounts[0].Name=f.state.volumes[0].Name;
+    if(fault==='pg-network')f.childState.networks[1].Internal=false;
+    if(fault==='pg-port')f.childState.containers[0].HostConfig.PortBindings={'5432/tcp':[{HostPort:'5432'}]};
+    await assert.rejects(createRestoreTarget(f.token,f.deps));
+    assert.ok(!f.targetCalls.some(a=>a.at(-1)==='cms-api'||a.at(-1)==='ingress'));
+    if(fault!=='relations')assert.ok(!f.targetCalls.some(a=>a[0]==='start'));
+    await assert.rejects(workflow.assertWorkflow(f.token,{},f.deps));
+  });
+}
+async function targetHelperFixture(t,kind='PG_RESTORE',seedProfile=false) {
+  const base=seedProfile?await ownedFixture(t,null,true):null;
+  if(base)await runOwnedHelper(base.token,{side:'source',kind:'INVENTORY'},base.deps);
+  const f=await childRuntimeFixture(t,true,base);await sealChild(f);
+  const phase={PG_RESTORE:'DB_RESTORED',MEDIA_RESTORE:'MEDIA_RESTORED',INVENTORY:'RAW_VERIFIED',REVOKE_SESSIONS:'SESSIONS_REVOKED'}[kind];
+  for(const next of ['DB_RESTORED','MEDIA_RESTORED','RAW_VERIFIED','SESSIONS_REVOKED']){
+    await workflow.beginPhase(f.token,next,{},f.deps);if(next===phase)break;await workflow.endPhase(f.token,{},f.deps);
+  }
+  const original=f.deps.command;
+  f.deps.command=async(file,args,options)=>{
+    const a=args.slice(2);if(a[0]==='image'){
+      const r=await original(file,args,options),rows=JSON.parse(r.stdout);rows.forEach(x=>Object.assign(x.Config,{Env:[],User:'',Volumes:x.Id===f.receipt.images.postgres?{'/var/lib/postgresql/data':{}}:null}));return{stdout:JSON.stringify(rows)};
+    }
+    if(a[0]==='network'&&a[2]==='none')return{stdout:JSON.stringify([{Id:'7'.repeat(64),Name:'none',Driver:'null',Scope:'local'}])};
+    return original(file,args,options);
+  };
+  const context=await workflow.reserveHelper(f.token,{side:'target',kind},f.deps);
+  const image={Id:context.target.images[kind.startsWith('PG_')?'postgres':kind.startsWith('MEDIA_')?'node':'api'],Os:'linux',Config:{Env:[],User:'',Labels:kind==='INVENTORY'||kind==='REVOKE_SESSIONS'?f.state.apiLabels:{},Volumes:kind.startsWith('PG_')?{'/var/lib/postgresql/data':{}}:null}};
+  const policy=buildHelperPolicy({...context,image,kind,side:'target',mediaUser:'0:0'}),policySha256=sha256(canonicalBytes(policy));
+  const expected={fullContainerId:'f'.repeat(64),name:`cms-pp1c-${operationId}-${context.seq}`,labels:{...image.Config.Labels,'org.cms.pp1c.operation':operationId,'org.cms.pp1c.seq':context.seq,'org.cms.pp1c.kind':kind,'org.cms.pp1c.policy':policySha256},
+    volumeMountpoints:Object.fromEntries(f.childState.volumes.map(v=>[v.Name,v.Mountpoint])),state:'created',dataNetworkName:`${f.child.target.project}_data`,noneNetworkId:'7'.repeat(64)};
+  const helper={kind,side:'target',fullContainerId:expected.fullContainerId,policySha256,state:'CREATED',endpoint:null,backend:null,startedAt:new Date().toISOString()};
+  const container=helperContainer(policy,expected,expected.volumeMountpoints);
+  if(!policy.networkId)container.NetworkSettings.Networks.none.NetworkID='';
+  if(policy.networkId)container.NetworkSettings.Networks[expected.dataNetworkName]={NetworkID:'',IPAddress:'',EndpointID:''};
+  f.state.containers.push(container);return{...f,context,policy,expected,helper,container};
+}
+for(const kind of ['PG_RESTORE','INVENTORY','REVOKE_SESSIONS'])test(`T131_T02_target_helper_${kind}_uses_child_identity`,async t=>{
+  const f=await targetHelperFixture(t,kind);await workflow.registerOwnedHelper(f.token,f.helper,f.policy,f.expected,f.deps);
+  const current=await workflow.assertWorkflow(f.token,{side:'target'},f.deps);
+  assert.equal(current.lease.helper.side,'target');assert.equal(current.target.runId,f.r.targetRunId);
+  assert.equal(f.policy.networkId,current.target.networkIds.data);assert.notEqual(f.policy.networkId,current.lease.source.networkIds.data);
+  assert.equal(current.lease.source.runId,runId);assert.equal(current.base,join(f.root,'maintenance'));
+});
+for(const fault of ['source-writer','target-writer','wrong-network','wrong-command','extra-holder'])test(`T131_T02_target_registry_rejects_${fault}`,async t=>{
+  const f=await targetHelperFixture(t,'PG_RESTORE');
+  if(fault==='source-writer')f.state.backends=[{pid:999}];
+  if(fault==='target-writer')f.childState.backends=[{pid:999}];
+  if(fault==='wrong-network')f.expected.dataNetworkName=`${project}_data`;
+  if(fault==='wrong-command'){f.policy.args=['--clean'];f.container.Config.Cmd=f.policy.args;f.helper.policySha256=sha256(canonicalBytes(f.policy));f.expected.labels['org.cms.pp1c.policy']=f.helper.policySha256;}
+  if(fault==='extra-holder')f.state.containers.push({...structuredClone(f.container),Id:'e'.repeat(64)});
+  await assert.rejects(workflow.registerOwnedHelper(f.token,f.helper,f.policy,f.expected,f.deps));
+});
+for(const options of [{side:'target',kind:'PG_RESTORE'},{side:'target',kind:'MEDIA_RESTORE'},{side:'target',kind:'REVOKE_SESSIONS'},{side:'target',kind:'BROWSER'},{side:'source',kind:'PG_RESTORE'}])test(`T131_T02_rejects_${options.side}_${options.kind}_in_TARGET_BLANK`,async t=>{
+  const f=await childRuntimeFixture(t);await sealChild(f);await assert.rejects(workflow.reserveHelper(f.token,options,f.deps));
+});
+for(const service of ['cms-api','ingress'])test(`T131_T02_rejects_${service}_command_drift_before_seal`,async t=>{
+  const f=await childRuntimeFixture(t);f.childState.containers.find(c=>c.Config.Labels['com.docker.compose.service']===service).Config.Cmd=['unexpected'];
+  await assert.rejects(sealChild(f));
+});
+test('T131_T02_target_media_requires_independently_cached_profile',async t=>{
+  const f=await targetHelperFixture(t,'MEDIA_RESTORE');await assert.rejects(workflow.registerOwnedHelper(f.token,f.helper,f.policy,f.expected,f.deps));
+});
+
+test('T131_T02_target_media_uses_verified_profile_from_same_real_registry_token',async t=>{
+  const f=await targetHelperFixture(t,'MEDIA_RESTORE',true);
+  await workflow.registerOwnedHelper(f.token,f.helper,f.policy,f.expected,f.deps);
+  assert.equal(f.policy.user,'0:0');assert.equal(f.policy.mounts.find(m=>m.destination==='/media').source,f.childState.volumes[1].Name);
+  f.container.State={Status:'running',Running:true,ExitCode:0};Object.assign(f.container.NetworkSettings.Networks.none,{NetworkID:'7'.repeat(64),EndpointID:'8'.repeat(64)});
+  await workflow.updateOwnedHelper(f.token,{...f.helper,state:'RUNNING'},f.deps);
+  f.container.State={Status:'exited',Running:false,ExitCode:0};f.container.NetworkSettings.Networks.none.EndpointID='';
+  const drained=await workflow.assertHelperDrain(f.token,f.deps);assert.equal(drained.target.runId,f.r.targetRunId);assert.equal(drained.lease.helper.endpoint,null);
+});
+test('T131_T02_source_after_inventory_is_allowed_only_at_raw_verification',async t=>{
+  const f=await childRuntimeFixture(t);await sealChild(f);
+  for(const phase of ['DB_RESTORED','MEDIA_RESTORED']){await workflow.beginPhase(f.token,phase,{},f.deps);await workflow.endPhase(f.token,{},f.deps);}
+  await workflow.beginPhase(f.token,'RAW_VERIFIED',{},f.deps);
+  await assert.rejects(workflow.reserveHelper(f.token,{side:'source',kind:'PG_DUMP'},f.deps));
+  await assert.rejects(workflow.reserveHelper(f.token,{side:'source',kind:'MEDIA_PACK'},f.deps));
+  const c=await workflow.reserveHelper(f.token,{side:'source',kind:'INVENTORY'},f.deps);assert.equal(c.target.runId,runId);
+});
+
+// Real registry/token; deterministic process and protected-material test seams only.
+async function targetOwnedFixture(t,kind) {
+  const f=await ownedFixture(t,null,true);await runOwnedHelper(f.token,{side:'source',kind:'INVENTORY'},f.deps);
+  await childRuntimeFixture(t,true,f);await sealChild(f);f.noneId='7'.repeat(64);
+  const phase={PG_RESTORE:'DB_RESTORED',MEDIA_RESTORE:'MEDIA_RESTORED',INVENTORY:'RAW_VERIFIED',REVOKE_SESSIONS:'SESSIONS_REVOKED'}[kind];
+  for(const next of ['DB_RESTORED','MEDIA_RESTORED','RAW_VERIFIED','SESSIONS_REVOKED']){
+    await workflow.beginPhase(f.token,next,{},f.deps);if(next===phase)break;await workflow.endPhase(f.token,{},f.deps);
+  }
+  const path=join(f.root,'synthetic-copy');await mkdir(path,{mode:0o700});
+  const dump=Buffer.from('synthetic PG restore stream'),header=canonicalBytes({version:1,files:[]}),length=Buffer.alloc(8);length.writeBigUInt64BE(BigInt(header.length));
+  const media=Buffer.concat([Buffer.from('PP1CMEDIA1\n'),length,header]);
+  const artifacts=[];for(const [name,bytes]of [['db.dump',dump],['media.package',media]]){
+    await writeFile(join(path,name),bytes,{mode:0o600});artifacts.push({path:name,sha256:sha256(bytes),byteSize:String(bytes.length)});
+  }
+  f.material={path,operationId,sourceRoot:f.root,backupId:'pp1-20261102T120000000Z-'+'b'.repeat(32),rawProofSha256:'a'.repeat(64),inventory:f.inventory,manifest:{artifacts,inventory:{fileCount:'0',fileBytes:'0'}}};
+  f.deps.restoreMaterial=async token=>{assert.equal(token,f.token);return f.material;};
+  const command=f.deps.command;
+  f.deps.command=async(file,args,options)=>{
+    if(args[2]==='exec'&&args.at(-1).includes('pg_stat_activity')&&f.pendingTargetPg){
+      const lease=JSON.parse(await readFile(join(f.root,'maintenance/lease.json')));
+      if(lease.helper?.backend){const finish=f.pendingTargetPg;delete f.pendingTargetPg;setTimeout(finish,250);}
+    }
+    return command(file,args,options);
+  };
+  return f;
+}
+for(const kind of ['INVENTORY','PG_RESTORE','MEDIA_RESTORE'])test(`PP1c_C12h1_real_registry_target_wrapper_${kind}`,async t=>{
+  const f=await targetOwnedFixture(t,kind),result=await runOwnedHelper(f.token,{side:'target',kind},f.deps);
+  assert.equal(result.kind,kind);const current=await workflow.assertWorkflow(f.token,{side:'target'},f.deps);
+  assert.equal(current.lease.helper,null);assert.equal(f.state.containers[1].State.Running,false);
+  assert.equal(f.childState.containers[1].State.Running,false);assert.equal(f.childState.containers[2].State.Running,false);
+  if(kind==='INVENTORY'){
+    const request=JSON.parse(await readFile(join(result.path,'../../request.json')));
+    assert.equal(request.side,'target');assert.equal(request.jdbcUrl,current.connection.jdbcUrl);
+  }else assert.deepEqual(f.receivedRestore,await readFile(join(f.material.path,kind==='PG_RESTORE'?'db.dump':'media.package')));
+});
+for(const fault of ['input-hash','media-receipt','source-writer'])test(`PP1c_C12h1_target_wrapper_rejects_${fault}_without_starting_API`,async t=>{
+  const kind=fault==='media-receipt'?'MEDIA_RESTORE':'PG_RESTORE',f=await targetOwnedFixture(t,kind);
+  const creates=f.calls.filter(a=>a[2]==='create').length;
+  if(fault==='input-hash')f.material.manifest.artifacts[0].sha256='0'.repeat(64);
+  if(fault==='media-receipt')f.material.manifest.inventory.fileCount='1';
+  if(fault==='source-writer')f.state.backends=[{pid:999}];
+  await assert.rejects(runOwnedHelper(f.token,{side:'target',kind},f.deps));
+  assert.equal(f.state.containers[1].State.Running,false);assert.equal(f.childState.containers[1].State.Running,false);
+  if(fault==='source-writer')assert.equal(f.calls.filter(a=>a[2]==='create').length,creates);
+  else assert.equal(JSON.parse(await readFile(join(f.root,'maintenance/lease.json'))).phase,'FAILED_OR_UNKNOWN');
+});
+test('PP1c_C14n2_real_registry_REVOKE_wrapper_uses_private_raw_material_and_authority',async t=>{
+  const f=await targetOwnedFixture(t,'REVOKE_SESSIONS'),result=await runOwnedHelper(f.token,{side:'target',kind:'REVOKE_SESSIONS'},f.deps);
+  assert.equal(result.receipt.committed,true);assert.equal(f.receivedRevokeRequest.rawProofSha256,f.material.rawProofSha256);
+  assert.equal(f.receivedRevokeRequest.backupId,f.material.backupId);assert.equal(f.receivedRevokeRequest.mediaRoot,null);
+  const c=await workflow.assertWorkflow(f.token,{side:'target'},f.deps);assert.equal(f.receivedRevokeRequest.jdbcUrl,c.connection.jdbcUrl);
+  const metadata=helperModule.verifiedSessionCommit(f.token,result);assert.equal(metadata.targetId,c.target.targetId);
+  assert.equal(metadata.rawProofSha256,f.material.rawProofSha256);assert.equal(c.lease.helper,null);
+  assert.throws(()=>helperModule.verifiedSessionCommit(f.token,structuredClone(result)),e=>e.code==='ADAPTER_UNSEALED');
+  assert.throws(()=>helperModule.verifiedSessionCommit({},result),e=>e.code==='ADAPTER_UNSEALED');
+  assert.equal(f.childState.containers[1].State.Running,false);
+});
+for(const rawProofSha256 of [null,'0'.repeat(63)])test(`PP1c_C14n2_revoke_without_private_raw_hash_${rawProofSha256===null?'null':'invalid'}_never_permits`,async t=>{
+  const f=await targetOwnedFixture(t,'REVOKE_SESSIONS'),permits=f.permits;
+  f.material.rawProofSha256=rawProofSha256;
+  await assert.rejects(runOwnedHelper(f.token,{side:'target',kind:'REVOKE_SESSIONS'},f.deps),e=>e.code==='ADAPTER_UNSEALED');
+  assert.equal(f.permits,permits);assert.equal(f.childState.containers[1].State.Running,false);
+});
+test('T131_T02_target_PG_backend_may_end_before_output_without_reappearing',async t=>{
+  const f=await targetHelperFixture(t),network=f.childState.networks[1];await workflow.registerOwnedHelper(f.token,f.helper,f.policy,f.expected,f.deps);
+  f.container.State={Status:'running',Running:true,ExitCode:0};Object.assign(f.container.NetworkSettings.Networks[network.Name],{NetworkID:network.Id,IPAddress:'172.29.0.9'});network.Containers[f.container.Id]={IPv4Address:'172.29.0.9/16'};
+  f.helper={...f.helper,state:'RUNNING',endpoint:{networkId:network.Id,address:'172.29.0.9'}};await workflow.updateOwnedHelper(f.token,f.helper,f.deps);
+  const backend={pid:91,backendStartEpoch:'1770000000.123',db:'cms',role:'cms_local',clientAddr:'172.29.0.9',applicationName:operationId};
+  const row={pid:91,backend_start_epoch:backend.backendStartEpoch,datname:'cms',usename:'cms_local',client_addr:backend.clientAddr,application_name:operationId,state:'active'};
+  f.childState.backends=[row];f.helper={...f.helper,backend};await workflow.updateOwnedHelper(f.token,f.helper,f.deps);
+  f.childState.backends=[];assert.equal((await workflow.assertHelperDrain(f.token,f.deps)).helperBackendEnded,true);
+  f.childState.backends=[row];await assert.rejects(workflow.assertHelperDrain(f.token,f.deps),/WRITER_NOT_QUIESCED/);
+});
+
+test('T146 factory preserves both privately created network IDs through unchanged Compose',async t=>{
+  const f=await childRuntimeFixture(t,false),{createRestoreTarget}=await import('./restore-target.mjs');
+  const context=await createRestoreTarget(f.token,f.deps);
+  assert.equal(f.targetCalls.filter(a=>a[0]==='network'&&a[1]==='create').length,2);
+  assert.equal(context.inspection.target.networkIds.web,f.childState.networks[0].Id);
+  assert.equal(context.inspection.target.networkIds.data,f.childState.networks[1].Id);
+  assert.equal(context.connection.jdbcUrl,'jdbc:postgresql://192.168.240.66:5432/cms');
+});
+for(const fault of ['web-id','data-id','subnet'])test(`T146 factory rejects Compose network ${fault} drift before PG start`,async t=>{
+  const f=await childRuntimeFixture(t,false),{createRestoreTarget}=await import('./restore-target.mjs'),original=f.deps.command;
+  f.deps.command=async(file,args,options)=>{
+    const result=await original(file,args,options);
+    if(file==='docker'&&args[2]==='compose'&&args.includes('create')){
+      if(fault==='subnet')f.childState.networks[0].IPAM.Config[0].Subnet='192.168.242.0/24';
+      else f.childState.networks[fault==='web-id'?0:1].Id='e'.repeat(64);
+    }
+    return result;
+  };
+  await assert.rejects(createRestoreTarget(f.token,f.deps));
+  assert.equal(f.targetCalls.filter(a=>a[0]==='network'&&a[1]==='create').length,2);
+  assert.ok(!f.targetCalls.some(a=>a[0]==='start'||a.at(-1)==='cms-api'||a.at(-1)==='ingress'));
+});
+
+test('T146d supported Compose create retains already-created dependencies and does not start apps',async t=>{
+  const f=await childRuntimeFixture(t,false),{createRestoreTarget}=await import('./restore-target.mjs');
+  const originalIds=Object.fromEntries(f.childState.containers.map(c=>[c.Config.Labels['com.docker.compose.service'],c.Id]));
+  const context=await createRestoreTarget(f.token,f.deps);
+  assert.deepEqual(context.inspection.target.containerIds,originalIds);
+  const creates=f.targetCalls.filter(a=>a[0]==='compose'&&a.includes('create'));
+  assert.deepEqual(creates.map(a=>a.at(-1)),['postgres','cms-api','ingress']);
+  for(const a of creates)assert.deepEqual(a.slice(a.indexOf('create')),['create','--no-recreate','--pull','never','--no-build',a.at(-1)]);
+  assert.deepEqual(f.targetCalls.filter(a=>a[0]==='start'),[['start',originalIds.postgres]]);
+  assert.ok(f.childState.containers.slice(1).every(c=>c.State.Running===false));
+});
+for(const fault of ['pg-recreated','api-recreated','dependency-started'])test(`T146d rejects ${fault} during dependency-aware create`,async t=>{
+  const f=await childRuntimeFixture(t,false),{createRestoreTarget}=await import('./restore-target.mjs'),original=f.deps.command;
+  const originalPgId=f.childState.containers[0].Id;
+  f.deps.command=async(file,args,options)=>{
+    const result=await original(file,args,options);
+    if(file==='docker'&&args[2]==='compose'&&args.includes('create')&&args.at(-1)===(fault==='pg-recreated'?'cms-api':'ingress')){
+      const c=f.childState.containers[fault==='pg-recreated'?0:1];
+      if(fault==='dependency-started')c.State={...c.State,Status:'running',Running:true};else c.Id='e'.repeat(64);
+    }
+    return result;
+  };
+  await assert.rejects(createRestoreTarget(f.token,f.deps));
+  assert.ok(!f.targetCalls.some(a=>a[0]==='start'&&a[1]!==originalPgId));
+  if(fault==='pg-recreated')assert.ok(!f.targetCalls.some(a=>a[0]==='compose'&&a.at(-1)==='ingress'));
+});
+
+function t147UnrelatedCreatedContainer() {
+  return {Id:'e'.repeat(64),Name:'/unrelated-created',State:{Status:'created',Running:false},
+    Config:{Labels:{'com.docker.compose.project':'unrelated-project'}},
+    NetworkSettings:{Networks:{unrelated_data:{NetworkID:'',IPAddress:'',EndpointID:''}}},Mounts:[]};
+}
+test('T147_real_restore_token_ignores_unrelated_empty_network_ID_and_seals_blank_child',async t=>{
+  const f=await childRuntimeFixture(t),foreign=t147UnrelatedCreatedContainer();f.state.containers.push(foreign);
+  assert.equal(f.childState.containers[1].State.Status,'created');assert.equal(f.childState.containers[2].State.Status,'created');
+  assert.ok(Object.values(f.childState.containers[1].NetworkSettings.Networks).every(n=>n.NetworkID===''));
+  const result=await sealChild(f);
+  assert.equal(result.lease.target.creationPhase,'BLANK_VERIFIED');assert.equal(result.lease.phase,'TARGET_BLANK');
+  assert.equal(result.lease.source.runId,runId);assert.equal(f.childState.containers[1].State.Running,false);
+  assert.equal(f.childState.containers[2].State.Running,false);assert.equal(foreign.State.Running,false);
+  await workflow.assertWorkflow(f.token,{side:'target'},f.deps);
+});
+for(const shared of ['full-id','name','db-mount','media-mount'])test(`T147_real_restore_token_rejects_shared_${shared}`,async t=>{
+  const f=await childRuntimeFixture(t),foreign=t147UnrelatedCreatedContainer();
+  if(shared==='full-id')foreign.NetworkSettings.Networks.unrelated_data.NetworkID=f.childState.networks[1].Id;
+  if(shared==='name')foreign.NetworkSettings.Networks={[f.childState.networks[0].Name]:{NetworkID:'',IPAddress:'',EndpointID:''}};
+  if(shared.endsWith('mount')){const volume=f.childState.volumes[shared==='db-mount'?0:1];
+    foreign.Mounts=[{Type:'volume',Name:volume.Name,Source:volume.Mountpoint,Destination:'/foreign',RW:true}];}
+  f.state.containers.push(foreign);await assert.rejects(sealChild(f),/QUIESCENCE_NOT_PROVEN/);
+  assert.equal(f.childState.containers[1].State.Running,false);assert.equal(f.childState.containers[2].State.Running,false);
+});
+
+// T152: approved JAR release ID stays distinct from the immutable Docker image ID.
+for(const [side,kind] of [['source','INVENTORY'],['target','INVENTORY'],['target','REVOKE_SESSIONS']]) {
+  test(`T152_helper_real_token_${side}_${kind}_jar_release_after_close_and_drain`,async t=>{
+    const f=side==='source'?await ownedFixture(t):await targetOwnedFixture(t,kind);
+    const prior=f.closedBeforeReceipt,result=await runOwnedHelper(f.token,{side,kind},f.deps);
+    const c=await workflow.assertWorkflow(f.token,{side},f.deps),request=f.requests.at(-1);
+    const releaseId=`sha256:${c.target.apiBuild.jarSha256}`;
+    assert.notEqual(releaseId,c.target.images.api);assert.equal(c.lease.releaseId,releaseId);
+    assert.equal(request.releaseId,releaseId);assert.equal(request.targetId,c.target.targetId);
+    const authority=kind==='INVENTORY'?helperModule.verifiedInventoryResult:helperModule.verifiedSessionCommit;
+    const metadata=authority(f.token,result);
+    assert.equal(metadata.releaseId,releaseId);assert.equal(metadata.requestSha256,sha256(canonicalBytes(request)));
+    assert.equal(f.permitRecords.at(-1).requestSha256,metadata.requestSha256);
+    assert.equal(f.permitRecords.at(-1).action,kind==='INVENTORY'?'READ_INVENTORY':'REVOKE_SESSIONS');
+    assert.equal(f.closedBeforeReceipt,prior+1);assert.equal(c.lease.helper,null);
+    assert.ok(f.calls.filter(a=>a[2]==='create').at(-1).includes(c.target.images.api));
+    assert.deepEqual(Object.keys(result.receipt).sort(),(kind==='INVENTORY'
+      ?'version operationId mode inventorySha256 dbSnapshotSha256 assetCount referencedFileCount orphanFileCount fileCount fileBytes'
+      :'operationId backupId revokedCount auditEventId committed').split(' ').sort());
+    assert.throws(()=>authority(f.token,structuredClone(result)),e=>e.code==='ADAPTER_UNSEALED');
+    assert.throws(()=>authority({},result),e=>e.code==='ADAPTER_UNSEALED');
+  });
+  test(`T152_helper_real_token_${side}_${kind}_image_substituted_Ready_rejected_before_permit`,async t=>{
+    const f=side==='source'?await ownedFixture(t):await targetOwnedFixture(t,kind);
+    f.readyImageRelease=true;const permits=f.permits,received=f.permitRecords.length;
+    await assert.rejects(runOwnedHelper(f.token,{side,kind},f.deps),e=>e.code==='CAPTURE_FAILED');
+    assert.equal(f.permits,permits);assert.equal(f.permitRecords.length,received);
+    assert.equal(JSON.parse(await readFile(join(f.root,'maintenance/lease.json'))).phase,'FAILED_OR_UNKNOWN');
+  });
+}

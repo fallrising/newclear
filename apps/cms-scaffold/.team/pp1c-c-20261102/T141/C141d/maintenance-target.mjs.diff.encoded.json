@@ -1,0 +1,8 @@
+{
+  "version": 1,
+  "original": "T141/C141d/maintenance-target.mjs.diff",
+  "sha256": "0907bacd98ac2a4f9e93f74f2344db9dd25d24d5cfd7166db6c39382d91f3b6f",
+  "byteSize": "546",
+  "encoding": "utf-8",
+  "text": "--- \n\n+++ \n\n@@ -236,7 +236,7 @@\n\n   ensure(lifecycle.restarts === 0);\n   for (const value of [config, imageConfig]) {\n     ensure(equal(value.Entrypoint, ['java', '-jar', '/app/app.jar']));\n-    ensure(value.Cmd === null && value.WorkingDir === '/app');\n+    ensure((value.Cmd ?? null) === null && value.WorkingDir === '/app');\n   }\n   ensure(Array.isArray(imageConfig.Env) && equal([...imageConfig.Env].sort(), [...inheritedApiEnv].sort()));\n   const expected = [...inheritedApiEnv, ...Object.entries(expectedEnv).map(([k, v]) => `${k}=${v}`)];\n"
+}

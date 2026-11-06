@@ -1,0 +1,9 @@
+{
+  "actualReadbackFunctionSha256": "04168ed44876c954f4b1a09ddd28b46ec5eb964580e341b5d03b4b9577ea4427",
+  "readbackFileSha256": "685c46b982779f248cf8c0497847c89e15cb5e4ffc78651ff852bcb22dc1cc3a",
+  "catalogSchemaPositives": 20,
+  "negativeCases": 126,
+  "differentRawHashesPreserved": true,
+  "runtimeExecuted": false,
+  "oldC5RemainsFailed": true
+}

@@ -1,0 +1,109 @@
+package com.fallrising.cms.ops;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
+import java.io.*;
+import java.nio.file.*;
+import java.nio.file.attribute.PosixFilePermissions;
+import java.sql.*;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
+class RestoreSessionRevokerTests {
+    @TempDir Path root;
+    final String operation = "00112233-4455-6677-8899-aabbccddeeff";
+    final String secret = "synthetic-secret-canary";
+    final String[] args = {"--request", "/run/pp1/request.json"};
+    final ByteArrayOutputStream output = new ByteArrayOutputStream();
+    final AtomicInteger connects = new AtomicInteger();
+    Map<String, Object> request, backend;
+    byte[] raw;
+    Connection connection;
+    Path path(Path fixed) { return root.resolve(fixed.toString().substring(1)); }
+    void file(String fixed, byte[] bytes) throws Exception {
+        Path p = path(Path.of(fixed)); Files.createDirectories(p.getParent());
+        Files.setPosixFilePermissions(p.getParent(), PosixFilePermissions.fromString("rwx------"));
+        Files.write(p, bytes); Files.setPosixFilePermissions(p, PosixFilePermissions.fromString("rw-------"));
+    }
+    void save() throws Exception { raw = RecoveryInventory.canonicalBytes(request); file("/run/pp1/request.json", raw); }
+    @BeforeEach void fixture() throws Exception {
+        request = new TreeMap<>(Map.of("version", 1, "mode", "REVOKE_SESSIONS", "operationId", operation,
+                "side", "target", "targetId", "pp1-local:" + "a".repeat(32), "releaseId", "sha256:" + "b".repeat(64),
+                "jdbcUrl", "jdbc:postgresql://db:5432/cms", "dbUser", "cms_local", "passwordFile", "/run/secrets/spring.datasource.password",
+                "backupId", "pp1-20261102T142500000Z-" + "c".repeat(32)));
+        request.put("rawProofSha256", "d".repeat(64)); request.put("mediaRoot", null); request.put("outputFile", null);
+        save(); file("/run/secrets/spring.datasource.password", secret.getBytes());
+        backend = Map.of("pid", 42, "backendStartEpoch", "1730000000.123456", "db", "cms", "role", "cms_local",
+                "clientAddr", "172.31.0.2", "applicationName", operation);
+        connection = mock(Connection.class);
+        when(connection.getAutoCommit()).thenReturn(true);
+        when(connection.createStatement()).thenAnswer(call -> {
+            Statement statement = mock(Statement.class); ResultSet row = mock(ResultSet.class);
+            when(statement.executeQuery(anyString())).thenReturn(row); when(row.next()).thenReturn(true, false);
+            when(row.getInt("pid")).thenReturn(42);
+            for (var entry : backend.entrySet()) if (entry.getValue() instanceof String s) when(row.getString(entry.getKey())).thenReturn(s);
+            return statement;
+        });
+    }
+    Map<String, Object> permit() throws Exception {
+        return new TreeMap<>(Map.of("version", 1, "operationId", operation, "requestSha256", RecoveryInventory.sha256(raw),
+                "backendSha256", RecoveryInventory.sha256(RecoveryInventory.canonicalBytes(backend)), "action", "REVOKE_SESSIONS"));
+    }
+    int run(byte[] input) {
+        return RestoreSessionRevoker.run(args, Map.of("SPRING_DATASOURCE_PASSWORD", "ignored-env-canary"), new PrintStream(output),
+                new ByteArrayInputStream(input), this::path, (url, properties) -> {
+                    connects.incrementAndGet(); assertEquals(secret, properties.getProperty("password")); return connection;
+                });
+    }
+    @Test void PP1c_revokeReadyThenEOFRejectsBeforeMutation() throws Exception {
+        assertEquals(2, run(new byte[0])); assertEquals(1, connects.get());
+        var ready = new ObjectMapper().readTree(output.toByteArray());
+        assertEquals("REVOKE_SESSIONS", ready.path("mode").textValue());
+        assertEquals("target", ready.path("side").textValue()); assertTrue(ready.path("readOnly").booleanValue());
+        assertEquals(42, ready.path("backend").path("pid").intValue());
+        verify(connection, never()).prepareStatement(anyString()); verify(connection, never()).commit();
+        verify(connection).rollback(); verify(connection).close();
+        assertFalse(output.toString().contains(secret)); assertFalse(output.toString().contains("jdbc:"));
+    }
+    @Test void PP1c_revokeWrongPermitBindingsNeverMutate() throws Exception {
+        for (String key : List.of("operationId", "requestSha256", "backendSha256", "action", "unknown")) {
+            var bad = permit(); bad.put(key, "wrong"); assertEquals(2, run(RecoveryInventory.canonicalBytes(bad)));
+        }
+        verify(connection, never()).prepareStatement(anyString()); verify(connection, never()).commit();
+    }
+    @Test void PP1c_revokePermitExtraBytesAndOversizeRejected() throws Exception {
+        byte[] valid = RecoveryInventory.canonicalBytes(permit());
+        for (byte[] bad : List.of((new String(valid) + "\n").getBytes(), (new String(valid) + new String(valid)).getBytes(), new byte[4097])) {
+            assertEquals(2, run(bad));
+        }
+        verify(connection, never()).prepareStatement(anyString());
+    }
+    @Test void PP1c_revokeRequestFieldsFailBeforeConnection() throws Exception {
+        for (String key : List.of("mode", "side", "backupId", "rawProofSha256", "mediaRoot", "outputFile", "passwordFile", "jdbcUrl", "unknown")) {
+            boolean existed = request.containsKey(key); Object prior = request.put(key, "bad"); save();
+            assertEquals(2, run(new byte[0]));
+            if (existed) request.put(key, prior); else request.remove(key);
+        }
+        assertEquals(0, connects.get());
+    }
+    @Test void PP1c_revokePrivateRequestAndSecretNoLinksOrPublicModes() throws Exception {
+        for (String name : List.of("/run/pp1/request.json", "/run/secrets/spring.datasource.password")) {
+            Path p = path(Path.of(name)); byte[] bytes = Files.readAllBytes(p);
+            Files.setPosixFilePermissions(p, PosixFilePermissions.fromString("rw-r--r--")); assertEquals(2, run(new byte[0]));
+            Files.setPosixFilePermissions(p, PosixFilePermissions.fromString("rw-------"));
+            Path other = p.resolveSibling("original"); Files.move(p, other); Files.createSymbolicLink(p, other);
+            assertEquals(2, run(new byte[0])); Files.delete(p); Files.delete(other); file(name, bytes);
+        }
+        assertEquals(0, connects.get());
+    }
+    @Test void PP1c_revokeNoncanonicalDuplicateUtf8Rejected() throws Exception {
+        for (byte[] bad : List.of((" " + new String(raw)).getBytes(), new String(raw).replace("{", "{\"version\":1,").getBytes(), new byte[]{(byte)0xc3, 0x28})) {
+            file("/run/pp1/request.json", bad); assertEquals(2, run(new byte[0]));
+        }
+        assertEquals(0, connects.get());
+    }
+}

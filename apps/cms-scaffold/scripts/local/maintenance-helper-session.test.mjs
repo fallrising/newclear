@@ -123,3 +123,10 @@ test('H04_private_stderr_limit_rejects_excess',async()=>{
  const f=pgFixture();const end=f.child.stderr.end.bind(f.child.stderr);f.child.stderr.end=()=>end(Buffer.alloc(4194305,120));
  try{await assert.rejects(()=>runPgTool(f.child,f.deps),e=>e.code==='CAPTURE_FAILED');}finally{f.stop();}
 });
+
+test('T152_handshake_Ready_for_image_substituted_release_is_not_jar_request_permit',async()=>{
+  const f=fixture(x=>{const imageRequest={...x.request,releaseId:`sha256:${'c'.repeat(64)}`};
+    x.ready.requestSha256=sha256(canonicalBytes(imageRequest));});
+  await assert.rejects(runJdbcHandshake(f.child,f.request,f.deps));assert.equal(f.sent.length,0);
+  f.child.stdout.destroy();f.child.stderr.destroy();
+});

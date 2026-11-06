@@ -53,6 +53,8 @@
 | `services/cms-api/src/main/java/com/fallrising/cms/ops/RestoreSessionRevoker.java` | 新；RAW_VERIFIED後同DB transaction revoke＋AUTH audit adapter | C13/C14 |
 | `services/cms-api/src/test/java/com/fallrising/cms/ops/RestoreSessionRevokerTests.java` | 新；rollback/audit failure/only-session-delta contract | C13/C14 |
 | `services/cms-api/src/integrationTest/java/com/fallrising/cms/contract/RestoreSessionRevokerIntegrationTests.java` | 新；real PG atomic revoke/audit test | C13/C14 |
+| `services/cms-api/src/integrationTest/java/com/fallrising/cms/ops/RestoreSessionRevokerMainIntegrationTests.java` | C接線回歸；真PG同connection Ready/Permit/revoke/Result（root test-only路徑） | C13/C14整合 |
+| `scripts/ops/local-recovery.fixture.mjs` | 僅Node測試共用fixture，產品不import | C09–C12測試 |
 | `scripts/ops/local-recovery-verify.mjs` | 新；bundle/release preflight及post-start exact allowlist verifier | C09/C10/C15/C16 |
 | `scripts/ops/local-recovery-verify.test.mjs` | 新；altered/missing receipt、release drift、smoke failure | C09/C10/C15/C16 |
 | `e2e-pp1-local/recovery.spec.ts` | 新；T04 寫 browser journey；C17 只執行／收證據 | T04 |
@@ -252,6 +254,8 @@ DB必須恰為以下20個relation，缺失/額外relation或column均`SCHEMA_UNS
 精確20 relation/column allowlist即 §4.1 表格（19 cms tables + locked Flyway 11.7.2 `flyway_schema_history`）。migration新增/刪欄前必先更新此allowlist及測試；不得用「capture/restore兩側動態欄位剛好相等」接受manual drift。完整metadata包括ordinal/name/dataType/udt/nullability/length/precision/scale/time precision/default/identity/generated expression及PK/unique/FK/check/index；snapshot與target須完全相等。`cms_media`與variant內容另按 §4.1固定query驗DB；媒體完整演算法唯一來源是 [PP1-recovery §5.1](../contracts/PP1-recovery.md#51-db檔案inventory只讀) 的五步及兩個固定 SQL；不得以本段摘要代替。每 asset 恰一 original、storedBytes 等於所有 variant size 和、可解碼 image 必須恰 original/thumbnail/web 且 JPEG fit320/1600；decode-null/PDF 只有 original 且 dimensions=null；status/contentType/重複 variant/objectKey 都依父契約拒絕。soft-deleted/orphan 全保留，不修復或刪除 source。
 
 附約§1以bounded no-network probe驗證既有approved image的JRE/JDBC/ImageIO及numeric UID，明確區分U:G私有檔與M:Gm新media；不能由舊image推論未來新build可用。每次實作run重驗同一profile。unsupported UID/GID/PG text edge/host filesystem link identity即 `ADAPTER_UNSEALED`，不得加權限或動態放寬allowlist。
+
+**已批准窄幅修訂（2026-11-06；必要審查／CI、正常合併與遠端核對後生效）：** [local adapters§2.1](../contracts/PP1c-local-adapters.md#21-已批准pg1615-九組-check-deparse-配對)提出僅PG16.15固定映像、9組具名CHECK原始definition定向配對；Inventory仍完全保留原字串與原hash，其他schema/rows/files/source-before/after仍exact。RawComparison可保留不同的原始schema/inventory hashes而在此有限政策下判schemaEqual；restore receipt改明訂target RAW_VERIFIED完整raw DB snapshot hash（[父契約§12](../contracts/PP1-recovery.md#12-已批准pg1615-check-配對與-target-raw-snapshot)）。Owner本次原話「批准。」接受PR1012於d9934746的完整九組配對與target hash定義；舊PR956／975批准沒有回溯擴張。正式文件交付後才實作新政策及fresh C驗證，再續D。
 
 ### 4.4 Local capture與restore phase
 

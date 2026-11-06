@@ -1,0 +1,15 @@
+{
+  "omittedOnlyResultFileWriteAtLines": [
+    78
+  ],
+  "result": {
+    "proposalOnly": true,
+    "productionEnabled": false,
+    "directedPairs": 9,
+    "actualSchemasExplained": 20,
+    "negativeCasesPassed": 126,
+    "sourceDbSnapshotSha256": "9f44cd306bf4e6d31febf784be10df94e189995e632772da7e828f7b7fee45f8",
+    "proposedTargetRawSnapshotSha256": "1a75c3d807ce7d86ba00a5270dd1c48ba2db8e9639c0dc4827767f73ea220961",
+    "rawHashesRemainDifferent": true
+  }
+}

@@ -1,0 +1,35 @@
+{
+  "sourceRunId": "da415cdd149c4d168b54c1a16700a409",
+  "scope": "readonly retained actual capture schema check; no recovered plaintext secret or resume authority",
+  "checks": {
+    "admin": {
+      "principalUnique": true,
+      "rawStatus": "active",
+      "failedCountZero": true,
+      "unlocked": true,
+      "notDeleted": true,
+      "sessionUnique": true,
+      "sessionHashShape": true,
+      "sessionIdShape": true
+    },
+    "operator": {
+      "principalUnique": true,
+      "rawStatus": "active",
+      "failedCountZero": true,
+      "unlocked": true,
+      "notDeleted": true,
+      "sessionUnique": true,
+      "sessionHashShape": true,
+      "sessionIdShape": true
+    },
+    "entries": true,
+    "revisionOne": true,
+    "mediaIds": true
+  },
+  "tableCount": 20,
+  "physicalFileCount": 17,
+  "referencedFileCount": 16,
+  "orphanFileCount": 1,
+  "dbSnapshotSha256": "6da6bef1746a1e6eda25fd354ae11a65401dac2b0beb47a4296d3febc781f720",
+  "mediaHeaderSha256": "e642729300c59b168cee29b7407c6710833c12076eccb334daf038a06d996469"
+}

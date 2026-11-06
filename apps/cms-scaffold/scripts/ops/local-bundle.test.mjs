@@ -1,11 +1,13 @@
 import test from 'node:test';
+import { spawnSync } from 'node:child_process';
+import { fileURLToPath } from 'node:url';
 import assert from 'node:assert/strict';
 import { mkdtemp, mkdir, writeFile, readFile, readdir, rm, stat, symlink, link } from 'node:fs/promises';
 import { readFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { deflateSync } from 'node:zlib';
-import { captureSource, captureLocal } from './local-bundle.mjs';
+import { captureSource, captureLocal, parseArgs, run } from './local-bundle.mjs';
 import { canonicalBytes, sha256, parseStrictJson, validateManifest, validateLocalComplete, OpsError } from './recovery-protocol.mjs';
 
 const digest = value => sha256(canonicalBytes(value));
@@ -167,4 +169,119 @@ test('PP1c_C08_manifest_start_is_original_command_time_not_capture_time', async 
   const f = await fixture(t), result = await captureSource(f.token, f.deps);
   assert.equal(result.manifest.times.startedAt, f.ctx.request.startedAt);
   assert.equal(result.manifest.times.quiescedAt, '2026-11-02T12:00:00.000Z');
+});
+
+const cliPath = fileURLToPath(new URL('./local-bundle.mjs', import.meta.url));
+test('PP1c_backup_native_CLI_malformed_input_is_not_silent_success', async t => {
+  const cwd = await mkdtemp(join(tmpdir(), 'cms-backup-cli-'));
+  t.after(() => rm(cwd, { recursive: true, force: true }));
+  const result = spawnSync(process.execPath, [cliPath, '--unknown', 'private-canary'], { cwd, encoding: 'utf8', timeout: 10000 });
+  assert.equal(result.status, 2);
+  assert.deepEqual(JSON.parse(result.stdout), { operationId: null, backupId: null, phase: null, code: 'INPUT_INVALID', exitCode: 2 });
+  assert.equal(result.stderr, ''); assert.deepEqual(await readdir(cwd), []);
+});
+
+const cliRunId = 'a'.repeat(32), cliArgs = ['--run-id', cliRunId, '--operation-id', op];
+const cliBackupId = `pp1-20261102T120000000Z-${'b'.repeat(32)}`;
+const nodeHash = sha256(readFileSync(process.execPath));
+function cliFixture() {
+  const chunks = [], states = [], captures = [];
+  const inspection = { target: { runId: cliRunId, targetId: `pp1-local:${cliRunId}`, nodeBinarySha256: nodeHash } };
+  const deps = { cwd: '/trusted-component', stdout: { write: bytes => chunks.push(bytes) },
+    inspectTarget: async (root, _deps, { apiState }) => { assert.equal(root, `/trusted-component/local/pp1/${cliRunId}`); states.push(apiState); return inspection; },
+    captureLocal: async (value, request) => { assert.equal(value, inspection); captures.push(request); return { backupId: cliBackupId }; } };
+  return { deps, states, captures, inspection, receipt: () => parseStrictJson(Buffer.concat(chunks)) };
+}
+test('PP1c_backup_CLI_exact_unique_flags_in_either_order', () => {
+  assert.deepEqual(parseArgs(cliArgs), { runId: cliRunId, operationId: op });
+  assert.deepEqual(parseArgs(['--operation-id', op, '--run-id', cliRunId]), parseArgs(cliArgs));
+  assert.ok(Object.isFrozen(parseArgs(cliArgs)));
+});
+for (const [name, args] of [
+  ['empty', []], ['missing', cliArgs.slice(0, 3)], ['duplicate', ['--run-id', cliRunId, '--run-id', cliRunId]],
+  ['unknown', ['--root', '/private-canary', '--operation-id', op]], ['extra', [...cliArgs, 'private-canary']],
+  ['upper-run', ['--run-id', 'A'.repeat(32), '--operation-id', op]],
+  ['bad-operation', ['--run-id', cliRunId, '--operation-id', 'private-canary']],
+  ['equals-form', [`--run-id=${cliRunId}`, '--operation-id', op]],
+  ['policy-override', [...cliArgs, '--completion-policy', 'KEEP_STOPPED']]
+]) test(`PP1c_backup_native_CLI_${name}_rejects_without_mutation`, async t => {
+  const cwd = await mkdtemp(join(tmpdir(), 'cms-backup-cli-'));
+  t.after(() => rm(cwd, { recursive: true, force: true }));
+  const result = spawnSync(process.execPath, [cliPath, ...args], { cwd, encoding: 'utf8', timeout: 10000 });
+  assert.equal(result.status, 2); assert.equal(result.stderr, '');
+  assert.deepEqual(parseStrictJson(Buffer.from(result.stdout)), { operationId: null, backupId: null, phase: null, code: 'INPUT_INVALID', exitCode: 2 });
+  assert.deepEqual(await readdir(cwd), []); assert.ok(!result.stdout.includes('private-canary'));
+});
+test('PP1c_backup_CLI_running_source_uses_fixed_policy_and_complete_receipt', async () => {
+  const f = cliFixture(); assert.equal(await run(cliArgs, f.deps), 0);
+  assert.deepEqual(f.states, ['running']);
+  assert.deepEqual(f.captures, [{ operationId: op, purpose: 'BACKUP_LOCAL', completionPolicy: 'RESTORE_ORIGINAL', targetRunId: null, incidentStartedAt: null }]);
+  assert.deepEqual(f.receipt(), { operationId: op, backupId: cliBackupId, phase: 'COMPLETE', code: null, exitCode: 0 });
+});
+test('PP1c_backup_CLI_stopped_state_requires_second_full_inspection_without_start', async () => {
+  const f = cliFixture(), inspect = f.deps.inspectTarget;
+  f.deps.inspectTarget = async (...args) => { const result = await inspect(...args); if (args[2].apiState === 'running') throw Error('private-canary'); return result; };
+  assert.equal(await run(cliArgs, f.deps), 0); assert.deepEqual(f.states, ['running', 'stopped']); assert.equal(f.captures.length, 1);
+});
+test('PP1c_backup_CLI_no_valid_full_identity_never_captures', async () => {
+  const f = cliFixture(); f.inspection.target.runId = 'f'.repeat(32);
+  assert.equal(await run(cliArgs, f.deps), 7); assert.deepEqual(f.states, ['running', 'stopped']); assert.deepEqual(f.captures, []);
+  assert.deepEqual(f.receipt(), { operationId: op, backupId: null, phase: null, code: 'TARGET_NOT_OWNED', exitCode: 7 });
+});
+test('PP1c_backup_CLI_unverified_host_Node_never_captures', async () => {
+  const f = cliFixture(); f.inspection.target.nodeBinarySha256 = '0'.repeat(64);
+  assert.equal(await run(cliArgs, f.deps), 7); assert.equal(f.receipt().code, 'ADAPTER_UNSEALED'); assert.deepEqual(f.captures, []);
+});
+test('PP1c_backup_CLI_malformed_flags_never_call_inspection_or_capture', async () => {
+  const f = cliFixture(); assert.equal(await run([...cliArgs, '--root', '/private-canary'], f.deps), 2);
+  assert.deepEqual(f.states, []); assert.deepEqual(f.captures, []);
+});
+for (const failure of [new OpsError('WRITER_NOT_QUIESCED', 'SOURCE_QUIESCED'), new OpsError('LOCK_BUSY'),
+  new OpsError('JOURNAL_INCOMPLETE', 'LOCAL_CAPTURED'), new Error('secret SQL /private-canary')]) {
+  test(`PP1c_backup_CLI_error_${failure.code ?? 'unknown'}_is_sanitized`, async () => {
+    const f = cliFixture(); f.deps.captureLocal = async () => { throw failure; };
+    assert.equal(await run(cliArgs, f.deps), failure instanceof OpsError ? failure.exitCode : 5);
+    assert.deepEqual(f.receipt(), { operationId: op, backupId: null, phase: failure instanceof OpsError ? failure.phase : null,
+      code: failure instanceof OpsError ? failure.code : 'CAPTURE_FAILED', exitCode: failure instanceof OpsError ? failure.exitCode : 5 });
+  });
+}
+test('PP1c_backup_native_CLI_valid_unavailable_run_is_not_silent_success', async () => {
+  const cwd = fileURLToPath(new URL('../../', import.meta.url)), absent = 'f'.repeat(32), path = join(cwd, 'local/pp1', absent);
+  await assert.rejects(stat(path), { code: 'ENOENT' });
+  const result = spawnSync(process.execPath, [cliPath, '--run-id', absent, '--operation-id', op], { cwd, encoding: 'utf8', timeout: 10000 });
+  assert.equal(result.status, 7); assert.equal(result.stderr, '');
+  assert.deepEqual(parseStrictJson(Buffer.from(result.stdout)), { operationId: op, backupId: null, phase: null, code: 'TARGET_NOT_OWNED', exitCode: 7 });
+  await assert.rejects(stat(path), { code: 'ENOENT' });
+});
+test('PP1c_backup_native_import_has_no_CLI_side_effects', () => {
+  const url = new URL('./local-bundle.mjs', import.meta.url).href;
+  const result = spawnSync(process.execPath, ['--input-type=module', '-e', `await import(${JSON.stringify(url)});process.stdout.write(${JSON.stringify('imported\n')});`, '--', '--unknown'],
+    { encoding: 'utf8', timeout: 10000 });
+  assert.equal(result.status, 0); assert.equal(result.stdout, 'imported\n'); assert.equal(result.stderr, '');
+});
+
+test('PP1c_backup_native_wrong_Node_major_refuses_before_source_inspection', () => {
+  const url = new URL('./local-bundle.mjs', import.meta.url).href;
+  const script = `Object.defineProperty(process.versions,'node',{value:'23.0.0'});const {run}=await import(${JSON.stringify(url)});process.exitCode=await run(${JSON.stringify(cliArgs)});`;
+  const result = spawnSync(process.execPath, ['--input-type=module', '-e', script], {
+    cwd: fileURLToPath(new URL('../../', import.meta.url)), encoding: 'utf8', timeout: 10000 });
+  assert.equal(result.status, 7); assert.equal(result.stderr, '');
+  assert.deepEqual(parseStrictJson(Buffer.from(result.stdout)), { operationId: op, backupId: null, phase: null, code: 'ADAPTER_UNSEALED', exitCode: 7 });
+});
+test('PP1c_backup_CLI_default_capture_composes_real_module_with_trusted_test_helpers', async t => {
+  const f = await fixture(t), chunks = [];
+  const deps = { ...f.deps, cwd: f.cwd, stdout: { write: bytes => chunks.push(bytes) },
+    inspectTarget: async () => ({ target: { ...f.ctx.target, nodeBinarySha256: nodeHash } }) };
+  assert.equal(await run(cliArgs, deps), 0);
+  const receipt = parseStrictJson(Buffer.concat(chunks)); assert.equal(receipt.phase, 'COMPLETE');
+  assert.equal(f.calls.at(-1), 'finish');
+  const manifest = validateManifest(parseStrictJson(await readFile(join(f.root, 'bundles', receipt.backupId, 'manifest.json'))));
+  validateLocalComplete(parseStrictJson(await readFile(join(f.root, 'bundles', receipt.backupId, 'local-complete.json'))), manifest);
+});
+test('PP1c_backup_native_wrong_cwd_rejects_before_inspection', async t => {
+  const cwd = await mkdtemp(join(tmpdir(), 'cms-backup-cli-'));
+  t.after(() => rm(cwd, { recursive: true, force: true }));
+  const result = spawnSync(process.execPath, [cliPath, ...cliArgs], { cwd, encoding: 'utf8', timeout: 10000 });
+  assert.equal(result.status, 2); assert.equal(result.stderr, ''); assert.deepEqual(await readdir(cwd), []);
+  assert.deepEqual(parseStrictJson(Buffer.from(result.stdout)), { operationId: op, backupId: null, phase: null, code: 'INPUT_INVALID', exitCode: 2 });
 });

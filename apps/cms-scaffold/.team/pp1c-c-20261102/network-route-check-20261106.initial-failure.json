@@ -1,0 +1,6 @@
+{
+  "exitCode": 1,
+  "exception": "TypeError: 'NoneType' object is not iterable",
+  "cause": "Docker built-in network IPAM.Config is null; read-only diagnostic iterated it as list",
+  "correction": "Treat null built-in IPAM.Config as empty; no network/runtime mutation"
+}

@@ -1,0 +1,7 @@
+{
+  "sourceRunId": "9d313b43bf8449f7a41859488a90fc20",
+  "command": "timeout 900 /home/ckc/.local/bin/node .team/pp1c-c-20261102/runtime/run-core.mjs",
+  "startedAt": "2026-11-02T17:50:18.815822+00:00",
+  "driverSha256": "4ae448f7e82b08f9735e2f8b27bdbb9ac3529d31242477525031ef1cca2872ac",
+  "defaultProductAdapters": true
+}

@@ -1,0 +1,67 @@
+import { createHash } from 'node:crypto';
+import { canonicalBytes } from '../../../scripts/ops/recovery-protocol.mjs';
+const digest=bytes=>createHash('sha256').update(bytes).digest('hex');
+const requireValue=(ok,code='FIXTURE_INPUT_INVALID')=>{if(!ok)throw Object.assign(new Error(code),{code});};
+const uuid=value=>typeof value==='string'&&/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/.test(value);
+const plain=value=>typeof value==='string'&&value.length>0&&!/[\u0000-\u001f\u007f]/u.test(value);
+const same=(a,b)=>canonicalBytes(a).equals(canonicalBytes(b));
+const keys=(object,names)=>requireValue(object&&same(Object.keys(object).sort(),names.split(' ').sort()));
+function validate(input) {
+  keys(input,'sourceRunId admin operatorPassword pngs sessionConfig apiClient beforeFinalLogin');keys(input.admin,'username password');keys(input.pngs,'public replacement draft private deleted');keys(input.sessionConfig,'sessionAbsoluteSeconds sessionMaxSeconds');
+  requireValue(/^[a-f0-9]{32}$/.test(input.sourceRunId)&&/^[a-z0-9._-]{3,32}$/.test(input.admin.username));
+  for(const password of [input.admin.password,input.operatorPassword])requireValue(plain(password)&&password.length>=12);
+  requireValue(input.admin.password.toLowerCase()!==input.admin.username&&typeof input.apiClient==='function'&&typeof input.beforeFinalLogin==='function');
+  requireValue(Object.values(input.sessionConfig).every(s=>typeof s==='string'&&/^[1-9][0-9]*$/.test(s)));
+  for(const png of Object.values(input.pngs))requireValue(Buffer.isBuffer(png)&&png.length>=33&&png.subarray(0,8).toString('hex')==='89504e470d0a1a0a'&&png.toString('ascii',12,16)==='IHDR'&&png.readUInt32BE(16)===32&&png.readUInt32BE(20)===16);
+  requireValue(new Set(Object.values(input.pngs).map(digest)).size===5);
+}
+function api(input) {
+  const jars={admin:new Map(),operator:new Map(),anonymous:new Map()};
+  async function request(actor,method,path,{json,multipart,bytes=false,status=200}={}) {
+    const surface=actor==='admin'?'admin':actor==='operator'?'back':'front',jar=jars[actor];
+    const headers={Origin:`https://${surface}.cms.test:8443`};
+    if(jar.size)headers.Cookie=[...jar].map(([k,v])=>`${k}=${v}`).join('; ');
+    if(method!=='GET'&&jar.has('cms_csrf'))headers['X-CSRF-Token']=jar.get('cms_csrf');
+    if(json!==undefined)headers['Content-Type']='application/json';
+    let response;try{response=await input.apiClient({method,path,surface,headers,...(json!==undefined?{json}:{}),...(multipart?{multipart}:{}),response:bytes?'bytes':'json'});}catch{throw Object.assign(new Error('FIXTURE_HTTP_FAILED'),{code:'FIXTURE_HTTP_FAILED'});}
+    requireValue(response?.status===status,'FIXTURE_HTTP_STATUS');
+    const seen=new Set();for(const cookie of response.setCookies??[]){
+      requireValue(typeof cookie==='string'&&!/[\r\n]/.test(cookie),'FIXTURE_COOKIE_INVALID');const parts=cookie.split(';').map(v=>v.trim()),at=parts[0].indexOf('='),name=parts[0].slice(0,at),value=parts[0].slice(at+1);
+      requireValue(['cms_session','cms_csrf'].includes(name)&&!seen.has(name)&&/^[A-Za-z0-9_-]+$/.test(value),'FIXTURE_COOKIE_INVALID');seen.add(name);
+      requireValue(parts.some(p=>p.toLowerCase()==='secure')&&parts.some(p=>p.toLowerCase()==='path=/')&&parts.some(p=>p.toLowerCase()==='samesite=lax'),'FIXTURE_COOKIE_INVALID');
+      requireValue(parts.some(p=>p.toLowerCase()===`max-age=${input.sessionConfig.sessionMaxSeconds}`),'FIXTURE_COOKIE_INVALID');
+      if(name==='cms_session')requireValue(parts.some(p=>p.toLowerCase()==='httponly'),'FIXTURE_COOKIE_INVALID');jar.set(name,value);
+    }
+    if(status===204||status===404)return null;
+    if(bytes){requireValue(Buffer.isBuffer(response.bytes)&&response.bytes.length>0,'FIXTURE_RESPONSE_INVALID');return response.bytes;}
+    requireValue(response.json&&typeof response.json==='object'&&!Array.isArray(response.json),'FIXTURE_RESPONSE_INVALID');return response.json;
+  }
+  async function login(actor,credentials,expectedId=null) {
+    const csrf=await request(actor,'GET','/api/v1/auth/csrf');requireValue(csrf.csrfToken===jars[actor].get('cms_csrf'),'FIXTURE_COOKIE_INVALID');
+    const body=await request(actor,'POST','/api/v1/auth/login',{json:{username:credentials.username,password:credentials.password,surface:actor==='admin'?'admin':'back'}});
+    requireValue(body.csrfToken===jars[actor].get('cms_csrf')&&plain(jars[actor].get('cms_session')),'FIXTURE_COOKIE_INVALID');
+    requireValue(uuid(body.principal?.id)&&body.principal.username===credentials.username&&body.principal.status==='active'&&(!expectedId||body.principal.id===expectedId),'FIXTURE_PRINCIPAL_INVALID');
+    requireValue(!body.forceChangePassword&&!body.mustChangePassword&&Array.isArray(body.roles)&&body.roles.some(r=>r.code===actor),'FIXTURE_PRINCIPAL_INVALID');
+    if(actor==='operator')requireValue(body.roles.length===1&&same([...body.roles[0].contentTypeCodes].sort(),['album','photo']),'FIXTURE_PERMISSION_INVALID');
+    return{principalId:body.principal.id,username:credentials.username,password:credentials.password,oldSessionToken:jars[actor].get('cms_session')};
+  }
+  return{request,login};
+}
+export async function prepareSmokeFixture(input) {
+  validate(input);const {request,login}=api(input),admin=await login('admin',input.admin);
+  const roles=await request('admin','GET','/api/v1/roles');for(const role of ['operator','anonymous'])requireValue(roles.items?.filter(r=>r.code===role).length===1,'FIXTURE_PERMISSION_INVALID');
+  const operator={username:`pp1c-op-${input.sourceRunId.slice(0,16)}`,password:input.operatorPassword};
+  requireValue(operator.username!==admin.username&&operator.password.toLowerCase()!==operator.username);
+  const created=await request('admin','POST','/api/v1/principals',{status:201,json:{username:operator.username,displayName:'PP1c operator',email:null,temporaryPassword:operator.password}});
+  requireValue(uuid(created.id)&&created.id!==admin.principalId&&created.username===operator.username&&created.status==='active'&&created.temporaryPassword===operator.password,'FIXTURE_PRINCIPAL_INVALID');
+  await request('admin','PUT',`/api/v1/principals/${created.id}/roles`,{status:204,json:[{code:'operator',contentTypeCodes:['album','photo']}]});
+  for(const role of ['operator','anonymous']) {
+    const permissions=['album','photo'].flatMap(contentTypeCode=>(role==='operator'?['read_published','read_draft']:['read_published']).map(action=>({action,contentTypeCode,predicateJson:null,allowedSurfaces:role==='operator'?['back','admin']:['front']})));
+    await request('admin','PUT',`/api/v1/roles/${role}/permissions`,{status:204,json:permissions});
+    const actual=await request('admin','GET',`/api/v1/roles/${role}/permissions`);
+    const normalize=values=>values.map(({action,contentTypeCode,predicateJson,allowedSurfaces})=>({action,contentTypeCode,predicateJson,allowedSurfaces:[...allowedSurfaces].sort()})).sort((a,b)=>(a.contentTypeCode+a.action).localeCompare(b.contentTypeCode+b.action));
+    requireValue(Array.isArray(actual.items)&&same(normalize(actual.items),normalize(permissions)),'FIXTURE_PERMISSION_INVALID');
+  }
+  await request('admin','POST','/api/v1/media',{status:201,multipart:{file:{filename:'public.png',contentType:'image/png',bytes:input.pngs.public},fields:{}}});
+  throw Object.assign(new Error('FIXTURE_UNSEALED'),{code:'FIXTURE_UNSEALED'});
+}

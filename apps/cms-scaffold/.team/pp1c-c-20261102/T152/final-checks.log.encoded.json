@@ -1,0 +1,8 @@
+{
+  "version": 1,
+  "original": "T152/final-checks.log",
+  "sha256": "ca25cd6b528c9bbba762cbab015b3e62368c97b0bf3410e425cd7878985a8713",
+  "byteSize": "707",
+  "encoding": "utf-8",
+  "text": "scripts/local/maintenance-helper.mjs input snapshot/hash, frozen copy, syntax and added whitespace checks passed\nscripts/local/maintenance-workflow.test.mjs input snapshot/hash, frozen copy, syntax and added whitespace checks passed\nscripts/local/maintenance-helper-session.test.mjs input snapshot/hash, frozen copy, syntax and added whitespace checks passed\nscripts/ops/local-recovery-verify.mjs input snapshot/hash, frozen copy, syntax and added whitespace checks passed\nscripts/ops/local-recovery.fixture.mjs input snapshot/hash, frozen copy, syntax and added whitespace checks passed\nscripts/ops/local-recovery-verify.test.mjs input snapshot/hash, frozen copy, syntax and added whitespace checks passed\n"
+}

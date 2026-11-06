@@ -141,3 +141,7 @@ W4 共用 Admin 治理已於 [PR #289](https://github.com/fallrising/newclear/pu
 已在隔離 prod runtime 通過 fresh-init 真 TTY、initialized SQL 七項 rollback 語義負例、guard live 負例、可信 TLS 正式帳號／distinct operator／explicit public grants／Q25／reset 旅程；旅程後同 API 容器重啟，20 張表 counts/hash 相同。Flyway validation 需要第二個 logical handle 的問題已修正，仍共用同一 bound PostgreSQL backend，Hikari pool 上限保持 1。
 
 [本輪證據](.team/resume-20261101/RUNTIME-REPORT.md)記錄實際來源、工具例外、失敗與重驗。狀態為 local acceptance，最終整合202/202與mock93/93已通過；獨立review收尾／CI／正常合併及遠端回讀仍待完成。host recover-success 仍缺 PP1c matching verified DB＋media rollback bundle；PP1c DRAFT、完整備份還原、正式 host/offsite/upgrade/ops 與全 BW6 均未因此完成。沒有部署或 usable tag。
+
+### PP1c local recovery implementation checkpoint — 2026-11-06
+
+C now has fresh private target creation, immutable bundle verification, complete raw DB/media comparison and atomic restored-session revocation. The controlled local drill restored17files/14089bytes and20tables, preserved source bytes and verified the exact two-session/one-AUTH delta independently. [Evidence and retained failures](.team/pp1c-c-20261102/EVIDENCE.md) record source hashes, commands and scoped acceptance gates. The public restore/verifier CLI stays unsealed until D supplies startup/browser/restart/full-proof and recovery integration; C does not emit a complete recovery proof. Same-host protected copy is local evidence; overall AC04/05 and formal/offsite operation remain pending.

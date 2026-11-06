@@ -1,0 +1,8 @@
+{
+  "version": 1,
+  "original": "T141/C141d/red.log",
+  "sha256": "80cbad02b7ea44b5a794d088c9d1573ec6a8cf614e7252ce2ac1e1797c878390",
+  "byteSize": "953",
+  "encoding": "utf-8",
+  "text": "✖ T141d actual Docker omitted image Cmd is the same fixed no-command tuple (23.692497ms)\nℹ tests 1\nℹ suites 0\nℹ pass 0\nℹ fail 1\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 85.157207\n\n✖ failing tests:\n\ntest at scripts/local/maintenance-target.test.mjs:419:1\n✖ T141d actual Docker omitted image Cmd is the same fixed no-command tuple (23.692497ms)\n  Error: ADAPTER_UNSEALED\n      at observedSessionConfig (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-c-revoke-20261102/apps/cms-scaffold/scripts/local/maintenance-target.mjs:260:19)\n      at TestContext.<anonymous> (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-c-revoke-20261102/apps/cms-scaffold/scripts/local/maintenance-target.test.mjs:426:28)\n      at async Test.run (node:internal/test_runner/test:1332:7)\n      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:385:3) {\n    code: 'ADAPTER_UNSEALED',\n    phase: null,\n    operationId: null\n  }\n"
+}

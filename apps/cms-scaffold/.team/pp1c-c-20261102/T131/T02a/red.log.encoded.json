@@ -1,0 +1,8 @@
+{
+  "version": 1,
+  "original": "T131/T02a/red.log",
+  "sha256": "e8fc01c36be8a3a80a85b69e13d87600bb22eb52fe22e17c7c271dc1fcf79b12",
+  "byteSize": "1009",
+  "encoding": "utf-8",
+  "text": "✖ T131_T02_reserved_child_inspection_is_token_bound_and_stopped (307.312691ms)\nℹ tests 1\nℹ suites 0\nℹ pass 0\nℹ fail 1\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 377.948377\n\n✖ failing tests:\n\ntest at scripts/local/maintenance-workflow.test.mjs:656:1\n✖ T131_T02_reserved_child_inspection_is_token_bound_and_stopped (307.312691ms)\n  Error: QUIESCENCE_NOT_PROVEN\n      at fail (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-c-target-20261102/apps/cms-scaffold/scripts/local/maintenance-target.mjs:8:28)\n      at inspectTarget (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-c-target-20261102/apps/cms-scaffold/scripts/local/maintenance-target.mjs:196:13)\n      at async TestContext.<anonymous> (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-c-target-20261102/apps/cms-scaffold/scripts/local/maintenance-workflow.test.mjs:658:15)\n      at async Test.run (node:internal/test_runner/test:1332:7)\n      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:385:3)\n"
+}

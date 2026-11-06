@@ -1,0 +1,8 @@
+{
+  "version": 1,
+  "original": "runtime/image-build.log",
+  "sha256": "8d5f183387196315aaa5203ce728e3a99157488ab4efba2af652cb5d6a744c62",
+  "byteSize": "1302",
+  "encoding": "utf-8",
+  "text": "DEPRECATED: The legacy builder is deprecated and will be removed in a future release.\n            Install the buildx component to build images with BuildKit:\n            https://docs.docker.com/go/buildx/\n\nSending build context to Docker daemon  41.55MB\r\r\nStep 1/10 : ARG BASE_IMAGE\nStep 2/10 : FROM ${BASE_IMAGE}\n ---> 1ad1f859e141\nStep 3/10 : ARG BASE_IMAGE\n ---> Using cache\n ---> fd35928ad4fd\nStep 4/10 : ARG PP1_SOURCE_COMMIT\n ---> Using cache\n ---> 79f6cc6388ec\nStep 5/10 : ARG PP1_JAR_SHA256\n ---> Using cache\n ---> 8fd3ff1482cc\nStep 6/10 : LABEL org.cms.pp1.source-commit=$PP1_SOURCE_COMMIT       org.cms.pp1.jar-sha256=$PP1_JAR_SHA256       org.cms.pp1.base-image=$BASE_IMAGE\n ---> Running in c124dd91b7ac\n ---> Removed intermediate container c124dd91b7ac\n ---> 02f7f1466567\nStep 7/10 : WORKDIR /app\n ---> Running in 6736301fbbcd\n ---> Removed intermediate container 6736301fbbcd\n ---> 8bd2bfdb624e\nStep 8/10 : COPY services/cms-api/build/libs/*.jar /app/app.jar\n ---> 3ab65c6fcdaf\nStep 9/10 : EXPOSE 8080\n ---> Running in 2f13572701d5\n ---> Removed intermediate container 2f13572701d5\n ---> b7cca9482c7c\nStep 10/10 : ENTRYPOINT [\"java\", \"-jar\", \"/app/app.jar\"]\n ---> Running in 4a438c0a0a52\n ---> Removed intermediate container 4a438c0a0a52\n ---> c4190d14f340\nSuccessfully built c4190d14f340\n"
+}

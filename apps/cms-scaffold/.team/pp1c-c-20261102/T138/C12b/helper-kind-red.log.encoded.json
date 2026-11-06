@@ -1,0 +1,8 @@
+{
+  "version": 1,
+  "original": "T138/C12b/helper-kind-red.log",
+  "sha256": "4a538d2c0ef489d4f27332674a7250fad4a115b8aad8ca1fc79d86d589a781f5",
+  "byteSize": "868",
+  "encoding": "utf-8",
+  "text": "✖ T138_C12_wrong_helper_kind_blocks_later_mutations (12.736245ms)\nℹ tests 1\nℹ suites 0\nℹ pass 0\nℹ fail 1\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 84.833978\n\n✖ failing tests:\n\ntest at scripts/ops/local-restore.test.mjs:142:1\n✖ T138_C12_wrong_helper_kind_blocks_later_mutations (12.736245ms)\n  AssertionError [ERR_ASSERTION]: Missing expected rejection.\n      at async TestContext.<anonymous> (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-c-target-20261102/apps/cms-scaffold/scripts/ops/local-restore.test.mjs:145:3)\n      at async Test.run (node:internal/test_runner/test:1332:7)\n      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:385:3) {\n    generatedMessage: false,\n    code: 'ERR_ASSERTION',\n    actual: undefined,\n    expected: { code: 'RESTORE_FAILED' },\n    operator: 'rejects',\n    diff: 'simple'\n  }\n"
+}

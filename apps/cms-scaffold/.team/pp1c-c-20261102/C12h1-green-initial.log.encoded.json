@@ -1,0 +1,8 @@
+{
+  "version": 1,
+  "original": "C12h1-green-initial.log",
+  "sha256": "8f5307e8cd9ace4f7ff26f859c251efe68bd21626c6d65dbd641b64324b092ff",
+  "byteSize": "330",
+  "encoding": "utf-8",
+  "text": "✔ PP1c_C12h1_real_registry_target_wrapper_INVENTORY (1838.993577ms)\n✔ PP1c_C12h1_real_registry_target_wrapper_PG_RESTORE (1561.557716ms)\n✔ PP1c_C12h1_real_registry_target_wrapper_MEDIA_RESTORE (1259.48292ms)\nℹ tests 3\nℹ suites 0\nℹ pass 3\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 4735.824559\n"
+}

@@ -1,0 +1,18 @@
+{
+  "recordedAt": "2026-11-02T18:48:58.257318+00:00",
+  "desk": {
+    "command": "python3 scripts/deskctl.py check",
+    "exit": 0,
+    "documents": 449,
+    "whitespace": "passed",
+    "diff": "only task7-lineappend"
+  },
+  "journal": {
+    "command": "python3 scripts/check.py; python3 -m unittest discover -s tests -v; git diff --check",
+    "exit": 0,
+    "runs": 173,
+    "testsLog": "/home/ckc/test/codex/wt/newclear/cms-pp1c-c-20261102/apps/cms-scaffold/.team/pp1c-c-20261102/journal-decision-tests.log",
+    "diff": "only ownrun11-lineappend"
+  },
+  "proposalCI": "CMS web stillrunning; other3SUCCESS; noownerapproval"
+}

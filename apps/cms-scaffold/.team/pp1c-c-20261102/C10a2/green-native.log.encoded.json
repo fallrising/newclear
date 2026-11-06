@@ -1,0 +1,8 @@
+{
+  "version": 1,
+  "original": "C10a2/green-native.log",
+  "sha256": "268f178992625a897cbbe5033e563ca2e3e700608643ab0b3acc641f7bcdc5dd",
+  "byteSize": "1496",
+  "encoding": "utf-8",
+  "text": "✔ PP1c_C09_valid_private_bundle_verifies_without_target_mutation (149.903633ms)\n✔ PP1c_C09_changed_artifact_rejected_before_target_write (105.440823ms)\n✔ PP1c_C09_noncanonical_marker_rejected_before_target_write (101.575029ms)\n✔ PP1c_C09_symlink_artifact_rejected_before_target_write (111.311707ms)\n✔ PP1c_C10a1_extra_bundle_file_rejects_fixed_layout (97.727815ms)\n✔ PP1c_C10a1_public_bundle_directory_rejects_fixed_layout (100.040615ms)\n✔ PP1c_C10a2_api_image_lineage_rejects_coherent_marker (103.30202ms)\n✔ PP1c_C10a2_frontend_lineage_rejects_coherent_marker (118.602926ms)\n✔ PP1c_C10a2_config_lineage_rejects_coherent_marker (105.651792ms)\n✔ PP1c_C10a2_migration_lineage_rejects_coherent_marker (106.252619ms)\n✔ PP1c_C10a2_java_version_lineage_rejects_coherent_marker (105.256794ms)\n✔ PP1c_C10a2_pg_version_lineage_rejects_coherent_marker (98.622412ms)\n✔ PP1c_C10a2_artifact_build_lineage_rejects_coherent_marker (109.795695ms)\n✔ PP1c_C10a2_profile_rejects_forged_capability (0.399859ms)\n✔ PP1c_C10a2_private_copy_is_exclusive_rehashed_and_never_offsite (135.636095ms)\n✔ PP1c_C10a2_copy_rejects_json_authority_and_changed_source_before_directory_creation (108.64797ms)\n✔ PP1c_C10a2_copy_capacity_refusal_preserves_complete_source (112.163295ms)\n✔ PP1c_C10a2_restore_material_requires_original_token_and_rechecks_both_copies (134.531469ms)\nℹ tests 18\nℹ suites 0\nℹ pass 18\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 1981.526524\n"
+}

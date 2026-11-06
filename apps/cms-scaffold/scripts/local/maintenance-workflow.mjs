@@ -1,8 +1,8 @@
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
 import { join } from 'node:path';
-import { mkdir, open, lstat } from 'node:fs/promises';
-import { inspectTarget, inspectionDetails } from './maintenance-target.mjs';
+import { mkdir, open, lstat, rename } from 'node:fs/promises';
+import { inspectTarget, inspectionDetails, mediaProbeCommand } from './maintenance-target.mjs';
 import { reserveWorkflow, loadWorkflow, persistWorkflow, releaseWorkflow, updatePendingWorkflow, WORKFLOW_PHASES, directory, syncDirectory, read } from './maintenance-store.mjs';
 import { canonicalBytes, sha256, OpsError } from '../ops/recovery-protocol.mjs';
 const tokens=new WeakMap(),execute=promisify(execFile);
@@ -57,7 +57,7 @@ export async function beginWorkflow(inspection,request,deps={}) {
   await persistWorkflow(record,'END','PRECHECK',{},deps);return token;
 }
 export async function assertWorkflow(token,{side='source',stage}={},deps={}) {
-  const c=await owned(token,deps),l=c.record.lease;ensure(side==='source','ADAPTER_UNSEALED');
+  const c=await owned(token,deps),l=c.record.lease;ensure(['source','target'].includes(side),'ADAPTER_UNSEALED');
   if(l.target)ensure(c.child&&l.target.runId===c.record.request.targetRunId);
   if(c.child){
     const stat=await directory(c.child.root),marker=join(c.child.root,'restore-target.json');
@@ -70,16 +70,26 @@ export async function assertWorkflow(token,{side='source',stage}={},deps={}) {
   const apiState=l.phase==='PRECHECK'?l.originalApiState:l.phase==='COMPLETE'&&l.completionPolicy==='RESTORE_ORIGINAL'?l.originalApiState:'stopped';
   const inspection=await inspectTarget(c.record.root,deps,{apiState,workflow:token});
   ensure(same(inspection.target,l.source)&&same({jdbcUrl:inspection.jdbcUrl,dataGateway:inspection.dataGateway},l.sourceConnection),'SOURCE_CHANGED');
-  if(apiState==='stopped')await noWriters(inspection,deps,l.helper,l.operationId,c.helper);
-  return Object.freeze({root:c.record.root,base:c.record.base,lease:structuredClone(l),request:structuredClone(c.record.request),inspection,
+  if(apiState==='stopped')await noWriters(inspection,deps,l.helper?.side==='source'?l.helper:null,l.operationId,c.helper);
+  let selected=inspection,selectedRoot=c.record.root,connection=l.sourceConnection;
+  if(l.target?.identity) {
+    const child=await inspectTarget(c.child.root,deps,{apiState:'stopped',workflow:token});
+    ensure(same(child.target,l.target.identity)&&same({jdbcUrl:child.jdbcUrl,dataGateway:child.dataGateway},l.target.connection));
+    await noWriters(child,deps,l.helper?.side==='target'?l.helper:null,l.operationId,c.helper);
+    if(side==='target'){selected=child;selectedRoot=c.child.root;connection=l.target.connection;}
+  }else ensure(side==='source','ADAPTER_UNSEALED');
+  return Object.freeze({root:selectedRoot,connection:structuredClone(connection),base:c.record.base,lease:structuredClone(l),request:structuredClone(c.record.request),inspection:selected,
     nodeBinary:inspectionDetails(inspection).nodeBinary,helperSequence:c.sequence,
     helperRoot:c.sequence?join(c.record.base,'operations',l.operationId,'helper',String(c.sequence)):null,
-    seq:String(c.sequence),operationId:l.operationId,target:inspection.target,runRoot:c.record.root,
+    seq:String(c.sequence),operationId:l.operationId,target:selected.target,runRoot:selectedRoot,
     cwd:deps.cwd??process.cwd(),uid:c.record.identity.uid,gid:c.record.identity.gid});
 }
 export async function beginPhase(token,phase,patch={},deps={}) {
   const c=await owned(token,deps);ensure(Object.keys(patch).length===0);
-  if(c.record.lease.purpose==='RESTORE_VERIFY_LOCAL')ensure(WORKFLOW_PHASES.RESTORE_VERIFY_LOCAL.indexOf(phase)<4,'ADAPTER_UNSEALED');
+  if(c.record.lease.purpose==='RESTORE_VERIFY_LOCAL') {
+    ensure(WORKFLOW_PHASES.RESTORE_VERIFY_LOCAL.indexOf(phase)<WORKFLOW_PHASES.RESTORE_VERIFY_LOCAL.indexOf('STARTUP_VERIFIED'),'ADAPTER_UNSEALED');
+    if(WORKFLOW_PHASES.RESTORE_VERIFY_LOCAL.indexOf(phase)>=5)ensure(c.record.lease.target?.creationPhase==='BLANK_VERIFIED','ADAPTER_UNSEALED');
+  }
   await assertWorkflow(token,{},deps);
   await persistWorkflow(c.record,'BEGIN',phase,patch,deps);
   if(phase==='SOURCE_QUIESCED') {
@@ -140,13 +150,23 @@ export async function reserveRestoreTarget(token,{runId},deps={}) {
   try{await handle.writeFile(canonicalBytes(target));await handle.sync();markerIdentity=await handle.stat();}finally{await handle.close();}
   await syncDirectory(root);await syncDirectory(join(root,'..'));c.child={root,identity,markerIdentity,marker:structuredClone(target)};
   await persistWorkflow(c.record,'BEGIN','TARGET_RESERVED',{target},deps);
-  await persistWorkflow(c.record,'END','TARGET_RESERVED',{},deps);return Object.freeze({root,target:structuredClone(target)});
+  return Object.freeze({root,target:structuredClone(target)});
+}
+export async function restoreTargetContext(token,deps={}) {
+  const c=await owned(token,deps);await assertWorkflow(token,{},deps);
+  ensure(c.child&&c.record.lease.purpose==='RESTORE_VERIFY_LOCAL'&&c.record.lease.phase==='TARGET_RESERVED'
+    &&c.record.lease.target.creationPhase==='RESERVED','TARGET_NOT_BLANK');
+  return Object.freeze({root:c.child.root,target:structuredClone(c.record.lease.target),source:structuredClone(c.record.lease.source),
+    sourceRoot:c.record.root,nodeBinary:c.details.nodeBinary,receipt:await read(join(c.record.root,'receipt.json')),
+    artifacts:await read(join(c.record.root,'artifacts.json'))});
 }
 export async function reserveHelper(token,{side,kind},deps={}) {
   const c=await owned(token,deps);ensure(!c.helper&&!c.reservation&&c.record.lease.helper===null);
   ensure(c.record.journal.records.at(-1)?.event==='BEGIN','JOURNAL_INCOMPLETE');
   const context=await assertWorkflow(token,{side},deps);
-  ensure(side==='source'&&['INVENTORY','PG_DUMP','MEDIA_PACK'].includes(kind),'ADAPTER_UNSEALED');
+  const allowed={PG_RESTORE:['DB_RESTORED'],MEDIA_RESTORE:['MEDIA_RESTORED'],INVENTORY:['RAW_VERIFIED','SESSIONS_REVOKED'],REVOKE_SESSIONS:['SESSIONS_REVOKED']};
+  ensure(side==='source'?['INVENTORY','PG_DUMP','MEDIA_PACK'].includes(kind)&&(['SOURCE_QUIESCED','LOCAL_CAPTURED','LOCAL_VERIFIED'].includes(context.lease.phase)||kind==='INVENTORY'&&context.lease.phase==='RAW_VERIFIED'):
+    context.lease.target?.creationPhase==='BLANK_VERIFIED'&&allowed[kind]?.includes(context.lease.phase),'ADAPTER_UNSEALED');
   ensure(context.lease.phase!=='PRECHECK'&&context.lease.phase!=='COMPLETE');
   const parent=join(c.record.base,'operations',context.operationId);
   await privateDir(parent);await privateDir(join(parent,'helper'));c.sequence++;
@@ -163,17 +183,20 @@ export async function registerOwnedHelper(token,helper,policy,expected,deps={}) 
   const c=await owned(token,deps),r=c.reservation,l=c.record.lease;
   ensure(r&&!c.helper&&l.helper===null&&helper.kind===r.kind&&helper.side===r.side&&helper.state==='CREATED');
   ensure(helper.policySha256===sha256(canonicalBytes(policy))&&helper.fullContainerId===expected.fullContainerId);
-  const {buildHelperPolicy}=await import('./maintenance-helper.mjs');
+  const {buildHelperPolicy,verifiedHelperProfile}=await import('./maintenance-helper.mjs');
   const images=JSON.parse(await docker(deps,['image','inspect',policy.imageId]));ensure(images.length===1);
   const image=images[0],helperRoot=join(c.record.base,'operations',l.operationId,'helper',String(c.sequence));
-  const generated=buildHelperPolicy({kind:r.kind,side:r.side,target:l.source,image,helperRoot,runRoot:c.record.root,
+  const target=r.side==='target'?l.target.identity:l.source,runRoot=r.side==='target'?c.child.root:c.record.root;
+  if(r.kind==='MEDIA_RESTORE')ensure(typeof verifiedHelperProfile==='function','ADAPTER_UNSEALED');
+  const mediaUser=r.kind==='MEDIA_RESTORE'?(await verifiedHelperProfile(token,deps)).mediaUser:undefined;
+  const generated=buildHelperPolicy({kind:r.kind,side:r.side,target,image,helperRoot,runRoot,mediaUser,
     cwd:deps.cwd??process.cwd(),nodeBinary:c.details.nodeBinary,uid:c.record.identity.uid,gid:c.record.identity.gid,
     operationId:l.operationId,seq:String(c.sequence)});
   ensure(same(generated,policy),'ADAPTER_UNSEALED');
   const labels={...(image.Config.Labels??{}),'org.cms.pp1c.operation':l.operationId,'org.cms.pp1c.seq':String(c.sequence),
     'org.cms.pp1c.kind':r.kind,'org.cms.pp1c.policy':helper.policySha256};
   ensure(expected.name===`cms-pp1c-${l.operationId}-${c.sequence}`&&same(expected.labels,labels));
-  if(policy.networkId)ensure(expected.dataNetworkName===`${l.source.project}_data`);
+  if(policy.networkId)ensure(expected.dataNetworkName===`${target.project}_data`);
   else {
     const networks=JSON.parse(await docker(deps,['network','inspect','none']));
     ensure(Array.isArray(networks)&&networks.length===1);
@@ -221,14 +244,19 @@ export async function clearOwnedHelper(token,deps={}) {
 }
 // Called only by the target inspector; possession of a JSON lookalike grants nothing.
 export async function workflowInspectionContext(token,root,deps) {
-  const c=await owned(token,deps);ensure(root===c.record.root);
-  return c.helper?{helper:structuredClone(c.record.lease.helper),policy:structuredClone(c.helper.policy),expected:structuredClone(c.helper.expected),allowExited:c.helper.draining===true}:null;
+  const c=await owned(token,deps),restore=root===c.child?.root;ensure(root===c.record.root||restore);
+  if(restore){const stat=await directory(root),marker=await lstat(join(root,'restore-target.json'));
+    ensure(stat.ino===c.child.identity.ino&&stat.dev===c.child.identity.dev&&marker.ino===c.child.markerIdentity.ino
+      &&marker.dev===c.child.markerIdentity.dev&&same(await read(join(root,'restore-target.json'),true),c.child.marker));}
+  const helper=c.helper&&c.record.lease.helper.side===(restore?'target':'source');
+  return restore||helper?{restoreRoot:restore?root:null,...(helper?{helper:structuredClone(c.record.lease.helper),policy:structuredClone(c.helper.policy),
+    expected:structuredClone(c.helper.expected),allowExited:c.helper.draining===true}:{})}:null;
 }
 
 // Completion inspection is bound to the existing helper and in-memory token.
 export async function assertHelperDrain(token,deps={}) {
   const c=await owned(token,deps),h=c.record.lease.helper;
-  const media=h?.kind==='MEDIA_PACK';
+  const media=['MEDIA_PACK','MEDIA_RESTORE'].includes(h?.kind);
   ensure(c.helper&&h&&(h.backend!==null||media)&&
     (h.state==='PERMITTED'||(h.kind.startsWith('PG_')||media)&&h.state==='RUNNING'||h.state==='EXITED'));
   c.helper.draining=true;
@@ -242,6 +270,35 @@ export async function assertHelperDrain(token,deps={}) {
     ensure(media||c.helper.backendEnded,'WRITER_NOT_QUIESCED');
     await updatePendingWorkflow(c.record,{helper:{...h,state:'EXITED'}},deps);
   }
-  const current=await assertWorkflow(token,{},deps);
+  const current=await assertWorkflow(token,{side:h.side},deps);
   return Object.freeze({...current,helperBackendEnded:c.helper.backendEnded===true});
+}
+
+export async function sealRestoreTarget(token,inspection,hashes,deps={}) {
+  const c=await owned(token,deps);await restoreTargetContext(token,deps);
+  ensure(inspectionDetails(inspection).runRoot===c.child.root);
+  const fresh=await inspectTarget(c.child.root,deps,{apiState:'stopped',workflow:token});ensure(same(fresh,inspection));
+  const preparation={receipt:await read(join(c.child.root,'receipt.json')),artifacts:await read(join(c.child.root,'artifacts.json'))};
+  const resources={containerIds:fresh.target.containerIds,networkIds:fresh.target.networkIds,volumeNames:fresh.target.volumeNames};
+  ensure(Object.keys(hashes).sort().join(',')==='createdResourceSetSha256,preparationSha256'
+    &&hashes.preparationSha256===sha256(canonicalBytes(preparation))&&hashes.createdResourceSetSha256===sha256(canonicalBytes(resources)));
+  ensure(same(fresh.target.images,c.record.lease.source.images)&&same(fresh.target.apiBuild,c.record.lease.source.apiBuild));
+  const marker=async value=>{
+    const temp=join(c.child.root,'restore-target.next'),file=await open(temp,'wx',0o600);
+    try{await file.writeFile(canonicalBytes(value));await file.sync();}finally{await file.close();}
+    await rename(temp,join(c.child.root,'restore-target.json'));await syncDirectory(c.child.root);
+    c.child.marker=structuredClone(value);c.child.markerIdentity=await lstat(join(c.child.root,'restore-target.json'));
+    await updatePendingWorkflow(c.record,{target:value},deps);
+  };
+  const target={...c.record.lease.target,creationPhase:'CREATED',identity:fresh.target,
+    connection:{jdbcUrl:fresh.jdbcUrl,dataGateway:fresh.dataGateway},...hashes};
+  await marker(target);await assertWorkflow(token,{},deps);
+  const blank="SELECT count(*)::text FROM pg_catalog.pg_class c JOIN pg_catalog.pg_namespace n ON n.oid=c.relnamespace WHERE n.nspname='public' OR c.relname='flyway_schema_history';";
+  ensure((await docker(deps,['exec',fresh.target.containerIds.postgres,'psql','-X','-q','-t','-A','-U','cms_local','-d','cms','-c',blank])).trim()==='0','TARGET_NOT_BLANK');
+  const probe=mediaProbeCommand(fresh,c.record.lease.operationId),result=await(deps.command??execute)(probe.file,probe.args,probe.options);
+  ensure((result.code===undefined||result.code===0)&&result.stdout==='EMPTY\n','TARGET_NOT_BLANK');
+  await assertWorkflow(token,{},deps);await marker({...target,creationPhase:'BLANK_VERIFIED'});
+  await persistWorkflow(c.record,'END','TARGET_RESERVED',{},deps);
+  await beginPhase(token,'TARGET_BLANK',{},deps);await endPhase(token,{},deps);
+  return assertWorkflow(token,{side:'target'},deps);
 }

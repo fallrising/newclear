@@ -1,0 +1,63 @@
+package com.fallrising.cms.ops;
+
+import com.fallrising.cms.identity.domain.AuditEvent;
+import com.fallrising.cms.identity.store.JdbcIdentityStore;
+import org.springframework.jdbc.datasource.SingleConnectionDataSource;
+import java.nio.charset.StandardCharsets;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.time.Instant;
+import java.util.Map;
+import java.util.UUID;
+
+/** Fixed offline restored-session transaction; never opens another connection. */
+public final class RestoreSessionRevoker {
+    private RestoreSessionRevoker() {}
+
+    public static Map<String, Object> revoke(Connection connection, UUID operationId,
+                                              String backupId, String targetRef) throws Exception {
+        return revoke(connection, operationId, backupId, targetRef, () -> {});
+    }
+
+    @FunctionalInterface interface Check { void verify() throws Exception; }
+
+    static Map<String, Object> revoke(Connection connection, UUID operationId,
+                                     String backupId, String targetRef, Check preCommit) throws Exception {
+        boolean commitAttempted = false;
+        try {
+            if (operationId == null || backupId == null || !backupId.matches("pp1-\\d{8}T\\d{9}Z-[0-9a-f]{32}")
+                    || targetRef == null || !targetRef.matches("pp1-local:[0-9a-f]{32}")) throw new SQLException();
+            writable(connection);
+            Instant at = Instant.now();
+            UUID auditId = UUID.randomUUID();
+            long count;
+            try (var statement = connection.prepareStatement("UPDATE cms_session SET revoked_at = ? WHERE revoked_at IS NULL")) {
+                statement.setQueryTimeout(30);
+                statement.setTimestamp(1, Timestamp.from(at));
+                count = statement.executeLargeUpdate();
+            }
+            String detail = new String(RecoveryInventory.canonicalBytes(Map.of("operationId", operationId.toString(),
+                    "backupId", backupId, "targetRef", targetRef, "revokedCount", Long.toString(count))), StandardCharsets.UTF_8);
+            // JdbcTemplate releases only its suppress-close view of this exact existing connection.
+            var source = new SingleConnectionDataSource(connection, true);
+            new JdbcIdentityStore(source, null).insertAudit(new AuditEvent(auditId, at, null, "AUTH",
+                    "PRODUCTION_SESSIONS_INVALIDATED_AFTER_RESTORE", "restore", null, "admin", "ok", null, detail));
+            preCommit.verify();
+            writable(connection);
+            commitAttempted = true;
+            connection.commit();
+            return Map.of("operationId", operationId.toString(), "backupId", backupId,
+                    "revokedCount", Long.toString(count), "auditEventId", auditId.toString(), "committed", true);
+        } catch (Exception failure) {
+            if (!commitAttempted) {
+                try { connection.rollback(); } catch (Exception rollback) { failure.addSuppressed(rollback); }
+            }
+            throw failure;
+        }
+    }
+
+    private static void writable(Connection connection) throws SQLException {
+        if (connection.isClosed() || connection.getAutoCommit() || connection.isReadOnly()) throw new SQLException();
+    }
+}

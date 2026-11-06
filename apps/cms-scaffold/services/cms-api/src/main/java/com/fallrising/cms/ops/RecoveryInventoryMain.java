@@ -139,7 +139,7 @@ public final class RecoveryInventoryMain {
         require(uri.getPort() == -1 || uri.getPort() > 0 && uri.getPort() <= 65535);
     }
 
-    private static Map<String, Object> backend(Connection connection, String operation) throws Exception {
+    static Map<String, Object> backend(Connection connection, String operation) throws Exception {
         try (Statement statement = connection.createStatement()) {
             statement.setQueryTimeout(15);
             try (ResultSet row = statement.executeQuery("SELECT pid, extract(epoch FROM backend_start)::text AS \"backendStartEpoch\", "
@@ -158,7 +158,7 @@ public final class RecoveryInventoryMain {
         }
     }
 
-    private static JsonNode strict(byte[] raw) throws Exception {
+    static JsonNode strict(byte[] raw) throws Exception {
         try {
             JsonNode node = JSON.readTree(utf8(raw));
             require(node != null && Arrays.equals(raw, RecoveryInventory.canonicalBytes(node)));
@@ -166,24 +166,24 @@ public final class RecoveryInventoryMain {
         } catch (Exception invalid) { throw new Invalid(); }
     }
 
-    private static String utf8(byte[] raw) throws Invalid {
+    static String utf8(byte[] raw) throws Invalid {
         try {
             return StandardCharsets.UTF_8.newDecoder().onMalformedInput(CodingErrorAction.REPORT)
                     .onUnmappableCharacter(CodingErrorAction.REPORT).decode(ByteBuffer.wrap(raw)).toString();
         } catch (Exception invalid) { throw new Invalid(); }
     }
 
-    private static void keys(JsonNode node, String names) throws Invalid {
+    static void keys(JsonNode node, String names) throws Invalid {
         Set<String> actual = new HashSet<>(); node.fieldNames().forEachRemaining(actual::add);
         require(node.isObject() && actual.equals(Set.of(names.split(","))));
     }
 
-    private static String text(JsonNode node, String key) throws Invalid {
+    static String text(JsonNode node, String key) throws Invalid {
         require(node.has(key) && node.get(key).isTextual()); return node.get(key).textValue();
     }
 
-    private static void require(boolean condition) throws Invalid { if (!condition) throw new Invalid(); }
-    private static final class Invalid extends Exception {}
+    static void require(boolean condition) throws Invalid { if (!condition) throw new Invalid(); }
+    static final class Invalid extends Exception {}
 
     private static void noLinks(Path path) throws Exception {
         Path current = path.toAbsolutePath().getRoot();
@@ -193,7 +193,7 @@ public final class RecoveryInventoryMain {
         }
     }
 
-    private static byte[] privateBytes(Path path, int limit) throws Exception {
+    static byte[] privateBytes(Path path, int limit) throws Exception {
         try {
             noLinks(path);
             require(Files.isRegularFile(path, LinkOption.NOFOLLOW_LINKS));
@@ -220,13 +220,13 @@ public final class RecoveryInventoryMain {
         try (var parent = FileChannel.open(path.getParent(), StandardOpenOption.READ)) { parent.force(true); }
     }
 
-    private static void writeLine(PrintStream out, Object value) throws Exception {
+    static void writeLine(PrintStream out, Object value) throws Exception {
         byte[] bytes = RecoveryInventory.canonicalBytes(value);
         if (bytes.length > 16384) throw new Invalid();
         out.write(bytes); out.flush(); if (out.checkError()) throw new java.io.IOException();
     }
 
-    private static <T> T bounded(Callable<T> action, int seconds) throws Exception {
+    static <T> T bounded(Callable<T> action, int seconds) throws Exception {
         ExecutorService executor = Executors.newSingleThreadExecutor(task -> Thread.ofPlatform().daemon().unstarted(task));
         Future<T> future = executor.submit(action);
         try { return future.get(seconds, TimeUnit.SECONDS); }

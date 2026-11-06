@@ -1,0 +1,11 @@
+{
+  "sourceCommit": "05dc0a28117d56ad7f9f2d7f0b5b441d8ca56885",
+  "worktreeDirty": true,
+  "jarSha256": "c77db33818be74674006328f990531543584983cb2ffe13351b605eb60ecfc15",
+  "baseImage": "sha256:1ad1f859e141f2296a7d49457414f84c2813ad8439e5b836cc0d9963ab491e09",
+  "image": "sha256:c4190d14f3402afd40bfbfe5e44e7fa5e4eeb4515d8662c1e5261d7fe704c5d4",
+  "startedAt": "2026-11-02T16:29:07.853828+00:00",
+  "endedAt": "2026-11-02T16:29:08.369297+00:00",
+  "exitCode": 0,
+  "scope": "approved C isolated integration only; no release/deploy"
+}

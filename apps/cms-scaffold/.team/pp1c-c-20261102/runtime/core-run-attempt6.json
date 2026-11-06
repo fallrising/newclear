@@ -1,0 +1,13 @@
+{
+  "command": [
+    "/home/ckc/.local/node-v24.18.0/bin/node",
+    ".team/pp1c-c-20261102/runtime/run-core.mjs"
+  ],
+  "startedAt": "2026-11-06T15:45:29.553525+00:00",
+  "timeoutSeconds": 900,
+  "scope": "fresh C6 default adapters through SESSIONS_REVOKED; no D proof",
+  "sourceFreeze": "source-freeze-approved-policy-20261106.json",
+  "exitCode": 0,
+  "endedAt": "2026-11-06T15:54:29.574438+00:00",
+  "elapsedSeconds": 540.0209166698623
+}

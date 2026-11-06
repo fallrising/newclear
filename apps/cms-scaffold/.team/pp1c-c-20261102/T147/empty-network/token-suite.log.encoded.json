@@ -1,0 +1,8 @@
+{
+  "version": 1,
+  "original": "T147/empty-network/token-suite.log",
+  "sha256": "5912e72bd877efb2164da71891a8b4309b6d95d17bee7802f3f77d516362500f",
+  "byteSize": "1010",
+  "encoding": "utf-8",
+  "text": "✔ PP1C_L03a_forged_or_serialized_tokens_have_no_authority (84.029628ms)\n✔ PP1C_L03a_lock_inode_swap_and_source_drift_rejected (65.275685ms)\n✔ PP1C_L03a_backup_restores_only_original_running_state (760.853835ms)\n✔ PP1C_L03a_writer_failure_retains_lock_and_never_restarts (179.430795ms)\n✔ PP1C_L03a_source_identity_drift_is_not_token_authority (126.427711ms)\n✔ T131_T02_reserved_child_inspection_is_token_bound_and_stopped (444.638909ms)\n✔ T131_T02_seals_fresh_blank_target_and_keeps_source_identity (633.938817ms)\n✔ T147_real_restore_token_ignores_unrelated_empty_network_ID_and_seals_blank_child (602.864742ms)\n✔ T147_real_restore_token_rejects_shared_full-id (460.774509ms)\n✔ T147_real_restore_token_rejects_shared_name (417.88142ms)\n✔ T147_real_restore_token_rejects_shared_db-mount (484.545727ms)\n✔ T147_real_restore_token_rejects_shared_media-mount (404.587266ms)\nℹ tests 12\nℹ suites 0\nℹ pass 12\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 4739.076939\n"
+}

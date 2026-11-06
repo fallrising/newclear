@@ -1,0 +1,36 @@
+{
+  "observedAt": "2026-11-06T15:38:21.232566+00:00",
+  "routeTables": [
+    "52",
+    "local",
+    "main"
+  ],
+  "routeCount": 150,
+  "routesSha256": "22737e05c9e6725e1a339e736c0a711d02e6cc58b9b9100408614e812f1b0df1",
+  "rulesSha256": "1510d80c199ed191a580bfb25470aeae711eef4acde6b29e96faad434ee2691f",
+  "candidatePool": "192.168.240.0/20",
+  "candidatePrefix": 26,
+  "dockerNetworkCount": 43,
+  "availableSlots": 16,
+  "availableCIDRs": [
+    "192.168.252.0/26",
+    "192.168.252.64/26",
+    "192.168.252.128/26",
+    "192.168.252.192/26",
+    "192.168.253.0/26",
+    "192.168.253.64/26",
+    "192.168.253.128/26",
+    "192.168.253.192/26",
+    "192.168.254.0/26",
+    "192.168.254.64/26",
+    "192.168.254.128/26",
+    "192.168.254.192/26",
+    "192.168.255.0/26",
+    "192.168.255.64/26",
+    "192.168.255.128/26",
+    "192.168.255.192/26"
+  ],
+  "allPolicyTablesCompared": true,
+  "retainedResourcesUnchanged": true,
+  "noHostNetworkChange": true
+}

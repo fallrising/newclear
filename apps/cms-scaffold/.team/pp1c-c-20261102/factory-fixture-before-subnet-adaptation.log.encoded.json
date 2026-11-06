@@ -1,0 +1,8 @@
+{
+  "version": 1,
+  "original": "factory-fixture-before-subnet-adaptation.log",
+  "sha256": "862bf554814a9a16336f4d54000ea2f10a2a9e56a03a702e7b4737c88399195a",
+  "byteSize": "1110",
+  "encoding": "utf-8",
+  "text": "✖ T131_T02_factory_creates_PG_first_and_only_after_blank_creates_stopped_services (366.382955ms)\nℹ tests 1\nℹ suites 0\nℹ pass 0\nℹ fail 1\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 436.984062\n\n✖ failing tests:\n\ntest at scripts/local/maintenance-workflow.test.mjs:732:1\n✖ T131_T02_factory_creates_PG_first_and_only_after_blank_creates_stopped_services (366.382955ms)\n  Error: ADAPTER_UNSEALED\n      at createPreparedNetworks (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-c-20261102/apps/cms-scaffold/scripts/local/prepare.mjs:299:16)\n      at async createRestoreTarget (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-c-20261102/apps/cms-scaffold/scripts/local/restore-target.mjs:67:27)\n      at async TestContext.<anonymous> (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-c-20261102/apps/cms-scaffold/scripts/local/maintenance-workflow.test.mjs:734:17)\n      at async Test.run (node:internal/test_runner/test:1332:7)\n      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:385:3) {\n    code: 'ADAPTER_UNSEALED',\n    phase: null,\n    operationId: null\n  }\n"
+}

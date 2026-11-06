@@ -1,0 +1,8 @@
+{
+  "command": "timeout 900 /home/ckc/.local/bin/node .team/pp1c-c-20261102/runtime/run-core.mjs",
+  "driverSha256": "4ae448f7e82b08f9735e2f8b27bdbb9ac3529d31242477525031ef1cca2872ac",
+  "fixtureClientSha256": "3426c9143d99dad9a8690c60856a99b861dcd3c12e46733f48de75b34dd58477",
+  "sourceRunId": "da415cdd149c4d168b54c1a16700a409",
+  "startedAt": "2026-11-02T17:07:02.110464+00:00",
+  "scope": "fresh retry after13linefixture410correction; no failedsource/target reuse"
+}

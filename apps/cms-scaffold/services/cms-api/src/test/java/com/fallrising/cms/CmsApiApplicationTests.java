@@ -26,7 +26,7 @@ class CmsApiApplicationTests {
         var calls = new java.util.ArrayList<String>();
         Integer exit = CmsApiApplication.dispatch(new String[]{"ops-inventory", "--request", "/run/pp1/request.json"},
                 args -> calls.add("spring"), args -> { calls.add("maintenance"); return 9; },
-                args -> { calls.add(String.join(" ", args)); return 0; });
+                args -> { calls.add(String.join(" ", args)); return 0; }, args -> 8);
         assertThat(exit).isZero();
         assertThat(calls).containsExactly("--request /run/pp1/request.json");
     }
@@ -38,7 +38,7 @@ class CmsApiApplicationTests {
             var calls = new java.util.ArrayList<String>();
             Integer exit = CmsApiApplication.dispatch(input, args -> calls.add("spring"),
                     args -> { calls.add("maintenance"); return 9; },
-                    args -> { calls.add("inventory"); return 0; });
+                    args -> { calls.add("inventory"); return 0; }, args -> { calls.add("revoke"); return 8; });
             assertThat(exit).isEqualTo(2);
             assertThat(calls).isEmpty();
         }
@@ -50,7 +50,7 @@ class CmsApiApplicationTests {
             var calls = new java.util.ArrayList<String>();
             Integer exit = CmsApiApplication.dispatch(input, args -> calls.add("spring"),
                     args -> { calls.add(String.join(" ", args)); return 6; },
-                    args -> { calls.add("inventory"); return 0; });
+                    args -> { calls.add("inventory"); return 0; }, args -> { calls.add("revoke"); return 8; });
             assertThat(exit).isEqualTo(6);
             assertThat(calls).containsExactly(input[0].equals("maintenance") ? "fresh-init" : "");
         }
@@ -60,8 +60,32 @@ class CmsApiApplicationTests {
     void pp1cNormalStartupStillReachesSpring() {
         var calls = new java.util.ArrayList<String>();
         assertThat(CmsApiApplication.dispatch(new String[]{"--server.port=0"}, args -> calls.add(args[0]),
-                args -> 9, args -> 8)).isNull();
+                args -> 9, args -> 8, args -> 7)).isNull();
         assertThat(calls).containsExactly("--server.port=0");
+    }
+
+    @Test
+    void pp1cExactRevokeDispatchNeverStartsBootOrOtherRoutes() {
+        var calls = new java.util.ArrayList<String>();
+        Integer exit = CmsApiApplication.dispatch(new String[]{"ops-revoke-restored-sessions", "--request", "/run/pp1/request.json"},
+                args -> calls.add("spring"), args -> { calls.add("maintenance"); return 9; },
+                args -> { calls.add("inventory"); return 9; }, args -> { calls.add(String.join(" ", args)); return 0; });
+        assertThat(exit).isZero();
+        assertThat(calls).containsExactly("--request /run/pp1/request.json");
+    }
+
+    @Test
+    void pp1cMalformedOfflineArgsNeverDispatchOrStartBoot() {
+        for (String[] input : new String[][]{
+                {"ops-revoke-restored-sessions", "ops-inventory"},
+                {"ops-revoke-restored-sessions", "--request", "/tmp/arbitrary"},
+                {"ops-revoke-restored-sessions", "--request", "/run/pp1/request.json", "extra"},
+                {"ops-inventory", "--unknown"}}) {
+            var calls = new java.util.ArrayList<String>();
+            assertThat(CmsApiApplication.dispatch(input, a -> calls.add("boot"), a -> { calls.add("maintenance"); return 9; },
+                    a -> { calls.add("inventory"); return 9; }, a -> { calls.add("revoke"); return 9; })).isEqualTo(2);
+            assertThat(calls).isEmpty();
+        }
     }
 
     @Autowired

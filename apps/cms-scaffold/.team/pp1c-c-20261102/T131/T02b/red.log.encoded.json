@@ -1,0 +1,8 @@
+{
+  "version": 1,
+  "original": "T131/T02b/red.log",
+  "sha256": "f75e059b9af8f619d91dece9c45b0866f1e04ff022bdfdec852667235ff33853",
+  "byteSize": "966",
+  "encoding": "utf-8",
+  "text": "✖ T131_T02_factory_creates_PG_first_and_only_after_blank_creates_stopped_services (255.188744ms)\nℹ tests 1\nℹ suites 0\nℹ pass 0\nℹ fail 1\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 326.137476\n\n✖ failing tests:\n\ntest at scripts/local/maintenance-workflow.test.mjs:699:1\n✖ T131_T02_factory_creates_PG_first_and_only_after_blank_creates_stopped_services (255.188744ms)\n  Error: ADAPTER_UNSEALED\n      at createRestoreTarget (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-c-target-20261102/apps/cms-scaffold/scripts/local/restore-target.mjs:2:53)\n      at TestContext.<anonymous> (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-c-target-20261102/apps/cms-scaffold/scripts/local/maintenance-workflow.test.mjs:701:23)\n      at async Test.run (node:internal/test_runner/test:1332:7)\n      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:385:3) {\n    code: 'ADAPTER_UNSEALED',\n    phase: null,\n    operationId: null\n  }\n"
+}

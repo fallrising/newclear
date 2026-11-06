@@ -1,0 +1,10 @@
+{
+  "recordedAt": "2026-11-02T18:54:13.357299+00:00",
+  "archive": "/home/ckc/test/backup/cms-pp1c-c-20261102-raw-mismatch/source-evidence.tar.gz",
+  "sha256": "d58f1ff91d57d681edf7ea7d402f5bddb6e720ec1c91008c29815bec8fe8615d",
+  "sourceEvidenceFiles": 2082,
+  "gitHead": "05dc0a28117d56ad7f9f2d7f0b5b441d8ca56885",
+  "productUncommitted": true,
+  "actualCResult": "RAW_MISMATCH before revoke; no accepted C/fullD proof",
+  "excludedRawRuntime": "local/pp1 DB/media/bundles/credentials and Docker volumes remain in retained worktree/runtime; this is not a DB/offsite backup"
+}

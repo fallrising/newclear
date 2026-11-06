@@ -1,0 +1,15 @@
+{
+  "handwrittenChangedLines": 141,
+  "files": {
+    "scripts/ops/local-recovery-verify.mjs": 79,
+    "scripts/ops/local-recovery-verify.test.mjs": 58,
+    "scripts/ops/local-recovery.fixture.mjs": 4
+  },
+  "sha256": {
+    "scripts/ops/local-recovery-verify.mjs": "839219dab5d322a50a141bda86bb3bd315b69f6f63000315eca44f7c74565035",
+    "scripts/ops/local-recovery-verify.test.mjs": "24652e36321fdc357b23e5336833f936443f3a019e2a806cd62589e8aa9f0ae2",
+    "scripts/ops/local-recovery.fixture.mjs": "ae5430c88280b770846ab62576032a9d5b24c8ed55b6b69a8aa43cddf9af3a7e"
+  },
+  "checks": "30/30 focused pass; named two-case Red retained; first Green API-return misuse fixed with no weakenedvalidation",
+  "frozenAt": "2026-11-02T16:13:56.861137+00:00"
+}

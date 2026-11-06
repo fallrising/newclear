@@ -1,8 +1,9 @@
+import { OpsError } from '../ops/recovery-protocol.mjs';
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
 import { createHash } from 'node:crypto';
 import { isIPv4 } from 'node:net';
-import { lstat, open, readdir } from 'node:fs/promises';
+import { lstat, open, readdir, mkdtemp, writeFile } from 'node:fs/promises';
 import { constants } from 'node:fs';
 import { resolve, join, dirname, parse, isAbsolute } from 'node:path';
 const fail = () => { throw new Error('QUIESCENCE_NOT_PROVEN'); };
@@ -62,8 +63,10 @@ export async function inspectTarget(runRoot, deps = {}, { apiState, workflow } =
     const root = resolve(runRoot), runId = root.split('/').at(-1), cwd = dirname(dirname(dirname(root)));
     ensure(hex(runId, 32) && root === join(cwd, 'local/pp1', runId)); await ancestors(root);
     const rootStat = await lstat(root); ensure(rootStat.isDirectory() && (rootStat.mode & 0o7777) === 0o700 && rootStat.uid === process.getuid());
-    try { await lstat(join(root,'restore-target.json')); fail(); } catch(error) { if(error.code!=='ENOENT')throw error; }
     const workflowContext=workflow ? await (await import('./maintenance-workflow.mjs')).workflowInspectionContext(workflow,root,deps) : null;
+    const restore=workflowContext?.restoreRoot===root;
+    try { await lstat(join(root,'restore-target.json')); ensure(restore&&apiState==='stopped'); } catch(error) { if(error.code!=='ENOENT')throw error; }
+    if(restore)ensure(apiState==='stopped');
     const receipt = JSON.parse(await regular(join(root, 'receipt.json'), true));
     const artifacts = JSON.parse(await regular(join(root, 'artifacts.json'), true));
     const project = `cms-pp1-local-${runId}`, build = receipt.apiBuild;
@@ -91,7 +94,7 @@ export async function inspectTarget(runRoot, deps = {}, { apiState, workflow } =
     const all = await list(['inspect', ...ids]); ensure(all.length === ids.length && new Set(all.map(c => c.Id)).size === ids.length && all.every(c => ids.includes(c.Id)));
     ensure(all.every(c => object(c.Config?.Labels) && object(c.NetworkSettings?.Networks) && Array.isArray(c.Mounts)));
     let permitted=null;
-    if(workflowContext) {
+    if(workflowContext?.helper) {
       const {helper,policy,expected}=workflowContext;permitted=all.find(c=>c.Id===helper.fullContainerId);ensure(permitted);
       const state=workflowContext.allowExited&&permitted.State?.Status==='exited'?'exited':
         {CREATED:'created',RUNNING:'running',READY:'running',PERMITTED:'running',EXITED:'exited'}[helper.state];
@@ -110,7 +113,7 @@ export async function inspectTarget(runRoot, deps = {}, { apiState, workflow } =
     for (const c of all.filter(c => !allowed.includes(c))) ensure(!Object.entries(c.NetworkSettings.Networks).some(([n, e]) => networkNames.includes(n) || networksOwnedId(e.NetworkID)) && !c.Mounts.some(m => volumeNames.includes(m.Name)));
     const networks = await list(['network', 'inspect', ...networkNames]); ensure(networks.length === 2 && new Set(networks.map(n => n.Name)).size === 2 && new Set(networks.map(n => n.Id)).size === 2);
     const networkMap = new Map();
-    function networksOwnedId(id) { return owned.some(c => Object.values(c.NetworkSettings.Networks).some(e => e.NetworkID === id)); }
+    function networksOwnedId(id) { return hex(id, 64) && owned.some(c => Object.values(c.NetworkSettings.Networks).some(e => e.NetworkID === id)); }
     for (const n of networks) {
       const name = ['web', 'data'].find(k => n.Name === `${project}_${k}`);
       ensure(name && hex(n.Id, 64) && n.Internal === true && n.Driver === 'bridge' && n.Labels?.['com.docker.compose.project'] === project && n.Labels['com.docker.compose.network'] === name);
@@ -120,10 +123,10 @@ export async function inspectTarget(runRoot, deps = {}, { apiState, workflow } =
       ensure(equal(Object.keys(n.Containers).sort(), members.map(c => c.Id).sort()));
       networkMap.set(name, n);
     }
-    const containerIds = {}, mounts = new Map();
+    const containerIds = {}, mounts = new Map(); let sessionMetadata;
     for (const [name, c] of service) {
       const kind = { postgres: 'postgres', 'cms-api': 'api', ingress: 'node' }[name]; containerIds[name] = c.Id;
-      ensure(c.Name === `/${project}-${name}-1` && c.Image === receipt.images[kind] && c.State?.Running === (name !== 'cms-api' || apiState === 'running'));
+      ensure(c.Name === `/${project}-${name}-1` && c.Image === receipt.images[kind] && c.State?.Running === (restore?name==='postgres':name !== 'cms-api' || apiState === 'running'));
       const expectedEnv = name === 'postgres' ? { POSTGRES_DB: 'cms', POSTGRES_USER: 'cms_local', POSTGRES_PASSWORD_FILE: '/run/secrets/spring.datasource.password' } : name === 'cms-api' ? {
         SPRING_PROFILES_ACTIVE: 'prod', CMS_RUNTIME_PRODUCTION_REQUIRED: 'true', CMS_SITE_DOMAIN: 'cms.test', CMS_API_ORIGIN: receipt.apiOrigin,
         CMS_CORS_ORIGINS: 'https://front.cms.test:8443,https://back.cms.test:8443,https://admin.cms.test:8443',
@@ -141,21 +144,28 @@ export async function inspectTarget(runRoot, deps = {}, { apiState, workflow } =
       ensure(keys(c.NetworkSettings.Networks, names.map(n => `${project}_${n}`)));
       for (const n of names) {
         const network = networkMap.get(n), endpoint = c.NetworkSettings.Networks[network.Name];
-        ensure(endpoint.NetworkID === network.Id);
+        const inactive=restore&&name!=='postgres'||name==='cms-api'&&apiState==='stopped';
+        ensure(endpoint.NetworkID === network.Id||restore&&inactive&&endpoint.NetworkID==='');
         const aliases = [`${project}-${name}-1`, name, ...(name === 'ingress' ? ['front.cms.test', 'back.cms.test', 'admin.cms.test', 'api.cms.test'] : [])];
         ensure(Array.isArray(endpoint.Aliases) && equal([...endpoint.Aliases].sort(), aliases.sort()));
         // Docker internal bridges omit a default route; the host connection still binds to verified IPAM.
         const internalWithoutDefaultRoute = network.Internal === true && network.Driver === 'bridge'
           && endpoint.Gateway === '' && privateIp(network.IPAM.Config[0].Gateway)
           && within(network.IPAM.Config[0].Gateway, network.IPAM.Config[0].Subnet);
-        if (name === 'cms-api' && apiState === 'stopped') ensure(!network.Containers[c.Id] && !endpoint.IPAddress);
+        if (inactive) {
+          ensure(!network.Containers[c.Id]&&!endpoint.IPAddress);
+          if(restore){for(const key of ['EndpointID','Gateway','MacAddress','IPv6Gateway','GlobalIPv6Address'])ensure((endpoint[key]??'')==='');
+            ensure((endpoint.IPPrefixLen??0)===0&&(endpoint.GlobalIPv6PrefixLen??0)===0);}
+        }
         else ensure(privateIp(endpoint.IPAddress) && within(endpoint.IPAddress, network.IPAM.Config[0].Subnet)
           && (endpoint.Gateway === network.IPAM.Config[0].Gateway || internalWithoutDefaultRoute)
           && endpoint.IPPrefixLen === Number(network.IPAM.Config[0].Subnet.split('/')[1])
           && network.Containers[c.Id]?.IPv4Address === `${endpoint.IPAddress}/${endpoint.IPPrefixLen}`);
       }
       const resolved = await list(['image', 'inspect', receipt.imageRefs[kind]]); ensure(resolved.length === 1 && resolved[0].Id === c.Image && resolved[0].Os === 'linux');
-      if (name === 'cms-api') { const labels = resolved[0].Config?.Labels; ensure(labels && labels['org.cms.pp1.source-commit'] === build.sourceCommit && labels['org.cms.pp1.jar-sha256'] === build.jarSha256 && labels['org.cms.pp1.base-image'] === build.baseImage); }
+      if(restore){const command=name==='ingress'?{Entrypoint:['/opt/pp1-node'],Cmd:['/tool/ingress.mjs','--config','/config/ingress.json']}:resolved[0].Config;
+        ensure(equal(c.Config.Entrypoint??null,command.Entrypoint??null)&&equal(c.Config.Cmd??null,command.Cmd??null));}
+      if (name === 'cms-api') { sessionMetadata = structuredClone({ config: c.Config, imageConfig: resolved[0].Config, expectedEnv, lifecycle: { created: c.Created, started: c.State.StartedAt, finished: c.State.FinishedAt, restarts: c.RestartCount, status: c.State.Status } }); const labels = resolved[0].Config?.Labels; ensure(labels && labels['org.cms.pp1.source-commit'] === build.sourceCommit && labels['org.cms.pp1.jar-sha256'] === build.jarSha256 && labels['org.cms.pp1.base-image'] === build.baseImage); }
       ensure(Array.isArray(c.Mounts)); const m = new Map(c.Mounts.map(v => [v.Destination, v])); ensure(m.size === c.Mounts.length); mounts.set(name, m);
       if (name !== 'ingress') {
         ensure(m.size === 2); const secret = m.get('/run/secrets/spring.datasource.password');
@@ -192,7 +202,7 @@ export async function inspectTarget(runRoot, deps = {}, { apiState, workflow } =
     catch (error) { if (error.code !== 'ENOENT') throw error; }
     const endpoint = service.get('postgres').NetworkSettings.Networks[`${project}_data`];
     const inspection = freeze({ target, jdbcUrl: `jdbc:postgresql://${endpoint.IPAddress}:5432/cms`, dataGateway: networkMap.get('data').IPAM.Config[0].Gateway });
-    capabilities.set(inspection, { nodeBinary, probe, env, apiState, runRoot: root }); return inspection;
+    capabilities.set(inspection, { nodeBinary, probe, env, apiState, runRoot: root, workflow, jar: join(libs, jars[0]), sessionMetadata }); return inspection;
   } catch { fail(); }
 }
 export function mediaProbeCommand(inspection, operationId) {
@@ -210,4 +220,177 @@ export function mediaProbeCommand(inspection, operationId) {
 export function inspectionDetails(inspection) {
   const details=capabilities.get(inspection);ensure(details);
   return Object.freeze({nodeBinary:details.nodeBinary,apiState:details.apiState,runRoot:details.runRoot});
+}
+
+// This observation is valid for the controlled fresh local lifecycle. Its caller
+// must establish that external configuration was not loaded and removed earlier.
+const inheritedApiEnv = [
+  'PATH=/opt/java/openjdk/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin',
+  'JAVA_HOME=/opt/java/openjdk', 'LANG=en_US.UTF-8', 'LANGUAGE=en_US:en',
+  'LC_ALL=en_US.UTF-8', 'JAVA_VERSION=jdk-25.0.5+8'
+];
+function sessionMetadataProven(capability) {
+  const { config, imageConfig, expectedEnv, lifecycle } = capability.sessionMetadata;
+  ensure(capability.apiState === 'running' ? lifecycle.status === 'running' : ['created', 'exited'].includes(lifecycle.status));
+  ensure(['created', 'started', 'finished'].every(k => typeof lifecycle[k] === 'string' && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?Z$/.test(lifecycle[k])));
+  ensure(lifecycle.restarts === 0);
+  for (const value of [config, imageConfig]) {
+    ensure(equal(value.Entrypoint, ['java', '-jar', '/app/app.jar']));
+    ensure((value.Cmd ?? null) === null && value.WorkingDir === '/app');
+  }
+  ensure(Array.isArray(imageConfig.Env) && equal([...imageConfig.Env].sort(), [...inheritedApiEnv].sort()));
+  const expected = [...inheritedApiEnv, ...Object.entries(expectedEnv).map(([k, v]) => `${k}=${v}`)];
+  ensure(Array.isArray(config.Env) && equal([...config.Env].sort(), expected.sort()));
+}
+export async function observedSessionConfig(inspection, deps = {}) {
+  try {
+    const capability = capabilities.get(inspection); ensure(capability);
+    sessionMetadataProven(capability);
+    const fresh = async () => {
+      const value = await inspectTarget(capability.runRoot, deps, { apiState: capability.apiState, workflow: capability.workflow });
+      ensure(equal(value, inspection)); const current = capabilities.get(value); sessionMetadataProven(current);
+      ensure(equal(current.sessionMetadata, capability.sessionMetadata)); return current;
+    };
+    await fresh();
+    const settings = await readSessionSettings(inspection, capability, deps);
+    await fresh(); ensure(digest(await regular(capability.jar)) === inspection.target.apiBuild.jarSha256);
+    ensure(keys(settings, ['sessionAbsoluteSeconds', 'sessionMaxSeconds']));
+    ensure(Object.values(settings).every(v => typeof v === 'string' && /^[1-9][0-9]{0,18}$/.test(v) && BigInt(v) <= 9223372036854775807n));
+    return Object.freeze(settings);
+  } catch { throw new OpsError('ADAPTER_UNSEALED'); }
+}
+function configTar(bytes, limit) {
+  ensure(Buffer.isBuffer(bytes) && bytes.length <= limit + 65536 && bytes.length % 512 === 0);
+  const entries = new Map(); let offset = 0, ended = false, payload = 0;
+  const field = bytes => { const end = bytes.indexOf(0); return bytes.subarray(0, end < 0 ? bytes.length : end).toString('utf8'); };
+  while (offset + 512 <= bytes.length) {
+    const header = bytes.subarray(offset, offset + 512); offset += 512;
+    if (header.every(byte => byte === 0)) {
+      ensure(offset + 512 <= bytes.length && bytes.subarray(offset).every(byte => byte === 0)); ended = true; break;
+    }
+    ensure(field(header.subarray(257, 263)) === 'ustar');
+    const stored = field(header.subarray(148, 156)).trim(); ensure(/^[0-7]+$/.test(stored));
+    const checksum = header.reduce((sum, byte, i) => sum + (i >= 148 && i < 156 ? 32 : byte), 0);
+    ensure(parseInt(stored, 8) === checksum && field(header.subarray(345, 500)) === '');
+    const name = field(header.subarray(0, 100)), type = String.fromCharCode(header[156]);
+    ensure(/^[a-zA-Z0-9._/-]+$/.test(name) && !name.startsWith('/') && !name.split('/').some(p => p === '.' || p === '..'));
+    ensure(entries.size < 32 && !entries.has(name) && ['0', '5', '\0'].includes(type) && field(header.subarray(157, 257)) === '');
+    const octal = field(header.subarray(124, 136)).trim(); ensure(/^[0-7]+$/.test(octal));
+    const size = parseInt(octal, 8); payload += size; ensure(Number.isSafeInteger(size) && payload <= limit && (type !== '5' || size === 0));
+    const next = offset + Math.ceil(size / 512) * 512; ensure(next <= bytes.length);
+    ensure(bytes.subarray(offset + size, next).every(byte => byte === 0));
+    entries.set(name, { directory: type === '5', bytes: bytes.subarray(offset, offset + size) }); offset = next;
+  }
+  ensure(ended); return entries;
+}
+async function readSessionSettings(inspection, capability, deps) {
+  const command = deps.command ?? execute, id = inspection.target.containerIds['cms-api'];
+  const copy = async (path, limit, absent = false) => {
+    const options = { env: { ...capability.env }, shell: false, timeout: 30000, maxBuffer: limit + 65536, encoding: 'buffer' };
+    let result;
+    try { result = await command('docker', ['--host', 'unix:///var/run/docker.sock', 'cp', `${id}:${path}`, '-'], options); }
+    catch (error) { result = error; }
+    ensure(Buffer.isBuffer(result.stdout) && Buffer.isBuffer(result.stderr) && !result.signal && !result.killed);
+    if (absent) {
+      ensure(result.code === 1 && result.stdout.length === 0 && result.stderr.equals(Buffer.from(`Error response from daemon: Could not find the file ${path} in container ${id}\n`)));
+      return null;
+    }
+    ensure((result.code === undefined || result.code === 0) && result.stderr.length === 0);
+    return configTar(result.stdout, limit);
+  };
+  const inspectFiles = async () => {
+  const jar = await copy('/app/app.jar', 268435456);
+  ensure(jar.size === 1 && jar.get('app.jar')?.directory === false && digest(jar.get('app.jar').bytes) === inspection.target.apiBuild.jarSha256);
+  for (const base of ['/app', '']) {
+    await copy(`${base}/config`, 1048576, true);
+    for (const profile of ['', '-prod']) for (const extension of ['yaml', 'yml', 'properties']) await copy(`${base}/application${profile}.${extension}`, 1048576, true);
+  }
+  const secrets = await copy('/run/secrets', 1048576), directory = secrets.get('secrets') ?? secrets.get('secrets/');
+  ensure(secrets.size === 2 && directory?.directory === true && secrets.get('secrets/spring.datasource.password')?.directory === false);
+  };
+  await inspectFiles();
+  const settings = await probeSessionJar(capability, inspection.target.apiBuild.jarSha256, command);
+  await inspectFiles(); return settings;
+}
+const sessionProbeSource = String.raw`import java.net.URLClassLoader;
+import java.nio.file.*;
+import java.nio.file.attribute.PosixFilePermissions;
+import java.security.MessageDigest;
+import java.time.Duration;
+import java.util.*;
+import java.util.jar.*;
+import java.util.zip.*;
+public final class SessionSettingsProbe {
+  static final Map<String,String> CONFIG = Map.of(
+    "BOOT-INF/classes/application.yaml", "7e10f4aacf8ec01d11a976cc113e5c1e830b45bfbac753aa1d86fe52046ac25f",
+    "BOOT-INF/classes/application-prod.yaml", "20569e43b73f2780e9746337bc87a7550a095eaa93015983dbf7390c020fe137");
+  static final List<String> CLASSES = List.of("com/fallrising/cms/identity/IdentityProperties.class", "com/fallrising/cms/identity/domain/Surface.class");
+  static void require(boolean condition) { if (!condition) throw new IllegalStateException(); }
+  static String sha(byte[] bytes) throws Exception { return HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256").digest(bytes)); }
+  static boolean config(String name) {
+    String base = name.substring(name.lastIndexOf('/') + 1);
+    return (base.startsWith("application") || base.startsWith("bootstrap")) && (base.endsWith(".yaml") || base.endsWith(".yml") || base.endsWith(".properties"));
+  }
+  static byte[] bounded(java.io.InputStream input) throws Exception {
+    byte[] value = input.readNBytes(1048577); require(value.length <= 1048576); return value;
+  }
+  public static void main(String[] args) throws Exception {
+    require(args.length == 3 && Runtime.version().feature() == 25);
+    Path source = Path.of(args[0]), output = Path.of(args[2]);
+    require(sha(Files.readAllBytes(source)).equals(args[1]));
+    Set<String> names = new HashSet<>(), configs = new HashSet<>(), classes = new HashSet<>();
+    try (JarFile jar = new JarFile(source.toFile())) {
+      var entries = jar.entries();
+      while (entries.hasMoreElements()) {
+        JarEntry entry = entries.nextElement(); String name = entry.getName(); require(names.add(name));
+        if (config(name)) {
+          require(CONFIG.containsKey(name));
+          try (var input = jar.getInputStream(entry)) { require(sha(bounded(input)).equals(CONFIG.get(name))); }
+          configs.add(name);
+        }
+        if (name.startsWith("BOOT-INF/lib/") && name.endsWith(".jar")) {
+          try (var nested = new ZipInputStream(jar.getInputStream(entry))) {
+            ZipEntry item; int count = 0;
+            while ((item = nested.getNextEntry()) != null) { require(++count < 100000 && !config(item.getName())); nested.closeEntry(); }
+          }
+        }
+        for (String type : CLASSES) if (name.equals("BOOT-INF/classes/" + type)) {
+          Path file = output.resolve(type), directory = output;
+          for (Path part : output.relativize(file.getParent())) {
+            directory = directory.resolve(part);
+            if (!Files.exists(directory, LinkOption.NOFOLLOW_LINKS)) Files.createDirectory(directory, PosixFilePermissions.asFileAttribute(PosixFilePermissions.fromString("rwx------")));
+            require(Files.isDirectory(directory, LinkOption.NOFOLLOW_LINKS));
+          }
+          try (var input = jar.getInputStream(entry)) {
+            Files.createFile(file, PosixFilePermissions.asFileAttribute(PosixFilePermissions.fromString("rw-------")));
+            Files.write(file, bounded(input));
+          }
+          classes.add(type);
+        }
+      }
+    }
+    require(configs.equals(CONFIG.keySet()) && classes.equals(new HashSet<>(CLASSES)));
+    try (var loader = new URLClassLoader(new java.net.URL[]{output.toUri().toURL()}, ClassLoader.getPlatformClassLoader())) {
+      Class<?> type = Class.forName("com.fallrising.cms.identity.IdentityProperties", true, loader);
+      Object properties = type.getConstructor().newInstance();
+      Duration absolute = (Duration) type.getMethod("getSessionAbsolute").invoke(properties);
+      Duration maximum = (Duration) type.getMethod("getSessionMax").invoke(properties);
+      require(!absolute.isNegative() && !absolute.isZero() && absolute.getNano() == 0 && !maximum.isNegative() && !maximum.isZero() && maximum.getNano() == 0);
+      require(sha(Files.readAllBytes(source)).equals(args[1]));
+      System.out.println("{\"sessionAbsoluteSeconds\":\"" + absolute.getSeconds() + "\",\"sessionMaxSeconds\":\"" + maximum.getSeconds() + "\"}");
+    }
+  }
+}
+`;
+async function probeSessionJar(capability, expectedHash, command) {
+  ensure(digest(await regular(capability.jar)) === expectedHash);
+  const directory = await mkdtemp(join(capability.runRoot, 'session-config-'));
+  const stat = await lstat(directory); ensure(stat.isDirectory() && (stat.mode & 0o7777) === 0o700 && stat.uid === process.getuid());
+  const source = join(directory, 'SessionSettingsProbe.java');
+  await writeFile(source, sessionProbeSource, { mode: 0o600, flag: 'wx' });
+  const result = await command('/home/ckc/.cache/devbox/toolchains/jdk-25.0.5+8/bin/java', [source, capability.jar, expectedHash, directory],
+    { env: { LANG: 'C.UTF-8', TZ: 'UTC' }, shell: false, timeout: 30000, maxBuffer: 4096 });
+  ensure((result.code === undefined || result.code === 0) && !result.signal && !result.killed && result.stderr === '' && typeof result.stdout === 'string');
+  const match = /^\{"sessionAbsoluteSeconds":"([1-9][0-9]{0,18})","sessionMaxSeconds":"([1-9][0-9]{0,18})"\}\n$/.exec(result.stdout);
+  ensure(match); return { sessionAbsoluteSeconds: match[1], sessionMaxSeconds: match[2] };
 }

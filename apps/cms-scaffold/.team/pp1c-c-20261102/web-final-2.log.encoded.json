@@ -1,0 +1,8 @@
+{
+  "version": 1,
+  "original": "web-final-2.log",
+  "sha256": "1b8c62754cedbc492b21fb080987fe0ee039d4fa248a3734a32a1d21685474ed",
+  "byteSize": "372",
+  "encoding": "utf-8",
+  "text": "\n> typecheck\n> npm run typecheck --workspaces --if-present\n\n\n> @cms/api@0.2.0 typecheck\n> tsc --noEmit\n\n\n> @cms/auth@0.1.0 typecheck\n> tsc --noEmit\n\n\n> @cms/fields@0.2.0 typecheck\n> tsc --noEmit\n\n\n> @cms/mocks@0.1.0 typecheck\n> tsc --noEmit\n\n\n> @cms/ui@0.2.0 typecheck\n> tsc --noEmit\n\n\n> typecheck\n> tsc --noEmit\n\n\n> typecheck\n> tsc --noEmit\n\n\n> typecheck\n> tsc --noEmit\n\n"
+}

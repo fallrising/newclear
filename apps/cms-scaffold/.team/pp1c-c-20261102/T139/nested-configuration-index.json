@@ -1,0 +1,10 @@
+{
+  "nestedApplicationConfig": [],
+  "mainFactories": [
+    {
+      "entry": "META-INF/spring.factories",
+      "sha256": "f0c418132bfc3612c1bdfb9c4b440837de557a8ba632f2d0b01f478cec0059bc",
+      "text": "org.springframework.boot.env.EnvironmentPostProcessor=com.fallrising.cms.platform.ProductionEnvironmentValidator\n"
+    }
+  ]
+}

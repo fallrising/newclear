@@ -1,0 +1,8 @@
+{
+  "version": 1,
+  "original": "nov6-before-policy-runtime/observe-config-after-cmd-fix.log",
+  "sha256": "f264893da32529a7455e1c5eb0a4723dedf168f75d6ab144c0efe15d4002c488",
+  "byteSize": "92",
+  "encoding": "utf-8",
+  "text": "{\"success\":true,\"settings\":{\"sessionAbsoluteSeconds\":\"43200\",\"sessionMaxSeconds\":\"604800\"}}\n"
+}

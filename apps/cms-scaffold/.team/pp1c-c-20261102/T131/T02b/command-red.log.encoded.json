@@ -1,0 +1,8 @@
+{
+  "version": 1,
+  "original": "T131/T02b/command-red.log",
+  "sha256": "5936094836d2da92c7e62b8337bf9f81449452c44c47e7eb9338851c50533926",
+  "byteSize": "902",
+  "encoding": "utf-8",
+  "text": "✖ T131_T02_factory_rejects_pg-command_without_starting_application (717.164838ms)\nℹ tests 1\nℹ suites 0\nℹ pass 0\nℹ fail 1\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 789.168629\n\n✖ failing tests:\n\ntest at scripts/local/maintenance-workflow.test.mjs:709:3\n✖ T131_T02_factory_rejects_pg-command_without_starting_application (717.164838ms)\n  AssertionError [ERR_ASSERTION]: Missing expected rejection.\n      at async TestContext.<anonymous> (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-c-target-20261102/apps/cms-scaffold/scripts/local/maintenance-workflow.test.mjs:718:5)\n      at async Test.run (node:internal/test_runner/test:1332:7)\n      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:385:3) {\n    generatedMessage: false,\n    code: 'ERR_ASSERTION',\n    actual: undefined,\n    expected: undefined,\n    operator: 'rejects',\n    diff: 'simple'\n  }\n"
+}

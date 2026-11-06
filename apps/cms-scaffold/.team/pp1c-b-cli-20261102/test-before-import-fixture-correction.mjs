@@ -1,0 +1,261 @@
+import test from 'node:test';
+import { spawnSync } from 'node:child_process';
+import { fileURLToPath } from 'node:url';
+import assert from 'node:assert/strict';
+import { mkdtemp, mkdir, writeFile, readFile, readdir, rm, stat, symlink, link } from 'node:fs/promises';
+import { readFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { deflateSync } from 'node:zlib';
+import { captureSource, captureLocal, parseArgs, run } from './local-bundle.mjs';
+import { canonicalBytes, sha256, parseStrictJson, validateManifest, validateLocalComplete, OpsError } from './recovery-protocol.mjs';
+
+const digest = value => sha256(canonicalBytes(value));
+const java = readFileSync(new URL('../../services/cms-api/src/main/java/com/fallrising/cms/ops/RecoveryInventory.java', import.meta.url), 'utf8');
+const columns = Object.fromEntries([...java.matchAll(/Map.entry\("([^"]+)", List.of\((.*?)\)\)/g)]
+  .map(([, name, values]) => [name, [...values.matchAll(/"([^"]+)"/g)].map(m => m[1])]));
+function inventory() {
+  const tables = Object.keys(columns).sort().map(tableName => {
+    const schema = { columns: columns[tableName].map((name, i) => ({ ordinalPosition: String(i + 1), name,
+      dataType: 'text', udtSchema: 'pg_catalog', udtName: 'text', isNullable: true,
+      characterMaximumLength: null, numericPrecision: null, numericScale: null, datetimePrecision: null,
+      columnDefault: null, isIdentity: false, identityGeneration: null, isGenerated: false, generationExpression: null })), constraints: [], indexes: [] };
+    const rows = tableName === 'flyway_schema_history' ? [{ installed_rank: '1', version: '2', description: 'Identity',
+      type: 'SQL', script: 'V2__identity.sql', checksum: null, installed_by: 'cms_local', installed_on: '2026-11-01 00:00:00',
+      execution_time: '1', success: 'true' }] : [];
+    return { tableName, schema, rows, schemaSha256: digest(schema), rowsSha256: digest(rows),
+      rowCount: String(rows.length), snapshotSha256: digest({ schema, rows }) };
+  });
+  return { version: 1, files: [], tables, assets: [], variants: [],
+    dbSnapshotSha256: digest(tables.map(({ tableName, schemaSha256, rowsSha256, rowCount }) =>
+      ({ tableName, schemaSha256, rowsSha256, rowCount }))), mediaHeaderSha256: digest({ version: 1, files: [] }) };
+}
+const full = c => c.repeat(64), op = '11111111-1111-4111-8111-111111111111';
+function archive() {
+  const integer = n => { const b = Buffer.alloc(5); b[0] = n < 0 ? 1 : 0; b.writeUInt32LE(Math.abs(n), 1); return b; };
+  const string = s => s === null ? integer(-1) : Buffer.concat([integer(Buffer.byteLength(s)), Buffer.from(s)]);
+  const names = Object.keys(columns).sort(), chunks = [Buffer.from('PGDMP'), Buffer.from([1, 15, 0, 4, 8, 1, 1]),
+    ...[0, 0, 0, 2, 10, 126, 0].map(integer), ...['cms', '16.15', '16.15'].map(string), integer(names.length)];
+  names.forEach((name, i) => chunks.push(integer(i + 1), integer(1), string('0'), string('0'), string(name), string('TABLE DATA'),
+    integer(2), ...['', '', `COPY public.${name} FROM stdin;`, 'public', '', '', 'cms_local', 'false'].map(string), string(null), Buffer.from([1]), Buffer.alloc(8)));
+  for (let i = 0; i < names.length; i++) {
+    const data = deflateSync(Buffer.from('\\.\n'));
+    chunks.push(Buffer.from([1]), integer(i + 1), integer(data.length), data, integer(0));
+  }
+  return Buffer.concat(chunks);
+}
+export async function fixture(t) {
+  const cwd = await mkdtemp(join(tmpdir(), 'cms-bundle-'));
+  t.after(() => rm(cwd, { recursive: true, force: true }));
+  const root = join(cwd, 'run'), base = join(root, 'maintenance');
+  await mkdir(base, { recursive: true, mode: 0o700 });
+  const target = { runId: 'a'.repeat(32), targetId: `pp1-local:${'a'.repeat(32)}`, project: `cms-pp1-local-${'a'.repeat(32)}`,
+    sourceCommit: 'b'.repeat(40), images: { api: `sha256:${full('c')}`, postgres: `sha256:${full('d')}` },
+    volumeNames: { 'db-data': 'db-source', 'media-data': 'media-source' } };
+  const artifacts = { apiOrigin: 'https://api.cms.test:8443', sourceCommit: target.sourceCommit,
+    ingressScriptSha256: full('e'), nodeBinarySha256: full('f'),
+    dist: Object.fromEntries(['front', 'back', 'admin'].map(s => [s, { 'index.html': full('a') }])) };
+  await writeFile(join(root, 'artifacts.json'), JSON.stringify(artifacts), { mode: 0o600 });
+  const profile = { javaRuntimeVersion: '25.0.5+8', pgDumpVersion: '16.15', pgRestoreVersion: '16.15', postgresServerVersion: '16.15' };
+  const ctx = { root, base, target, operationId: op,
+    request: { startedAt: '2026-11-02T11:59:00.000Z' },
+    lease: { source: target, operationId: op, purpose: 'BACKUP_LOCAL', phase: 'SOURCE_QUIESCED' } };
+  const token = Object.freeze({}), calls = [], state = { checks: 0, helpers: 0, inventoryCount: 0, fail: null };
+  const workflow = {
+    beginWorkflow: async () => { calls.push('begin'); return token; },
+    assertWorkflow: async value => { assert.equal(value, token); state.checks++; if (state.writer) throw new OpsError('WRITER_NOT_QUIESCED'); return structuredClone(ctx); },
+    beginPhase: async (_t, phase) => { calls.push(`begin:${phase}`); ctx.lease.phase = phase; },
+    endPhase: async () => { calls.push(`end:${ctx.lease.phase}`); },
+    failWorkflow: async (_t, code) => { calls.push(`fail:${code}`); state.fail = code; },
+    finishWorkflow: async () => { calls.push('finish'); }
+  };
+  const helper = async (_t, { side, kind }) => {
+    assert.equal(side, 'source'); calls.push(kind); state.helpers++;
+    const dir = join(base, 'operations', op, 'helper', String(state.helpers));
+    await mkdir(dir, { recursive: true, mode: 0o700 });
+    if (state.failureKind === kind) { await writeFile(join(dir, 'partial'), 'CANARY', { mode: 0o600 }); throw new OpsError('CAPTURE_FAILED'); }
+    let bytes, name, value;
+    if (kind === 'INVENTORY') {
+      state.inventoryCount++; value = inventory();
+      if (state.change && state.inventoryCount === 2) value.tables.find(t => t.tableName === 'flyway_schema_history').rows[0].installed_on = '2026-11-02 00:00:00';
+      if (state.large) value.tables[0].rows.push({ ...Object.fromEntries(columns[value.tables[0].tableName].map(c => [c, null])), detail_json: 'x'.repeat(1100000) });
+      for (const table of value.tables) Object.assign(table, { rowsSha256: digest(table.rows), rowCount: String(table.rows.length), snapshotSha256: digest({ schema: table.schema, rows: table.rows }) });
+      value.dbSnapshotSha256 = digest(value.tables.map(({ tableName, schemaSha256, rowsSha256, rowCount }) => ({ tableName, schemaSha256, rowsSha256, rowCount })));
+      bytes = canonicalBytes(value); name = 'inventory.json';
+    } else if (kind === 'PG_DUMP') {
+      bytes = state.dumpBytes ?? archive(); name = 'db.dump'; if (state.truncatedDump) bytes = bytes.subarray(0, bytes.length - 1);
+      if (state.dumpMutation) bytes = state.dumpMutation(bytes);
+    }
+    else {
+      const header = canonicalBytes({ version: 1, files: [] }), length = Buffer.alloc(8); length.writeBigUInt64BE(BigInt(header.length));
+      bytes = Buffer.concat([Buffer.from('PP1CMEDIA1\n'), length, header]); name = 'media.package';
+      if (state.trailingMedia) bytes = Buffer.concat([bytes, Buffer.from('extra')]);
+    }
+    const path = join(dir, name); await writeFile(path, bytes, { mode: 0o600 });
+    if (state.linkKind === kind) { await link(path, `${path}.hardlink`); }
+    const result = { kind, path, byteSize: String(bytes.length), sha256: sha256(bytes) };
+    if (kind === 'INVENTORY') Object.assign(result, { inventory: value, inventorySha256: sha256(bytes), profile });
+    if (state.wrongHash === kind) result.sha256 = full('0');
+    if (state.writerAfter === kind) state.writer = true;
+    return result;
+  };
+  return { cwd, root, base, token, calls, state, ctx, deps: { workflow, runOwnedHelper: helper, now: () => new Date('2026-11-02T12:00:00.000Z') } };
+}
+test('PP1c_C07_complete_capture_is_private_and_preserves_original_service_policy', async t => {
+  const f = await fixture(t), result = await captureLocal({}, {}, f.deps);
+  const m = parseStrictJson(await readFile(join(result.path, 'manifest.json')));
+  validateManifest(m); validateLocalComplete(parseStrictJson(await readFile(join(result.path, 'local-complete.json'))), m);
+  assert.deepEqual(f.calls.filter(x => ['INVENTORY', 'PG_DUMP', 'MEDIA_PACK'].includes(x)), ['INVENTORY', 'PG_DUMP', 'MEDIA_PACK', 'INVENTORY']);
+  assert.equal(f.calls.at(-1), 'finish'); assert.ok(f.state.checks >= 5);
+  for (const name of await readdir(result.path)) assert.equal((await stat(join(result.path, name))).mode & 0o777, 0o600);
+  assert.equal((await stat(result.path)).mode & 0o777, 0o700);
+  assert.equal(m.instanceId, 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa');
+  assert.equal(m.release.javaRuntimeVersion, '25.0.5+8');
+});
+for (const kind of ['PG_DUMP', 'MEDIA_PACK']) test(`PP1c_C07_${kind}_partial_failure_retains_staging_without_complete_or_restart`, async t => {
+  const f = await fixture(t); f.state.failureKind = kind;
+  await assert.rejects(captureLocal({}, {}, f.deps), e => e.code === 'CAPTURE_FAILED');
+  assert.equal(f.state.fail, 'CAPTURE_FAILED'); assert.ok(!f.calls.includes('finish'));
+  const dirs = await readdir(join(f.root, 'bundles')); assert.equal(dirs.length, 1);
+  assert.ok(!(await readdir(join(f.root, 'bundles', dirs[0]))).includes('local-complete.json'));
+  const failure = await readFile(join(f.root, 'bundles', dirs[0], 'failure.json'), 'utf8'); assert.ok(!failure.includes('CANARY'));
+});
+for (const scenario of ['change', 'trailingMedia', 'writer', 'badHash', 'hardlink', 'capacity']) {
+  test(`PP1c_C07_${scenario}_never_publishes_complete`, async t => {
+    const f = await fixture(t);
+    if (scenario === 'badHash') f.state.wrongHash = 'PG_DUMP';
+    else if (scenario === 'hardlink') f.state.linkKind = 'PG_DUMP';
+    else if (scenario === 'writer') f.state.writerAfter = 'PG_DUMP';
+    else if (scenario === 'capacity') f.deps.statfs = async () => ({ bsize: 1n, bavail: 1n });
+    else f.state[scenario] = true;
+    await assert.rejects(captureSource(f.token, f.deps)); assert.ok(!f.calls.includes('finish'));
+    const dirs = await readdir(join(f.root, 'bundles')).catch(() => []);
+    for (const d of dirs) assert.ok(!(await readdir(join(f.root, 'bundles', d))).includes('local-complete.json'));
+  });
+}
+test('PP1c_C07_old_bundle_remains_byte_identical_and_symlink_root_is_refused', async t => {
+  const f = await fixture(t), outside = join(f.cwd, 'outside'); await mkdir(outside, { mode: 0o700 });
+  await writeFile(join(outside, 'old'), 'immutable', { mode: 0o600 });
+  await symlink(outside, join(f.root, 'bundles'));
+  await assert.rejects(captureSource(f.token, f.deps));
+  assert.equal(await readFile(join(outside, 'old'), 'utf8'), 'immutable'); assert.deepEqual(await readdir(outside), ['old']);
+});
+test('PP1c_C08_inventory_larger_than_metadata_limit_remains_a_valid_private_artifact', async t => {
+  const f = await fixture(t); f.state.large = true;
+  const result = await captureSource(f.token, f.deps);
+  assert.ok(BigInt(result.manifest.artifacts[1].byteSize) > 1048576n);
+  assert.equal(result.inventory.tables[0].rows[0].detail_json.length, 1100000);
+});
+test('PP1c_C08_complete_raw_change_is_rejected_after_valid_inventory_hashes', async t => {
+  const f = await fixture(t); f.state.change = true;
+  await assert.rejects(captureSource(f.token, f.deps), e => e.code === 'WRITER_NOT_QUIESCED');
+});
+test('PP1c_C08_zero_exit_truncated_dump_with_matching_size_and_hash_is_refused', async t => {
+  const f = await fixture(t); f.state.truncatedDump = true;
+  await assert.rejects(captureSource(f.token, f.deps), e => e.code === 'BUNDLE_MISMATCH');
+});
+for (const [name, mutate] of [
+  ['missing_whole_table_block', b => b.subarray(0, b.length - (16 + deflateSync(Buffer.from('\\.\n')).length))],
+  ['truncated_toc', b => b.subarray(0, 110)],
+  ['compressed_checksum', b => { b[b.length - 6] ^= 1; return b; }],
+  ['duplicate_block', b => Buffer.concat([b, b.subarray(b.length - (16 + deflateSync(Buffer.from('\\.\n')).length))])],
+  ['trailing_bytes', b => Buffer.concat([b, Buffer.from('extra')])],
+  ['wrong_format_version', b => { b[6] = 14; return b; }]
+]) test(`PP1c_C08_archive_${name}_matching_helper_hash_does_not_authorize_complete`, async t => {
+  const f = await fixture(t); f.state.dumpMutation = mutate;
+  await assert.rejects(captureSource(f.token, f.deps), e => e.code === 'BUNDLE_MISMATCH');
+});
+test('PP1c_C08_manifest_start_is_original_command_time_not_capture_time', async t => {
+  const f = await fixture(t), result = await captureSource(f.token, f.deps);
+  assert.equal(result.manifest.times.startedAt, f.ctx.request.startedAt);
+  assert.equal(result.manifest.times.quiescedAt, '2026-11-02T12:00:00.000Z');
+});
+
+const cliPath = fileURLToPath(new URL('./local-bundle.mjs', import.meta.url));
+test('PP1c_backup_native_CLI_malformed_input_is_not_silent_success', async t => {
+  const cwd = await mkdtemp(join(tmpdir(), 'cms-backup-cli-'));
+  t.after(() => rm(cwd, { recursive: true, force: true }));
+  const result = spawnSync(process.execPath, [cliPath, '--unknown', 'private-canary'], { cwd, encoding: 'utf8', timeout: 10000 });
+  assert.equal(result.status, 2);
+  assert.deepEqual(JSON.parse(result.stdout), { operationId: null, backupId: null, phase: null, code: 'INPUT_INVALID', exitCode: 2 });
+  assert.equal(result.stderr, ''); assert.deepEqual(await readdir(cwd), []);
+});
+
+const cliRunId = 'a'.repeat(32), cliArgs = ['--run-id', cliRunId, '--operation-id', op];
+const cliBackupId = `pp1-20261102T120000000Z-${'b'.repeat(32)}`;
+const nodeHash = sha256(readFileSync(process.execPath));
+function cliFixture() {
+  const chunks = [], states = [], captures = [];
+  const inspection = { target: { runId: cliRunId, targetId: `pp1-local:${cliRunId}`, nodeBinarySha256: nodeHash } };
+  const deps = { cwd: '/trusted-component', stdout: { write: bytes => chunks.push(bytes) },
+    inspectTarget: async (root, _deps, { apiState }) => { assert.equal(root, `/trusted-component/local/pp1/${cliRunId}`); states.push(apiState); return inspection; },
+    captureLocal: async (value, request) => { assert.equal(value, inspection); captures.push(request); return { backupId: cliBackupId }; } };
+  return { deps, states, captures, inspection, receipt: () => parseStrictJson(Buffer.concat(chunks)) };
+}
+test('PP1c_backup_CLI_exact_unique_flags_in_either_order', () => {
+  assert.deepEqual(parseArgs(cliArgs), { runId: cliRunId, operationId: op });
+  assert.deepEqual(parseArgs(['--operation-id', op, '--run-id', cliRunId]), parseArgs(cliArgs));
+  assert.ok(Object.isFrozen(parseArgs(cliArgs)));
+});
+for (const [name, args] of [
+  ['empty', []], ['missing', cliArgs.slice(0, 3)], ['duplicate', ['--run-id', cliRunId, '--run-id', cliRunId]],
+  ['unknown', ['--root', '/private-canary', '--operation-id', op]], ['extra', [...cliArgs, 'private-canary']],
+  ['upper-run', ['--run-id', 'A'.repeat(32), '--operation-id', op]],
+  ['bad-operation', ['--run-id', cliRunId, '--operation-id', 'private-canary']],
+  ['equals-form', [`--run-id=${cliRunId}`, '--operation-id', op]],
+  ['policy-override', [...cliArgs, '--completion-policy', 'KEEP_STOPPED']]
+]) test(`PP1c_backup_native_CLI_${name}_rejects_without_mutation`, async t => {
+  const cwd = await mkdtemp(join(tmpdir(), 'cms-backup-cli-'));
+  t.after(() => rm(cwd, { recursive: true, force: true }));
+  const result = spawnSync(process.execPath, [cliPath, ...args], { cwd, encoding: 'utf8', timeout: 10000 });
+  assert.equal(result.status, 2); assert.equal(result.stderr, '');
+  assert.deepEqual(parseStrictJson(Buffer.from(result.stdout)), { operationId: null, backupId: null, phase: null, code: 'INPUT_INVALID', exitCode: 2 });
+  assert.deepEqual(await readdir(cwd), []); assert.ok(!result.stdout.includes('private-canary'));
+});
+test('PP1c_backup_CLI_running_source_uses_fixed_policy_and_complete_receipt', async () => {
+  const f = cliFixture(); assert.equal(await run(cliArgs, f.deps), 0);
+  assert.deepEqual(f.states, ['running']);
+  assert.deepEqual(f.captures, [{ operationId: op, purpose: 'BACKUP_LOCAL', completionPolicy: 'RESTORE_ORIGINAL', targetRunId: null, incidentStartedAt: null }]);
+  assert.deepEqual(f.receipt(), { operationId: op, backupId: cliBackupId, phase: 'COMPLETE', code: null, exitCode: 0 });
+});
+test('PP1c_backup_CLI_stopped_state_requires_second_full_inspection_without_start', async () => {
+  const f = cliFixture(), inspect = f.deps.inspectTarget;
+  f.deps.inspectTarget = async (...args) => { const result = await inspect(...args); if (args[2].apiState === 'running') throw Error('private-canary'); return result; };
+  assert.equal(await run(cliArgs, f.deps), 0); assert.deepEqual(f.states, ['running', 'stopped']); assert.equal(f.captures.length, 1);
+});
+test('PP1c_backup_CLI_no_valid_full_identity_never_captures', async () => {
+  const f = cliFixture(); f.inspection.target.runId = 'f'.repeat(32);
+  assert.equal(await run(cliArgs, f.deps), 7); assert.deepEqual(f.states, ['running', 'stopped']); assert.deepEqual(f.captures, []);
+  assert.deepEqual(f.receipt(), { operationId: op, backupId: null, phase: null, code: 'TARGET_NOT_OWNED', exitCode: 7 });
+});
+test('PP1c_backup_CLI_unverified_host_Node_never_captures', async () => {
+  const f = cliFixture(); f.inspection.target.nodeBinarySha256 = '0'.repeat(64);
+  assert.equal(await run(cliArgs, f.deps), 7); assert.equal(f.receipt().code, 'ADAPTER_UNSEALED'); assert.deepEqual(f.captures, []);
+});
+test('PP1c_backup_CLI_malformed_flags_never_call_inspection_or_capture', async () => {
+  const f = cliFixture(); assert.equal(await run([...cliArgs, '--root', '/private-canary'], f.deps), 2);
+  assert.deepEqual(f.states, []); assert.deepEqual(f.captures, []);
+});
+for (const failure of [new OpsError('WRITER_NOT_QUIESCED', 'SOURCE_QUIESCED'), new OpsError('LOCK_BUSY'),
+  new OpsError('JOURNAL_INCOMPLETE', 'LOCAL_CAPTURED'), new Error('secret SQL /private-canary')]) {
+  test(`PP1c_backup_CLI_error_${failure.code ?? 'unknown'}_is_sanitized`, async () => {
+    const f = cliFixture(); f.deps.captureLocal = async () => { throw failure; };
+    assert.equal(await run(cliArgs, f.deps), failure instanceof OpsError ? failure.exitCode : 5);
+    assert.deepEqual(f.receipt(), { operationId: op, backupId: null, phase: failure instanceof OpsError ? failure.phase : null,
+      code: failure instanceof OpsError ? failure.code : 'CAPTURE_FAILED', exitCode: failure instanceof OpsError ? failure.exitCode : 5 });
+  });
+}
+test('PP1c_backup_native_CLI_valid_unavailable_run_is_not_silent_success', async () => {
+  const cwd = fileURLToPath(new URL('../../', import.meta.url)), absent = 'f'.repeat(32), path = join(cwd, 'local/pp1', absent);
+  await assert.rejects(stat(path), { code: 'ENOENT' });
+  const result = spawnSync(process.execPath, [cliPath, '--run-id', absent, '--operation-id', op], { cwd, encoding: 'utf8', timeout: 10000 });
+  assert.equal(result.status, 7); assert.equal(result.stderr, '');
+  assert.deepEqual(parseStrictJson(Buffer.from(result.stdout)), { operationId: op, backupId: null, phase: null, code: 'TARGET_NOT_OWNED', exitCode: 7 });
+  await assert.rejects(stat(path), { code: 'ENOENT' });
+});
+test('PP1c_backup_native_import_has_no_CLI_side_effects', () => {
+  const url = new URL('./local-bundle.mjs', import.meta.url).href;
+  const result = spawnSync(process.execPath, ['--input-type=module', '-e', `await import(${JSON.stringify(url)});process.stdout.write('imported\n');`, '--', '--unknown'],
+    { encoding: 'utf8', timeout: 10000 });
+  assert.equal(result.status, 0); assert.equal(result.stdout, 'imported\n'); assert.equal(result.stderr, '');
+});

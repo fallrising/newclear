@@ -1,0 +1,21 @@
+{
+  "timestamps": [
+    {
+      "value": "2026-11-02T16:36:47.06476241Z",
+      "accepted": true
+    },
+    {
+      "value": "2026-11-02T16:36:50.711099908Z",
+      "accepted": true
+    },
+    {
+      "value": "0001-01-01T00:00:00Z",
+      "accepted": true
+    }
+  ],
+  "frozenSourceUnchanged": true,
+  "commandGate": {
+    "absentCmdAccepted": false,
+    "nullCmdAccepted": true
+  }
+}

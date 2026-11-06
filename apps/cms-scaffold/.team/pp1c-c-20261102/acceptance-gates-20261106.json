@@ -1,0 +1,50 @@
+{
+  "recordedAt": "2026-11-06T15:58:44.309177+00:00",
+  "scope": "C ninecards only through SESSIONS_REVOKED",
+  "spec": {
+    "pr": 1012,
+    "merge": "646b11189ced91016e1dc57306460cf890d1dee3",
+    "approved": true,
+    "remoteReadback": true
+  },
+  "sourceFreeze": "source-freeze-approved-policy-20261106.json",
+  "node": {
+    "tests": 866,
+    "pass": 866,
+    "fail": 0,
+    "skip": 0
+  },
+  "javaSameSource": {
+    "unit": 575,
+    "postgres": 223,
+    "unchangedFiles": 208
+  },
+  "frontendSameSource": {
+    "workspace": 672,
+    "mock": 93
+  },
+  "actualC6": {
+    "result": "runtime/attempt6/core-result.json",
+    "success": true,
+    "sourceUnchangedAll20": true,
+    "rawAll20": true,
+    "physicalFileCount": 17,
+    "physicalFileBytes": 14089,
+    "sessionsRevoked": 2,
+    "exactAuthAdded": 1,
+    "allSixStopped": true,
+    "targetAppsNeverStarted": true,
+    "lockRetained": true
+  },
+  "independentPythonActual": {
+    "result": "runtime/attempt6/core-independent-readback.json",
+    "exitCode": 0
+  },
+  "independentNewPolicy": "T158 DONE",
+  "independentWholeC": "T143 DONE; root actual evidence-gate accepted",
+  "productPublication": "not yet committed/pushed/PR/CI/merged",
+  "DStarted": false,
+  "fullPP1Acceptance": false,
+  "aggregateUsage": null,
+  "localImplementationAcceptedAt": "2026-11-06T16:05:33Z"
+}

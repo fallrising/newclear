@@ -1,0 +1,8 @@
+{
+  "sourceRunId": "bfe98fc8cd8d474880c9f92f1ce6367c",
+  "priorOperationId": "7e301694-fa4e-46ef-a6db-3bd0e90f40b6",
+  "priorComplete": true,
+  "priorLockReleased": true,
+  "cliSha256": "c5039e1071047b2096a6cd3f011345cfab5c1d5b6ce2159c84953708f02314f8",
+  "scope": "root-owned actual CLI test candidate copied into original B runtime workspace; prior file retained"
+}

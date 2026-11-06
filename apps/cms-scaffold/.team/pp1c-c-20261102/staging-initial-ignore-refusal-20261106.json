@@ -1,0 +1,7 @@
+{
+  "step": "initial git add of explicit reviewed publish paths",
+  "exitCode": 1,
+  "reason": "nested historical source snapshots under scripts/local are ignored by generic local/ rule",
+  "commitPerformed": false,
+  "correction": "Classify explicit publish paths via git check-ignore and force-add only those intended snapshot paths plus production restore-target; preserve global ignore policy"
+}

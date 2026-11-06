@@ -1,0 +1,8 @@
+{
+  "version": 1,
+  "original": "T146/B/red.log",
+  "sha256": "b23bf1c522b9524ba6bbd4e6db09131c70dfb5b19e1d66d95a2df1986987287c",
+  "byteSize": "946",
+  "encoding": "utf-8",
+  "text": "✖ T146 factory preserves both privately created network IDs through unchanged Compose (639.93128ms)\nℹ tests 1\nℹ suites 0\nℹ pass 0\nℹ fail 1\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 714.287357\n\n✖ failing tests:\n\ntest at scripts/local/maintenance-workflow.test.mjs:898:1\n✖ T146 factory preserves both privately created network IDs through unchanged Compose (639.93128ms)\n  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n  \n  0 !== 2\n  \n      at TestContext.<anonymous> (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-c-revoke-20261102/apps/cms-scaffold/scripts/local/maintenance-workflow.test.mjs:901:10)\n      at async Test.run (node:internal/test_runner/test:1332:7)\n      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:385:3) {\n    generatedMessage: true,\n    code: 'ERR_ASSERTION',\n    actual: 0,\n    expected: 2,\n    operator: 'strictEqual',\n    diff: 'simple'\n  }\n"
+}

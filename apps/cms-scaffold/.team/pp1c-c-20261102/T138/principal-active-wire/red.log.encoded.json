@@ -1,0 +1,8 @@
+{
+  "version": 1,
+  "original": "T138/principal-active-wire/red.log",
+  "sha256": "107032aa9ce72b74184224f0e676b601a795cebb9de3bddcd4e3700661092590",
+  "byteSize": "1189",
+  "encoding": "utf-8",
+  "text": "✖ T138_actual_PG_active_text_derives_fixture_with_native_text_columns (2.145801ms)\n✔ T138_actual_PG_principal_rejects_ACTIVE (0.993686ms)\n✔ T138_actual_PG_principal_rejects_disabled (0.28002ms)\n✔ T138_actual_PG_principal_rejects_locked (0.774808ms)\nℹ tests 4\nℹ suites 0\nℹ pass 3\nℹ fail 1\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 79.172662\n\n✖ failing tests:\n\ntest at scripts/ops/local-restore.test.mjs:148:1\n✖ T138_actual_PG_active_text_derives_fixture_with_native_text_columns (2.145801ms)\n  Error: INPUT_INVALID\n      at deriveSmokeFixture (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-c-target-20261102/apps/cms-scaffold/scripts/ops/local-restore.mjs:69:16)\n      at TestContext.<anonymous> (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-c-target-20261102/apps/cms-scaffold/scripts/ops/local-restore.test.mjs:150:16)\n      at Test.runInAsyncScope (node:async_hooks:227:14)\n      at Test.run (node:internal/test_runner/test:1325:25)\n      at Test.start (node:internal/test_runner/test:1191:17)\n      at startSubtestAfterBootstrap (node:internal/test_runner/harness:385:17) {\n    code: 'INPUT_INVALID',\n    phase: null,\n    operationId: null\n  }\n"
+}

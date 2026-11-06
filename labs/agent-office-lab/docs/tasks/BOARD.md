@@ -280,5 +280,7 @@ Owner 指示 Claude Opus 5.5 指導、Pi agent 實作，可獨立部分平行開
 
 | ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| T-0024-01 | Claude 指導完成；Pi 後端實作授權／派工 | AC-01／11 子集 | in_progress | 2026-11-06T15:39:34Z | — | 2026-11-06T16:40:43Z |
-| T-0024-02 | Pi 介面平行實作及整合驗收 | AC-06／09 子集 | in_progress | 2026-11-06T15:39:34Z | — | 2026-11-06T16:40:43Z |
+| T-0024-01 | Claude 指導完成；Pi 後端實作授權／派工 | AC-01／11 子集 | done | 2026-11-06T15:39:34Z | 2026-11-06T16:43:13Z | 2026-11-06T16:43:50Z |
+| T-0024-02 | Pi 介面平行實作及整合驗收 | AC-06／09 子集 | done | 2026-11-06T15:39:34Z | 2026-11-06T16:43:13Z | 2026-11-06T16:43:50Z |
+
+T-0024 結案：[PR #1036](https://github.com/fallrising/newclear/pull/1036) 已合併，commit `a7ec5cc7af24288e879f1a0ec726be8b2c9c0784`，offline／validate 兩項 CI success。已回讀主線證據：218 tests、五組 Chrome 授權測試替身、真實 Pi 本機 429／取消及 65 筆結果回歸通過。Claude Opus 5.5 實際提供指導，兩個 Pi CLI（OpenAI GPT-5.5）獨立工作區平行實作；後端到達 24 次請求上限後由主導 agent 完成審查與整合。持久化一次性 grant、CLI 建立與 console opt-in、先鎖及預檢後消耗、崩潰不退還、刷新／重啟不重跑及遠端 retry 隔離通過；實際消耗與未知用量保守顯示。94／46／29 個受追蹤程序全部退出，鎖釋放，取消清理 3.521 秒。開發 API 用量與產品驗收分開：產品零模型推論／遠端請求、未建立真實付費 grant，沒有本地 Strata 推論。新入口到 DeepSeek 產物及遠端串流停止仍待另次明確批准與實測，完整 MVP／安全驗收保持 pending，沒有 release／deploy／usable tag。

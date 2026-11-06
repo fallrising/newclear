@@ -546,3 +546,15 @@ Pre-live checkpoint：private readonly gate已完成／獨立ACCEPT_READONLY_GAT
 9supervisor+2policy+可信TLS假上游fixture通過，3初審finding修正後覆核接受。
 沒有原服務啟動或intent消耗；owner私人連線／登入／TLS readiness待確認。
 詳見[checkpoint](docs/acceptance/M3-owner-operation.md)，非live／本人FN07完成。
+
+## T-0442 重啟前保存 — 2026-11-06
+
+Owner要求先保存進度、提交代碼並合併PR。將已接受的私人只讀gate六份原始碼／測試
+保存為[去私人路徑的source-only快照](acceptance/owner-readonly-snapshot/README.md)，
+三個字串路徑以tokens替代；逐檔還原後與原已審來源bytes／SHA256完全相同。
+不改production或新開里程碑，原可執行碼／設定／備份留在可信端；不開服務或消耗窗口。
+驗證採六檔來源hash／inverse substitution／Python AST與JS syntax、project contracts、
+whitespace與獨立保存審查；原已綠9supervisor/2policy/TLSfixture不因存檔重跑。
+上次Connection refused是服務未啟，owner本人確認與完整FN07仍未完成；
+原TLS已於2026-11-02到期，重啟後先核對當時來源／原安裝／本人連線與TLS前置，
+不得直接使用舊就緒結果開窗、不重設consumed intent或自動更新認證。

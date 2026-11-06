@@ -1,0 +1,422 @@
+"""Single manual readback window. Importing this file performs no side effects."""
+import argparse
+import contextlib
+import fcntl
+import hashlib
+import http.client
+import json
+import os
+from pathlib import Path
+import signal
+import socket
+import sqlite3
+import ssl
+import subprocess
+import sys
+import time
+from urllib.parse import urlsplit, urlunsplit
+
+ROOT = Path('@PRIVATE_WORKSPACE@')
+BASE = ROOT / '.local/fanz-owner-live-20261102'
+BACKUP = Path('@RECONCILE_BACKUP@')
+CONFIG = ROOT / '.local/fanz-m3-20261101/runtime-private.json'
+SQLITE = ROOT / '.local/fanz-m3-20261101/state/submissions.sqlite'
+BINARY = BACKUP / 'codebox-control-plane'
+VENV = ROOT / '.local/fanz-readonly-20261101/venv/bin/python'
+NODE = Path('@NODE_EXECUTABLE@')
+DB = 'fanz-t0442-m2-postgres'
+PORTS = (18447, 18448, 18449, 28048)
+TABLES = ('commands', 'tasks', 'runs', 'jobs', 'run_events', 'result_archives')
+
+
+def put(path, value, exclusive=False):
+    data = (json.dumps(value, sort_keys=True, indent=2) + '\n').encode()
+    if exclusive:
+        fd = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
+        with os.fdopen(fd, 'wb') as f:
+            f.write(data)
+            f.flush()
+            os.fsync(f.fileno())
+    else:
+        temp = path.with_suffix(path.suffix + '.tmp-' + str(os.getpid()))
+        put(temp, value, exclusive=True)
+        os.replace(temp, path)
+
+
+@contextlib.contextmanager
+def locked(run):
+    with (run / 'state.lock').open('a') as f:
+        fcntl.flock(f, fcntl.LOCK_EX)
+        yield
+
+
+def read_state(run):
+    return json.loads((run / 'state.json').read_text())
+
+
+def proc_identity(pid):
+    try:
+        fields = Path(f'/proc/{pid}/stat').read_text().rsplit(')', 1)[1].split()
+        return None if fields[0] == 'Z' else fields[19]
+    except (OSError, IndexError):
+        return None
+
+
+def proc_alive(entry):
+    return entry['identity'] is not None and proc_identity(entry['pid']) == entry['identity']
+
+
+def group_members(entry):
+    members = []
+    leader_identity = proc_identity(entry['pid'])
+    if leader_identity is not None and leader_identity != entry['identity']:
+        raise RuntimeError('process group identity changed')
+    for path in Path('/proc').iterdir():
+        if not path.name.isdecimal():
+            continue
+        try:
+            fields = (path / 'stat').read_text().rsplit(')', 1)[1].split()
+            if fields[0] != 'Z' and int(fields[2]) == entry['pid']:
+                if int(fields[19]) < int(entry['identity']):
+                    raise RuntimeError('foreign process group member')
+                members.append(int(path.name))
+        except (OSError, IndexError):
+            continue
+    return members
+
+
+def due(state, mono=None):
+    return (time.monotonic() if mono is None else mono) >= state['cleanup_mono']
+
+
+def consume(run, intent):
+    if intent.get('task') != 'T-0442' or intent.get('mode') != 'readonly_existing_results':
+        raise ValueError('intent scope')
+    if intent.get('approved') is not True or intent.get('owner_connection_ready') is not True:
+        raise ValueError('owner not ready')
+    if not 0 <= time.time() - intent['approved_at_epoch'] <= 3600:
+        raise ValueError('stale intent')
+    state = {'parent': {'pid': os.getpid(), 'identity': proc_identity(os.getpid())},
+             'started_wall': time.time(), 'started_mono': time.monotonic(),
+             'cleanup_mono': time.monotonic() + 480,
+             'cleanup_wall_ms': int((time.time() + 480) * 1000),
+             'deadline_mono': time.monotonic() + 600,
+             'children': [], 'db_owned': False, 'closing': False}
+    put(run / 'started.json', {'intent_sha256': hashlib.sha256(json.dumps(intent, sort_keys=True).encode()).hexdigest(), 'started_wall': state['started_wall']}, exclusive=True)
+    put(run / 'state.json', state)
+    return state
+
+
+def command(args, timeout=10, capture=True):
+    result = subprocess.run(args, stdout=subprocess.PIPE if capture else subprocess.DEVNULL,
+                            stderr=subprocess.DEVNULL, timeout=timeout, check=True)
+    return result.stdout if capture else b''
+
+
+def db_running():
+    return json.loads(command(['docker', 'inspect', '--format', '{{json .State.Running}}', DB]))
+
+
+def listeners():
+    result = {}
+    for port in PORTS:
+        with socket.socket() as s:
+            s.settimeout(0.3)
+            result[str(port)] = s.connect_ex(('127.0.0.1', port)) == 0
+    return result
+
+
+def sqlite_snapshot():
+    with sqlite3.connect(f'file:{SQLITE}?mode=ro', uri=True, timeout=3) as connection:
+        rows = connection.execute('SELECT sequence,owner,key,state,request,receipt,run_id FROM submissions ORDER BY sequence').fetchall()
+        states = dict(connection.execute('SELECT state,count(*) FROM submissions GROUP BY state'))
+    return {'states': states, 'immutable_sha256': hashlib.sha256(json.dumps(rows, separators=(',', ':')).encode()).hexdigest()}
+
+
+def database_snapshot(run):
+    import psycopg
+    config = json.loads((run / 'runtime-private.json').read_text())
+    result = {}
+    with psycopg.connect(config['database_url'], connect_timeout=3,
+                        options='-c default_transaction_read_only=on -c statement_timeout=3000') as connection:
+        for table in TABLES:
+            rows = connection.execute(f'SELECT to_jsonb(t)::text FROM {table} t ORDER BY to_jsonb(t)::text').fetchall()
+            result[table] = {'count': len(rows), 'sha256': hashlib.sha256('\n'.join(row[0] for row in rows).encode()).hexdigest()}
+    return result
+
+
+def prepare_snapshot(run):
+    before = {'database': database_snapshot(run), 'sqlite': sqlite_snapshot()}
+    with locked(run):
+        state = read_state(run)
+        if state['closing'] or due(state):
+            raise RuntimeError('snapshot completed after admission closed')
+        put(run / 'before.json', before, exclusive=True)
+
+
+def offline_check():
+    assert hashlib.sha256(BINARY.read_bytes()).hexdigest() == '13f2b192ed219566721a313779ed364b9a83ea45f1e88b8d6371bec8bf226085'
+    inventory = json.loads((BACKUP / 'SHA256SUMS.json').read_text())
+    matched = 0
+    for name, expected in inventory.items():
+        if name.startswith('runtime-src/') or name == 'serve-ap.py':
+            if not isinstance(expected, str):
+                expected = expected['sha256']
+            assert hashlib.sha256((BACKUP / name).read_bytes()).hexdigest() == expected
+            matched += 1
+    assert matched > 0
+    assert CONFIG.stat().st_mode & 0o777 == 0o600
+    assert SQLITE.stat().st_mode & 0o777 == 0o600
+    config = json.loads(CONFIG.read_text())
+    assert config['container_name'] == DB and config['origin'] == 'https://localhost:18447'
+    certificate = ssl._ssl._test_decode_cert(str(ROOT / '.local/fanz-executor-20261031/tls.crt'))
+    assert ('DNS', 'localhost') in certificate['subjectAltName']
+    assert ssl.cert_time_to_seconds(certificate['notAfter']) > time.time() + 600
+    assert sqlite_snapshot()['states'] == {'confirmed': 4}
+    assert VENV.exists() and NODE.exists()
+    assert os.statvfs(ROOT).f_bavail * os.statvfs(ROOT).f_frsize >= 15 * 1024**3
+    return {'binary': 'matches', 'runtime_files_matched': matched, 'original_sqlite': '4confirmed/0unknown', 'tls_covers_600s': True, 'disk_at_least_15GiB': True}
+
+
+def launch_child(run, guardian, name, args, env):
+    with locked(run):
+        state = read_state(run)
+        if state['closing'] or due(state) or guardian.poll() is not None:
+            raise RuntimeError('admission closed')
+        if name in state.setdefault('launching', {}):
+            raise RuntimeError('duplicate child launch')
+        state['launching'][name] = 'reserved'
+        put(run / 'state.json', state)
+    # The wrapper records its own group before exec. Parent death in Popen cannot
+    # create an unregistered service: a late wrapper sees closing/dead parent and exits.
+    log = (run / (name + '-private.log')).open('ab')
+    try:
+        return subprocess.Popen([str(VENV), str(BASE / 'window.py'), '--child', str(run),
+                                 '--child-name', name, '--exec-args', *args], env=env,
+                                stdout=log, stderr=subprocess.STDOUT, start_new_session=True)
+    finally:
+        log.close()
+
+
+def child_exec(run, name, args):
+    with locked(run):
+        state = read_state(run)
+        if (state['closing'] or due(state) or not proc_alive(state['parent'])
+                or not proc_alive(state['guardian'])
+                or state.get('launching', {}).get(name) != 'reserved'):
+            raise RuntimeError('child admission closed')
+        identity = proc_identity(os.getpid())
+        if identity is None or os.getpgid(0) != os.getpid():
+            raise RuntimeError('child group identity unavailable')
+        state['children'].append({'name': name, 'pid': os.getpid(), 'identity': identity})
+        state['launching'][name] = 'registered'
+        put(run / 'state.json', state)
+    os.execvpe(args[0], args, os.environ)
+
+
+def ready(port, process, run):
+    for _ in range(50):
+        if process.poll() is not None or due(read_state(run)):
+            raise RuntimeError('startup stopped')
+        try:
+            c = http.client.HTTPConnection('127.0.0.1', port, timeout=0.5)
+            c.request('GET', '/api/v1/session')
+            r = c.getresponse()
+            r.read()
+            c.close()
+            if r.status == 200:
+                return
+        except (OSError, http.client.HTTPException):
+            pass
+        time.sleep(0.1)
+    raise RuntimeError('readiness deadline')
+
+
+def cleanup(run):
+    with (run / 'cleanup.lock').open('a') as cleanup_lock:
+        fcntl.flock(cleanup_lock, fcntl.LOCK_EX)
+        if (run / 'result.json').exists():
+            return
+        with locked(run):
+            state = read_state(run)
+            state['closing'] = True
+            put(run / 'state.json', state)
+        errors = []
+        for entry in reversed(state['children']):
+            try:
+                if group_members(entry):
+                    os.killpg(entry['pid'], signal.SIGINT)
+                    until = time.monotonic() + 2
+                    while group_members(entry) and time.monotonic() < until:
+                        time.sleep(0.05)
+                    if group_members(entry):
+                        os.killpg(entry['pid'], signal.SIGKILL)
+                        until = time.monotonic() + 1
+                        while group_members(entry) and time.monotonic() < until:
+                            time.sleep(0.05)
+                    if group_members(entry):
+                        raise RuntimeError('process stop unknown')
+            except (OSError, RuntimeError) as e:
+                errors.append(type(e).__name__)
+        stable = None
+        if state['db_owned']:
+            try:
+                before = json.loads((run / 'before.json').read_text())
+                after = {'database': database_snapshot(run), 'sqlite': sqlite_snapshot()}
+                put(run / 'after.json', after)
+                stable = after == before
+                if not stable:
+                    errors.append('state_changed')
+            except BaseException as e:
+                errors.append(type(e).__name__)
+            try:
+                command(['docker', 'stop', '--time', '5', DB], timeout=12, capture=False)
+                if db_running():
+                    errors.append('database_stop_unknown')
+            except BaseException as e:
+                errors.append(type(e).__name__)
+        remaining_listeners = listeners()
+        if any(remaining_listeners.values()):
+            errors.append('listener_still_open')
+        remaining_processes = sum(len(group_members(x)) for x in state['children'])
+        if remaining_processes:
+            errors.append('owned_process_group_still_alive')
+        overrun = time.monotonic() > state['deadline_mono']
+        put(run / 'result.json', {'status': 'STOPPED' if not errors and not overrun else 'STOP_UNKNOWN_OR_FAILED',
+                                 'errors': errors, 'state_unchanged': stable, 'overrun': overrun,
+                                 'elapsed_seconds': time.monotonic() - state['started_mono'],
+                                 'owned_processes_alive': remaining_processes,
+                                 'listeners': remaining_listeners, 'product_cli_starts': 0, 'vm_starts': 0,
+                                 'owner_confirmation': 'separate human response required'})
+
+
+def guardian(run):
+    with locked(run):
+        state = read_state(run)
+        state['guardian'] = {'pid': os.getpid(), 'identity': proc_identity(os.getpid())}
+        put(run / 'state.json', state)
+    put(run / 'guardian-ready.json', {'pid': os.getpid()}, exclusive=True)
+    while True:
+        state = read_state(run)
+        if due(state) or (run / 'stop.request').exists() or not proc_alive(state['parent']):
+            cleanup(run)
+            return
+        time.sleep(0.1)
+
+
+def serve(run):
+    offline_check()
+    if any(listeners().values()) or db_running():
+        raise RuntimeError('installation not stopped')
+    bindings = json.loads(command(['docker', 'inspect', '--format', '{{json .HostConfig.PortBindings}}', DB]))
+    if not all(item['HostIp'] in ('127.0.0.1', '::1') for values in bindings.values() for item in values):
+        raise RuntimeError('nonprivate database')
+    intent = json.loads((run / 'intent.json').read_text())
+    consume(run, intent)
+    guard = subprocess.Popen([str(VENV), str(BASE / 'window.py'), '--guardian', str(run)],
+                              stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, start_new_session=True)
+    try:
+        for _ in range(50):
+            if (run / 'guardian-ready.json').exists():
+                break
+            if guard.poll() is not None:
+                raise RuntimeError('guardian unavailable')
+            time.sleep(0.1)
+        else:
+            raise RuntimeError('guardian not ready')
+        with locked(run):
+            state = read_state(run)
+            if state['closing'] or due(state) or guard.poll() is not None:
+                raise RuntimeError('closed before database')
+            state['db_owned'] = True
+            put(run / 'state.json', state)
+            command(['docker', 'start', DB], capture=False)
+            mapping = json.loads(command(['docker', 'inspect', '--format', '{{json .NetworkSettings.Ports}}', DB]))['5432/tcp']
+            assert len(mapping) == 1 and mapping[0]['HostIp'] == '127.0.0.1'
+            config = json.loads(CONFIG.read_text())
+            u = urlsplit(config['database_url'])
+            assert u.hostname in ('127.0.0.1', 'localhost')
+            config['database_url'] = urlunsplit((u.scheme, u.netloc.rsplit(':', 1)[0] + ':' + mapping[0]['HostPort'], u.path, u.query, u.fragment))
+            put(run / 'runtime-private.json', config, exclusive=True)
+        # Readiness and snapshots never hold state.lock: the guardian can close
+        # admission and stop the DB even if this process is blocked in a read.
+        for _ in range(30):
+            if due(read_state(run)) or guard.poll() is not None:
+                raise RuntimeError('closed during database readiness')
+            try:
+                command(['docker', 'exec', DB, 'pg_isready', '-U', 'agent_platform'], timeout=2, capture=False)
+                break
+            except subprocess.CalledProcessError:
+                time.sleep(0.1)
+        else:
+            raise RuntimeError('database unavailable')
+        prepare_snapshot(run)
+        env = dict(os.environ, PYTHONPATH=str(BACKUP / 'runtime-src'))
+        api = launch_child(run, guard, 'api', [str(VENV), str(BACKUP / 'serve-ap.py'), str(run)], env)
+        ready(18448, api, run)
+        env.update(CODEBOX_MODE='isolated', CODEBOX_PUBLIC_ORIGIN='https://localhost:18447',
+                   CODEBOX_LISTEN_ADDRESS='127.0.0.1:18449', CODEBOX_AGENT_PLATFORM_ADDRESS='127.0.0.1:18448',
+                   CODEBOX_ISOLATED_STORE=str(SQLITE))
+        rust = launch_child(run, guard, 'rust', [str(BINARY)], env)
+        ready(18449, rust, run)
+        proxy = launch_child(run, guard, 'proxy', [str(NODE), str(BASE / 'proxy.mjs'), str(run)], env)
+        for _ in range(50):
+            if (run / 'proxy-receipts.jsonl').exists():
+                break
+            if proxy.poll() is not None or guard.poll() is not None:
+                raise RuntimeError('proxy unavailable')
+            time.sleep(0.1)
+        else:
+            raise RuntimeError('proxy not ready')
+        put(run / 'owner-ready.json', {'ready': True, 'cleanup_wall_ms': read_state(run)['cleanup_wall_ms'],
+                                      'existing_results_only': True}, exclusive=True)
+        while guard.poll() is None:
+            if api.poll() is not None or rust.poll() is not None or proxy.poll() is not None:
+                (run / 'stop.request').touch(mode=0o600)
+            time.sleep(0.1)
+        if not (run / 'result.json').exists():
+            raise RuntimeError('guardian lost')
+    except BaseException:
+        (run / 'stop.request').touch(mode=0o600)
+        if guard.poll() is not None:
+            cleanup(run)
+        else:
+            try:
+                guard.wait(timeout=60)
+            except subprocess.TimeoutExpired:
+                # Synchronous cleanup is an independent fallback, never a new window.
+                cleanup(run)
+        raise
+
+
+def main():
+    os.umask(0o077)
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--offline-check', action='store_true')
+    parser.add_argument('--guardian', type=Path)
+    parser.add_argument('--start', type=Path)
+    parser.add_argument('--child', type=Path)
+    parser.add_argument('--child-name')
+    parser.add_argument('--exec-args', nargs=argparse.REMAINDER)
+    args = parser.parse_args()
+    try:
+        if args.offline_check:
+            print(json.dumps(offline_check()))
+        elif args.guardian:
+            guardian(args.guardian)
+        elif args.start:
+            serve(args.start)
+        elif args.child:
+            child_exec(args.child, args.child_name, args.exec_args)
+        else:
+            parser.error('explicit offline check or approved single window required')
+    except BaseException as e:
+        if args.start:
+            put(args.start / 'launch-failure.json', {'error_type': type(e).__name__})
+        print(json.dumps({'status': 'FAILED', 'error_type': type(e).__name__}))
+        return 1
+    return 0
+
+
+if __name__ == '__main__':
+    sys.exit(main())

@@ -1,0 +1,20 @@
+{
+  "task": "T-182",
+  "atUtc": "2026-11-06T21:18:41.970062+00:00",
+  "rawDiffRetained": true,
+  "encodedRoundtripMatches": true,
+  "sizeBytes": 9044,
+  "sha256": "8028ef62c3bad569bd942db73e9074957e099b0ced92af6031de4429d5197629",
+  "allCurrentDocHashesUnchanged": true,
+  "preNoteReportSha256": "edafa2f7c74a6a9e5c32569ca68f415fe9049505b0c942d06d6a4a5e6b457f35",
+  "command": [
+    "python3",
+    "/home/ckc/test/codex/agents/codex-team-superpowers/scripts/teamctl.py",
+    "validate-report",
+    "apps/cms-scaffold/.team/reports/T-182.md"
+  ],
+  "exitCode": 0,
+  "output": "validate-report validation passed: apps/cms-scaffold/.team/reports/T-182.md\n",
+  "gitStateIndependentlyInspected": false,
+  "scope": "lossless packaging only; root owns publication"
+}

@@ -197,6 +197,68 @@ class ConsoleTests(unittest.TestCase):
         self.wait_job(job);self.assertEqual(commands[0][2:],['run','pi','--execute','--check-cancel'])
         with self.assertRaises(console.ConsoleError):self.app.execute(key)
 
+    def test_remote_grant_opt_in_plans_without_leaking_id_and_spawns_remote_grant(self):
+        grant_id='d'*32
+        record={'id':grant_id,'provider':'pi','task':'synthetic_file','model':'deepseek/deepseek-flash',
+                'expires_at':time.time()+120,'limits':dispatch.plan('pi')['limits']}
+        self.app.remote_grant_providers=('pi',)
+        commands=[]
+        native=subprocess.Popen
+        def spawn(command, log):
+            commands.append(command)
+            return native([sys.executable,'-c','pass'], stdout=log, stderr=subprocess.STDOUT)
+        with patch.object(console.grants,'pending',return_value=record), patch.object(console.grants,'inspect',return_value=record), patch.object(self.app,'spawn',side_effect=spawn):
+            code,raw,_=self.request('/api/plan',{'provider':'pi','mode':'task'})
+            self.assertEqual(code,200); payload=json.loads(raw)
+            self.assertTrue(payload['executable'])
+            self.assertEqual(payload['plan']['authorization']['kind'],'server_grant')
+            self.assertNotIn(grant_id, raw.decode())
+            result=self.app.execute(payload['plan_id'])
+            self.wait_job(result['job_id'])
+        self.assertEqual(commands[0][2:], ['run','pi','--execute','--remote-grant',grant_id])
+        self.assertNotIn('--allow-remote', commands[0])
+
+    def test_remote_grant_used_before_execute_is_reported_without_spawn(self):
+        grant_id='e'*32
+        record={'id':grant_id,'provider':'pi','task':'synthetic_file','model':'deepseek/deepseek-flash',
+                'expires_at':time.time()+120,'limits':dispatch.plan('pi')['limits']}
+        self.app.remote_grant_providers=('pi',)
+        with patch.object(console.grants,'pending',return_value=record):
+            key=self.app.plan({'provider':'pi','mode':'task'})['plan_id']
+        with patch.object(console.grants,'inspect',side_effect=console.grants.GrantError('remote_grant_used')), patch.object(self.app,'spawn') as spawn:
+            with self.assertRaisesRegex(console.grants.GrantError,'remote_grant_used'):
+                self.app.execute(key)
+            spawn.assert_not_called()
+
+    def test_remote_retry_never_uses_pending_fresh_task_grant(self):
+        self.app.remote_grant_providers=('pi',)
+        preview=dict(dispatch.plan('pi'), retry_of='pi-work-failed', attempt=1)
+        with patch.object(self.app,'preview',return_value=(preview,None)), patch.object(console.grants,'pending') as pending, patch.object(self.app,'spawn') as spawn:
+            result=self.app.plan({'retry_id':'pi-work-failed'})
+            self.assertFalse(result['executable'])
+            with self.assertRaises(console.ConsoleError): self.app.execute(result['plan_id'])
+            pending.assert_not_called(); spawn.assert_not_called()
+
+    def test_http_cannot_create_replace_grant_or_add_execution_arguments(self):
+        self.app.remote_grant_providers=('pi',)
+        with patch.object(self.app,'spawn') as spawn:
+            for endpoint,body in [('/api/grant',{'provider':'pi'}),('/api/grant-revoke',{'id':'a'*32}),
+                                  ('/api/execute',{'plan_id':'missing','remote_grant':'a'*32}),
+                                  ('/api/execute',{'plan_id':'missing','allow_remote':True})]:
+                self.assertEqual(self.request(endpoint,body)[0],404)
+            spawn.assert_not_called()
+
+    def test_bad_grant_state_does_not_hide_jobs_or_report_false_consumption(self):
+        self.app.remote_grant_providers=('pi',)
+        _,job,_=self.launch_helper({'provider':'pi','mode':'http_429'},'pass'); self.wait_job(job)
+        self.app.jobs[job].update(remote=True,grant_id='f'*32)
+        with patch.object(console.grants,'pending',side_effect=console.grants.GrantError('remote_grant_source_changed')), patch.object(console.grants,'consumed',side_effect=console.grants.GrantError('remote_grant_unavailable')):
+            snapshot=self.app.snapshot()
+            self.assertEqual(len(snapshot['jobs']),1)
+            self.assertIsNone(snapshot['jobs'][0]['authorization_consumed'])
+            self.assertEqual(snapshot['remote_grants']['pending'],[])
+            self.assertEqual(snapshot['remote_grants']['errors'][0]['error'],'remote_grant_source_changed')
+
     def test_terminal_dispatch_only_local_and_cannot_mix_modes(self):
         with patch.object(dispatch,'detect') as detect:
             for provider,options in [('pi',{}),('grok',{}),('opencode',{'check_cancel':True}),('opencode',{'check_failure':401})]:

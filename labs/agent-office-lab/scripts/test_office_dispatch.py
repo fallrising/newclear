@@ -224,6 +224,30 @@ class DispatchTest(unittest.TestCase):
             self.assertEqual(dispatch.plan(provider)['model'].split('/')[-1], native['model'])
             self.assertEqual(dispatch.plan(provider)['limits']['timeout_seconds'], native['timeout_seconds'])
 
+    def test_remote_grant_consumed_only_after_preflight_and_exec_uses_authorization_ref(self):
+        consumed=[]
+        def fake_consume(lab, grant_id, provider, entry):
+            consumed.append((grant_id, provider, entry)); return {'id':grant_id}
+        with patch.object(dispatch, 'detect', return_value={'launch_prerequisites_present': False}), \
+                patch.object(dispatch.grants, 'consume', side_effect=fake_consume), \
+                patch.object(os, 'execve') as execute, contextlib.redirect_stdout(io.StringIO()):
+            self.assertEqual(dispatch.launch('pi', False, self.lab, remote_grant='a'*32), 1)
+            self.assertEqual(consumed, []); execute.assert_not_called()
+        with patch.object(dispatch, 'detect', return_value={'launch_prerequisites_present': True}), \
+                patch.object(dispatch.grants, 'consume', side_effect=fake_consume), \
+                patch.object(os, 'execve', side_effect=OSError('stop')) as execute:
+            with self.assertRaises(OSError):
+                dispatch.launch('pi', False, self.lab, remote_grant='b'*32)
+            self.assertEqual(consumed, [('b'*32, 'pi', 'dispatcher')])
+            self.assertEqual(execute.call_args.args[1][2:], ['--allow-remote','--authorization-ref','b'*32])
+
+    def test_remote_grant_rejects_retry_checks_and_non_pi(self):
+        with patch.object(dispatch, 'detect') as detect, patch.object(os, 'execve') as execute:
+            for provider, options in [('grok', {}), ('pi', {'check_cancel':True}), ('pi', {'check_failure':429}), ('pi', {'check_crash':True}), ('pi', {'check_resume':True}), ('pi', {'retry_parent':'pi-work-x'})]:
+                with self.assertRaises((SlotError, dispatch.grants.GrantError)):
+                    dispatch.launch(provider, False, self.lab, remote_grant='c'*32, **options)
+            detect.assert_not_called(); execute.assert_not_called()
+
     def test_all_direct_runner_entrypoints_obey_busy_slot(self):
         scripts = Path(__file__).resolve().parent
         cases = [(spec, spec['args']) for spec in dispatch.SPECS.values()]

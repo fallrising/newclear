@@ -18,6 +18,7 @@ RUN_NAME = re.compile(r'(?:local-work|grok-work|pi-work|cursor-work)-[A-Za-z0-9_
 TOKEN = re.compile(r'[A-Za-z0-9][A-Za-z0-9._/-]{0,127}\Z')
 MARKER = re.compile(r'[A-Za-z0-9_-]{1,128}\Z')
 SHA256 = re.compile(r'[a-f0-9]{64}\Z')
+AUTH_FINGERPRINT = re.compile(r'[a-f0-9]{12}\Z')
 MAX_RUNS = 1000
 
 
@@ -108,6 +109,16 @@ def _normalize(run_fd, run_id):
     if not isinstance(office, dict):
         return dict(row, reason='invalid_native_report')
     row['version'] = safe_token(report.get('version'))
+    authorization = report.get('authorization')
+    if (isinstance(authorization, dict) and set(authorization) == {'kind','fingerprint'}
+            and authorization.get('kind') == 'server_grant'
+            and isinstance(authorization.get('fingerprint'), str) and AUTH_FINGERPRINT.fullmatch(authorization['fingerprint'])):
+        row['authorization'] = {'kind':'server_grant','fingerprint':authorization['fingerprint']}
+    usage = report.get('remote_usage')
+    if (isinstance(usage, dict) and set(usage) == {'requests','output_tokens'}
+            and type(usage.get('requests')) is int and 0 <= usage['requests'] <= 4
+            and (usage.get('output_tokens') is None or (type(usage.get('output_tokens')) is int and 0 <= usage['output_tokens'] <= 4 * 512))):
+        row['remote_usage'] = {'requests':usage['requests'], 'output_tokens':usage['output_tokens']}
     # Preserve model provenance from the saved native report, never infer it from a CLI default.
     row['model'] = safe_token(office.get('model'))
     requested = safe_token(report.get('model'))

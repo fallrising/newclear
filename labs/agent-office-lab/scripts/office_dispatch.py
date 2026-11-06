@@ -21,6 +21,7 @@ import time
 import cursor_cli
 from execution_slot import SlotError, acknowledge_stopped, execution_slot, inspect_slot
 import remote_cli
+import remote_grant as grants
 
 LAB = Path(__file__).resolve().parents[1]
 VENDOR_COMMIT = '852e2ab28c4f3f31bffdf4b20353bd119c9d3270'
@@ -242,18 +243,27 @@ def plan(provider, check_cancel=False, check_failure=None, check_crash=False, ke
             'model_task_started': False, 'automatic_fallback': False}
 
 
-def launch(provider, allow_remote, lab=LAB, check_cancel=False, check_failure=None, check_crash=False, retry_parent=None, keep_open=False, check_resume=False, check_host_restart=False):
-    validate_host_restart(provider, check_host_restart, check_resume, check_cancel, check_failure, check_crash, keep_open, allow_remote)
-    validate_resume(provider, check_resume, check_cancel, check_failure, check_crash, keep_open, allow_remote)
+def launch(provider, allow_remote, lab=LAB, check_cancel=False, check_failure=None, check_crash=False, retry_parent=None, keep_open=False, check_resume=False, check_host_restart=False, remote_grant=None):
+    grant_remote = remote_grant is not None
+    if grant_remote:
+        if allow_remote:
+            raise SlotError('remote_grant_conflicts_with_allow_remote')
+        if provider != 'pi':
+            raise grants.GrantError('remote_grant_provider_not_supported')
+        if retry_parent is not None or check_cancel or check_failure is not None or check_crash or check_resume or check_host_restart or keep_open:
+            raise SlotError('remote_grant_requires_fresh_task')
+    effective_allow_remote = allow_remote or grant_remote
+    validate_host_restart(provider, check_host_restart, check_resume, check_cancel, check_failure, check_crash, keep_open, effective_allow_remote)
+    validate_resume(provider, check_resume, check_cancel, check_failure, check_crash, keep_open, effective_allow_remote)
     validate_keep_open(provider, keep_open, check_cancel, check_failure, check_crash)
-    validate_crash(provider, check_crash, check_cancel, check_failure, allow_remote)
+    validate_crash(provider, check_crash, check_cancel, check_failure, effective_allow_remote)
     spec = SPECS[provider]
-    validate_failure(provider, check_failure, check_cancel, allow_remote)
+    validate_failure(provider, check_failure, check_cancel, effective_allow_remote)
     if check_cancel and provider not in ('opencode', 'pi'):
         raise SlotError('local_cancel_check_only')
-    if (spec['remote'] and check_failure is None and not check_crash and not check_cancel and not check_resume and not check_host_restart) != allow_remote:
+    if (spec['remote'] and check_failure is None and not check_crash and not check_cancel and not check_resume and not check_host_restart) != effective_allow_remote:
         raise SlotError('explicit_remote_authorization_required' if spec['remote'] else 'local_remote_flag_forbidden')
-    # Lock before preflight, then replace this process; the runner adopts the same lock/PID.
+    # Lock before preflight and grant consumption, then replace this process; the runner adopts the same lock/PID.
     with execution_slot(lab) as slot:
         if retry_parent is not None:
             meta, _, _ = pi_retry.inspect(lab, retry_parent)
@@ -265,8 +275,13 @@ def launch(provider, allow_remote, lab=LAB, check_cancel=False, check_failure=No
         if not ready:
             print(json.dumps({'status': 'blocked', 'reason': 'preflight_failed', 'check': check}))
             return 1
+        consumed = None
+        if grant_remote:
+            consumed = grants.consume(lab, remote_grant, 'pi', 'dispatcher')
         python = strata_home(lab) / 'source/.venv/bin/python' if provider == 'opencode' else Path(sys.executable)
         runner_args = ['--check-failure', str(check_failure)] if check_failure is not None else spec['args']
+        if grant_remote:
+            runner_args = ['--allow-remote', '--authorization-ref', consumed['id']]
         if check_host_restart: runner_args = ['--check-host-restart']
         if check_resume: runner_args = ['--check-resume']
         if check_crash: runner_args = ['--check-crash']
@@ -307,8 +322,12 @@ def main(argv=None):
     commands.add_parser('status', help='Read the shared execution state without launching or acknowledging anything')
     check = commands.add_parser('detect'); check.add_argument('--provider', choices=[*SPECS, 'all'], default='all')
     preview = commands.add_parser('plan'); preview.add_argument('provider', choices=SPECS)
+    grant = commands.add_parser('grant'); grant.add_argument('provider', choices=['pi']); grant.add_argument('--ttl', type=int, default=900); grant.add_argument('--confirm-paid-remote-run', action='store_true', required=True)
+    revoke = commands.add_parser('grant-revoke'); revoke.add_argument('grant_id')
+    commands.add_parser('grants', help='List pending remote grants without exposing IDs')
     run = commands.add_parser('run'); run.add_argument('provider', choices=SPECS)
-    run.add_argument('--execute', action='store_true'); run.add_argument('--allow-remote', action='store_true')
+    run.add_argument('--execute', action='store_true')
+    remote_group = run.add_mutually_exclusive_group(); remote_group.add_argument('--allow-remote', action='store_true'); remote_group.add_argument('--remote-grant')
     run.add_argument('--check-cancel', action='store_true', help='OpenCode: local task cancellation; Pi: cancel a held loopback request without model calls')
     run.add_argument('--check-failure', type=int, choices=(401, 429), help='Pi only: injected loopback HTTP failure; no remote calls')
     run.add_argument('--check-host-restart', action='store_true', help='Pi only: crash/restart Office and reconnect one saved session; no model calls')
@@ -323,6 +342,19 @@ def main(argv=None):
     args = parser.parse_args(argv)
     try:
         if args.action == 'local-text': return launch_text_task(args.request,args.sha256)
+        if args.action == 'grant':
+            value = grants.create(LAB, args.provider, args.ttl)
+            print(json.dumps({'id': value['id'], 'fingerprint': value['fingerprint'], 'expires_at': value['expires_at'],
+                              'limits': value['limits'], 'money_cap': None}, indent=2))
+            return 0
+        if args.action == 'grant-revoke':
+            grants.revoke(LAB, args.grant_id)
+            print(json.dumps({'status':'revoked', 'fingerprint': grants.fingerprint(args.grant_id)}))
+            return 0
+        if args.action == 'grants':
+            row = grants.pending(LAB, 'pi')
+            print(json.dumps({'remote_grants': {'enabled_providers':['pi'], 'pending': [] if row is None else [grants.public(row)]}}, indent=2))
+            return 0
         if args.action == 'status':
             state = inspect_slot(LAB)
             print(json.dumps({'shared_execution':state,'model_task_started':False}))
@@ -342,10 +374,13 @@ def main(argv=None):
                               'processes_stopped_by_this_command': False, 'model_task_started': False}))
             return 0
         if args.action == 'plan' or not args.execute:
-            if args.action == 'run' and args.allow_remote:
-                parser.error('--allow-remote requires --execute')
+            if args.action == 'run' and (args.allow_remote or args.remote_grant):
+                parser.error('--allow-remote/--remote-grant requires --execute')
             print(json.dumps(plan(args.provider, getattr(args, 'check_cancel', False), getattr(args, 'check_failure', None), getattr(args, 'check_crash', False), getattr(args, 'keep_open', False), getattr(args, 'check_resume', False), getattr(args, 'check_host_restart', False)), indent=2)); return 0
-        return launch(args.provider, args.allow_remote, check_cancel=args.check_cancel, check_failure=args.check_failure, check_crash=args.check_crash, keep_open=args.keep_open, check_resume=args.check_resume, check_host_restart=args.check_host_restart)
+        return launch(args.provider, args.allow_remote, check_cancel=args.check_cancel, check_failure=args.check_failure, check_crash=args.check_crash, keep_open=args.keep_open, check_resume=args.check_resume, check_host_restart=args.check_host_restart, remote_grant=args.remote_grant)
+    except grants.GrantError as error:
+        print(json.dumps({'status':'blocked', 'reason':str(error)}), file=sys.stderr)
+        return 1
     except SlotError as error:
         print(json.dumps({'status': 'blocked', 'reason': str(error)}), file=sys.stderr)
         return 1

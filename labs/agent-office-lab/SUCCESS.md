@@ -5,8 +5,8 @@ purpose: 驗證本地優先的 OpenCode、Grok、Pi、Cursor 四工位 Agent Off
 kind: lab
 mainline: incomplete
 usable_tag: none
-reviewed: 2026-11-06
-source_commit: 716dbd977d4089d6e991256b051d4f25e002d4cc
+reviewed: 2026-11-07
+source_commit: 646b11189ced91016e1dc57306460cf890d1dee3
 ---
 
 # Agent Office Lab 驗收
@@ -14,6 +14,10 @@ source_commit: 716dbd977d4089d6e991256b051d4f25e002d4cc
 四個 provider 的合成任務已實測通過：OpenCode、Grok、Pi + DeepSeek、Cursor。各次獨立付費授權已使用，沒有自動重跑；歷史失敗及修正見 [HANDOFF](HANDOFF.md) 和 [任務板](docs/tasks/BOARD.md)。完整 MVP 保持 incomplete。
 
 ## 主線與範圍
+
+T-0024：[指導與委託契約](docs/T24-TECHNICAL-GUIDANCE.md)。依 owner 指示，由 Claude Opus 5.5 提供技術指導，Pi agent 在獨立工作區平行實作下一步遠端操作台派工。優先範圍為固定 Pi／DeepSeek 任務的一次性操作員授權、頁面明確確認、派工／停止／結果整合；預設仍不允許遠端執行。
+
+驗證計畫：Claude 指導先固定 API 與檔案分工，Pi 後端與介面工作分離；主導 agent 審查整合、離線授權／競態／失敗回歸及瀏覽器驗收。開發委託的模型呼叫與產品遠端實測分開記錄；沒有產品付費任務批准前，只跑本機故障／測試替身，不能宣稱遠端模型端到端驗收。原限制、共用執行鎖及完整清理要求保留。
 
 T-0023：Pi Office host 重啟與明確同 session 重新連接。以本機 429 建立真實 Pi 的未完成歷史，核對所屬 Office 主程序後注入 SIGKILL；新 host 將工位停泊為 interrupted，重複重啟及瀏覽器刷新均不自動派工。明確一次性無 prompt resume 接回相同 session，保留歷史且不追加模型請求。
 
@@ -116,6 +120,8 @@ T-0015：完成 [Pi CLI crash 與明確重新啟動](docs/CRASH.md)。真實 Pi 
 T-0016：完成 [Pi 有界明確重試](docs/RETRY.md)。統一入口 retry 預設只顯示計畫；執行時重新核對最新失敗、完整清理、固定模式／fixture 與來源，同一任務最多兩次重試。真實 Pi 本機 429 的初次＋兩次重試通過：三個獨立 session 使用相同 input，原報告／事件不變，第三次及舊 parent 的六項請求全部拒絕且不新增 run。三次分別追蹤 41／35／46 個程序，全部退出、鎖釋放；各一次本機請求、零模型推論或外部請求。152 tests 與 46 筆結果瀏覽器關聯／分類／刷新通過。[證據](docs/evidence/pi-retry-2026-11-02.json)，交付狀態見[任務板](docs/tasks/BOARD.md)。其他 provider、原 session 恢復、UI 派工與完整 MVP 仍待驗。
 
 ## 現況與缺口
+
+T-0024：完成 [Pi 遠端操作台一次性授權](docs/REMOTE-GRANT.md)。實際由 Claude Opus 5.5 指導，兩個 Pi CLI worker（OpenAI GPT-5.5）在獨立工作區平行實作；後端達 24 次請求上限後停止，主導 agent 補齊審查與整合。授權先由 CLI 建立、操作台明示接受，綁定固定任務與來源，消耗後不退還；重啟不重置、遠端重試保持 CLI。218 tests、五組 Chrome 測試替身流程、真實 Pi 本機 429／取消及 65 筆結果回歸通過。取消清理 3.521 秒；測試替身／429／取消分別追蹤 94／46／29 個程序，全部退出、鎖釋放。開發 agent 有遠端 API 用量；產品驗收零模型推論、零遠端請求、未建立真實付費 grant。遠端 UI 到 DeepSeek 產物仍待另次批准驗收，完整 MVP／安全驗收保持 pending。[證據](docs/evidence/remote-grant-2026-11-07.json)，交付見[任務板](docs/tasks/BOARD.md)。
 
 MVP 的 11 項必要 AC（01–09、11、13）中，02／03／04／13 的四 provider 合成任務已有原受測版本成功證據；其餘 7 項仍 pending，已有多項子集通過。這不是工時百分比，也不表示最新版完整流程已驗收。主要剩餘工作為遠端 UI 派工／原生終端／結果整合、跨 provider 權限／取消／session 恢復與重試、遠端新入口端到端實測，以及完整路徑／hooks／憑證／網路邊界。本地文字任務已支援自訂要求與工作目錄快照；單檔修改提案已可審閱／下載，多檔修改、自動測試、安全套用與完整日常工作流程仍待完成。
 

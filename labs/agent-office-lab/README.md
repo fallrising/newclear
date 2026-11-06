@@ -4,6 +4,7 @@
 
 - [本地單檔修改提案：選檔、審閱差異與下載](docs/LOCAL-FILE-PROPOSAL.md)
 - [本地文字任務：選目錄、輸入要求與下載文件](docs/LOCAL-TEXT-TASK.md)
+- [Pi 遠端操作台一次性授權](docs/REMOTE-GRANT.md)：CLI 建立、持久化消耗與頁面明確執行；真實遠端驗收待完成。
 - [本機操作台：派工、原生終端與結果](docs/CONSOLE.md)
 - [Pi 明確重試與次數限制](docs/RETRY.md)
 - [Pi CLI crash 與明確重新啟動](docs/CRASH.md)

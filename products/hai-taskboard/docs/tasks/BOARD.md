@@ -514,8 +514,13 @@ stay out of scope.
 
 | ID | Task | AC | Status | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| HBLKP | Propose and review AddBlocker / ResolveBlocker command contract | BLK-PLAN-01..03 | in_progress | 2026-11-02T16:16:24Z |  | 2026-11-02T16:22:43Z |
+| HBLKP | Propose and review AddBlocker / ResolveBlocker command contract | BLK-PLAN-01..03 | done | 2026-11-02T16:16:24Z | 2026-11-02T16:33:49Z | 2026-11-02T16:33:49Z |
 
 BLK-PLAN-01 maps the unreachable blocker lifecycle to source. BLK-PLAN-02 fixes BLK-01..04, BLK-AC-01..04 and the
 minimal owner decision. BLK-PLAN-03 disposes Claude review, passes document checks and completes Git/CI/readback/ledger
 delivery. [Proposal](../plans/blocker-commands-20261102.md); [review evidence](../evidence/blocker-commands-plan-20261102.md).
+
+2026-11-02T16:33:49Z: proposal [#1005](https://github.com/fallrising/newclear/pull/1005) merged normally as `b66257fde9a7095f0f83e3842f358dbe00d51642`.
+Reviewed head `692c6339` passed HAI CI 41480926957 and Project success 41480926678; remote HAI files match the reviewed
+head. HBLKP end uses the merge time. Merging does not approve the contract: implementation (HBLK) waits for owner D1
+(slice and public OpenAPI amendment) and D2 (AddBlocker phases; D2-a recommended). T-0339 stays in_progress.

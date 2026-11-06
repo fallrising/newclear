@@ -269,5 +269,7 @@ Owner 指示繼續開發；真實 Pi、本機 429，零模型呼叫。
 
 | ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| T-0023-01 | Host crash、重複重啟、明確同 session 重新連接 | AC-08 子集 | in_progress | 2026-11-06T15:16:20Z | — | 2026-11-06T15:22:30Z |
-| T-0023-02 | 一次性 gate、結果與瀏覽器、歷史及程序清理驗收 | AC-09／11 子集 | in_progress | 2026-11-06T15:16:20Z | — | 2026-11-06T15:22:30Z |
+| T-0023-01 | Host crash、重複重啟、明確同 session 重新連接 | AC-08 子集 | done | 2026-11-06T15:16:20Z | 2026-11-06T15:25:51Z | 2026-11-06T15:26:30Z |
+| T-0023-02 | 一次性 gate、結果與瀏覽器、歷史及程序清理驗收 | AC-09／11 子集 | done | 2026-11-06T15:16:20Z | 2026-11-06T15:25:51Z | 2026-11-06T15:26:30Z |
+
+T-0023 結案：[PR #1033](https://github.com/fallrising/newclear/pull/1033) 已合併，commit `03edf45eb3593064ef74a643201389862d1cba9f`，offline／validate 兩項 CI success。已回讀主線證據：195 tests、真實 Pi 1.4.0／三代 Office host／Chrome 首輪驗收，以及 63 筆結果回歸通過。一次本機 429 後對已核對所屬 host 注入 SIGKILL，重啟後保持 interrupted，重複重啟與刷新不重跑；明確一次性無 prompt 重連到相同 session、新 PID，六筆歷史保留。runner 41.06 秒，外層 83 個程序全退出、鎖釋放；正常關閉後兩個已追蹤背景程序經身分核對送 SIGTERM，確認無殘留。零模型推論與外部請求，任務保持 stopped。完成 AC-08／09／11 子集；進行中遠端串流恢復、任務續做、其他 provider 與完整安全／MVP 仍 pending，沒有 release／deploy／usable tag。

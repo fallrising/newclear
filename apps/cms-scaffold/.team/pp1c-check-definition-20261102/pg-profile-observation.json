@@ -1,0 +1,9 @@
+{
+  "postgresImageDigest": "sha256:6a2e324ebe59af6031c4c1cd96c1d5072c2ebc36563d2196365e43b8297c062d",
+  "postgresServerVersion": "16.15",
+  "pgDumpVersion": "16.15",
+  "pgRestoreVersion": "16.15",
+  "targetPostgresImage": "sha256:6a2e324ebe59af6031c4c1cd96c1d5072c2ebc36563d2196365e43b8297c062d",
+  "manifestSha256": "32d924e2396648c715ca7e2e4f7e7336592403b1b293c4fad4e1c09be70f68d4",
+  "scope": "actual captured source manifest and failed target sealed identity; no successful C receipt"
+}

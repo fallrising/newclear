@@ -1,0 +1,47 @@
+[
+  {
+    "path": "cms_content_type/schema/constraints/3/definition",
+    "source": "CHECK (((slug_policy)::text = ANY ((ARRAY['required'::character varying, 'optional'::character varying, 'none'::character varying])::text[])))",
+    "target": "CHECK (((slug_policy)::text = ANY (ARRAY[('required'::character varying)::text, ('optional'::character varying)::text, ('none'::character varying)::text])))"
+  },
+  {
+    "path": "cms_entry/schema/constraints/2/definition",
+    "source": "CHECK (((publication_state)::text = ANY ((ARRAY['draft'::character varying, 'published'::character varying, 'archived'::character varying])::text[])))",
+    "target": "CHECK (((publication_state)::text = ANY (ARRAY[('draft'::character varying)::text, ('published'::character varying)::text, ('archived'::character varying)::text])))"
+  },
+  {
+    "path": "cms_entry_index/schema/constraints/1/definition",
+    "source": "CHECK (((value_kind)::text = ANY ((ARRAY['string'::character varying, 'enum'::character varying, 'int'::character varying, 'bool'::character varying, 'datetime'::character varying, 'ref'::character varying])::text[])))",
+    "target": "CHECK (((value_kind)::text = ANY (ARRAY[('string'::character varying)::text, ('enum'::character varying)::text, ('int'::character varying)::text, ('bool'::character varying)::text, ('datetime'::character varying)::text, ('ref'::character varying)::text])))"
+  },
+  {
+    "path": "cms_entry_index/schema/constraints/2/definition",
+    "source": "CHECK (((scope)::text = ANY ((ARRAY['work'::character varying, 'published'::character varying])::text[])))",
+    "target": "CHECK (((scope)::text = ANY (ARRAY[('work'::character varying)::text, ('published'::character varying)::text])))"
+  },
+  {
+    "path": "cms_entry_ref/schema/constraints/1/definition",
+    "source": "CHECK (((to_kind)::text = ANY ((ARRAY['entry'::character varying, 'media'::character varying, 'principal'::character varying])::text[])))",
+    "target": "CHECK (((to_kind)::text = ANY (ARRAY[('entry'::character varying)::text, ('media'::character varying)::text, ('principal'::character varying)::text])))"
+  },
+  {
+    "path": "cms_field/schema/constraints/2/definition",
+    "source": "CHECK (((on_delete)::text = ANY ((ARRAY['restrict'::character varying, 'set_null'::character varying, 'cascade_soft'::character varying])::text[])))",
+    "target": "CHECK (((on_delete)::text = ANY (ARRAY[('restrict'::character varying)::text, ('set_null'::character varying)::text, ('cascade_soft'::character varying)::text])))"
+  },
+  {
+    "path": "cms_field/schema/constraints/4/definition",
+    "source": "CHECK (((visibility)::text = ANY ((ARRAY['public'::character varying, 'back'::character varying, 'internal'::character varying])::text[])))",
+    "target": "CHECK (((visibility)::text = ANY (ARRAY[('public'::character varying)::text, ('back'::character varying)::text, ('internal'::character varying)::text])))"
+  },
+  {
+    "path": "cms_navigation_menu/schema/constraints/2/definition",
+    "source": "CHECK (((publication_state)::text = ANY ((ARRAY['draft'::character varying, 'published'::character varying])::text[])))",
+    "target": "CHECK (((publication_state)::text = ANY (ARRAY[('draft'::character varying)::text, ('published'::character varying)::text])))"
+  },
+  {
+    "path": "cms_principal/schema/constraints/1/definition",
+    "source": "CHECK (((status)::text = ANY ((ARRAY['active'::character varying, 'disabled'::character varying, 'locked'::character varying])::text[])))",
+    "target": "CHECK (((status)::text = ANY (ARRAY[('active'::character varying)::text, ('disabled'::character varying)::text, ('locked'::character varying)::text])))"
+  }
+]

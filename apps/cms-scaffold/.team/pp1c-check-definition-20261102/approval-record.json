@@ -1,0 +1,12 @@
+{
+  "status": "APPROVED",
+  "ownerQuote": "批准。",
+  "exactUtteranceAt": null,
+  "firstRecordedAt": "2026-11-06T15:19:35Z",
+  "firstRecordedAtSingapore": "2026-11-06 23:19:35 SGT",
+  "proposalHead": "d99347461a787eb6b4724d5bac93651253785d6c",
+  "proposalFixtureSha256": "321c4c27feb93fe4118f72785e79f6df720d0bc825d4d2a2c96f53bf343012d1",
+  "approvedFixtureSha256": "f25157feb8a0c027f1b8930c4fad64fe7e0291e0745702d2e2a3b727533e856a",
+  "implementationEnabled": false,
+  "cAccepted": false
+}

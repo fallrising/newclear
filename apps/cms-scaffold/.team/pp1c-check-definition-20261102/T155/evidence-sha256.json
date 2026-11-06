@@ -1,0 +1,15 @@
+{
+  "schemaHashesRecomputed": 40,
+  "exactPairsMatchedToSavedCatalog": 9,
+  "sha256": {
+    "approval-checker.txt": "cca4a9a003e7e217d315d7bd237d5ab6bbbc27b02afaf1d5ba26b883fb086e54",
+    "approval-protocol.txt": "647d9d7b181fe1dea5fccea8f3faae0d1169adbcdfd642fd169e050d8a234842",
+    "approval-project.txt": "7ce977474c34786fd293ed867813160ce21d392ba3d7db8a3b4edcefa646b9ee",
+    "approval-project-tests.txt": "83ad79a1e26467e2445a1816751b66d64a11dbbbac25b9002f6e48960864f468",
+    "catalog-only-observations.json": "eb469fe3185d55cdb7ef0bf3c02cb4eef029d21b921f9b6c890750c3a45f5341",
+    "pg-profile-observation.json": "f89ac9c31f9edb93ebf6fecd241a843aeb937a6bcff7143a887ed2577f673b2c",
+    "DECISION.md": "9e14d501d64ce8838237c35a45ec43190cabb22ee1513eef2ef38db9fa4f9b82",
+    "PLAN.md": "f8738a352240e051b3ea91e35584fbc5c901155b78be29e0e20150a488876cc9",
+    "approval-record.json": "23df572d2446a74a28d1b44a58ed15cd5394c31acdae31949de5d060699fd999"
+  }
+}

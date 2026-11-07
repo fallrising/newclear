@@ -1,0 +1,8 @@
+{
+  "version": 1,
+  "original": "T141/C141a/green.log",
+  "sha256": "97a134401207ae8d3b8f897453e2217a95edef94d9b48b9348f8480ad6ab922d",
+  "byteSize": "1292",
+  "encoding": "utf-8",
+  "text": "✔ PP1FM04_targetProvenanceMustMatch (31.291489ms)\n✔ PP1FM04 artifact drift and malformed source fail closed (59.57674ms)\n✔ PP1FM04 target never publishes DB ports or changes topology (65.014266ms)\n✔ PP1FM04 private metadata/ancestor safety rejects before Docker (36.513717ms)\n✔ PP1FM04 persistent metadata exact schema/generation and mode (46.078727ms)\n✔ PP1FM04 derives fresh PG IP and verifies stopped API plus unknown writers (20.960203ms)\n✔ PP1FM04 malformed output/env/dist and all service ports fail closed (63.226895ms)\n✔ PP1FM04 media probe uses exact owned no-network readonly pinned tuple (14.21943ms)\n✔ PP1FM04 owner UID and dependency errors use fixed rejection (6.753822ms)\n✔ PP1FM04 full mounts reject Source mismatch and overlapping foreign sources (88.789447ms)\n✔ PP1FM04 media tree permits empty directories and rejects file/symlink/read errors (38.519028ms)\n✔ PP1FM04 internal endpoints without default routes bind only the verified IPAM gateway (30.910569ms)\n✔ T141 original capability is mandatory for observed settings (8.147155ms)\n✔ T141 exact source launcher and inherited environment refuse override channels (87.533982ms)\nℹ tests 14\nℹ suites 0\nℹ pass 14\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 660.923659\n"
+}

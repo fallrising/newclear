@@ -1,0 +1,13 @@
+import {lstat,realpath,readdir,writeFile} from 'node:fs/promises';
+import {resolve} from 'node:path';
+export async function privateState(path){if(typeof path!=='string'||resolve(path)!==path)throw Error('REVIEW_STATE_PATH');const st=await lstat(path);if(st.isSymbolicLink()||!st.isDirectory()||st.uid!==process.getuid()||(st.mode&0o777)!==0o700||await realpath(path)!==path)throw Error('REVIEW_STATE_OWNER');if((await readdir(path)).length)throw Error('REVIEW_STATE_NOT_EMPTY');await writeFile(path+'/started','fanz-review\n',{flag:'wx',mode:0o600});return path;}
+export async function bounded(action,ms,label){let timer;try{return await Promise.race([Promise.resolve().then(action),new Promise((_,reject)=>{timer=setTimeout(()=>reject(Error('REVIEW_TIMEOUT_'+label)),ms);})]);}finally{clearTimeout(timer);}}
+export class Lifecycle{
+ constructor({drainMs=31000,closeMs=3000}={}){this.drainMs=drainMs;this.closeMs=closeMs;this.entries=[];this.cancelled=false;this.closing=false;this.cancelPromise=new Promise((_,reject)=>{this.rejectCancel=reject;});this.cancelPromise.catch(()=>{});}
+ check(){if(this.cancelled||this.closing)throw Error('REVIEW_CANCELLED');}
+ cancel(reason){if(!this.cancelled){this.cancelled=true;this.reason=reason;this.rejectCancel(Error('REVIEW_CANCELLED'));}}
+ run(action){this.check();return Promise.race([Promise.resolve().then(action),this.cancelPromise]);}
+ async acquire(name,create,close){this.check();const entry={name,close,state:'acquiring'};this.entries.push(entry);entry.pending=Promise.resolve().then(create).then(async value=>{entry.value=value;entry.state='acquired';if(this.closing||this.cancelled)await this.closeEntry(entry);return value;},error=>{entry.state='acquire-failed';throw error;});entry.pending.catch(()=>{});return Promise.race([entry.pending,this.cancelPromise]);}
+ closeEntry(entry){if(entry.closing)return entry.closing;entry.closing=(async()=>{try{await bounded(()=>entry.close(entry.value),this.closeMs,entry.name);entry.state='closed';}catch(error){entry.state=String(error.message).startsWith('REVIEW_TIMEOUT_')?'close-timeout':'close-failed';}})();return entry.closing;}
+ async finish(){this.closing=true;let drainComplete=true;try{await bounded(()=>Promise.allSettled(this.entries.map(x=>x.pending)),this.drainMs,'acquisition-drain');}catch{drainComplete=false;}await Promise.all(this.entries.filter(x=>x.state==='acquired'||x.closing).map(x=>this.closeEntry(x)));return {cancelled:this.cancelled,reason:this.reason??null,drainComplete,resources:this.entries.map(x=>({name:x.name,state:x.state,closed:['closed','acquire-failed'].includes(x.state)}))};}
+}

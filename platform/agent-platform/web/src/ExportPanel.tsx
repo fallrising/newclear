@@ -55,7 +55,15 @@ function prLink(operation: ExportOperation) {
     : null;
 }
 
-export function ExportPanel({ artifact }: { artifact: Artifact }) {
+type ArchiveIdentity = Pick<Artifact, 'run_id' | 'id' | 'sha256'>;
+
+export function ExportPanel({
+  artifact,
+  onExpired,
+}: {
+  artifact: Artifact;
+  onExpired?: (identity: ArchiveIdentity) => void;
+}) {
   const cache = useQueryClient();
   const path = `/runs/${encodeURIComponent(artifact.run_id)}/exports`;
   const queryKey = ['exports', artifact.run_id];
@@ -80,16 +88,17 @@ export function ExportPanel({ artifact }: { artifact: Artifact }) {
     targets.data?.items.find((item) => `${item.repo}@${item.base_branch}` === targetKey) ??
     targets.data?.items[0];
   const preview = useMutation({
-    mutationFn: () =>
+    mutationFn: (source: Artifact) =>
       request<ExportPreview>(`${path}/preview`, {
         method: 'POST',
         body: JSON.stringify({
-          artifact_id: artifact.id,
-          artifact_sha256: artifact.sha256,
+          artifact_id: source.id,
+          artifact_sha256: source.sha256,
           target_repo: target!.repo,
           base_branch: target!.base_branch,
         }),
       }),
+    onError: (error, source) => archiveError(error, source),
   });
   function refresh(value: ExportOperation) {
     cache.setQueryData<{ items: ExportOperation[] }>(queryKey, (old) => ({
@@ -100,6 +109,11 @@ export function ExportPanel({ artifact }: { artifact: Artifact }) {
   function authError(error: unknown) {
     if (error instanceof ApiError && error.status === 401)
       void cache.invalidateQueries({ queryKey: ['session'] });
+  }
+  function archiveError(error: unknown, source: ArchiveIdentity) {
+    authError(error);
+    if (error instanceof ApiError && error.status === 410 && error.message === 'artifact_expired')
+      onExpired?.(source);
   }
   const approve = useMutation({
     mutationFn: (value: ExportPreview) =>
@@ -117,7 +131,12 @@ export function ExportPanel({ artifact }: { artifact: Artifact }) {
       refresh(value);
       preview.reset();
     },
-    onError: authError,
+    onError: (error, source) =>
+      archiveError(error, {
+        run_id: source.run_id,
+        id: source.artifact_id,
+        sha256: source.artifact_sha256,
+      }),
   });
   const reconcile = useMutation({
     mutationFn: (id: string) =>
@@ -179,7 +198,7 @@ export function ExportPanel({ artifact }: { artifact: Artifact }) {
             disabled={busy || history.isPending || history.isError}
             onClick={() => {
               approve.reset();
-              preview.mutate();
+              preview.mutate(artifact);
             }}
           >
             {preview.isPending ? '正在檢視…' : '檢視匯出內容'}

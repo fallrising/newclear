@@ -1,0 +1,11 @@
+{
+  "name": "virtual-office-lab",
+  "main": "src/worker.mjs",
+  "compatibility_date": "2026-10-01",
+  "workers_dev": false,
+  "preview_urls": false,
+  "observability": {"enabled": false},
+  "vars": {"OFFICE_ID": "local-office-v1", "OFFICE_MODE": "live"},
+  "durable_objects": {"bindings": [{"name": "OFFICE", "class_name": "OfficeRoom"}]},
+  "migrations": [{"tag": "v1", "new_sqlite_classes": ["OfficeRoom"]}]
+}

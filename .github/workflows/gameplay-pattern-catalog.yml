@@ -1,0 +1,46 @@
+name: Gameplay pattern catalog
+on:
+  pull_request:
+    paths:
+      - 'tools/gameplay-pattern-catalog/**'
+      - '.github/workflows/gameplay-pattern-catalog.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'tools/gameplay-pattern-catalog/**'
+      - '.github/workflows/gameplay-pattern-catalog.yml'
+permissions:
+  contents: read
+jobs:
+  catalog:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Validate metadata and unit tests
+        working-directory: tools/gameplay-pattern-catalog
+        run: |
+          python3 -m pip install opencc-python-reimplemented==0.1.7
+          python3 sources/inventory.py --check
+          python3 sources/text_cache.py --check
+          python3 check_quotes.py --check
+          python3 status.py --check
+          python3 build.py --check
+          python3 -m unittest discover -s tests -v
+          python3 build.py
+          node --check app.js
+      - name: Regenerate and check repository indexes
+        run: |
+          python3 scripts/check_project_success.py --write-index
+          git diff --exit-code -- PROJECTS.md
+          python3 scripts/check_indexes.py
+      - name: Install browser QA dependencies
+        run: |
+          python3 -m pip install playwright==1.57.0
+          python3 -m playwright install --with-deps chromium
+      - name: Real browser navigation and interaction smoke
+        working-directory: tools/gameplay-pattern-catalog
+        run: python3 tests/browser_smoke.py

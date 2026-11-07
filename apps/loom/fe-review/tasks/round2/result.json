@@ -1,0 +1,64 @@
+{
+  "status": "runtime-verified-awaiting-delivery",
+  "scope": "T-0380 R2-AC-11/E review-only synthetic Web",
+  "unit": "loom",
+  "runtime": {
+    "acceptedCaptureCount": 21,
+    "runs": [
+      "loom-002",
+      "loom-006"
+    ],
+    "allAcceptedCaptureHealthAndOverflowPassed": true,
+    "allRecordedPngHashesVerified": true,
+    "ownedCleanupPassed": true
+  },
+  "provenance": "evidence/final-docs/audit.json",
+  "nativeChecks": [
+    {
+      "command": [
+        "npm",
+        "run",
+        "typecheck:contracts"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 1.482
+    },
+    {
+      "command": [
+        "npm",
+        "run",
+        "typecheck:app"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 3.227
+    },
+    {
+      "command": [
+        "npm",
+        "test"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 3.427
+    },
+    {
+      "command": [
+        "npm",
+        "run",
+        "build"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 8.073
+    }
+  ],
+  "fullRound3Accepted": false,
+  "productMainlineAccepted": false,
+  "delivery": {
+    "pr": 598,
+    "requiredCi": "pending",
+    "independentFinalReview": "pending",
+    "merged": false,
+    "remoteReadback": "pending"
+  },
+  "historicalPreloadCheckpoint": "evidence/final-docs/preload-result.before.json",
+  "aggregateUsage": null
+}

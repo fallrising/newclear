@@ -1,0 +1,305 @@
+{
+  "runId": "53256881826545b4ba868b51cbe8f0dd",
+  "operationId": "d42c974e-a4f0-4d77-86e8-e8bb2f281f11",
+  "startedAt": "2026-11-02T13:16:12.200Z",
+  "scope": "real B source capture only; no restore acceptance",
+  "calls": [
+    {
+      "action": "inspect",
+      "milliseconds": 20,
+      "helpers": []
+    },
+    {
+      "action": "inspect",
+      "milliseconds": 19,
+      "helpers": []
+    },
+    {
+      "action": "inspect",
+      "milliseconds": 21,
+      "helpers": []
+    },
+    {
+      "action": "start",
+      "milliseconds": 18
+    },
+    {
+      "action": "inspect",
+      "milliseconds": 21,
+      "helpers": []
+    },
+    {
+      "action": "ps",
+      "milliseconds": 26
+    },
+    {
+      "action": "inspect",
+      "milliseconds": 41,
+      "helpers": [
+        {
+          "kind": "INVENTORY",
+          "id": "1d9d2c5a8a5e3928d43b41542b32ae6ba18ba86e1daf9b9c28b748fdffd94443",
+          "state": "created",
+          "exit": 0
+        },
+        {
+          "kind": "PROFILE",
+          "id": "a5444793df46dedaba7674edb48518826ea467db09ab285784d758e96c11f2f1",
+          "state": "created",
+          "exit": 0
+        }
+      ]
+    },
+    {
+      "action": "network",
+      "milliseconds": 21
+    },
+    {
+      "action": "image",
+      "milliseconds": 22
+    },
+    {
+      "action": "image",
+      "milliseconds": 21
+    },
+    {
+      "action": "image",
+      "milliseconds": 22
+    },
+    {
+      "action": "image",
+      "milliseconds": 22
+    },
+    {
+      "action": "volume",
+      "milliseconds": 21
+    },
+    {
+      "action": "exec",
+      "milliseconds": 68
+    },
+    {
+      "action": "ps",
+      "milliseconds": 27
+    },
+    {
+      "action": "inspect",
+      "milliseconds": 42,
+      "helpers": [
+        {
+          "kind": "INVENTORY",
+          "id": "1d9d2c5a8a5e3928d43b41542b32ae6ba18ba86e1daf9b9c28b748fdffd94443",
+          "state": "created",
+          "exit": 0
+        },
+        {
+          "kind": "PROFILE",
+          "id": "a5444793df46dedaba7674edb48518826ea467db09ab285784d758e96c11f2f1",
+          "state": "created",
+          "exit": 0
+        }
+      ]
+    },
+    {
+      "action": "network",
+      "milliseconds": 24
+    },
+    {
+      "action": "image",
+      "milliseconds": 20
+    },
+    {
+      "action": "image",
+      "milliseconds": 20
+    },
+    {
+      "action": "image",
+      "milliseconds": 20
+    },
+    {
+      "action": "image",
+      "milliseconds": 20
+    },
+    {
+      "action": "volume",
+      "milliseconds": 20
+    },
+    {
+      "action": "exec",
+      "milliseconds": 64
+    },
+    {
+      "action": "ps",
+      "milliseconds": 26
+    },
+    {
+      "action": "inspect",
+      "milliseconds": 41,
+      "helpers": [
+        {
+          "kind": "INVENTORY",
+          "id": "1d9d2c5a8a5e3928d43b41542b32ae6ba18ba86e1daf9b9c28b748fdffd94443",
+          "state": "created",
+          "exit": 0
+        },
+        {
+          "kind": "PROFILE",
+          "id": "a5444793df46dedaba7674edb48518826ea467db09ab285784d758e96c11f2f1",
+          "state": "created",
+          "exit": 0
+        }
+      ]
+    },
+    {
+      "action": "network",
+      "milliseconds": 24
+    },
+    {
+      "action": "image",
+      "milliseconds": 21
+    },
+    {
+      "action": "image",
+      "milliseconds": 20
+    },
+    {
+      "action": "image",
+      "milliseconds": 21
+    },
+    {
+      "action": "image",
+      "milliseconds": 21
+    },
+    {
+      "action": "volume",
+      "milliseconds": 21
+    },
+    {
+      "action": "exec",
+      "milliseconds": 69
+    },
+    {
+      "action": "stop",
+      "milliseconds": 505
+    },
+    {
+      "action": "ps",
+      "milliseconds": 27
+    },
+    {
+      "action": "inspect",
+      "milliseconds": 41,
+      "helpers": [
+        {
+          "kind": "INVENTORY",
+          "id": "1d9d2c5a8a5e3928d43b41542b32ae6ba18ba86e1daf9b9c28b748fdffd94443",
+          "state": "created",
+          "exit": 0
+        },
+        {
+          "kind": "PROFILE",
+          "id": "a5444793df46dedaba7674edb48518826ea467db09ab285784d758e96c11f2f1",
+          "state": "created",
+          "exit": 0
+        }
+      ]
+    },
+    {
+      "action": "network",
+      "milliseconds": 23
+    },
+    {
+      "action": "image",
+      "milliseconds": 22
+    },
+    {
+      "action": "image",
+      "milliseconds": 22
+    },
+    {
+      "action": "image",
+      "milliseconds": 22
+    },
+    {
+      "action": "image",
+      "milliseconds": 22
+    },
+    {
+      "action": "volume",
+      "milliseconds": 23
+    },
+    {
+      "action": "exec",
+      "milliseconds": 66
+    },
+    {
+      "action": "exec",
+      "milliseconds": 67,
+      "backendCount": 0
+    },
+    {
+      "action": "ps",
+      "milliseconds": 28
+    },
+    {
+      "action": "inspect",
+      "milliseconds": 41,
+      "helpers": [
+        {
+          "kind": "INVENTORY",
+          "id": "1d9d2c5a8a5e3928d43b41542b32ae6ba18ba86e1daf9b9c28b748fdffd94443",
+          "state": "created",
+          "exit": 0
+        },
+        {
+          "kind": "PROFILE",
+          "id": "a5444793df46dedaba7674edb48518826ea467db09ab285784d758e96c11f2f1",
+          "state": "created",
+          "exit": 0
+        }
+      ]
+    },
+    {
+      "action": "network",
+      "milliseconds": 28
+    },
+    {
+      "action": "image",
+      "milliseconds": 19
+    },
+    {
+      "action": "image",
+      "milliseconds": 17
+    },
+    {
+      "action": "image",
+      "milliseconds": 17
+    },
+    {
+      "action": "image",
+      "milliseconds": 17
+    },
+    {
+      "action": "volume",
+      "milliseconds": 17
+    },
+    {
+      "action": "exec",
+      "milliseconds": 64
+    },
+    {
+      "action": "exec",
+      "milliseconds": 75,
+      "backendCount": 1
+    },
+    {
+      "action": "stop",
+      "milliseconds": 30123
+    }
+  ],
+  "initialInspection": true,
+  "success": false,
+  "code": "WRITER_NOT_QUIESCED",
+  "stopped": true,
+  "endedAt": "2026-11-02T13:16:46.434Z"
+}

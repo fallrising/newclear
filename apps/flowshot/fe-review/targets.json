@@ -1,8 +1,8 @@
 {
   "project": "flowshot",
-  "verified": false,
-  "verifiedNote": "第1輪draft；只核對dev server與/，未啟動。DESIGN所需review-only IPC preload/互動driver尚未實作；generic capture無init hook，不能直接完成review。D1/D2與AC-15待owner確認。",
-  "locale": "zh-TW",
+  "verified": true,
+  "verifiedNote": "Scoped R2 synthetic Web runtime and retained local frontend gates passed; required current-head CI and merge remain delivery gates. Use component run-review.mjs; generic capture does not inject the fixture. Not full Round3 or native/product acceptance.",
+  "locale": "en-US",
   "colorSchemes": [
     "light",
     "dark"
@@ -25,5 +25,29 @@
         }
       ]
     }
-  ]
+  ],
+  "viewports": [
+    {
+      "name": "desktop",
+      "width": 1440,
+      "height": 900
+    },
+    {
+      "name": "tablet",
+      "width": 834,
+      "height": 1112
+    },
+    {
+      "name": "mobile",
+      "width": 390,
+      "height": 844
+    }
+  ],
+  "verificationScope": "R2-AC-11 synthetic Web preload/driver only; delivery requires independent review and current-head CI",
+  "verificationEvidence": [
+    "tasks/round2/report.md",
+    "tasks/round2/result.json",
+    "tasks/round2/evidence/final-docs/audit.json"
+  ],
+  "verifiedAt": "2026-10-24"
 }

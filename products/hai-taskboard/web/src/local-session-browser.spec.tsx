@@ -46,19 +46,24 @@ afterEach(() => vi.unstubAllGlobals());
 describe('local-session-browser connected component boundary (not browser acceptance)', () => {
   it('inspects cookie session, clears password immediately, uses same-origin fetch, and logs out', async () => {
     let login!: (response: Response) => void;
-    const fetcher = vi
-      .fn()
-      .mockResolvedValueOnce(
-        response({ error: { code: 'unauthenticated', message: 'login' } }, 401),
-      )
-      .mockImplementationOnce(
-        () =>
-          new Promise<Response>((resolve) => {
-            login = resolve;
-          }),
-      )
-      .mockResolvedValueOnce(response({ items: [] }))
-      .mockResolvedValueOnce(response({ status: 'logged_out' }));
+    const fetcher = vi.fn((url: string, options?: RequestInit) => {
+      if (url === '/api/v1/session' && options?.method === 'POST')
+        return new Promise<Response>((resolve) => {
+          login = resolve;
+        });
+      if (url === '/api/v1/session' && options?.method === 'DELETE')
+        return Promise.resolve(response({ status: 'logged_out' }));
+      if (url === '/api/v1/session' && options?.method === 'GET')
+        return Promise.resolve(
+          response(
+            { error: { code: 'unauthenticated', message: 'login' } },
+            401,
+          ),
+        );
+      if (url === '/api/v1/projects' && options?.method === 'GET')
+        return Promise.resolve(response({ items: [] }));
+      throw new Error(`Unexpected request: ${options?.method} ${url}`);
+    });
     vi.stubGlobal('fetch', fetcher);
     render(<ConnectedApp />);
     const password = await screen.findByLabelText('Local operator secret');
@@ -68,18 +73,46 @@ describe('local-session-browser connected component boundary (not browser accept
     fireEvent.change(password, { target: { value: 'a'.repeat(43) } });
     fireEvent.click(screen.getByRole('button', { name: 'Log in' }));
     expect(password).toHaveValue('');
-    expect(fetcher.mock.calls[1][1]).toMatchObject({
-      credentials: 'same-origin',
-      method: 'POST',
+    expect(
+      fetcher.mock.calls.filter(([, options]) => options?.method === 'POST'),
+    ).toEqual([
+      [
+        '/api/v1/session',
+        expect.objectContaining({
+          credentials: 'same-origin',
+          method: 'POST',
+          body: JSON.stringify({ token: 'a'.repeat(43) }),
+        }),
+      ],
+    ]);
+    await act(async () => {
+      login(response({ status: 'authenticated', actor: 'operator' }));
     });
-    expect(fetcher.mock.calls[1][0]).toBe('/api/v1/session');
-    login(response({ status: 'authenticated', actor: 'operator' }));
     const logout = await screen.findByRole('button', {
       name: 'Log out operator',
     });
+    fireEvent.click(screen.getByRole('button', { name: 'Refresh projects' }));
+    await waitFor(() =>
+      expect(
+        fetcher.mock.calls.filter(([url]) => url === '/api/v1/projects'),
+      ).toHaveLength(2),
+    );
     fireEvent.click(logout);
-    await screen.findByLabelText('Local operator secret');
-    expect(fetcher.mock.calls[3][1].method).toBe('DELETE');
+    await screen.findByText('Logged out of this browser.');
+    expect(await screen.findByLabelText('Local operator secret')).toHaveValue(
+      '',
+    );
+    expect(
+      fetcher.mock.calls.filter(([, options]) => options?.method === 'DELETE'),
+    ).toEqual([
+      [
+        '/api/v1/session',
+        expect.objectContaining({
+          credentials: 'same-origin',
+          method: 'DELETE',
+        }),
+      ],
+    ]);
     expect(screen.queryByText('a'.repeat(43))).not.toBeInTheDocument();
   });
   it('shows honest route unavailability without runtime fixture fallback', async () => {

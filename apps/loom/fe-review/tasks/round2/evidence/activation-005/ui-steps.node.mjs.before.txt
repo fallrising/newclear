@@ -1,0 +1,23 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { defaultAriaLabelConfig } from '@xyflow/system';
+import { controls, fit, separateNodes } from './ui-steps.mjs';
+test('review locators use the actual locked React Flow accessible control names', async () => {
+  assert.equal(controls.fit, 'Fit View'); assert.equal(controls.zoomOut, 'Zoom Out');
+  assert.equal(controls.zoomOut, defaultAriaLabelConfig['controls.zoomOut.ariaLabel']);
+  let clicked = false;
+  await fit({ getByRole(role, options) { assert.equal(role, 'button'); assert.deepEqual(options, { name: defaultAriaLabelConfig['controls.fitView.ariaLabel'], exact: true }); return { async click() { clicked = true; } }; } });
+  assert.equal(clicked, true);
+});
+
+test('node separation derives the real mouse delta from observed overlap and keeps a visible gap', async () => {
+  const before = { stable: true, last: { document: { x: 66, width: 646 }, terminal: { x: 637, width: 739 }, source: { centerHit: false }, target: { centerHit: true } } };
+  const after = { stable: true, last: { document: { x: 30, width: 400 }, terminal: { x: 460, width: 450 }, source: { centerHit: true }, target: { centerHit: true } } };
+  const samples = [before, after], moves = [], receipt = {};
+  const page = { async evaluate() { return samples.shift(); }, locator() { return { async boundingBox() { return { x: 660, y: 100, width: 100, height: 20 }; } }; }, mouse: { async move(x, y) { moves.push({ x, y }); }, async down() {}, async up() {} }, getByRole() { return { async click() {} }; } };
+  await separateNodes(page, receipt);
+  assert.deepEqual(moves, [{ x: 710, y: 110 }, { x: 833, y: 110 }]);
+  assert.equal(receipt.nodeSeparation.before.last.source.centerHit, false);
+  assert.equal(receipt.nodeSeparation.after.last.source.centerHit, true);
+  assert.equal(receipt.nodeSeparation.screenDelta, 123);
+});

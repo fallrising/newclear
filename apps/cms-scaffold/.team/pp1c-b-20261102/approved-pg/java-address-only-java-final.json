@@ -1,0 +1,28 @@
+{
+  "command": [
+    "./gradlew",
+    "test",
+    "integrationTest",
+    ":services:cms-api:bootJar",
+    "--no-daemon",
+    "--no-parallel"
+  ],
+  "startedAt": "2026-11-02T12:54:55.847271+00:00",
+  "exit": 0,
+  "elapsedSeconds": 378.2810568790883,
+  "endedAt": "2026-11-02T13:01:14.128325+00:00",
+  "counts": {
+    "test": {
+      "tests": 564,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    "integrationTest": {
+      "tests": 212,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    }
+  }
+}

@@ -1,0 +1,120 @@
+{
+  "id": "progression-successor-selection",
+  "system": "progression",
+  "edition": 2,
+  "name": {
+    "zh": "失败后挑选下一位继承者",
+    "en": "Choose the next heir"
+  },
+  "summary": {
+    "zh": "每次重新出发先换个人，适应新角色的长处与毛病。",
+    "en": "Start the next attempt with a different mix of strengths and quirks."
+  },
+  "rules": {
+    "zh": "当前角色结束冒险后，系统提供几位带不同职业和特征的后继人选。玩家选择一个开始下一次，既利用已有长期积累，也要适应新限制；重点是从候选人中挑选，不是安排配对繁殖。",
+    "en": "When a character’s attempt ends, choose from successors with different classes and traits. Persistent investment remains useful, but each new person changes the immediate approach. The loop selects among candidates rather than breeding traits."
+  },
+  "loop": [
+    {
+      "zh": "结束当前角色的冒险",
+      "en": "End the current attempt"
+    },
+    {
+      "zh": "查看继承者特征",
+      "en": "Inspect successor traits"
+    },
+    {
+      "zh": "选一个适合当前目标的人",
+      "en": "Choose for the next goal"
+    },
+    {
+      "zh": "调整打法再出发",
+      "en": "Adapt and set out"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "选自己熟悉的职业，还是接受陌生特征尝试新办法？",
+      "en": "Choose a familiar class or adapt to an unfamiliar trait?"
+    },
+    {
+      "zh": "选更适合当前难关的人，还是选择能探索另一条路线的人？",
+      "en": "Select for the current obstacle or for exploring a different route?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "候选人数",
+        "en": "Candidate count"
+      },
+      "effect": {
+        "zh": "人选多更容易避开不喜欢的特征，但也会降低被迫适应的频率。",
+        "en": "More candidates make unwanted traits easier to avoid but reduce adaptation."
+      }
+    },
+    {
+      "name": {
+        "zh": "特征影响范围",
+        "en": "Trait impact"
+      },
+      "effect": {
+        "zh": "只改数值容易同质化；改移动或感知更鲜明，也更需要可读的说明。",
+        "en": "Stat-only traits can feel similar; movement or perception changes are distinct but need clear explanations."
+      }
+    }
+  ],
+  "tags": [
+    "randomness",
+    "progression",
+    "planning"
+  ],
+  "related": [
+    "progression-random-level-choices",
+    "progression-challenge-tiers",
+    "progression-death-loses-training",
+    "progression-evolution-recipes"
+  ],
+  "contrast": {
+    "zh": "两代都让死亡成为换人入口；第二代进一步把不同职业的动作差异与特征搭配，让选择影响实际操作。",
+    "en": "Both use death as a transition to another person; the sequel further combines distinct class actions with traits, changing how the next attempt plays."
+  },
+  "combination": {
+    "zh": "设计提案：候选人分别有高耐力慢恢复、低耐力快恢复等特点，玩家根据下一场敌人的节奏选人。",
+    "en": "Design proposal: heirs trade high stamina and slow recovery against a smaller fast-recovering pool; choose for the next enemy’s rhythm."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "上一位冒险者失败；候选人甲有 80 耐力但恢复慢，乙只有 50 但恢复快。",
+      "en": "The last adventurer failed; candidate A has 80 stamina with slow recovery, B has 50 with fast recovery."
+    },
+    "action": {
+      "zh": "你准备挑战攻击间隔短的守卫，选择乙。",
+      "en": "Choose B to face a guard with frequent attacks."
+    },
+    "result": {
+      "zh": "每次只能打一下，但短暂后退就能恢复闪避额度。",
+      "en": "You can only strike once, but a short retreat restores enough stamina to dodge."
+    },
+    "next": {
+      "zh": "过关后判断下一间房是否还适合短打，不再照搬上一位的打法。",
+      "en": "Afterward, judge whether the next room also suits short exchanges."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "做三个固定候选人，每人只有一个明显长处和一个限制，再接同一短关卡。",
+      "en": "Build three fixed candidates, each with one strength and one constraint, followed by the same short level."
+    },
+    "pitfall": {
+      "zh": "先别随机组合几十种特征；先排除会让关卡完全不可通行的搭配。",
+      "en": "Avoid dozens of random traits until combinations that make the level impossible are excluded."
+    },
+    "test": {
+      "zh": "换人后玩家是否真的改变一次行动节奏，而不只是读了不同姓名？",
+      "en": "Does changing the character produce a visible change in play rather than just a new name?"
+    }
+  }
+}

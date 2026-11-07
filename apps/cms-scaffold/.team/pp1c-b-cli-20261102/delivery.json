@@ -1,0 +1,12 @@
+{
+  "pr": 1002,
+  "head": "0984e2748142c8d4658d0bab83793b571ba46dc5",
+  "merge": "0c5177fd6f4dd24e0ead584f494944fd864eca4f",
+  "mergedAt": "2026-11-02T16:11:57Z",
+  "cmsCi": 41477646306,
+  "contractsCi": 41477646602,
+  "allRequiredChecks": "SUCCESS",
+  "fullComponentRemoteDiff": "empty",
+  "state": "MERGED",
+  "T137": "DONE"
+}

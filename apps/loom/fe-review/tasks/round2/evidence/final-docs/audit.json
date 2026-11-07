@@ -1,0 +1,1162 @@
+{
+  "unit": "loom",
+  "mode": "read-only receipt/source/PNG hash audit, no runtime rerun",
+  "runAudits": [
+    {
+      "run": "loom-001",
+      "status": "failed",
+      "manifestSha256": "f542c65fbb337db0b5feb0eed08adf1de01f1bea29b38d5e24aca15eb3b59aa2",
+      "screenshots": [
+        {
+          "id": "empty__desktop__light",
+          "sha256": "eb9804370ed8f8ad135762781b171df1cc3da35a653841a055fd154d197fbb3d",
+          "hashBytesDimensionsMatch": true,
+          "dimensions": [
+            1440,
+            900
+          ]
+        }
+      ]
+    },
+    {
+      "run": "loom-002",
+      "status": "failed",
+      "manifestSha256": "09906953c7b8ee8a9c24859bcd10fcfffecf9f2a7d2f59d746c7dc07ca1c9058",
+      "screenshots": [
+        {
+          "id": "empty__desktop__light",
+          "sha256": "eb9804370ed8f8ad135762781b171df1cc3da35a653841a055fd154d197fbb3d",
+          "hashBytesDimensionsMatch": true,
+          "dimensions": [
+            1440,
+            900
+          ]
+        },
+        {
+          "id": "populated__desktop__light",
+          "sha256": "e6eb8d274a1d21fd2fc51f8b27a2c497bd468c0cd636e6cf1e7bf7c0a08524d5",
+          "hashBytesDimensionsMatch": true,
+          "dimensions": [
+            1440,
+            900
+          ]
+        },
+        {
+          "id": "empty__desktop__dark",
+          "sha256": "eb9804370ed8f8ad135762781b171df1cc3da35a653841a055fd154d197fbb3d",
+          "hashBytesDimensionsMatch": true,
+          "dimensions": [
+            1440,
+            900
+          ]
+        },
+        {
+          "id": "populated__desktop__dark",
+          "sha256": "0f5f15d629e8d03b995e914ee8c5a115cde59572134fa7dd53c17e533fb7282b",
+          "hashBytesDimensionsMatch": true,
+          "dimensions": [
+            1440,
+            900
+          ]
+        },
+        {
+          "id": "empty__tablet__light",
+          "sha256": "e96ce28201f310c7f000caa1ee62c7e82f4a23eee722b5e23c67f6339d21b109",
+          "hashBytesDimensionsMatch": true,
+          "dimensions": [
+            834,
+            1112
+          ]
+        },
+        {
+          "id": "populated__tablet__light",
+          "sha256": "b37b1d5c0ae0eab909e178b271cdc9d7dd680f0ca5369b81aa2c84ea95203e3e",
+          "hashBytesDimensionsMatch": true,
+          "dimensions": [
+            834,
+            1112
+          ]
+        },
+        {
+          "id": "empty__tablet__dark",
+          "sha256": "e96ce28201f310c7f000caa1ee62c7e82f4a23eee722b5e23c67f6339d21b109",
+          "hashBytesDimensionsMatch": true,
+          "dimensions": [
+            834,
+            1112
+          ]
+        },
+        {
+          "id": "populated__tablet__dark",
+          "sha256": "b37b1d5c0ae0eab909e178b271cdc9d7dd680f0ca5369b81aa2c84ea95203e3e",
+          "hashBytesDimensionsMatch": true,
+          "dimensions": [
+            834,
+            1112
+          ]
+        },
+        {
+          "id": "empty__mobile__light",
+          "sha256": "395728e3585a1de202711d3be9622c8609edd774308361d4f7c3336cbe1224c1",
+          "hashBytesDimensionsMatch": true,
+          "dimensions": [
+            390,
+            844
+          ]
+        },
+        {
+          "id": "populated__mobile__light",
+          "sha256": "8f6b9c7ee2fc76dfb9a7eae5e4ff09b9c0f24f604afd712de2825a8b9154aaca",
+          "hashBytesDimensionsMatch": true,
+          "dimensions": [
+            390,
+            844
+          ]
+        },
+        {
+          "id": "empty__mobile__dark",
+          "sha256": "395728e3585a1de202711d3be9622c8609edd774308361d4f7c3336cbe1224c1",
+          "hashBytesDimensionsMatch": true,
+          "dimensions": [
+            390,
+            844
+          ]
+        },
+        {
+          "id": "populated__mobile__dark",
+          "sha256": "8f6b9c7ee2fc76dfb9a7eae5e4ff09b9c0f24f604afd712de2825a8b9154aaca",
+          "hashBytesDimensionsMatch": true,
+          "dimensions": [
+            390,
+            844
+          ]
+        }
+      ]
+    },
+    {
+      "run": "loom-003",
+      "status": "failed",
+      "manifestSha256": "211bf610af85f73b0cc6a992cd00898dda2cdd4832e2b22c058ab5a22eafe960",
+      "screenshots": []
+    },
+    {
+      "run": "loom-004",
+      "status": "failed",
+      "manifestSha256": "929e8419688a66fc57c1abdc3e70e790ea7ea6bb3c3f92c2ce5cb30ae52916e6",
+      "screenshots": []
+    },
+    {
+      "run": "loom-005",
+      "status": "failed",
+      "manifestSha256": "e4eeabbbbd52ea64fe47bb6c93e8a38223702f47d1bc72fc48d9e1b9b133463a",
+      "screenshots": []
+    },
+    {
+      "run": "loom-006",
+      "status": "passed",
+      "manifestSha256": "8bd55944d5209b1650c7718dcae7f44955ee7707aabe5c6b04a166b7f313b399",
+      "screenshots": [
+        {
+          "id": "edge-run-pin",
+          "sha256": "4a80df93790cfc53303451289c5ef3f537fedf05dc68161d302ec2d1f679d3cf",
+          "hashBytesDimensionsMatch": true,
+          "dimensions": [
+            1440,
+            900
+          ]
+        },
+        {
+          "id": "dirty-cancel",
+          "sha256": "977a8ae21d9ea3fa86bd508d7209a72686381f48f8a69b583bd5fd5c1155db2a",
+          "hashBytesDimensionsMatch": true,
+          "dimensions": [
+            1440,
+            900
+          ]
+        },
+        {
+          "id": "close-save-error",
+          "sha256": "a00440d156c66ef9d24166ae7f0830f6c7faa06b153768c360d7b0d89dd080c0",
+          "hashBytesDimensionsMatch": true,
+          "dimensions": [
+            1440,
+            900
+          ]
+        },
+        {
+          "id": "close-save-conflict",
+          "sha256": "db45219217856b492710707288ac7975165afb1586e4d3a531db07e38fd67b3d",
+          "hashBytesDimensionsMatch": true,
+          "dimensions": [
+            1440,
+            900
+          ]
+        },
+        {
+          "id": "sidecar-reloaded",
+          "sha256": "195d3c376edfca11f0c5dd96b2e7463e7fac7960aa6921b6283c4fae0183f262",
+          "hashBytesDimensionsMatch": true,
+          "dimensions": [
+            1440,
+            900
+          ]
+        },
+        {
+          "id": "history-loading",
+          "sha256": "67453949ec2f10e91f023f4ac9c479dd55e088818aa3ecafc2bdd4db9298bee5",
+          "hashBytesDimensionsMatch": true,
+          "dimensions": [
+            1440,
+            900
+          ]
+        },
+        {
+          "id": "history-error",
+          "sha256": "d2fb046cee7af3719f990164940b3466739cb4d6410d24c4cc5194333949b73a",
+          "hashBytesDimensionsMatch": true,
+          "dimensions": [
+            1440,
+            900
+          ]
+        },
+        {
+          "id": "history-empty",
+          "sha256": "90dd7c2591f0b9579aa63c50a2df09ccec384912a7b656968e9ef4bf5b9f7099",
+          "hashBytesDimensionsMatch": true,
+          "dimensions": [
+            1440,
+            900
+          ]
+        },
+        {
+          "id": "history-memory",
+          "sha256": "1f421e15c09ec08e71ae0a22b4850205630cb6535849405dfcf22802bca47ac3",
+          "hashBytesDimensionsMatch": true,
+          "dimensions": [
+            1440,
+            900
+          ]
+        }
+      ]
+    },
+    {
+      "run": "loom-diag-001",
+      "status": "failed",
+      "manifestSha256": "fed138aada1d7c252e535e7298c351efccb71d4da2406ab12c3d20f06524e250",
+      "screenshots": [
+        {
+          "id": "empty__desktop__light",
+          "sha256": "eb9804370ed8f8ad135762781b171df1cc3da35a653841a055fd154d197fbb3d",
+          "hashBytesDimensionsMatch": true,
+          "dimensions": [
+            1440,
+            900
+          ]
+        }
+      ]
+    }
+  ],
+  "retainedAcceptedCaptures": [
+    {
+      "run": "loom-002",
+      "id": "empty__desktop__light",
+      "status": 200,
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "violations": [
+        {
+          "id": "region",
+          "impact": "moderate",
+          "nodes": 1
+        }
+      ],
+      "incomplete": [
+        {
+          "id": "aria-prohibited-attr",
+          "impact": "serious",
+          "nodes": 1
+        },
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "nodes": 1
+        }
+      ]
+    },
+    {
+      "run": "loom-002",
+      "id": "populated__desktop__light",
+      "status": 200,
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "violations": [
+        {
+          "id": "aria-input-field-name",
+          "impact": "serious",
+          "nodes": 1
+        },
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "nodes": 1
+        }
+      ],
+      "incomplete": [
+        {
+          "id": "aria-prohibited-attr",
+          "impact": "serious",
+          "nodes": 1
+        },
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "nodes": 11
+        }
+      ]
+    },
+    {
+      "run": "loom-002",
+      "id": "empty__desktop__dark",
+      "status": 200,
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "violations": [
+        {
+          "id": "region",
+          "impact": "moderate",
+          "nodes": 1
+        }
+      ],
+      "incomplete": [
+        {
+          "id": "aria-prohibited-attr",
+          "impact": "serious",
+          "nodes": 1
+        },
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "nodes": 1
+        }
+      ]
+    },
+    {
+      "run": "loom-002",
+      "id": "populated__desktop__dark",
+      "status": 200,
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "violations": [
+        {
+          "id": "aria-input-field-name",
+          "impact": "serious",
+          "nodes": 1
+        },
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "nodes": 1
+        }
+      ],
+      "incomplete": [
+        {
+          "id": "aria-prohibited-attr",
+          "impact": "serious",
+          "nodes": 1
+        },
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "nodes": 11
+        }
+      ]
+    },
+    {
+      "run": "loom-002",
+      "id": "empty__tablet__light",
+      "status": 200,
+      "viewport": {
+        "width": 834,
+        "height": 1112
+      },
+      "violations": [
+        {
+          "id": "region",
+          "impact": "moderate",
+          "nodes": 1
+        }
+      ],
+      "incomplete": [
+        {
+          "id": "aria-prohibited-attr",
+          "impact": "serious",
+          "nodes": 1
+        },
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "nodes": 1
+        }
+      ]
+    },
+    {
+      "run": "loom-002",
+      "id": "populated__tablet__light",
+      "status": 200,
+      "viewport": {
+        "width": 834,
+        "height": 1112
+      },
+      "violations": [
+        {
+          "id": "aria-input-field-name",
+          "impact": "serious",
+          "nodes": 1
+        },
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "nodes": 1
+        }
+      ],
+      "incomplete": [
+        {
+          "id": "aria-prohibited-attr",
+          "impact": "serious",
+          "nodes": 1
+        },
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "nodes": 7
+        }
+      ]
+    },
+    {
+      "run": "loom-002",
+      "id": "empty__tablet__dark",
+      "status": 200,
+      "viewport": {
+        "width": 834,
+        "height": 1112
+      },
+      "violations": [
+        {
+          "id": "region",
+          "impact": "moderate",
+          "nodes": 1
+        }
+      ],
+      "incomplete": [
+        {
+          "id": "aria-prohibited-attr",
+          "impact": "serious",
+          "nodes": 1
+        },
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "nodes": 1
+        }
+      ]
+    },
+    {
+      "run": "loom-002",
+      "id": "populated__tablet__dark",
+      "status": 200,
+      "viewport": {
+        "width": 834,
+        "height": 1112
+      },
+      "violations": [
+        {
+          "id": "aria-input-field-name",
+          "impact": "serious",
+          "nodes": 1
+        },
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "nodes": 1
+        }
+      ],
+      "incomplete": [
+        {
+          "id": "aria-prohibited-attr",
+          "impact": "serious",
+          "nodes": 1
+        },
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "nodes": 7
+        }
+      ]
+    },
+    {
+      "run": "loom-002",
+      "id": "empty__mobile__light",
+      "status": 200,
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "violations": [
+        {
+          "id": "region",
+          "impact": "moderate",
+          "nodes": 1
+        }
+      ],
+      "incomplete": [
+        {
+          "id": "aria-prohibited-attr",
+          "impact": "serious",
+          "nodes": 1
+        },
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "nodes": 1
+        }
+      ]
+    },
+    {
+      "run": "loom-002",
+      "id": "populated__mobile__light",
+      "status": 200,
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "violations": [
+        {
+          "id": "aria-input-field-name",
+          "impact": "serious",
+          "nodes": 1
+        },
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "nodes": 1
+        }
+      ],
+      "incomplete": [
+        {
+          "id": "aria-prohibited-attr",
+          "impact": "serious",
+          "nodes": 1
+        },
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "nodes": 7
+        }
+      ]
+    },
+    {
+      "run": "loom-002",
+      "id": "empty__mobile__dark",
+      "status": 200,
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "violations": [
+        {
+          "id": "region",
+          "impact": "moderate",
+          "nodes": 1
+        }
+      ],
+      "incomplete": [
+        {
+          "id": "aria-prohibited-attr",
+          "impact": "serious",
+          "nodes": 1
+        },
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "nodes": 1
+        }
+      ]
+    },
+    {
+      "run": "loom-002",
+      "id": "populated__mobile__dark",
+      "status": 200,
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "violations": [
+        {
+          "id": "aria-input-field-name",
+          "impact": "serious",
+          "nodes": 1
+        },
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "nodes": 1
+        }
+      ],
+      "incomplete": [
+        {
+          "id": "aria-prohibited-attr",
+          "impact": "serious",
+          "nodes": 1
+        },
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "nodes": 7
+        }
+      ]
+    },
+    {
+      "run": "loom-006",
+      "id": "edge-run-pin",
+      "status": 200,
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "violations": [
+        {
+          "id": "aria-input-field-name",
+          "impact": "serious",
+          "nodes": 1
+        },
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "nodes": 2
+        }
+      ],
+      "incomplete": [
+        {
+          "id": "aria-prohibited-attr",
+          "impact": "serious",
+          "nodes": 1
+        },
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "nodes": 8
+        }
+      ]
+    },
+    {
+      "run": "loom-006",
+      "id": "dirty-cancel",
+      "status": 200,
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "violations": [
+        {
+          "id": "aria-input-field-name",
+          "impact": "serious",
+          "nodes": 1
+        },
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "nodes": 1
+        }
+      ],
+      "incomplete": [
+        {
+          "id": "aria-prohibited-attr",
+          "impact": "serious",
+          "nodes": 1
+        },
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "nodes": 8
+        }
+      ]
+    },
+    {
+      "run": "loom-006",
+      "id": "close-save-error",
+      "status": 200,
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "violations": [
+        {
+          "id": "aria-input-field-name",
+          "impact": "serious",
+          "nodes": 1
+        },
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "nodes": 1
+        }
+      ],
+      "incomplete": [
+        {
+          "id": "aria-prohibited-attr",
+          "impact": "serious",
+          "nodes": 1
+        },
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "nodes": 8
+        }
+      ]
+    },
+    {
+      "run": "loom-006",
+      "id": "close-save-conflict",
+      "status": 200,
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "violations": [
+        {
+          "id": "aria-input-field-name",
+          "impact": "serious",
+          "nodes": 1
+        },
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "nodes": 1
+        }
+      ],
+      "incomplete": [
+        {
+          "id": "aria-prohibited-attr",
+          "impact": "serious",
+          "nodes": 1
+        },
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "nodes": 8
+        }
+      ]
+    },
+    {
+      "run": "loom-006",
+      "id": "sidecar-reloaded",
+      "status": 200,
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "violations": [
+        {
+          "id": "aria-input-field-name",
+          "impact": "serious",
+          "nodes": 1
+        }
+      ],
+      "incomplete": [
+        {
+          "id": "aria-prohibited-attr",
+          "impact": "serious",
+          "nodes": 1
+        },
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "nodes": 22
+        }
+      ]
+    },
+    {
+      "run": "loom-006",
+      "id": "history-loading",
+      "status": 200,
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "violations": [
+        {
+          "id": "region",
+          "impact": "moderate",
+          "nodes": 1
+        }
+      ],
+      "incomplete": [
+        {
+          "id": "aria-prohibited-attr",
+          "impact": "serious",
+          "nodes": 1
+        },
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "nodes": 1
+        }
+      ]
+    },
+    {
+      "run": "loom-006",
+      "id": "history-error",
+      "status": 200,
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "violations": [
+        {
+          "id": "region",
+          "impact": "moderate",
+          "nodes": 1
+        }
+      ],
+      "incomplete": [
+        {
+          "id": "aria-prohibited-attr",
+          "impact": "serious",
+          "nodes": 1
+        },
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "nodes": 1
+        }
+      ]
+    },
+    {
+      "run": "loom-006",
+      "id": "history-empty",
+      "status": 200,
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "violations": [
+        {
+          "id": "region",
+          "impact": "moderate",
+          "nodes": 1
+        }
+      ],
+      "incomplete": [
+        {
+          "id": "aria-prohibited-attr",
+          "impact": "serious",
+          "nodes": 1
+        },
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "nodes": 1
+        }
+      ]
+    },
+    {
+      "run": "loom-006",
+      "id": "history-memory",
+      "status": 200,
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "violations": [
+        {
+          "id": "region",
+          "impact": "moderate",
+          "nodes": 1
+        }
+      ],
+      "incomplete": [
+        {
+          "id": "aria-prohibited-attr",
+          "impact": "serious",
+          "nodes": 1
+        },
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "nodes": 1
+        }
+      ]
+    }
+  ],
+  "sourceProvenance": {
+    "currentRuntimeSourceChecks": [
+      {
+        "path": "fe-review/preload.mjs",
+        "sha256": "fdaa370f4ec8aa8180eea17482f94e5fa665ee2c17d878fe7a58a331eab27c1a",
+        "matches": true
+      },
+      {
+        "path": "fe-review/preload.node.mjs",
+        "sha256": "df919610272d9da0a1c894da3c96aadf68d2e4669a06aff2e654138c3a228015",
+        "matches": true
+      },
+      {
+        "path": "fe-review/run-review.mjs",
+        "sha256": "efaf73dbbbb2b755fa7ba869f57ab4dc55185beb60bf3a7873643fb66340afa9",
+        "matches": true
+      },
+      {
+        "path": "fe-review/ui-steps.mjs",
+        "sha256": "6462d5b6daa4ac5c7ecd7c44448de4e9c8be488ca0e7cc425690c756ed588dd1",
+        "matches": true
+      },
+      {
+        "path": "fe-review/drag-configuration.mjs",
+        "sha256": "f02bd225ee611813b23e853cdf03bd4166024206c9fddc327c7422aa39e2bfd0",
+        "matches": true
+      },
+      {
+        "path": "fe-review/geometry.mjs",
+        "sha256": "bb39c8231278adc7047a92d9881c36a74ef9e8ea384bfb033d9ae46bd2eae12b",
+        "matches": true
+      },
+      {
+        "path": "fe-review/vite-review-config.mjs",
+        "sha256": "e509aa929a58701c425b6fe0e9aac39a26585ad5ea99b9c6c09430b6d2d18d48",
+        "matches": true
+      },
+      {
+        "path": "vite.config.ts",
+        "sha256": "e3c18a83e6de2d367810fd2324d7a4cf14246d9b679cc5d97f11d5860631ff2d",
+        "matches": true
+      },
+      {
+        "path": "../flowshot/fe-review/browser-runtime.mjs",
+        "sha256": "23adc88ebc6466a7f5616b43149ebab3d059fd7a47394c00a277047988c4ca3c",
+        "matches": true
+      },
+      {
+        "path": "../flowshot/fe-review/runtime-guards.mjs",
+        "sha256": "b4c5fbe3f31ab2ce73d6246e8ca37ccf135a8ba7034cb4dd921c4eeb635e7b80",
+        "matches": true
+      },
+      {
+        "path": "src/ipc.ts",
+        "sha256": "3c56b0c5b60309e50758c90bcfde277a54787fc4a4049647dd0b0bc617aa1e18",
+        "matches": true
+      },
+      {
+        "path": "src/App.tsx",
+        "sha256": "dc2c8c8885fde55955b0988755c90aae385222ce42f6efed420f0b53be47fc26",
+        "matches": true
+      },
+      {
+        "path": "src/main.tsx",
+        "sha256": "7cf38f34838d009ef718093a1686b55bedd34b732d4a9bd1a07e4a37037b095c",
+        "matches": true
+      },
+      {
+        "path": "src/Terminal.tsx",
+        "sha256": "5723ca6004f1af87d345f4a54f70436a0bf15a3e9e48628ad413f49f84da0513",
+        "matches": true
+      },
+      {
+        "path": "src/surfaces/canvas/CanvasSurface.tsx",
+        "sha256": "54ef8c2d3820ae74da624cee9ed1fb11936813f739625f3c3c43963538392378",
+        "matches": true
+      },
+      {
+        "path": "src/surfaces/canvas/persistence.ts",
+        "sha256": "f180099aff2b590d917d7c79f3965fac59c5e5d065dd8f6fc55a3ee98ae65549",
+        "matches": true
+      },
+      {
+        "path": "src/surfaces/canvas/history.ts",
+        "sha256": "7c2ef08e69bd6cac87e17c4a35d4577e2b770623656962f08b31fff1c83e0acf",
+        "matches": true
+      },
+      {
+        "path": "src/surfaces/canvas/window_close_ipc.ts",
+        "sha256": "1429cc472105b6811cb27c76215896324e9a826538fb958ae016d066b17d397f",
+        "matches": true
+      },
+      {
+        "path": "src/surfaces/document/DocumentSurface.tsx",
+        "sha256": "06dcde9765cb0ffbf43f8a57054b91bab5e1479d2c9737b232ea22586abc430c",
+        "matches": true
+      },
+      {
+        "path": "src/surfaces/document/doc_ipc.ts",
+        "sha256": "bd19031e6655a31343b86e23019ea24fddc453dc3990acf44611851c3f23219b",
+        "matches": true
+      },
+      {
+        "path": "src/surfaces/document/ai_ipc.ts",
+        "sha256": "a73fae88a9ec2149a1f765ebdb55c6c2db70e670cb0f81d4a568bc3e316299a6",
+        "matches": true
+      },
+      {
+        "path": "package-lock.json",
+        "sha256": "79e87f1819728b06bb45091404661964e5560486c5d094db597b54a516f3aad6",
+        "matches": true
+      }
+    ],
+    "retainedMatrixSourceChecks": [
+      {
+        "path": "fe-review/preload.mjs",
+        "sha256": "fdaa370f4ec8aa8180eea17482f94e5fa665ee2c17d878fe7a58a331eab27c1a",
+        "matches": true
+      },
+      {
+        "path": "vite.config.ts",
+        "sha256": "e3c18a83e6de2d367810fd2324d7a4cf14246d9b679cc5d97f11d5860631ff2d",
+        "matches": true
+      },
+      {
+        "path": "../flowshot/fe-review/runtime-guards.mjs",
+        "sha256": "b4c5fbe3f31ab2ce73d6246e8ca37ccf135a8ba7034cb4dd921c4eeb635e7b80",
+        "matches": true
+      },
+      {
+        "path": "src/ipc.ts",
+        "sha256": "3c56b0c5b60309e50758c90bcfde277a54787fc4a4049647dd0b0bc617aa1e18",
+        "matches": true
+      },
+      {
+        "path": "src/App.tsx",
+        "sha256": "dc2c8c8885fde55955b0988755c90aae385222ce42f6efed420f0b53be47fc26",
+        "matches": true
+      },
+      {
+        "path": "src/main.tsx",
+        "sha256": "7cf38f34838d009ef718093a1686b55bedd34b732d4a9bd1a07e4a37037b095c",
+        "matches": true
+      },
+      {
+        "path": "src/Terminal.tsx",
+        "sha256": "5723ca6004f1af87d345f4a54f70436a0bf15a3e9e48628ad413f49f84da0513",
+        "matches": true
+      },
+      {
+        "path": "src/surfaces/canvas/CanvasSurface.tsx",
+        "sha256": "54ef8c2d3820ae74da624cee9ed1fb11936813f739625f3c3c43963538392378",
+        "matches": true
+      },
+      {
+        "path": "src/surfaces/canvas/persistence.ts",
+        "sha256": "f180099aff2b590d917d7c79f3965fac59c5e5d065dd8f6fc55a3ee98ae65549",
+        "matches": true
+      },
+      {
+        "path": "src/surfaces/canvas/history.ts",
+        "sha256": "7c2ef08e69bd6cac87e17c4a35d4577e2b770623656962f08b31fff1c83e0acf",
+        "matches": true
+      },
+      {
+        "path": "src/surfaces/canvas/window_close_ipc.ts",
+        "sha256": "1429cc472105b6811cb27c76215896324e9a826538fb958ae016d066b17d397f",
+        "matches": true
+      },
+      {
+        "path": "src/surfaces/document/DocumentSurface.tsx",
+        "sha256": "06dcde9765cb0ffbf43f8a57054b91bab5e1479d2c9737b232ea22586abc430c",
+        "matches": true
+      },
+      {
+        "path": "src/surfaces/document/doc_ipc.ts",
+        "sha256": "bd19031e6655a31343b86e23019ea24fddc453dc3990acf44611851c3f23219b",
+        "matches": true
+      },
+      {
+        "path": "src/surfaces/document/ai_ipc.ts",
+        "sha256": "a73fae88a9ec2149a1f765ebdb55c6c2db70e670cb0f81d4a568bc3e316299a6",
+        "matches": true
+      },
+      {
+        "path": "package-lock.json",
+        "sha256": "79e87f1819728b06bb45091404661964e5560486c5d094db597b54a516f3aad6",
+        "matches": true
+      }
+    ],
+    "matrixPrerequisite": {
+      "run": "loom-002",
+      "sha256": "09906953c7b8ee8a9c24859bcd10fcfffecf9f2a7d2f59d746c7dc07ca1c9058",
+      "uniqueCaptures": 12,
+      "rerun": false,
+      "healthAndLoadedIdentity": true
+    },
+    "networkPrerequisite": {
+      "run": "loom-001",
+      "sha256": "f542c65fbb337db0b5feb0eed08adf1de01f1bea29b38d5e24aca15eb3b59aa2",
+      "passed": true,
+      "rerun": false
+    },
+    "qualification": "loom002 remains failed; only its12 completed keys retained. loom006 executes remaining journeys only. Old driver/helper changes are preserved in activation005/configured006 delta artifacts."
+  },
+  "nativeChecks": [
+    {
+      "command": [
+        "npm",
+        "run",
+        "typecheck:contracts"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 1.482
+    },
+    {
+      "command": [
+        "npm",
+        "run",
+        "typecheck:app"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 3.227
+    },
+    {
+      "command": [
+        "npm",
+        "test"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 3.427
+    },
+    {
+      "command": [
+        "npm",
+        "run",
+        "build"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 8.073
+    }
+  ],
+  "outerExecution": {
+    "exitCode": 0,
+    "elapsedSeconds": 12.57,
+    "containerRemoved": true,
+    "cleanupError": null,
+    "image": "sha256:47317f37e2082ffb77d8f37a24a0ff80a097c41b82500b6b19c4b784e90cc3fd"
+  },
+  "pending": [
+    "current-head required CI",
+    "independent final acceptance",
+    "normal merge and remote readback"
+  ],
+  "fullRound3Accepted": false,
+  "nativeProductAccepted": false,
+  "originalNativeReceipts": [
+    {
+      "file": "loom-native.json",
+      "sha256": "e220a10f1725860141161056e6e751e3f80b984f68d26eb5c08a6d63c93c513b",
+      "byteIdenticalToRootOriginal": true
+    }
+  ]
+}

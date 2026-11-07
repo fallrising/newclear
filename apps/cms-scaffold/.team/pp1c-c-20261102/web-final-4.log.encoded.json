@@ -1,0 +1,8 @@
+{
+  "version": 1,
+  "original": "web-final-4.log",
+  "sha256": "9610787d15362d5b6d84c9b262b69df8f9fb5e89d8dca771cce3ae2c5b932880",
+  "byteSize": "100",
+  "encoding": "utf-8",
+  "text": "\n> test:bundle\n> node scripts/check-bundles.mjs\n\ntest:bundle passed: web-front, web-back, web-admin\n"
+}

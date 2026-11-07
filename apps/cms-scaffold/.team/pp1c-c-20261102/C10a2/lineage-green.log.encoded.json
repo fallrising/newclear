@@ -1,0 +1,8 @@
+{
+  "version": 1,
+  "original": "C10a2/lineage-green.log",
+  "sha256": "fa6401801aa3fd6db69002dd155fa02841b77424060635d8b7110ab35b1036cb",
+  "byteSize": "1138",
+  "encoding": "utf-8",
+  "text": "✔ PP1c_C09_valid_private_bundle_verifies_without_target_mutation (178.238894ms)\n✔ PP1c_C09_changed_artifact_rejected_before_target_write (148.242802ms)\n✔ PP1c_C09_noncanonical_marker_rejected_before_target_write (128.568677ms)\n✔ PP1c_C09_symlink_artifact_rejected_before_target_write (127.67883ms)\n✔ PP1c_C10a1_extra_bundle_file_rejects_fixed_layout (108.744073ms)\n✔ PP1c_C10a1_public_bundle_directory_rejects_fixed_layout (91.629246ms)\n✔ PP1c_C10a2_api_image_lineage_rejects_coherent_marker (135.297228ms)\n✔ PP1c_C10a2_frontend_lineage_rejects_coherent_marker (142.513896ms)\n✔ PP1c_C10a2_config_lineage_rejects_coherent_marker (129.349173ms)\n✔ PP1c_C10a2_migration_lineage_rejects_coherent_marker (128.527167ms)\n✔ PP1c_C10a2_java_version_lineage_rejects_coherent_marker (151.594907ms)\n✔ PP1c_C10a2_pg_version_lineage_rejects_coherent_marker (110.529775ms)\n✔ PP1c_C10a2_artifact_build_lineage_rejects_coherent_marker (142.393708ms)\n✔ PP1c_C10a2_profile_rejects_forged_capability (0.375147ms)\nℹ tests 14\nℹ suites 0\nℹ pass 14\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 1808.445617\n"
+}

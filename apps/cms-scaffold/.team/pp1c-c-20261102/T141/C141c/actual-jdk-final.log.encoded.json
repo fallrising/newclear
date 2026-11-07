@@ -1,0 +1,8 @@
+{
+  "version": 1,
+  "original": "T141/C141c/actual-jdk-final.log",
+  "sha256": "2b313d8a40c9ee77c675c1145662d54d15de9de3698cb59b97fdc5883aff939b",
+  "byteSize": "210",
+  "encoding": "utf-8",
+  "text": "✔ T141 actual installed JDK observes root pinned JAR through modeled Docker (2045.044723ms)\nℹ tests 1\nℹ suites 0\nℹ pass 1\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 2119.291807\n"
+}

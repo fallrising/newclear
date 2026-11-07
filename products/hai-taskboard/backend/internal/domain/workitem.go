@@ -147,10 +147,13 @@ func (item WorkItem) RemoveBlocker(expectedVersion uint64, blockerID BlockerID) 
 }
 
 type TransitionGuards struct {
-	ExpectedVersion             uint64
-	HasAcceptedAC               bool
-	SpecificationValid          bool
-	ExplicitStart               bool
+	ExpectedVersion    uint64
+	HasAcceptedAC      bool
+	SpecificationValid bool
+	ExplicitStart      bool
+	// PriorRunsSettled permits an explicit Developing redispatch only when the
+	// WorkItem already has Runs and every one of them is settled.
+	PriorRunsSettled            bool
 	RunStartAcknowledged        bool
 	HasCurrentCandidate         bool
 	RequiredReviewsApproved     bool
@@ -194,6 +197,17 @@ func (item WorkItem) transitionRejection(target Phase, guards TransitionGuards) 
 		}
 		if !guards.ExplicitStart && !guards.RunStartAcknowledged {
 			return CodeExplicitStartRequired
+		}
+		return ""
+	case item.phase == PhaseDeveloping && target == PhaseDeveloping:
+		if len(item.blockers) > 0 {
+			return CodeActiveBlocker
+		}
+		if !guards.ExplicitStart {
+			return CodeExplicitStartRequired
+		}
+		if !guards.PriorRunsSettled {
+			return CodeActiveOrUnknownRun
 		}
 		return ""
 	case item.phase == PhaseDeveloping && target == PhaseReview:

@@ -1,0 +1,119 @@
+{
+  "id": "deckbuilding-poker-hand-requirements",
+  "system": "deckbuilding",
+  "edition": 2,
+  "name": {
+    "zh": "凑牌型来支付行动",
+    "en": "Using card patterns as action requirements"
+  },
+  "summary": {
+    "zh": "同一手扑克可以凑成不同组合，用哪一组决定你能做什么。",
+    "en": "The same hand can form different patterns, determining which actions become available."
+  },
+  "rules": {
+    "zh": "行动或得分要求由对子、同花、连续数字等牌型定义，玩家从手牌中选出满足条件的一组。使用这些牌后，可留给其他行动的组合会改变，因此强牌型不一定总是最合适。",
+    "en": "Define actions or scoring through patterns such as pairs, suits or sequences. Selecting one group changes what remains for other actions, so the largest pattern is not always the best use."
+  },
+  "loop": [
+    {
+      "zh": "观察手牌关系",
+      "en": "Read relationships in the hand"
+    },
+    {
+      "zh": "列出可达成的牌型",
+      "en": "Identify achievable patterns"
+    },
+    {
+      "zh": "按目标分配牌组",
+      "en": "Assign a group to the current goal"
+    },
+    {
+      "zh": "更新剩余组合",
+      "en": "Reassess the remaining cards"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "用对子完成眼前的小收益，还是消耗更多牌去凑更强效果？",
+      "en": "Use a pair for a modest gain or commit more cards to a stronger effect?"
+    },
+    {
+      "zh": "同一张牌能补两种组合，把它给攻击还是防守？",
+      "en": "One card completes two patterns: assign it to offense or defense?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "牌型条件难度",
+        "en": "Pattern difficulty"
+      },
+      "effect": {
+        "zh": "条件越难，成功越有成就感，但需要更多抽牌或修牌支持。",
+        "en": "Harder patterns reward planning but require more draw or manipulation support."
+      }
+    },
+    {
+      "name": {
+        "zh": "小牌型保底收益",
+        "en": "Fallback rewards"
+      },
+      "effect": {
+        "zh": "给普通组合可靠用途，能减少坏手牌直接失去一回合。",
+        "en": "Reliable simple patterns keep poor draws from becoming lost turns."
+      }
+    }
+  ],
+  "tags": [
+    "planning",
+    "randomness"
+  ],
+  "related": [
+    "deckbuilding-dice-allocation",
+    "deckbuilding-discard-redraw",
+    "deckbuilding-reward-choice",
+    "deckbuilding-dual-use-cards"
+  ],
+  "contrast": {
+    "zh": "《小丑牌》主要把牌型转成通关分数；《扑克任务》把它们作为具体装备行动的输入。",
+    "en": "Balatro translates patterns into a score target; Poker Quest uses them as inputs for equipment actions."
+  },
+  "combination": {
+    "zh": "设计提案：把订单写成牌型要求：对子完成小订单，同花完成大订单，但交货会消耗这些货物牌。",
+    "en": "Design proposal: Make contracts require patterns: pairs fill small orders and flushes fill larger ones, consuming the submitted goods cards."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "编辑示例：手里有两张七和三张同花牌，盾牌要对子，火球要三张同花。",
+      "en": "Editorial example: two sevens and three suited cards can pay for a pair-based shield or a three-suit fireball."
+    },
+    "action": {
+      "zh": "其中一张七也是同花牌；玩家先用对子防守。",
+      "en": "One seven overlaps the suited group; spend the pair to defend."
+    },
+    "result": {
+      "zh": "防守成功，但火球组合因此被拆开。",
+      "en": "Defense succeeds, but the fireball pattern is broken."
+    },
+    "next": {
+      "zh": "下一次抽牌优先检查能否补回同花。",
+      "en": "Check the next draw for a replacement suited card."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "只用两种花色和对子、三张同花两个条件，配一个攻击和一个防守行动。",
+      "en": "Use two suits and two conditions—pair and three suited cards—for attack and defense."
+    },
+    "pitfall": {
+      "zh": "别急着实现全部扑克牌型；先保证界面能解释为什么一组牌合法。",
+      "en": "Do not implement every poker hand before legality is clearly communicated."
+    },
+    "test": {
+      "zh": "玩家能发现一张牌被多个组合争用，并选择牺牲其中一个。",
+      "en": "Players notice overlap and deliberately sacrifice one available pattern."
+    }
+  }
+}

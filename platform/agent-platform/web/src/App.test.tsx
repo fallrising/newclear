@@ -214,7 +214,10 @@ beforeEach(() => {
           expect(options.credentials).toBe('same-origin');
           return archiveDownloadStatus === 200
             ? new Response('{"schema":"result-archive-v1"}')
-            : Response.json({ error: 'artifact_invalid' }, { status: archiveDownloadStatus });
+            : Response.json(
+                { error: archiveDownloadStatus === 410 ? 'artifact_expired' : 'artifact_invalid' },
+                { status: archiveDownloadStatus },
+              );
         }
         return archiveStatus === 200
           ? Response.json({

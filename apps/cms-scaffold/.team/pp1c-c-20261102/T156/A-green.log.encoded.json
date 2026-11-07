@@ -1,0 +1,8 @@
+{
+  "version": 1,
+  "original": "T156/A-green.log",
+  "sha256": "f52f49b2a646715d74847d3a1ca489a8a67214eeea5687dcd227dbf92cc68a2a",
+  "byteSize": "1321",
+  "encoding": "utf-8",
+  "text": "✔ T156_all_nine_directed_CHECK_pairs_pass_live_and_pure_with_distinct_raw_hashes (297.386295ms)\n✔ T156_exact_pair_cms_content_type_slug_policy_chk_passes_independently (220.01477ms)\n✔ T156_exact_pair_cms_entry_state_chk_passes_independently (246.169112ms)\n✔ T156_exact_pair_cms_entry_index_kind_chk_passes_independently (200.591996ms)\n✔ T156_exact_pair_cms_entry_index_scope_chk_passes_independently (221.593202ms)\n✔ T156_exact_pair_cms_entry_ref_kind_chk_passes_independently (188.674889ms)\n✔ T156_exact_pair_cms_field_on_delete_chk_passes_independently (188.240831ms)\n✔ T156_exact_pair_cms_field_visibility_chk_passes_independently (199.572351ms)\n✔ T156_exact_pair_cms_navigation_menu_state_chk_passes_independently (203.447023ms)\n✔ T156_exact_pair_cms_principal_status_chk_passes_independently (199.858949ms)\n✔ T156_pure_validator_binds_source_manifest_source_commit (188.38287ms)\n✔ T156_pure_validator_binds_source_manifest_inventory_commit (194.597893ms)\n✔ T156_pure_validator_binds_source_manifest_postgres_image (238.172008ms)\n✔ T156_pure_validator_binds_source_manifest_db_snapshot (209.620035ms)\n✔ T156_pure_validator_binds_source_manifest_migration (179.626338ms)\nℹ tests 15\nℹ suites 0\nℹ pass 15\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 3261.67041\n"
+}

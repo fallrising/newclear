@@ -66,6 +66,12 @@ async fn responses_mock(State(seen): State<Seen>, req: Request) -> Response {
 
     let mut events = vec![created];
     let last_text = last["content"][0]["text"].as_str().unwrap_or("");
+    if last_text.starts_with("jr_") {
+        return Response::builder()
+            .header(header::CONTENT_TYPE, "application/json")
+            .body(Body::from(direct_json_fixture(last_text)))
+            .unwrap();
+    }
     if last_text.starts_with("br_") {
         let completed = json!({"type":"response.completed","response":{"id":"resp_abc","status":"completed","output":[],"usage":usage}});
         let error =
@@ -1034,6 +1040,226 @@ async fn nr2_native_terminals_preserve_output_and_finality() {
                 raw.contains("PRIVATE-ERROR-CANARY"),
                 "native upstream errors remain unchanged"
             );
+        }
+    }
+}
+
+fn direct_json_fixture(scenario: &str) -> String {
+    let mut v = json!({"id":"resp_json", "object":"response", "model":"gpt-mock", "status":"completed",
+        "error":null, "output":[{"type":"message", "role":"assistant", "content":[{"type":"output_text", "text":"direct success"}]}],
+        "usage":{"input_tokens":11,"output_tokens":7,"total_tokens":18}, "opaque":{"keep":true}});
+    let error = json!({"code":"unknown_fixture_code", "message":"PRIVATE-JSON-CANARY"});
+    match scenario {
+        "jr_failed" => {
+            v["status"] = json!("failed");
+            v["error"] = error;
+        }
+        "jr_error" => v = json!({"error":error}),
+        "jr_cancelled" => v["status"] = json!("cancelled"),
+        "jr_queued" | "jr_queued_bg" => {
+            v["status"] = json!("queued");
+            v["background"] = json!(scenario.ends_with("_bg"));
+        }
+        "jr_in_progress" | "jr_in_progress_bg" => {
+            v["status"] = json!("in_progress");
+            v["background"] = json!(scenario.ends_with("_bg"));
+        }
+        "jr_missing_status" => {
+            v.as_object_mut().unwrap().remove("status");
+        }
+        "jr_unknown" => v["status"] = json!("new_unknown_status"),
+        "jr_bad_status" => v["status"] = json!(123),
+        "jr_bad_json" => return "{PRIVATE-JSON-CANARY".into(),
+        "jr_array" => v = json!([]),
+        "jr_scalar" => v = json!("PRIVATE-JSON-CANARY"),
+        "jr_bad_output" => v["output"] = json!({"text":"PRIVATE-JSON-CANARY"}),
+        "jr_missing_output" => {
+            v.as_object_mut().unwrap().remove("output");
+        }
+        "jr_conflict" => {
+            v["error"] = json!({"code":"subscription_sharing_usage_limit_exceeded","message":"PRIVATE-JSON-CANARY"})
+        }
+        "jr_quota" => {
+            v["status"] = json!("failed");
+            v["error"] = json!({"code":"subscription_sharing_usage_limit_exceeded","message":"PRIVATE-JSON-CANARY"});
+        }
+        "jr_top_quota" => {
+            v = json!({"error":{"code":"subscription_sharing_usage_unavailable","message":"PRIVATE-JSON-CANARY"}})
+        }
+        "jr_completed" => {}
+        "jr_incomplete" => {
+            v["status"] = json!("incomplete");
+            v["incomplete_details"] = json!({"reason":"max_output_tokens"});
+        }
+        "jr_tools" => {
+            v["output"] = json!([{"type":"function_call","id":"fc_json","call_id":"call_json","name":"lookup","arguments":"{\"city\":\"Taipei\"}"}])
+        }
+        "jr_empty" => v["output"] = json!([]),
+        _ => panic!("unknown JSON fixture {scenario}"),
+    }
+    format!(" \n{}\n", serde_json::to_string_pretty(&v).unwrap())
+}
+
+#[tokio::test]
+async fn jr1_direct_json_failures_are_not_success() {
+    let env = Env::start_with("grok", json!({})).await;
+    for scenario in [
+        "jr_failed",
+        "jr_error",
+        "jr_cancelled",
+        "jr_queued",
+        "jr_in_progress",
+        "jr_queued_bg",
+        "jr_in_progress_bg",
+        "jr_missing_status",
+        "jr_unknown",
+        "jr_bad_status",
+        "jr_bad_json",
+        "jr_array",
+        "jr_scalar",
+        "jr_bad_output",
+        "jr_missing_output",
+        "jr_conflict",
+        "jr_quota",
+        "jr_top_quota",
+    ] {
+        for path in ["/v1/chat/completions", "/v1/messages", "/v1/responses"] {
+            let before = env.seen.lock().unwrap().len();
+            let r = env
+                .client
+                .post(format!("{}{path}", env.base))
+                .json(&buffered_request(path, scenario))
+                .send()
+                .await
+                .unwrap();
+            let status = r.status();
+            let raw = r.text().await.unwrap();
+            assert_eq!(
+                status,
+                if scenario.ends_with("quota") {
+                    429
+                } else {
+                    502
+                },
+                "{scenario} {path}: {raw}"
+            );
+            assert!(
+                !raw.contains("PRIVATE-")
+                    && !raw.contains("direct success")
+                    && !raw.contains("unknown_fixture_code"),
+                "{raw}"
+            );
+            let v: Value = serde_json::from_str(&raw).unwrap();
+            assert!(
+                v.get("error").is_some() && v.get("choices").is_none() && v.get("output").is_none()
+            );
+            if scenario.ends_with("quota") {
+                assert!(raw.contains(if scenario == "jr_quota" {
+                    "subscription_sharing_usage_limit_exceeded"
+                } else {
+                    "subscription_sharing_usage_unavailable"
+                }));
+            }
+            assert_eq!(env.seen.lock().unwrap().len(), before + 1);
+            assert_eq!(env.upstream_body()["stream"], false);
+        }
+    }
+}
+
+#[tokio::test]
+async fn jr2_valid_json_preserves_native_bytes_and_conversions() {
+    let env = Env::start_with("grok", json!({})).await;
+    for scenario in ["jr_completed", "jr_incomplete", "jr_tools", "jr_empty"] {
+        for path in ["/v1/chat/completions", "/v1/messages", "/v1/responses"] {
+            let r = env.post(path, buffered_request(path, scenario)).await;
+            let raw = r.text().await.unwrap();
+            let v: Value = serde_json::from_str(&raw).unwrap();
+            if path == "/v1/responses" {
+                assert_eq!(raw, direct_json_fixture(scenario));
+            } else if path == "/v1/chat/completions" {
+                assert_eq!(v["usage"]["prompt_tokens"], 11);
+                assert_eq!(v["usage"]["completion_tokens"], 7);
+                assert_eq!(
+                    v["choices"][0]["finish_reason"],
+                    if scenario == "jr_tools" {
+                        "tool_calls"
+                    } else if scenario == "jr_incomplete" {
+                        "length"
+                    } else {
+                        "stop"
+                    }
+                );
+                if scenario == "jr_tools" {
+                    assert_eq!(
+                        v["choices"][0]["message"]["tool_calls"][0]["id"],
+                        "call_json"
+                    );
+                    assert_eq!(
+                        v["choices"][0]["message"]["tool_calls"][0]["function"]["arguments"],
+                        "{\"city\":\"Taipei\"}"
+                    );
+                } else {
+                    assert_eq!(
+                        v["choices"][0]["message"]["content"],
+                        if scenario == "jr_empty" {
+                            ""
+                        } else {
+                            "direct success"
+                        }
+                    );
+                }
+            } else {
+                assert_eq!(v["usage"]["input_tokens"], 11);
+                assert_eq!(v["usage"]["output_tokens"], 7);
+                assert_eq!(
+                    v["stop_reason"],
+                    if scenario == "jr_tools" {
+                        "tool_use"
+                    } else if scenario == "jr_incomplete" {
+                        "max_tokens"
+                    } else {
+                        "end_turn"
+                    }
+                );
+                if scenario == "jr_tools" {
+                    assert_eq!(v["content"][0]["name"], "lookup");
+                    assert_eq!(v["content"][0]["input"]["city"], "Taipei");
+                } else if scenario != "jr_empty" {
+                    assert_eq!(v["content"][0]["text"], "direct success");
+                }
+            }
+        }
+    }
+}
+
+#[tokio::test]
+async fn jr3_only_explicit_native_background_can_remain_pending() {
+    let env = Env::start_with("grok", json!({})).await;
+    for scenario in [
+        "jr_queued",
+        "jr_in_progress",
+        "jr_queued_bg",
+        "jr_in_progress_bg",
+    ] {
+        for background in [true, false] {
+            let mut request = buffered_request("/v1/responses", scenario);
+            request["background"] = json!(background);
+            let r = env
+                .client
+                .post(format!("{}/v1/responses", env.base))
+                .json(&request)
+                .send()
+                .await
+                .unwrap();
+            let status = r.status();
+            let raw = r.text().await.unwrap();
+            assert_eq!(env.upstream_body()["background"], background);
+            if background && scenario.ends_with("_bg") {
+                assert_eq!(status, 200);
+                assert_eq!(raw, direct_json_fixture(scenario));
+            } else {
+                assert_eq!(status, 502, "{scenario} background={background}: {raw}");
+            }
         }
     }
 }

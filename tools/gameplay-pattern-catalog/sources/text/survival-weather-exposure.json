@@ -1,0 +1,119 @@
+{
+  "id": "survival-weather-exposure",
+  "system": "survival",
+  "edition": 2,
+  "name": {
+    "zh": "淋湿、受冻与取暖",
+    "en": "Wetness, cold and warming up"
+  },
+  "summary": {
+    "zh": "天气改变身体状态，玩家要为赶路、避雨和烘干安排顺序。",
+    "en": "Weather alters physical condition, forcing choices between travel, shelter and drying off."
+  },
+  "rules": {
+    "zh": "暴露在雨雪或低温中会积累不利状态；衣物、遮蔽和火源改变暴露或恢复速度。路线不只是距离问题，也取决于途中能否停靠和恢复。",
+    "en": "Rain, snow or cold create adverse conditions; clothing, shelter and heat alter exposure and recovery. Route quality depends on recovery stops as well as distance."
+  },
+  "loop": [
+    {
+      "zh": "判断天气和自身状态",
+      "en": "Check weather and condition"
+    },
+    {
+      "zh": "选择防护及停靠点",
+      "en": "Choose protection and shelter stops"
+    },
+    {
+      "zh": "在暴露中移动",
+      "en": "Travel while exposed"
+    },
+    {
+      "zh": "避雨取暖后重新出发",
+      "en": "Recover under shelter and depart"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "走短但无遮蔽的路，还是绕经安全火源？",
+      "en": "Take a short exposed route or detour past a safe fire?"
+    },
+    {
+      "zh": "等衣服干透再走，还是趁天亮继续赶路？",
+      "en": "Wait until clothing dries or use the remaining daylight?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "暴露累积速度",
+        "en": "Exposure rate"
+      },
+      "effect": {
+        "zh": "越快越强调临时避难；越慢越强调出发前规划。",
+        "en": "Fast accumulation emphasizes emergency shelter; slow accumulation emphasizes preparation."
+      }
+    },
+    {
+      "name": {
+        "zh": "遮蔽恢复效率",
+        "en": "Shelter recovery"
+      },
+      "effect": {
+        "zh": "停靠点恢复越快，地图上的避难设施越能影响路线。",
+        "en": "Faster recovery makes shelter locations more influential route choices."
+      }
+    }
+  ],
+  "tags": [
+    "planning",
+    "spatial"
+  ],
+  "related": [
+    "survival-balanced-nutrition",
+    "survival-bleeding-triage",
+    "survival-competing-needs",
+    "survival-contagion-control"
+  ],
+  "contrast": {
+    "zh": "漫漫长夜重点是衣物防护和长时间暴露；英灵神殿用状态效果与火源形成更直接的恢复节奏。",
+    "en": "The Long Dark emphasizes clothing and sustained exposure; Valheim uses status effects and fire for a more immediate rhythm."
+  },
+  "combination": {
+    "zh": "设计提案：亲自抵达营地并修好炉子后，才解锁这个快速旅行节点；火灭后节点暂时停用，返程前要决定是否留下燃料。",
+    "en": "Design proposal: reaching a camp and repairing its stove unlocks a fast-travel node. It closes when the fire dies, making fuel provision a return-route decision."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "演示设定：直穿湖岸需两轮，沿林中火屋走需三轮。",
+      "en": "Example: the exposed shore takes two turns; a route through a fire hut takes three."
+    },
+    "action": {
+      "zh": "湿衣状态下选择火屋路线。",
+      "en": "Choose the hut route while clothing is wet."
+    },
+    "result": {
+      "zh": "多花一轮，但抵达时保留足够体力。",
+      "en": "Spend an extra turn but arrive with enough stamina."
+    },
+    "next": {
+      "zh": "在火屋补充燃料，使返程也有停靠点。",
+      "en": "Restock the hut so it remains useful on the return trip."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "先做湿透和寒冷两种状态、三个路线节点与一处可点燃火源。",
+      "en": "Start with wet and cold states, three route nodes and one lightable fire."
+    },
+    "pitfall": {
+      "zh": "无需一开始做动态气候和布料模拟；状态变化必须在移动前可估计。",
+      "en": "Skip dynamic climate and cloth simulation initially; make exposure predictable before moving."
+    },
+    "test": {
+      "zh": "用一次降雨改变条件，看玩家是否重新选择路线。",
+      "en": "Introduce rain and see whether players reconsider their route."
+    }
+  }
+}

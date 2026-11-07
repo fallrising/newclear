@@ -1,0 +1,122 @@
+✔ PP1c_canonical_codepoint_order_LF_nullable_PG_text (3.140694ms)
+✔ PP1c_strict_duplicate (0.490318ms)
+✔ PP1c_strict_unknown_spacing (0.178788ms)
+✔ PP1c_strict_key_order (0.09728ms)
+✔ PP1c_strict_missing_LF (0.117929ms)
+✔ PP1c_strict_extra_LF (0.095218ms)
+✔ PP1c_strict_BOM (0.086799ms)
+✔ PP1c_strict_invalid_UTF8 (0.096879ms)
+✔ PP1c_strict_overflow_number (0.130729ms)
+✔ PP1c_strict_multiple_documents (0.225029ms)
+✔ PP1c_strict_escaped_key (0.14666ms)
+✔ PP1c_strict_surrogate (0.128299ms)
+✔ PP1c_canonical_rejects_NaN (0.092309ms)
+✔ PP1c_canonical_rejects_Infinity (0.07093ms)
+✔ PP1c_canonical_rejects_undefined (0.0647ms)
+✔ PP1c_canonical_rejects_bigint (0.04744ms)
+✔ PP1c_canonical_rejects_sparse (0.04419ms)
+✔ PP1c_canonical_rejects_date (0.038859ms)
+✔ PP1c_canonical_rejects_surrogate (0.03748ms)
+✖ PP1c_valid_manifest_and_receipts_roundtrip (5.354373ms)
+✔ PP1c_manifest_unknown_root (0.302009ms)
+✔ PP1c_manifest_missing_required (0.17905ms)
+✔ PP1c_manifest_wrong_version (0.294729ms)
+✔ PP1c_manifest_backupId (0.371919ms)
+✔ PP1c_manifest_instanceId (0.344697ms)
+✔ PP1c_manifest_source_commit (0.355908ms)
+✔ PP1c_manifest_release_unknown (0.360039ms)
+✔ PP1c_manifest_frontend_unknown (0.314809ms)
+✔ PP1c_manifest_frontend_missing (0.259629ms)
+✔ PP1c_manifest_PG_major (0.267058ms)
+✔ PP1c_manifest_Java_major (0.214528ms)
+✔ PP1c_manifest_tool_source_binding (0.261868ms)
+✔ PP1c_manifest_tool_Java_binding (0.395277ms)
+✔ PP1c_manifest_empty_tool (0.889656ms)
+✔ PP1c_manifest_scope_missing_table (0.225569ms)
+✔ PP1c_manifest_scope_order (0.279048ms)
+✔ PP1c_manifest_secret_ref_value (0.349698ms)
+✔ PP1c_manifest_secret_ref_duplicate (0.370547ms)
+✔ PP1c_manifest_unsafe_ref_path (0.183698ms)
+✔ PP1c_manifest_unsafe_ref_URL (0.257448ms)
+✔ PP1c_manifest_same_volumes (0.246698ms)
+✔ PP1c_manifest_migration_order (0.170809ms)
+✔ PP1c_manifest_migration_rank_duplicate (0.148789ms)
+✔ PP1c_manifest_migration_failed (0.145241ms)
+✔ PP1c_manifest_migration_unknown (0.136261ms)
+✔ PP1c_manifest_migration_bad_checksum (0.190019ms)
+✔ PP1c_manifest_time_backwards (0.17357ms)
+✔ PP1c_manifest_time_invalid_calendar (0.15474ms)
+✔ PP1c_manifest_artifact_order (0.201698ms)
+✔ PP1c_manifest_artifact_path (0.901786ms)
+✔ PP1c_manifest_artifact_self (0.294989ms)
+✔ PP1c_manifest_artifact_unknown (0.302828ms)
+✔ PP1c_manifest_artifact_size_number (0.304229ms)
+✔ PP1c_manifest_artifact_size_leading_zero (0.257139ms)
+✔ PP1c_manifest_artifact_hash_upper (0.268949ms)
+✔ PP1c_manifest_inventory_hash_binding (0.283948ms)
+✔ PP1c_manifest_inventory_count_binding (0.255468ms)
+✔ PP1c_manifest_inventory_count_number (0.300808ms)
+✔ PP1c_complete_backup_binding (0.583628ms)
+✔ PP1c_complete_hash_binding (0.743196ms)
+✔ PP1c_complete_time_binding (0.679838ms)
+✔ PP1c_complete_unknown (1.074964ms)
+✔ PP1c_restore_backup_binding (0.646928ms)
+✔ PP1c_restore_hash_binding (0.645996ms)
+✔ PP1c_restore_target_source_alias (0.725197ms)
+✔ PP1c_restore_run_binding (0.640696ms)
+✔ PP1c_restore_raw_hash_binding (0.531987ms)
+✔ PP1c_restore_inventory_hash_binding (0.384928ms)
+✔ PP1c_restore_time_backwards (0.824745ms)
+✔ PP1c_restore_elapsed_understates_incident (0.571107ms)
+✔ PP1c_restore_rto_budget (0.462597ms)
+✔ PP1c_restore_rto_false_claim (0.379358ms)
+✔ PP1c_restore_unknown (0.15678ms)
+✔ PP1c_restore_environment (0.542967ms)
+✖ PP1c_RTO_missed_receipt_preserves_successful_restore (0.569967ms)
+✔ PP1c_error_fixed_safe_context_and_exit (0.663107ms)
+ℹ tests 76
+ℹ suites 0
+ℹ pass 74
+ℹ fail 2
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 56.345965
+
+✖ failing tests:
+
+test at scripts/ops/recovery-protocol.test.mjs:69:1
+✖ PP1c_valid_manifest_and_receipts_roundtrip (5.354373ms)
+  OpsError: MANIFEST_MISMATCH
+      at fail (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-a-protocol-20261101/apps/cms-scaffold/scripts/ops/recovery-protocol.mjs:30:54)
+      at safeValidation (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-a-protocol-20261101/apps/cms-scaffold/scripts/ops/recovery-protocol.mjs:109:11)
+      at validateRestoreVerified (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-a-protocol-20261101/apps/cms-scaffold/scripts/ops/recovery-protocol.mjs:198:10)
+      at TestContext.<anonymous> (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-a-protocol-20261101/apps/cms-scaffold/scripts/ops/recovery-protocol.test.mjs:73:20)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+      at Test.postRun (node:internal/test_runner/test:1465:19)
+      at Test.run (node:internal/test_runner/test:1390:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    code: 'MANIFEST_MISMATCH',
+    phase: null,
+    operationId: null
+  }
+
+test at scripts/ops/recovery-protocol.test.mjs:134:1
+✖ PP1c_RTO_missed_receipt_preserves_successful_restore (0.569967ms)
+  OpsError: MANIFEST_MISMATCH
+      at fail (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-a-protocol-20261101/apps/cms-scaffold/scripts/ops/recovery-protocol.mjs:30:54)
+      at safeValidation (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-a-protocol-20261101/apps/cms-scaffold/scripts/ops/recovery-protocol.mjs:109:11)
+      at validateRestoreVerified (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-a-protocol-20261101/apps/cms-scaffold/scripts/ops/recovery-protocol.mjs:198:10)
+      at TestContext.<anonymous> (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-a-protocol-20261101/apps/cms-scaffold/scripts/ops/recovery-protocol.test.mjs:137:16)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+      at Test.postRun (node:internal/test_runner/test:1465:19)
+      at Test.run (node:internal/test_runner/test:1390:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    code: 'MANIFEST_MISMATCH',
+    phase: null,
+    operationId: null
+  }

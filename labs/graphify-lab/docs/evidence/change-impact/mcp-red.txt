@@ -1,0 +1,50 @@
+test_I04_impact_edit_refresh_and_source (test_change_impact_mcp.ChangeImpactMCP.test_I04_impact_edit_refresh_and_source) ... ERROR
+
+======================================================================
+ERROR: test_I04_impact_edit_refresh_and_source (test_change_impact_mcp.ChangeImpactMCP.test_I04_impact_edit_refresh_and_source)
+----------------------------------------------------------------------
+  + Exception Group Traceback (most recent call last):
+  |   File "/usr/lib/python3.12/unittest/async_case.py", line 90, in _callTestMethod
+  |     if self._callMaybeAsync(method) is not None:
+  |        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/usr/lib/python3.12/unittest/async_case.py", line 112, in _callMaybeAsync
+  |     return self._asyncioRunner.run(
+  |            ^^^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/usr/lib/python3.12/asyncio/runners.py", line 118, in run
+  |     return self._loop.run_until_complete(task)
+  |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/usr/lib/python3.12/asyncio/base_events.py", line 687, in run_until_complete
+  |     return future.result()
+  |            ^^^^^^^^^^^^^^^
+  |   File "<repo>/labs/graphify-lab/tests/test_change_impact_mcp.py", line 37, in test_I04_impact_edit_refresh_and_source
+  |     async with stdio_client(params, errlog=log) as (read, write):
+  |   File "/usr/lib/python3.12/contextlib.py", line 231, in __aexit__
+  |     await self.gen.athrow(value)
+  |   File "<repo>/labs/graphify-lab/.venv/lib/python3.12/site-packages/mcp/client/stdio.py", line 201, in stdio_client
+  |     async with anyio.create_task_group() as tg:
+  |   File "<repo>/labs/graphify-lab/.venv/lib/python3.12/site-packages/anyio/_backends/_asyncio.py", line 847, in __aexit__
+  |     raise BaseExceptionGroup(
+  | ExceptionGroup: unhandled errors in a TaskGroup (1 sub-exception)
+  +-+---------------- 1 ----------------
+    | Exception Group Traceback (most recent call last):
+    |   File "<repo>/labs/graphify-lab/.venv/lib/python3.12/site-packages/mcp/client/stdio.py", line 205, in stdio_client
+    |     yield read_stream, write_stream
+    |   File "<repo>/labs/graphify-lab/tests/test_change_impact_mcp.py", line 39, in test_I04_impact_edit_refresh_and_source
+    |     async with ClientSession(read, write, read_timeout_seconds=timeout) as session:
+    |   File "<repo>/labs/graphify-lab/.venv/lib/python3.12/site-packages/mcp/client/session.py", line 514, in __aexit__
+    |     result = await self._task_group.__aexit__(exc_type, exc_val, exc_tb)
+    |              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "<repo>/labs/graphify-lab/.venv/lib/python3.12/site-packages/anyio/_backends/_asyncio.py", line 847, in __aexit__
+    |     raise BaseExceptionGroup(
+    | ExceptionGroup: unhandled errors in a TaskGroup (1 sub-exception)
+    +-+---------------- 1 ----------------
+      | Traceback (most recent call last):
+      |   File "<repo>/labs/graphify-lab/tests/test_change_impact_mcp.py", line 42, in test_I04_impact_edit_refresh_and_source
+      |     self.assertIn('change_impact', tools)
+      | AssertionError: 'change_impact' not found in {'workspace_status': Tool(name='workspace_status', title=None, description='Check the active snapshot without rebuilding it.', input_schema={'properties': {}, 'required': [], 'type': 'object', 'additionalProperties': False}, execution=None, output_schema=None, icons=None, annotations=None, meta=None), 'refresh_workspace': Tool(name='refresh_workspace', title=None, description='Explicitly validate/build and atomically select a current snapshot.', input_schema={'properties': {}, 'required': [], 'type': 'object', 'additionalProperties': False}, execution=None, output_schema=None, icons=None, annotations=None, meta=None), 'query_graph': Tool(name='query_graph', title=None, description='Query real Graphify; fail if the active snapshot is not current.', input_schema={'properties': {'question': {'type': 'string', 'minLength': 1}, 'budget': {'type': 'integer', 'minimum': 1, 'maximum': 32000}, 'context': {'type': 'string', 'minLength': 1}}, 'required': ['question'], 'type': 'object', 'additionalProperties': False}, execution=None, output_schema=None, icons=None, annotations=None, meta=None), 'source_excerpt': Tool(name='source_excerpt', title=None, description='Read bounded source for one exact label; fail if stale.', input_schema={'properties': {'label': {'type': 'string', 'minLength': 1}, 'file': {'type': 'string', 'minLength': 1}, 'lines': {'type': 'integer', 'minimum': 1, 'maximum': 100}}, 'required': ['label'], 'type': 'object', 'additionalProperties': False}, execution=None, output_schema=None, icons=None, annotations=None, meta=None), 'calls_path': Tool(name='calls_path', title=None, description='Find a bounded directed calls-only path using exact ID or unique exact label.', input_schema={'properties': {'source': {'type': 'string', 'minLength': 1}, 'target': {'type': 'string', 'minLength': 1}, 'max_hops': {'type': 'integer', 'minimum': 1, 'maximum': 100}, 'max_visited': {'type': 'integer', 'minimum': 1, 'maximum': 100000}}, 'required': ['source', 'target'], 'type': 'object', 'additionalProperties': False}, execution=None, output_schema=None, icons=None, annotations=None, meta=None)}
+      +------------------------------------
+
+----------------------------------------------------------------------
+Ran 1 test in 2.383s
+
+FAILED (errors=1)

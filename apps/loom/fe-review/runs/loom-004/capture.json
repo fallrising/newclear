@@ -1,0 +1,286 @@
+{
+  "schema": 1,
+  "unit": "loom",
+  "synthetic": true,
+  "status": "failed",
+  "stage": "EDGE_RUN_PIN",
+  "started": "2026-10-24T11:59:14.388Z",
+  "sourceHashes": {
+    "fe-review/preload.mjs": "fdaa370f4ec8aa8180eea17482f94e5fa665ee2c17d878fe7a58a331eab27c1a",
+    "fe-review/preload.node.mjs": "df919610272d9da0a1c894da3c96aadf68d2e4669a06aff2e654138c3a228015",
+    "fe-review/run-review.mjs": "238caab8383d525fc0ab45361ded3954785e264b9bca77dc6f36188b4a611673",
+    "fe-review/ui-steps.mjs": "64eee27630f0315a4841fecd2a9f391a4c7cbcf9903c81d4d821b4643cad05fe",
+    "fe-review/geometry.mjs": "bb39c8231278adc7047a92d9881c36a74ef9e8ea384bfb033d9ae46bd2eae12b",
+    "fe-review/vite-review-config.mjs": "e509aa929a58701c425b6fe0e9aac39a26585ad5ea99b9c6c09430b6d2d18d48",
+    "vite.config.ts": "e3c18a83e6de2d367810fd2324d7a4cf14246d9b679cc5d97f11d5860631ff2d",
+    "../flowshot/fe-review/browser-runtime.mjs": "23adc88ebc6466a7f5616b43149ebab3d059fd7a47394c00a277047988c4ca3c",
+    "../flowshot/fe-review/runtime-guards.mjs": "b4c5fbe3f31ab2ce73d6246e8ca37ccf135a8ba7034cb4dd921c4eeb635e7b80",
+    "src/ipc.ts": "3c56b0c5b60309e50758c90bcfde277a54787fc4a4049647dd0b0bc617aa1e18",
+    "src/App.tsx": "dc2c8c8885fde55955b0988755c90aae385222ce42f6efed420f0b53be47fc26",
+    "src/main.tsx": "7cf38f34838d009ef718093a1686b55bedd34b732d4a9bd1a07e4a37037b095c",
+    "src/Terminal.tsx": "5723ca6004f1af87d345f4a54f70436a0bf15a3e9e48628ad413f49f84da0513",
+    "src/surfaces/canvas/CanvasSurface.tsx": "54ef8c2d3820ae74da624cee9ed1fb11936813f739625f3c3c43963538392378",
+    "src/surfaces/canvas/persistence.ts": "f180099aff2b590d917d7c79f3965fac59c5e5d065dd8f6fc55a3ee98ae65549",
+    "src/surfaces/canvas/history.ts": "7c2ef08e69bd6cac87e17c4a35d4577e2b770623656962f08b31fff1c83e0acf",
+    "src/surfaces/canvas/window_close_ipc.ts": "1429cc472105b6811cb27c76215896324e9a826538fb958ae016d066b17d397f",
+    "src/surfaces/document/DocumentSurface.tsx": "06dcde9765cb0ffbf43f8a57054b91bab5e1479d2c9737b232ea22586abc430c",
+    "src/surfaces/document/doc_ipc.ts": "bd19031e6655a31343b86e23019ea24fddc453dc3990acf44611851c3f23219b",
+    "src/surfaces/document/ai_ipc.ts": "a73fae88a9ec2149a1f765ebdb55c6c2db70e670cb0f81d4a568bc3e316299a6",
+    "package-lock.json": "79e87f1819728b06bb45091404661964e5560486c5d094db597b54a516f3aad6"
+  },
+  "tools": {
+    "node": "v24.18.0",
+    "playwright": "1.63.0",
+    "browser": "153.0.8010.12"
+  },
+  "captures": [],
+  "steps": [],
+  "cleanup": {
+    "context0": true,
+    "browserClosed": true,
+    "serverClosed": true,
+    "listenerAbsent": true
+  },
+  "limits": [
+    "Web simulation only",
+    "Native/real vault/PTY/AI/Mac not verified",
+    "Full Round3 not accepted"
+  ],
+  "viteOriginalConfigSha256": "e3c18a83e6de2d367810fd2324d7a4cf14246d9b679cc5d97f11d5860631ff2d",
+  "matrixPrerequisite": {
+    "run": "loom-002",
+    "sha256": "09906953c7b8ee8a9c24859bcd10fcfffecf9f2a7d2f59d746c7dc07ca1c9058",
+    "uniqueCaptures": 12,
+    "rerun": false,
+    "healthAndLoadedIdentity": true
+  },
+  "networkPrerequisite": {
+    "run": "loom-001",
+    "sha256": "f542c65fbb337db0b5feb0eed08adf1de01f1bea29b38d5e24aca15eb3b59aa2",
+    "passed": true,
+    "rerun": false
+  },
+  "nodeSeparation": {
+    "before": {
+      "stable": true,
+      "frames": 4,
+      "stableFrames": 3,
+      "first": {
+        "transform": "transform: translate(0px, 0px) scale(1);",
+        "source": {
+          "box": {
+            "x": 695,
+            "y": 386,
+            "width": 10,
+            "height": 10
+          },
+          "centerHit": true,
+          "hitTag": "DIV",
+          "hitHandle": "out",
+          "hitNode": "d-notes.md-1792843157353"
+        },
+        "target": {
+          "box": {
+            "x": 55,
+            "y": 276,
+            "width": 10,
+            "height": 10
+          },
+          "centerHit": true,
+          "hitTag": "DIV",
+          "hitHandle": "in",
+          "hitNode": "t-synthetic-session-1"
+        },
+        "document": {
+          "x": 140,
+          "y": 181,
+          "width": 560,
+          "height": 420
+        },
+        "terminal": {
+          "x": 60,
+          "y": 101,
+          "width": 640,
+          "height": 360
+        },
+        "domEdges": 0,
+        "persistedEdges": null,
+        "canvasWrites": 0
+      },
+      "last": {
+        "transform": "transform: translate(0px, 0px) scale(1);",
+        "source": {
+          "box": {
+            "x": 695,
+            "y": 386,
+            "width": 10,
+            "height": 10
+          },
+          "centerHit": true,
+          "hitTag": "DIV",
+          "hitHandle": "out",
+          "hitNode": "d-notes.md-1792843157353"
+        },
+        "target": {
+          "box": {
+            "x": 55,
+            "y": 276,
+            "width": 10,
+            "height": 10
+          },
+          "centerHit": true,
+          "hitTag": "DIV",
+          "hitHandle": "in",
+          "hitNode": "t-synthetic-session-1"
+        },
+        "document": {
+          "x": 140,
+          "y": 181,
+          "width": 560,
+          "height": 420
+        },
+        "terminal": {
+          "x": 60,
+          "y": 101,
+          "width": 640,
+          "height": 360
+        },
+        "domEdges": 0,
+        "persistedEdges": null,
+        "canvasWrites": 0
+      }
+    },
+    "screenDelta": 688,
+    "after": {
+      "stable": true,
+      "frames": 4,
+      "stableFrames": 3,
+      "first": {
+        "transform": "transform: translate(-87.9882px, 88.526px) scale(1.09992);",
+        "source": {
+          "box": {
+            "x": 676.453369140625,
+            "y": 508.9970397949219,
+            "width": 10.99920654296875,
+            "height": 10.999176025390625
+          },
+          "centerHit": false,
+          "hitTag": "DIV",
+          "hitHandle": null,
+          "hitNode": "t-synthetic-session-1"
+        },
+        "target": {
+          "box": {
+            "x": 666.5541381835938,
+            "y": 388.00628662109375,
+            "width": 10.9991455078125,
+            "height": 10.9991455078125
+          },
+          "centerHit": true,
+          "hitTag": "DIV",
+          "hitHandle": "in",
+          "hitNode": "t-synthetic-session-1"
+        },
+        "document": {
+          "x": 65.99999237060547,
+          "y": 283.5142822265625,
+          "width": 615.9529418945312,
+          "height": 461.9647216796875
+        },
+        "terminal": {
+          "x": 672.0537109375,
+          "y": 195.52099609375,
+          "width": 703.9461669921875,
+          "height": 395.9697265625
+        },
+        "domEdges": 0,
+        "persistedEdges": null,
+        "canvasWrites": 0
+      },
+      "last": {
+        "transform": "transform: translate(-87.9882px, 88.526px) scale(1.09992);",
+        "source": {
+          "box": {
+            "x": 676.453369140625,
+            "y": 508.9970397949219,
+            "width": 10.99920654296875,
+            "height": 10.999176025390625
+          },
+          "centerHit": false,
+          "hitTag": "DIV",
+          "hitHandle": null,
+          "hitNode": "t-synthetic-session-1"
+        },
+        "target": {
+          "box": {
+            "x": 666.5541381835938,
+            "y": 388.00628662109375,
+            "width": 10.9991455078125,
+            "height": 10.9991455078125
+          },
+          "centerHit": true,
+          "hitTag": "DIV",
+          "hitHandle": "in",
+          "hitNode": "t-synthetic-session-1"
+        },
+        "document": {
+          "x": 65.99999237060547,
+          "y": 283.5142822265625,
+          "width": 615.9529418945312,
+          "height": 461.9647216796875
+        },
+        "terminal": {
+          "x": 672.0537109375,
+          "y": 195.52099609375,
+          "width": 703.9461669921875,
+          "height": 395.9697265625
+        },
+        "domEdges": 0,
+        "persistedEdges": null,
+        "canvasWrites": 0
+      }
+    }
+  },
+  "failure": {
+    "stage": "EDGE_RUN_PIN",
+    "reason": "ASSERTION_FAILED",
+    "site": "ui-steps.mjs:76:10",
+    "fixture": {
+      "synthetic": true,
+      "disposed": false,
+      "counts": {
+        "plugin:event|listen": 14,
+        "canvas_read": 2,
+        "vault_root": 2,
+        "plugin:event|unlisten": 7,
+        "session_history": 2,
+        "home_dir": 1,
+        "pty_spawn": 1,
+        "pty_session_meta": 1,
+        "pty_detach": 1,
+        "pty_subscribe": 1,
+        "pty_resize": 4,
+        "ai_status": 2,
+        "doc_read": 2,
+        "doc_close": 1,
+        "doc_open": 1,
+        "doc_mark_clean": 1
+      },
+      "unknownCommands": 0,
+      "rejectedArguments": 0,
+      "listeners": 7,
+      "callbacks": 7,
+      "listenerIdsDistinct": true,
+      "subscriptions": 1,
+      "sessions": 1,
+      "openDocuments": 1,
+      "dirtyDocuments": 0,
+      "pending": 0,
+      "detached": 1,
+      "closedDocuments": 1,
+      "closeApproved": 0,
+      "exactRunPayloads": 0
+    }
+  },
+  "ended": "2026-10-24T11:59:18.011Z"
+}

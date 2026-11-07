@@ -155,3 +155,168 @@ test('PP1aFM06 TLS failure leaves no successful receipt and sanitizes child fail
   await assert.rejects(prepare(parseArgs(args), f.deps), { message: 'PP1_LOCAL_PREPARE_FAILED' });
   await assert.rejects(readFile(join(f.cwd, 'local/pp1', id, 'receipt.json')), { code: 'ENOENT' });
 });
+test('T146 private network allocator requires an original prepared receipt', async t => {
+  const {createPreparedNetworks}=await import('./prepare.mjs'); assert.equal(typeof createPreparedNetworks,'function');
+  const f=await fixture(t),receipt=await prepare(parseArgs(args),f.deps);
+  await assert.rejects(createPreparedNetworks(structuredClone(receipt),f.deps),{code:'ADAPTER_UNSEALED'});
+});
+const routeHeader='Iface Destination Gateway Flags RefCnt Use Metric Mask MTU Window IRTT\n';
+async function networkFixture(t) {
+  const f=await fixture(t),original=f.deps.command,state={networks:[],creates:[],routes:routeHeader+'eth0 00000000 01011FAC 0003 0 0 100 00000000 0 0 0\n'};
+  f.deps.readRoutes=async()=>state.routes;
+  f.deps.command=async(file,argv)=>{
+    const a=argv.slice(2);
+    if(file==='docker'&&a[0]==='network'&&a[1]==='ls'&&!a.includes('--filter'))return{stdout:state.networks.map(n=>n.Id).join('\n')};
+    if(file==='docker'&&a[0]==='network'&&a[1]==='inspect')return{stdout:JSON.stringify(state.networks.filter(n=>a.includes(n.Id)))};
+    if(file==='docker'&&a[0]==='network'&&a[1]==='create'){
+      state.creates.push(a);if(state.failAt===state.creates.length)throw Error('private-canary');
+      const labels={};for(let i=0;i<a.length;i++)if(a[i]==='--label'){const value=a[++i],at=value.indexOf('=');labels[value.slice(0,at)]=value.slice(at+1);}
+      const n={Id:String(state.creates.length+3).repeat(64),Name:a.at(-1),Driver:'bridge',Internal:true,Scope:'local',EnableIPv6:false,Attachable:false,Ingress:false,
+        Labels:labels,Containers:{},Options:{},IPAM:{Driver:'default',Options:null,Config:[{Subnet:a[a.indexOf('--subnet')+1],Gateway:a[a.indexOf('--gateway')+1]}]}};
+      state.mutateCreated?.(n);state.networks.push(n);return{stdout:n.Id+'\n'};
+    }
+    return original(file,argv);
+  };
+  f.networkState=state;return f;
+}
+test('T146 original prepare creates exactly two private /26s once and keeps CLI receipt shape',async t=>{
+  const f=await networkFixture(t),{createPreparedNetworks}=await import('./prepare.mjs'),receipt=await prepare(parseArgs(args),f.deps);
+  assert.equal(f.networkState.creates.length,0);const shape=Object.keys(receipt),result=await createPreparedNetworks(receipt,f.deps);
+  assert.equal(result.web.subnet,'192.168.240.0/26');assert.equal(result.data.subnet,'192.168.240.64/26');
+  assert.equal(result.web.gateway,'192.168.240.1');assert.equal(result.data.gateway,'192.168.240.65');assert.ok(Object.isFrozen(result)&&Object.isFrozen(result.web));
+  assert.deepEqual(Object.keys(receipt),shape);assert.equal(f.networkState.creates.length,2);
+  const root=join(f.cwd,'local/pp1',id);for(const name of ['network-attempt.json','created-network-web.json','created-network-data.json','prepared-networks.json'])assert.equal((await stat(join(root,name))).mode&0o777,0o600);
+  assert.equal(JSON.parse(await readFile(join(root,'prepared-networks.json'),'utf8')).networks.data.id,result.data.id);
+  await assert.rejects(createPreparedNetworks(receipt,f.deps),{code:'ADAPTER_UNSEALED'});assert.equal(f.networkState.creates.length,2);
+});
+test('T146 receipt mutation crosscwd and replaced private receipt reject before network create',async t=>{
+  const {createPreparedNetworks}=await import('./prepare.mjs');
+  for(const fault of ['mutation','cwd','file','runner']){
+    const f=await networkFixture(t),receipt=await prepare(parseArgs(args),f.deps),deps={...f.deps};
+    if(fault==='mutation')receipt.project='other';if(fault==='cwd')deps.cwd='/tmp';if(fault==='runner')deps.command=async()=>({stdout:''});
+    if(fault==='file')await writeFile(join(f.cwd,'local/pp1',id,'receipt.json'),'{}');
+    await assert.rejects(createPreparedNetworks(receipt,deps),{code:'ADAPTER_UNSEALED'});assert.equal(f.networkState.creates.length,0);
+  }
+});
+test('T146 private allocation fails closed on routes capacity and partial second create',async t=>{
+  const {createPreparedNetworks}=await import('./prepare.mjs');
+  for(const fault of ['route','mask','capacity','single','partial','identity']){
+    const f=await networkFixture(t),s=f.networkState,receipt=await prepare(parseArgs(args),f.deps);
+    if(fault==='route')s.routes='malformed';
+    if(fault==='mask')s.routes=routeHeader+'eth0 0000A8C0 00000000 0001 0 0 0 00F0FF00 0 0 0\n';
+    if(fault==='capacity'||fault==='single')for(let i=0;i<(fault==='single'?63:64);i++)s.networks.push(occupiedNetwork(i,`192.168.${240+Math.floor(i/4)}.${(i%4)*64}/26`));
+    if(fault==='partial')s.failAt=2;if(fault==='identity')s.mutateCreated=n=>{n.Internal=false;};
+    await assert.rejects(createPreparedNetworks(receipt,f.deps),{code:'ADAPTER_UNSEALED'});
+    assert.equal(s.creates.length,fault==='partial'?2:fault==='identity'?1:0);
+    if(fault==='partial')assert.equal(s.networks.length,1);
+    await assert.rejects(createPreparedNetworks(receipt,f.deps),{code:'ADAPTER_UNSEALED'});
+  }
+});
+test('T146 main-table overlap handles default then /24 and nested host routes',async t=>{
+  const {createPreparedNetworks}=await import('./prepare.mjs');
+  for(const row of ['br0 00F0A8C0 00000000 0001 0 0 0 00FFFFFF 0 0 0','eth0 80F0A8C0 00000000 0001 0 0 0 80FFFFFF 0 0 0']){
+    const f=await networkFixture(t);f.networkState.routes+=row+'\n';const receipt=await prepare(parseArgs(args),f.deps);
+    const result=await createPreparedNetworks(receipt,f.deps),third=row.includes('80F0A8C0')?240:241;
+    assert.equal(result.web.subnet,`192.168.${third}.0/26`);assert.equal(result.data.subnet,`192.168.${third}.64/26`);
+  }
+  const f=await networkFixture(t);f.networkState.routes+='eth0 0000A8C0 00000000 0001 0 0 0 0000FFFF 0 0 0\n';
+  const receipt=await prepare(parseArgs(args),f.deps);await assert.rejects(createPreparedNetworks(receipt,f.deps),{code:'ADAPTER_UNSEALED'});assert.equal(f.networkState.creates.length,0);
+});
+test('T146 race consumes receipt and retains prior creation without selecting replacement',async t=>{
+  const {createPreparedNetworks}=await import('./prepare.mjs');
+  for(const raceAt of [2,3]){
+    const f=await networkFixture(t);let reads=0;
+    f.deps.readRoutes=async()=>++reads===raceAt?routeHeader+'br0 00F0A8C0 00000000 0001 0 0 0 00F0FFFF 0 0 0\n':routeHeader;
+    const receipt=await prepare(parseArgs(args),f.deps);await assert.rejects(createPreparedNetworks(receipt,f.deps),{code:'ADAPTER_UNSEALED'});
+    assert.equal(f.networkState.creates.length,raceAt===2?0:1);assert.equal(f.networkState.networks.length,raceAt===2?0:1);
+    await assert.rejects(createPreparedNetworks(receipt,f.deps),{code:'ADAPTER_UNSEALED'});
+    await assert.rejects(readFile(join(f.cwd,'local/pp1',id,'prepared-networks.json')),{code:'ENOENT'});
+  }
+});
+test('T146 parallel calls share one consumption and never create four networks',async t=>{
+  const f=await networkFixture(t),{createPreparedNetworks}=await import('./prepare.mjs'),receipt=await prepare(parseArgs(args),f.deps);
+  const results=await Promise.allSettled([createPreparedNetworks(receipt,f.deps),createPreparedNetworks(receipt,f.deps)]);
+  assert.equal(results.filter(r=>r.status==='fulfilled').length,1);assert.equal(results.filter(r=>r.status==='rejected'&&r.reason.code==='ADAPTER_UNSEALED').length,1);
+  assert.equal(f.networkState.creates.length,2);
+});
+test('T146 unknown global IPAM routes and preexisting namespace are never silently ignored',async t=>{
+  const {createPreparedNetworks}=await import('./prepare.mjs');
+  for(const fault of ['name','label','ipv6','noncanonical','gateway','driver','route-flags','route-columns']){
+    const f=await networkFixture(t),receipt=await prepare(parseArgs(args),f.deps);
+    const n={Id:'f'.repeat(64),Name:'foreign',Driver:'bridge',Labels:{},IPAM:{Driver:'default',Config:[{Subnet:'172.17.0.0/16',Gateway:'172.17.0.1'}]}};
+    if(fault==='name')n.Name=`cms-pp1-local-${id}_web`;if(fault==='label')n.Labels['com.docker.compose.project']=receipt.project;
+    if(fault==='ipv6')n.IPAM.Config[0].Subnet='fd00::/64';if(fault==='noncanonical')n.IPAM.Config[0].Subnet='192.168.240.1/24';
+    if(fault==='gateway')n.IPAM.Config[0].Gateway='192.168.240.1';if(fault==='driver')n.Driver='overlay';
+    f.networkState.networks.push(n);
+    if(fault==='route-flags')f.networkState.routes=routeHeader+'eth0 0000A8C0 00000000 0009 0 0 0 0000FFFF 0 0 0\n';
+    if(fault==='route-columns')f.networkState.routes=routeHeader+'eth0 0000A8C0\n';
+    await assert.rejects(createPreparedNetworks(receipt,f.deps),{code:'ADAPTER_UNSEALED'});assert.equal(f.networkState.creates.length,0);
+  }
+});
+test('T146 created network security and final pair drift retain partial evidence',async t=>{
+  const {createPreparedNetworks}=await import('./prepare.mjs');
+  for(const fault of ['id','name','labels','containers','options','scope','ipam','ipv6','attachable','ingress','final-first-drift']){
+    const f=await networkFixture(t),s=f.networkState;
+    s.mutateCreated=n=>{
+      if(fault==='id')n.Id='short';if(fault==='name')n.Name='other';if(fault==='labels')n.Labels.extra='other';
+      if(fault==='containers')n.Containers.foreign={};if(fault==='options')n.Options.extra='unsafe';if(fault==='scope')n.Scope='swarm';
+      if(fault==='ipam')n.IPAM.Config[0].Subnet='192.168.255.0/24';if(fault==='ipv6')n.EnableIPv6=true;
+      if(fault==='attachable')n.Attachable=true;if(fault==='ingress')n.Ingress=true;
+      if(fault==='final-first-drift'&&s.creates.length===2)s.networks[0].Internal=false;
+    };
+    const receipt=await prepare(parseArgs(args),f.deps);await assert.rejects(createPreparedNetworks(receipt,f.deps),{code:'ADAPTER_UNSEALED'});
+    assert.equal(s.creates.length,fault==='final-first-drift'?2:1);assert.equal(s.networks.length,s.creates.length);
+    await assert.rejects(readFile(join(f.cwd,'local/pp1',id,'prepared-networks.json')),{code:'ENOENT'});
+  }
+});
+test('T146 unknown IPAM driver is refused instead of assuming default allocator semantics',async t=>{
+  const f=await networkFixture(t),{createPreparedNetworks}=await import('./prepare.mjs'),receipt=await prepare(parseArgs(args),f.deps);
+  f.networkState.networks.push({Id:'f'.repeat(64),Name:'foreign',Driver:'bridge',IPAM:{Driver:'unknown',Config:[{Subnet:'172.17.0.0/16'}]}});
+  await assert.rejects(createPreparedNetworks(receipt,f.deps),{code:'ADAPTER_UNSEALED'});assert.equal(f.networkState.creates.length,0);
+});
+test('T146 supplied auxiliary IPAM addresses outside subnet are not ignored',async t=>{
+  const f=await networkFixture(t),{createPreparedNetworks}=await import('./prepare.mjs'),receipt=await prepare(parseArgs(args),f.deps);
+  f.networkState.networks.push({Id:'f'.repeat(64),Name:'foreign',Driver:'bridge',IPAM:{Driver:'default',Config:[{Subnet:'172.17.0.0/16',AuxiliaryAddresses:{other:'192.168.240.2'}}]}});
+  await assert.rejects(createPreparedNetworks(receipt,f.deps),{code:'ADAPTER_UNSEALED'});assert.equal(f.networkState.creates.length,0);
+});
+function occupiedNetwork(index,subnet) {
+  return {Id:(1000+index).toString(16).padStart(64,'0'),Name:`retained-${index}`,Driver:'bridge',IPAM:{Driver:'default',Config:[{Subnet:subnet}]}};
+}
+test('T153 retained twelve /24s still permit C four plus D six fresh private /26s',async t=>{
+  const {createPreparedNetworks}=await import('./prepare.mjs');
+  const retained=Array.from({length:12},(_,i)=>occupiedNetwork(i,`192.168.${240+i}.0/24`));
+  const oldBytes=JSON.stringify(retained),networks=[...retained],allocated=[];
+  for(let attempt=0;attempt<5;attempt++){
+    const f=await networkFixture(t);f.networkState.networks=networks;
+    f.networkState.mutateCreated=n=>{n.Id=(2000+attempt*2+f.networkState.creates.length).toString(16).padStart(64,'0');};
+    const options={...parseArgs(args),runId:(attempt+2).toString(16).repeat(32)},receipt=await prepare(options,f.deps);
+    const result=await createPreparedNetworks(receipt,f.deps);
+    for(const network of Object.values(result))allocated.push(network.subnet);
+    assert.equal(f.networkState.creates.length,2);
+    await assert.rejects(createPreparedNetworks(receipt,f.deps),{code:'ADAPTER_UNSEALED'});
+  }
+  assert.equal(JSON.stringify(networks.slice(0,12)),oldBytes);assert.equal(networks.length,22);
+  assert.deepEqual(allocated,['192.168.252.0/26','192.168.252.64/26','192.168.252.128/26','192.168.252.192/26',
+    '192.168.253.0/26','192.168.253.64/26','192.168.253.128/26','192.168.253.192/26','192.168.254.0/26','192.168.254.64/26']);
+});
+
+test('T153 last two /26 slots have typed gateways and both durable creation receipts',async t=>{
+  const f=await networkFixture(t),{createPreparedNetworks}=await import('./prepare.mjs');
+  f.networkState.networks=Array.from({length:62},(_,i)=>occupiedNetwork(i,`192.168.${240+Math.floor(i/4)}.${(i%4)*64}/26`));
+  const receipt=await prepare(parseArgs(args),f.deps),result=await createPreparedNetworks(receipt,f.deps);
+  assert.equal(result.web.subnet,'192.168.255.128/26');assert.equal(result.web.gateway,'192.168.255.129');
+  assert.equal(result.data.subnet,'192.168.255.192/26');assert.equal(result.data.gateway,'192.168.255.193');
+  for(const role of ['web','data']){
+    const recorded=JSON.parse(await readFile(join(f.cwd,'local/pp1',id,`created-network-${role}.json`),'utf8'));
+    for(const key of ['id','name','subnet','gateway'])assert.equal(recorded[key],result[role][key]);
+    assert.equal(recorded.phase,'CREATED_UNVERIFIED');
+  }
+});
+test('T153 enclosing and nested Docker IPAM block only overlapping fixed /26 candidates',async t=>{
+  const {createPreparedNetworks}=await import('./prepare.mjs');
+  for(const [occupied,expected] of [['192.168.240.0/24','192.168.241.0/26'],['192.168.240.32/27','192.168.240.64/26']]){
+    const f=await networkFixture(t);f.networkState.networks.push(occupiedNetwork(0,occupied));
+    const receipt=await prepare(parseArgs(args),f.deps),result=await createPreparedNetworks(receipt,f.deps);
+    assert.equal(result.web.subnet,expected);assert.equal(f.networkState.creates.length,2);
+  }
+});

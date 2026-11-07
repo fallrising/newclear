@@ -1,0 +1,205 @@
+✖ real eager launch consumes preload pending promise, then exact synthetic DTO (2.16233ms)
+✖ typed error is controlled after loading and is the existing eager promise rejection (28.538255ms)
+✖ resolve before observed loading, duplicate settle, late/colliding installation fail closed (1.008826ms)
+✖ fresh contexts do not reuse resolved state and long metadata remains synthetic (0.865096ms)
+✖ unknown native invoke refuses with safe code and records no supplied payload (0.700598ms)
+✖ locked SDK invoke + listen callback delivers synchronous replay only after registration (0.800696ms)
+✖ listener id is distinct from callback id; SDK unlisten releases both and late unlisten is safe (0.204288ms)
+✖ unknown invoke/invalid Origin/unsafe path do not mutate state or expose request values (0.749327ms)
+✖ runtime document DTO validates expectedHash; conflict/error do not write; doc close releases state (0.217919ms)
+✖ history reads never restart or write stdin; restart and forget are explicit; reset is isolated (0.217629ms)
+✖ sidecar is exact JSON string boundary and explicit export/reseed is separate from reset (0.157689ms)
+✖ no-key AI cannot issue a request; disposal settles pending history and forbids native fallback (0.215399ms)
+ℹ Error: Test "no-key AI cannot issue a request; disposal settles pending history and forbids native fallback" at apps/loom/fe-review/preload.test.mjs:69:1 generated asynchronous activity after the test ended. This activity created the error "TypeError: Cannot read properties of undefined (reading 'invoke')" and would have caused the test to fail, but instead triggered an unhandledRejection event.
+ℹ tests 12
+ℹ suites 0
+ℹ pass 0
+ℹ fail 12
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 313.949854
+
+✖ failing tests:
+
+test at apps/flowshot/fe-review/preload.test.mjs:25:1
+✖ real eager launch consumes preload pending promise, then exact synthetic DTO (2.16233ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+
+  + 'undefined'
+  - 'function'
+
+      at TestContext.<anonymous> (file://<worktree>/apps/flowshot/fe-review/preload.test.mjs:27:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.start (node:internal/test_runner/test:1191:17)
+      at startSubtestAfterBootstrap (node:internal/test_runner/harness:385:17) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 'undefined',
+    expected: 'function',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at apps/flowshot/fe-review/preload.test.mjs:34:1
+✖ typed error is controlled after loading and is the existing eager promise rejection (28.538255ms)
+  TypeError: Cannot read properties of undefined (reading 'observeLoading')
+      at TestContext.<anonymous> (file://<worktree>/apps/flowshot/fe-review/preload.test.mjs:36:23)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+      at Test.postRun (node:internal/test_runner/test:1465:19)
+      at Test.run (node:internal/test_runner/test:1390:12)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:385:3)
+
+test at apps/flowshot/fe-review/preload.test.mjs:40:1
+✖ resolve before observed loading, duplicate settle, late/colliding installation fail closed (1.008826ms)
+  AssertionError [ERR_ASSERTION]: The input did not match the regular expression /LOADING_NOT_OBSERVED/. Input:
+
+  "TypeError: Cannot read properties of undefined (reading 'ready')"
+
+      at TestContext.<anonymous> (file://<worktree>/apps/flowshot/fe-review/preload.test.mjs:42:10)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+      at Test.postRun (node:internal/test_runner/test:1465:19)
+      at Test.run (node:internal/test_runner/test:1390:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: TypeError: Cannot read properties of undefined (reading 'ready')
+        at file://<worktree>/apps/flowshot/fe-review/preload.test.mjs:42:43
+        at getActual (node:assert:611:5)
+        at strict.throws (node:assert:759:24)
+        at TestContext.<anonymous> (file://<worktree>/apps/flowshot/fe-review/preload.test.mjs:42:10)
+        at Test.runInAsyncScope (node:async_hooks:227:14)
+        at Test.run (node:internal/test_runner/test:1325:25)
+        at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+        at Test.postRun (node:internal/test_runner/test:1465:19)
+        at Test.run (node:internal/test_runner/test:1390:12)
+        at async Test.processPendingSubtests (node:internal/test_runner/test:911:7),
+    expected: /LOADING_NOT_OBSERVED/,
+    operator: 'throws',
+    diff: 'simple'
+  }
+
+test at apps/flowshot/fe-review/preload.test.mjs:49:1
+✖ fresh contexts do not reuse resolved state and long metadata remains synthetic (0.865096ms)
+  TypeError: Cannot read properties of undefined (reading 'observeLoading')
+      at TestContext.<anonymous> (file://<worktree>/apps/flowshot/fe-review/preload.test.mjs:50:54)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+      at Test.postRun (node:internal/test_runner/test:1465:19)
+      at Test.run (node:internal/test_runner/test:1390:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7)
+
+test at apps/flowshot/fe-review/preload.test.mjs:55:1
+✖ unknown native invoke refuses with safe code and records no supplied payload (0.700598ms)
+  TypeError: Cannot read properties of undefined (reading 'invoke')
+      at TestContext.<anonymous> (file://<worktree>/apps/flowshot/fe-review/preload.test.mjs:57:48)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+      at Test.postRun (node:internal/test_runner/test:1465:19)
+      at Test.run (node:internal/test_runner/test:1390:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7)
+
+test at apps/loom/fe-review/preload.test.mjs:14:1
+✖ locked SDK invoke + listen callback delivers synchronous replay only after registration (0.800696ms)
+  TypeError: Cannot read properties of undefined (reading 'invoke')
+      at invoke (file://<worktree>/apps/loom/node_modules/@tauri-apps/api/core.js:202:39)
+      at spawn (file://<worktree>/apps/loom/fe-review/preload.test.mjs:12:21)
+      at TestContext.<anonymous> (file://<worktree>/apps/loom/fe-review/preload.test.mjs:15:45)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.start (node:internal/test_runner/test:1191:17)
+      at startSubtestAfterBootstrap (node:internal/test_runner/harness:385:17)
+
+test at apps/loom/fe-review/preload.test.mjs:26:1
+✖ listener id is distinct from callback id; SDK unlisten releases both and late unlisten is safe (0.204288ms)
+  TypeError: Cannot read properties of undefined (reading 'transformCallback')
+      at transformCallback (file://<worktree>/apps/loom/node_modules/@tauri-apps/api/core.js:72:39)
+      at listen (file://<worktree>/apps/loom/node_modules/@tauri-apps/api/event.js:79:18)
+      at TestContext.<anonymous> (file://<worktree>/apps/loom/fe-review/preload.test.mjs:27:56)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+      at Test.postRun (node:internal/test_runner/test:1465:19)
+      at Test.run (node:internal/test_runner/test:1390:12)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:385:3)
+
+test at apps/loom/fe-review/preload.test.mjs:33:1
+✖ unknown invoke/invalid Origin/unsafe path do not mutate state or expose request values (0.749327ms)
+  AssertionError [ERR_ASSERTION]: The input did not match the regular expression /UNKNOWN_COMMAND/. Input:
+
+  "TypeError: Cannot read properties of undefined (reading 'invoke')"
+
+      at async TestContext.<anonymous> (file://<worktree>/apps/loom/fe-review/preload.test.mjs:35:3)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: TypeError: Cannot read properties of undefined (reading 'invoke')
+        at invoke (file://<worktree>/apps/loom/node_modules/@tauri-apps/api/core.js:202:39)
+        at TestContext.<anonymous> (file://<worktree>/apps/loom/fe-review/preload.test.mjs:35:24)
+        at Test.runInAsyncScope (node:async_hooks:227:14)
+        at Test.run (node:internal/test_runner/test:1325:25)
+        at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+        at Test.postRun (node:internal/test_runner/test:1465:19)
+        at Test.run (node:internal/test_runner/test:1390:12)
+        at async Test.processPendingSubtests (node:internal/test_runner/test:911:7),
+    expected: /UNKNOWN_COMMAND/,
+    operator: 'rejects',
+    diff: 'simple'
+  }
+
+test at apps/loom/fe-review/preload.test.mjs:40:1
+✖ runtime document DTO validates expectedHash; conflict/error do not write; doc close releases state (0.217919ms)
+  TypeError: Cannot read properties of undefined (reading 'invoke')
+      at invoke (file://<worktree>/apps/loom/node_modules/@tauri-apps/api/core.js:202:39)
+      at TestContext.<anonymous> (file://<worktree>/apps/loom/fe-review/preload.test.mjs:41:40)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+      at Test.postRun (node:internal/test_runner/test:1465:19)
+      at Test.run (node:internal/test_runner/test:1390:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7)
+
+test at apps/loom/fe-review/preload.test.mjs:52:1
+✖ history reads never restart or write stdin; restart and forget are explicit; reset is isolated (0.217629ms)
+  TypeError: Cannot read properties of undefined (reading 'invoke')
+      at invoke (file://<worktree>/apps/loom/node_modules/@tauri-apps/api/core.js:202:39)
+      at TestContext.<anonymous> (file://<worktree>/apps/loom/fe-review/preload.test.mjs:53:68)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+      at Test.postRun (node:internal/test_runner/test:1465:19)
+      at Test.run (node:internal/test_runner/test:1390:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7)
+
+test at apps/loom/fe-review/preload.test.mjs:62:1
+✖ sidecar is exact JSON string boundary and explicit export/reseed is separate from reset (0.157689ms)
+  TypeError: Cannot read properties of undefined (reading 'invoke')
+      at invoke (file://<worktree>/apps/loom/node_modules/@tauri-apps/api/core.js:202:39)
+      at TestContext.<anonymous> (file://<worktree>/apps/loom/fe-review/preload.test.mjs:64:9)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+      at Test.postRun (node:internal/test_runner/test:1465:19)
+      at Test.run (node:internal/test_runner/test:1390:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7)
+
+test at apps/loom/fe-review/preload.test.mjs:69:1
+✖ no-key AI cannot issue a request; disposal settles pending history and forbids native fallback (0.215399ms)
+  TypeError: Cannot read properties of undefined (reading 'invoke')
+      at invoke (file://<worktree>/apps/loom/node_modules/@tauri-apps/api/core.js:202:39)
+      at TestContext.<anonymous> (file://<worktree>/apps/loom/fe-review/preload.test.mjs:71:23)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+      at Test.postRun (node:internal/test_runner/test:1465:19)
+      at Test.run (node:internal/test_runner/test:1390:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7)

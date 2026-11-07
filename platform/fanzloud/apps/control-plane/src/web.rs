@@ -15,6 +15,7 @@ use crate::transport::CachedResponse;
 pub(crate) const INDEX_HTML: &[u8] = include_bytes!("../web/index.html");
 pub(crate) const APP_JS: &[u8] = include_bytes!("../web/p0-app.js");
 pub(crate) const CLIENT_JS: &[u8] = include_bytes!("../web/p0-client.js");
+pub(crate) const FAVICON_ICO: &[u8] = include_bytes!("../web/favicon.ico");
 pub(crate) const STYLE_CSS: &[u8] = include_bytes!("../web/p0.css");
 
 const NOSNIFF: HeaderName = HeaderName::from_static("x-content-type-options");
@@ -39,6 +40,10 @@ pub(crate) async fn client(State(shared): State<Arc<Shared>>) -> Response<Body> 
 
 pub(crate) async fn style(State(shared): State<Arc<Shared>>) -> Response<Body> {
     asset_response(&shared, STYLE_CSS, "text/css; charset=utf-8")
+}
+
+pub(crate) async fn favicon(State(shared): State<Arc<Shared>>) -> Response<Body> {
+    asset_response(&shared, FAVICON_ICO, "image/x-icon")
 }
 
 fn asset_response(

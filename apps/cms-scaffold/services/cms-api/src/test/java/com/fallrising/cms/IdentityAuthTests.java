@@ -217,7 +217,7 @@ class IdentityAuthTests {
                         .header("X-CSRF-Token", session.csrf)
                         .cookie(session.sessionCookie(), session.csrfCookie()))
                 .andExpect(status().isForbidden())
-                .andExpect(jsonPath("$.error.code").value("LAST_ADMIN"));
+                .andExpect(jsonPath("$.error.code").value("SELF_DISABLE_FORBIDDEN"));
     }
 
     @Test

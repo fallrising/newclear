@@ -1,4 +1,8 @@
-# W5 frontend hardening
+# Current team delivery
+
+Desk T-0351 current PP1c C routing and acceptance: [C plan](pp1c-c-20261102/PLAN.md). Local implementation and C6 accepted by T143/T158; current-head CI/normal merge/remote readback remain publication gates. D begins after C delivery. All earlier plans below are historical.
+
+## Historical W5 frontend hardening
 
 Status: IN_PROGRESS — owner approved A–G (G on 2026-10-06); baseline W4 merge 3b7be596e32920268036d4eb91361972f52bc8ba. Historical T02 failure remains recorded below.
 
@@ -67,3 +71,14 @@ G2/2 real004 exit0,14/14/zero skipped/flaky, rowREAL-20261006-04 appended. Final
 ## Root evidence-gate acceptance and publication routing
 
 T961independentDONEreportactuallyread/validated, no scope/securityblocker; allrequiredlocalartifactsinspected. RootacceptsT960andT961withinboundedscopes, notjusttheirclaims. G implementation/localgateaccepted withreal14/cleanup/31contracts/static/preservation/appendonlyproof. Current-headremoteCIisaseparatependingpublicationgate; rootwillcommit/push/updatePR300, requireallnecessarychecksSUCCESSandrequiredreview, mergewithoutbypass/force/deploy, verifyremoteancestry/CMS-treeequalityandrecordpublicationreceipt/sessionhandoff. VERIFIEDstatusindocsonlytakeseffectwhenPR300isactuallymerged.
+
+## Active2026-11-01 resume
+See [bounded CMS PR333/334 resume](resume-20261101/PLAN.md); earlier plan remains historical.
+
+Current T0351 PP1c D01–D03 seal work is routed in [pp1c-seal-20261101/PLAN.md](pp1c-seal-20261101/PLAN.md); root owns integration, T114 is the only bounded independent reviewer.
+
+Current approved PP1c implementation routes through [pp1c-implementation-20261101/PLAN.md](pp1c-implementation-20261101/PLAN.md); prior seal work remains historical.
+
+PP1c-B routing and acceptance: [.team/pp1c-b-20261101/PLAN.md](pp1c-b-20261101/PLAN.md), approved continuation after A PR955 merge/readback.
+
+Current narrow B CLI repair routing/acceptance: [pp1c-b-cli-20261102/PLAN.md](pp1c-b-cli-20261102/PLAN.md); T136 implementation, T137 independent review; actual default CLI and537Node pass, publication gates pending. C continues separately after B988/989 delivery.

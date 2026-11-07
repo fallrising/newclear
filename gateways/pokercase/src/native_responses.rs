@@ -11,12 +11,20 @@ pub(crate) struct NativeResponses {
     next_sequence: u64,
     saw_frame: bool,
     pub(crate) done: bool,
+    pub(crate) failed: bool,
 }
 
 impl NativeResponses {
+    #[cfg(test)]
     pub(crate) fn push(&mut self, chunk: &[u8]) -> Vec<u8> {
+        self.push_counted(chunk).0
+    }
+
+    /// The count excludes lookahead or later bytes not accepted by this guard.
+    pub(crate) fn push_counted(&mut self, chunk: &[u8]) -> (Vec<u8>, usize) {
         let mut out = Vec::new();
-        for &byte in chunk {
+        let mut consumed = 0;
+        for (index, &byte) in chunk.iter().enumerate() {
             if self.done {
                 break;
             }
@@ -27,6 +35,7 @@ impl NativeResponses {
                     if !self.append(byte, &mut out) {
                         break;
                     }
+                    consumed = index + 1;
                     self.line_end(2, &mut out);
                     continue;
                 }
@@ -38,13 +47,14 @@ impl NativeResponses {
             if !self.append(byte, &mut out) {
                 break;
             }
+            consumed = index + 1;
             match byte {
                 b'\r' => self.pending_cr = true,
                 b'\n' => self.line_end(1, &mut out),
                 _ => {}
             }
         }
-        out
+        (out, consumed)
     }
 
     fn append(&mut self, byte: u8, out: &mut Vec<u8>) -> bool {
@@ -140,12 +150,48 @@ impl NativeResponses {
     }
 
     fn fail(&mut self, out: &mut Vec<u8>) {
+        self.fail_with(
+            out,
+            "upstream_stream_incomplete",
+            crate::error::INCOMPLETE_STREAM_MESSAGE,
+        );
+    }
+
+    pub(crate) fn stall(&mut self) -> Vec<u8> {
+        let mut out = Vec::new();
+        if !self.done {
+            self.fail_with(
+                &mut out,
+                "upstream_stream_timeout",
+                crate::error::STALLED_STREAM_MESSAGE,
+            );
+        }
+        out
+    }
+
+    pub(crate) fn read_error(&mut self) -> Vec<u8> {
+        if let Some(out) = self.finish_cr_terminal() {
+            return out;
+        }
+        let mut out = Vec::new();
+        if !self.done {
+            self.fail_with(
+                &mut out,
+                "upstream_stream_read_error",
+                crate::error::READ_FAILED_STREAM_MESSAGE,
+            );
+        }
+        out
+    }
+
+    fn fail_with(&mut self, out: &mut Vec<u8>, code: &str, message: &str) {
         self.frame.clear();
         self.line_start = 0;
         self.pending_cr = false;
         self.done = true;
-        let error = json!({"type":"error", "code":"upstream_stream_incomplete",
-            "message":crate::error::INCOMPLETE_STREAM_MESSAGE, "param":null,
+        self.failed = true;
+        let error = json!({"type":"error", "code":code,
+            "message":message, "param":null,
             "sequence_number": self.next_sequence});
         out.extend_from_slice(format!("event: error\ndata: {error}\n\n").as_bytes());
     }

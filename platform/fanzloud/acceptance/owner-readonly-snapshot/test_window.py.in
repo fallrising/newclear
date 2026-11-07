@@ -1,0 +1,165 @@
+import importlib.util
+import json
+from pathlib import Path
+import subprocess
+import sys
+import tempfile
+import time
+import os
+import signal
+import threading
+import unittest
+from unittest.mock import patch
+
+spec = importlib.util.spec_from_file_location('window', Path(__file__).with_name('window.py'))
+w = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(w)
+
+
+class WindowTests(unittest.TestCase):
+    def intent(self):
+        return {'task': 'T-0442', 'mode': 'readonly_existing_results', 'approved': True,
+                'owner_connection_ready': True, 'approved_at_epoch': time.time()}
+
+    def test_absent_owner_connection_cannot_consume_window(self):
+        with tempfile.TemporaryDirectory() as td:
+            intent = self.intent()
+            intent['owner_connection_ready'] = False
+            with self.assertRaises(ValueError):
+                w.consume(Path(td), intent)
+            self.assertFalse((Path(td) / 'started.json').exists())
+
+    def test_consumed_window_never_resets_its_original_deadline(self):
+        with tempfile.TemporaryDirectory() as td:
+            p = Path(td)
+            original = w.consume(p, self.intent())
+            self.assertLess(original['cleanup_mono'], original['deadline_mono'])
+            with self.assertRaises(FileExistsError):
+                w.consume(p, self.intent())
+            self.assertEqual(w.read_state(p), original)
+
+    def test_mutation_gate_closes_at_cleanup_cutoff(self):
+        with tempfile.TemporaryDirectory() as td:
+            state = w.consume(Path(td), self.intent())
+            self.assertFalse(w.due(state, state['cleanup_mono'] - 0.01))
+            self.assertTrue(w.due(state, state['cleanup_mono']))
+
+    def guard_case(self, owner_lost):
+        with tempfile.TemporaryDirectory() as td:
+            p = Path(td)
+            state = w.consume(p, self.intent())
+            process = subprocess.Popen([sys.executable, '-c', 'import time; time.sleep(60)'], start_new_session=True)
+            try:
+                state['children'] = [{'name': 'dummy-only', 'pid': process.pid, 'identity': w.proc_identity(process.pid)}]
+                if owner_lost:
+                    state['parent'] = {'pid': 99999999, 'identity': 'not-live'}
+                else:
+                    state['cleanup_mono'] = time.monotonic() - 1
+                w.put(p / 'state.json', state)
+                guardian = subprocess.Popen([sys.executable, str(Path(__file__).with_name('window.py')), '--guardian', str(p)], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                out, err = guardian.communicate(timeout=8)
+                self.assertEqual(guardian.returncode, 0, (out, err))
+                process.wait(timeout=3)
+                result = json.loads((p / 'result.json').read_text())
+                self.assertEqual(result['status'], 'STOPPED')
+                self.assertEqual(result['owned_processes_alive'], 0)
+                self.assertFalse(result['overrun'])
+                self.assertEqual(result['product_cli_starts'], 0)
+            finally:
+                if process.poll() is None:
+                    process.kill()
+                    process.wait()
+
+    def test_slow_startup_read_cannot_block_independent_cleanup(self):
+        with tempfile.TemporaryDirectory() as td:
+            p = Path(td)
+            state = w.consume(p, self.intent())
+            state['cleanup_mono'] = time.monotonic() + .3
+            w.put(p / 'state.json', state)
+            entered, release = threading.Event(), threading.Event()
+            failures = []
+            def slow_read(_run):
+                entered.set()
+                release.wait(timeout=5)
+                return {}
+            def reading():
+                try:
+                    w.prepare_snapshot(p)
+                except RuntimeError:
+                    failures.append('closed')
+            with patch.object(w, 'database_snapshot', side_effect=slow_read), patch.object(w, 'sqlite_snapshot', return_value={}):
+                worker = threading.Thread(target=reading)
+                worker.start()
+                self.assertTrue(entered.wait(timeout=1))
+                guardian = subprocess.Popen([sys.executable, str(Path(__file__).with_name('window.py')), '--guardian', str(p)], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                try:
+                    out, err = guardian.communicate(timeout=2)
+                    self.assertEqual(guardian.returncode, 0, (out, err))
+                    self.assertTrue(worker.is_alive(), 'guardian finished while startup read was still stalled')
+                    self.assertTrue((p / 'result.json').exists())
+                finally:
+                    release.set()
+                    worker.join(timeout=2)
+                    if guardian.poll() is None:
+                        guardian.kill()
+                        guardian.wait()
+                self.assertEqual(failures, ['closed'])
+                self.assertFalse((p / 'before.json').exists())
+
+    def test_late_child_after_parent_death_never_executes_effect(self):
+        with tempfile.TemporaryDirectory() as td:
+            p = Path(td)
+            state = w.consume(p, self.intent())
+            state['parent'] = {'pid': 99999999, 'identity': 'not-live'}
+            state['guardian'] = {'pid': os.getpid(), 'identity': w.proc_identity(os.getpid())}
+            state['launching'] = {'dummy': 'reserved'}
+            w.put(p / 'state.json', state)
+            effect = p / 'forbidden-effect'
+            child = subprocess.Popen([sys.executable, str(Path(__file__).with_name('window.py')), '--child', str(p), '--child-name', 'dummy', '--exec-args', sys.executable, '-c', f"from pathlib import Path;Path({str(effect)!r}).touch()"], start_new_session=True, stdout=subprocess.DEVNULL)
+            child.wait(timeout=4)
+            self.assertNotEqual(child.returncode, 0)
+            self.assertFalse(effect.exists())
+
+    def test_cleanup_stops_descendant_after_group_leader_exit(self):
+        with tempfile.TemporaryDirectory() as td:
+            p = Path(td)
+            state = w.consume(p, self.intent())
+            pidfile = p / 'descendant'
+            script = "import subprocess,time;from pathlib import Path;p=subprocess.Popen(["+repr(sys.executable)+",'-c','import signal,time;signal.signal(signal.SIGINT,signal.SIG_IGN);time.sleep(60)']);Path("+repr(str(pidfile))+").write_text(str(p.pid));time.sleep(.3)"
+            leader = subprocess.Popen([sys.executable, '-c', script], start_new_session=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            entry = {'name': 'dummy-only', 'pid': leader.pid, 'identity': w.proc_identity(leader.pid)}
+            try:
+                leader.wait(timeout=4)
+                self.assertTrue(w.group_members(entry))
+                state['children'] = [entry]
+                w.put(p / 'state.json', state)
+                w.cleanup(p)
+                self.assertFalse(w.group_members(entry))
+                self.assertEqual(json.loads((p / 'result.json').read_text())['status'], 'STOPPED')
+            finally:
+                try:
+                    os.killpg(leader.pid, signal.SIGKILL)
+                except ProcessLookupError:
+                    pass
+                if leader.poll() is None:
+                    leader.wait(timeout=3)
+
+    def test_live_listener_forbids_stopped_claim(self):
+        with tempfile.TemporaryDirectory() as td:
+            p = Path(td)
+            w.consume(p, self.intent())
+            with patch.object(w, 'listeners', return_value={'18447': True}):
+                w.cleanup(p)
+            result = json.loads((p / 'result.json').read_text())
+            self.assertEqual(result['status'], 'STOP_UNKNOWN_OR_FAILED')
+            self.assertIn('listener_still_open', result['errors'])
+
+    def test_independent_guard_stops_owned_dummy_at_deadline(self):
+        self.guard_case(False)
+
+    def test_independent_guard_stops_owned_dummy_after_parent_disappears(self):
+        self.guard_case(True)
+
+
+if __name__ == '__main__':
+    unittest.main(verbosity=2)

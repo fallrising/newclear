@@ -1,0 +1,45 @@
+{
+  "jarSha256": "fc1aa2b9b74ecdd838d5bf2bba8d6f4100bf919a9dbe5de64c172ded1a58c756",
+  "cases": [
+    {
+      "args": [
+        "ops-inventory",
+        "--request",
+        "/tmp/caller.json"
+      ],
+      "exit": 2,
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr": "INPUT_INVALID",
+      "springStarted": false
+    },
+    {
+      "args": [
+        "x",
+        "ops-inventory"
+      ],
+      "exit": 2,
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr": "",
+      "springStarted": false
+    },
+    {
+      "args": [
+        "ops-inventory",
+        "ops-inventory"
+      ],
+      "exit": 2,
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr": "",
+      "springStarted": false
+    },
+    {
+      "args": [
+        "maintenance"
+      ],
+      "exit": 2,
+      "stdoutSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr": "{\"code\":\"INPUT_INVALID\",\"operationId\":null}",
+      "springStarted": false
+    }
+  ]
+}

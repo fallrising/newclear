@@ -1,0 +1,8 @@
+{
+  "version": 1,
+  "original": "T146/A/red.log",
+  "sha256": "9e7fc997c092e26a21806e724eb56e3ca8429aa2f43a9d5d35560932ffd85086",
+  "byteSize": "949",
+  "encoding": "utf-8",
+  "text": "✖ T146 private network allocator requires an original prepared receipt (1.673583ms)\nℹ tests 1\nℹ suites 0\nℹ pass 0\nℹ fail 1\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 57.632129\n\n✖ failing tests:\n\ntest at scripts/local/prepare.test.mjs:158:1\n✖ T146 private network allocator requires an original prepared receipt (1.673583ms)\n  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n  + actual - expected\n  \n  + 'undefined'\n  - 'function'\n  \n      at TestContext.<anonymous> (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-c-revoke-20261102/apps/cms-scaffold/scripts/local/prepare.test.mjs:159:72)\n      at async Test.run (node:internal/test_runner/test:1332:7)\n      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:385:3) {\n    generatedMessage: true,\n    code: 'ERR_ASSERTION',\n    actual: 'undefined',\n    expected: 'function',\n    operator: 'strictEqual',\n    diff: 'simple'\n  }\n"
+}

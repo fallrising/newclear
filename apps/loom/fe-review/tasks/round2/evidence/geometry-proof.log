@@ -1,0 +1,10 @@
+✔ geometry observer requires successive actual frames and reports occlusion without changing DOM (2.45807ms)
+✔ continually moving geometry reaches its bounded failure rather than claiming stable coordinates (2.49466ms)
+ℹ tests 2
+ℹ suites 0
+ℹ pass 2
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 60.866878

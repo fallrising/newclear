@@ -386,7 +386,7 @@ Approval 內容保存 normalized action、參數 hash、有效期限與 policy r
 | UI 事件 | DB commit 到連線中瀏覽器顯示 p95 < 1 秒 |
 | Terminal output | 單 tool 最大 10 MiB，超過截斷並標記；run 日誌上限 100 MiB |
 | Artifacts | 現有結果 JSON archive 每 run 一份、1 MiB，diff 256 KiB；未來任意 artifact 目標單檔 100 MiB／每 run 1 GiB，目前未實作 |
-| Retention | 手動 archive payload GC 至少 30 天、每批最多 100；active／interrupted／未確認 cleanup／export 引用均保護，metadata/原始 diff 保留。事件 30 天／audit 90 天仍為未實作目標 |
+| Retention | 手動 archive payload GC 至少 30 天、每批最多 100；active／interrupted／未確認 cleanup／export 引用均保護，metadata/原始 diff 保留。手動事件 GC 至少30天、100 inspected runs／1000 events／8MiB encoded records，保留 durable dedupe 與連續 cursor；[本機切片證據](docs/EVENT-RETENTION.md)，focused T088 已接受，CI 待驗收。Audit90天仍未實作 |
 
 Capacity 計算使用 configured reservations 與 observed 使用量中較保守的結果。CPU 可設明確超賣政策，RAM 初版不超賣；VM、golden template 與 warm pool 都占資源。UI 分別顯示 queue wait、provision、agent execution 與 cleanup 時間，不能用上游 warm-claim 毫秒數宣稱整體任務已就緒。
 
@@ -456,7 +456,7 @@ M0/M1 建立 fake model、fake AgentBackend、fake SandboxProvider 與 fake GitH
 | M1 | API/Postgres/schema、operator login、queue、fake adapters、UI 骨架、根目錄 path-scoped CI | AT-01、登入／建立任務／讀取事件垂直切片 | Passed：PostgreSQL／HTTP／fake adapter 與 UI component 驗收，見 [M1](docs/M1.md) |
 | M2 | 真實 sandbox adapter + OpenHands adapter、並行工作台／events／diff | AT-02/03/10，至少兩個真實 VM 並行 | Passed：四真實 VM、100-event browser reconnect、unsupported gate；固定模擬模型，見 [M2](docs/M2.md) |
 | M3 | lease/recovery、approval、cancel、egress、budget、audit | AT-04/05/06/07/08/11，restart/partition 故障注入 | In progress：AT-04/05 recovery、AT-06 approval、AT-08 cancel 固定模式已驗收；安全 pause/resume、控制憑證隔離與固定節點 egress 已驗收；AT-11-A proxy、B guest transport、C1 fixture credits、C2a 公開費率演練及 C2b1 loopback mock 已驗收。C2b2 的 mock HTTPS 與 isolation 已在新主機通過；CI 不代替那次 KVM。真接口暫定 OpenCode Go Chat Completions，開發仍用本機 mock。單人版本已決定延後真實計費／硬金額上限，不作目前 gate，費用保持 unknown；完整 AT-07/11 跨切片驗收待完成。24 小時停留是 release 前整合測試，見 [AT-11-C2b2](docs/M3-HTTPS-PROVIDER.md) |
-| M4 | 結果封存、explicit GitHub export、backup/GC、單節點部署手冊 | AT-09/12/13、完整 fake E2E + opt-in live smoke；MVP gate | In progress：bounded PostgreSQL 成果封存／authenticated download 與明確授權 GitHub export 切片（fake HTTP 驗收、live 尚未執行）；離線 DB 備份／空庫還原、手動 archive payload retention 見 [備份與保留](docs/BACKUP-RETENTION.md)。單節點操作手冊與隔離 control-plane 演練見 [SINGLE-NODE](docs/SINGLE-NODE.md)；任意 artifacts、事件／審計 retention、stale VM cleanup、實際主機部署與完整 AT-09/12/13 尚未完成，見 [成果封存](docs/RESULT-ARCHIVE.md)／[GitHub 匯出](docs/GITHUB-EXPORT.md) |
+| M4 | 結果封存、explicit GitHub export、backup/GC、單節點部署手冊 | AT-09/12/13、完整 fake E2E + opt-in live smoke；MVP gate | In progress：bounded PostgreSQL 成果封存／authenticated download 與明確授權 GitHub export 切片（fake HTTP 驗收、live 尚未執行）；離線 DB 備份／空庫還原、手動 archive payload retention 見 [備份與保留](docs/BACKUP-RETENTION.md)，[手動事件 GC](docs/EVENT-RETENTION.md) 已有 focused/native/browser 本機證據，focused T088 已接受，CI 待驗收。單節點手冊與隔離演練見 [SINGLE-NODE](docs/SINGLE-NODE.md)；任意 artifacts、audit retention、stale VM cleanup、實際主機部署與完整 AT-09/12/13 尚未完成，見 [成果封存](docs/RESULT-ARCHIVE.md)／[GitHub 匯出](docs/GITHUB-EXPORT.md) |
 | M5 | 一個 ACP adapter、UTC schedules／GitHub webhook | capability contract、delivery dedupe、overlap policy、run history | Deferred |
 | M6 | 多節點／RBAC／checkpoint-fork | tenant boundary、placement/recovery、checkpoint compatibility tests | Deferred |
 

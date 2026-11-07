@@ -1,0 +1,8 @@
+{
+  "version": 1,
+  "original": "T131/T02c/media-integration-green2.log",
+  "sha256": "409ba0dc95634bc65e1ae72b5dd52fd6508a590caeaff89956d2ad43a3f5f7f5",
+  "byteSize": "467",
+  "encoding": "utf-8",
+  "text": "✔ T131_T02_target_media_requires_independently_cached_profile (1112.145863ms)\n✔ T131_T02_target_media_uses_verified_profile_from_same_real_registry_token (1969.272419ms)\n✔ T131_T02_source_after_inventory_is_allowed_only_at_raw_verification (1266.547581ms)\n✔ T131_T02_target_PG_backend_may_end_before_output_without_reappearing (1150.570279ms)\nℹ tests 4\nℹ suites 0\nℹ pass 4\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 5583.890395\n"
+}

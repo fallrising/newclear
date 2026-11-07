@@ -1,0 +1,560 @@
+{
+  "schema_version": 1,
+  "provenance": "公開 synthetic 合成繁體中文拒答實驗 heldout 資料。所有名稱、物件、活動、設定及紀錄均為虛構，不含真實人物、私人資料或專業建議。兩個新 split 由獨立資料作者在未讀取任何評估輸出、排名或分數且未執行模型檢索的情況下同時撰寫；舊 fixtures 僅供避免重複。每筆事實僅適用於指名的實體，不代表其他相似名稱。查詢及人工 oracle 理由供評估前審查與固定；這是小型人工樣本，不宣稱雙盲或母體代表性。",
+  "notes": [
+    {
+      "id": "h01",
+      "uri": "mv2://rejection-heldout/h01",
+      "title": "砂岬風鈴掛設",
+      "text": "砂岬風鈴掛在露臺橫桿中央，最長的金屬管長二十六公分。敲片上刻著一個月牙。"
+    },
+    {
+      "id": "h02",
+      "uri": "mv2://rejection-heldout/h02",
+      "title": "灰灣冰壺體驗",
+      "text": "灰灣冰壺體驗的第一輪使用紅柄壺，第二輪換成黃柄壺。場邊記分牌的左欄記錄紅柄組。"
+    },
+    {
+      "id": "h03",
+      "uri": "mv2://rejection-heldout/h03",
+      "title": "橙脊攀岩粉袋",
+      "text": "橙脊攀岩粉袋扣在腰帶右側，袋口用黑色束繩收緊。粉袋外面的小袋裝著木柄清潔刷。"
+    },
+    {
+      "id": "h04",
+      "uri": "mv2://rejection-heldout/h04",
+      "title": "流環扯鈴練習",
+      "text": "流環扯鈴課先練平拋，再練繞腳，最後練接鈴。課後把兩支短棍插入牆上的並排圓孔。"
+    },
+    {
+      "id": "h05",
+      "uri": "mv2://rejection-heldout/h05",
+      "title": "銅雀溜溜球配件",
+      "text": "銅雀溜溜球換上六十公分的棉繩，繩尾打成單環。舊繩捲在帶凹槽的塑膠片上。"
+    },
+    {
+      "id": "h06",
+      "uri": "mv2://rejection-heldout/h06",
+      "title": "丘影沙漏擺設",
+      "text": "丘影沙漏放在壁龕最右端，流砂顏色是暗紅色。每次翻轉後約五分鐘流完。"
+    },
+    {
+      "id": "h07",
+      "uri": "mv2://rejection-heldout/h07",
+      "title": "杏霧果醬分裝",
+      "text": "杏霧果醬分成七個矮罐，罐蓋都綁著麻繩。這批只貼了製作批號「杏三」。"
+    },
+    {
+      "id": "h08",
+      "uri": "mv2://rejection-heldout/h08",
+      "title": "石徑吸塵器接頭",
+      "text": "石徑吸塵器清理門軌時接扁嘴吸頭，吸頭平常卡在機身後方的卡座。圓刷接頭放在配件托盤。"
+    },
+    {
+      "id": "h09",
+      "uri": "mv2://rejection-heldout/h09",
+      "title": "琥翼紙昆蟲模型",
+      "text": "琥翼紙昆蟲模型有四片透明翅膀，翅脈用深棕線描出。完成品立在六角形底座上。"
+    },
+    {
+      "id": "h10",
+      "uri": "mv2://rejection-heldout/h10",
+      "title": "晚霞扇舞排練",
+      "text": "晚霞扇舞排練在第三個八拍打開摺扇，收扇動作安排在第五個八拍。地板貼線用來標示轉身的位置。"
+    },
+    {
+      "id": "h11",
+      "uri": "mv2://rejection-heldout/h11",
+      "title": "斜星跳棋收局",
+      "text": "斜星跳棋這次由綠色棋子先走，最後留在終點區的是紫色棋子。收局時所有棋子分色裝進六個小杯。"
+    },
+    {
+      "id": "h12",
+      "uri": "mv2://rejection-heldout/h12",
+      "title": "方轍折疊推車",
+      "text": "方轍折疊推車收合後立在樓梯轉角，固定帶繞過兩個車輪。車架上的掛鉤朝向牆面。"
+    },
+    {
+      "id": "h13",
+      "uri": "mv2://rejection-heldout/h13",
+      "title": "葉舟吊床整理",
+      "text": "葉舟吊床的兩端繩索各繞成一圈，再一起放進長條筒袋。筒袋靠在露營架最下方。"
+    },
+    {
+      "id": "h14",
+      "uri": "mv2://rejection-heldout/h14",
+      "title": "墨磐書法練字",
+      "text": "墨磐練字紙這次寫的是「山高水長」，每張紙排兩列，每列四字。用過的毛筆架在雙槽筆架。"
+    },
+    {
+      "id": "h15",
+      "uri": "mv2://rejection-heldout/h15",
+      "title": "細雨壓花卡",
+      "text": "細雨壓花卡把兩朵乾燥小花排在卡面左下角，右上角留給手寫祝福。固定花朵用的是透明薄膜。"
+    },
+    {
+      "id": "h16",
+      "uri": "mv2://rejection-heldout/h16",
+      "title": "彈途動力小車",
+      "text": "彈途橡皮筋動力車測試前把後軸轉了十二圈，鬆手後朝木板斜坡前進。車頭貼著一道白色短線。"
+    },
+    {
+      "id": "h17",
+      "uri": "mv2://rejection-heldout/h17",
+      "title": "弧線投籃練習",
+      "text": "弧線投籃練習從罰球線開始，每投十球就記一次命中數。這次使用表面有粗點紋的球。"
+    },
+    {
+      "id": "h18",
+      "uri": "mv2://rejection-heldout/h18",
+      "title": "絨芽衣物修整",
+      "text": "絨芽毛球修剪機清理後，收集槽卡回機身下方。替換網罩裝在帶旋蓋的小筒裡。"
+    },
+    {
+      "id": "h19",
+      "uri": "mv2://rejection-heldout/h19",
+      "title": "StepHaven 步數目標",
+      "text": "StepHaven 計步器的每日目標設為 6500 步，主畫面顯示的是今日累計。錶帶選用細孔那一條。"
+    },
+    {
+      "id": "h20",
+      "uri": "mv2://rejection-heldout/h20",
+      "title": "WakeReed 鬧鈴設定",
+      "text": "WakeReed 鬧鐘的 Alarm B 設在 06:45，提示音選木魚聲。鬧鐘正面貼了一片防眩薄片。"
+    },
+    {
+      "id": "h21",
+      "uri": "mv2://rejection-heldout/h21",
+      "title": "AirMarble 風扇角度",
+      "text": "AirMarble 桌扇的 Swing 範圍設成 70 度，風速停在第二段。底座放在軟木圓墊上。"
+    },
+    {
+      "id": "h22",
+      "uri": "mv2://rejection-heldout/h22",
+      "title": "WeightBirch 行李秤",
+      "text": "WeightBirch 行李秤的單位切換成 kg，掛帶穿過提把後再扣回秤鉤。秤面朝上方便讀數。"
+    },
+    {
+      "id": "h23",
+      "uri": "mv2://rejection-heldout/h23",
+      "title": "FrostOwl 製冰格",
+      "text": "FrostOwl 製冰盒的 Mini 格盤共有十五格，每格呈蜂巢狀。盒蓋扣好後放在冷凍室上層。"
+    },
+    {
+      "id": "h24",
+      "uri": "mv2://rejection-heldout/h24",
+      "title": "TurnCedar 展示轉盤",
+      "text": "TurnCedar 展示轉盤選擇 Slow 模式，轉一圈需要四十五秒。盤面中央鋪著一片黑色絨紙。"
+    }
+  ],
+  "queries": [
+    {
+      "id": "hq01",
+      "category": "exact",
+      "text": "砂岬風鈴最長的金屬管有幾公分？",
+      "relevant_uris": [
+        "mv2://rejection-heldout/h01"
+      ],
+      "rationale": "h01 明示「二十六公分」，直接提供本題所問的事實；其餘筆記沒有同一實體的這項紀錄。"
+    },
+    {
+      "id": "hq02",
+      "category": "exact",
+      "text": "灰灣冰壺體驗的第二輪使用什麼顏色的壺柄？",
+      "relevant_uris": [
+        "mv2://rejection-heldout/h02"
+      ],
+      "rationale": "h02 明示「第二輪換成黃柄壺」，直接提供本題所問的事實；其餘筆記沒有同一實體的這項紀錄。"
+    },
+    {
+      "id": "hq03",
+      "category": "exact",
+      "text": "橙脊攀岩粉袋扣在腰帶哪一側？",
+      "relevant_uris": [
+        "mv2://rejection-heldout/h03"
+      ],
+      "rationale": "h03 明示「腰帶右側」，直接提供本題所問的事實；其餘筆記沒有同一實體的這項紀錄。"
+    },
+    {
+      "id": "hq04",
+      "category": "exact",
+      "text": "流環扯鈴課練完平拋，接著練什麼？",
+      "relevant_uris": [
+        "mv2://rejection-heldout/h04"
+      ],
+      "rationale": "h04 明示「再練繞腳」，直接提供本題所問的事實；其餘筆記沒有同一實體的這項紀錄。"
+    },
+    {
+      "id": "hq05",
+      "category": "exact",
+      "text": "銅雀溜溜球換上的棉繩有多長？",
+      "relevant_uris": [
+        "mv2://rejection-heldout/h05"
+      ],
+      "rationale": "h05 明示「六十公分」，直接提供本題所問的事實；其餘筆記沒有同一實體的這項紀錄。"
+    },
+    {
+      "id": "hq06",
+      "category": "exact",
+      "text": "丘影沙漏的流砂是什麼顏色？",
+      "relevant_uris": [
+        "mv2://rejection-heldout/h06"
+      ],
+      "rationale": "h06 明示「暗紅色」，直接提供本題所問的事實；其餘筆記沒有同一實體的這項紀錄。"
+    },
+    {
+      "id": "hq07",
+      "category": "partial",
+      "text": "這批果醬一共分裝成幾個矮罐？",
+      "relevant_uris": [
+        "mv2://rejection-heldout/h07"
+      ],
+      "rationale": "h07 明示「七個矮罐」，直接提供本題所問的事實；其餘筆記沒有同一實體的這項紀錄。"
+    },
+    {
+      "id": "hq08",
+      "category": "partial",
+      "text": "清理門軌用的吸頭平常卡在哪裡？",
+      "relevant_uris": [
+        "mv2://rejection-heldout/h08"
+      ],
+      "rationale": "h08 明示「機身後方的卡座」，直接提供本題所問的事實；其餘筆記沒有同一實體的這項紀錄。"
+    },
+    {
+      "id": "hq09",
+      "category": "partial",
+      "text": "這隻紙昆蟲有幾片透明翅膀？",
+      "relevant_uris": [
+        "mv2://rejection-heldout/h09"
+      ],
+      "rationale": "h09 明示「四片透明翅膀」，直接提供本題所問的事實；其餘筆記沒有同一實體的這項紀錄。"
+    },
+    {
+      "id": "hq10",
+      "category": "partial",
+      "text": "排練到第幾個八拍時要把摺扇打開？",
+      "relevant_uris": [
+        "mv2://rejection-heldout/h10"
+      ],
+      "rationale": "h10 明示「第三個八拍」，直接提供本題所問的事實；其餘筆記沒有同一實體的這項紀錄。"
+    },
+    {
+      "id": "hq11",
+      "category": "partial",
+      "text": "這盤由哪個顏色的棋子先走？",
+      "relevant_uris": [
+        "mv2://rejection-heldout/h11"
+      ],
+      "rationale": "h11 明示「綠色棋子先走」，直接提供本題所問的事實；其餘筆記沒有同一實體的這項紀錄。"
+    },
+    {
+      "id": "hq12",
+      "category": "partial",
+      "text": "推車收合後用固定帶繞過哪個部位？",
+      "relevant_uris": [
+        "mv2://rejection-heldout/h12"
+      ],
+      "rationale": "h12 明示「兩個車輪」，直接提供本題所問的事實；其餘筆記沒有同一實體的這項紀錄。"
+    },
+    {
+      "id": "hq13",
+      "category": "paraphrase",
+      "text": "收起懸吊睡床時，兩頭的繩子怎麼整理？",
+      "relevant_uris": [
+        "mv2://rejection-heldout/h13"
+      ],
+      "rationale": "h13 明示「兩端繩索各繞成一圈」，直接提供本題所問的事實；其餘筆記沒有同一實體的這項紀錄。"
+    },
+    {
+      "id": "hq14",
+      "category": "paraphrase",
+      "text": "這回用毛筆反覆練的是哪四個字？",
+      "relevant_uris": [
+        "mv2://rejection-heldout/h14"
+      ],
+      "rationale": "h14 明示「山高水長」，直接提供本題所問的事實；其餘筆記沒有同一實體的這項紀錄。"
+    },
+    {
+      "id": "hq15",
+      "category": "paraphrase",
+      "text": "做乾花賀卡時，花材排在卡面的哪個角落？",
+      "relevant_uris": [
+        "mv2://rejection-heldout/h15"
+      ],
+      "rationale": "h15 明示「左下角」，直接提供本題所問的事實；其餘筆記沒有同一實體的這項紀錄。"
+    },
+    {
+      "id": "hq16",
+      "category": "paraphrase",
+      "text": "讓橡皮筋帶動的小車出發前，後面的軸要先轉幾圈？",
+      "relevant_uris": [
+        "mv2://rejection-heldout/h16"
+      ],
+      "rationale": "h16 明示「後軸轉了十二圈」，直接提供本題所問的事實；其餘筆記沒有同一實體的這項紀錄。"
+    },
+    {
+      "id": "hq17",
+      "category": "paraphrase",
+      "text": "練習把球投進籃框時，站在哪條線上開始？",
+      "relevant_uris": [
+        "mv2://rejection-heldout/h17"
+      ],
+      "rationale": "h17 明示「從罰球線開始」，直接提供本題所問的事實；其餘筆記沒有同一實體的這項紀錄。"
+    },
+    {
+      "id": "hq18",
+      "category": "paraphrase",
+      "text": "修整衣服表面的小機器，清空的收集盒要裝回哪裡？",
+      "relevant_uris": [
+        "mv2://rejection-heldout/h18"
+      ],
+      "rationale": "h18 明示「機身下方」，直接提供本題所問的事實；其餘筆記沒有同一實體的這項紀錄。"
+    },
+    {
+      "id": "hq19",
+      "category": "mixed",
+      "text": "StepHaven 的 daily goal 設成多少步？",
+      "relevant_uris": [
+        "mv2://rejection-heldout/h19"
+      ],
+      "rationale": "h19 明示「6500 步」，直接提供本題所問的事實；其餘筆記沒有同一實體的這項紀錄。"
+    },
+    {
+      "id": "hq20",
+      "category": "mixed",
+      "text": "WakeReed 的 Alarm B 設在幾點？",
+      "relevant_uris": [
+        "mv2://rejection-heldout/h20"
+      ],
+      "rationale": "h20 明示「06:45」，直接提供本題所問的事實；其餘筆記沒有同一實體的這項紀錄。"
+    },
+    {
+      "id": "hq21",
+      "category": "mixed",
+      "text": "AirMarble 的 Swing 範圍是多少度？",
+      "relevant_uris": [
+        "mv2://rejection-heldout/h21"
+      ],
+      "rationale": "h21 明示「70 度」，直接提供本題所問的事實；其餘筆記沒有同一實體的這項紀錄。"
+    },
+    {
+      "id": "hq22",
+      "category": "mixed",
+      "text": "WeightBirch 目前顯示哪一種重量 unit？",
+      "relevant_uris": [
+        "mv2://rejection-heldout/h22"
+      ],
+      "rationale": "h22 明示「kg」，直接提供本題所問的事實；其餘筆記沒有同一實體的這項紀錄。"
+    },
+    {
+      "id": "hq23",
+      "category": "mixed",
+      "text": "FrostOwl 的 Mini 格盤一共有幾格？",
+      "relevant_uris": [
+        "mv2://rejection-heldout/h23"
+      ],
+      "rationale": "h23 明示「十五格」，直接提供本題所問的事實；其餘筆記沒有同一實體的這項紀錄。"
+    },
+    {
+      "id": "hq24",
+      "category": "mixed",
+      "text": "TurnCedar 用 Slow 模式轉完一圈要幾秒？",
+      "relevant_uris": [
+        "mv2://rejection-heldout/h24"
+      ],
+      "rationale": "h24 明示「四十五秒」，直接提供本題所問的事實；其餘筆記沒有同一實體的這項紀錄。"
+    },
+    {
+      "id": "hq25",
+      "category": "unanswerable",
+      "text": "霧冠口技表演的開場角色叫什麼？",
+      "relevant_uris": [],
+      "rationale": "全部筆記均未記錄霧冠口技表演或其角色名單，沒有開場角色的資料。",
+      "negative_type": "out_of_domain"
+    },
+    {
+      "id": "hq26",
+      "category": "unanswerable",
+      "text": "池鏡遙控潛艇試航使用哪個頻道？",
+      "relevant_uris": [],
+      "rationale": "全部筆記均未涉及池鏡遙控潛艇、試航或遙控頻道。",
+      "negative_type": "out_of_domain"
+    },
+    {
+      "id": "hq27",
+      "category": "unanswerable",
+      "text": "圓谷飛盤友誼賽每局打幾分鐘？",
+      "relevant_uris": [],
+      "rationale": "全部筆記均未記錄圓谷飛盤友誼賽或飛盤賽制，沒有每局時間。",
+      "negative_type": "out_of_domain"
+    },
+    {
+      "id": "hq28",
+      "category": "unanswerable",
+      "text": "石角拔河隊的隊旗上畫了什麼？",
+      "relevant_uris": [],
+      "rationale": "全部筆記均未涉及石角拔河隊或隊旗圖案，沒有可用的旗面描述。",
+      "negative_type": "out_of_domain"
+    },
+    {
+      "id": "hq29",
+      "category": "unanswerable",
+      "text": "蜜虹糖畫攤使用哪種形狀的展示板？",
+      "relevant_uris": [],
+      "rationale": "全部筆記均未記錄蜜虹糖畫攤或其展示設備，果醬分裝資訊不能提供糖畫攤資料。",
+      "negative_type": "out_of_domain"
+    },
+    {
+      "id": "hq30",
+      "category": "unanswerable",
+      "text": "輪月獨輪車遊行從哪一座廣場出發？",
+      "relevant_uris": [],
+      "rationale": "全部筆記均未涉及輪月獨輪車遊行或遊行路線，沒有出發廣場紀錄。",
+      "negative_type": "out_of_domain"
+    },
+    {
+      "id": "hq31",
+      "category": "unanswerable",
+      "text": "方玉石膏翻模練習選用哪種脫模劑？",
+      "relevant_uris": [],
+      "rationale": "全部筆記均未涉及方玉石膏翻模練習或脫模材料，沒有脫模劑的紀錄。",
+      "negative_type": "out_of_domain"
+    },
+    {
+      "id": "hq32",
+      "category": "unanswerable",
+      "text": "角環摔角表演的舞臺鋪墊是什麼顏色？",
+      "relevant_uris": [],
+      "rationale": "全部筆記均未涉及角環摔角表演或其舞臺配置，沒有鋪墊顏色。",
+      "negative_type": "out_of_domain"
+    },
+    {
+      "id": "hq33",
+      "category": "unanswerable",
+      "text": "砂汀風鈴掛在露臺橫桿的哪個位置？",
+      "relevant_uris": [],
+      "rationale": "h01 記錄砂岬風鈴的位置；砂汀風鈴未出現，不能沿用另一串風鈴的掛設位置。",
+      "negative_type": "near_miss"
+    },
+    {
+      "id": "hq34",
+      "category": "unanswerable",
+      "text": "灰港冰壺體驗第一輪使用什麼顏色的壺柄？",
+      "relevant_uris": [],
+      "rationale": "h02 記的是灰灣冰壺體驗；所有筆記均無灰港體驗的輪次安排。",
+      "negative_type": "near_miss"
+    },
+    {
+      "id": "hq35",
+      "category": "unanswerable",
+      "text": "橙嶺攀岩粉袋的小袋裡裝著什麼？",
+      "relevant_uris": [],
+      "rationale": "h03 只記橙脊粉袋的小袋內有木柄清潔刷；橙嶺粉袋沒有出現在筆記中。",
+      "negative_type": "near_miss"
+    },
+    {
+      "id": "hq36",
+      "category": "unanswerable",
+      "text": "流星扯鈴課下課後把短棍收在哪裡？",
+      "relevant_uris": [],
+      "rationale": "h04 的收棍方式屬於流環扯鈴課；沒有流星扯鈴課的器材收納紀錄。",
+      "negative_type": "near_miss"
+    },
+    {
+      "id": "hq37",
+      "category": "unanswerable",
+      "text": "銅燕溜溜球的舊繩收在哪種物件上？",
+      "relevant_uris": [],
+      "rationale": "h05 記的是銅雀溜溜球；沒有銅燕溜溜球或其舊繩的紀錄。",
+      "negative_type": "near_miss"
+    },
+    {
+      "id": "hq38",
+      "category": "unanswerable",
+      "text": "丘暈沙漏每次翻轉後多久流完？",
+      "relevant_uris": [],
+      "rationale": "h06 的五分鐘屬於丘影沙漏；丘暈沙漏未出現在任何筆記。",
+      "negative_type": "near_miss"
+    },
+    {
+      "id": "hq39",
+      "category": "unanswerable",
+      "text": "WakeWillow 鬧鐘的 Alarm B 用什麼提示音？",
+      "relevant_uris": [],
+      "rationale": "h20 的木魚聲是 WakeReed 的設定；未記錄 WakeWillow 或其鬧鈴設定。",
+      "negative_type": "near_miss"
+    },
+    {
+      "id": "hq40",
+      "category": "unanswerable",
+      "text": "TurnMaple 展示轉盤的 Slow 模式轉一圈需要多久？",
+      "relevant_uris": [],
+      "rationale": "h24 的四十五秒是 TurnCedar 的模式；沒有 TurnMaple 的轉速紀錄。",
+      "negative_type": "near_miss"
+    },
+    {
+      "id": "hq41",
+      "category": "unanswerable",
+      "text": "砂岬風鈴一共有幾根金屬管？",
+      "relevant_uris": [],
+      "rationale": "h01 只記掛設位置、最長管的長度與敲片圖案，沒有金屬管總數。",
+      "negative_type": "missing_attribute"
+    },
+    {
+      "id": "hq42",
+      "category": "unanswerable",
+      "text": "橙脊攀岩粉袋的袋身是哪一種材質？",
+      "relevant_uris": [],
+      "rationale": "h03 提供佩掛位置、束繩顏色及刷子描述；沒有粉袋袋身材質，刷柄材質不能代替袋身材質。",
+      "negative_type": "missing_attribute"
+    },
+    {
+      "id": "hq43",
+      "category": "unanswerable",
+      "text": "杏霧果醬每個矮罐的容量是多少毫升？",
+      "relevant_uris": [],
+      "rationale": "h07 只記七個矮罐、麻繩和批號，沒有罐子容量；罐數不能換算單罐毫升數。",
+      "negative_type": "missing_attribute"
+    },
+    {
+      "id": "hq44",
+      "category": "unanswerable",
+      "text": "石徑吸塵器一次充滿電需要多久？",
+      "relevant_uris": [],
+      "rationale": "h08 只描述接頭用途及收納位置，沒有電池或充電時間資訊。",
+      "negative_type": "missing_attribute"
+    },
+    {
+      "id": "hq45",
+      "category": "unanswerable",
+      "text": "晚霞扇舞排練一共安排了幾個八拍？",
+      "relevant_uris": [],
+      "rationale": "h10 提供第三與第五個八拍的動作，未提供整段排練的八拍總數，不能把已記的最大序號當成總長。",
+      "negative_type": "missing_attribute"
+    },
+    {
+      "id": "hq46",
+      "category": "unanswerable",
+      "text": "葉舟吊床兩端之間展開後有幾公尺？",
+      "relevant_uris": [],
+      "rationale": "h13 記的是繩索整理方式、筒袋和收納位置，沒有吊床展開長度。",
+      "negative_type": "missing_attribute"
+    },
+    {
+      "id": "hq47",
+      "category": "unanswerable",
+      "text": "StepHaven 的每日步數在幾點歸零？",
+      "relevant_uris": [],
+      "rationale": "h19 有每日目標、今日累計顯示及錶帶描述；未提供歸零時間，不能從每日目標推定設定時刻。",
+      "negative_type": "missing_attribute"
+    },
+    {
+      "id": "hq48",
+      "category": "unanswerable",
+      "text": "FrostOwl 的 Mini 每一格可以裝幾毫升水？",
+      "relevant_uris": [],
+      "rationale": "h23 記十五格、蜂巢形狀與收納層位，未記單格尺寸或容量，格數不能推出毫升數。",
+      "negative_type": "missing_attribute"
+    }
+  ]
+}

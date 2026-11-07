@@ -1,0 +1,381 @@
+{
+  "schema_version": 1,
+  "provenance": "公開 synthetic 合成繁體中文個人筆記與預先指定的相關性判斷；人物、活動、物件標籤與地點均為虛構，不代表真實私人資料、專業建議或實際流量。全部筆記是互相獨立的當前事實；查詢與 gold labels 在任何檢索執行前人工固定，未依檢索結果調整。",
+  "notes": [
+    {
+      "id": "n01",
+      "uri": "mv2://notes/n01",
+      "title": "桂花烏龍收納",
+      "text": "桂花烏龍放在廚房第二層抽屜的圓形白鐵罐。罐蓋貼著橘色圓點，旁邊的方罐裝紅茶。"
+    },
+    {
+      "id": "n02",
+      "uri": "mv2://notes/n02",
+      "title": "海邊散步取書",
+      "text": "圖書館預約的《海邊散步》已到館，取書位置是二樓自助取書櫃的第六格。借書證放在灰色帆布袋內袋。"
+    },
+    {
+      "id": "n03",
+      "uri": "mv2://notes/n03",
+      "title": "單車保養收據",
+      "text": "這次單車保養更換後輪內胎，費用是二百八十元。紙本收據放在玄關藍色資料夾，前輪沒有更換。"
+    },
+    {
+      "id": "n04",
+      "uri": "mv2://notes/n04",
+      "title": "陶藝體驗報到",
+      "text": "陶藝體驗預約在十一月八日下午兩點，地點是河岸工房。報到要帶紙本確認單；圍裙由工房提供。"
+    },
+    {
+      "id": "n05",
+      "uri": "mv2://notes/n05",
+      "title": "羅勒花盆標籤",
+      "text": "陽台右側長方盆種的是羅勒，白色圓盆種的是薄荷。羅勒的木牌上畫了三角形，兩盆沒有交換位置。"
+    },
+    {
+      "id": "n06",
+      "uri": "mv2://notes/n06",
+      "title": "山城住宿備忘",
+      "text": "山城旅行訂了兩晚的松影客棧，房間有吹風機，沒有洗衣機。行李清單中的備用布袋已放進側袋。"
+    },
+    {
+      "id": "n07",
+      "uri": "mv2://notes/n07",
+      "title": "外套清洗紀錄",
+      "text": "米色外套清洗時用了最大的洗衣袋。洗衣袋現在掛在浴室門後，深藍色小袋仍放在洗衣籃裡。"
+    },
+    {
+      "id": "n08",
+      "uri": "mv2://notes/n08",
+      "title": "包裝材料",
+      "text": "生日禮物包裝剩下的星星紙膠帶收進客廳矮櫃左抽屜。透明膠帶在書桌上，兩種膠帶分開收納。"
+    },
+    {
+      "id": "n09",
+      "uri": "mv2://notes/n09",
+      "title": "週末野餐用品",
+      "text": "綠色野餐墊已交給活動主辦的服務台保管，當天從北側入口領取。家裡留下的是灰色地墊。"
+    },
+    {
+      "id": "n10",
+      "uri": "mv2://notes/n10",
+      "title": "週五電影",
+      "text": "週五晚上的電影票是九排十二號，場次開始時間為七點二十分。取票用的紙本代碼夾在橘色記事本中。"
+    },
+    {
+      "id": "n11",
+      "uri": "mv2://notes/n11",
+      "title": "筆芯整理",
+      "text": "黑色鋼珠筆的替換筆芯在書桌右側透明盒，盒蓋貼著黑色方塊。藍色筆芯在另一個有藍點的小盒。"
+    },
+    {
+      "id": "n12",
+      "uri": "mv2://notes/n12",
+      "title": "展覽帶回的書",
+      "text": "《光的房間》展覽圖錄放在客廳書架第三層，封面是銀灰色。展覽摺頁另放進白色文件袋。"
+    },
+    {
+      "id": "n13",
+      "uri": "mv2://notes/n13",
+      "title": "日語課作業",
+      "text": "日語課的聽力作業錄音存在平板的「語言練習」資料夾，檔名是「第三課慢速」。課堂講義則留在綠色活頁夾。"
+    },
+    {
+      "id": "n14",
+      "uri": "mv2://notes/n14",
+      "title": "咖啡試飲",
+      "text": "上次試飲最喜歡的咖啡豆來自霧丘烘焙，包裝標示榛果與可可風味。那包豆子的烘焙程度是中焙。"
+    },
+    {
+      "id": "n15",
+      "uri": "mv2://notes/n15",
+      "title": "空玻璃瓶去向",
+      "text": "家中的空玻璃瓶已送到社區西門旁的回收點。紙箱這次沒有一起搬走，仍放在儲藏室。"
+    },
+    {
+      "id": "n16",
+      "uri": "mv2://notes/n16",
+      "title": "縫紉材料位置",
+      "text": "做帆布收納袋剩下的黃色棉線收在紅色針線盒底層。袋子的紙樣折好放在盒蓋下。"
+    },
+    {
+      "id": "n17",
+      "uri": "mv2://notes/n17",
+      "title": "練琴錄音備忘",
+      "text": "木笛合奏的彩排錄音存在隨身錄音筆，名稱是「窗邊下午」。正式演出尚未錄音，這份只有彩排內容。"
+    },
+    {
+      "id": "n18",
+      "uri": "mv2://notes/n18",
+      "title": "共享廚房筆記",
+      "text": "這次共享廚房聚會做了番茄麵，使用的是白色大鍋。聚會結束後，大鍋已歸還三樓器材櫃。"
+    },
+    {
+      "id": "n19",
+      "uri": "mv2://notes/n19",
+      "title": "Photo Walk 報到",
+      "text": "Photo Walk P7 的集合時間是上午九點十分，集合處為南門鐘樓。這個預約報到要帶紙本確認單，現場會發借用的識別背帶。"
+    },
+    {
+      "id": "n20",
+      "uri": "mv2://notes/n20",
+      "title": "SSD 備份紀錄",
+      "text": "相片備份存到標籤為 Archive-2 的 SSD，完成的是十月份相簿。連接線為 USB-C，SSD 收在書桌下方的防震包。"
+    },
+    {
+      "id": "n21",
+      "uri": "mv2://notes/n21",
+      "title": "家用設備標籤",
+      "text": "書房的閱讀燈型號是 Luma R2，暖光亮度記錄為 40%。客廳的同系列燈是 Luma R1，這次沒有記錄其亮度。"
+    },
+    {
+      "id": "n22",
+      "uri": "mv2://notes/n22",
+      "title": "練習專案匯出",
+      "text": "練習專案 NoteBox 的 CSV 匯出使用 UTF-8 編碼，欄位順序是 title、date、body。這是本機練習資料，不含帳號或聯絡資訊。"
+    },
+    {
+      "id": "n23",
+      "uri": "mv2://notes/n23",
+      "title": "線上工作坊",
+      "text": "Sketch 101 工作坊在十一月十二日 19:30 開始，報名方案包含活動後七天內可觀看的 replay。教材以 PDF 提供。"
+    },
+    {
+      "id": "n24",
+      "uri": "mv2://notes/n24",
+      "title": "桌遊收藏",
+      "text": "桌遊 Star Orchard 的繁中規則書收在盒蓋內側，遊戲人數標示為 2–4 人。擴充牌裝在獨立的紫色布袋。"
+    }
+  ],
+  "queries": [
+    {
+      "id": "q01",
+      "category": "exact",
+      "text": "桂花烏龍收納",
+      "relevant_uris": [
+        "mv2://notes/n01"
+      ]
+    },
+    {
+      "id": "q02",
+      "category": "exact",
+      "text": "海邊散步取書",
+      "relevant_uris": [
+        "mv2://notes/n02"
+      ]
+    },
+    {
+      "id": "q03",
+      "category": "exact",
+      "text": "單車保養收據",
+      "relevant_uris": [
+        "mv2://notes/n03"
+      ]
+    },
+    {
+      "id": "q04",
+      "category": "exact",
+      "text": "陶藝體驗報到",
+      "relevant_uris": [
+        "mv2://notes/n04"
+      ]
+    },
+    {
+      "id": "q05",
+      "category": "exact",
+      "text": "羅勒花盆標籤",
+      "relevant_uris": [
+        "mv2://notes/n05"
+      ]
+    },
+    {
+      "id": "q06",
+      "category": "exact",
+      "text": "山城住宿備忘",
+      "relevant_uris": [
+        "mv2://notes/n06"
+      ]
+    },
+    {
+      "id": "q07",
+      "category": "partial",
+      "text": "洗衣袋",
+      "relevant_uris": [
+        "mv2://notes/n07"
+      ]
+    },
+    {
+      "id": "q08",
+      "category": "partial",
+      "text": "紙膠帶",
+      "relevant_uris": [
+        "mv2://notes/n08"
+      ]
+    },
+    {
+      "id": "q09",
+      "category": "partial",
+      "text": "野餐墊",
+      "relevant_uris": [
+        "mv2://notes/n09"
+      ]
+    },
+    {
+      "id": "q10",
+      "category": "partial",
+      "text": "電影票",
+      "relevant_uris": [
+        "mv2://notes/n10"
+      ]
+    },
+    {
+      "id": "q11",
+      "category": "partial",
+      "text": "替換筆芯",
+      "relevant_uris": [
+        "mv2://notes/n11"
+      ]
+    },
+    {
+      "id": "q12",
+      "category": "partial",
+      "text": "展覽圖錄",
+      "relevant_uris": [
+        "mv2://notes/n12"
+      ]
+    },
+    {
+      "id": "q13",
+      "category": "paraphrase",
+      "text": "外語練習的音檔存在哪個裝置與資料夾？",
+      "relevant_uris": [
+        "mv2://notes/n13"
+      ]
+    },
+    {
+      "id": "q14",
+      "category": "paraphrase",
+      "text": "我偏好的那款咖啡是誰烘的，屬於哪種焙度？",
+      "relevant_uris": [
+        "mv2://notes/n14"
+      ]
+    },
+    {
+      "id": "q15",
+      "category": "paraphrase",
+      "text": "家裡不用的玻璃容器最後送去哪裡？",
+      "relevant_uris": [
+        "mv2://notes/n15"
+      ]
+    },
+    {
+      "id": "q16",
+      "category": "paraphrase",
+      "text": "做布袋剩下的黃線和樣板分別收在哪裡？",
+      "relevant_uris": [
+        "mv2://notes/n16"
+      ]
+    },
+    {
+      "id": "q17",
+      "category": "paraphrase",
+      "text": "合奏排練的聲音紀錄放在哪裡，叫什麼名字？",
+      "relevant_uris": [
+        "mv2://notes/n17"
+      ]
+    },
+    {
+      "id": "q18",
+      "category": "paraphrase",
+      "text": "哪些預約明確要求攜帶印出來的確認文件？",
+      "relevant_uris": [
+        "mv2://notes/n04",
+        "mv2://notes/n19"
+      ]
+    },
+    {
+      "id": "q19",
+      "category": "mixed",
+      "text": "Photo Walk P7 幾點在哪裡集合？",
+      "relevant_uris": [
+        "mv2://notes/n19"
+      ]
+    },
+    {
+      "id": "q20",
+      "category": "mixed",
+      "text": "Archive-2 SSD 備份了哪個月份的相簿？",
+      "relevant_uris": [
+        "mv2://notes/n20"
+      ]
+    },
+    {
+      "id": "q21",
+      "category": "mixed",
+      "text": "Luma R2 暖光亮度記了多少 %？",
+      "relevant_uris": [
+        "mv2://notes/n21"
+      ]
+    },
+    {
+      "id": "q22",
+      "category": "mixed",
+      "text": "NoteBox 的 CSV 使用哪種編碼與欄位順序？",
+      "relevant_uris": [
+        "mv2://notes/n22"
+      ]
+    },
+    {
+      "id": "q23",
+      "category": "mixed",
+      "text": "Sketch 101 的 replay 可以看幾天？",
+      "relevant_uris": [
+        "mv2://notes/n23"
+      ]
+    },
+    {
+      "id": "q24",
+      "category": "mixed",
+      "text": "Star Orchard 的繁中規則書在哪裡？",
+      "relevant_uris": [
+        "mv2://notes/n24"
+      ]
+    },
+    {
+      "id": "q25",
+      "category": "unanswerable",
+      "text": "《海邊散步》續借逾期一天要收多少費用？",
+      "relevant_uris": []
+    },
+    {
+      "id": "q26",
+      "category": "unanswerable",
+      "text": "這次更換的單車後輪內胎保固到哪一天？",
+      "relevant_uris": []
+    },
+    {
+      "id": "q27",
+      "category": "unanswerable",
+      "text": "山城旅行回程車站的末班火車幾點開？",
+      "relevant_uris": []
+    },
+    {
+      "id": "q28",
+      "category": "unanswerable",
+      "text": "天文社觀星夜預定用哪一款望遠鏡？",
+      "relevant_uris": []
+    },
+    {
+      "id": "q29",
+      "category": "unanswerable",
+      "text": "合唱團鋼琴下一次調音日期是哪天？",
+      "relevant_uris": []
+    },
+    {
+      "id": "q30",
+      "category": "unanswerable",
+      "text": "遠端氣象站的雨量資料每隔幾分鐘更新？",
+      "relevant_uris": []
+    }
+  ]
+}

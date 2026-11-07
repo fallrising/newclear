@@ -1,0 +1,42 @@
+{
+  "scope": "public derivative whitespace normalization only",
+  "originalEvidencePreserved": true,
+  "files": [
+    {
+      "path": "apps/flowshot/fe-review/tasks/round2/evidence/proof-red.log",
+      "originalSha256": "f56aa4edf59cd1294a0f5a2126532e692edeb58d605dcf78283ce6118bb5ec09",
+      "publicSha256": "7b03b38d3175138288543e8ec1e2484fffd35f3f2552e7a834ecfb0facc5be2e",
+      "change": "trailing whitespace removed only; original immutable private backup"
+    },
+    {
+      "path": "apps/loom/fe-review/tasks/round2/evidence/activation-005/red-tests.log",
+      "originalSha256": "53896a0c1eaaf1232a59f9b7af2795260ded301344d5d5f8c1c8eae6ae7ffc17",
+      "publicSha256": "e692fadff1d4d7c3f316726869ee49362456fde415d8a0f17fcc5fea6cc979d4",
+      "change": "trailing whitespace removed only; original immutable private backup"
+    },
+    {
+      "path": "apps/loom/fe-review/tasks/round2/evidence/configured-activation-006/run-review.mjs.diff",
+      "originalSha256": "c8fd55968c571bef6a904cee2a53107b0996acaec435e86671a11591b80b8ddc",
+      "publicSha256": "a60a84d0bff40adb4e72d18754378546b6f440c757a6c3c6d37f8ce96da31a8d",
+      "change": "trailing whitespace removed only; original immutable private backup"
+    },
+    {
+      "path": "apps/loom/fe-review/tasks/round2/evidence/doc-ack-red.log",
+      "originalSha256": "bcdb99b59852ded7ed8946c509525747d28278814085a72c29eefe09b9420345",
+      "publicSha256": "8a62bc261b3c481966f792d95423e4da28305bc25792e0350b07376ca866aff0",
+      "change": "trailing whitespace removed only; original immutable private backup"
+    },
+    {
+      "path": "apps/loom/fe-review/tasks/round2/evidence/proof-red.log",
+      "originalSha256": "f56aa4edf59cd1294a0f5a2126532e692edeb58d605dcf78283ce6118bb5ec09",
+      "publicSha256": "7b03b38d3175138288543e8ec1e2484fffd35f3f2552e7a834ecfb0facc5be2e",
+      "change": "trailing whitespace removed only; original immutable private backup"
+    },
+    {
+      "path": "apps/loom/fe-review/tasks/round2/separation-red.log",
+      "originalSha256": "cdb21e22c2dc9f6248c702da65c0f661c7eefa4498cb292f14ebae532e715bd0",
+      "publicSha256": "01197ece25aa945e4b075c9a678f83a2bb37aa79679bbb831903706c3d05131e",
+      "change": "trailing whitespace removed only; original immutable private backup"
+    }
+  ]
+}

@@ -1,0 +1,8 @@
+{
+  "version": 1,
+  "original": "T141/C141c/red.log",
+  "sha256": "871175856e22d57d2f3341db196a48d76b5ef7c39d310546f7b0495218ac50ac",
+  "byteSize": "957",
+  "encoding": "utf-8",
+  "text": "✖ T141 observed settings bind fresh identity and fixed scrubbed JDK probe (28.774439ms)\nℹ tests 1\nℹ suites 0\nℹ pass 0\nℹ fail 1\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 91.255287\n\n✖ failing tests:\n\ntest at scripts/local/maintenance-target.test.mjs:336:1\n✖ T141 observed settings bind fresh identity and fixed scrubbed JDK probe (28.774439ms)\n  Error: ADAPTER_UNSEALED\n      at observedSessionConfig (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-c-revoke-20261102/apps/cms-scaffold/scripts/local/maintenance-target.mjs:257:19)\n      at async TestContext.<anonymous> (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-c-revoke-20261102/apps/cms-scaffold/scripts/local/maintenance-target.test.mjs:351:18)\n      at async Test.run (node:internal/test_runner/test:1332:7)\n      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:385:3) {\n    code: 'ADAPTER_UNSEALED',\n    phase: null,\n    operationId: null\n  }\n"
+}

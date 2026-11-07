@@ -1,0 +1,119 @@
+{
+  "id": "allocation-follow-phase",
+  "system": "allocation",
+  "edition": 3,
+  "name": {
+    "zh": "我选行动，其他人也能跟着做",
+    "en": "Choose a phase that others can also use"
+  },
+  "summary": {
+    "zh": "自己开启的机会，也可能帮对手推进计划。",
+    "en": "Opening your action can also advance an opponent’s plan."
+  },
+  "rules": {
+    "zh": "玩家各自选择希望发生的行动阶段，公布后只执行有人选择的阶段，其他玩家也可在符合条件时参与。玩家要判断别人会选什么，借对方开启的阶段完成自己的计划；自己选择则确保阶段发生，或获得选择者奖励。",
+    "en": "Players choose phases, then only selected phases occur. Eligible rivals may participate as well. Predict others’ choices to use phases they open, while choosing a phase yourself guarantees it or earns a selector benefit."
+  },
+  "loop": [
+    {
+      "zh": "观察大家当前需要什么",
+      "en": "Read everyone’s current needs"
+    },
+    {
+      "zh": "选择自己必须确保的阶段",
+      "en": "Choose a phase you must guarantee"
+    },
+    {
+      "zh": "揭示并共同执行已选阶段",
+      "en": "Reveal and resolve selected phases"
+    },
+    {
+      "zh": "利用结果预测下一轮",
+      "en": "Use the result to predict the next round"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "相信别人会选生产，自己去选出售，还是亲自确保生产发生？",
+      "en": "Trust someone else to select production and choose selling, or guarantee production yourself?"
+    },
+    {
+      "zh": "某个阶段对自己有利，但会让对手更快得分，还要开启吗？",
+      "en": "Open a useful phase if it advances an opponent’s score even more?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "选择是否隐藏",
+        "en": "Hidden selection"
+      },
+      "effect": {
+        "zh": "同时暗选强化预测，公开顺选则强化回应与让利判断。",
+        "en": "Simultaneous hidden picks emphasize prediction; visible sequential picks emphasize response."
+      }
+    },
+    {
+      "name": {
+        "zh": "选择者优势",
+        "en": "Selector benefit"
+      },
+      "effect": {
+        "zh": "额外收益能补偿开启公共机会，也不能大到让跟随没有意义。",
+        "en": "A benefit compensates for opening a public opportunity without making following pointless."
+      }
+    }
+  ],
+  "tags": [
+    "information",
+    "planning"
+  ],
+  "related": [
+    "allocation-public-pick",
+    "allocation-area-majority",
+    "allocation-public-goal-race",
+    "allocation-shared-stock"
+  ],
+  "contrast": {
+    "zh": "银河竞逐用行动牌和选择者奖励安排阶段；银河骰子还要求预先分配骰子工人，猜对阶段却没派人也无法充分利用。",
+    "en": "Race uses action cards and selector bonuses; Roll additionally requires advance worker allocation, so predicting a phase is insufficient without assigned workers."
+  },
+  "combination": {
+    "zh": "组合提案：多个工厂各选一道公共生产工序，只执行被选中的工序；玩家可借对手开启的加工阶段，把自己的选择留给运输环节。",
+    "en": "Design proposal: factories each choose a public production step; only selected steps run, allowing one player to rely on a rival’s processing phase and choose transport instead."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "你有原料，对手有待加工材料，双方都可能选择加工。",
+      "en": "You have raw material and the opponent has material ready to process; both may choose processing."
+    },
+    "action": {
+      "zh": "判断对手会加工，自己选择运输。",
+      "en": "Expect the opponent to process and choose transport."
+    },
+    "result": {
+      "zh": "对手果然选加工，两道工序都发生，你完成加工后接着出货。",
+      "en": "The opponent selects processing, so both phases occur and you process before shipping."
+    },
+    "next": {
+      "zh": "下轮对手库存变空，不能再默认他会选相同阶段。",
+      "en": "The opponent’s stock is now empty, so the same prediction may fail next round."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "competitive",
+    "firstStep": {
+      "zh": "两名本地玩家轮流遮屏选三种阶段，生产、加工、出售按固定顺序执行。",
+      "en": "Use two local players choosing among three phases privately; resolve production, processing and selling in fixed order."
+    },
+    "pitfall": {
+      "zh": "必须区分选阶段与在阶段中有资格行动，避免用户觉得跟随被漏算。",
+      "en": "Distinguish selecting a phase from eligibility to act in it."
+    },
+    "test": {
+      "zh": "玩家是否会根据对手库存预测阶段，且猜错后能解释原因？",
+      "en": "Do players predict phases from rivals’ stock and explain failed predictions?"
+    }
+  }
+}

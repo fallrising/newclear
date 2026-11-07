@@ -1,0 +1,14 @@
+{
+  "recordedAt": "2026-11-06T15:41:50.189152+00:00",
+  "sha256": {
+    "scripts/ops/local-recovery-verify.mjs": "6fc41628d4eafac391de214302553739fbf10c4b4ab630a918b977d24c34b70c",
+    "scripts/ops/local-recovery-verify.test.mjs": "3a6e02a43c5ab54d034a43fdd2575782206a3d690614dff1ed04491daee77e21",
+    "scripts/ops/local-recovery.fixture.mjs": "221f40105646a626f932ac0f53ca230bf9c4b1574d9a951699cbea5988fce96a"
+  },
+  "approvedFixtureSha256": "f25157feb8a0c027f1b8930c4fad64fe7e0291e0745702d2e2a3b727533e856a",
+  "checkpointAChangedLines": 123,
+  "checkpointBChangedLines": 157,
+  "newTests": 115,
+  "finalFocusedTests": 234,
+  "productionScope": "finite source-to-target RAW schema comparison and source manifest binding only; strict postrevoke baseline unchanged"
+}

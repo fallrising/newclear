@@ -1,0 +1,40 @@
+{
+  "scope": "real same-image synthetic private-file/JDBC-load/ImageIO/Node/PG profile; no application backup/restore claim",
+  "context": {
+    "cwd": "/home/ckc/test/codex/wt/newclear/cms-pp1c-b-20261101/apps/cms-scaffold",
+    "runRoot": "/home/ckc/test/codex/wt/newclear/cms-pp1c-b-20261101/apps/cms-scaffold/local/pp1c-real-profile",
+    "helperRoot": "/home/ckc/test/codex/wt/newclear/cms-pp1c-b-20261101/apps/cms-scaffold/local/pp1c-real-profile/helper",
+    "nodeBinary": "/home/ckc/.local/node-v24.18.0/bin/node",
+    "uid": 1000,
+    "gid": 1000,
+    "operationId": "24b17b05-8b67-4034-8968-1149b3490119",
+    "seq": "1",
+    "target": {
+      "images": {
+        "api": "sha256:27cb00b13e5fa8336392cb7bdd61729188b1f9fc5602db8f74447da20ced717a",
+        "node": "sha256:6a8ca4b22705adf7134d2220ab8aadff634a6b76c816dba55e0409f8e5c180dc",
+        "postgres": "sha256:6a2e324ebe59af6031c4c1cd96c1d5072c2ebc36563d2196365e43b8297c062d"
+      },
+      "containerIds": {
+        "postgres": "f521d86647ff246fbbdc142ee25a15627e0e73991fa03b4a0fb141d2eef27ef5"
+      },
+      "volumeNames": {
+        "media-data": "cms-pp1c-profile-43fb7996-cdf1-4060-a377-488d5a87c5c5"
+      }
+    }
+  },
+  "failedCommand": {
+    "file": "docker",
+    "args": [
+      "--host",
+      "unix:///var/run/docker.sock",
+      "inspect",
+      "e4d3561ee191aa9da47263fbb870558fe760d75bc9f0d6e25e05c181b34eddd9"
+    ],
+    "code": 1,
+    "stderr": "error: no such object: e4d3561ee191aa9da47263fbb870558fe760d75bc9f0d6e25e05c181b34eddd9\n"
+  },
+  "success": false,
+  "code": "ADAPTER_UNSEALED",
+  "pgStopped": true
+}

@@ -1,8 +1,21 @@
+# Current M1 handoff — 2026-10-31
+
+[Real browser/isolated task evidence](acceptance/M1-isolated.md), [operator entry](isolated-operator.md), [PR885](https://github.com/fallrising/newclear/pull/885). One actual subscription coding run succeeded; preserve its source/diff/cleanup evidence. No Cloud retry. M2 second vendor and M3 durable recovery remain open. Final acceptance/CI state is in the M1 report. Historical handoff follows.
+
 # Development Handoff
 
-Date: 2026-10-05
+> **2026-10-31 M1 checkpoint**：PR849／SDD 已批准並合併，沿既有訂閱優先。下一步只處理 [qualification 缺口與有界方案](acceptance/M1-qualification.md)：需要 Agent Platform external-tool interface 與授權 KVM target，不能繼續用 mock 宣稱 M1。Cloud 重試仍暫停。
+
+Date: 2026-10-30
 
 ## Current Goal
+
+Owner resumed the bounded P0 browser-to-Cloud mainline under T-0442. Follow
+[SPEC-T008](specs/SPEC-T008-p0-real-browser.md), [quickstart](quickstart.md), and
+[board](tasks/BOARD.md). First prove actual Chromium against production Rust with T007 fake CLI,
+then same-source live AC-04 only with all operator prerequisites. Previous frontend acceptance
+is preserved; no Round3 or host-runtime work is authorized here. The older actor direction below
+is historical context, not the next action for this run.
 
 T030A/B monorepo recovery and T030D snapshot save are Accepted and merged. T030C public
 snapshot load and T030 A/B/C/D composition are now independently Accepted after test-first
@@ -574,3 +587,13 @@ TD §0.3 automatic rustdoc/spec drift checking is an existing gap: neither histo
 CI implements the required generator or signature/error/contract-section comparison. Recovery
 preserves the existing rustdoc and explicitly records this limitation; it does not claim full
 project-wide documentation automation compliance.
+
+## T-0442 current P0 result — 2026-10-30
+
+Actual Chromium through the production Rust binary and strict T007 fake executable now reaches
+the final diff; [T008](acceptance/T008.acceptance.md) records source/binary hashes, one exec/status/
+diff, real WS progression, explicit Refresh, logout and cleanup. The official 0.145.0 CLI has been
+separately verified without changing the default version. Live AC-04 has not run: private operator
+scope/Cloud target/HTTPS configuration is missing. Continue only from the bounded live plan once
+that input is supplied; do not replay the successful fake gate or reopen accepted frontend work.
+AC-05 remains separate, with its smallest next slice in [quickstart](quickstart.md).

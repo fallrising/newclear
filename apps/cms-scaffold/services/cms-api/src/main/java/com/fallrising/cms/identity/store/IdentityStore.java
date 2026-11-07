@@ -15,8 +15,12 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Supplier;
 
 public interface IdentityStore {
+    boolean hasIdentityDataIncludingDeleted();
+    boolean hasMaintenanceOperation(UUID operationId);
+    <T> T maintenanceTransaction(Supplier<T> attempt);
 
     Optional<Principal> findPrincipalById(UUID id);
 

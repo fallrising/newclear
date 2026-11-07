@@ -1,0 +1,120 @@
+{
+  "id": "matching-clear-under-cargo",
+  "system": "matching",
+  "edition": 3,
+  "name": {
+    "zh": "消掉下方支撑，把目标送到出口",
+    "en": "Clear support beneath cargo to reach an exit"
+  },
+  "summary": {
+    "zh": "目标不能直接消除，要改变它下面的地形让它继续往下走。",
+    "en": "The target is not cleared directly; remove what supports it to move it downward."
+  },
+  "rules": {
+    "zh": "目标物件受重力影响，只有到达指定出口才算收集。玩家消除它下方或侧下方的物件来打开通路；无关位置的大面积消除可能得分很高，却没有推进运输目标。",
+    "en": "A target piece is collected only when gravity carries it to a designated exit. Clear supporting or nearby pieces to open its route. A large clear elsewhere may score well while doing nothing for delivery."
+  },
+  "loop": [
+    {
+      "zh": "找到目标与出口之间的阻挡",
+      "en": "Find obstacles between target and exit"
+    },
+    {
+      "zh": "选择能打开通路的消除",
+      "en": "Choose a clear that opens the route"
+    },
+    {
+      "zh": "观察目标掉落与停靠",
+      "en": "Watch where the target falls and stops"
+    },
+    {
+      "zh": "继续处理下一个支撑点",
+      "en": "Address the next supporting piece"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "清目标正下方的小组，还是制造特殊块一次打穿多层？",
+      "en": "Clear a small group directly below the target or create a tool that removes several layers?"
+    },
+    {
+      "zh": "出口不在正下方时，要先横向调整目标，还是先清另一条路线？",
+      "en": "If the exit is offset, reposition the target first or prepare another route?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "出口数量与位置",
+        "en": "Exit placement"
+      },
+      "effect": {
+        "zh": "多个出口更宽容；偏置或狭窄出口让路径准备更重要。",
+        "en": "Several exits are forgiving; narrow or offset exits emphasize route preparation."
+      }
+    },
+    {
+      "name": {
+        "zh": "途中固定障碍",
+        "en": "Fixed route obstacles"
+      },
+      "effect": {
+        "zh": "障碍增加分阶段规划，但必须让玩家清楚哪些格子可以通过。",
+        "en": "Obstacles add staged planning, but passable cells must be easy to distinguish."
+      }
+    }
+  ],
+  "tags": [
+    "planning",
+    "spatial",
+    "time"
+  ],
+  "related": [
+    "matching-complete-lines",
+    "matching-gravity-cascade",
+    "matching-merge-three-upgrade",
+    "matching-pattern-creates-power"
+  ],
+  "contrast": {
+    "zh": "两者都让消除服务于运输；Homescapes的官方说明还明确了后续目标分批进入，使清开的通路可以重复利用。",
+    "en": "Both turn clearing into transportation; Homescapes explicitly describes later targets entering in batches, allowing an opened route to be reused."
+  },
+  "combination": {
+    "zh": "组合提案：把下落目标变成限时订单货物。不同出口对应不同客户，玩家既要在步数内送达，也要避免把货物送进错误出口。",
+    "en": "Design proposal: make falling targets timed contract cargo. Different exits serve different customers, so delivery must be timely and reach the correct destination."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "一个包裹下方还有两层色块，底部只有右侧出口，剩余五步。",
+      "en": "A parcel rests above two layers of colored pieces, with an exit only on the right and five moves left."
+    },
+    "action": {
+      "zh": "玩家先清右下方一组，打开落向出口的通路。",
+      "en": "The player clears a lower-right group to open a route toward the exit."
+    },
+    "result": {
+      "zh": "包裹落下一层，但仍停在最后一块支撑上。",
+      "en": "The parcel drops one level but stops on the final supporting piece."
+    },
+    "next": {
+      "zh": "下一步必须处理这个支撑，而不是去追逐远处的大消除。",
+      "en": "The next move must address that support rather than chase a distant large match."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "做一个固定棋盘、一个目标和一个出口，只保留消除与重力。",
+      "en": "Use one fixed board, one cargo target and one exit, with only clearing and gravity."
+    },
+    "pitfall": {
+      "zh": "斜向掉落和传送规则容易让路径难预测；先用直落和清楚的出口标记。",
+      "en": "Diagonal fall and portals can obscure prediction; begin with straight fall and clear exit markers."
+    },
+    "test": {
+      "zh": "玩家会不会选择较小的消除，因为它能让目标真正前进一步？",
+      "en": "Will players choose a smaller clear because it actually advances delivery?"
+    }
+  }
+}

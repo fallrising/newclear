@@ -1,0 +1,58 @@
+✔ PP1C_L01_v1_insertion_order_bytes_and_atomic_update (12.382118ms)
+✔ PP1C_L01_duplicate_reservation_preserves_existing_bytes (2.029981ms)
+✔ PP1C_L01_symlink_hardlink_and_mode_rejected (3.604046ms)
+✔ PP1C_L02_version (0.910866ms)
+✔ PP1C_L02_unknown (0.364179ms)
+✔ PP1C_L02_missing (0.284659ms)
+✔ PP1C_L02_source_identity (0.872617ms)
+✔ PP1C_L02_source_unknown (0.427358ms)
+✔ PP1C_L02_source_connection (0.744807ms)
+✔ PP1C_L02_operation (0.32904ms)
+✔ PP1C_L02_phase (0.182579ms)
+✔ PP1C_L02_source_release (0.293298ms)
+✔ PP1C_L02_policy (0.286048ms)
+✔ PP1C_L02_time (0.183999ms)
+✔ PP1C_L02_target_for_backup (0.351049ms)
+✔ PP1C_L02_proof_for_backup (0.316329ms)
+✔ PP1C_L02_account_for_backup (0.295739ms)
+✔ PP1C_L02_helper_empty (0.318539ms)
+✔ PP1C_L02_restore_missing_target (0.256108ms)
+✔ PP1C_L02_recover_running (0.19946ms)
+✔ PP1C_L02_valid_backup_phases_and_nested_required (5.939295ms)
+✔ PP1C_L02_restore_reserved_created_blank_and_no_second_source (1.582884ms)
+✔ PP1C_L02_helper_handshake_state_network_and_backend_bindings (4.601081ms)
+✔ PP1C_L02_recover_proof_self_hash_and_account_phase (2.203731ms)
+✔ PP1C_L04_BEGIN_without_END_is_incomplete_and_lock_retained (44.262707ms)
+✔ PP1C_L04_partial_bytes_and_unknown_sequence_fail_closed (31.02927ms)
+✔ PP1C_L04_rename_or_sync_failure_never_releases_lock (34.874695ms)
+✔ PP1C_L04_FAIL_retains_original_phase_and_primary_failure (28.473731ms)
+✔ PP1C_L04_complete_requires_all_pairs_and_releases_only_owned_lock (96.157422ms)
+✔ PP1C_L04_inflight_metadata_requires_open_phase_and_final_hash (53.627159ms)
+✔ PP1C_L05_only_complete_END_and_absent_lock_is_released (110.031225ms)
+✔ PP1C_L05_unknown_version_and_noncanonical_v2_never_fall_back (10.551867ms)
+✔ PP1C_L05_v2_inspect_is_readonly_and_account_bridge_unsealed (31.57875ms)
+✖ PP1C_L04_invalid_request_is_rejected_before_registry_mkdir (4.256432ms)
+ℹ tests 34
+ℹ suites 0
+ℹ pass 33
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 550.495969
+
+✖ failing tests:
+
+test at scripts/local/maintenance-store.test.mjs:227:1
+✖ PP1C_L04_invalid_request_is_rejected_before_registry_mkdir (4.256432ms)
+  AssertionError [ERR_ASSERTION]: Missing expected rejection.
+      at async TestContext.<anonymous> (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-registry-20261101/apps/cms-scaffold/scripts/local/maintenance-store.test.mjs:232:5)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: { code: 'ENOENT' },
+    operator: 'rejects',
+    diff: 'simple'
+  }

@@ -1,0 +1,8 @@
+{
+  "version": 1,
+  "original": "T153/slot-refinement/red-prefix-observation.log",
+  "sha256": "83a4f8808bfa3ca4567c7af166e878b750680d65297371729ccb547850cdcc7c",
+  "byteSize": "945",
+  "encoding": "utf-8",
+  "text": "✖ T153 retained twelve /24s still permit C four plus D six fresh private /26s (192.962337ms)\nℹ tests 1\nℹ suites 0\nℹ pass 0\nℹ fail 1\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 266.613832\n\n✖ failing tests:\n\ntest at scripts/local/prepare.test.mjs:283:1\n✖ T153 retained twelve /24s still permit C four plus D six fresh private /26s (192.962337ms)\n  AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:\n  \n    assert.ok(network.subnet.endsWith('/26'))\n  \n      at TestContext.<anonymous> (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-c-revoke-20261102/apps/cms-scaffold/scripts/local/prepare.test.mjs:292:56)\n      at async Test.run (node:internal/test_runner/test:1332:7)\n      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:385:3) {\n    generatedMessage: true,\n    code: 'ERR_ASSERTION',\n    actual: false,\n    expected: true,\n    operator: '==',\n    diff: 'simple'\n  }\n"
+}

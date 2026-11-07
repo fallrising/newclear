@@ -10,6 +10,11 @@ pub fn env() -> &'static Environment<'static> {
         // Template names carry no .html suffix, so escaping must be forced on: pages
         // render upstream error bodies and client-supplied model names.
         env.set_auto_escape_callback(|_| AutoEscape::Html);
+        env.add_template(
+            "cost_summary",
+            include_str!("../templates/cost_summary.html"),
+        )
+        .unwrap();
         env.add_template("dashboard", include_str!("../templates/dashboard.html"))
             .unwrap();
         env.add_template("connections", include_str!("../templates/connections.html"))
@@ -38,7 +43,7 @@ mod tests {
         let html = super::render(
             "usage",
             minijinja::context! {
-                title => "Usage", active => "usage", csrf => "", cost_total => "0",
+                title => "Usage", active => "usage", csrf => "", cost_total => crate::store::UsageCostSummary::from_observations(None, 0, 0),
                 daily => Vec::<i32>::new(), admin_protected => true,
                 events => vec![minijinja::context! { ts => "t", error => "<script>x()</script>" }],
             },

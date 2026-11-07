@@ -1,0 +1,25 @@
+{
+  "fullContainerId": "a5444793df46dedaba7674edb48518826ea467db09ab285784d758e96c11f2f1",
+  "imageId": "sha256:6a2e324ebe59af6031c4c1cd96c1d5072c2ebc36563d2196365e43b8297c062d",
+  "state": "created",
+  "imageVolumes": {
+    "/var/lib/postgresql/data": {}
+  },
+  "mounts": [
+    {
+      "Type": "volume",
+      "Name": "9ec11afa0079a762b41283e90c06f4c6537819d81e31483951c30d8d120b844b",
+      "Source": "/var/lib/docker/volumes/9ec11afa0079a762b41283e90c06f4c6537819d81e31483951c30d8d120b844b/_data",
+      "Destination": "/var/lib/postgresql/data",
+      "Driver": "local",
+      "Mode": "",
+      "RW": true,
+      "Propagation": ""
+    }
+  ],
+  "tmpfs": {
+    "/tmp": "rw,nosuid,nodev,size=67108864"
+  },
+  "cause": "exact helper mount policy rejects automatically created anonymous RW PGDATA volume before start",
+  "priorNonzeroInspect": "expected absence after successfully removed API/Node probes, not cause of this failure"
+}

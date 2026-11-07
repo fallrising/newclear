@@ -1,0 +1,8 @@
+{
+  "version": 1,
+  "original": "T138/C11a/green.log",
+  "sha256": "352123511591d7310a1d1e4cd5373d8c598f3489f870b886ed9db7a0e382eea7",
+  "byteSize": "1504",
+  "encoding": "utf-8",
+  "text": "✔ T138_C11_preflight_accepts_exact_memory_input_and_derives_only_safe_fixture (4.305741ms)\n✔ T138_C11_preflight_rejects_no-secrets (0.641397ms)\n✔ T138_C11_preflight_rejects_extra-secret (0.19128ms)\n✔ T138_C11_preflight_rejects_principal-mismatch (0.285239ms)\n✔ T138_C11_preflight_rejects_short-password (0.384318ms)\n✔ T138_C11_preflight_rejects_equal-password (0.246459ms)\n✔ T138_C11_preflight_rejects_token-control (0.17168ms)\n✔ T138_C11_preflight_rejects_input-extra (0.15247ms)\n✔ T138_C11_preflight_rejects_missing-hash (0.17787ms)\n✔ T138_C11_preflight_rejects_bad-seconds (0.326328ms)\n✔ T138_C11_preflight_rejects_revision-two (0.230429ms)\n✔ T138_C11_preflight_rejects_duplicate-media (0.19902ms)\n✔ T138_C11_preflight_rejects_same-target (0.148499ms)\n✔ T138_C11_preflight_rejects_future-incident (0.109179ms)\n✔ T138_C11_derive_rejects_missing-session (0.271269ms)\n✔ T138_C11_derive_rejects_duplicate-session (0.14324ms)\n✔ T138_C11_derive_rejects_expired (0.184908ms)\n✔ T138_C11_derive_rejects_revoked (0.20046ms)\n✔ T138_C11_derive_rejects_wrong-hash (0.136249ms)\n✔ T138_C11_derive_rejects_inactive-principal (0.104ms)\n✔ T138_C11_derive_rejects_missing-entry (0.125269ms)\n✔ T138_C11_derive_rejects_missing-media (0.159289ms)\n✔ T138_C11_derive_rejects_missing-revision (0.23891ms)\n✔ T138_C11_derive_rejects_ambiguous-revision (0.15977ms)\nℹ tests 24\nℹ suites 0\nℹ pass 24\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 75.019212\n"
+}

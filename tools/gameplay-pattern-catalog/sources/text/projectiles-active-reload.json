@@ -1,0 +1,120 @@
+{
+  "id": "projectiles-active-reload",
+  "system": "projectiles",
+  "edition": 3,
+  "name": {
+    "zh": "在装填窗口里再按一次",
+    "en": "Press again inside the reload window"
+  },
+  "summary": {
+    "zh": "把等待装填的时间，变成一次可以争取额外收益的小判断。",
+    "en": "Turn a reload wait into a small timing decision with a possible reward."
+  },
+  "rules": {
+    "zh": "装填开始后，指针经过一个可见的成功区。玩家可在窗口内再次按键，缩短等待或强化下一轮射击；错过时按普通装填完成，或承受事先说明的惩罚。玩家要在看进度条和观察战场之间分配注意力。",
+    "en": "A reload indicator passes through a visible success zone. Press again inside it to finish sooner or strengthen the next shots. Missing yields a normal reload or an explicitly shown penalty, splitting attention between the bar and the battlefield."
+  },
+  "loop": [
+    {
+      "zh": "选择开始装填的空当",
+      "en": "Choose a safe moment to reload"
+    },
+    {
+      "zh": "跟随进度条找窗口",
+      "en": "Track the success window"
+    },
+    {
+      "zh": "再次按键争取奖励",
+      "en": "Press again for the reward"
+    },
+    {
+      "zh": "利用新弹匣继续行动",
+      "en": "Use the new magazine and act again"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "周围安全时争取强化，还是在被追赶时把注意力全留给走位？",
+      "en": "Seek the bonus in safety or devote all attention to movement while pursued?"
+    },
+    {
+      "zh": "提前装填以准备下一次交战，是否会浪费剩余弹药或当前攻击机会？",
+      "en": "Will reloading early waste remaining rounds or an immediate attack opportunity?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "成功区宽度",
+        "en": "Success-window width"
+      },
+      "effect": {
+        "zh": "宽窗口易学；窄窗口更强调熟练，但要有清楚的音画提示。",
+        "en": "A wide window is easier to learn; a narrow one emphasizes practice and needs clear audiovisual cues."
+      }
+    },
+    {
+      "name": {
+        "zh": "失败后果",
+        "en": "Miss consequence"
+      },
+      "effect": {
+        "zh": "只失去奖励适合初学者；延长停顿会让冒险装填更紧张。",
+        "en": "Losing only the bonus is forgiving; an added delay makes risky reloads more tense."
+      }
+    }
+  ],
+  "tags": [
+    "timing",
+    "dexterity",
+    "risk"
+  ],
+  "related": [
+    "projectiles-charged-release",
+    "projectiles-graze-reward",
+    "projectiles-heat-pacing",
+    "projectiles-spread-recovery"
+  ],
+  "contrast": {
+    "zh": "挺进地牢通过道具给既有装填加一层奖励；SYNTHETIK 把退匣与主动装填放进基本武器操作。",
+    "en": "Gungeon adds the timing reward through an item; SYNTHETIK builds ejection and active reload into core weapon handling."
+  },
+  "combination": {
+    "zh": "组合提案：一名玩家掩护时，另一名玩家成功装填可给双方短暂增益；队友决定是否为这次操作争取安全时间。",
+    "en": "Design proposal: a successful active reload briefly buffs both partners while one covers the other, making protection time a shared decision."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "弹匣空了，装填条将经过一小块亮区。",
+      "en": "The magazine is empty and the reload marker approaches a lit zone."
+    },
+    "action": {
+      "zh": "玩家在亮区按下第二次装填。",
+      "en": "The player presses reload again in that zone."
+    },
+    "result": {
+      "zh": "装填提前完成，下一弹匣获得醒目的强化标记。",
+      "en": "The reload finishes early and the next magazine gets a visible bonus marker."
+    },
+    "next": {
+      "zh": "选择马上利用强化进攻，还是继续保留安全位置。",
+      "en": "Choose whether to attack with the bonus now or retain a safe position."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "先做一把武器、一个装填条和一个成功奖励，不做随机卡壳。",
+      "en": "Start with one weapon, one reload bar and one success reward, without random jams."
+    },
+    "pitfall": {
+      "zh": "成功区若与动画或输入延迟不一致，会让玩家觉得判定不可信。",
+      "en": "A window that disagrees with animation or input timing makes the judgment feel unreliable."
+    },
+    "test": {
+      "zh": "玩家能否说明自己为何成功或失败，并在压力下决定放弃奖励？",
+      "en": "Can players explain a success or miss and deliberately skip the bonus under pressure?"
+    }
+  }
+}

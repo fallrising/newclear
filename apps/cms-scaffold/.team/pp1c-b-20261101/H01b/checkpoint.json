@@ -1,0 +1,5 @@
+{
+  "handwrittenChangedLines": 158,
+  "green": "49/49 native tests,0fail/skip; including fixed nonzero and SIGINT cleanup",
+  "scope": "H01b execution core; capability wrapper wired in H02 integration"
+}

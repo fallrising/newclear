@@ -23,6 +23,7 @@ const (
 
 type runtimeConfig struct {
 	ApprovedRepositoriesFile string
+	CompletionPoliciesFile   string
 	DataRoot                 string
 	WebRoot                  string
 	ListenAddress            string
@@ -46,6 +47,7 @@ func loadRuntimeConfig(getenv func(string) string, args []string) (runtimeConfig
 	}
 	config := runtimeConfig{
 		ApprovedRepositoriesFile: getenv("HAI_TASKBOARD_APPROVED_REPOSITORIES_FILE"),
+		CompletionPoliciesFile:   getenv("HAI_TASKBOARD_COMPLETION_POLICIES_FILE"),
 		DataRoot:                 getenv("HAI_TASKBOARD_DATA_ROOT"),
 		WebRoot:                  getenv("HAI_TASKBOARD_WEB_ROOT"),
 		ListenAddress:            listenAddress,

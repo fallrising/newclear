@@ -1,0 +1,13 @@
+{
+  "changedLines": {
+    "scripts/ops/local-recovery-verify.mjs": 12,
+    "scripts/ops/local-recovery.fixture.mjs": 8,
+    "scripts/ops/local-recovery-verify.test.mjs": 62
+  },
+  "total": 82,
+  "sha256": {
+    "scripts/ops/local-recovery-verify.mjs": "32b4bec7c2f27e260a9cf06565a6804820f349fa574d988ddcb100b55335b54f",
+    "scripts/ops/local-recovery.fixture.mjs": "14f759ecd3bfd505bc40de4f16ee1e961d91e2ac71cfbb47f61cb234b013b689",
+    "scripts/ops/local-recovery-verify.test.mjs": "8143ec0986fba0a77984063820aab7d9181561b55abbb17d95f25125eb89cc6c"
+  }
+}

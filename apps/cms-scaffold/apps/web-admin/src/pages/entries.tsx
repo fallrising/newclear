@@ -1,7 +1,7 @@
-import { useMemo, useState, type FormEvent } from "react";
+import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import { Link, Navigate, useNavigate, useParams, useSearchParams } from "react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { adminQueries, isApiError, keys, workQueries, type AdminField, type WorkEntry } from "@cms/api";
+import { adminQueries, isApiError, keys, workQueries, type AdminField, type PurgeEntryRequest, type WorkEntry } from "@cms/api";
 import { useSession } from "@cms/auth";
 import {
   Button,
@@ -294,6 +294,7 @@ function MemberLinks({ entry, fields }: { entry: WorkEntry; fields: AdminField[]
 }
 
 type Action = "unpublish" | "archive" | "purge";
+type MutationInput = { action: Action; id: string; contentType: string; confirmation?: PurgeEntryRequest };
 
 function Inspector({ entry }: { entry: WorkEntry }) {
   const me = useSession().me!;
@@ -302,36 +303,48 @@ function Inspector({ entry }: { entry: WorkEntry }) {
   const types = useQuery(adminQueries.types(api.admin));
   const type = types.data?.items.find((t) => t.key === entry.contentType);
   const [pending, setPending] = useState<Action | null>(null);
+  const inFlight = useRef(false);
+  const alive = useRef(false);
+  useEffect(() => {
+    alive.current = true;
+    return () => { alive.current = false; };
+  }, []);
   const run = useMutation({
-    mutationFn: async (action: Action) => {
-      if (action === "purge") return api.admin.purgeEntry(entry.id);
-      return action === "unpublish" ? api.work.unpublish(entry.id) : api.work.archive(entry.id);
+    mutationFn: async (payload: MutationInput) => {
+      if (payload.action === "purge") return api.admin.purgeEntry(payload.id, payload.confirmation);
+      return payload.action === "unpublish" ? api.work.unpublish(payload.id) : api.work.archive(payload.id);
     },
-    onSuccess: (result, action) => {
+    onSuccess: (result, payload) => {
+      void queryClient.invalidateQueries({ queryKey: keys.entries.lists(payload.contentType) });
+      void queryClient.invalidateQueries({ queryKey: keys.admin.audit({ targetId: payload.id, action: "entry.", size: 20 }), exact: true });
+      if (!alive.current) return;
       setPending(null);
       void queryClient.invalidateQueries({ queryKey: keys.admin.auditAll() });
-      void queryClient.invalidateQueries({ queryKey: keys.entries.lists(entry.contentType) });
-      if (action === "purge") {
+      if (payload.action === "purge") {
         // Keep the detail cache: a refetch would 404 and flash /404 before the list (W1-FM07).
         toast.success(copy["entries.purged"]);
-        navigate(`/entries?type=${entry.contentType}`, { replace: true });
+        navigate(`/entries?type=${payload.contentType}`, { replace: true });
         return;
       }
-      queryClient.setQueryData(keys.entries.detail(entry.id), result as WorkEntry);
-      toast.success(copy[action === "unpublish" ? "entries.unpublished" : "entries.archived"]);
+      queryClient.setQueryData(keys.entries.detail(payload.id), result as WorkEntry);
+      toast.success(copy[payload.action === "unpublish" ? "entries.unpublished" : "entries.archived"]);
     },
-    onError: (error) => {
+    onError: (error, payload) => {
+      if (!alive.current) return;
       setPending(null);
       if (isApiError(error) && error.code === "REF_CONSTRAINT") toast.error(copy["entries.referenced"]);
       else if (isApiError(error) && error.code === "INVALID_STATE_TRANSITION") {
-        void queryClient.invalidateQueries({ queryKey: keys.entries.detail(entry.id) });
+        void queryClient.invalidateQueries({ queryKey: keys.entries.detail(payload.id) });
         toast.error(copy["entries.stateChanged"]);
       } else toast.error(failureText(error));
+    },
+    onSettled: () => {
+      if (alive.current) inFlight.current = false;
     },
   });
   const memberFields = type?.fields.filter((f) => f.type === "principal-ref" && f.enabled) ?? [];
   const name = entryName(entry);
-  const phrase = entry.slug ?? entry.id;
+  const phrase = entry.slug !== null && entry.slug !== "" ? entry.slug : entry.id;
   const actions = [
     entry.publicationState === "published" ? { label: copy["entries.unpublish"], onSelect: () => setPending("unpublish"), testId: "entry-unpublish" } : null,
     entry.publicationState !== "archived" ? { label: copy["entries.archive"], onSelect: () => setPending("archive"), testId: "entry-archive" } : null,
@@ -390,14 +403,26 @@ function Inspector({ entry }: { entry: WorkEntry }) {
         }
       />
       <ConfirmDialog
+        key={pending ?? "closed"}
         open={pending !== null}
         title={pending ? dialog[pending].title : ""}
         description={pending ? dialog[pending].body : ""}
         confirmLabel={pending ? dialog[pending].confirm : ""}
         phrase={pending === "purge" ? phrase : undefined}
+        confirmationWord={pending === "purge" ? "DELETE" : undefined}
+        acknowledgementLabel={pending === "purge" ? copy["confirm.irreversible"] : undefined}
         destructive={pending === "purge"}
         pending={run.isPending}
-        onConfirm={() => pending && run.mutate(pending)}
+        onConfirm={(typed, word) => {
+          if (!pending || inFlight.current) return;
+          const payload: MutationInput = { action: pending, id: entry.id, contentType: entry.contentType };
+          if (pending === "purge") {
+            if (word !== "DELETE" || typed !== phrase) return;
+            payload.confirmation = { confirmPhrase: word, confirmId: typed };
+          }
+          inFlight.current = true;
+          run.mutate(payload);
+        }}
         onCancel={() => setPending(null)}
       />
     </>
@@ -419,5 +444,5 @@ export function EntryInspectorPage() {
     );
   }
   if (entry.isPending) return <DefaultSkeleton />;
-  return <Inspector entry={entry.data} />;
+  return <Inspector key={`${entry.data.id}:${entry.data.version}:${entry.data.slug ?? ""}`} entry={entry.data} />;
 }

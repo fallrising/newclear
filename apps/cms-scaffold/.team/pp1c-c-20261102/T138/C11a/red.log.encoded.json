@@ -1,0 +1,8 @@
+{
+  "version": 1,
+  "original": "T138/C11a/red.log",
+  "sha256": "d98f3218f877c8643b27933461331ef062c20fa773bd7a65a65c524a93930cb2",
+  "byteSize": "1041",
+  "encoding": "utf-8",
+  "text": "✖ T138_C11_preflight_accepts_exact_memory_input_and_derives_only_safe_fixture (1.124995ms)\nℹ tests 1\nℹ suites 0\nℹ pass 0\nℹ fail 1\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 56.73072\n\n✖ failing tests:\n\ntest at scripts/ops/local-restore.test.mjs:17:1\n✖ T138_C11_preflight_accepts_exact_memory_input_and_derives_only_safe_fixture (1.124995ms)\n  Error: ADAPTER_UNSEALED\n      at validateRestorePreflight (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-c-target-20261102/apps/cms-scaffold/scripts/ops/local-restore.mjs:2:52)\n      at TestContext.<anonymous> (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-c-target-20261102/apps/cms-scaffold/scripts/ops/local-restore.test.mjs:18:20)\n      at Test.runInAsyncScope (node:async_hooks:227:14)\n      at Test.run (node:internal/test_runner/test:1325:25)\n      at Test.start (node:internal/test_runner/test:1191:17)\n      at startSubtestAfterBootstrap (node:internal/test_runner/harness:385:17) {\n    code: 'ADAPTER_UNSEALED',\n    phase: null,\n    operationId: null\n  }\n"
+}

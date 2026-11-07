@@ -1,0 +1,40 @@
+{
+  "task": "T-185",
+  "atUtc": "2026-11-06T21:27:15.260668+00:00",
+  "checks": [
+    {
+      "command": [
+        "python3",
+        "/home/ckc/test/codex/agents/codex-team-superpowers/scripts/teamctl.py",
+        "validate-task",
+        "apps/cms-scaffold/.team/tasks/T-185.md"
+      ],
+      "exitCode": 0,
+      "output": "validate-task validation passed: apps/cms-scaffold/.team/tasks/T-185.md\n"
+    },
+    {
+      "command": [
+        "python3",
+        "/home/ckc/test/codex/agents/codex-team-superpowers/scripts/teamctl.py",
+        "validate-report",
+        "apps/cms-scaffold/.team/reports/T-185.md"
+      ],
+      "exitCode": 0,
+      "output": "validate-report validation passed: apps/cms-scaffold/.team/reports/T-185.md\n"
+    },
+    {
+      "command": [
+        "python3",
+        "/home/ckc/test/codex/agents/codex-team-superpowers/scripts/teamctl.py",
+        "validate-report",
+        "apps/cms-scaffold/.team/reports/T-185.md"
+      ],
+      "stage": "final reread",
+      "exitCode": 0,
+      "output": "validate-report validation passed: apps/cms-scaffold/.team/reports/T-185.md\n"
+    }
+  ],
+  "sourceStillMatches": true,
+  "reportWhitespaceClean": true,
+  "findings": []
+}

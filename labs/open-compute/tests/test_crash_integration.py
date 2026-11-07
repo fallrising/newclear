@@ -1,5 +1,6 @@
 """M5 harness contracts with a synthetic runtime; no upstream certification."""
 from contextlib import ExitStack, redirect_stdout
+import copy
 import io
 import json
 from pathlib import Path
@@ -40,9 +41,9 @@ class HTTPTests(unittest.TestCase):
             self.assertEqual(historical.read_requests, 1)
 
     def test_cli_routes_only_crash(self):
-        with patch('sys.argv', ['lab.py', 'integration-crash']), patch('lab.integration', return_value=0) as run:
+        with patch('sys.argv', ['lab.py', 'integration-crash']), patch('crash_lifecycle.dispatch', return_value=0) as run:
             self.assertEqual(lab.main(), 0)
-        self.assertEqual(run.call_args.kwargs, dict(restore=False, resources=False, storage=False, crash=True))
+        self.assertEqual(run.call_args.args[0].command, 'integration-crash')
 
 
 class IntegrationTests(unittest.TestCase):
@@ -152,7 +153,7 @@ class IntegrationTests(unittest.TestCase):
                     item.process.poll.return_value = 0
                     if failure == 'unknown' and n == 2:
                         item.observation_error = lab.ProcessObservationError('unknown')
-                    return dict(was_running=failure != 'not_running' or n != 2, signal='SIGKILL' if failure == 'wrong_final_signal' and n == 2 else 'SIGTERM', forced=failure == 'forced' and n == 2, all_owned_exited=not item.observation_error, exit_code=0)
+                    return dict(was_running=failure != 'not_running' or n != 2, signal='SIGKILL' if failure == 'wrong_final_signal' and n == 2 else 'SIGTERM', forced=failure == 'forced' and n == 2, all_owned_exited=not item.observation_error, exit_code=0, observation_error=item.observation_error)
                 item.stop.side_effect = stop
                 processes.append(item)
                 return item
@@ -205,6 +206,71 @@ class IntegrationTests(unittest.TestCase):
                 status = 'running' if failure == 'workflow' and stage[0] == 'readback' else target
                 return dict(status=status, steps=[dict(name='instrumented-callback', success=failure != 'step')], output=dict(jobId=job['id'], nonce='fixture-nonce'))
 
+            import crash_lifecycle as lifecycle
+            class Owner(lifecycle.Runner):
+                """Explicit synthetic owner API; real kernel proof is tested separately."""
+                def __init__(self):
+                    self.value=lifecycle.initial();self.value['generations']=[lifecycle.generation_record(1)]
+                    self.failure=None;self.scope=None;self.final_shutdown=None;self.token=None;self.removal_observed=False
+                def check(self,**kwargs):
+                    if self.failure:raise lifecycle.LifecycleError(self.failure)
+                def latch(self,reason):
+                    self.failure=self.failure or reason;self.value['failure']=self.failure
+                    self.epoch['launches_closed']=True
+                    if self.value['cleanup']['status']!='removed':self.value['cleanup']=dict(status='refused',reason=self.failure,kernel_echild=False)
+                def cancel(self):self.latch('cancelled')
+                def source_commit(self):return 'a'*40
+                def command(self,argv,timeout=30,**kwargs):self.check();return command(argv,timeout)
+                def bind_scope(self,value):self.scope=value
+                def start_daemon(self,argv):
+                    self.check();item=process(argv)
+                    self.epoch.update(root=lab.public_process(item.identity,strict=True),launches=1,pipes_open=1,threads_open=1)
+                    return item
+                def root_check(self,item):
+                    self.check();lab.require(item.process.poll() is None,'root_exit')
+                def sample_liveness(self,item):
+                    self.value['sampling'].update(attempted=1,stable_children=1)
+                    return [dict(pid=21,pgid=21,start_ticks=201)]
+                def closed(self,kind,code):
+                    self.epoch.update(launches_closed=True,waited=1,pipes_open=0,threads_open=0,
+                        root_exit_code=code,history_nonlive=True,drains_closed=True,kernel_echild=True,closed=True,closure_kind=kind)
+                def abrupt_shutdown(self,item,*,deadline):
+                    try:
+                        value=stimulus(item,deadline=deadline,read_identity=lab.process_info)
+                        value=crash.project_crash(value)
+                        lab.require({k:value['targets'][0][k] for k in ('pid','pgid','start_ticks')}==self.epoch['root'],'identity')
+                    except BaseException:
+                        self.latch('crash');raise
+                    self.closed('crash',-9);self.token=object();self.value['restart']=dict(status='issued',reason=None)
+                    return value,self.token
+                def consume_restart(self,token,argv):
+                    self.check();lab.require(token is self.token,'receipt')
+                    self.value['restart']=dict(status='consumed',reason=None)
+                    self.value['generations'].append(lifecycle.generation_record(2))
+                    return self.start_daemon(argv)
+                def finalize(self,*,deadline):
+                    self.check()
+                    if processes and not self.epoch['closed']:
+                        item=processes[-1]
+                        self.root_check(item)
+                        shutdown=item.stop()
+                        lab.require(shutdown['was_running'] is True and shutdown['signal']=='SIGTERM' and shutdown['forced'] is False and shutdown['all_owned_exited'] is True and shutdown['exit_code']==0,'ownership')
+                        self.final_shutdown=shutdown;self.closed('normal',0)
+                    self.value['cleanup']=dict(status='verified',reason=None,kernel_echild=True)
+                    return object(),self.final_shutdown
+                def consume_deletion(self,seal,remove):
+                    self.check();self.scope.check_owner()
+                    value=remove();self.value['cleanup']=dict(status='removed',reason=None,kernel_echild=True)
+                    return value
+                def _record_removal(self):
+                    self.removal_observed=True;self.value['cleanup']=dict(status='removed',reason=None,kernel_echild=True)
+                def _failure_evidence(self):return lifecycle.project(self.value)
+                def evidence(self,*,complete=False):
+                    if failure=='lifecycle_projection':
+                        value=copy.deepcopy(self.value);value['private_path']='/private/secret';return value
+                    return lifecycle.project(self.value,complete=complete)
+            owner=Owner()
+
             patches = {'pwd.getpwuid': lambda uid: SimpleNamespace(pw_dir=str(root)), 'preflight': lambda port: scope, 'source_commit': lambda: 'a' * 40, 'download_binary': lambda *args: root / 'ocd', 'sha256_file': lambda path: 'b' * 64, 'command': command, 'Process': process, 'LocalHTTP': HTTP, 'poll': poll, 'wait_workflow': wait, 'worker_host': lambda *args: 'worker.local:8787', 'state_identity': lambda *args: dict({name: {'device': 1, 'inode': 2 if failure == 'state' and stage[0] == 'readback' else 1} for name in ('scope', 'data', 'control_db', 'scheduler_db')}, config_sha256='d' * 64)}
             # Retain the real GET-only wrapper and its inherited LocalHTTP.v4;
             # replace only its low-level transport for synthetic observations.
@@ -242,7 +308,7 @@ class IntegrationTests(unittest.TestCase):
                 stack.enter_context(patch('crash.project_readback', project))
             stream = io.StringIO()
             with redirect_stdout(stream):
-                code = lab.integration(SimpleNamespace(port=8787, cache=str(root / 'cache'), output=str(output)), crash=True)
+                code = lab.integration(SimpleNamespace(port=8787, cache=str(root / 'cache'), output=str(output)), crash=True, lifecycle=owner)
             evidence = json.loads((output / 'report.json').read_text()) if (output / 'report.json').exists() else None
             return code, json.loads(stream.getvalue()), events, scope.exists(), evidence
 
@@ -299,7 +365,7 @@ class IntegrationTests(unittest.TestCase):
                 self.assertNotIn('spawn:2', events)
                 self.assertNotIn('approval', events)
                 self.assertNotEqual(report['acceptance']['M5-02'], 'passed')
-                self.assertFalse(exists)
+                self.assertTrue(exists)
                 self.assertEqual(report['error'], 'deadline' if failure == 'crash_timeout' else 'schema')
 
     def test_numeric_identity_injection_is_not_public_evidence(self):
@@ -321,7 +387,7 @@ class IntegrationTests(unittest.TestCase):
         self.assertEqual(report['readback']['read_requests'], 0)
 
     def test_cleanup_and_evidence_failures_revoke_success(self):
-        for failure in ('completion_bool', 'final_dead', 'forced', 'unknown', 'marker', 'not_running', 'wrong_final_signal', 'evidence'):
+        for failure in ('completion_bool', 'final_dead', 'forced', 'unknown', 'marker', 'not_running', 'wrong_final_signal', 'evidence', 'lifecycle_projection'):
             with self.subTest(failure=failure):
                 code, report, events, exists, evidence = self.run_case(failure)
                 self.assertEqual(code, 1)
@@ -329,6 +395,12 @@ class IntegrationTests(unittest.TestCase):
                 if failure in ('final_dead', 'forced', 'unknown', 'marker', 'not_running', 'wrong_final_signal'):
                     self.assertTrue(exists)
                     self.assertNotEqual(report['acceptance']['M5-04'], 'passed')
+                if failure == 'lifecycle_projection':
+                    self.assertFalse(exists)
+                    self.assertEqual(report['crash']['status'],'verified')
+                    self.assertTrue(report['scope_removed'])
+                    self.assertEqual(report['crash_lifecycle']['cleanup']['status'],'removed')
+                    self.assertNotIn('/private/secret',json.dumps(report))
                 if failure == 'evidence':
                     self.assertFalse(exists)
                     self.assertIsNone(evidence)

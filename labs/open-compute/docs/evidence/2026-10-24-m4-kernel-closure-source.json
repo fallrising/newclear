@@ -1,0 +1,49 @@
+{
+  "container_image": "mcr.microsoft.com/playwright@sha256:dcc5531e97840b9b5e794f2814476b21571c5124a3fca2267d73041f56e7580e",
+  "contract_commit": "c5d7622e2f79a209161ed159978cf59f1132ac9f",
+  "description": "Original artifact M4 qualification of working-tree source, bound by exact file digests; harness_commit records the unchanged Git base, not the modified candidate.",
+  "environment": {
+    "cpu_limit": 2,
+    "fresh_owned_scope": true,
+    "memory_gib": 4,
+    "network": "none",
+    "non_root": true,
+    "pid_limit": 512,
+    "source_mount": "read_only"
+  },
+  "git_base": "4b51945ca589c60d34418abf51158a5a5856d03a",
+  "independent_focused_tests": 16,
+  "limits": "One bounded M4 qualification; no reconstruction of historical exact PID/edge/timing and no full-mainline or deployment/release claim.",
+  "offline_seconds": 36.457,
+  "offline_source_digest": "57be515883f0933712f89517a2ac7526d1b82eff79544c48d839e9603247a566",
+  "offline_tests": 332,
+  "original_artifact_sha256": "8829a5bcb334dd3bbd8dc949ad9a2afdfe0e1fef44035c041556cd12087c586f",
+  "report_sha256": "5a3cc6316ae6e541743092afd4ee0cc63bd6c13f9eee90c3376932e690e746fe",
+  "runtime_summary": {
+    "elapsed_seconds": 61.007,
+    "exit_code": 0,
+    "log_sha256": "34b1eaec198889844cce76ee5d91224536ee3f4d3d7d931eb1e1dab3393f6c40",
+    "owned_container_absent_after": true,
+    "profile": "integration-storage",
+    "source_unchanged": true,
+    "timeout": false
+  },
+  "source_manifest": {
+    "Makefile": "d1577e804a5e7fb3bae1694342a6aaeadcb79a00613a7d659e3f9c53fd2035e2",
+    "cold_backup.py": "ec436faf1043fb061b9ef5abdcc182b1a5dce3cd7e7a3907af40bb3d2a648ab0",
+    "crash.py": "86f9b8b188e7f0737d102d5938c6e638dc9a4da8df78ffa83ff65761890c9221",
+    "failure_diagnostics.py": "a6bf01498816fbd41b5f638410056663db5293629cfa1658619c79458339dd55",
+    "fixtures/worker.js": "4618b185c706f1895856a881cd5b7426229931328f7725db7adbbda5fe7c0a37",
+    "lab.py": "9835e567670df4f3d616488c06f4c2c56882f05c3b9d2e37c3caf5135863c7c9",
+    "resources.py": "6b543baacfc51c6fe457c2b6b2878f33de6c6d8643264a82d8fbfb54e85f23eb",
+    "retry.py": "bc21e10e2bab568c17bd5e74c7faee77a670de67f6464e0cd6ec2d4c94fcc47c",
+    "retry_contract.py": "44e229c53f4a330bd61267135eb01e262f82880f50e5023211a5a8bcc4dbcd7b",
+    "storage.py": "a579a39c91eb26419d42736031d5ebe9bc7cdafc3e54418205f1f5e053520bc6",
+    "storage_lifecycle.py": "0c7ed4faa36a82180301396a52b4cfbcf178058c46591835ad4e1fb923371fff",
+    "trial.py": "e89014214398f08139b18df9b7a3640712ccb2beb8b520adecd88a72142fdb18",
+    "trial_integration.py": "4c53878b831aa8d37217edfd8f4f326837b11a667b5986184da8a5d0f121a011",
+    "trial_state.py": "752c87a526a3e3018517821c5b585ed1c2aa9240e4c3f602cdefa7a9bdf7a61d",
+    "trial_supervision.py": "1768ef78ed97d5831d89438de6dd5d7a02f72e8dee698162278a9e07a14c572e",
+    "upstream.lock.json": "9ebb4759157a32c0a2c807f51d2a8613527c3a24d303a5598b60684f6088375c"
+  }
+}

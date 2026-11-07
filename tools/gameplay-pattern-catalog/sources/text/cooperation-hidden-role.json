@@ -1,0 +1,120 @@
+{
+  "id": "cooperation-hidden-role",
+  "system": "cooperation",
+  "edition": 2,
+  "name": {
+    "zh": "隐藏身份与行为伪装",
+    "en": "Hidden roles and convincing behavior"
+  },
+  "summary": {
+    "zh": "目标不同的人混在一起，行动既要获利，也要经得起别人观察。",
+    "en": "Players with opposing goals share a space, balancing progress against looking suspicious."
+  },
+  "rules": {
+    "zh": "暗中分配身份与胜利目标。部分玩家公开完成共同任务，破坏者利用相似的外观与行动混入其中；目击、失踪和任务变化提供可讨论的线索。",
+    "en": "Assign secret roles and goals. Some players pursue shared tasks while saboteurs blend in through similar appearances and behavior; sightings, disappearances and task changes create evidence."
+  },
+  "loop": [
+    {
+      "zh": "确认自己的秘密目标",
+      "en": "Learn your secret goal"
+    },
+    {
+      "zh": "选择行动与同行者",
+      "en": "Choose actions and company"
+    },
+    {
+      "zh": "留下或发现行为线索",
+      "en": "Create or notice evidence"
+    },
+    {
+      "zh": "根据怀疑调整下一步",
+      "en": "Adapt to suspicion"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "独自行动效率高，却缺少证人；要不要找人同行？",
+      "en": "Working alone is efficient but leaves no witness; should you travel with someone?"
+    },
+    {
+      "zh": "现在出手收益大，还是先帮忙建立可信形象？",
+      "en": "Act against the group now or first build trust by helping?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "身份差异",
+        "en": "Role differences"
+      },
+      "effect": {
+        "zh": "能力越多，可疑行为越难解释，入门负担也越重。",
+        "en": "More abilities make behavior harder to interpret and increase learning effort."
+      }
+    },
+    {
+      "name": {
+        "zh": "可观察信息",
+        "en": "Observable evidence"
+      },
+      "effect": {
+        "zh": "让行动留下部分线索，讨论才有依据；全公开则很难伪装。",
+        "en": "Partial evidence supports discussion; complete visibility leaves little room for deception."
+      }
+    }
+  ],
+  "tags": [
+    "information",
+    "risk",
+    "cooperation"
+  ],
+  "related": [
+    "cooperation-discussion-vote",
+    "cooperation-downed-revival",
+    "cooperation-split-information",
+    "cooperation-temporary-alliance"
+  ],
+  "contrast": {
+    "zh": "《Among Us》的基础对立容易说明白；《鹅鸭杀》用中立目标增加“他为什么这样做”的解释空间。",
+    "en": "Among Us offers an accessible basic conflict; Goose Goose Duck adds more explanations through neutral goals."
+  },
+  "combination": {
+    "zh": "设计提案：把潜入路线做成公开行动记录，只隐藏每人真正要偷的物品，让绕路也能成为线索。",
+    "en": "Design proposal: reveal movement logs but hide each player’s target item, making detours meaningful evidence."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "编辑示例：四人修三个设备，其中一人暗中想让维修失败。",
+      "en": "Editorial example: four players repair three machines, but one secretly wants the repair to fail."
+    },
+    "action": {
+      "zh": "破坏者先帮忙修好一台，再趁独处把另一台关掉。",
+      "en": "The saboteur helps repair one machine, then disables another while alone."
+    },
+    "result": {
+      "zh": "队友发现设备停了，却只有“谁最后离开”的线索。",
+      "en": "The team sees a stopped machine but knows only who last left the room."
+    },
+    "next": {
+      "zh": "破坏者要解释行程；其他人决定跟踪谁，继续维修。",
+      "en": "The saboteur explains their route while the others choose whom to watch and resume repairs."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "competitive",
+    "firstStep": {
+      "zh": "先做四张身份卡、三个任务标记和主持人记录行动的纸面回合。",
+      "en": "Use four role cards, three task tokens and a moderator who records paper turns."
+    },
+    "pitfall": {
+      "zh": "先验证伪装是否有可观察的破绽；过早加十几种身份会让所有异常都能被借口解释。",
+      "en": "Check that deception leaves readable clues before adding many roles that can explain away every anomaly."
+    },
+    "test": {
+      "zh": "好人能依据一次具体行为提出怀疑，破坏者也至少有一次合理的伪装选择。",
+      "en": "Testers can suspect someone for a specific action, while the saboteur has at least one plausible cover choice."
+    }
+  }
+}

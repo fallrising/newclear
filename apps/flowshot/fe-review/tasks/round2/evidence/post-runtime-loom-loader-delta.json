@@ -1,0 +1,8 @@
+{
+  "beforeSha256": "9e0a7638587d7dfdf1c5b3c0c6d826e747f754979ee31ce0b2ee1986839ef35d",
+  "afterSha256": "268fc690eca41a1b522912678315e70e8cc3e0b922f3f053fe37556a1d607b7f",
+  "before": "    await acquireOwned(() => createServer({ root: component, configFile: join(component, 'vite.config.ts'), ...(unit === 'flowshot' ? { configLoader: 'runner' } : {}), cacheDir: join(output, '.state/vite'), logLevel: 'silent', server: { host: '127.0.0.1', port: 1420, strictPort: true } }), (value) => { server = value; }, interruption);",
+  "after": "    // Flowshot keeps its original runner-loaded config. Only Loom Vite5 uses the hash-pinned equivalent.\n    let reviewConfig = {};\n    if (unit === 'loom') {\n      const { loadReviewViteConfig, originalConfigSha256 } = await import(pathToFileURL(join(component, 'fe-review/vite-review-config.mjs')));\n      reviewConfig = await loadReviewViteConfig(component);\n      receipt.viteOriginalConfigSha256 = originalConfigSha256;\n    }\n    await acquireOwned(() => createServer({ root: component, configFile: join(component, 'vite.config.ts'), ...(unit === 'flowshot' ? { configLoader: 'runner' } : {}), ...reviewConfig, cacheDir: join(output, '.state/vite'), logLevel: 'silent', server: { ...reviewConfig.server, host: '127.0.0.1', port: 1420, strictPort: true } }), (value) => { server = value; }, interruption);",
+  "scope": "Only unit===loom loads hash-pinned review config. Flowshot options/behavior unchanged; green browser not rerun.",
+  "reconstructsOriginal": true
+}

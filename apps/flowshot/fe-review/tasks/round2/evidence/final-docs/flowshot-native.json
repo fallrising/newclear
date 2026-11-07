@@ -1,0 +1,12 @@
+[
+  {
+    "command": "npm run lint",
+    "exitCode": 0,
+    "elapsedSeconds": 3.878
+  },
+  {
+    "command": "npm test",
+    "exitCode": 1,
+    "elapsedSeconds": 7.855
+  }
+]

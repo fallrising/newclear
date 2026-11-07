@@ -22,7 +22,9 @@ const (
 	ApproveSubjectOperation   Operation = "ApproveSubject"
 	RequestQAOperation        Operation = "RequestQA"
 	RequestCancelOperation    Operation = "RequestCancellation"
+	RequestReworkOperation    Operation = "RequestRework"
 	CompleteWorkItemOperation Operation = "CompleteWorkItem"
+	ReopenWorkItemOperation   Operation = "ReopenWorkItem"
 )
 
 // Metadata contains caller-supplied command identity. CorrelationID is not
@@ -162,6 +164,23 @@ type RequestQA struct {
 	SubjectDigest domain.Digest
 }
 
+type RequestRework struct {
+	Metadata
+	ProjectID     domain.ProjectID
+	WorkItemID    domain.WorkItemID
+	SubjectDigest domain.Digest
+	Reason        string
+}
+
+// ReopenWorkItem returns a Done WorkItem to Draft or Ready with a recorded reason.
+type ReopenWorkItem struct {
+	Metadata
+	ProjectID   domain.ProjectID
+	WorkItemID  domain.WorkItemID
+	TargetPhase domain.Phase
+	Reason      string
+}
+
 type RequestCancellation struct {
 	Metadata
 	ProjectID  domain.ProjectID
@@ -178,6 +197,8 @@ type CompleteWorkItem struct {
 }
 
 type Result struct {
+	ReportID                string
+	ReportKind              string
 	AcceptedRevisionDigest  string
 	AcceptanceSubjectDigest string
 	ProposalDigest          string
@@ -190,6 +211,10 @@ type Result struct {
 	RunID                   domain.RunID
 	Version                 uint64
 	Phase                   domain.Phase
+	// Reason is recorded only for ReworkRequested and WorkItemReopened;
+	// SubjectDigest only for ReworkRequested.
+	Reason        string
+	SubjectDigest domain.Digest
 }
 
 type Outcome struct {

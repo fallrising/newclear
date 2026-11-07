@@ -1,0 +1,68 @@
+--- a/bindings/python/src/lib.rs
++++ b/bindings/python/src/lib.rs
+@@ -2051,3 +2051,40 @@
+-            inner
+-                .put_parallel_inputs(&parallel_inputs, build_opts)
+-                .map_err(Self::core_err)
++            if embeddings_vec.is_some() {
++                // Explicit vectors must use one coherent full-index commit path.
++                // The parallel builder returns WAL sequences and mixes segment
++                // vectors with monolithic indexes created by auto-checkpoints.
++                let dimension = parallel_inputs.first()
++                    .and_then(|input| input.embedding.as_ref()).map(Vec::len).unwrap_or(0);
++                if dimension == 0 || parallel_inputs.iter().any(|input| {
++                    input.embedding.as_ref().map_or(true, |vector| {
++                        vector.len() != dimension || vector.iter().any(|value| !value.is_finite())
++                    })
++                }) {
++                    return Err(PyValueError::new_err("explicit vectors must be finite, nonempty and dimension-consistent"));
++                }
++                inner.begin_batch(put_opts.clone()).map_err(Self::core_err)?;
++                let result = (|| -> PyResult<Vec<u64>> {
++                    let mut ids = Vec::with_capacity(parallel_inputs.len());
++                    for input in &parallel_inputs {
++                        let ParallelPayload::Bytes(bytes) = &input.payload else {
++                            return Err(PyValueError::new_err("explicit vector batch requires byte payloads"));
++                        };
++                        // This binding uses PutOptions::default(): dedup=false.
++                        // next_frame_id includes pending inserts and child frames.
++                        let id = inner.next_frame_id();
++                        inner.put_with_embedding_and_options(
++                            bytes, input.embedding.clone().expect("validated explicit vector"), input.options.clone()
++                        ).map_err(Self::core_err)?;
++                        ids.push(id);
++                    }
++                    Ok(ids)
++                })();
++                // Attempt to end the batch even when insertion fails;
++                // a WAL flush error is propagated, with no atomicity promise.
++                let end = inner.end_batch().map_err(Self::core_err);
++                let ids = result?;
++                end?;
++                inner.commit().map_err(Self::core_err)?;
++                Ok(ids)
++            } else {
++                inner.put_parallel_inputs(&parallel_inputs, build_opts).map_err(Self::core_err)
++            }
+--- a/crates/memvid-core/src/vec.rs
++++ b/crates/memvid-core/src/vec.rs
+@@ -275,4 +275,7 @@
+-            VecIndex::Hnsw(_) => {
+-                // HNSW graph doesn't easily iterate all embeddings
+-                Box::new(std::iter::empty())
+-            }
++            VecIndex::Hnsw(index) => Box::new(
++                // ids and graph features are appended in the same order.
++                // Full-index commits must retain existing active vectors.
++                index.ids.iter().enumerate().map(|(position, &frame_id)| {
++                    (frame_id, index.graph.feature(position).as_slice())
++                }),
++            ),
+--- a/Cargo.toml
++++ b/Cargo.toml
+@@ -2,0 +3 @@
++exclude = ["vendor/hnsw"]
+@@ -29,0 +31,3 @@
++
++[patch.crates-io]
++hnsw = { path = "vendor/hnsw" }

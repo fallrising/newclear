@@ -1,0 +1,20 @@
+{
+  "rows": [
+    {
+      "file": "restore-target.mjs",
+      "changedLines": 85,
+      "sha256": "6adb229f69372085cfb7a978fe188c180d240c60e949c312f32c332f0f79b8c9"
+    },
+    {
+      "file": "maintenance-workflow.test.mjs",
+      "changedLines": 49,
+      "sha256": "4add0bf68f9f1fac511cbca1d1ea677f63cdcb465f1975fc08c7683415545da7"
+    },
+    {
+      "file": "prepare.mjs",
+      "changedLines": 1,
+      "sha256": "636ae173feada8f973509f1dce0a4c03d17a8addc1b71ac3d30aca925028a277"
+    }
+  ],
+  "total": 135
+}

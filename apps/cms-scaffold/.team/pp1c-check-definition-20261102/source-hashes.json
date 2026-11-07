@@ -1,0 +1,15 @@
+{
+  "sha256": {
+    "docs/v2/contracts/PP1-recovery.md": "afabe7087a0475dacdb6e156847a33e9672a823f841d97ea5797fda226fc7bc9",
+    "docs/v2/contracts/PP1c-local-adapters.md": "5fb7d40250b1b20faf578ae1feafce02911f5a82b458a4ef2fb9f7760bedcde9",
+    "docs/v2/waves/PP1c.md": "d64f0c32aad66debca30a3dde2ae1a7badee0bd578819881d1c8c1e635308526",
+    "docs/v2/contracts/fixtures/pp1c-check-definition-pairs-v1.json": "f25157feb8a0c027f1b8930c4fad64fe7e0291e0745702d2e2a3b727533e856a",
+    ".team/pp1c-check-definition-20261102/DECISION.md": "9e14d501d64ce8838237c35a45ec43190cabb22ee1513eef2ef38db9fa4f9b82",
+    ".team/pp1c-check-definition-20261102/PLAN.md": "ac813e95d53eb7d19cbfb4c6e33697b4e6ee7e03cdefb5b46c98e8c09a060c3e",
+    ".team/pp1c-check-definition-20261102/check-proposal.py": "67ba1e3a80402a9eddacbbe4db288d7acfb96c4fb2be474245e7ef8c08795193",
+    ".team/tasks/T-148.md": "6dfe1c5b3c57c8ec697258a7de1863fa55615d1f8e6416ba0de1e3b34202beb7",
+    ".team/tasks/T-155.md": "01728bc3a1c9abbf1267e5cc0023fb62fc9d5134e0b0e5f4eebf07db621d12cf",
+    ".team/pp1c-check-definition-20261102/approval-record.json": "23df572d2446a74a28d1b44a58ed15cd5394c31acdae31949de5d060699fd999"
+  },
+  "note": "2026-11-06 approval status delta; original proposed hashes retained separately; no product changes."
+}

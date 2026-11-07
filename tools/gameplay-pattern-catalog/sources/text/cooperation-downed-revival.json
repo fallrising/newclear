@@ -1,0 +1,120 @@
+{
+  "id": "cooperation-downed-revival",
+  "system": "cooperation",
+  "edition": 2,
+  "name": {
+    "zh": "倒地救援与掩护",
+    "en": "Reviving a downed teammate"
+  },
+  "summary": {
+    "zh": "伙伴失去行动力后，队伍要拿眼前的安全换回一名战力。",
+    "en": "When an ally falls, trade immediate safety for restoring a teammate."
+  },
+  "rules": {
+    "zh": "生命耗尽先进入倒地状态，伙伴靠近并持续救援才能让其重新行动。救援会占用时间和位置，周围威胁仍在；救回的人恢复队伍能力，救援者倒下则会扩大危机。",
+    "en": "Depleted health causes a downed state before removal. A teammate must approach and spend uninterrupted time reviving while threats continue; success restores team capacity, but another casualty deepens the crisis."
+  },
+  "loop": [
+    {
+      "zh": "伙伴倒地并发出提示",
+      "en": "An ally falls and signals"
+    },
+    {
+      "zh": "清理威胁或安排掩护",
+      "en": "Clear threats or arrange cover"
+    },
+    {
+      "zh": "靠近并完成救援",
+      "en": "Approach and finish revival"
+    },
+    {
+      "zh": "重整位置继续目标",
+      "en": "Regroup and continue the objective"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "先救人，还是先处理会打断救援的敌人？",
+      "en": "Revive immediately or first remove a threat that could interrupt it?"
+    },
+    {
+      "zh": "把防御资源留给自己，还是现在花掉为救援争取时间？",
+      "en": "Save a defensive resource or spend it to create a rescue window?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "救援耗时",
+        "en": "Revive duration"
+      },
+      "effect": {
+        "zh": "时间越长，掩护和选位置越重要。",
+        "en": "Longer duration increases the value of cover and positioning."
+      }
+    },
+    {
+      "name": {
+        "zh": "倒地后的等待限制",
+        "en": "Downed waiting limit"
+      },
+      "effect": {
+        "zh": "有时限会催促救援，没有时限则允许先稳定局面。",
+        "en": "A deadline creates urgency; no deadline allows stabilization first."
+      }
+    }
+  ],
+  "tags": [
+    "cooperation",
+    "risk",
+    "timing"
+  ],
+  "related": [
+    "cooperation-hidden-role",
+    "cooperation-shared-vehicle",
+    "cooperation-split-information",
+    "cooperation-synchronized-triggers"
+  ],
+  "contrast": {
+    "zh": "《深岩银河》强调靠近并完成救援动作；《盗贼之海》还让倒地者决定等待队友还是转入死亡后的流程。",
+    "en": "Deep Rock Galactic emphasizes reaching and completing the revive; Sea of Thieves also lets the fallen player choose waiting or the death route."
+  },
+  "combination": {
+    "zh": "设计提案：在掩体战里加入可拖动的倒地伙伴，先拖进安全处，再决定是否投入救援时间。",
+    "en": "Design proposal: let players drag downed allies into cover before committing time to revival."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "编辑示例：A倒在门口，B还有一面只能挡三秒的护盾，救援需要两秒。",
+      "en": "Editorial example: A falls in a doorway; B has a three-second shield and revival takes two seconds."
+    },
+    "action": {
+      "zh": "B先开盾挡住门，再走到A身边持续救援。",
+      "en": "B shields the doorway, then stands beside A and holds revive."
+    },
+    "result": {
+      "zh": "A起身，两人赶在护盾消失前退回房内。",
+      "en": "A gets up, and both retreat before the shield expires."
+    },
+    "next": {
+      "zh": "下一波来前，他们调整站位，避免同时倒在门口。",
+      "en": "Before the next wave, they spread out to avoid falling together in the doorway."
+    }
+  },
+  "prototype": {
+    "scope": "medium",
+    "interaction": "cooperative",
+    "firstStep": {
+      "zh": "先做同屏两人、一个移动威胁、倒地状态和可中断的两秒救援条。",
+      "en": "Build two local players, one moving threat, a downed state and an interruptible two-second revive bar."
+    },
+    "pitfall": {
+      "zh": "不要一开始就做完整射击和职业体系；先确保救援失败的原因能被看懂。",
+      "en": "Avoid a full shooter and class system initially; make failed rescues understandable first."
+    },
+    "test": {
+      "zh": "试玩者遇到危险救援时会先制造安全窗口，而不是每次无脑按住救援键。",
+      "en": "Testers create a safe window for dangerous rescues instead of always holding revive immediately."
+    }
+  }
+}

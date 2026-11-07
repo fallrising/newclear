@@ -1,0 +1,119 @@
+{
+  "id": "allocation-shared-stock",
+  "system": "allocation",
+  "edition": 3,
+  "name": {
+    "zh": "从共享库存购买单位",
+    "en": "Recruit from a shared stock"
+  },
+  "summary": {
+    "zh": "别人买走的同类单位，会减少你继续补齐的机会。",
+    "en": "Opponents buying the same unit reduce your remaining supply."
+  },
+  "rules": {
+    "zh": "每种单位的可用副本来自所有玩家共用的有限库存，商店从剩余库存抽取。玩家观察他人持有量来判断是否继续追同一种单位，或改选竞争较少的方向；出售等规则可能让副本回流。",
+    "en": "Copies of each unit come from a finite pool shared by all players, and shops draw from what remains. Observe opponents’ holdings before chasing more copies or switching to less contested choices. Rules such as selling can return stock."
+  },
+  "loop": [
+    {
+      "zh": "查看自己与他人的持有量",
+      "en": "Inspect your roster and rivals’ holdings"
+    },
+    {
+      "zh": "购买或放弃竞争中的单位",
+      "en": "Buy or pass on a contested unit"
+    },
+    {
+      "zh": "共享余量改变后续出现机会",
+      "en": "Let the shared remainder affect future offers"
+    },
+    {
+      "zh": "转向较少人使用的选择",
+      "en": "Adapt toward less contested choices"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "已经投入很多，却发现多人也在买同一种单位，还要继续刷新吗？",
+      "en": "Keep rerolling after investing heavily if several opponents want the same unit?"
+    },
+    {
+      "zh": "买下对手急需的单位会占用资金与格子，阻断收益是否够大？",
+      "en": "Is denying a needed copy worth tying up cash and bench space?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "每类副本数",
+        "en": "Copies per unit"
+      },
+      "effect": {
+        "zh": "数量越少，观察他人阵容越重要，也更容易被迫改方向。",
+        "en": "Smaller pools make scouting more important and force more pivots."
+      }
+    },
+    {
+      "name": {
+        "zh": "回流规则",
+        "en": "Return rules"
+      },
+      "effect": {
+        "zh": "出售或淘汰后的回流会让紧缺单位重新出现，形成等待窗口。",
+        "en": "Returns after selling or elimination can reopen scarce options and create timing windows."
+      }
+    }
+  ],
+  "tags": [
+    "information",
+    "economy"
+  ],
+  "related": [
+    "allocation-follow-phase",
+    "allocation-public-pick",
+    "allocation-worker-placement",
+    "allocation-area-majority"
+  ],
+  "contrast": {
+    "zh": "两作都把招募变成间接资源争夺；英雄费用、库存容量与上场规则不同，所以不能照搬同一套追牌概率。",
+    "en": "Both turn recruitment into indirect resource competition, but unit tiers, pool sizes and roster rules prevent transferring the same recruitment odds."
+  },
+  "combination": {
+    "zh": "组合提案：背包格数限制临时囤货，抢走稀缺单位需要先腾出位置，玩家必须比较阻断对手与保留实用工具。",
+    "en": "Design proposal: limited inventory slots constrain stockpiling, forcing a choice between holding scarce recruits to deny rivals and keeping useful tools."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "公共池某单位只有六份，你已有两份，对手合计持有三份。",
+      "en": "A unit has six shared copies; you hold two and rivals hold three."
+    },
+    "action": {
+      "zh": "检查对手后，停止为最后一份连续刷新。",
+      "en": "After scouting, stop repeatedly rerolling for the final copy."
+    },
+    "result": {
+      "zh": "资金保住，但原来的组合尚未成型。",
+      "en": "You preserve cash but leave the intended combination incomplete."
+    },
+    "next": {
+      "zh": "改买库存较充足的替代单位，或等有人出售后再追。",
+      "en": "Buy an abundant alternative or wait for a rival to sell."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "competitive",
+    "firstStep": {
+      "zh": "两名本地玩家共用三类单位库存，让每次购买立即更新公共余量。",
+      "en": "Use two local players and three shared unit pools, updating counts on each purchase."
+    },
+    "pitfall": {
+      "zh": "只告诉玩家概率下降却不解释共享来源，会把对抗误读成纯运气。",
+      "en": "Without explaining the shared source, changing odds feel like pure luck."
+    },
+    "test": {
+      "zh": "玩家是否因对手持有量改变刷新或转型决定？",
+      "en": "Do opponents’ holdings change reroll and pivot decisions?"
+    }
+  }
+}

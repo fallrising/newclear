@@ -1,0 +1,15 @@
+{
+  "rows": [
+    {
+      "file": "fixture-client.mjs",
+      "changedLines": 67,
+      "sha256": "47bef839d76c97f16aac2103bd4b2c32dd6038b74c69305ce19f842494e33162"
+    },
+    {
+      "file": "fixture-client.test.mjs",
+      "changedLines": 25,
+      "sha256": "4a04d24a27375035990a9d6a8b84a589398372f2651ca1cd167fda79f84f4e4b"
+    }
+  ],
+  "total": 92
+}

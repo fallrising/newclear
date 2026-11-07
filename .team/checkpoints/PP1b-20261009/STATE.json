@@ -1,0 +1,49 @@
+{
+  "at": "2026-10-09T15:11:13.783912+00:00",
+  "status": "OWNER_CHECKPOINT_UNVERIFIED",
+  "base": "e3d0c3fbea02fa47cdd99a6b43914c1a8ad4fd1c",
+  "branch": "feat/cms-pp1b-local",
+  "ownerRequest": "Pause development; preserve and publish code for VPS maintenance. Required acceptance remains unmet; Draft PR only.",
+  "passed": {
+    "javaUnitBeforeFinalG06": 506,
+    "focusedPostgres": 75,
+    "webUnit": 672,
+    "mockBrowser": 93,
+    "affectedMockAfterLint": 85,
+    "g06NodeNew": 8,
+    "g06JavaFocused": 42,
+    "g06JavaRootExecution": "FROM-CACHE; author fresh42 pass",
+    "targetGuardVerifierNode": 43,
+    "accountsParserCases": 4,
+    "realNegativeCases": [
+      "extra idle backend rejects without DB changes",
+      "API restart rejects without DB changes"
+    ]
+  },
+  "pending": [
+    "true fresh initialization success and initialized aggregate SQL with rollback-only semantic negative cases",
+    "same-name/replacement backend and target drift/exclusive lock live checks",
+    "trusted real browser accounts journey",
+    "final independent acceptance and required product CI",
+    "PP1c corrected construction review, docs CI and merge before any backup/restore implementation"
+  ],
+  "claims": {
+    "PP1bVerified": false,
+    "PP1cDocReady": false,
+    "BW6Verified": false,
+    "productionReady": false
+  },
+  "runsStopped": [
+    "29bfd87b59ab4250bebbd9ce9049182e",
+    "86499b7576d447e5afd7c20d1324cb5b",
+    "0f18b0c13cf7492fbcaf20ae4fb18a64"
+  ],
+  "volumesRemoved": false,
+  "capacityResolvedObservedFreeGiB": 41,
+  "capacityChangeCause": "unknown",
+  "metrics": {
+    "providerRequests": null,
+    "outerCalls": null,
+    "nestedCalls": null
+  }
+}

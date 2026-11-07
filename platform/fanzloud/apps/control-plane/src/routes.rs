@@ -56,6 +56,7 @@ pub(crate) fn router(shared: Arc<Shared>) -> Router {
         .route("/assets/p0-app.js", get(crate::web::app))
         .route("/assets/p0-client.js", get(crate::web::client))
         .route("/assets/p0.css", get(crate::web::style))
+        .route("/favicon.ico", get(crate::web::favicon))
         .fallback(not_found)
         .method_not_allowed_fallback(method_not_allowed)
         .with_state(shared)

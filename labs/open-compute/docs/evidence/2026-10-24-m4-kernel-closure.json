@@ -1,0 +1,610 @@
+{
+  "acceptance": {
+    "M4-01": "passed",
+    "M4-02": "passed",
+    "M4-03": "passed",
+    "M4-04": "passed",
+    "M4-05": "passed"
+  },
+  "command": "make integration-storage",
+  "daemon_after": {
+    "pgid": 84,
+    "pid": 84,
+    "start_ticks": 15387794
+  },
+  "daemon_before": {
+    "pgid": 16,
+    "pid": 16,
+    "start_ticks": 15385621
+  },
+  "daemon_second": {
+    "pgid": 84,
+    "pid": 84,
+    "start_ticks": 15387794
+  },
+  "daemon_third": {
+    "pgid": 260,
+    "pid": 260,
+    "start_ticks": 15389735
+  },
+  "duplicate_submission": {
+    "requests": 2,
+    "row_count": 1
+  },
+  "environment": {
+    "architecture": "x86_64",
+    "euid": 1001,
+    "os": "Linux",
+    "python": "3.12.3"
+  },
+  "evidence_file_written": true,
+  "final_shutdown": {
+    "all_owned_exited": true,
+    "children": [],
+    "exit_code": 0,
+    "forced": false,
+    "observation_error": null,
+    "signal": "SIGTERM",
+    "was_running": true
+  },
+  "first_shutdown": {
+    "all_owned_exited": true,
+    "children": [
+      {
+        "pgid": 43,
+        "pid": 43,
+        "start_ticks": 15386166
+      }
+    ],
+    "exit_code": 0,
+    "forced": false,
+    "observation_error": null,
+    "signal": "SIGTERM",
+    "was_running": true
+  },
+  "functional_acceptance": {
+    "AC-01": "passed",
+    "AC-02": "passed",
+    "AC-03": "passed",
+    "AC-04": "passed",
+    "AC-05": "passed",
+    "AC-06": "passed",
+    "AC-07": "passed",
+    "AC-08": "passed"
+  },
+  "harness_commit": "4b51945ca589c60d34418abf51158a5a5856d03a",
+  "instance": {
+    "account_id": "01a16dce59d27350870866971b376ee2",
+    "instance_id": "01a16dce59d27350870866971b376ee2",
+    "name": "lab"
+  },
+  "live_children_before_restart": [
+    {
+      "pgid": 43,
+      "pid": 43,
+      "start_ticks": 15386166
+    }
+  ],
+  "phase": "complete",
+  "result": "passed",
+  "run_id": "20261024T120639Z-3335ef1c",
+  "runtime": {
+    "artifact_sha256": "8829a5bcb334dd3bbd8dc949ad9a2afdfe0e1fef44035c041556cd12087c586f",
+    "version_text": "ocd 0.2.4"
+  },
+  "scenario": "cold-storage-footprint",
+  "schema_version": 1,
+  "scope_removed": true,
+  "state_identity": {
+    "after": {
+      "config_sha256": "1ecc23986c89e177ce652617acc0d66e28b239b977383f8dc9a6d4fbbf6c72bf",
+      "control_db": {
+        "device": 66309,
+        "inode": 1323029
+      },
+      "data": {
+        "device": 66309,
+        "inode": 1323009
+      },
+      "scheduler_db": {
+        "device": 66309,
+        "inode": 1323032
+      },
+      "scope": {
+        "device": 66309,
+        "inode": 1322870
+      }
+    },
+    "before": {
+      "config_sha256": "1ecc23986c89e177ce652617acc0d66e28b239b977383f8dc9a6d4fbbf6c72bf",
+      "control_db": {
+        "device": 66309,
+        "inode": 1323029
+      },
+      "data": {
+        "device": 66309,
+        "inode": 1323009
+      },
+      "scheduler_db": {
+        "device": 66309,
+        "inode": 1323032
+      },
+      "scope": {
+        "device": 66309,
+        "inode": 1322870
+      }
+    },
+    "same": true
+  },
+  "storage": {
+    "deltas": {
+      "completion_minus_writes": {
+        "allocated_bytes": 1224704,
+        "directories": 9,
+        "hardlink_aliases": 0,
+        "logical_bytes": 1218299,
+        "regular_paths": 2,
+        "sockets": 0,
+        "unique_files": 2
+      },
+      "writes_minus_baseline": {
+        "allocated_bytes": 1466368,
+        "directories": 9,
+        "hardlink_aliases": 0,
+        "logical_bytes": 1459962,
+        "regular_paths": 2,
+        "sockets": 0,
+        "unique_files": 2
+      }
+    },
+    "limitations": {
+      "cold_cooperating_runtime": true,
+      "directory_socket_blocks_excluded": true,
+      "filesystem_allocation_policy": "unknown",
+      "observed_hardlinks_deduplicated": true,
+      "peak_growth_rate_capacity_retention_tested": false,
+      "physical_extent_allocation": "unknown",
+      "regular_files_only": true,
+      "same_device_bind_mount_coverage": "unknown",
+      "sequential_metadata": true
+    },
+    "limits": {
+      "extension_bytes": 49152,
+      "max_depth": 32,
+      "max_entries": 8192,
+      "max_file_logical_bytes": 536870912,
+      "max_path_bytes": 512,
+      "max_total_allocated_bytes": 2147483648,
+      "max_total_logical_bytes": 2147483648,
+      "snapshot_seconds": 10
+    },
+    "schema_version": 1,
+    "snapshots": {
+      "cold_after_completion": {
+        "elapsed_seconds": 0.016115602978970855,
+        "entries": 574,
+        "groups": {
+          "derived_tessdata": {
+            "allocated_bytes": 8953856,
+            "directories": 2,
+            "hardlink_aliases": 2,
+            "logical_bytes": 8948886,
+            "regular_paths": 5,
+            "sockets": 0,
+            "unique_files": 3
+          },
+          "instance_other": {
+            "allocated_bytes": 2281472,
+            "directories": 29,
+            "hardlink_aliases": 0,
+            "logical_bytes": 2257471,
+            "regular_paths": 12,
+            "sockets": 0,
+            "unique_files": 12
+          },
+          "instance_transient": {
+            "allocated_bytes": 3239936,
+            "directories": 6,
+            "hardlink_aliases": 0,
+            "logical_bytes": 3218716,
+            "regular_paths": 7,
+            "sockets": 0,
+            "unique_files": 7
+          },
+          "local_objects": {
+            "allocated_bytes": 11628544,
+            "directories": 256,
+            "hardlink_aliases": 0,
+            "logical_bytes": 11332712,
+            "regular_paths": 119,
+            "sockets": 0,
+            "unique_files": 119
+          },
+          "scope_other": {
+            "allocated_bytes": 16384,
+            "directories": 4,
+            "hardlink_aliases": 0,
+            "logical_bytes": 6411,
+            "regular_paths": 4,
+            "sockets": 0,
+            "unique_files": 4
+          },
+          "scope_transient": {
+            "allocated_bytes": 204914688,
+            "directories": 28,
+            "hardlink_aliases": 0,
+            "logical_bytes": 204675311,
+            "regular_paths": 102,
+            "sockets": 0,
+            "unique_files": 102
+          }
+        },
+        "phase": "cold_after_completion",
+        "totals": {
+          "allocated_bytes": 231034880,
+          "directories": 325,
+          "hardlink_aliases": 2,
+          "logical_bytes": 230439507,
+          "regular_paths": 249,
+          "sockets": 0,
+          "unique_files": 247
+        }
+      },
+      "cold_after_writes": {
+        "elapsed_seconds": 0.013961549004307017,
+        "entries": 563,
+        "groups": {
+          "derived_tessdata": {
+            "allocated_bytes": 8953856,
+            "directories": 2,
+            "hardlink_aliases": 2,
+            "logical_bytes": 8948886,
+            "regular_paths": 5,
+            "sockets": 0,
+            "unique_files": 3
+          },
+          "instance_other": {
+            "allocated_bytes": 2134016,
+            "directories": 29,
+            "hardlink_aliases": 0,
+            "logical_bytes": 2110014,
+            "regular_paths": 12,
+            "sockets": 0,
+            "unique_files": 12
+          },
+          "instance_transient": {
+            "allocated_bytes": 2162688,
+            "directories": 6,
+            "hardlink_aliases": 0,
+            "logical_bytes": 2147874,
+            "regular_paths": 5,
+            "sockets": 0,
+            "unique_files": 5
+          },
+          "local_objects": {
+            "allocated_bytes": 11628544,
+            "directories": 247,
+            "hardlink_aliases": 0,
+            "logical_bytes": 11332712,
+            "regular_paths": 119,
+            "sockets": 0,
+            "unique_files": 119
+          },
+          "scope_other": {
+            "allocated_bytes": 16384,
+            "directories": 4,
+            "hardlink_aliases": 0,
+            "logical_bytes": 6411,
+            "regular_paths": 4,
+            "sockets": 0,
+            "unique_files": 4
+          },
+          "scope_transient": {
+            "allocated_bytes": 204914688,
+            "directories": 28,
+            "hardlink_aliases": 0,
+            "logical_bytes": 204675311,
+            "regular_paths": 102,
+            "sockets": 0,
+            "unique_files": 102
+          }
+        },
+        "phase": "cold_after_writes",
+        "totals": {
+          "allocated_bytes": 229810176,
+          "directories": 316,
+          "hardlink_aliases": 2,
+          "logical_bytes": 229221208,
+          "regular_paths": 247,
+          "sockets": 0,
+          "unique_files": 245
+        }
+      },
+      "cold_baseline": {
+        "elapsed_seconds": 0.015098144998773932,
+        "entries": 552,
+        "groups": {
+          "derived_tessdata": {
+            "allocated_bytes": 8953856,
+            "directories": 2,
+            "hardlink_aliases": 2,
+            "logical_bytes": 8948886,
+            "regular_paths": 5,
+            "sockets": 0,
+            "unique_files": 3
+          },
+          "instance_other": {
+            "allocated_bytes": 1744896,
+            "directories": 29,
+            "hardlink_aliases": 0,
+            "logical_bytes": 1720894,
+            "regular_paths": 12,
+            "sockets": 0,
+            "unique_files": 12
+          },
+          "instance_transient": {
+            "allocated_bytes": 1085440,
+            "directories": 6,
+            "hardlink_aliases": 0,
+            "logical_bytes": 1077032,
+            "regular_paths": 3,
+            "sockets": 0,
+            "unique_files": 3
+          },
+          "local_objects": {
+            "allocated_bytes": 11628544,
+            "directories": 238,
+            "hardlink_aliases": 0,
+            "logical_bytes": 11332712,
+            "regular_paths": 119,
+            "sockets": 0,
+            "unique_files": 119
+          },
+          "scope_other": {
+            "allocated_bytes": 16384,
+            "directories": 4,
+            "hardlink_aliases": 0,
+            "logical_bytes": 6411,
+            "regular_paths": 4,
+            "sockets": 0,
+            "unique_files": 4
+          },
+          "scope_transient": {
+            "allocated_bytes": 204914688,
+            "directories": 28,
+            "hardlink_aliases": 0,
+            "logical_bytes": 204675311,
+            "regular_paths": 102,
+            "sockets": 0,
+            "unique_files": 102
+          }
+        },
+        "phase": "cold_baseline",
+        "totals": {
+          "allocated_bytes": 228343808,
+          "directories": 307,
+          "hardlink_aliases": 2,
+          "logical_bytes": 227761246,
+          "regular_paths": 245,
+          "sockets": 0,
+          "unique_files": 243
+        }
+      }
+    },
+    "units": {
+      "allocated_block_bytes": 512
+    },
+    "workload": {
+      "absence_checks_attempted": 16,
+      "absence_checks_completed": 16,
+      "jobs": 16,
+      "payload_bytes_per_job": 128,
+      "retained_reads_attempted": 16,
+      "retained_reads_completed": 16,
+      "submission_attempted": 32,
+      "submission_completed": 32,
+      "unique_payload_bytes": 2048
+    }
+  },
+  "storage_lifecycle": {
+    "cleanup": {
+      "kernel_echild": true,
+      "reason": null,
+      "status": "verified"
+    },
+    "epochs": [
+      {
+        "adopted_reaped": 0,
+        "closed": true,
+        "failure": null,
+        "forced": false,
+        "index": 1,
+        "launches": 5,
+        "locks_released": true,
+        "phase": "cold_baseline",
+        "pipes_open": 0,
+        "root": {
+          "pgid": 16,
+          "pid": 16,
+          "start_ticks": 15385621
+        },
+        "root_exit_code": 0,
+        "sampling": {
+          "ambiguous_edges": 0,
+          "attempted": 1,
+          "reasons": {
+            "child_missing": 0,
+            "child_reparented": 0,
+            "child_reused": 0,
+            "parent_missing": 0,
+            "parent_reused": 0,
+            "parent_zombie": 0,
+            "start_order": 0
+          },
+          "stable_children": 1
+        },
+        "snapshot_complete": true,
+        "snapshot_consumed": true,
+        "threads_open": 0,
+        "waited": 5,
+        "was_running": true
+      },
+      {
+        "adopted_reaped": 0,
+        "closed": true,
+        "failure": null,
+        "forced": false,
+        "index": 2,
+        "launches": 13,
+        "locks_released": true,
+        "phase": "cold_after_writes",
+        "pipes_open": 0,
+        "root": {
+          "pgid": 84,
+          "pid": 84,
+          "start_ticks": 15387794
+        },
+        "root_exit_code": 0,
+        "sampling": {
+          "ambiguous_edges": 0,
+          "attempted": 0,
+          "reasons": {
+            "child_missing": 0,
+            "child_reparented": 0,
+            "child_reused": 0,
+            "parent_missing": 0,
+            "parent_reused": 0,
+            "parent_zombie": 0,
+            "start_order": 0
+          },
+          "stable_children": 0
+        },
+        "snapshot_complete": true,
+        "snapshot_consumed": true,
+        "threads_open": 0,
+        "waited": 13,
+        "was_running": true
+      },
+      {
+        "adopted_reaped": 0,
+        "closed": true,
+        "failure": null,
+        "forced": false,
+        "index": 3,
+        "launches": 13,
+        "locks_released": true,
+        "phase": "cold_after_completion",
+        "pipes_open": 0,
+        "root": {
+          "pgid": 260,
+          "pid": 260,
+          "start_ticks": 15389735
+        },
+        "root_exit_code": 0,
+        "sampling": {
+          "ambiguous_edges": 0,
+          "attempted": 0,
+          "reasons": {
+            "child_missing": 0,
+            "child_reparented": 0,
+            "child_reused": 0,
+            "parent_missing": 0,
+            "parent_reused": 0,
+            "parent_zombie": 0,
+            "start_order": 0
+          },
+          "stable_children": 0
+        },
+        "snapshot_complete": true,
+        "snapshot_consumed": true,
+        "threads_open": 0,
+        "waited": 13,
+        "was_running": true
+      }
+    ],
+    "failure": null,
+    "limits": {
+      "extension_bytes": 8192,
+      "log_tail_bytes": 32768,
+      "max_adopted_reaped": 1024,
+      "max_epochs": 3,
+      "max_launches": 1024,
+      "max_pipes": 3072,
+      "max_proc_entries": 8192,
+      "max_sampled_generations": 1024,
+      "max_samples_per_epoch": 1,
+      "max_threads": 16,
+      "poll_seconds": 0.01,
+      "stat_bytes": 4096,
+      "thread_join_seconds": 2
+    },
+    "mode": "kernel_epochs",
+    "schema_version": 1
+  },
+  "storage_shutdowns": {
+    "cold_after_completion": {
+      "all_owned_exited": true,
+      "children": [],
+      "exit_code": 0,
+      "forced": false,
+      "observation_error": null,
+      "signal": "SIGTERM",
+      "was_running": true
+    },
+    "cold_after_writes": {
+      "all_owned_exited": true,
+      "children": [],
+      "exit_code": 0,
+      "forced": false,
+      "observation_error": null,
+      "signal": "SIGTERM",
+      "was_running": true
+    },
+    "cold_baseline": {
+      "all_owned_exited": true,
+      "children": [
+        {
+          "pgid": 43,
+          "pid": 43,
+          "start_ticks": 15386166
+        }
+      ],
+      "exit_code": 0,
+      "forced": false,
+      "observation_error": null,
+      "signal": "SIGTERM",
+      "was_running": true
+    }
+  },
+  "upstream": {
+    "artifact": {
+      "architecture": "x86_64",
+      "bytes": 195537392,
+      "name": "ocd-v0.2.4-linux-x64",
+      "os": "Linux",
+      "sha256": "8829a5bcb334dd3bbd8dc949ad9a2afdfe0e1fef44035c041556cd12087c586f",
+      "url": "https://github.com/elliothux/open-compute/releases/download/v0.2.4/ocd-v0.2.4-linux-x64"
+    },
+    "embedded_workerd": {
+      "build": "v1.20260930.0-open-compute-r4.e98a3e843",
+      "source_commit": "e98a3e8433979356047a202d3e0d1b0e2e2c4b8c"
+    },
+    "published_at": "2026-10-05T23:09:38Z",
+    "release": "v0.2.4",
+    "repository": "https://github.com/elliothux/open-compute",
+    "schema_version": 1,
+    "source_commit": "73efa56a1b1ad51a4519b2253ffaa499cb29fb2d"
+  },
+  "workflow": {
+    "after_callback_count": 1,
+    "after_nonce_sha256": "23b2a241b9f701f2f6a57a3be7c5e97c63d9473c2cd7f4e1a3c9d164c02718e1",
+    "after_status": "complete",
+    "before_callback_count": 1,
+    "before_nonce_sha256": "23b2a241b9f701f2f6a57a3be7c5e97c63d9473c2cd7f4e1a3c9d164c02718e1",
+    "before_status": "waiting",
+    "completed": 1,
+    "id": "flow-20261024t120639z-3335ef1c",
+    "nonce_unchanged": true,
+    "same_id": true
+  }
+}

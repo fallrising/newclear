@@ -1,0 +1,153 @@
+[
+  {
+    "mount": "/prior",
+    "run": "baseline-desktop-001",
+    "manifestSha256": "c4520c3e235334dad36a84f0b8adda3415e6b82d94d5233e317c04151a7619b8",
+    "keys": [
+      {
+        "key": "bootstrap-empty__desktop__dark",
+        "png": "7d353e2bb44d689b81d1127f0b44c7cc1a4329c78ed2314b239652224e0dddc6",
+        "sourceHashes": {
+          "fixture.mjs": "818163cb77396a63ec4fdf8a465b9885f77f185a1a9569ed3ea646b198c88348",
+          "transport.mjs": "711f44a1f32c6c935e7e2ce58af241f1a6ac8c2f568957607a3e597bf5d78457",
+          "lifecycle.mjs": "7f3f1dcda77c0587d57d23a01d8a59567b02ce0bb5e5ef1a366d0783a8d838d9",
+          "baseline.mjs": "c24f640bd8eb9190fcbf404931b03ccc58691f998ac70929031139a6bc518f64",
+          "baseline-support.mjs": "2899c89cdc073683aff1e75ce9472f2a122cff88308ff5270e559ed9dcc0e437",
+          "trust.mjs": "1f5f0f31ad493ccc3866cc18967f237518ed9e798624aafff4344a36ada738f5",
+          "/": "2581673709aacd0a31159fbd8f802deec95b60c6cc86bc3dd982eebf4bd13cbf",
+          "/assets/p0-app.js": "a0dcb11ef6ca65c53f7010bd3af2e654de360d9f8d380876900393e14f6adab0",
+          "/assets/p0-client.js": "e97d83722dfe98cbcc576048f4e82252b383b8e010d3537970d24c7c816d8703",
+          "/assets/p0.css": "96bc727a6bd932175db677f4e2f59afaf370d46bfe61a927469a6f8ca7b0ade6"
+        }
+      },
+      {
+        "key": "authenticated-ready__desktop__dark",
+        "png": "47550f5a8bb108870ff40ae6e2a124d516eceaa0a9297e365c5d042b0d339970",
+        "sourceHashes": {
+          "fixture.mjs": "818163cb77396a63ec4fdf8a465b9885f77f185a1a9569ed3ea646b198c88348",
+          "transport.mjs": "711f44a1f32c6c935e7e2ce58af241f1a6ac8c2f568957607a3e597bf5d78457",
+          "lifecycle.mjs": "7f3f1dcda77c0587d57d23a01d8a59567b02ce0bb5e5ef1a366d0783a8d838d9",
+          "baseline.mjs": "c24f640bd8eb9190fcbf404931b03ccc58691f998ac70929031139a6bc518f64",
+          "baseline-support.mjs": "2899c89cdc073683aff1e75ce9472f2a122cff88308ff5270e559ed9dcc0e437",
+          "trust.mjs": "1f5f0f31ad493ccc3866cc18967f237518ed9e798624aafff4344a36ada738f5",
+          "/": "2581673709aacd0a31159fbd8f802deec95b60c6cc86bc3dd982eebf4bd13cbf",
+          "/assets/p0-app.js": "a0dcb11ef6ca65c53f7010bd3af2e654de360d9f8d380876900393e14f6adab0",
+          "/assets/p0-client.js": "e97d83722dfe98cbcc576048f4e82252b383b8e010d3537970d24c7c816d8703",
+          "/assets/p0.css": "96bc727a6bd932175db677f4e2f59afaf370d46bfe61a927469a6f8ca7b0ade6"
+        }
+      }
+    ]
+  },
+  {
+    "mount": "/supplement",
+    "run": "baseline-desktop-003",
+    "manifestSha256": "49e1809865810b958f0c8dc6a84b69d056e62819f89fc26e7c5ddec9be3cb2d3",
+    "keys": [
+      {
+        "key": "device-pending__desktop__dark",
+        "png": "27cb73cc492a1b57145c85ea6e811410e426d15a199ee17ffaa41dba41825f08",
+        "sourceHashes": {
+          "fixture.mjs": "818163cb77396a63ec4fdf8a465b9885f77f185a1a9569ed3ea646b198c88348",
+          "transport.mjs": "711f44a1f32c6c935e7e2ce58af241f1a6ac8c2f568957607a3e597bf5d78457",
+          "lifecycle.mjs": "7f3f1dcda77c0587d57d23a01d8a59567b02ce0bb5e5ef1a366d0783a8d838d9",
+          "baseline.mjs": "f46bf9f3950b6721956d1e3e4acd42e0059f79ab4b861748c57987a1b061c976",
+          "baseline-support.mjs": "445a5fcd969654c20fbe5f6e97ce8c52d8cd1343cdbf27be64ef93d7044d0636",
+          "trust.mjs": "1f5f0f31ad493ccc3866cc18967f237518ed9e798624aafff4344a36ada738f5",
+          "continuation.mjs": "a204e02a1640e18aea30db3f6377eb71c7ea8729d34dc6a492bafb8f86107146",
+          "/": "2581673709aacd0a31159fbd8f802deec95b60c6cc86bc3dd982eebf4bd13cbf",
+          "/assets/p0-app.js": "a0dcb11ef6ca65c53f7010bd3af2e654de360d9f8d380876900393e14f6adab0",
+          "/assets/p0-client.js": "e97d83722dfe98cbcc576048f4e82252b383b8e010d3537970d24c7c816d8703",
+          "/assets/p0.css": "96bc727a6bd932175db677f4e2f59afaf370d46bfe61a927469a6f8ca7b0ade6"
+        }
+      }
+    ]
+  },
+  {
+    "mount": "/after-device",
+    "run": "baseline-desktop-004",
+    "manifestSha256": "7fa11ab42cfb176b4460d6e36089ea4e018079a4f4e6b877427408b54ff7bd34",
+    "keys": [
+      {
+        "key": "turn-busy__desktop__dark",
+        "png": "1bc04a1a8854f0e739cd25842e47837cbdbae0516f7ac99be67680713efe0bb3",
+        "sourceHashes": {
+          "fixture.mjs": "818163cb77396a63ec4fdf8a465b9885f77f185a1a9569ed3ea646b198c88348",
+          "transport.mjs": "711f44a1f32c6c935e7e2ce58af241f1a6ac8c2f568957607a3e597bf5d78457",
+          "lifecycle.mjs": "7f3f1dcda77c0587d57d23a01d8a59567b02ce0bb5e5ef1a366d0783a8d838d9",
+          "baseline.mjs": "e02da97a1f5864e46fbe84bac51fb1b4186cff9b55d81e93f5c3527b4e8b6da4",
+          "baseline-support.mjs": "445a5fcd969654c20fbe5f6e97ce8c52d8cd1343cdbf27be64ef93d7044d0636",
+          "trust.mjs": "1f5f0f31ad493ccc3866cc18967f237518ed9e798624aafff4344a36ada738f5",
+          "continuation.mjs": "11e7963653dd2a5a0759b40fc39bbbdf844f5a184b90bdf3b49c3383f4b2c5a3",
+          "/": "2581673709aacd0a31159fbd8f802deec95b60c6cc86bc3dd982eebf4bd13cbf",
+          "/assets/p0-app.js": "a0dcb11ef6ca65c53f7010bd3af2e654de360d9f8d380876900393e14f6adab0",
+          "/assets/p0-client.js": "e97d83722dfe98cbcc576048f4e82252b383b8e010d3537970d24c7c816d8703",
+          "/assets/p0.css": "96bc727a6bd932175db677f4e2f59afaf370d46bfe61a927469a6f8ca7b0ade6"
+        }
+      },
+      {
+        "key": "success-diff__desktop__dark",
+        "png": "623f22986cc9a0dcf87e04b92a03321283339c26cfd45831d4b4d6ca12af05ec",
+        "sourceHashes": {
+          "fixture.mjs": "818163cb77396a63ec4fdf8a465b9885f77f185a1a9569ed3ea646b198c88348",
+          "transport.mjs": "711f44a1f32c6c935e7e2ce58af241f1a6ac8c2f568957607a3e597bf5d78457",
+          "lifecycle.mjs": "7f3f1dcda77c0587d57d23a01d8a59567b02ce0bb5e5ef1a366d0783a8d838d9",
+          "baseline.mjs": "e02da97a1f5864e46fbe84bac51fb1b4186cff9b55d81e93f5c3527b4e8b6da4",
+          "baseline-support.mjs": "445a5fcd969654c20fbe5f6e97ce8c52d8cd1343cdbf27be64ef93d7044d0636",
+          "trust.mjs": "1f5f0f31ad493ccc3866cc18967f237518ed9e798624aafff4344a36ada738f5",
+          "continuation.mjs": "11e7963653dd2a5a0759b40fc39bbbdf844f5a184b90bdf3b49c3383f4b2c5a3",
+          "/": "2581673709aacd0a31159fbd8f802deec95b60c6cc86bc3dd982eebf4bd13cbf",
+          "/assets/p0-app.js": "a0dcb11ef6ca65c53f7010bd3af2e654de360d9f8d380876900393e14f6adab0",
+          "/assets/p0-client.js": "e97d83722dfe98cbcc576048f4e82252b383b8e010d3537970d24c7c816d8703",
+          "/assets/p0.css": "96bc727a6bd932175db677f4e2f59afaf370d46bfe61a927469a6f8ca7b0ade6"
+        }
+      },
+      {
+        "key": "action-rejected__desktop__dark",
+        "png": "0e5fbb5a6422b415f5b0e29aeb8b109a57a85df8b06ee9d4258ec4649efceb01",
+        "sourceHashes": {
+          "fixture.mjs": "818163cb77396a63ec4fdf8a465b9885f77f185a1a9569ed3ea646b198c88348",
+          "transport.mjs": "711f44a1f32c6c935e7e2ce58af241f1a6ac8c2f568957607a3e597bf5d78457",
+          "lifecycle.mjs": "7f3f1dcda77c0587d57d23a01d8a59567b02ce0bb5e5ef1a366d0783a8d838d9",
+          "baseline.mjs": "e02da97a1f5864e46fbe84bac51fb1b4186cff9b55d81e93f5c3527b4e8b6da4",
+          "baseline-support.mjs": "445a5fcd969654c20fbe5f6e97ce8c52d8cd1343cdbf27be64ef93d7044d0636",
+          "trust.mjs": "1f5f0f31ad493ccc3866cc18967f237518ed9e798624aafff4344a36ada738f5",
+          "continuation.mjs": "11e7963653dd2a5a0759b40fc39bbbdf844f5a184b90bdf3b49c3383f4b2c5a3",
+          "/": "2581673709aacd0a31159fbd8f802deec95b60c6cc86bc3dd982eebf4bd13cbf",
+          "/assets/p0-app.js": "a0dcb11ef6ca65c53f7010bd3af2e654de360d9f8d380876900393e14f6adab0",
+          "/assets/p0-client.js": "e97d83722dfe98cbcc576048f4e82252b383b8e010d3537970d24c7c816d8703",
+          "/assets/p0.css": "96bc727a6bd932175db677f4e2f59afaf370d46bfe61a927469a6f8ca7b0ade6"
+        }
+      }
+    ]
+  },
+  {
+    "mount": "/accepted-canceled",
+    "run": "canceled-006",
+    "manifestSha256": "064d77d8888448677cbef60d1a0d85bf46293e96bba98cb2e62fe91fe4f084e7",
+    "keys": [
+      {
+        "key": "canceled-local__desktop__dark",
+        "png": "3b1afef73079781eee9a0acb0ee7815fb4097891106c92f7b659d2dc426b7511",
+        "sourceHashes": {
+          "fixture.mjs": "818163cb77396a63ec4fdf8a465b9885f77f185a1a9569ed3ea646b198c88348",
+          "transport.mjs": "04636827f238869182d0f7084fed9558c31f6a9f1e351d4b1f708188fecafae3",
+          "lifecycle.mjs": "7f3f1dcda77c0587d57d23a01d8a59567b02ce0bb5e5ef1a366d0783a8d838d9",
+          "baseline.mjs": "5420a52f3fa4612b765a4712ef8f0eea614150435f4c8e404f6e61d3a0d09a47",
+          "baseline-support.mjs": "445a5fcd969654c20fbe5f6e97ce8c52d8cd1343cdbf27be64ef93d7044d0636",
+          "trust.mjs": "1f5f0f31ad493ccc3866cc18967f237518ed9e798624aafff4344a36ada738f5",
+          "continuation.mjs": "11e7963653dd2a5a0759b40fc39bbbdf844f5a184b90bdf3b49c3383f4b2c5a3",
+          "canceled-continuation.mjs": "146e5630b9fad0b0537dcb0f5d4903b8e05eb6c2292fd74a90f0bc4a0596cb4a",
+          "canceled-observer.mjs": "6bc5cb5761d2bd31555314d4a26763c5c3305674b6c92bf7ce27538ee8f71b41",
+          "bootstrap-probe.mjs": "8f6fa59a5421ac4a23e62d8644391873b932c38fba9f3e60c40fde47563fbf4b",
+          "bootstrap-observer.mjs": "c425158e63a8fdfe05a6041849c7c3c4679e6b4f7492e92471b9c640ba8b0e08",
+          "/": "2581673709aacd0a31159fbd8f802deec95b60c6cc86bc3dd982eebf4bd13cbf",
+          "/assets/p0-app.js": "a0dcb11ef6ca65c53f7010bd3af2e654de360d9f8d380876900393e14f6adab0",
+          "/assets/p0-client.js": "e97d83722dfe98cbcc576048f4e82252b383b8e010d3537970d24c7c816d8703",
+          "/assets/p0.css": "96bc727a6bd932175db677f4e2f59afaf370d46bfe61a927469a6f8ca7b0ade6",
+          "canceled-combined-probe.mjs": "d9c848148aaa1298dbdc1efe41b1c5e3f98a4438cdf47f93388f7b38e59e4a5f",
+          "canceled-combined.mjs": "a28e9b556b7db4d96597223667a2e801dc488c1f9c07679cce863b1add8a3d18"
+        }
+      }
+    ]
+  }
+]

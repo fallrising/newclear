@@ -128,7 +128,7 @@ entropy source is the operating-system CSPRNG.
   termination claim.
 - JSON request bodies are UTF-8, `application/json`, at most 40 KiB unless the endpoint has no
   body. Prompt validation retains the lower exact 32-KiB bound.
-- Header values are at most 256 bytes. Unsupported content type is 415; oversized input is 413;
+- Header values are at most 256 bytes; an overlong header value is 422 `invalid_request`. Unsupported content type is 415; an oversized request body is 413;
   malformed JSON/UUID/value is 400 or 422 as classified below.
 - JSON request types deny unknown and duplicate fields. No-body routes accept exactly zero body
   octets with either no content type or `application/json`; a nonempty body is 422

@@ -1,0 +1,42 @@
+STATUS: DONE
+
+## Summary
+
+Decision: **ACCEPT** the frozen M1a implementation and focused acceptance evidence. No blocking source finding. This is an independent native-agent implementation review, not final milestone delivery or full-product acceptance. No Claude or other external provider was invoked by this reviewer.
+
+Reviewed the actual seven Go files, relevant existing implementation and tests, scoped diff from `6b7bf17c`, approved completion-preparation mini-SDD/OpenAPI and C01/C02/C06 amendments. All seven files match `.local-evidence/hai-m1a/backend-final-sha256.json`; the independent check is retained in `.local-evidence/hai-m1a/reviewer-manifest-check.json` at `2026-10-30T04:18:00.105857+00:00`.
+
+Source conclusions:
+
+- Authentication and project authorization precede optional-reader invocation. Canonical paths retain existing handling; invalid project/item/candidate dot IDs are intercepted before ServeMux redirection and remain non-disclosing. Existing runtime Host guarding remains outside the API handler; GET retains existing Origin behavior. Every normal preparation success/error branch uses the shared no-store writer. Missing capability fails closed.
+- The response passes the existing recursive strict wire validator plus preparation-specific validation: required nested fields and explicit booleans, null/unknown/duplicate rejection, nonzero prefixed digests, positive SQLite-safe numbers, UTF-8 byte bounds, equal sorted unique AC/rule sets, scope, Review/QA version relation and recomputed subject digest. Collections are capped at 1024 and response bytes at 1 MiB. Existing candidate artifact limits remain 10 MiB/object and 50 MiB/operation outside writer locks.
+- Persisted Run-input canonical integrity and envelope scope are validated before current-policy incompleteness. SQLite loaders validate malformed digest/current accepted-record material independently; their scoped candidate join does not disclose another project's/item's candidate. All comparable captured/current semantic fields are checked before missing rules/zero environment classification. Stored rules are never substituted to grant preparation success.
+- Both reads retain current head identity, material, authority, subject, cloned policy and incompleteness state. A missing rule on the second read cannot bypass comparison: it marks incomplete, while the changed cloned map/state causes stale rejection before policy rejection. Actual new between-read regressions use head/version/policy changes plus zero environment; the second-read rule-deletion branch is supported by source inspection, not a separately named new test.
+- Mutating command paths continue using unchanged `currentCompletionMaterial`/`verifyCurrentRunInput`; the missing-rule classification regression remains stale. Production changes introduce no persistence writes, executor calls, dependencies, migrations, runtime composition or UI changes. C01/C06 documentation remains consistent with the reviewed architecture and preserves historical authority/evidence.
+
+## Verification
+
+- Actual scoped `git diff 6b7bf17c -- ...`, direct reads of the seven frozen files, `service/current_input.go`, `service/integrity.go`, `service/vertical.go`, `port/current_input.go`, SQLite completion/current-input loaders, shared HTTP strict validator, existing completion tests, root/product instructions, T-001 and T-002 reports; applied `codex-task-worker` and `codex-evidence-gate` report contracts — passed
+- Python SHA-256 comparison of every path in `.local-evidence/hai-m1a/backend-final-sha256.json`; all seven matched, retained in `reviewer-manifest-check.json` — passed
+- PREP-AC-01: inspected `TestCompletionPreparationHTTP_AuthScopeAndNoStore`, actual auth/authorization/canonical-path/no-store code and existing runtime Host guard coverage. Final focused `go test -count=1 ./internal/application/service ./internal/transport/httpapi -run TestCompletionPreparation` output in `.local-evidence/hai-m1a/worker/green-dot-final.log` reports both packages passed, 0.864s and 0.144s — passed
+- PREP-AC-02: inspected actual `TestCompletionPreparationHTTP_ExactSnapshotWithoutWrites`; real SQLite/application/HTTP Review and QA, two reads, Store reopen, exact bytes/subject/version/fences and all persisted table-row comparison. The same final focused log covers these tests — passed
+- PREP-AC-03: inspected `TestCompletionPreparation_PolicyPrecedence` and `TestCompletionPreparationHTTP_StaleAndPolicyRemainDistinct`; missing rule/environment, simultaneous stale policy/recipe/approval/base/verifier/executor identity, corrupt persisted envelope, between-read head/version/policy plus environment changes, fixed error detail and unchanged mutating classification. Existing `TestConnectedCompletion_DeniesInvalidAuthority` includes missing artifact bytes and `TestConnectedCompletion_RechecksAfterArtifactIO` exercises prior two-read checks. Both complete packages passed in `.local-evidence/hai-m1a/worker/green-final.log` (9.854s/0.161s), with the later dot-only delta covered by the final focused log — passed
+- PREP-AC-04: inspected strict response/capability/error tests and legal maximum/version/1024-record tests. Shared `TestCompletionHTTP_BoundsAndScope` tests 0/1024/1025 records through the unchanged recursive slice guard; shared nested-field tests cover duplicate/unknown/wrong-type cases. This is shared collection-overflow coverage, not a newly added route-specific 1025-rule test. Final focused and complete-package logs above supply execution evidence — passed
+- Inspected retained `.local-evidence/hai-m1a/worker/red-compiled.log`: tests compiled and failed for absent route and old incomplete-policy classification. The distinct initial Docker socket denial remains in `worker/red.log`; the stopped root gate remains in `backend-superseded-dot-fix.log`. Neither is represented as final acceptance — passed
+- Inspected root `api-lint.log`, `web.log`, `project-success.log`, `indexes.log` and `docs-final.log`: OpenAPI valid, web build completed, 47 project contracts and 8 indexes/zero errors, 19 Markdown files/183 local links and anchors. Initial offline web dependency failure remains retained. Reviewed docs preserve incomplete product mainline, pending AC-02/03/04, usable_tag none and Proposed follow-up scope — passed
+- `git diff --check` returned exit 0 on the integrated worktree diff — passed
+- `python3 "$TEAMCTL" validate-report .team/hai-m1a-20261030/T-003-review.md`, where TEAMCTL resolves to the installed team validator; exact result retained in `.local-evidence/hai-m1a/reviewer-report-validation.log` — passed
+
+## Documentation
+
+Only this review report and reviewer scratch evidence were written. No production/tests/docs edits, Git mutations, provider access or delegation occurred. Public source references are repository-relative; private execution logs remain local evidence. The worker's seven-path freeze is the reviewed source identity. Root owns final public evidence wording, BOARD/PLAN synchronization and delivery.
+
+## Risks and Follow-ups
+
+No blocker or required source correction. One nonblocking evidence precision point was sent to root: describe 1025-record rejection as shared-validator coverage, alongside the preparation endpoint's 1024-record boundary, rather than implying a new route-specific overflow oracle.
+
+The final frozen-source root backend gate was still running during review: visible output showed full tests passed and the beginning of race tests; this review does not claim final race/vet/build completion. Root must record the final process result, keep the superseded exit137 visible, finish exact-head CI/review and normal Git delivery, and update acceptance documentation before claiming milestone completion. No broad gate was rerun by this reviewer because root was already executing it on the checked frozen files.
+
+Scope limits remain: modeled admission repository/artifact/session fixtures with real application/HTTP/SQLite, SQLite Store reopen rather than OS restart, no new browser acceptance, real adapter, restore, human-report UI or full Done-flow claim. Existing artifact external-writer atomicity limits are unchanged.
+
+Tool accounting is local transcript scope only: no child-agent starts or external provider launches; exact aggregate tool/provider requests, retries and whole-review elapsed time are unknown/null. Source snapshot time above is measured; package durations are observed test output, not provider telemetry.

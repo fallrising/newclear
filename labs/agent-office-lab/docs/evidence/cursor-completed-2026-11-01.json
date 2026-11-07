@@ -1,0 +1,154 @@
+{
+  "date": "2026-11-01",
+  "status": "completed",
+  "acceptance": "AC-13",
+  "tested_commit": "d6678d4449e24a86dee4ac06103cee2951d4d9cc",
+  "provider": "cursor",
+  "model": "composer-2.5",
+  "version": "2026.10.22-27dcf5f",
+  "source_sha256": {
+    "run_cursor_work.py": "26f170f3904c02f2aef8c52d370abbe8c8e174aa7cc94e3dc7a9bcb1fa35ae47",
+    "cursor_cli.py": "90fee7eab9f04b536a1ce0ebe75169509b200684c0e5e015c6ecae7fd1b229f2",
+    "cursor_task_hook.py": "55b59876b6040665e0352c94dfff2c6ffe9c19b59655a0f816e6142828d18684",
+    "cursor_work_policy.mjs": "b9c65d411d61e2c4803c54811b4ea954192cff5e52686ba37564544c58e32a41",
+    "office_cursor_work.mjs": "90cd72d854934d434998f42eaa854eaa0ded730925bfffca87f4f3acf66d059c",
+    "cursor_hook_preflight.mjs": "3115fc57df97757a68ba35d0fee1ffb152a8808f3a8f946a72368a1b781022a9",
+    "cursor-task/cursor-agent": "4cda9627980c703a4e04efac8e8939c16000ba3ee866c3aed15a1d091a9ddf2a",
+    "remote_cli.py": "9a0ee26503ef76b003b9d8d387f6381acd1a043723374f62793a7f75bf97bb89",
+    "run_grok_startup.py": "8b5b556ae1c5bb6f1232738b9fc6549c8df5de77945a04e14ee7efa15c1d02c5",
+    "grok_startup.py": "af5188f82d05ebfb0830bbe7a7cb0e3c6838e37cd947424252b8ac7ea9b4af72"
+  },
+  "model_inference_verified": true,
+  "elapsed_s": 15.567157457815483,
+  "authorization": {
+    "single_task": true,
+    "max_tools": 4,
+    "timeout_seconds": 240,
+    "host_retries": 0,
+    "consumed": true
+  },
+  "native_hook_preflight": {
+    "valid": true,
+    "errors": [],
+    "rejects_zero_loop_limit": true
+  },
+  "same_session_model_verified": true,
+  "authenticated_events": [
+    "sessionStart",
+    "beforeSubmitPrompt",
+    "preToolUse",
+    "postToolUse",
+    "preToolUse",
+    "postToolUse",
+    "preToolUse",
+    "postToolUse",
+    "stop"
+  ],
+  "native_events": [
+    {
+      "event": "sessionStart",
+      "model": "composer-2.5"
+    },
+    {
+      "event": "beforeSubmitPrompt",
+      "model": "composer-2.5",
+      "allowed": true
+    },
+    {
+      "event": "preToolUse",
+      "model": "composer-2.5",
+      "tool": "Read",
+      "target": "input.json",
+      "allowed": true
+    },
+    {
+      "event": "beforeReadFile",
+      "model": "composer-2.5",
+      "allowed": true
+    },
+    {
+      "event": "postToolUse",
+      "model": "composer-2.5",
+      "tool": "Read"
+    },
+    {
+      "event": "preToolUse",
+      "model": "composer-2.5",
+      "tool": "Read",
+      "target": "result.json",
+      "allowed": true
+    },
+    {
+      "event": "beforeReadFile",
+      "model": "composer-2.5",
+      "allowed": true
+    },
+    {
+      "event": "postToolUse",
+      "model": "composer-2.5",
+      "tool": "Read"
+    },
+    {
+      "event": "preToolUse",
+      "model": "composer-2.5",
+      "tool": "Write",
+      "target": "result.json",
+      "allowed": true
+    },
+    {
+      "event": "postToolUse",
+      "model": "composer-2.5",
+      "tool": "Write"
+    },
+    {
+      "event": "stop",
+      "model": "composer-2.5",
+      "status": "completed",
+      "loop_count": 0,
+      "input_tokens": 37723,
+      "output_tokens": 424
+    },
+    {
+      "event": "afterAgentResponse",
+      "model": "composer-2.5",
+      "input_tokens": 37723,
+      "output_tokens": 424
+    }
+  ],
+  "completed_tools": [
+    "Read",
+    "Read",
+    "Write"
+  ],
+  "native_stop_verified": true,
+  "artifact": {
+    "exact_content_verified": true,
+    "sha256": "836df85be1a2cb9b5e12ec0d9480e2382171e4d2ac0a5b26610bdbb4bad35d4e",
+    "bytes": 52
+  },
+  "usage": {
+    "source": "native stop hook",
+    "input_tokens": 37723,
+    "output_tokens": 424,
+    "request_count": null,
+    "cost": null
+  },
+  "states": [
+    "idle",
+    "working",
+    "done"
+  ],
+  "cleanup": {
+    "completed": true,
+    "workspace_hooks_removed": true,
+    "copied_credentials_removed": true,
+    "owned_processes_seen": 59,
+    "errors": []
+  },
+  "limitations": [
+    "Provider request/token/money caps remain null.",
+    "Successful file task does not validate Cursor cancellation, permission interaction, restart/resume or full egress isolation.",
+    "The Office subreport left its unused model_inference_verified field at its initial false value; the parent runner independently verified and returned true. The reporting-only field is corrected after this run; runtime source hashes above identify the tested bytes.",
+    "Earlier failed attempts remain preserved; no automatic retry was performed."
+  ]
+}

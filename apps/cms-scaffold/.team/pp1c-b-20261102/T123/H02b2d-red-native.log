@@ -1,0 +1,42 @@
+✖ PP1C_H02b2d_profile_accepts_actual_Docker_lowercase_exact_missing_ID (34.629814ms)
+✖ H02b2d_main_Docker_missing_actual (14.045771ms)
+✔ H02b2d_main_Docker_missing_wrong-ID (3.452095ms)
+✔ H02b2d_main_Docker_missing_extra-text (3.366656ms)
+✔ H02b2d_main_Docker_missing_wrong-code (2.35837ms)
+ℹ tests 5
+ℹ suites 0
+ℹ pass 3
+ℹ fail 2
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 105.633184
+
+✖ failing tests:
+
+test at scripts/local/maintenance-helper-integration.test.mjs:66:1
+✖ PP1C_H02b2d_profile_accepts_actual_Docker_lowercase_exact_missing_ID (34.629814ms)
+  Error: ADAPTER_UNSEALED
+      at probeHelperProfile (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-integration-20261102/apps/cms-scaffold/scripts/local/maintenance-helper.mjs:457:16)
+      at async TestContext.<anonymous> (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-integration-20261102/apps/cms-scaffold/scripts/local/maintenance-helper-integration.test.mjs:68:17)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:385:3) {
+    code: 'ADAPTER_UNSEALED',
+    phase: null,
+    operationId: null
+  }
+
+test at scripts/local/maintenance-helper.test.mjs:141:68
+✖ H02b2d_main_Docker_missing_actual (14.045771ms)
+  Error: CAPTURE_FAILED
+      at docker (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-integration-20261102/apps/cms-scaffold/scripts/local/maintenance-helper.mjs:141:13)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+      at async remove (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-integration-20261102/apps/cms-scaffold/scripts/local/maintenance-helper.mjs:150:67)
+      at async executeHelperLifecycle (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-integration-20261102/apps/cms-scaffold/scripts/local/maintenance-helper.mjs:176:5)
+      at async TestContext.<anonymous> (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-integration-20261102/apps/cms-scaffold/scripts/local/maintenance-helper.test.mjs:145:41)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:385:3) {
+    code: 'CAPTURE_FAILED',
+    phase: null,
+    operationId: null
+  }

@@ -1,0 +1,7 @@
+{
+  "encoding": "utf-8",
+  "originalPath": ".team/pp1c-b-20261102/C08/start-time-red.log",
+  "byteSize": 1028,
+  "sha256": "b6ac248694b114c0a3a23de1823d023f1a8e6eb1050af162caed0d7f89befa1e",
+  "text": "✖ PP1c_C08_manifest_start_is_original_command_time_not_capture_time (145.861642ms)\nℹ tests 1\nℹ suites 0\nℹ pass 0\nℹ fail 1\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 210.431454\n\n✖ failing tests:\n\ntest at scripts/ops/local-bundle.test.mjs:166:1\n✖ PP1c_C08_manifest_start_is_original_command_time_not_capture_time (145.861642ms)\n  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n  + actual - expected\n  \n  + '2026-11-02T12:00:00.000Z'\n  - '2026-11-02T11:59:00.000Z'\n                 ^\n  \n      at TestContext.<anonymous> (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-20261101/apps/cms-scaffold/scripts/ops/local-bundle.test.mjs:168:10)\n      at async Test.run (node:internal/test_runner/test:1332:7)\n      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:385:3) {\n    generatedMessage: true,\n    code: 'ERR_ASSERTION',\n    actual: '2026-11-02T12:00:00.000Z',\n    expected: '2026-11-02T11:59:00.000Z',\n    operator: 'strictEqual',\n    diff: 'simple'\n  }\n"
+}

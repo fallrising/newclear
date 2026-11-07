@@ -1,0 +1,120 @@
+{
+  "id": "automation-byproduct-loop",
+  "system": "automation",
+  "edition": 1,
+  "name": {
+    "zh": "副产物消纳与回流",
+    "en": "Byproduct consumption and recirculation"
+  },
+  "summary": {
+    "zh": "给不想要的产出找到去处，避免它把主产品生产一起堵停。",
+    "en": "Find a destination for unwanted outputs so they do not stall the main product."
+  },
+  "rules": {
+    "zh": "一条工序同时产生多种输出，玩家必须为每一种设计使用、储存或排出路径。副产物积满会限制生产，转化与回流则把废物变成下一环输入。",
+    "en": "A process produces several outputs, and players provide uses, storage or disposal for each. Full byproduct outputs constrain production; conversion and recirculation turn waste into another input."
+  },
+  "loop": [
+    {
+      "zh": "列出全部输出",
+      "en": "List all outputs"
+    },
+    {
+      "zh": "安排主副产物流向",
+      "en": "Route products and byproducts"
+    },
+    {
+      "zh": "监测积压",
+      "en": "Monitor buildup"
+    },
+    {
+      "zh": "新增消耗或回流",
+      "en": "Add consumption or recirculation"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "直接处理简单可靠，回收利用更省资源却增加耦合。",
+      "en": "Disposal is simple; reuse saves resources but couples systems."
+    },
+    {
+      "zh": "临时大仓延后问题，但不能解决长期供需不平衡。",
+      "en": "A large temporary buffer delays imbalance without solving it."
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "副产比例",
+        "en": "Byproduct ratio"
+      },
+      "effect": {
+        "zh": "比例越高，处理链越接近核心生产目标。",
+        "en": "A higher ratio makes waste handling central to the factory."
+      }
+    },
+    {
+      "name": {
+        "zh": "可处置方式",
+        "en": "Disposal options"
+      },
+      "effect": {
+        "zh": "允许随时丢弃降低停线风险；必须利用则强化闭环规划。",
+        "en": "Easy disposal lowers stall risk; mandatory reuse emphasizes closed-loop planning."
+      }
+    }
+  ],
+  "tags": [
+    "optimization",
+    "planning",
+    "risk"
+  ],
+  "related": [
+    "automation-power-budget",
+    "automation-aerial-logistics",
+    "automation-belt-routing",
+    "automation-blueprint-reuse"
+  ],
+  "contrast": {
+    "zh": "Factorio的裂解围绕多种油品调平；Satisfactory常要求同时处理固液两种物流接口。",
+    "en": "Factorio balances oil fractions through cracking; Satisfactory often requires both solid and fluid output handling."
+  },
+  "combination": {
+    "zh": "在糖厂经营中把残渣卖给牧场或回流发电；两个出口的价格和用量波动，迫使玩家保留弹性。",
+    "en": "Run a sugar mill whose residue can be sold as feed or burned for power, with changing demand rewarding flexible outlets."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "工厂每做一份主产品都产生废液，废液罐已经快满。",
+      "en": "Every main product produces waste liquid, and the waste tank is almost full."
+    },
+    "action": {
+      "zh": "你先接上处理出口，再尝试把部分废液送给能使用它的工序。",
+      "en": "Add a disposal outlet, then route some waste into a process that can consume it."
+    },
+    "result": {
+      "zh": "主产线恢复运转；回收端若需求不足，积压仍会回来。",
+      "en": "The main line resumes, but insufficient recycling demand can create another backlog."
+    },
+    "next": {
+      "zh": "持续比较副产物生成与消耗速度，调整回流或保底出口。",
+      "en": "Compare generation and consumption rates and adjust recycling or the fallback outlet."
+    }
+  },
+  "prototype": {
+    "scope": "medium",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "做一种主产品、一种副产物和有限容量，提供“处理掉”与“再利用”两条路径。",
+      "en": "Use one main output, one byproduct and finite storage, with disposal and reuse routes."
+    },
+    "pitfall": {
+      "zh": "复杂回流容易产生互相等待的死锁；先保证每种产出都有可解释的最终去处。",
+      "en": "Complex recycling can deadlock; first ensure every output has an understandable destination."
+    },
+    "test": {
+      "zh": "让回收端暂时停机，玩家能否找出积压源并恢复主线，而非只继续加仓库？",
+      "en": "Pause the recycling consumer; can players diagnose the backlog and restore production without merely adding storage?"
+    }
+  }
+}

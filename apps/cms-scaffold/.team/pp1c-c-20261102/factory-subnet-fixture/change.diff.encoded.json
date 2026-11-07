@@ -1,0 +1,8 @@
+{
+  "version": 1,
+  "original": "factory-subnet-fixture/change.diff",
+  "sha256": "fbcc20da0a2e8b60b57e685ef51d2542bef57f7fc5c9874a00e53d6ac6e4d4ea",
+  "byteSize": "1268",
+  "encoding": "utf-8",
+  "text": "--- before.mjs\n+++ after.mjs\n@@ -646,8 +646,8 @@\n   const replacement=value=>JSON.parse(JSON.stringify(value).replaceAll(project,f.child.target.project).replaceAll(f.root,f.child.root));\n   const containers=replacement(f.state.containers),networks=replacement(f.state.networks),volumes=replacement(f.state.volumes);\n   const ids=new Map(f.state.containers.map((c,i)=>[c.Id,String(i+4).repeat(64)]));\n-  networks.forEach((n,i)=>{n.Id=['c','d'][i].repeat(64);n.Containers={};n.IPAM.Config=[prepared?{Subnet:`172.${28+i}.0.0/16`,Gateway:`172.${28+i}.0.1`}:{Subnet:`192.168.${240+i}.0/24`,Gateway:`192.168.${240+i}.1`}];});\n-  const pgAddress=prepared?'172.29.0.2':'192.168.241.2',prefix=prepared?16:24;\n+  networks.forEach((n,i)=>{n.Id=['c','d'][i].repeat(64);n.Containers={};n.IPAM.Config=[prepared?{Subnet:`172.${28+i}.0.0/16`,Gateway:`172.${28+i}.0.1`}:{Subnet:`192.168.240.${i*64}/26`,Gateway:`192.168.240.${i*64+1}`}];});\n+  const pgAddress=prepared?'172.29.0.2':'192.168.240.66',prefix=prepared?16:26;\n   containers.forEach((c,i)=>{\n     if(i===2){c.Config.Entrypoint=['/opt/pp1-node'];c.Config.Cmd=['/tool/ingress.mjs','--config','/config/ingress.json'];}\n     c.Id=ids.get(c.Id);c.State={Status:i===0?'running':'created',Running:i===0,Health:{Status:'healthy'}};\n"
+}

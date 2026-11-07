@@ -1,0 +1,13 @@
+{
+  "handwrittenChangedLines": 71,
+  "files": {
+    "scripts/ops/local-recovery-verify.mjs": 62,
+    "scripts/ops/local-recovery-verify.test.mjs": 9
+  },
+  "sha256": {
+    "scripts/ops/local-recovery-verify.mjs": "495e96464e00804f3b1bcb9fb4710e46567832ed22eaf87616e0fbba5298748c",
+    "scripts/ops/local-recovery-verify.test.mjs": "22bbf8675bb99608a799ac42923c0e58ded2d9513d6ac6df2d06d923ece13eb8"
+  },
+  "checks": "6/6 focused pass; C09 namedRed and layoutRed retained",
+  "frozenAt": "2026-11-02T14:36:24.024646+00:00"
+}

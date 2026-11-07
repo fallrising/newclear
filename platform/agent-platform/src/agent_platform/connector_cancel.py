@@ -35,7 +35,10 @@ def cancel(service, run_id, generation):
                 http.expect("POST", "/api/conversations/" + row["run_id"] + "/interrupt")
             return {"acknowledged": True}
 
-        if row["operations"].get("prepare", {}).get("state") == "completed":
+        if (
+            not row["input"].get("external_workspace")
+            and row["operations"].get("prepare", {}).get("state") == "completed"
+        ):
             try:
                 service.journal.operation(row, "cancel_interrupt", "interrupt-v1", interrupt)
             except Exception:

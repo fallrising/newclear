@@ -1,0 +1,55 @@
+{
+  "status": "completed",
+  "provider": "grok",
+  "version": "1.0.70",
+  "model_inference_verified": false,
+  "authentication_verified": false,
+  "credentials_loaded": false,
+  "prompt_supplied": false,
+  "external_network_denied": true,
+  "external_tcp_denial_verified": true,
+  "workspace_trust": "synthetic_fixture_only",
+  "source_sha256": {
+    "run_grok_startup.py": "8b5b556ae1c5bb6f1232738b9fc6549c8df5de77945a04e14ee7efa15c1d02c5",
+    "grok_startup.py": "af5188f82d05ebfb0830bbe7a7cb0e3c6838e37cd947424252b8ac7ea9b4af72",
+    "office_grok.mjs": "d06fa40bce91c5e4a709b3930fd2836ccf0d75a37528d57fb98ca2a129a4376d",
+    "grok_office_policy.mjs": "9c508cb2fd37dfdf7b7c5884fd3ae69c3c49a50a68a6321e309ee52861f29e6d",
+    "remote_cli.py": "9a0ee26503ef76b003b9d8d387f6381acd1a043723374f62793a7f75bf97bb89",
+    "bin/grok": "cbcf375862b857b50e0b04c56e719e6c753f9bd9c4e80fac064b0f597473b548"
+  },
+  "cleanup_errors": [],
+  "owned_processes_seen": 15,
+  "additional_processes_stopped": 1,
+  "cleanup_completed": true,
+  "elapsed_s": 12.82603520900011,
+  "recorded_at": "2026-10-31T18:36:04Z",
+  "scope": "credential-free native startup only",
+  "strict_network_isolation_verified": false,
+  "offline_tests": {
+    "node": 28,
+    "python": 19
+  },
+  "office": {
+    "status": "completed",
+    "states": [
+      "starting",
+      "needs_input"
+    ],
+    "task_completed": false,
+    "session_hook_verified": false,
+    "startup_verified": true,
+    "outcome": "login_required",
+    "native_login_screen_verified": true,
+    "launch_session_id_preserved": true,
+    "cleanup_completed": true
+  },
+  "prior_attempts": [
+    {
+      "status": "failed",
+      "reason": "expected SessionStart before login; native login screen appeared without session hook",
+      "elapsed_s": 30.984143000096083,
+      "cleanup_completed": true,
+      "model_inference_verified": false
+    }
+  ]
+}

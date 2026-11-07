@@ -1,0 +1,23 @@
+✖ PP1C_H02b2b_owned_inventory_uses_private_request_profile_and_receipt_binding (290.063373ms)
+ℹ tests 1
+ℹ suites 0
+ℹ pass 0
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 325.399863
+
+✖ failing tests:
+
+test at scripts/local/maintenance-workflow.test.mjs:411:1
+✖ PP1C_H02b2b_owned_inventory_uses_private_request_profile_and_receipt_binding (290.063373ms)
+  OpsError: ADAPTER_UNSEALED
+      at runOwnedHelper (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-integration-20261102/apps/cms-scaffold/scripts/local/maintenance-helper.mjs:439:9)
+      at TestContext.<anonymous> (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-integration-20261102/apps/cms-scaffold/scripts/local/maintenance-workflow.test.mjs:412:46)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:385:3) {
+    code: 'ADAPTER_UNSEALED',
+    phase: null,
+    operationId: null
+  }

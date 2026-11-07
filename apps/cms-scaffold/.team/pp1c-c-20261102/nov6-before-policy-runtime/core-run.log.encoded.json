@@ -1,0 +1,8 @@
+{
+  "version": 1,
+  "original": "nov6-before-policy-runtime/core-run.log",
+  "sha256": "ff95b72dd657938868acdd9742ab93c7a841dc7754e53ceff0af4e2a4605c062",
+  "byteSize": "47",
+  "encoding": "utf-8",
+  "text": "{\"success\":false,\"code\":\"FIXTURE_HTTP_STATUS\"}\n"
+}

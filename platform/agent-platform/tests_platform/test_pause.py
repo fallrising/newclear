@@ -5,6 +5,7 @@ import tempfile
 import threading
 import time
 from pathlib import Path
+from unittest import mock
 
 from pause_fixture import PauseConnector
 from recovery_fixture import Server
@@ -94,8 +95,9 @@ class PauseTests(PlatformFixture):
         with self.db.transaction() as conn:
             conn.execute("UPDATE jobs SET available_at=now()")
         worker = Worker(self.db, self.connector)
-        claim = worker.claim_control()
-        self.assertIsNotNone(claim)
+        # SKIP LOCKED may legitimately miss a transiently held job row.
+        # Wait with the fixture's deadline, retaining the completion assertions.
+        claim = self.wait_for(worker.claim_control)
         worker.execute(claim)
         if resume_execution and self.view()["state"] == "running":
             worker.run_once()
@@ -358,6 +360,34 @@ class PauseTests(PlatformFixture):
         self.step()
         self.assertEqual(self.view()["state"], "paused")
         self.assertEqual(self.server.service.resume_calls, 0)
+
+    def test_control_step_waits_for_transient_job_row_lock(self):
+        self.start()
+        self.assertEqual(self.action().status_code, 202)
+        for thread in self.threads:
+            thread.join(timeout=5)
+            self.assertFalse(thread.is_alive())
+        original = Worker.claim_control
+        skipped = []
+
+        def temporarily_locked(worker):
+            if not skipped:
+                with self.db.transaction() as holder:
+                    holder.execute(
+                        "SELECT id FROM jobs WHERE run_id=%s FOR UPDATE", (self.run["id"],)
+                    )
+                    claim = original(worker)
+                    self.assertIsNone(claim)
+                    skipped.append(True)
+                    return claim
+            return original(worker)
+
+        with mock.patch.object(Worker, "claim_control", temporarily_locked):
+            self.step()
+        self.assertEqual(skipped, [True])
+        self.assertEqual(self.view()["state"], "paused")
+        self.assertEqual(self.server.service.policy_calls, 1)
+        self.assertEqual(Store(self.db).runtime()["occupied"], 1)
 
     def test_missing_baseline_or_unproven_pause_reply_never_paused(self):
         self.start()

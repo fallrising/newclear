@@ -2,7 +2,7 @@
 
 from .auth import audit
 from .connector_recovery import stopped
-from .domain import TERMINAL, Problem
+from .domain import RUNTIME_BACKENDS, TERMINAL, Problem
 from .store import event, require_row, run_view
 
 
@@ -15,7 +15,7 @@ def request_cancel(conn, run_id, data, command_id):
     )
     if run["state_version"] != data.expected_state_version:
         raise Problem(409, "state_conflict")
-    if data.action != "cancel" or run["backend"] != "openhands":
+    if data.action != "cancel" or run["backend"] not in RUNTIME_BACKENDS:
         raise Problem(409, "unsupported_capability:" + data.action)
     if run["state"] == "finalizing":
         raise Problem(409, "finalizing")

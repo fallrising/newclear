@@ -1,0 +1,120 @@
+{
+  "id": "movement-variable-jump",
+  "system": "movement",
+  "edition": 3,
+  "name": {
+    "zh": "按住多久，决定跳多高",
+    "en": "Hold duration sets jump height"
+  },
+  "summary": {
+    "zh": "同一个跳跃键，轻点过矮坎，长按够高台。",
+    "en": "Tap the same jump button for a low hop; hold it to reach a higher platform."
+  },
+  "rules": {
+    "zh": "起跳后的一小段时间内，继续按住跳跃键会延长上升，提前松手则更早下落。玩家要根据头顶障碍和目标高度决定松手时机；每次落地都重新获得调整下一跳的机会。",
+    "en": "For a short period after takeoff, holding jump sustains the rise; releasing it ends the rise sooner. Choose when to release based on the ceiling and destination. Landing gives you another chance to shape the next jump."
+  },
+  "loop": [
+    {
+      "zh": "观察顶棚与落点",
+      "en": "Read the ceiling and landing"
+    },
+    {
+      "zh": "按下跳跃",
+      "en": "Start the jump"
+    },
+    {
+      "zh": "选择松手时机",
+      "en": "Choose when to release"
+    },
+    {
+      "zh": "落地后调整下一跳",
+      "en": "Land and adjust the next jump"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "头顶很低，是提前松手小跳，还是等走出顶棚再高跳？",
+      "en": "With a low ceiling, release for a short hop or wait until you clear it before jumping high?"
+    },
+    {
+      "zh": "高处奖励需要更长滞空，要不要放弃奖励，早点落回安全地面？",
+      "en": "A high reward requires more airtime. Take it, or land safely sooner?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "长按生效窗口",
+        "en": "Hold window"
+      },
+      "effect": {
+        "zh": "窗口越长，高低跳区别越大，但按键时长也更难预测。",
+        "en": "A longer window separates low and high jumps more, but makes timing harder to predict."
+      }
+    },
+    {
+      "name": {
+        "zh": "松手后的减速",
+        "en": "Rise reduction on release"
+      },
+      "effect": {
+        "zh": "减速越明显，低跳越干脆；过于突然会让动作显得生硬。",
+        "en": "Stronger reduction makes short hops crisp; an abrupt cutoff can feel unnatural."
+      }
+    }
+  ],
+  "tags": [
+    "timing",
+    "precision",
+    "dexterity"
+  ],
+  "related": [
+    "movement-auto-forward",
+    "exploration-grapple-swing",
+    "exploration-wall-jump",
+    "movement-low-slide"
+  ],
+  "contrast": {
+    "zh": "《蔚蓝》让玩家在可停留的平台间调整跳高；《Canabalt》的角色持续前进，还要让按键时长适应不断变化的跑速。",
+    "en": "Celeste lets players shape jumps between platforms they can pause on; Canabalt also ties hold timing to a runner that keeps moving and changes speed."
+  },
+  "combination": {
+    "zh": "设计提案：在两面墙间放低矮横梁，玩家蹬墙后用短按避梁，用长按抵达下一块落脚处。",
+    "en": "Design proposal: place low beams between two walls. Release quickly after a wall jump to avoid a beam, or hold longer to reach the next foothold."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "教学示例：左边矮坎高 1 格，右边高台高 3 格，矮坎上方有顶棚。",
+      "en": "Teaching example: a one-tile step lies under a ceiling; a three-tile ledge stands beyond it."
+    },
+    "action": {
+      "zh": "你先轻点跳跃过矮坎，离开顶棚后再长按跳跃。",
+      "en": "Tap jump over the step, then hold jump after clearing the ceiling."
+    },
+    "result": {
+      "zh": "第一跳没有撞头，第二跳升到高台边缘。",
+      "en": "The first hop avoids the ceiling; the second reaches the high ledge."
+    },
+    "next": {
+      "zh": "下一个平台更窄，你需要重新选择松手时机，而非一直长按。",
+      "en": "The next platform is narrower, so reconsider the release timing instead of always holding."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "做一间房，放一处低顶棚和两种高度的平台；仅实现轻点与长按两种可明显区分的跳高。",
+      "en": "Build one room with a low ceiling and two platform heights; make taps and holds produce clearly different jump heights."
+    },
+    "pitfall": {
+      "zh": "如果最高点几乎相同，玩家会把差别误认成随机误差；先把两种弧线拉开。",
+      "en": "If the two peaks barely differ, players may mistake the variation for randomness; separate the arcs first."
+    },
+    "test": {
+      "zh": "让 5 位新玩家各过两次房间，检查第二次是否主动短按过低顶棚、长按上高台。",
+      "en": "Have five new players cross the room twice; check whether they deliberately tap under the ceiling and hold for the high ledge on the second pass."
+    }
+  }
+}

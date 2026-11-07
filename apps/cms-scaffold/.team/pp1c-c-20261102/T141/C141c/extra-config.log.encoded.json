@@ -1,0 +1,8 @@
+{
+  "version": 1,
+  "original": "T141/C141c/extra-config.log",
+  "sha256": "64a3a420bd936ed0c648fa2a394b3a1a1124b103fba85a5680c1cdb6c27a0f1a",
+  "byteSize": "210",
+  "encoding": "utf-8",
+  "text": "✔ T141 actual installed JDK observes root pinned JAR through modeled Docker (1888.848572ms)\nℹ tests 1\nℹ suites 0\nℹ pass 1\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 1965.137073\n"
+}

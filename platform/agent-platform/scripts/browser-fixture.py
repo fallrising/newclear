@@ -8,6 +8,7 @@ import secrets
 import sys
 import time
 from contextlib import ExitStack
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from uuid import UUID, uuid4
 
@@ -104,6 +105,18 @@ def main():
                 port=18600,
                 access_log=False,
             )
+        elif action == "result-truth-hold":
+            from browser_result_truth_fixture import hold_result_truth
+
+            hold_result_truth(db, output)
+        elif action.startswith("download-retention-"):
+            from browser_download_retention_fixture import download_retention_action
+
+            download_retention_action(action, db, output)
+        elif action.startswith("m4-retention-"):
+            from browser_m4_retention_fixture import retention_action
+
+            retention_action(action, db, output)
         elif action.startswith("export"):
             from browser_export_fixture import export_action
 
@@ -181,6 +194,77 @@ def main():
                     }
                 )
             )
+        elif action == "event-history":
+            fixture = json.loads(output.read_text())
+            task_id, run_id = uuid4(), uuid4()
+            result = {
+                "summary": "Preserved event retention result",
+                "verification": {"status": "not_run"},
+            }
+            with db.transaction() as conn:
+                conn.execute(
+                    "INSERT INTO tasks(id,project_id,title,created_by) "
+                    "SELECT %s,project_id,'Event retention browser fixture',created_by "
+                    "FROM tasks WHERE id=%s",
+                    (task_id, fixture["task_id"]),
+                )
+                conn.execute(
+                    "INSERT INTO runs(id,task_id,attempt_no,base_sha,profile_revision,goal,"
+                    "state,deadline,last_event_seq,result) SELECT %s,%s,1,base_sha,"
+                    "profile_revision,'Retain result while expiring activity','succeeded',"
+                    "deadline,3,%s FROM runs WHERE id=%s",
+                    (run_id, task_id, Jsonb(result), fixture["run_id"]),
+                )
+                now = datetime.now(UTC)
+                for seq in range(1, 4):
+                    created = now - timedelta(days=31 if seq < 3 else 1)
+                    metadata = (
+                        run_id,
+                        seq,
+                        uuid4(),
+                        "browser-retention",
+                        str(seq),
+                        "fixture.event",
+                        created,
+                    )
+                    conn.execute(
+                        "INSERT INTO run_event_identities VALUES (%s,%s,%s,%s,%s,%s,%s)",
+                        metadata,
+                    )
+                    conn.execute(
+                        "INSERT INTO run_events(run_id,seq,event_id,source,source_event_id,"
+                        "type,created_at,payload) "
+                        "VALUES (%s,%s,%s,%s,%s,%s,%s,%s)",
+                        (
+                            *metadata,
+                            Jsonb(
+                                {
+                                    "content": "Retained activity suffix"
+                                    if seq == 3
+                                    else "Expired activity prefix"
+                                }
+                            ),
+                        ),
+                    )
+            print(json.dumps({"task_id": str(task_id), "run_id": str(run_id), "result": result}))
+        elif action == "event-prune":
+            from agent_platform.event_retention import apply, preview
+
+            run_id = UUID(sys.argv[2])
+            with db.transaction() as conn:
+                owned = conn.execute(
+                    "SELECT r.id FROM runs r JOIN tasks t ON t.id=r.task_id "
+                    "WHERE r.id=%s AND t.title='Event retention browser fixture' "
+                    "AND r.state='succeeded' AND r.cleanup_state='not_allocated'",
+                    (run_id,),
+                ).fetchone()
+            if owned is None:
+                raise AssertionError("not an owned terminal event fixture")
+            plan = preview(db)
+            if [item["run_id"] for item in plan["candidates"]] != [str(run_id)]:
+                raise AssertionError("retention selected unexpected fixture events")
+            receipt = apply(db, plan, approval_digest=plan["approval_digest"])
+            print(json.dumps({"receipt": receipt}))
         elif action == "archive":
             value = json.loads(output.read_text())
             store = Store(db)

@@ -1,0 +1,13 @@
+✔ HTTP/WS accept only exact namespace loopback origin; credentials and other ports/protocols refuse (3.607735ms)
+✔ safe failure classification never emits arbitrary error, URL or path content (0.405559ms)
+✔ browser rejection and hanging close still attempt every owned resource and fail closed (14.359367ms)
+✔ signal during async creation retains late resource ownership for final cleanup (6.426232ms)
+✔ normal scenarios reject every unexpected health category without raw diagnostic data (6.370422ms)
+ℹ tests 5
+ℹ suites 0
+ℹ pass 5
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 162.717259

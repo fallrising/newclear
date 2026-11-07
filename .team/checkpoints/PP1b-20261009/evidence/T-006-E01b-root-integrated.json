@@ -1,0 +1,9 @@
+{
+  "at": "2026-10-09T15:07:57.449739+00:00",
+  "oldSha256": "7a918de8b979762bdc96731a8edf2d0fccac67052ad03d8a11f24e35ac7cefe7",
+  "newSha256": "27e21fb57eac5f4a9ade7518a39e74d4413b40a0ac692b361f3247a0844245b5",
+  "parserCases": 4,
+  "passed": 4,
+  "realBrowser": "pending capacity and fresh successful initialization",
+  "sourceReview": "full332lines read; correction published-purgePage200 before204/404"
+}

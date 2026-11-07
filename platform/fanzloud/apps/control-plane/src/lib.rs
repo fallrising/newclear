@@ -7,6 +7,7 @@
 mod config;
 mod error;
 mod idempotency;
+pub mod isolated;
 mod ports;
 mod routes;
 mod state;

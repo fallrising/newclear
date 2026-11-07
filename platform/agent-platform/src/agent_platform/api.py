@@ -17,6 +17,7 @@ from psycopg_pool import PoolTimeout
 from starlette.concurrency import run_in_threadpool
 
 from .auth import Auth
+from .command_lookup import lookup as lookup_command
 from .config import Settings
 from .db import Database
 from .domain import (
@@ -32,6 +33,7 @@ from .domain import (
 from .export_service import ApprovalInput, ExportService, PreviewInput, ReconcileInput
 from .result_archive import list_archives, read_archive
 from .result_download import DOWNLOAD_CSP, diff_bytes
+from .review import ReviewInput, ReworkInput, admit_review, admit_rework
 from .store import Store, json_value
 from .task_query import TaskState
 
@@ -195,6 +197,14 @@ def create_app(settings=None, db=None, web_dist=None):
             )
         )
 
+    @app.get("/api/v1/commands/{key}/tasks")
+    def task_command(key: str, session=authenticated):
+        return lookup_command(db, session["operator_id"], key)
+
+    @app.get("/api/v1/commands/{key}/runs/{source}/{action}")
+    def handoff_command(key: str, source: str, action: str, session=authenticated):
+        return lookup_command(db, session["operator_id"], key, source, action)
+
     @app.get("/api/v1/tasks/{task_id}")
     def task_detail(task_id: UUID, session=authenticated):
         return store.task(task_id)
@@ -213,6 +223,44 @@ def create_app(settings=None, db=None, web_dist=None):
                 idempotency_key,
                 data,
                 lambda conn, command_id: store.retry(conn, task_id, data, command_id),
+            )
+        )
+
+    @app.post("/api/v1/runs/{run_id}/reviews", status_code=202)
+    def review(
+        run_id: UUID,
+        data: ReviewInput,
+        session=authenticated,
+        idempotency_key: str | None = Header(default=None),
+    ):
+        operator = session["operator_id"]
+        return command_response(
+            store.command(
+                operator,
+                f"runs/{run_id}/reviews",
+                idempotency_key,
+                data,
+                lambda conn, command_id: admit_review(
+                    store, conn, operator, run_id, data, command_id
+                ),
+            )
+        )
+
+    @app.post("/api/v1/runs/{run_id}/rework", status_code=202)
+    def rework(
+        run_id: UUID,
+        data: ReworkInput,
+        session=authenticated,
+        idempotency_key: str | None = Header(default=None),
+    ):
+        operator = session["operator_id"]
+        return command_response(
+            store.command(
+                operator,
+                f"runs/{run_id}/rework",
+                idempotency_key,
+                data,
+                lambda conn, command_id: admit_rework(store, conn, operator, run_id, command_id),
             )
         )
 

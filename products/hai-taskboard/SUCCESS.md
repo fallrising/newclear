@@ -4,11 +4,14 @@ purpose: 以可追溯工作圖與證據關卡控制人機軟體交付
 kind: application
 mainline: incomplete
 usable_tag: none
-reviewed: 2026-10-23
-source_commit: b7f2a4311d1135977ba273efba8e77702b908036
+reviewed: 2026-10-29
+source_commit: 0111908492c32d0b01d561b24b6024737cb4f641
 ---
 
 # HAI Taskboard 成功契約
+
+剩餘工作與後續設計的順序、依賴及規劃驗收見 [2026-10-29 計劃](docs/plans/remaining-work-20261029.md)。
+該文件工作不改下列產品 AC、歷史驗證日期或 Fake-only 範圍；提出的未來驗收仍未執行。
 
 ## 主線與範圍
 
@@ -34,6 +37,18 @@ Board/SSE 是 projection；WorkItem、Run、Candidate、Review、Evidence、Appr
 | AC-04 | Given 備份、proposal import 與依賴圖變更，When 還原並接續，Then accepted binding、reconciliation 與 ContextPack 可完整恢復 | pending | [traceability](docs/traceability.md)：backup/restore、durable activation 與 full ops group 未完 |
 
 ## 現況與缺口
+
+### 目前能用到哪裡
+
+| 層次 | 現況 | 還需要什麼 |
+| --- | --- | --- |
+| 本機開發試用 | 已有 authenticated connected browser、project/Draft、明確接受規格、Ready/Fake、回應遺失查回與重連的局部歷史證據 | 依 quickstart/local-development 設定；Fake 成功仍停 Developing；本次文件工作未重跑 runtime |
+| 完整 P0-A | 尚未完成；AC-02/03/04 pending | 完整 Candidate/Review/Evidence/QA/Done UI、detail/attention/impact、activation、backup/restore、ContextPack 接續及整組驗收 |
+| 日常真實 agent 工作台 | 尚未啟用；目前不能派送真實 Codex/Claude 工作，也沒有已啟用的 MCP 取件流程 | 完整 P0-A 後，另行授權並驗收單一真實 adapter、agent 身分/權限、成果驗收與中斷接續 |
+
+因此目前適合試用已完成的 Fake 流程，尚不適合作為日常真實 agent 工作台。
+Fake-only 是 P0-A 的原定範圍；不以增加真 provider 作為補足本輪 AC 的捷徑。
+2026-10-29 的更新只核對文件與來源；下列原有通過紀錄保留各自日期與驗證範圍。
 
 Domain kernel、SQLite、HTTP/SSE、Fake vertical 與 local bootstrap 有獨立接受切片。
 [交接](docs/HANDOFF.md)保留 T-062、T-077/079、T-047/082 等歷史 FAIL 與後續修復，不能抹成首輪全過。
@@ -84,3 +99,167 @@ Approved ConnectedApp DESIGN items1–4 only: review-owned same-origin runtime/s
 Acceptance: current pinned web gate and root-owned backend gate; focused Red/Green review-harness safety tests; fresh private state outside checkout, owned graceful lifecycle, immutable synthetic repository admission and no token in argv/URLs/logs/storageState/traces/screenshots. Actual UI login/project/Draft/explicit exact-AC acceptance/Ready/Fake with successful Fake remaining Developing; same command identity for uncertain recovery, authoritative reconnect and existing status/alert feedback. Actual theme button, three viewport sizes, keyboard/focus/wrapping evidence and documented faults. Preserve failed/unrun observations and unresolved product-mainline gaps; targets verified only after original R2 evidence, no fullRound3 claim.
 
 Local R2 evidence: pinned native web30tests/backendfull+race, review safety8tests,30unique actual-theme captures and true session/admission/Ready/Fake/fault/cleanup checks passed; see [scoped report](fe-review/tasks/round2/report.md). Existing legacy AC count and earlier refresh-warning/later Connected feedback remain unresolved. No product AC-02/03/04 or fullRound3 completion follows.
+
+## Kanzo usability documentation — T-1029
+
+2026-10-29 scope: clarify current usability and specify selected Kanzo-inspired follow-ups
+before implementation. Documentation baseline is `0111908492c32d0b01d561b24b6024737cb4f641`;
+this is a static documentation/source review, not a new runtime verification. Existing
+AC-01 evidence retains its original date; AC-02/03/04 stay pending, mainline incomplete,
+and usable_tag none. The Fake-only P0-A boundary and its full acceptance scope remain intact.
+
+Documentation acceptance: DOC-01 accurately separates the current runnable slice, complete
+P0-A and a future real-agent workspace; DOC-02 gives ordered feature contracts and named
+future oracles without activating them; DOC-03 supplies navigation/contract checks and
+independent review. Verification planned: exact upstream materialization, scoped diff,
+local-link/identifier checks, project-success/index preflight, independent document review,
+and applicable PR checks. No product tests or real providers are introduced by this task.
+The proposed [Kanzo-inspired design](docs/sdd/kanzo-inspired-usability.md) records the follow-up
+contracts, dependencies and named future oracles. All HAI-KZ feature oracles remain Proposed/NotRun;
+they are not added to P0-A AC-01..04. Current task status and writable scope are in
+[BOARD](docs/tasks/BOARD.md); actual document verification and independent review are recorded in
+[the bounded report](docs/evidence/kanzo-usability-docs-20261029.md).
+
+
+## M0 baseline reconciliation — T-0339 / 2026-10-29
+
+Owner continued development after the reviewed remaining-work plan. This bounded task audits current source `1e70824e24161bafacfc1eca33bb31ba7045df5a` and runs the pinned backend/web gates plus existing real ConnectedApp foundation harness. It produces full clause/implementation/test/gap coverage and precise contract-conflict proposals before M1a. Acceptance is M0-01..03 in [BOARD](docs/tasks/BOARD.md); no production/spec changes or product AC promotion. Initial tests are NotRun for this source until recorded in the new evidence. Historical failures/partial results stay intact.
+
+M0 current local result: pinned backend full/race/vet/build, web30tests/build and8harness safety tests pass; real ConnectedApp13steps/30captures pass with Fake remaining Developing/Succeeded andDone0. Two source inventories and independent T-003 review support only this baseline; [full evidence and limits](docs/evidence/m0-baseline-20261029.md) retain initial environment failures and all product gaps. Required Git/CI delivery is tracked separately in BOARD; no AC-02/03/04 promotion.
+
+## M1a completion preparation — T-0339 / 2026-10-30
+
+Owner approved C01/C02/C06 and requested current design authority. Source `6b7bf17c010f6a354f7abf3676f994f7ae2d19ec`
+has the same HAI tree as M0 closeout; no newer open HAI design PR at intake. This bounded milestone
+aligns bootstrap/preflight wording and implements the [snapshot-only completion preparation contract](docs/sdd/completion-preparation.md),
+PREP-AC-01..04. Verify auth/scope, exact Review/QA snapshot with no writes, stale/policy precedence and
+strict output/bounds/capability refusal using focused Red/Green and real SQLite; then pinned backend
+full/race/vet/build, OpenAPI lint, existing web gate, document checks, independent review and PR CI.
+Initial status NotRun; full product AC-02/03/04 remain pending. No UI or later M1/M2 slice is included.
+
+M1a local evidence: PREP-AC-01..04 focused/real SQLite checks pass; pinned backend full/race/vet/build,
+web30/type/lint/format/build and OpenAPI lint pass. Independent contract and implementation reviews
+ACCEPT. [Evidence](docs/evidence/m1a-completion-preparation-20261030.md) retains meaningful Red and
+environment/superseded runs; required Git/CI delivery is tracked in BOARD. Product ACs stay pending.
+
+## M1b scoped output access — T-0339 / 2026-10-30
+
+Owner continued with Claude Code plan/code review. [Bounded plan](docs/plans/m1b-output-access-20261030.md)
+fixes ACCESS-AC-01..04 before implementation: authenticated Run output list and project-bound
+verified artifact bytes, zero writes and historical restart readability. Initial status NotRun.
+Checks: focused Red/Green and real SQLite, pinned backend full/race/vet/build, existing web gate,
+OpenAPI/doc checks, independent Claude reviews and required PR CI. No product AC promotion.
+
+M1b local result: ACCESS-AC-01..04 pass with real SQLite/HTTP/localArtifactStore repeat/reopen,
+scoping, safety and no-write evidence. Claude plan/code ACCEPT after retained REWORK;
+[exact verification and source limits](docs/evidence/m1b-output-access-20261030.md) cover
+root full/race/vet/build plus assertion-only final delta race, web30 and API/doc checks.
+Git/CI delivery remains separately tracked in BOARD. Full product acceptance stays pending.
+
+## Session control-room documentation — T-1030 / 2026-10-30
+
+本輪來源：`1181db123f108ab096bbc1ae9a4e804097d939ca`；僅整合設計並診斷真實 provider 的依賴鏈。
+不變更上方 frontmatter、產品 AC-01..04、歷史驗證或 P0-A Fake-only。新功能全部 Proposed/NotRun；
+本次文件合併不代表接受 runtime contract、G2/pilot 授權或產品可用。
+
+SC-DOC-01：在 [Session mini-SDD](docs/sdd/session-control-room.md) 明確映射既有 domain authority、
+Session／Execution／Turn、指標可信度、角色投影、observation-only／managed 及控制命令；具名未來 oracles 不冒充已實作測試。
+SC-DOC-02：在 [provider 主線診斷](docs/plans/provider-critical-path-20261030.md) 分開已核對事實、推論、
+現行路線與待批准 L1，列出精確授權差異；不把微小切片或 planned 功能臆測成已證實工時浪費。
+SC-DOC-03：驗證原始 blob、局部連結／契約／差異、原子 Git 提交、非 force branch 更新及遠端回讀。
+必要 CI 與獨立 review 各自記錄；未完成不能算接受，自我檢查不是獨立審查。
+
+[驗證紀錄](docs/evidence/session-control-room-20261030.md)只涵蓋本輪文件；
+[BOARD](docs/tasks/BOARD.md) T-1030 是唯一任務狀態，合併前不標 done。
+
+
+## M1c human report slice — 2026-10-31
+
+Current bounded objective: [M1c plan](docs/plans/m1c-human-reports-20261031.md), REPORT-AC-01..05.
+Seal exact bounded human text, bind authenticated actor/subject/scope, atomically publish distinct
+Review/Evidence plus durable command bookkeeping, and read metadata/verified attachments after restart.
+Required evidence: meaningful Red/Green, immutable migration/rollback, real SQLite/service/HTTP/local-store
+replay/no unintended transitions, pinned full backend/web/API gates, Claude plan/code review and PR CI.
+Local REPORT-AC-01..05 now pass, including real human-record QA/approval/Done joins and isolated
+missing Evidence/ChangesRequested refusals. Claude plan/code each REWORK then ACCEPT; final pinned
+backend full/race/vet/build, unchanged web30tests, API lint and document gates passed.
+[Evidence and receipt](docs/evidence/m1c-human-reports-20261031.md) distinguish this backend slice
+from full AC-02..04, which remain pending; no UI/L1/provider/release is included.
+New Session/provider documents remain Proposed and do not change current authority. Status: BOARD HM1C.
+
+
+## M2 identity alignment — 2026-10-31
+
+Current bounded objective and fixed ID-AC-01..04: [M2 plan](docs/plans/m2-ac-identity-20261031.md).
+Align new AC inputs with accepted UTF-8 byte identity, preserve canonical history, and verify exact
+accepted-input/evidence/completion behavior under explicit test policy. ID-AC-01..03 now pass; root full/race/vet/build, web30/build, API lint and Claude plan/code review
+passed. [Evidence](docs/evidence/m2-ac-identity-20261031.md) records limits and retained failures.
+ID-AC-04 delivery completed through PR #854 and BOARD closure #855. General policy configuration is tracked in the approved successor below; verified coverage remains pending. Full M2 and
+AC-02/03/04 remain incomplete. No UI/provider/dependency/restore change.
+
+## Immutable project policy — 2026-10-31
+
+Owner approved the concrete M2 local policy-source direction. This slice fixes POL-AC-01..05 in
+[the local project policy contract](docs/sdd/local-project-policy.md): strict operator-selected JSON,
+exact project/AC selection, canonical immutable persistence, startup rejection and actual completion/
+restart regression. POL-AC-01..04 pass locally; pinned backend full/race/vet/build, web/API/docs
+and Claude plan/code reviews pass with explicit final test-delta evidence. POL-AC-05 still requires
+normal final-commit CI/merge/readback/ledger, tracked by BOARD. See [evidence](docs/evidence/project-policy-20261031.md).
+No full M2/coverage/UI/provider/AC-02..04 claim.
+Status and scope: BOARD HMPOL.
+
+## M2 verified coverage — 2026-11-01
+
+Owner approved the [reviewed contract and fixed COV-AC-01..06](docs/plans/m2-verified-coverage-20261101.md)
+and [normative entry](docs/sdd/verified-coverage.md). BOARD HM2C tracks delivery. Authenticated GET
+observes exact per-AC byte verification in Review/QA; QA eligibility shares the completion predicate.
+Reads allocate no IDs, mutate no persisted state and reserve no authority. Completion remains explicit.
+
+[Implementation evidence](docs/evidence/m2-verified-coverage-20261101.md) maps COV-AC-01..05 to passing
+focused/integration tests, full backend baseline and source-bound final revision checks. COV-AC-06
+requires final review, PR CI, normal merge and remote readback; its delivery receipt is recorded in BOARD.
+The initial proposal's NotRun checkpoint is historical, not the current test status. Full M2, completion
+UI and product AC-02..04 remain incomplete. No release, usable tag or deployment is part of this slice.
+
+## WorkItem material-index proposal — 2026-11-01
+
+[Concrete next contract](docs/plans/work-item-material-index-20261101.md) maps remaining M2/detail gaps and proposes one metadata-only discovery API. DTL-PLAN-01..03 in BOARD cover this planning delivery; IDX-AC-01..06 remain NotRun until owner acceptance and implementation. Existing full WorkItemDetail, product ACs and delivered policy/coverage contracts are unchanged.
+
+Owner approved D1 on2026-11-01. [Normative material-index contract](docs/sdd/work-item-material-index.md)
+is now the bounded implementation scope: authenticated closed metadata/AC/Run/Candidate read,
+one SQLite snapshot, exact legacy compatibility, deterministic limits and no writes/authority.
+Fixed IDX-AC-01..06 require named Red/Green, storage/concurrency and real discovery-to-completion
+regressions, backend full/race/vet/build, web/API/docs, Claude code review and normal delivery.
+The bounded implementation is delivered in [#920](https://github.com/fallrising/newclear/pull/920)
+after independent code review, complete exact-head CI and remote source verification.
+[BOARD HMDTL](docs/tasks/BOARD.md) and [evidence](docs/evidence/work-item-material-index-20261101.md) record delivery.
+No whole-product AC or full M2 status is promoted.
+
+## Rework loop — 2026-11-01
+
+Owner approved D1/D2 of the [reviewed proposal](docs/plans/rework-loop-20261101.md). The
+[normative contract](docs/sdd/rework-loop.md) implements RequestRework (Review/QA → Developing with a recorded
+reason), explicit redispatch from Developing when every Run is settled, and the latest Run's Candidate as the only
+current Candidate, so Candidate B cannot use Candidate A's material. RWK-AC-01..04 map to real SQLite/Fake/HTTP
+oracles in [evidence](docs/evidence/rework-loop-20261101.md); RWK-AC-05 is review, gates and delivery in BOARD HRWK.
+No completion UI, full M2 or product AC-02..04 claim; no migration, dependency, provider, release or deploy.
+
+## WorkItem detail — 2026-11-02
+
+Owner approved D1 of the [reviewed proposal](docs/plans/work-item-detail-20261102.md). The
+[normative contract](docs/sdd/work-item-detail.md) serves `GET work-items/{id}` as `work_item_detail/v1`:
+board summary, material index and stored blockers/reviews/evidence/approvals/completion records/audit.
+Never-stored fields are omitted; Review/Evidence/Approval rows are attributed through the immutable audit
+chain and an unattributable row is `storage_corruption`. DTL-AC-01..05 map to real SQLite/Fake/HTTP oracles
+in [evidence](docs/evidence/work-item-detail-20261102.md); DTL-AC-06 is review, gates and delivery in BOARD HDTL.
+No completion UI, Done validity, whole-M2 or product AC-02..04 claim; no migration, dependency, provider, release or deploy.
+
+## ReopenWorkItem — 2026-11-02
+
+Owner approved D1 of the [reviewed proposal](docs/plans/reopen-work-item-20261102.md). The
+[normative contract](docs/sdd/reopen-work-item.md) implements the accepted `ReopenWorkItem` command: Done → Draft or Ready
+with a byte-exact reason in the `WorkItemReopened` result, Ready only when the current inputs still resolve, and every
+CompletionRecord and history row retained. Ready dispatch with existing Runs now obeys the settled/strict-order guards,
+so a second Candidate and a second completion are lawful. ROP-AC-01..03 map to real SQLite/Fake/HTTP oracles in
+[evidence](docs/evidence/reopen-work-item-20261102.md); ROP-AC-04 is review, gates and delivery in BOARD HROP.
+No completion UI, Done validity, whole-M2 or product AC-02..04 claim; no migration, dependency, provider, release or deploy.

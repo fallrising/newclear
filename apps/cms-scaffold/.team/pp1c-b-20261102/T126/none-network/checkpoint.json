@@ -1,0 +1,21 @@
+{
+  "handwrittenChangedLines": 93,
+  "files": {
+    "maintenance-workflow.test.mjs": 36,
+    "maintenance-workflow.mjs": 7,
+    "maintenance-helper-integration.test.mjs": 8,
+    "maintenance-helper.test.mjs": 21,
+    "maintenance-helper.mjs": 21
+  },
+  "sha256": {
+    "scripts/local/maintenance-workflow.test.mjs": "8af2002013d003e2fe63e936dec8e56e7aaa55436e9561f7c429408ec8fd0436",
+    "scripts/local/maintenance-helper-integration.test.mjs": "e75181dc9334f3a8a0333354305a7f039f654e084a337e9154eb4e5c7cca026c",
+    "scripts/local/maintenance-helper.test.mjs": "fad2c4e0c3ad9d13d76acb676f04e2c763411c819259f2948b07086f573e089e",
+    "scripts/local/maintenance-helper.mjs": "58a459288c7be94a97981e4a2da2a24c5545d7e346b3c240f09186c5dac14bb4",
+    "scripts/local/maintenance-workflow.mjs": "c4f8aefa3025dba1cae40008d22183cad47f51b2852cc8d5f61e314426014bff"
+  },
+  "followupStartedAt": "2026-11-02T13:44:37Z",
+  "frozenAt": "2026-11-02T13:47:53Z",
+  "cumulativeActiveMinutesEstimate": 21,
+  "originalBudgetMinutes": 30
+}

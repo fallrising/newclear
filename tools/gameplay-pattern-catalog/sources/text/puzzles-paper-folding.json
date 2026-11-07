@@ -1,0 +1,120 @@
+{
+  "id": "puzzles-paper-folding",
+  "system": "puzzles",
+  "edition": 1,
+  "name": {
+    "zh": "折叠地形连通",
+    "en": "Folding terrain to connect routes"
+  },
+  "summary": {
+    "zh": "把远处的两块地形折到一起，再让角色通过。",
+    "en": "Fold distant terrain together to build a route."
+  },
+  "rules": {
+    "zh": "玩家沿允许的边缘折叠或展开纸面世界，让分离的路径相接。折叠会遮住区域、改变连接，角色位置与机关状态需要配合；新通路出现后才能继续前进。",
+    "en": "Fold or unfold a paper world to connect separated paths. Folding hides areas and changes links, requiring coordinated character positions and mechanism states before proceeding."
+  },
+  "loop": [
+    {
+      "zh": "观察可用路径",
+      "en": "Inspect available paths"
+    },
+    {
+      "zh": "选择折叠边缘",
+      "en": "Choose a folding edge"
+    },
+    {
+      "zh": "拼接可走通道",
+      "en": "Join traversable segments"
+    },
+    {
+      "zh": "移动角色后调整",
+      "en": "Move the character and revise"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "连接终点的折叠会不会遮住必经入口？",
+      "en": "Will a fold connect the goal but hide an essential entrance?"
+    },
+    {
+      "zh": "先站在哪块地形才能完成下一次折叠？",
+      "en": "Where must the character stand before the next fold?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "折叠自由度",
+        "en": "Folding freedom"
+      },
+      "effect": {
+        "zh": "预设折线便于理解；更多折叠方式增加空间搜索。",
+        "en": "Preset folds are readable; more options increase spatial search."
+      }
+    },
+    {
+      "name": {
+        "zh": "双面信息",
+        "en": "Two-sided information"
+      },
+      "effect": {
+        "zh": "查看背面降低记忆负担；隐藏背面要求预判。",
+        "en": "Viewing the reverse reduces memory demands; hiding it requires prediction."
+      }
+    }
+  ],
+  "tags": [
+    "spatial",
+    "planning",
+    "creativity"
+  ],
+  "related": [
+    "puzzles-beam-routing",
+    "puzzles-box-pushing",
+    "puzzles-gravity",
+    "puzzles-linked-portals"
+  ],
+  "contrast": {
+    "zh": "纸间谜迹突出平面地形叠合；纸境突出立体书机关的层次展开。",
+    "en": "Paper Trail emphasizes overlapping terrain; Tengami emphasizes layered pop-up mechanisms."
+  },
+  "combination": {
+    "zh": "组合提案：地图同时是折叠背包，收起道路腾出物品位，却暂时切断该地区通行。",
+    "en": "Design proposal: the map doubles as a folding bag; closing a road frees storage but cuts access."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "纸面左侧有角色，右侧有出口，两段道路之间断开。",
+      "en": "The character is on the left and the exit on the right, with a gap between their paths."
+    },
+    "action": {
+      "zh": "你沿允许的折线翻折一角，让两段路的边缘接上。",
+      "en": "Fold a permitted corner so the path edges connect."
+    },
+    "result": {
+      "zh": "道路连通了，但折过去的纸也遮住原来的一个入口。",
+      "en": "The route connects, but the folded paper covers an earlier entrance."
+    },
+    "next": {
+      "zh": "先走到合适位置，再决定展开还是继续换一种折法。",
+      "en": "Move to a useful position, then decide whether to unfold or make another fold."
+    }
+  },
+  "prototype": {
+    "scope": "medium",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "做两块可折叠区域，使用离散网格连接而非自由纸张物理。",
+      "en": "Build two foldable regions using discrete grid connections rather than free-form paper physics."
+    },
+    "pitfall": {
+      "zh": "必须统一角色所在层与可行走边缘；先别支持任意角度和多层交叠。",
+      "en": "Keep character layers and walkable edges consistent before arbitrary angles or many overlapping folds."
+    },
+    "test": {
+      "zh": "观察玩家是否先安排角色站位再折纸，并能预测被遮住的路线。",
+      "en": "See whether players position the character before folding and predict which route gets covered."
+    }
+  }
+}

@@ -1,0 +1,120 @@
+{
+  "id": "cooking-food-preservation",
+  "system": "cooking",
+  "edition": 1,
+  "name": {
+    "zh": "加工保鲜",
+    "en": "Preservation through processing"
+  },
+  "summary": {
+    "zh": "花时间和设施容量，把即将过期的食物变成远征储备。",
+    "en": "Spend processing time and capacity to turn perishables into travel reserves."
+  },
+  "rules": {
+    "zh": "食物会随时间失去价值，玩家可投入盐、燃料或加工设施延长可用期。加工需要等待和空间，通常不能无限恢复材料；决定哪批先处理比无脑全部加工更关键。",
+    "en": "Food loses value over time, and players can spend salt, fuel or processing capacity to extend its useful life. Processing takes time and space and has limits; choosing which batch to preserve matters."
+  },
+  "loop": [
+    {
+      "zh": "检查剩余保质期",
+      "en": "Check remaining freshness"
+    },
+    {
+      "zh": "分配加工资源",
+      "en": "Allocate processing resources"
+    },
+    {
+      "zh": "等待保鲜完成",
+      "en": "Wait for preservation"
+    },
+    {
+      "zh": "按旅程长度分配口粮",
+      "en": "Pack for the trip length"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "先处理快坏的食物，还是更适合长期保存的高价值肉？",
+      "en": "Save nearly spoiled food or preserve higher-value meat?"
+    },
+    {
+      "zh": "现在吃掉，还是承受加工等待换取未来保障？",
+      "en": "Eat now or wait to secure future supplies?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "加工耗时",
+        "en": "Processing time"
+      },
+      "effect": {
+        "zh": "耗时越长越需要提前计划，也让突发收获更难处理。",
+        "en": "Long processing demands foresight and makes sudden harvests harder to save."
+      }
+    },
+    {
+      "name": {
+        "zh": "保鲜增益",
+        "en": "Shelf-life gain"
+      },
+      "effect": {
+        "zh": "提升太小不值得加工；提升很大则改变玩家的远征半径。",
+        "en": "Tiny gains discourage processing; large gains extend expedition range."
+      }
+    }
+  ],
+  "tags": [
+    "time",
+    "economy",
+    "planning"
+  ],
+  "related": [
+    "cooking-ingredient-substitution",
+    "cooking-order-triage",
+    "cooking-heat-window",
+    "cooking-meal-loadout"
+  ],
+  "contrast": {
+    "zh": "饥荒以持续占用晾晒设施换保质期；漫漫长夜新增盐等材料，让保存能力同时受物资供应约束。",
+    "en": "DST trades drying-rack time for shelf life; The Long Dark adds preservation supplies such as salt."
+  },
+  "combination": {
+    "zh": "组合创意：迁徙商队每晚只有有限烟熏位，玩家必须在明天的口粮与可高价出售的腌肉之间安排批次。",
+    "en": "Design proposal: a caravan has limited smoking slots each night, competing between tomorrow’s rations and valuable cured goods."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "你有5份肉，其中2份明天就坏，烘干架一次只能处理2份。",
+      "en": "You have five portions of meat, two expiring tomorrow; the dryer holds two portions."
+    },
+    "action": {
+      "zh": "你把快坏的肉先上架，把今天要吃的留下。",
+      "en": "Dry the nearly expired meat first and keep today’s meal fresh."
+    },
+    "result": {
+      "zh": "等待后得到能保存更久的口粮，架子才空出来。",
+      "en": "After processing, longer-lasting rations are ready and the dryer becomes available."
+    },
+    "next": {
+      "zh": "按下一趟远行时间安排剩余食物，继续轮换批次。",
+      "en": "Schedule the remaining food around the next journey and rotate batches."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "用每份食物的剩余天数、2个加工槽和固定加工时间做库存小原型。",
+      "en": "Use per-item shelf life, two processing slots and a fixed processing time in a small inventory prototype."
+    },
+    "pitfall": {
+      "zh": "不要把加工设计成无成本无限刷新保质期；投入与等待要影响安排。",
+      "en": "Avoid costless, endless freshness resets; processing cost and waiting should affect scheduling."
+    },
+    "test": {
+      "zh": "当远行日期提前时，玩家是否重新安排先加工哪批，以及今天直接吃什么？",
+      "en": "If departure moves earlier, do players change processing priority and what they eat today?"
+    }
+  }
+}

@@ -1,0 +1,10 @@
+✔ original exact config is accepted; drift refuses instead of silently ignoring a future alias/plugin (4.567124ms)
+✔ locked actual React plugin loads without a Vite server or adjacent config emission (78.072087ms)
+ℹ tests 2
+ℹ suites 0
+ℹ pass 2
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 142.302174

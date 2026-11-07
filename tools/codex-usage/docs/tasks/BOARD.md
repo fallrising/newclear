@@ -62,3 +62,22 @@ M3 本地接受；未Git合併，依repo規則維持in_progress。初審REWORK�
 尚待來源工作仍為 **7項 FU-01–07**：Codex可見status對照、Claude真資料、Cursor真Admin spend、OpenCode Go／Grok／Grok Bot／Antigravity自動quota接入。
 原AC-04維持todo/pending，整體主線incomplete／usable_tag:none；其他11條驗收在其明示範圍passed，不等於全面自動查額度。
 cc-quota保持封存、歷史未驗Mac情境保留；沒有tag／release／deploy，沒有資料／設定／既有服務操作。
+
+## T-1101 — Langfuse 整合文件先行
+
+需求來源：owner 於 2026-10-24 直接要求將 Langfuse 比較後續拆成開發與修正兩個文件 PR。
+承接者：Codex 主導；範圍限本文件里程碑。規格路徑：[整合規格](../../../../docs/specs/llm-observability-langfuse.md)。
+初次交付為文件 Draft PR；owner 於 2026-10-24 另行授權合併。本節只關閉文件里程碑，runtime 實作、真帳號驗收與部署仍未完成；既有產品驗收狀態不變。
+
+| ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| LD-D01 | 定義訂閱額度、執行觀測與控制責任的整合範圍 | LD-D01 | done | 2026-10-24T14:17:37Z | 2026-10-24T15:50:23Z | 2026-10-24T15:51:14Z |
+| LD-D02 | 定義來源、關聯 ID、計量、去重、隱私與失敗契約 | LD-D02 | done | 2026-10-24T14:17:37Z | 2026-10-24T15:50:23Z | 2026-10-24T15:51:14Z |
+| LD-D03 | 定義分階段實作依賴、驗收矩陣與文件交付證據 | LD-D03 | done | 2026-10-24T14:17:37Z | 2026-10-24T15:50:23Z | 2026-10-24T15:51:14Z |
+
+文件內容與本地檢查已通過；獨立 agent 文件審查 ACCEPT，命令與結果見 [T-1101 文件驗收](../../SUCCESS.md#t-1101--langfuse-整合文件先行)。
+文件里程碑已於原文件 PR 合併後結案；`end` 記實際合併時間，後續 runtime AC 與來源驗收缺口仍保留。
+
+合併證據：[PR #608](https://github.com/fallrising/newclear/pull/608)，`2026-10-24T15:50:23Z`，merge SHA `fe9adc9eab6aee48a493d733311184cd58566a3c`；已從 GitHub 回讀 `merged=true`。
+已驗證文件 head：`1a1b9266dea187e6ec009cc9e7bfe2860d0b51b8`；獨立文件審查 ACCEPT。
+該 head 的必要 CI 全部通過：[Agent Usage CI](https://github.com/fallrising/newclear/actions/runs/40106965997)、[Project success contracts](https://github.com/fallrising/newclear/actions/runs/40106965980)；文件及 CI 通過不代表後續功能已實作。

@@ -1,0 +1,119 @@
+{
+  "id": "allocation-area-majority",
+  "system": "allocation",
+  "edition": 3,
+  "name": {
+    "zh": "用人数争夺区域控制",
+    "en": "Control an area by having more presence"
+  },
+  "summary": {
+    "zh": "多放一个单位，可能就改变一整片区域的归属。",
+    "en": "One extra unit can change who controls an area."
+  },
+  "rules": {
+    "zh": "各方往同一区域投入可计数的单位或标记，在指定时点比较数量决定控制权或奖励。玩家要在多个区域分配有限力量，避免过量投入，也防止领先被刚好超过；平局如何处理必须明确。",
+    "en": "Players commit countable units or markers to areas. At a defined time, compare totals to award control or rewards. Divide limited strength between areas, avoid excess investment and protect narrow leads, with explicit tie rules."
+  },
+  "loop": [
+    {
+      "zh": "比较各区的投入数量",
+      "en": "Compare presence in each area"
+    },
+    {
+      "zh": "增援或连接到目标区域",
+      "en": "Add or connect presence"
+    },
+    {
+      "zh": "结算领先与归属",
+      "en": "Resolve majorities and control"
+    },
+    {
+      "zh": "根据新局势转移投入",
+      "en": "Reallocate around the new position"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "把领先从一人扩大到两人，还是去争另一个空区？",
+      "en": "Extend a one-unit lead or contest another area?"
+    },
+    {
+      "zh": "继续追赶已落后的地区，还是放弃并保住其他收益？",
+      "en": "Chase a deficit or concede it to preserve other rewards?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "结算时点",
+        "en": "Scoring time"
+      },
+      "effect": {
+        "zh": "持续判定强化即时控制，阶段结算强化临近结算的反超。",
+        "en": "Continuous control rewards immediate presence; timed scoring rewards late reversals."
+      }
+    },
+    {
+      "name": {
+        "zh": "平局规则",
+        "en": "Tie rules"
+      },
+      "effect": {
+        "zh": "无人控制、共享奖励与特定阵营胜出会产生不同争夺门槛。",
+        "en": "No control, shared rewards and faction advantages create different thresholds."
+      }
+    }
+  ],
+  "tags": [
+    "spatial",
+    "planning"
+  ],
+  "related": [
+    "allocation-follow-phase",
+    "allocation-public-goal-race",
+    "allocation-public-pick",
+    "allocation-route-denial"
+  ],
+  "contrast": {
+    "zh": "茂林源记的统治还影响移动与行动资格；卡卡颂把多数竞争与地形合并、完工结算联系起来。",
+    "en": "Root uses rule to affect movement and action eligibility; Carcassonne links majorities to merging features and completion scoring."
+  },
+  "combination": {
+    "zh": "组合提案：设施的服务范围产生影响力，但同一区域的服务名额归覆盖最多的一方，迫使玩家比较巩固旧区与开拓新区。",
+    "en": "Design proposal: facility coverage generates influence, with service rights going to the strongest local coverage; compare reinforcing a district with opening a new one."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "北区双方各两枚标记，南区你有一枚、对手没有。",
+      "en": "The north is tied at two each; you have one marker in the south and the opponent none."
+    },
+    "action": {
+      "zh": "把新标记投到北区。",
+      "en": "Put the new marker in the north."
+    },
+    "result": {
+      "zh": "以三比二获得北区领先。",
+      "en": "You lead the north three to two."
+    },
+    "next": {
+      "zh": "对手还能增援，决定下一枚用于守北区还是扩大南区。",
+      "en": "The opponent can reinforce; choose whether the next marker protects the north or expands south."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "competitive",
+    "firstStep": {
+      "zh": "三个区域、每人六枚标记和一个固定结算回合，用颜色块即可。",
+      "en": "Use three areas, six markers per player and a fixed scoring round."
+    },
+    "pitfall": {
+      "zh": "必须让当前数量、领先者与结算时点同时可见。",
+      "en": "Keep counts, leaders and scoring time visible together."
+    },
+    "test": {
+      "zh": "玩家是否会停止给已稳占的区域加人，转去争新的区域？",
+      "en": "Do players stop overcommitting to secure areas and contest new ones?"
+    }
+  }
+}

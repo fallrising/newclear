@@ -255,14 +255,11 @@ paths:
     patch:
       operationId: patchPrincipal
       tags: [Principals]
-      description: |
-        Null or absent properties keep their current value.
-        Errors:
-        - 400 VALIDATION_FAILED: `status` is not a PrincipalStatus, `displayName` is longer than 80,
-          or `email` is longer than 254 or used by another principal (case-insensitive).
-        - 403 LAST_ADMIN: the change would leave no active admin.
-        - 403 SURFACE_FORBIDDEN, FORBIDDEN: as listPrincipals.
-        - 404 PRINCIPAL_NOT_FOUND: no principal with this id.
+      description: "Null or absent properties keep their current value.\nErrors:\n- 400 VALIDATION_FAILED: `status` is not a PrincipalStatus,\
+        \ `displayName` is longer than 80,\n  or `email` is longer than 254 or used by another principal (case-insensitive).\n-\
+        \ 403 LAST_ADMIN: the change would leave no active admin.\n- 403 SURFACE_FORBIDDEN, FORBIDDEN: as listPrincipals.\n- 404\
+        \ PRINCIPAL_NOT_FOUND: no principal with this id.\n\n403 SELF_DISABLE_FORBIDDEN: 目標是呼叫者且新 status=disabled；先於 LAST_ADMIN\
+        \ 拒絕，資料與 session 不變。"
       parameters:
         - $ref: "#/components/parameters/Id"
         - $ref: "#/components/parameters/CsrfHeader"
@@ -287,12 +284,18 @@ paths:
     post:
       operationId: disablePrincipal
       tags: [Principals]
-      description: |
-        Revokes every session of the principal.
+      description: 'Revokes every session of the principal.
+
         Errors:
+
         - 403 LAST_ADMIN: the principal is the last active admin.
+
         - 403 SURFACE_FORBIDDEN, FORBIDDEN: as listPrincipals.
+
         - 404 PRINCIPAL_NOT_FOUND: no principal with this id.
+
+
+        403 SELF_DISABLE_FORBIDDEN: 不允許停用呼叫者自己；先於 LAST_ADMIN 拒絕，資料與 session 不變。'
       parameters:
         - $ref: "#/components/parameters/Id"
         - $ref: "#/components/parameters/CsrfHeader"
@@ -334,14 +337,10 @@ paths:
     put:
       operationId: replacePrincipalRoles
       tags: [Principals]
-      description: |
-        Replaces all role assignments. `editor` and `operator` need a non-empty `contentTypeCodes`.
-        Errors:
-        - 400 VALIDATION_FAILED: missing or duplicate role code, unknown role, or editor/operator
-          without an allowlist.
-        - 403 LAST_ADMIN: the change would leave no active admin.
-        - 403 SURFACE_FORBIDDEN, FORBIDDEN: as listPrincipals.
-        - 404 PRINCIPAL_NOT_FOUND: no principal with this id.
+      description: "Replaces all role assignments. `editor` and `operator` need a non-empty `contentTypeCodes`.\nErrors:\n- 400\
+        \ VALIDATION_FAILED: missing or duplicate role code, unknown role, or editor/operator\n  without an allowlist.\n- 403 LAST_ADMIN:\
+        \ the change would leave no active admin.\n- 403 SURFACE_FORBIDDEN, FORBIDDEN: as listPrincipals.\n- 404 PRINCIPAL_NOT_FOUND:\
+        \ no principal with this id.\n\n403 SELF_DEMOTION_FORBIDDEN: 目標是呼叫者、目前有 admin 且新集合沒有 admin；先於 LAST_ADMIN 拒絕。保留 admin 時可合法修改其他角色。"
       parameters:
         - $ref: "#/components/parameters/Id"
         - $ref: "#/components/parameters/CsrfHeader"
@@ -1225,25 +1224,53 @@ paths:
   /api/v1/admin/entries/{id}/purge:
     post:
       operationId: purgeEntry
-      tags: [Admin]
-      description: |
-        Hard delete with an audit event. Admin role on the Admin surface only.
+      tags:
+      - Admin
+      description: 'Hard delete with an audit event. Admin role on the Admin surface only.
+
         Errors:
+
         - 403 SURFACE_FORBIDDEN: called from the Front or Back surface.
+
         - 403 FORBIDDEN: caller does not hold the admin role.
+
         - 404 ENTRY_NOT_FOUND: entry missing.
+
         - 409 REF_CONSTRAINT: another entry still references this entry.
+
+
+        Q-25：確認JSON body的confirmPhrase=DELETE且confirmId=目標UUID或非空slug；400 CONFIRMATION_REQUIRED時沒有狀態變更，拒絕審計獨立保存。先surface/action/role，再找目標，再確認，再既有ref/交易刪除。415
+        MEDIA_TYPE_NOT_SUPPORTED:非JSON內容類型。'
       parameters:
-        - $ref: "#/components/parameters/Id"
-        - $ref: "#/components/parameters/CsrfHeader"
+      - $ref: '#/components/parameters/Id'
+      - $ref: '#/components/parameters/CsrfHeader'
       responses:
-        "204": { description: Hard deleted with audit }
-        "400": { $ref: "#/components/responses/Error400" }
-        "401": { $ref: "#/components/responses/Error401" }
-        "403": { $ref: "#/components/responses/Error403" }
-        "404": { $ref: "#/components/responses/Error404" }
-        "409": { $ref: "#/components/responses/Error409" }
-        "500": { $ref: "#/components/responses/Error500" }
+        '204':
+          description: Hard deleted with audit
+        '400':
+          $ref: '#/components/responses/Error400'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '409':
+          $ref: '#/components/responses/Error409'
+        '500':
+          $ref: '#/components/responses/Error500'
+        '415':
+          $ref: '#/components/responses/Error415'
+      requestBody:
+        required: false
+        description: 缺body或缺/錯任一確認欄位均由業務閘門回400 CONFIRMATION_REQUIRED，不允許無確認成功。
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PurgeEntryRequest'
+            example:
+              confirmPhrase: DELETE
+              confirmId: 30000000-0000-4000-8000-000000000001
   /api/v1/admin/audit:
     get:
       operationId: listAudit
@@ -1829,6 +1856,9 @@ components:
         - MEDIA_TYPE_NOT_SUPPORTED
         - RATE_LIMITED
         - INTERNAL_ERROR
+        - SELF_DISABLE_FORBIDDEN
+        - SELF_DEMOTION_FORBIDDEN
+        - CONFIRMATION_REQUIRED
     ErrorEnvelope:
       type: object
       additionalProperties: false
@@ -2796,6 +2826,22 @@ components:
         file: { type: string, format: binary }
         title: { type: string }
         altText: { type: string }
+    PurgeEntryRequest:
+      type: object
+      additionalProperties: true
+      required:
+      - confirmPhrase
+      - confirmId
+      properties:
+        confirmPhrase:
+          type: string
+          enum:
+          - DELETE
+        confirmId:
+          type: string
+          minLength: 1
+          description: 逐字等於路徑UUID的canonical字串，或目標非空slug；不trim、不忽略大小寫。
+
 security:
   - cookieAuth: []
   - bearerAuth: []

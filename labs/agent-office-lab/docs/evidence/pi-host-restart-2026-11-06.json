@@ -1,0 +1,177 @@
+{
+  "schema": 1,
+  "milestone": "T-0023",
+  "date": "2026-11-06",
+  "baseline": "716dbd977d4089d6e991256b051d4f25e002d4cc",
+  "scope": "Native Pi Office host SIGKILL after a persisted loopback 429, repeated host restart, interrupted desk, and explicit same-session reconnect without a prompt. No model inference or task continuation.",
+  "offline_tests": {
+    "python": 153,
+    "node": 42,
+    "total": 195,
+    "passed": true
+  },
+  "browser": {
+    "status": "passed",
+    "model_inference": false,
+    "remote_model_calls": 0,
+    "duplicate_execute_blocked": true,
+    "refresh_without_rerun": true,
+    "retry_rejected": true,
+    "runner_elapsed_seconds": 41.06338429101743,
+    "same_session_new_process": true,
+    "history_preserved": true,
+    "host_generations": 3,
+    "no_automatic_requests": true,
+    "cleanup_verified": true,
+    "external_browser_requests": 0,
+    "browser_errors": 0,
+    "result_detail_verified": true,
+    "runs": 63
+  },
+  "outer_cleanup": {
+    "exit_code": 0,
+    "owned_processes_seen": 83,
+    "remaining_owned_processes": 0,
+    "active_journal_present": false,
+    "elapsed_seconds": 60.05
+  },
+  "results_browser": {
+    "status": "passed",
+    "providers_checked": [
+      "opencode",
+      "grok",
+      "pi",
+      "cursor"
+    ],
+    "runs": 63,
+    "detail_content_and_hash": true,
+    "filters": true,
+    "refresh": true,
+    "external_requests": 0,
+    "browser_errors": 0
+  },
+  "native": {
+    "status": "stopped",
+    "model_inference_verified": false,
+    "host_restart_check_passed": true,
+    "host_target_verified": true,
+    "client_requests": 1,
+    "external_requests": 0,
+    "owned_processes_seen": 43,
+    "remaining_owned_processes": 0,
+    "cleanup_errors": [],
+    "elapsed_s": 41.06338429101743
+  },
+  "office": {
+    "status": "stopped",
+    "states": [
+      {
+        "generation": 1,
+        "status": "starting"
+      },
+      {
+        "generation": 1,
+        "status": "idle",
+        "task": "starting"
+      },
+      {
+        "generation": 1,
+        "status": "idle",
+        "task": "starting"
+      },
+      {
+        "generation": 1,
+        "status": "working",
+        "task": "starting"
+      },
+      {
+        "generation": 1,
+        "status": "needs_input",
+        "task": "starting"
+      },
+      {
+        "generation": 2,
+        "status": "offline",
+        "task": "interrupted"
+      },
+      {
+        "generation": 3,
+        "status": "offline",
+        "task": "interrupted"
+      },
+      {
+        "generation": 3,
+        "status": "starting",
+        "task": "starting"
+      },
+      {
+        "generation": 3,
+        "status": "starting",
+        "task": "starting"
+      },
+      {
+        "generation": 3,
+        "status": "starting",
+        "task": "starting"
+      },
+      {
+        "generation": 3,
+        "status": "starting",
+        "task": "starting"
+      },
+      {
+        "generation": 3,
+        "status": "idle",
+        "task": "starting"
+      },
+      {
+        "generation": 3,
+        "status": "idle",
+        "task": "starting"
+      },
+      {
+        "generation": 3,
+        "status": "idle",
+        "task": "starting"
+      }
+    ],
+    "cleanup_completed": true,
+    "history_prefix_sha256": "77ce5325be37d6d5098ac6ab81211b1428430fedc97d4940bc603a77e379851c",
+    "history_entries_before": 6,
+    "history_entries_after": 6,
+    "old_processes_exited": true,
+    "crash_recovery_verified": true,
+    "repeated_restart_preserved": true,
+    "browser_interrupted_visible": true,
+    "browser_refresh_without_replay": true,
+    "session_history_preserved": true,
+    "native_resume_verified": true,
+    "new_process_same_session": true,
+    "no_automatic_replay_observation_ms": 3000,
+    "host_generations": 3,
+    "distinct_host_processes": true,
+    "external_browser_requests": 0,
+    "browser_errors": 0
+  },
+  "source_sha256": {
+    "scripts/manual_recovery.mjs": "01112cd89031188edb10d90e80c2af0c3b54b4676c633a232656446609b259bb",
+    "scripts/pi_office_policy.mjs": "81371ddbaf85240ea99cf13df76357dd08a770f3db52ed02f25af5b2b9d9533b",
+    "scripts/office_pi_host.mjs": "4ab7ada64bdb4cd7932408e594bc51373f79c113dc6c20861c87343f7b6c7664",
+    "scripts/office_pi_restart.mjs": "34f7542c129fea762c9c7abef775f4887c06f8a72b5f3110bfd4d5ad476ac566",
+    "scripts/run_pi_work.py": "12096f63868b1a8ec059b28b552e5cfec48f3d4dce9ae7eeecd8fa831cf05c24",
+    "scripts/office_dispatch.py": "c581cbb318adc3848b5cebc4b15345241f4c3318191978861147dc7235d06788",
+    "scripts/office_console.py": "f4cb75b8aec7b94da216ebf099dfbfb0546a72c4e66f990fcabaed89d7ca6ce8",
+    "scripts/office_console.js": "3cb646f2d58c06782978af12ed4371bec5aecc949c2c121740a731d5dd1e70cd",
+    "scripts/office_results.py": "0353acb5e37174b22d89a4cb9378991e2a1cb41aa59493cfaeca8c038f4030f4",
+    "scripts/office_results.html": "4b8f1c67107ffee78420f4c0f195423bf4b1d7b0f2809e078e444d84cdefc9db",
+    "scripts/check_pi_host_restart_browser.mjs": "913bb097fa5427938e89dd51dffc437ad9050fc5dcbdeedbd30513f1d5f79d7a",
+    "scripts/check_office_results_browser.mjs": "51e11ce25193a1e582d5417c1fe511b38aad9c8e898b9f96a73d67d31287815c"
+  },
+  "limitations": [
+    "The crash occurred after a real Pi loopback HTTP 429 reached needs_input; this does not establish recovery of an in-flight remote stream or successful task continuation.",
+    "Three distinct native Office host processes and two Pi session_start events; one explicit no-prompt reconnect, six original history records preserved, one injected request total.",
+    "The authenticated browser clicked the interrupted native card only after the private one-shot gate was armed. This is a bounded acceptance mode, not a general-purpose session picker.",
+    "Normal native shutdown was followed by identity-checked SIGTERM for two tracked background descendants; the runner and independent supervisor then observed no survivors.",
+    "No owner credentials, remote model calls, Strata inference, release, deployment or usable tag; full MVP and security boundaries remain pending."
+  ]
+}

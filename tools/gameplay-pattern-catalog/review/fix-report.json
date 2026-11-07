@@ -1,0 +1,1605 @@
+{
+  "generated_at": "2026-11-03T06:58:33Z",
+  "applied": true,
+  "counts": {
+    "fixed": 180,
+    "failed": 0,
+    "cannot-fix": 0
+  },
+  "notes": [
+    {
+      "id": "allocation-area-majority",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 2304,
+      "chars_after": 2341,
+      "attempts": [
+        {
+          "provider": "default",
+          "error": "no body markers"
+        }
+      ]
+    },
+    {
+      "id": "allocation-follow-phase",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 2337,
+      "chars_after": 2425,
+      "attempts": []
+    },
+    {
+      "id": "allocation-public-goal-race",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 2414,
+      "chars_after": 2575,
+      "attempts": []
+    },
+    {
+      "id": "allocation-public-pick",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 2294,
+      "chars_after": 2707,
+      "attempts": [
+        {
+          "provider": "default",
+          "error": "simplified characters: 两"
+        }
+      ]
+    },
+    {
+      "id": "allocation-route-denial",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 2293,
+      "chars_after": 2529,
+      "attempts": []
+    },
+    {
+      "id": "allocation-savings-interest",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 2380,
+      "chars_after": 2439,
+      "attempts": [
+        {
+          "provider": "default",
+          "error": "no body markers"
+        }
+      ]
+    },
+    {
+      "id": "allocation-shared-stock",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 2093,
+      "chars_after": 2401,
+      "attempts": []
+    },
+    {
+      "id": "allocation-snake-order",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 2520,
+      "chars_after": 2593,
+      "attempts": [
+        {
+          "provider": "default",
+          "error": "no body markers"
+        }
+      ]
+    },
+    {
+      "id": "automation-aerial-logistics",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 2187,
+      "chars_after": 2817,
+      "attempts": []
+    },
+    {
+      "id": "automation-belt-routing",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 1038,
+      "chars_after": 1018,
+      "attempts": []
+    },
+    {
+      "id": "automation-blueprint-reuse",
+      "result": "fixed",
+      "provider": "deepseek",
+      "chars_before": 2169,
+      "chars_after": 2411,
+      "attempts": [
+        {
+          "provider": "default",
+          "error": "no body markers"
+        },
+        {
+          "provider": "default",
+          "error": "no body markers"
+        }
+      ]
+    },
+    {
+      "id": "automation-flow-splitting",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 2298,
+      "chars_after": 2505,
+      "attempts": []
+    },
+    {
+      "id": "automation-fluid-routing",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 2067,
+      "chars_after": 2349,
+      "attempts": []
+    },
+    {
+      "id": "automation-power-budget",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 2149,
+      "chars_after": 2321,
+      "attempts": []
+    },
+    {
+      "id": "building-access-network",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 2255,
+      "chars_after": 2527,
+      "attempts": []
+    },
+    {
+      "id": "building-modular-snapping",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 2225,
+      "chars_after": 2258,
+      "attempts": []
+    },
+    {
+      "id": "building-room-requirements",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 2082,
+      "chars_after": 2140,
+      "attempts": []
+    },
+    {
+      "id": "building-service-coverage",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 2297,
+      "chars_after": 2436,
+      "attempts": []
+    },
+    {
+      "id": "building-terrain-shaping",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 2181,
+      "chars_after": 2257,
+      "attempts": []
+    },
+    {
+      "id": "building-vertical-stacking",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 2329,
+      "chars_after": 2620,
+      "attempts": []
+    },
+    {
+      "id": "building-water-engineering",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 2224,
+      "chars_after": 2444,
+      "attempts": []
+    },
+    {
+      "id": "combat-action-points",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 2202,
+      "chars_after": 2346,
+      "attempts": []
+    },
+    {
+      "id": "combat-combat-deck-cycle",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 2190,
+      "chars_after": 2361,
+      "attempts": []
+    },
+    {
+      "id": "combat-combo-variation",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 2348,
+      "chars_after": 2565,
+      "attempts": []
+    },
+    {
+      "id": "combat-destructible-cover",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 2346,
+      "chars_after": 2562,
+      "attempts": []
+    },
+    {
+      "id": "combat-forced-movement",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 2201,
+      "chars_after": 2304,
+      "attempts": []
+    },
+    {
+      "id": "combat-friendly-fire",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 2154,
+      "chars_after": 2462,
+      "attempts": []
+    },
+    {
+      "id": "combat-intent-preview",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 2390,
+      "chars_after": 2591,
+      "attempts": []
+    },
+    {
+      "id": "combat-posture-break",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 2184,
+      "chars_after": 2494,
+      "attempts": []
+    },
+    {
+      "id": "combat-simultaneous-orders",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 2107,
+      "chars_after": 2191,
+      "attempts": []
+    },
+    {
+      "id": "combat-stamina-budget",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 1044,
+      "chars_after": 1024,
+      "attempts": []
+    },
+    {
+      "id": "command-focus-fire",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 2335,
+      "chars_after": 2497,
+      "attempts": []
+    },
+    {
+      "id": "command-frontline-shielding",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 2419,
+      "chars_after": 2656,
+      "attempts": []
+    },
+    {
+      "id": "command-interrupt-action",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 2174,
+      "chars_after": 2381,
+      "attempts": []
+    },
+    {
+      "id": "command-prebattle-formation",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 2083,
+      "chars_after": 2114,
+      "attempts": []
+    },
+    {
+      "id": "command-scout-current-vision",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 2170,
+      "chars_after": 2215,
+      "attempts": []
+    },
+    {
+      "id": "command-split-objectives",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 2275,
+      "chars_after": 2395,
+      "attempts": []
+    },
+    {
+      "id": "command-trait-thresholds",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 2383,
+      "chars_after": 2634,
+      "attempts": []
+    },
+    {
+      "id": "commerce-auction-bidding",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 2299,
+      "chars_after": 2452,
+      "attempts": []
+    },
+    {
+      "id": "commerce-debt-pressure",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 2307,
+      "chars_after": 2443,
+      "attempts": []
+    },
+    {
+      "id": "commerce-haggling",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 2216,
+      "chars_after": 2446,
+      "attempts": []
+    },
+    {
+      "id": "commerce-interpret-orders",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 2167,
+      "chars_after": 2224,
+      "attempts": []
+    },
+    {
+      "id": "commerce-price-discovery",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 1144,
+      "chars_after": 1099,
+      "attempts": []
+    },
+    {
+      "id": "commerce-regional-arbitrage",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 2180,
+      "chars_after": 2589,
+      "attempts": []
+    },
+    {
+      "id": "commerce-timed-contracts",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 2239,
+      "chars_after": 2282,
+      "attempts": [
+        {
+          "provider": "default",
+          "error": "simplified characters: 占"
+        }
+      ]
+    },
+    {
+      "id": "commerce-trade-route-programming",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 2133,
+      "chars_after": 2698,
+      "attempts": []
+    },
+    {
+      "id": "cooking-food-preservation",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 2414,
+      "chars_after": 2716,
+      "attempts": []
+    },
+    {
+      "id": "cooking-heat-window",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 2151,
+      "chars_after": 2342,
+      "attempts": []
+    },
+    {
+      "id": "cooking-order-triage",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 2111,
+      "chars_after": 2458,
+      "attempts": [
+        {
+          "provider": "default",
+          "error": "no body markers"
+        }
+      ]
+    },
+    {
+      "id": "cooking-preparation-chain",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 2082,
+      "chars_after": 2189,
+      "attempts": []
+    },
+    {
+      "id": "cooking-station-handoff",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 2149,
+      "chars_after": 2299,
+      "attempts": []
+    },
+    {
+      "id": "cooperation-hidden-role",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 2277,
+      "chars_after": 2328,
+      "attempts": []
+    },
+    {
+      "id": "cooperation-physical-tether",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 2093,
+      "chars_after": 2299,
+      "attempts": []
+    },
+    {
+      "id": "cooperation-split-information",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 2224,
+      "chars_after": 2479,
+      "attempts": []
+    },
+    {
+      "id": "cooperation-synchronized-triggers",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 2345,
+      "chars_after": 2535,
+      "attempts": []
+    },
+    {
+      "id": "cooperation-temporary-alliance",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 2248,
+      "chars_after": 2329,
+      "attempts": []
+    },
+    {
+      "id": "deckbuilding-card-upgrade",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 2524,
+      "chars_after": 2823,
+      "attempts": []
+    },
+    {
+      "id": "deckbuilding-discard-redraw",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 2331,
+      "chars_after": 2377,
+      "attempts": []
+    },
+    {
+      "id": "deckbuilding-exhaust-for-burst",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 2354,
+      "chars_after": 2628,
+      "attempts": []
+    },
+    {
+      "id": "deckbuilding-opening-hand-control",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 2325,
+      "chars_after": 2604,
+      "attempts": [
+        {
+          "provider": "default",
+          "error": "simplified characters: 占"
+        }
+      ]
+    },
+    {
+      "id": "deckbuilding-poker-hand-requirements",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 2282,
+      "chars_after": 2413,
+      "attempts": []
+    },
+    {
+      "id": "deckbuilding-rule-changing-passives",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 2479,
+      "chars_after": 2545,
+      "attempts": []
+    },
+    {
+      "id": "deckbuilding-temporary-generation",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 2285,
+      "chars_after": 2479,
+      "attempts": [
+        {
+          "provider": "default",
+          "error": "no body markers"
+        }
+      ]
+    },
+    {
+      "id": "deckbuilding-trigger-order",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 2194,
+      "chars_after": 2311,
+      "attempts": []
+    },
+    {
+      "id": "defense-ammunition-supply",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 2279,
+      "chars_after": 2677,
+      "attempts": []
+    },
+    {
+      "id": "defense-early-wave-call",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 2327,
+      "chars_after": 2400,
+      "attempts": []
+    },
+    {
+      "id": "defense-maze-routing",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 2609,
+      "chars_after": 2794,
+      "attempts": []
+    },
+    {
+      "id": "defense-mobile-defender",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 2319,
+      "chars_after": 3188,
+      "attempts": []
+    },
+    {
+      "id": "defense-resistance-counters",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 2317,
+      "chars_after": 2601,
+      "attempts": []
+    },
+    {
+      "id": "defense-target-priority",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 2144,
+      "chars_after": 2168,
+      "attempts": []
+    },
+    {
+      "id": "defense-tower-upgrade-budget",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 2236,
+      "chars_after": 2514,
+      "attempts": []
+    },
+    {
+      "id": "defense-trap-sequence",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 2306,
+      "chars_after": 2796,
+      "attempts": []
+    },
+    {
+      "id": "driving-air-balance",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 2085,
+      "chars_after": 2221,
+      "attempts": []
+    },
+    {
+      "id": "driving-air-stunt",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 2117,
+      "chars_after": 2281,
+      "attempts": []
+    },
+    {
+      "id": "driving-drift-boost",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 2323,
+      "chars_after": 2401,
+      "attempts": []
+    },
+    {
+      "id": "driving-slipstream",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 2216,
+      "chars_after": 2392,
+      "attempts": [
+        {
+          "provider": "default",
+          "error": "simplified characters: 里"
+        },
+        {
+          "provider": "default",
+          "error": "simplified characters: 里"
+        },
+        {
+          "provider": "deepseek",
+          "error": "simplified characters: 里"
+        }
+      ]
+    },
+    {
+      "id": "driving-start-charge",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 2260,
+      "chars_after": 2194,
+      "attempts": []
+    },
+    {
+      "id": "ecology-animal-taming",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 2124,
+      "chars_after": 2375,
+      "attempts": []
+    },
+    {
+      "id": "ecology-breeding-conditions",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 2285,
+      "chars_after": 2409,
+      "attempts": []
+    },
+    {
+      "id": "ecology-genetic-diversity",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 2277,
+      "chars_after": 2426,
+      "attempts": []
+    },
+    {
+      "id": "ecology-habitat-capacity",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 2214,
+      "chars_after": 2239,
+      "attempts": []
+    },
+    {
+      "id": "ecology-plant-crossbreeding",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 2359,
+      "chars_after": 2670,
+      "attempts": []
+    },
+    {
+      "id": "ecology-population-limits",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 2229,
+      "chars_after": 2364,
+      "attempts": []
+    },
+    {
+      "id": "ecology-species-compatibility",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 2490,
+      "chars_after": 2748,
+      "attempts": []
+    },
+    {
+      "id": "exploration-ability-gates",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 1025,
+      "chars_after": 1163,
+      "attempts": []
+    },
+    {
+      "id": "exploration-air-action-refill",
+      "result": "fixed",
+      "provider": "deepseek",
+      "chars_before": 2317,
+      "chars_after": 2539,
+      "attempts": [
+        {
+          "provider": "default",
+          "error": "no body markers"
+        },
+        {
+          "provider": "default",
+          "error": "no body markers"
+        }
+      ]
+    },
+    {
+      "id": "exploration-earned-map",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 2187,
+      "chars_after": 2425,
+      "attempts": []
+    },
+    {
+      "id": "exploration-gliding-descent",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 2074,
+      "chars_after": 2441,
+      "attempts": []
+    },
+    {
+      "id": "exploration-procedural-route-reading",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 2312,
+      "chars_after": 2980,
+      "attempts": [
+        {
+          "provider": "default",
+          "error": "no body markers"
+        }
+      ]
+    },
+    {
+      "id": "exploration-stealth-awareness",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 2362,
+      "chars_after": 2512,
+      "attempts": [
+        {
+          "provider": "default",
+          "error": "no body markers"
+        }
+      ]
+    },
+    {
+      "id": "exploration-wall-jump",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 2103,
+      "chars_after": 2332,
+      "attempts": [
+        {
+          "provider": "default",
+          "error": "no body markers"
+        }
+      ]
+    },
+    {
+      "id": "farming-fertilizer-tradeoff",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 2273,
+      "chars_after": 2526,
+      "attempts": [
+        {
+          "provider": "default",
+          "error": "no body markers"
+        }
+      ]
+    },
+    {
+      "id": "farming-growth-care",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 1046,
+      "chars_after": 1094,
+      "attempts": [
+        {
+          "provider": "default",
+          "error": "no body markers"
+        }
+      ]
+    },
+    {
+      "id": "farming-irrigation-layout",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 2236,
+      "chars_after": 2478,
+      "attempts": []
+    },
+    {
+      "id": "farming-livestock-care",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 2300,
+      "chars_after": 2389,
+      "attempts": []
+    },
+    {
+      "id": "farming-orchard-investment",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 2427,
+      "chars_after": 2469,
+      "attempts": []
+    },
+    {
+      "id": "fishing-bait-loadout",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 2158,
+      "chars_after": 2355,
+      "attempts": []
+    },
+    {
+      "id": "fishing-bite-window",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 926,
+      "chars_after": 906,
+      "attempts": []
+    },
+    {
+      "id": "fishing-line-tension",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 2245,
+      "chars_after": 2726,
+      "attempts": []
+    },
+    {
+      "id": "fishing-pond-production",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 2280,
+      "chars_after": 2350,
+      "attempts": []
+    },
+    {
+      "id": "fishing-timed-contest",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 2374,
+      "chars_after": 2679,
+      "attempts": []
+    },
+    {
+      "id": "gathering-oxygen-gathering",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 2297,
+      "chars_after": 2670,
+      "attempts": []
+    },
+    {
+      "id": "gathering-renewable-forage-route",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 2328,
+      "chars_after": 2694,
+      "attempts": []
+    },
+    {
+      "id": "gathering-resource-detection",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 2440,
+      "chars_after": 2556,
+      "attempts": []
+    },
+    {
+      "id": "gathering-supply-mining",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 2369,
+      "chars_after": 2453,
+      "attempts": []
+    },
+    {
+      "id": "gathering-tool-hardness",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 1014,
+      "chars_after": 1019,
+      "attempts": []
+    },
+    {
+      "id": "gathering-volumetric-excavation",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 2301,
+      "chars_after": 2481,
+      "attempts": []
+    },
+    {
+      "id": "incremental-farm-or-push",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 2367,
+      "chars_after": 2508,
+      "attempts": []
+    },
+    {
+      "id": "incremental-limited-team-dispatch",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 2328,
+      "chars_after": 2522,
+      "attempts": [
+        {
+          "provider": "default",
+          "error": "no body markers"
+        }
+      ]
+    },
+    {
+      "id": "incremental-manual-to-passive",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 2306,
+      "chars_after": 2475,
+      "attempts": []
+    },
+    {
+      "id": "incremental-overlap-income-bursts",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 2511,
+      "chars_after": 2858,
+      "attempts": []
+    },
+    {
+      "id": "inventory-death-retrieval",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 2328,
+      "chars_after": 2332,
+      "attempts": []
+    },
+    {
+      "id": "inventory-durability",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 2111,
+      "chars_after": 2245,
+      "attempts": []
+    },
+    {
+      "id": "inventory-equipment-budget",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 2336,
+      "chars_after": 2577,
+      "attempts": [
+        {
+          "provider": "default",
+          "error": "no body markers"
+        }
+      ]
+    },
+    {
+      "id": "inventory-identification",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 2477,
+      "chars_after": 2738,
+      "attempts": []
+    },
+    {
+      "id": "inventory-light-reserve",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 2029,
+      "chars_after": 2118,
+      "attempts": []
+    },
+    {
+      "id": "inventory-stack-limits",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 2333,
+      "chars_after": 2788,
+      "attempts": []
+    },
+    {
+      "id": "inventory-weight-budget",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 2139,
+      "chars_after": 2155,
+      "attempts": []
+    },
+    {
+      "id": "matching-clear-under-cargo",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 2380,
+      "chars_after": 2666,
+      "attempts": []
+    },
+    {
+      "id": "matching-combine-power-pieces",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 2374,
+      "chars_after": 2515,
+      "attempts": []
+    },
+    {
+      "id": "matching-complete-lines",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 2362,
+      "chars_after": 2496,
+      "attempts": []
+    },
+    {
+      "id": "matching-gravity-cascade",
+      "result": "fixed",
+      "provider": "deepseek",
+      "chars_before": 2374,
+      "chars_after": 2589,
+      "attempts": [
+        {
+          "provider": "default",
+          "error": "parse_note: related pattern needs a reason"
+        },
+        {
+          "provider": "default",
+          "error": "no body markers"
+        }
+      ]
+    },
+    {
+      "id": "matching-merge-three-upgrade",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 2193,
+      "chars_after": 2416,
+      "attempts": []
+    },
+    {
+      "id": "matching-pattern-creates-power",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 2362,
+      "chars_after": 2644,
+      "attempts": []
+    },
+    {
+      "id": "matching-slide-board-merge",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 2208,
+      "chars_after": 2714,
+      "attempts": []
+    },
+    {
+      "id": "matching-tap-connected-group",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 2306,
+      "chars_after": 2440,
+      "attempts": []
+    },
+    {
+      "id": "matching-trace-color-chain",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 2443,
+      "chars_after": 2575,
+      "attempts": []
+    },
+    {
+      "id": "movement-auto-forward",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 2314,
+      "chars_after": 2598,
+      "attempts": [
+        {
+          "provider": "default",
+          "error": "no body markers"
+        }
+      ]
+    },
+    {
+      "id": "movement-carry-object",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 2359,
+      "chars_after": 2849,
+      "attempts": []
+    },
+    {
+      "id": "movement-low-slide",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 2328,
+      "chars_after": 2613,
+      "attempts": [
+        {
+          "provider": "default",
+          "error": "no body markers"
+        }
+      ]
+    },
+    {
+      "id": "movement-run-walk-control",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 2234,
+      "chars_after": 2498,
+      "attempts": []
+    },
+    {
+      "id": "movement-target-bounce",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 2214,
+      "chars_after": 2334,
+      "attempts": []
+    },
+    {
+      "id": "narrative-background-dialogue-access",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 2268,
+      "chars_after": 2554,
+      "attempts": []
+    },
+    {
+      "id": "narrative-delayed-choice-consequences",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 2282,
+      "chars_after": 2350,
+      "attempts": []
+    },
+    {
+      "id": "narrative-loop-event-schedule",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 2347,
+      "chars_after": 2584,
+      "attempts": [
+        {
+          "provider": "default",
+          "error": "no body markers"
+        }
+      ]
+    },
+    {
+      "id": "narrative-service-as-response",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 2303,
+      "chars_after": 2491,
+      "attempts": []
+    },
+    {
+      "id": "progression-death-loses-training",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 2180,
+      "chars_after": 2230,
+      "attempts": []
+    },
+    {
+      "id": "progression-evolution-recipes",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 2391,
+      "chars_after": 2423,
+      "attempts": []
+    },
+    {
+      "id": "progression-respec-investment",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 2251,
+      "chars_after": 2349,
+      "attempts": []
+    },
+    {
+      "id": "projectiles-active-reload",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 2437,
+      "chars_after": 2519,
+      "attempts": []
+    },
+    {
+      "id": "projectiles-ballistic-arc",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 2245,
+      "chars_after": 2325,
+      "attempts": []
+    },
+    {
+      "id": "projectiles-charged-release",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 2395,
+      "chars_after": 2524,
+      "attempts": []
+    },
+    {
+      "id": "projectiles-heat-pacing",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 2189,
+      "chars_after": 2570,
+      "attempts": []
+    },
+    {
+      "id": "projectiles-independent-aim",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 2300,
+      "chars_after": 2439,
+      "attempts": []
+    },
+    {
+      "id": "projectiles-maintain-lock",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 2238,
+      "chars_after": 2540,
+      "attempts": []
+    },
+    {
+      "id": "projectiles-piercing-line",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 2390,
+      "chars_after": 2833,
+      "attempts": []
+    },
+    {
+      "id": "projectiles-spread-recovery",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 2266,
+      "chars_after": 2665,
+      "attempts": []
+    },
+    {
+      "id": "puzzles-beam-routing",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 2174,
+      "chars_after": 2651,
+      "attempts": [
+        {
+          "provider": "default",
+          "error": "no body markers"
+        }
+      ]
+    },
+    {
+      "id": "puzzles-box-pushing",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 1060,
+      "chars_after": 1040,
+      "attempts": []
+    },
+    {
+      "id": "puzzles-language-decoding",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 2092,
+      "chars_after": 2472,
+      "attempts": []
+    },
+    {
+      "id": "puzzles-linked-portals",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 2247,
+      "chars_after": 2427,
+      "attempts": []
+    },
+    {
+      "id": "puzzles-paper-folding",
+      "result": "fixed",
+      "provider": "deepseek",
+      "chars_before": 2259,
+      "chars_after": 2593,
+      "attempts": [
+        {
+          "provider": "default",
+          "error": "no body markers"
+        },
+        {
+          "provider": "default",
+          "error": "no body markers"
+        }
+      ]
+    },
+    {
+      "id": "puzzles-scene-deduction",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 2479,
+      "chars_after": 2553,
+      "attempts": []
+    },
+    {
+      "id": "puzzles-time-scrubbing",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 2229,
+      "chars_after": 2463,
+      "attempts": []
+    },
+    {
+      "id": "puzzles-visual-rule-learning",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 2257,
+      "chars_after": 2258,
+      "attempts": []
+    },
+    {
+      "id": "relationships-bond-scenes",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 2480,
+      "chars_after": 2656,
+      "attempts": []
+    },
+    {
+      "id": "relationships-companion-approval",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 2123,
+      "chars_after": 2224,
+      "attempts": []
+    },
+    {
+      "id": "relationships-daily-contact",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 2349,
+      "chars_after": 2485,
+      "attempts": []
+    },
+    {
+      "id": "relationships-date-itinerary",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 2290,
+      "chars_after": 2408,
+      "attempts": []
+    },
+    {
+      "id": "relationships-dynastic-marriage",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 2302,
+      "chars_after": 2436,
+      "attempts": []
+    },
+    {
+      "id": "relationships-gift-allocation",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 1030,
+      "chars_after": 1034,
+      "attempts": []
+    },
+    {
+      "id": "rhythm-hidden-beats",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 2367,
+      "chars_after": 2575,
+      "attempts": []
+    },
+    {
+      "id": "rhythm-onbeat-actions",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 2371,
+      "chars_after": 2809,
+      "attempts": [
+        {
+          "provider": "default",
+          "error": "simplified characters: 吃"
+        }
+      ]
+    },
+    {
+      "id": "stealth-disguise-access",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 2045,
+      "chars_after": 2342,
+      "attempts": []
+    },
+    {
+      "id": "stealth-hiding-spots",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 2129,
+      "chars_after": 2398,
+      "attempts": []
+    },
+    {
+      "id": "stealth-knockout-window",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 2279,
+      "chars_after": 2416,
+      "attempts": []
+    },
+    {
+      "id": "stealth-light-shadow",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 2165,
+      "chars_after": 2309,
+      "attempts": []
+    },
+    {
+      "id": "stealth-peeking",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 2312,
+      "chars_after": 2370,
+      "attempts": []
+    },
+    {
+      "id": "stealth-security-network",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 2102,
+      "chars_after": 2120,
+      "attempts": []
+    },
+    {
+      "id": "stealth-sound-lures",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 2318,
+      "chars_after": 2863,
+      "attempts": [
+        {
+          "provider": "default",
+          "error": "no body markers"
+        }
+      ]
+    },
+    {
+      "id": "stealth-staged-accidents",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 2249,
+      "chars_after": 2580,
+      "attempts": []
+    },
+    {
+      "id": "stealth-synchronized-actions",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 2148,
+      "chars_after": 2309,
+      "attempts": []
+    },
+    {
+      "id": "survival-body-inspection",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 2129,
+      "chars_after": 2235,
+      "attempts": []
+    },
+    {
+      "id": "survival-contagion-control",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 2409,
+      "chars_after": 2774,
+      "attempts": []
+    },
+    {
+      "id": "survival-fatigue-rest",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 2261,
+      "chars_after": 2443,
+      "attempts": []
+    },
+    {
+      "id": "survival-limb-impairment",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 2460,
+      "chars_after": 2713,
+      "attempts": []
+    },
+    {
+      "id": "survival-stress-crisis",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 2189,
+      "chars_after": 2365,
+      "attempts": []
+    },
+    {
+      "id": "survival-temporary-relief",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 2209,
+      "chars_after": 2458,
+      "attempts": []
+    },
+    {
+      "id": "survival-weather-exposure",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 2242,
+      "chars_after": 2362,
+      "attempts": []
+    },
+    {
+      "id": "survival-wound-cleanliness",
+      "result": "fixed",
+      "provider": "default",
+      "chars_before": 2404,
+      "chars_after": 2845,
+      "attempts": []
+    }
+  ]
+}

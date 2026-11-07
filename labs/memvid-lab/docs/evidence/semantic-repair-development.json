@@ -1,0 +1,62 @@
+{
+  "schema_version": 1,
+  "task": "T-0436",
+  "failures_retained": [
+    {
+      "command": "timeout 120 .venv/bin/python tests/semantic_native.py --output work/repair-baseline-20261030",
+      "result": "exit1; stock24vector control fails with18before/6after and mismatched IDs",
+      "evidence": "semantic-repair-stock-failure.json"
+    },
+    {
+      "command": ".venv/bin/python prepare_semantic_sdk.py --archive work/sdk-source-2.0.160/source.tar.gz --build",
+      "result": "initial exit101: official Cargo.lock includes absent workspace members; secondbuild exit101: missingOpenSSLheaders; fixed build prerequisites documented"
+    },
+    {
+      "command": "timeout 120 .venv/bin/python tests/semantic_native.py --patched --output work/repair-candidate-v1",
+      "result": "24/24 andIDs pass; append fixture missingrequiredlabel; testharness corrected"
+    },
+    {
+      "command": "timeout 120 .venv/bin/python tests/semantic_hnsw.py --output work/repair-hnsw-v1",
+      "result": "initial memorybuilt; nullabledoctor detail causedtestharnessAttributeError; fixedparser"
+    },
+    {
+      "command": "corrected harness inspect+append on preserved initialHNSW memory copy",
+      "result": "exit1;1000before/1after ratherthan1001",
+      "evidence": "semantic-hnsw-retention-failure.json"
+    },
+    {
+      "command": "timeout 120 .venv/bin/python tests/semantic_hnsw.py --output work/repair-hnsw-v2",
+      "result": "exit1;1000/1001/1000persisted butnativeHNSWsearchpanicked shortresult33/dest50",
+      "evidence": "semantic-hnsw-short-result-failure.json"
+    },
+    {
+      "command": ".venv/bin/python -m unittest discover -s tests -p test_semantic.py -v",
+      "result": "strict-cosine regression first2failures at±1.000001; changedguardto originalstrictcontract;9testspass"
+    },
+    {
+      "command": "make full RUN_DIR=work/repair-full-v3",
+      "result": "12passed/3blocked missingpreparedoriginalassets; nonzero preserved"
+    },
+    {
+      "command": "timeout 1200 make prepare",
+      "result": "Whisper build exit101missingheaders; existingmatchingheaderconfiguration reapplied; subsequentprepareandfullpassed"
+    },
+    {
+      "command": "python3 .github/scripts/check_workflows.py",
+      "result": "exit2 cachelocationrequired; subsequentlypassed withverifiedexistingarchive andexternalcache"
+    },
+    {
+      "command": "git diff --cached --check",
+      "result": "exit2 on required blank unified-diff context whitespace; commit/push did not execute. Zero-context patches reproduced byte-identical source/native library; equivalence record preserves original evaluated patch bytes."
+    }
+  ],
+  "final_controls": {
+    "native_24": "passed",
+    "native_hnsw_1000": "passed",
+    "full_original_scenarios": "15passed",
+    "unit_tests": "37passed",
+    "quality_adoption": "both do_not_adopt_directly"
+  },
+  "retry_boundary": "one native candidate plus2source-backedcorrections; no furthernativecorrection attempted",
+  "data_boundary": "all synthetic; sourceandfailurememorybackup retained; original2026-10-29 artifacts unchanged"
+}

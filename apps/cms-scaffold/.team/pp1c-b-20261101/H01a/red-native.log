@@ -1,0 +1,680 @@
+✖ H01a_exact_inventory_policy_and_create_vector (1.116546ms)
+✖ H01a_fixed_INVENTORY_target (0.155119ms)
+✖ H01a_fixed_REVOKE_SESSIONS_target (0.061981ms)
+✖ H01a_fixed_PG_DUMP_source (0.05339ms)
+✖ H01a_fixed_PG_RESTORE_target (0.05488ms)
+✖ H01a_fixed_MEDIA_PACK_source (0.061809ms)
+✖ H01a_fixed_MEDIA_RESTORE_target (0.04829ms)
+✖ H01a_reject_full_id (0.07413ms)
+✖ H01a_reject_name (0.17754ms)
+✖ H01a_reject_image (0.246179ms)
+✖ H01a_reject_labels (0.12394ms)
+✖ H01a_reject_environment (0.076579ms)
+✖ H01a_reject_duplicate_env (0.08047ms)
+✖ H01a_reject_user (0.032639ms)
+✖ H01a_reject_argv (0.02935ms)
+✖ H01a_reject_entrypoint (0.028531ms)
+✖ H01a_reject_tty (0.05089ms)
+✖ H01a_reject_stdin (0.033538ms)
+✖ H01a_reject_writable_root (0.02789ms)
+✖ H01a_reject_privileged (0.04114ms)
+✖ H01a_reject_cap_add (0.02899ms)
+✖ H01a_reject_cap_drop (0.03002ms)
+✖ H01a_reject_security (0.06072ms)
+✖ H01a_reject_restart (0.04642ms)
+✖ H01a_reject_logs (0.0283ms)
+✖ H01a_reject_port (0.027599ms)
+✖ H01a_reject_device (0.02734ms)
+✖ H01a_reject_pid (0.02883ms)
+✖ H01a_reject_ipc (0.036349ms)
+✖ H01a_reject_hosts (0.0304ms)
+✖ H01a_reject_socket (0.029831ms)
+✖ H01a_reject_mount_rw (0.07547ms)
+✖ H01a_reject_volume_source (0.034619ms)
+✖ H01a_reject_extra_network (0.03548ms)
+✖ H01a_reject_wrong_network (0.04202ms)
+✖ H01a_reject_tmpfs (0.04688ms)
+✖ H01a_running_and_exit_state_are_checked (0.135481ms)
+✔ H01a_context_wrong_side (0.419808ms)
+✔ H01a_context_unknown_kind (0.12915ms)
+✔ H01a_context_image_changed (0.07845ms)
+✔ H01a_context_uid_name (0.05061ms)
+✔ H01a_context_unsafe_path (0.06016ms)
+✔ H01a_context_image_env_collision (0.0582ms)
+ℹ tests 43
+ℹ suites 0
+ℹ pass 6
+ℹ fail 37
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 91.780583
+
+✖ failing tests:
+
+test at scripts/local/maintenance-helper.test.mjs:31:1
+✖ H01a_exact_inventory_policy_and_create_vector (1.116546ms)
+  Error: ADAPTER_UNSEALED
+      at buildHelperPolicy (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-20261101/apps/cms-scaffold/scripts/local/maintenance-helper.mjs:2:45)
+      at fixture (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-20261101/apps/cms-scaffold/scripts/local/maintenance-helper.test.mjs:15:37)
+      at TestContext.<anonymous> (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-20261101/apps/cms-scaffold/scripts/local/maintenance-helper.test.mjs:32:34)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.start (node:internal/test_runner/test:1191:17)
+      at startSubtestAfterBootstrap (node:internal/test_runner/harness:385:17) {
+    code: 'ADAPTER_UNSEALED',
+    phase: null,
+    operationId: null
+  }
+
+test at scripts/local/maintenance-helper.test.mjs:43:3
+✖ H01a_fixed_INVENTORY_target (0.155119ms)
+  Error: ADAPTER_UNSEALED
+      at buildHelperPolicy (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-20261101/apps/cms-scaffold/scripts/local/maintenance-helper.mjs:2:45)
+      at fixture (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-20261101/apps/cms-scaffold/scripts/local/maintenance-helper.test.mjs:15:37)
+      at TestContext.<anonymous> (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-20261101/apps/cms-scaffold/scripts/local/maintenance-helper.test.mjs:44:34)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+      at Test.postRun (node:internal/test_runner/test:1465:19)
+      at Test.run (node:internal/test_runner/test:1390:12)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:385:3) {
+    code: 'ADAPTER_UNSEALED',
+    phase: null,
+    operationId: null
+  }
+
+test at scripts/local/maintenance-helper.test.mjs:43:3
+✖ H01a_fixed_REVOKE_SESSIONS_target (0.061981ms)
+  Error: ADAPTER_UNSEALED
+      at buildHelperPolicy (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-20261101/apps/cms-scaffold/scripts/local/maintenance-helper.mjs:2:45)
+      at fixture (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-20261101/apps/cms-scaffold/scripts/local/maintenance-helper.test.mjs:15:37)
+      at TestContext.<anonymous> (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-20261101/apps/cms-scaffold/scripts/local/maintenance-helper.test.mjs:44:34)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+      at Test.postRun (node:internal/test_runner/test:1465:19)
+      at Test.run (node:internal/test_runner/test:1390:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    code: 'ADAPTER_UNSEALED',
+    phase: null,
+    operationId: null
+  }
+
+test at scripts/local/maintenance-helper.test.mjs:43:3
+✖ H01a_fixed_PG_DUMP_source (0.05339ms)
+  Error: ADAPTER_UNSEALED
+      at buildHelperPolicy (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-20261101/apps/cms-scaffold/scripts/local/maintenance-helper.mjs:2:45)
+      at fixture (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-20261101/apps/cms-scaffold/scripts/local/maintenance-helper.test.mjs:15:37)
+      at TestContext.<anonymous> (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-20261101/apps/cms-scaffold/scripts/local/maintenance-helper.test.mjs:44:34)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+      at Test.postRun (node:internal/test_runner/test:1465:19)
+      at Test.run (node:internal/test_runner/test:1390:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    code: 'ADAPTER_UNSEALED',
+    phase: null,
+    operationId: null
+  }
+
+test at scripts/local/maintenance-helper.test.mjs:43:3
+✖ H01a_fixed_PG_RESTORE_target (0.05488ms)
+  Error: ADAPTER_UNSEALED
+      at buildHelperPolicy (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-20261101/apps/cms-scaffold/scripts/local/maintenance-helper.mjs:2:45)
+      at fixture (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-20261101/apps/cms-scaffold/scripts/local/maintenance-helper.test.mjs:15:37)
+      at TestContext.<anonymous> (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-20261101/apps/cms-scaffold/scripts/local/maintenance-helper.test.mjs:44:34)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+      at Test.postRun (node:internal/test_runner/test:1465:19)
+      at Test.run (node:internal/test_runner/test:1390:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    code: 'ADAPTER_UNSEALED',
+    phase: null,
+    operationId: null
+  }
+
+test at scripts/local/maintenance-helper.test.mjs:43:3
+✖ H01a_fixed_MEDIA_PACK_source (0.061809ms)
+  Error: ADAPTER_UNSEALED
+      at buildHelperPolicy (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-20261101/apps/cms-scaffold/scripts/local/maintenance-helper.mjs:2:45)
+      at fixture (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-20261101/apps/cms-scaffold/scripts/local/maintenance-helper.test.mjs:15:37)
+      at TestContext.<anonymous> (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-20261101/apps/cms-scaffold/scripts/local/maintenance-helper.test.mjs:44:34)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+      at Test.postRun (node:internal/test_runner/test:1465:19)
+      at Test.run (node:internal/test_runner/test:1390:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    code: 'ADAPTER_UNSEALED',
+    phase: null,
+    operationId: null
+  }
+
+test at scripts/local/maintenance-helper.test.mjs:43:3
+✖ H01a_fixed_MEDIA_RESTORE_target (0.04829ms)
+  Error: ADAPTER_UNSEALED
+      at buildHelperPolicy (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-20261101/apps/cms-scaffold/scripts/local/maintenance-helper.mjs:2:45)
+      at fixture (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-20261101/apps/cms-scaffold/scripts/local/maintenance-helper.test.mjs:15:37)
+      at TestContext.<anonymous> (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-20261101/apps/cms-scaffold/scripts/local/maintenance-helper.test.mjs:44:34)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+      at Test.postRun (node:internal/test_runner/test:1465:19)
+      at Test.run (node:internal/test_runner/test:1390:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    code: 'ADAPTER_UNSEALED',
+    phase: null,
+    operationId: null
+  }
+
+test at scripts/local/maintenance-helper.test.mjs:64:5
+✖ H01a_reject_full_id (0.07413ms)
+  Error: ADAPTER_UNSEALED
+      at buildHelperPolicy (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-20261101/apps/cms-scaffold/scripts/local/maintenance-helper.mjs:2:45)
+      at fixture (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-20261101/apps/cms-scaffold/scripts/local/maintenance-helper.test.mjs:15:37)
+      at TestContext.<anonymous> (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-20261101/apps/cms-scaffold/scripts/local/maintenance-helper.test.mjs:65:32)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+      at Test.postRun (node:internal/test_runner/test:1465:19)
+      at Test.run (node:internal/test_runner/test:1390:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    code: 'ADAPTER_UNSEALED',
+    phase: null,
+    operationId: null
+  }
+
+test at scripts/local/maintenance-helper.test.mjs:64:5
+✖ H01a_reject_name (0.17754ms)
+  Error: ADAPTER_UNSEALED
+      at buildHelperPolicy (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-20261101/apps/cms-scaffold/scripts/local/maintenance-helper.mjs:2:45)
+      at fixture (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-20261101/apps/cms-scaffold/scripts/local/maintenance-helper.test.mjs:15:37)
+      at TestContext.<anonymous> (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-20261101/apps/cms-scaffold/scripts/local/maintenance-helper.test.mjs:65:32)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+      at Test.postRun (node:internal/test_runner/test:1465:19)
+      at Test.run (node:internal/test_runner/test:1390:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    code: 'ADAPTER_UNSEALED',
+    phase: null,
+    operationId: null
+  }
+
+test at scripts/local/maintenance-helper.test.mjs:64:5
+✖ H01a_reject_image (0.246179ms)
+  Error: ADAPTER_UNSEALED
+      at buildHelperPolicy (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-20261101/apps/cms-scaffold/scripts/local/maintenance-helper.mjs:2:45)
+      at fixture (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-20261101/apps/cms-scaffold/scripts/local/maintenance-helper.test.mjs:15:37)
+      at TestContext.<anonymous> (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-20261101/apps/cms-scaffold/scripts/local/maintenance-helper.test.mjs:65:32)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+      at Test.postRun (node:internal/test_runner/test:1465:19)
+      at Test.run (node:internal/test_runner/test:1390:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    code: 'ADAPTER_UNSEALED',
+    phase: null,
+    operationId: null
+  }
+
+test at scripts/local/maintenance-helper.test.mjs:64:5
+✖ H01a_reject_labels (0.12394ms)
+  Error: ADAPTER_UNSEALED
+      at buildHelperPolicy (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-20261101/apps/cms-scaffold/scripts/local/maintenance-helper.mjs:2:45)
+      at fixture (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-20261101/apps/cms-scaffold/scripts/local/maintenance-helper.test.mjs:15:37)
+      at TestContext.<anonymous> (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-20261101/apps/cms-scaffold/scripts/local/maintenance-helper.test.mjs:65:32)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+      at Test.postRun (node:internal/test_runner/test:1465:19)
+      at Test.run (node:internal/test_runner/test:1390:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    code: 'ADAPTER_UNSEALED',
+    phase: null,
+    operationId: null
+  }
+
+test at scripts/local/maintenance-helper.test.mjs:64:5
+✖ H01a_reject_environment (0.076579ms)
+  Error: ADAPTER_UNSEALED
+      at buildHelperPolicy (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-20261101/apps/cms-scaffold/scripts/local/maintenance-helper.mjs:2:45)
+      at fixture (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-20261101/apps/cms-scaffold/scripts/local/maintenance-helper.test.mjs:15:37)
+      at TestContext.<anonymous> (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-20261101/apps/cms-scaffold/scripts/local/maintenance-helper.test.mjs:65:32)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+      at Test.postRun (node:internal/test_runner/test:1465:19)
+      at Test.run (node:internal/test_runner/test:1390:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    code: 'ADAPTER_UNSEALED',
+    phase: null,
+    operationId: null
+  }
+
+test at scripts/local/maintenance-helper.test.mjs:64:5
+✖ H01a_reject_duplicate_env (0.08047ms)
+  Error: ADAPTER_UNSEALED
+      at buildHelperPolicy (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-20261101/apps/cms-scaffold/scripts/local/maintenance-helper.mjs:2:45)
+      at fixture (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-20261101/apps/cms-scaffold/scripts/local/maintenance-helper.test.mjs:15:37)
+      at TestContext.<anonymous> (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-20261101/apps/cms-scaffold/scripts/local/maintenance-helper.test.mjs:65:32)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+      at Test.postRun (node:internal/test_runner/test:1465:19)
+      at Test.run (node:internal/test_runner/test:1390:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    code: 'ADAPTER_UNSEALED',
+    phase: null,
+    operationId: null
+  }
+
+test at scripts/local/maintenance-helper.test.mjs:64:5
+✖ H01a_reject_user (0.032639ms)
+  Error: ADAPTER_UNSEALED
+      at buildHelperPolicy (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-20261101/apps/cms-scaffold/scripts/local/maintenance-helper.mjs:2:45)
+      at fixture (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-20261101/apps/cms-scaffold/scripts/local/maintenance-helper.test.mjs:15:37)
+      at TestContext.<anonymous> (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-20261101/apps/cms-scaffold/scripts/local/maintenance-helper.test.mjs:65:32)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+      at Test.postRun (node:internal/test_runner/test:1465:19)
+      at Test.run (node:internal/test_runner/test:1390:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    code: 'ADAPTER_UNSEALED',
+    phase: null,
+    operationId: null
+  }
+
+test at scripts/local/maintenance-helper.test.mjs:64:5
+✖ H01a_reject_argv (0.02935ms)
+  Error: ADAPTER_UNSEALED
+      at buildHelperPolicy (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-20261101/apps/cms-scaffold/scripts/local/maintenance-helper.mjs:2:45)
+      at fixture (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-20261101/apps/cms-scaffold/scripts/local/maintenance-helper.test.mjs:15:37)
+      at TestContext.<anonymous> (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-20261101/apps/cms-scaffold/scripts/local/maintenance-helper.test.mjs:65:32)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+      at Test.postRun (node:internal/test_runner/test:1465:19)
+      at Test.run (node:internal/test_runner/test:1390:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    code: 'ADAPTER_UNSEALED',
+    phase: null,
+    operationId: null
+  }
+
+test at scripts/local/maintenance-helper.test.mjs:64:5
+✖ H01a_reject_entrypoint (0.028531ms)
+  Error: ADAPTER_UNSEALED
+      at buildHelperPolicy (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-20261101/apps/cms-scaffold/scripts/local/maintenance-helper.mjs:2:45)
+      at fixture (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-20261101/apps/cms-scaffold/scripts/local/maintenance-helper.test.mjs:15:37)
+      at TestContext.<anonymous> (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-20261101/apps/cms-scaffold/scripts/local/maintenance-helper.test.mjs:65:32)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+      at Test.postRun (node:internal/test_runner/test:1465:19)
+      at Test.run (node:internal/test_runner/test:1390:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    code: 'ADAPTER_UNSEALED',
+    phase: null,
+    operationId: null
+  }
+
+test at scripts/local/maintenance-helper.test.mjs:64:5
+✖ H01a_reject_tty (0.05089ms)
+  Error: ADAPTER_UNSEALED
+      at buildHelperPolicy (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-20261101/apps/cms-scaffold/scripts/local/maintenance-helper.mjs:2:45)
+      at fixture (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-20261101/apps/cms-scaffold/scripts/local/maintenance-helper.test.mjs:15:37)
+      at TestContext.<anonymous> (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-20261101/apps/cms-scaffold/scripts/local/maintenance-helper.test.mjs:65:32)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+      at Test.postRun (node:internal/test_runner/test:1465:19)
+      at Test.run (node:internal/test_runner/test:1390:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    code: 'ADAPTER_UNSEALED',
+    phase: null,
+    operationId: null
+  }
+
+test at scripts/local/maintenance-helper.test.mjs:64:5
+✖ H01a_reject_stdin (0.033538ms)
+  Error: ADAPTER_UNSEALED
+      at buildHelperPolicy (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-20261101/apps/cms-scaffold/scripts/local/maintenance-helper.mjs:2:45)
+      at fixture (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-20261101/apps/cms-scaffold/scripts/local/maintenance-helper.test.mjs:15:37)
+      at TestContext.<anonymous> (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-20261101/apps/cms-scaffold/scripts/local/maintenance-helper.test.mjs:65:32)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+      at Test.postRun (node:internal/test_runner/test:1465:19)
+      at Test.run (node:internal/test_runner/test:1390:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    code: 'ADAPTER_UNSEALED',
+    phase: null,
+    operationId: null
+  }
+
+test at scripts/local/maintenance-helper.test.mjs:64:5
+✖ H01a_reject_writable_root (0.02789ms)
+  Error: ADAPTER_UNSEALED
+      at buildHelperPolicy (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-20261101/apps/cms-scaffold/scripts/local/maintenance-helper.mjs:2:45)
+      at fixture (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-20261101/apps/cms-scaffold/scripts/local/maintenance-helper.test.mjs:15:37)
+      at TestContext.<anonymous> (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-20261101/apps/cms-scaffold/scripts/local/maintenance-helper.test.mjs:65:32)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+      at Test.postRun (node:internal/test_runner/test:1465:19)
+      at Test.run (node:internal/test_runner/test:1390:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    code: 'ADAPTER_UNSEALED',
+    phase: null,
+    operationId: null
+  }
+
+test at scripts/local/maintenance-helper.test.mjs:64:5
+✖ H01a_reject_privileged (0.04114ms)
+  Error: ADAPTER_UNSEALED
+      at buildHelperPolicy (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-20261101/apps/cms-scaffold/scripts/local/maintenance-helper.mjs:2:45)
+      at fixture (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-20261101/apps/cms-scaffold/scripts/local/maintenance-helper.test.mjs:15:37)
+      at TestContext.<anonymous> (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-20261101/apps/cms-scaffold/scripts/local/maintenance-helper.test.mjs:65:32)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+      at Test.postRun (node:internal/test_runner/test:1465:19)
+      at Test.run (node:internal/test_runner/test:1390:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    code: 'ADAPTER_UNSEALED',
+    phase: null,
+    operationId: null
+  }
+
+test at scripts/local/maintenance-helper.test.mjs:64:5
+✖ H01a_reject_cap_add (0.02899ms)
+  Error: ADAPTER_UNSEALED
+      at buildHelperPolicy (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-20261101/apps/cms-scaffold/scripts/local/maintenance-helper.mjs:2:45)
+      at fixture (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-20261101/apps/cms-scaffold/scripts/local/maintenance-helper.test.mjs:15:37)
+      at TestContext.<anonymous> (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-20261101/apps/cms-scaffold/scripts/local/maintenance-helper.test.mjs:65:32)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+      at Test.postRun (node:internal/test_runner/test:1465:19)
+      at Test.run (node:internal/test_runner/test:1390:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    code: 'ADAPTER_UNSEALED',
+    phase: null,
+    operationId: null
+  }
+
+test at scripts/local/maintenance-helper.test.mjs:64:5
+✖ H01a_reject_cap_drop (0.03002ms)
+  Error: ADAPTER_UNSEALED
+      at buildHelperPolicy (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-20261101/apps/cms-scaffold/scripts/local/maintenance-helper.mjs:2:45)
+      at fixture (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-20261101/apps/cms-scaffold/scripts/local/maintenance-helper.test.mjs:15:37)
+      at TestContext.<anonymous> (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-20261101/apps/cms-scaffold/scripts/local/maintenance-helper.test.mjs:65:32)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+      at Test.postRun (node:internal/test_runner/test:1465:19)
+      at Test.run (node:internal/test_runner/test:1390:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    code: 'ADAPTER_UNSEALED',
+    phase: null,
+    operationId: null
+  }
+
+test at scripts/local/maintenance-helper.test.mjs:64:5
+✖ H01a_reject_security (0.06072ms)
+  Error: ADAPTER_UNSEALED
+      at buildHelperPolicy (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-20261101/apps/cms-scaffold/scripts/local/maintenance-helper.mjs:2:45)
+      at fixture (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-20261101/apps/cms-scaffold/scripts/local/maintenance-helper.test.mjs:15:37)
+      at TestContext.<anonymous> (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-20261101/apps/cms-scaffold/scripts/local/maintenance-helper.test.mjs:65:32)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+      at Test.postRun (node:internal/test_runner/test:1465:19)
+      at Test.run (node:internal/test_runner/test:1390:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    code: 'ADAPTER_UNSEALED',
+    phase: null,
+    operationId: null
+  }
+
+test at scripts/local/maintenance-helper.test.mjs:64:5
+✖ H01a_reject_restart (0.04642ms)
+  Error: ADAPTER_UNSEALED
+      at buildHelperPolicy (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-20261101/apps/cms-scaffold/scripts/local/maintenance-helper.mjs:2:45)
+      at fixture (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-20261101/apps/cms-scaffold/scripts/local/maintenance-helper.test.mjs:15:37)
+      at TestContext.<anonymous> (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-20261101/apps/cms-scaffold/scripts/local/maintenance-helper.test.mjs:65:32)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+      at Test.postRun (node:internal/test_runner/test:1465:19)
+      at Test.run (node:internal/test_runner/test:1390:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    code: 'ADAPTER_UNSEALED',
+    phase: null,
+    operationId: null
+  }
+
+test at scripts/local/maintenance-helper.test.mjs:64:5
+✖ H01a_reject_logs (0.0283ms)
+  Error: ADAPTER_UNSEALED
+      at buildHelperPolicy (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-20261101/apps/cms-scaffold/scripts/local/maintenance-helper.mjs:2:45)
+      at fixture (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-20261101/apps/cms-scaffold/scripts/local/maintenance-helper.test.mjs:15:37)
+      at TestContext.<anonymous> (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-20261101/apps/cms-scaffold/scripts/local/maintenance-helper.test.mjs:65:32)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+      at Test.postRun (node:internal/test_runner/test:1465:19)
+      at Test.run (node:internal/test_runner/test:1390:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    code: 'ADAPTER_UNSEALED',
+    phase: null,
+    operationId: null
+  }
+
+test at scripts/local/maintenance-helper.test.mjs:64:5
+✖ H01a_reject_port (0.027599ms)
+  Error: ADAPTER_UNSEALED
+      at buildHelperPolicy (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-20261101/apps/cms-scaffold/scripts/local/maintenance-helper.mjs:2:45)
+      at fixture (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-20261101/apps/cms-scaffold/scripts/local/maintenance-helper.test.mjs:15:37)
+      at TestContext.<anonymous> (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-20261101/apps/cms-scaffold/scripts/local/maintenance-helper.test.mjs:65:32)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+      at Test.postRun (node:internal/test_runner/test:1465:19)
+      at Test.run (node:internal/test_runner/test:1390:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    code: 'ADAPTER_UNSEALED',
+    phase: null,
+    operationId: null
+  }
+
+test at scripts/local/maintenance-helper.test.mjs:64:5
+✖ H01a_reject_device (0.02734ms)
+  Error: ADAPTER_UNSEALED
+      at buildHelperPolicy (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-20261101/apps/cms-scaffold/scripts/local/maintenance-helper.mjs:2:45)
+      at fixture (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-20261101/apps/cms-scaffold/scripts/local/maintenance-helper.test.mjs:15:37)
+      at TestContext.<anonymous> (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-20261101/apps/cms-scaffold/scripts/local/maintenance-helper.test.mjs:65:32)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+      at Test.postRun (node:internal/test_runner/test:1465:19)
+      at Test.run (node:internal/test_runner/test:1390:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    code: 'ADAPTER_UNSEALED',
+    phase: null,
+    operationId: null
+  }
+
+test at scripts/local/maintenance-helper.test.mjs:64:5
+✖ H01a_reject_pid (0.02883ms)
+  Error: ADAPTER_UNSEALED
+      at buildHelperPolicy (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-20261101/apps/cms-scaffold/scripts/local/maintenance-helper.mjs:2:45)
+      at fixture (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-20261101/apps/cms-scaffold/scripts/local/maintenance-helper.test.mjs:15:37)
+      at TestContext.<anonymous> (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-20261101/apps/cms-scaffold/scripts/local/maintenance-helper.test.mjs:65:32)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+      at Test.postRun (node:internal/test_runner/test:1465:19)
+      at Test.run (node:internal/test_runner/test:1390:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    code: 'ADAPTER_UNSEALED',
+    phase: null,
+    operationId: null
+  }
+
+test at scripts/local/maintenance-helper.test.mjs:64:5
+✖ H01a_reject_ipc (0.036349ms)
+  Error: ADAPTER_UNSEALED
+      at buildHelperPolicy (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-20261101/apps/cms-scaffold/scripts/local/maintenance-helper.mjs:2:45)
+      at fixture (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-20261101/apps/cms-scaffold/scripts/local/maintenance-helper.test.mjs:15:37)
+      at TestContext.<anonymous> (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-20261101/apps/cms-scaffold/scripts/local/maintenance-helper.test.mjs:65:32)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+      at Test.postRun (node:internal/test_runner/test:1465:19)
+      at Test.run (node:internal/test_runner/test:1390:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    code: 'ADAPTER_UNSEALED',
+    phase: null,
+    operationId: null
+  }
+
+test at scripts/local/maintenance-helper.test.mjs:64:5
+✖ H01a_reject_hosts (0.0304ms)
+  Error: ADAPTER_UNSEALED
+      at buildHelperPolicy (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-20261101/apps/cms-scaffold/scripts/local/maintenance-helper.mjs:2:45)
+      at fixture (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-20261101/apps/cms-scaffold/scripts/local/maintenance-helper.test.mjs:15:37)
+      at TestContext.<anonymous> (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-20261101/apps/cms-scaffold/scripts/local/maintenance-helper.test.mjs:65:32)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+      at Test.postRun (node:internal/test_runner/test:1465:19)
+      at Test.run (node:internal/test_runner/test:1390:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    code: 'ADAPTER_UNSEALED',
+    phase: null,
+    operationId: null
+  }
+
+test at scripts/local/maintenance-helper.test.mjs:64:5
+✖ H01a_reject_socket (0.029831ms)
+  Error: ADAPTER_UNSEALED
+      at buildHelperPolicy (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-20261101/apps/cms-scaffold/scripts/local/maintenance-helper.mjs:2:45)
+      at fixture (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-20261101/apps/cms-scaffold/scripts/local/maintenance-helper.test.mjs:15:37)
+      at TestContext.<anonymous> (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-20261101/apps/cms-scaffold/scripts/local/maintenance-helper.test.mjs:65:32)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+      at Test.postRun (node:internal/test_runner/test:1465:19)
+      at Test.run (node:internal/test_runner/test:1390:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    code: 'ADAPTER_UNSEALED',
+    phase: null,
+    operationId: null
+  }
+
+test at scripts/local/maintenance-helper.test.mjs:64:5
+✖ H01a_reject_mount_rw (0.07547ms)
+  Error: ADAPTER_UNSEALED
+      at buildHelperPolicy (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-20261101/apps/cms-scaffold/scripts/local/maintenance-helper.mjs:2:45)
+      at fixture (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-20261101/apps/cms-scaffold/scripts/local/maintenance-helper.test.mjs:15:37)
+      at TestContext.<anonymous> (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-20261101/apps/cms-scaffold/scripts/local/maintenance-helper.test.mjs:65:32)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+      at Test.postRun (node:internal/test_runner/test:1465:19)
+      at Test.run (node:internal/test_runner/test:1390:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    code: 'ADAPTER_UNSEALED',
+    phase: null,
+    operationId: null
+  }
+
+test at scripts/local/maintenance-helper.test.mjs:64:5
+✖ H01a_reject_volume_source (0.034619ms)
+  Error: ADAPTER_UNSEALED
+      at buildHelperPolicy (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-20261101/apps/cms-scaffold/scripts/local/maintenance-helper.mjs:2:45)
+      at fixture (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-20261101/apps/cms-scaffold/scripts/local/maintenance-helper.test.mjs:15:37)
+      at TestContext.<anonymous> (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-20261101/apps/cms-scaffold/scripts/local/maintenance-helper.test.mjs:65:32)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+      at Test.postRun (node:internal/test_runner/test:1465:19)
+      at Test.run (node:internal/test_runner/test:1390:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    code: 'ADAPTER_UNSEALED',
+    phase: null,
+    operationId: null
+  }
+
+test at scripts/local/maintenance-helper.test.mjs:64:5
+✖ H01a_reject_extra_network (0.03548ms)
+  Error: ADAPTER_UNSEALED
+      at buildHelperPolicy (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-20261101/apps/cms-scaffold/scripts/local/maintenance-helper.mjs:2:45)
+      at fixture (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-20261101/apps/cms-scaffold/scripts/local/maintenance-helper.test.mjs:15:37)
+      at TestContext.<anonymous> (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-20261101/apps/cms-scaffold/scripts/local/maintenance-helper.test.mjs:65:32)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+      at Test.postRun (node:internal/test_runner/test:1465:19)
+      at Test.run (node:internal/test_runner/test:1390:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    code: 'ADAPTER_UNSEALED',
+    phase: null,
+    operationId: null
+  }
+
+test at scripts/local/maintenance-helper.test.mjs:64:5
+✖ H01a_reject_wrong_network (0.04202ms)
+  Error: ADAPTER_UNSEALED
+      at buildHelperPolicy (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-20261101/apps/cms-scaffold/scripts/local/maintenance-helper.mjs:2:45)
+      at fixture (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-20261101/apps/cms-scaffold/scripts/local/maintenance-helper.test.mjs:15:37)
+      at TestContext.<anonymous> (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-20261101/apps/cms-scaffold/scripts/local/maintenance-helper.test.mjs:65:32)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+      at Test.postRun (node:internal/test_runner/test:1465:19)
+      at Test.run (node:internal/test_runner/test:1390:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    code: 'ADAPTER_UNSEALED',
+    phase: null,
+    operationId: null
+  }
+
+test at scripts/local/maintenance-helper.test.mjs:64:5
+✖ H01a_reject_tmpfs (0.04688ms)
+  Error: ADAPTER_UNSEALED
+      at buildHelperPolicy (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-20261101/apps/cms-scaffold/scripts/local/maintenance-helper.mjs:2:45)
+      at fixture (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-20261101/apps/cms-scaffold/scripts/local/maintenance-helper.test.mjs:15:37)
+      at TestContext.<anonymous> (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-20261101/apps/cms-scaffold/scripts/local/maintenance-helper.test.mjs:65:32)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+      at Test.postRun (node:internal/test_runner/test:1465:19)
+      at Test.run (node:internal/test_runner/test:1390:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    code: 'ADAPTER_UNSEALED',
+    phase: null,
+    operationId: null
+  }
+
+test at scripts/local/maintenance-helper.test.mjs:68:1
+✖ H01a_running_and_exit_state_are_checked (0.135481ms)
+  Error: ADAPTER_UNSEALED
+      at buildHelperPolicy (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-20261101/apps/cms-scaffold/scripts/local/maintenance-helper.mjs:2:45)
+      at fixture (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-20261101/apps/cms-scaffold/scripts/local/maintenance-helper.test.mjs:15:37)
+      at TestContext.<anonymous> (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-20261101/apps/cms-scaffold/scripts/local/maintenance-helper.test.mjs:69:32)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1325:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:911:18)
+      at Test.postRun (node:internal/test_runner/test:1465:19)
+      at Test.run (node:internal/test_runner/test:1390:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    code: 'ADAPTER_UNSEALED',
+    phase: null,
+    operationId: null
+  }

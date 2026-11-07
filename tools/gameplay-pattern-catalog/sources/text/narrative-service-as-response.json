@@ -1,0 +1,120 @@
+{
+  "id": "narrative-service-as-response",
+  "system": "narrative",
+  "edition": 3,
+  "name": {
+    "zh": "用做出的东西回应对方",
+    "en": "Respond through what you make and serve"
+  },
+  "summary": {
+    "zh": "选择递出什么，也是在决定对话往哪走。",
+    "en": "Choosing what to hand over also chooses where the conversation goes."
+  },
+  "rules": {
+    "zh": "角色通过需求和谈话提供线索，玩家用制作并递交的物品表达回应。系统读取实际交付结果，改变角色反应或后续故事；重点不只是订单是否合格，而是操作结果承担了对白选择的作用。",
+    "en": "A character’s request and conversation provide clues. The player responds by making and serving an item. The delivered result changes reactions or later story, so the action acts as a dialogue choice rather than merely fulfilling an order."
+  },
+  "loop": [
+    {
+      "zh": "听取需求与心情线索",
+      "en": "Listen to needs and emotional clues"
+    },
+    {
+      "zh": "选择要制作的东西",
+      "en": "Choose what to make"
+    },
+    {
+      "zh": "交付并观察角色反应",
+      "en": "Serve it and observe the reaction"
+    },
+    {
+      "zh": "把新信息用于下一次服务",
+      "en": "Use the new information in the next service"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "严格照做，还是根据对方的处境做一点调整？",
+      "en": "Follow the request exactly or adjust it to the person’s situation?"
+    },
+    {
+      "zh": "想得到某个回应时，是否值得牺牲眼前的满意度？",
+      "en": "Is a desired response worth sacrificing immediate satisfaction?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "物品与回应的关系",
+        "en": "Item-to-response mapping"
+      },
+      "effect": {
+        "zh": "线索明确，玩家才会觉得自己通过行动表达，而非碰巧触发分支。",
+        "en": "Clear clues make the action feel expressive rather than an accidental branch trigger."
+      }
+    },
+    {
+      "name": {
+        "zh": "影响故事的交付节点",
+        "en": "Story-sensitive servings"
+      },
+      "effect": {
+        "zh": "少量重要节点能控制写作量；若每次配方都改剧情，分支会迅速增长。",
+        "en": "A few important servings contain writing scope; branching on every recipe grows quickly."
+      }
+    }
+  ],
+  "tags": [
+    "narrative",
+    "information",
+    "creativity"
+  ],
+  "related": [
+    "narrative-background-dialogue-access",
+    "narrative-conversation-intervention",
+    "narrative-deliberate-silence",
+    "narrative-evidence-rebuttal"
+  ],
+  "contrast": {
+    "zh": "VA-11 Hall-A 用调酒把服务与人物状态连接；Coffee Talk 用咖啡馆的饮品选择承接顾客故事。两者都不意味着每杯饮品必然改变结局。",
+    "en": "VA-11 Hall-A connects bartending with patrons’ states, while Coffee Talk carries stories through café service. Neither implies that every drink changes an ending."
+  },
+  "combination": {
+    "zh": "组合提案：常用原料缺货时，玩家选择替代品；保持味道可能让顾客安心，说明替换原因则可能开启关于供货问题的新话题。",
+    "en": "Design proposal: substitute an unavailable ingredient. Preserving the flavor may reassure a customer, while explaining the substitution opens a topic about the supply problem."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "常客说想清醒一点，却习惯性点了很浓的甜饮。",
+      "en": "A regular wants to stay alert but habitually orders a heavy sweet drink."
+    },
+    "action": {
+      "zh": "玩家根据前面的谈话递出一杯更清爽的替代饮品。",
+      "en": "The player uses earlier clues to serve a lighter alternative."
+    },
+    "result": {
+      "zh": "常客询问原因，谈话转向今晚要完成的工作。",
+      "en": "The customer asks why, and the conversation turns to tonight’s work."
+    },
+    "next": {
+      "zh": "下次服务时，玩家已经知道他的具体压力来源。",
+      "en": "At the next serving, the player knows the source of the pressure."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "做两名顾客、三种成品和一个因交付不同而变化的后续对话。",
+      "en": "Build two customers, three finished items and one later conversation that varies by serving."
+    },
+    "pitfall": {
+      "zh": "若看不出物品如何影响人物，玩家只能逐个试配方。",
+      "en": "If the link between item and person is hidden, players can only try recipes one by one."
+    },
+    "test": {
+      "zh": "玩家能否解释自己为何做这件东西，并从回应看出表达是否被接收？",
+      "en": "Can players explain their serving choice and read whether its intent was understood?"
+    }
+  }
+}

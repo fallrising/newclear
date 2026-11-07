@@ -1,0 +1,24 @@
+{
+  "status": "partial",
+  "stage": "preload-proof",
+  "runtime": "not-run",
+  "tests": {
+    "preload": {
+      "passed": 12,
+      "failed": 0,
+      "redPreserved": true
+    },
+    "runtimeGuards": {
+      "passed": 3,
+      "failed": 0
+    }
+  },
+  "node": "24.18.0",
+  "lockedLoomSdk": "2.11.0",
+  "sourceHashes": {
+    "apps/flowshot/fe-review/preload.mjs": "50fd6a1cd727dcd0222643d8d988cba533e1319a8c29b8c046c88d0e81be5e37",
+    "apps/flowshot/fe-review/preload.test.mjs": "f03a6129db50820017a9914816702f8055284e89600335a51884893163b5cee7",
+    "apps/loom/fe-review/preload.mjs": "1b219e3433b0b5afca9673857841c4e90ea308d810678f972c7bba64da0e9112",
+    "apps/loom/fe-review/preload.test.mjs": "e2396cd377aa7733a31e42911b40e55dc241b4f36bf1c0401f8f94033da6c50f"
+  }
+}

@@ -1,6 +1,5 @@
 //! HTTP admission tests. Every upstream is a local, counted fake; no paid API calls.
 
-use std::path::Path;
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::Arc;
 use std::time::Duration;
@@ -10,6 +9,10 @@ use axum::{Json, Router};
 use serde_json::{json, Value};
 use tempfile::TempDir;
 use tokio::net::TcpListener;
+
+#[path = "support/owned_gateway.rs"]
+mod owned_gateway;
+use owned_gateway::{command, FailureCode, OwnedGateway};
 
 const INFERENCE_PATHS: [&str; 6] = [
     "/v1/chat/completions",
@@ -54,98 +57,34 @@ async fn fake_upstream() -> FakeUpstream {
     FakeUpstream { url, calls, task }
 }
 
-fn command(
-    data_dir: &Path,
-    host: &str,
-    port: u16,
-    bootstrap: bool,
-    admin: Option<&str>,
-) -> tokio::process::Command {
-    let mut cmd = tokio::process::Command::new(env!("CARGO_BIN_EXE_thinrouter"));
-    cmd.args([
-        "serve",
-        "--host",
-        host,
-        "--port",
-        &port.to_string(),
-        "--data-dir",
-        data_dir.to_str().unwrap(),
-    ]);
-    if bootstrap {
-        cmd.arg("--allow-keyless-bootstrap");
-    }
-    if let Some(token) = admin {
-        cmd.args(["--admin-token", token]);
-    }
-    for name in [
-        "THINROUTER_ADMIN_TOKEN",
-        "THINROUTER_SECRETS_KEY",
-        "THINROUTER_ALLOW_KEYLESS_BOOTSTRAP",
-        "HTTPS_PROXY",
-        "https_proxy",
-        "HTTP_PROXY",
-        "http_proxy",
-        "ALL_PROXY",
-        "all_proxy",
-    ] {
-        cmd.env_remove(name);
-    }
-    cmd.kill_on_drop(true)
-        .stdout(std::process::Stdio::null())
-        .stderr(std::process::Stdio::null());
-    cmd
-}
-
 struct Gateway {
     base: String,
     client: reqwest::Client,
     /// Explicit `--admin-token`, or the generated `<data_dir>/admin-token`.
     admin: String,
-    child: tokio::process::Child,
+    owner: OwnedGateway,
     _dir: TempDir,
 }
 
 impl Gateway {
     async fn start(host: &str, bootstrap: bool, admin: Option<&str>) -> Self {
         let dir = tempfile::tempdir().unwrap();
-        let listener = TcpListener::bind("127.0.0.1:0").await.unwrap();
-        let port = listener.local_addr().unwrap().port();
-        drop(listener);
-        let mut child = command(dir.path(), host, port, bootstrap, admin)
-            .spawn()
-            .unwrap();
-        let client = reqwest::Client::builder()
-            .no_proxy()
-            .timeout(Duration::from_secs(5))
-            .build()
-            .unwrap();
-        let base = format!("http://127.0.0.1:{port}");
-        for _ in 0..80 {
-            assert!(
-                child.try_wait().unwrap().is_none(),
-                "gateway exited before health"
-            );
-            if let Ok(resp) = client.get(format!("{base}/health")).send().await {
-                if resp.status().is_success() {
-                    let admin = match admin {
-                        Some(t) => t.to_string(),
-                        None => std::fs::read_to_string(dir.path().join("admin-token"))
-                            .unwrap()
-                            .trim()
-                            .to_string(),
-                    };
-                    return Self {
-                        base,
-                        client,
-                        admin,
-                        child,
-                        _dir: dir,
-                    };
-                }
-            }
-            tokio::time::sleep(Duration::from_millis(50)).await;
+        let owner = OwnedGateway::start(
+            command(dir.path(), host, 0, bootstrap, admin),
+            dir.path(),
+            host,
+            admin,
+            Duration::from_secs(5),
+        )
+        .await
+        .unwrap_or_else(|failure| panic!("{failure}"));
+        Self {
+            base: owner.base.clone(),
+            client: owner.client.clone(),
+            admin: owner.admin.clone(),
+            owner,
+            _dir: dir,
         }
-        panic!("gateway did not become healthy");
     }
 
     fn admin_post(&self, path: &str) -> reqwest::RequestBuilder {
@@ -251,7 +190,7 @@ async fn empty_and_disabled_keys_reject_before_all_upstream_surfaces() {
         .assert_inference(401, Some(("x-api-key", "invalid")))
         .await;
     assert_eq!(fake.calls.load(Ordering::SeqCst), 12);
-    gateway.child.kill().await.unwrap();
+    gateway.owner.shutdown().await;
 }
 
 #[tokio::test]
@@ -284,7 +223,7 @@ async fn explicit_loopback_bootstrap_only_accepts_absent_credentials_and_zero_to
     );
     gateway.assert_inference(401, None).await;
     assert_eq!(fake.calls.load(Ordering::SeqCst), 6);
-    gateway.child.kill().await.unwrap();
+    gateway.owner.shutdown().await;
 }
 
 #[tokio::test]
@@ -312,7 +251,7 @@ async fn public_listener_requires_admin_auth_and_gateway_auth() {
         .assert_inference(200, Some(("x-api-key", key["secret"].as_str().unwrap())))
         .await;
     assert_eq!(fake.calls.load(Ordering::SeqCst), 6);
-    gateway.child.kill().await.unwrap();
+    gateway.owner.shutdown().await;
 }
 
 #[tokio::test]
@@ -323,13 +262,20 @@ async fn public_bootstrap_and_unprotected_admin_fail_before_listener_start() {
         (false, None),
         (false, Some(" ")),
     ] {
-        let mut child = command(dir.path(), "0.0.0.0", 0, bootstrap, token)
-            .spawn()
-            .unwrap();
-        let status = tokio::time::timeout(Duration::from_secs(5), child.wait())
-            .await
-            .unwrap()
-            .unwrap();
-        assert!(!status.success());
+        let failure = OwnedGateway::start(
+            command(dir.path(), "0.0.0.0", 0, bootstrap, token),
+            dir.path(),
+            "0.0.0.0",
+            token,
+            Duration::from_secs(5),
+        )
+        .await
+        .unwrap_err();
+        assert_eq!(failure.code, FailureCode::ChildExited);
+        assert!(failure.diagnostics.exit_code.is_some_and(|code| code != 0));
+        assert_eq!(failure.diagnostics.health_request_attempts, 0);
+        assert_eq!(failure.diagnostics.admin_request_attempts, 0);
+        assert!(failure.diagnostics.child_reaped);
+        assert!(failure.diagnostics.drainer_closed);
     }
 }

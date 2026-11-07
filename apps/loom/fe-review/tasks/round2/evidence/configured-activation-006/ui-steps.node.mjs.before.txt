@@ -1,0 +1,80 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { defaultAriaLabelConfig } from '@xyflow/system';
+import { controls, fit, separateNodes } from './ui-steps.mjs';
+test('review locators use the actual locked React Flow accessible control names', async () => {
+  assert.equal(controls.fit, 'Fit View'); assert.equal(controls.zoomOut, 'Zoom Out');
+  assert.equal(controls.zoomOut, defaultAriaLabelConfig['controls.zoomOut.ariaLabel']);
+  let clicked = false;
+  await fit({ getByRole(role, options) { assert.equal(role, 'button'); assert.deepEqual(options, { name: defaultAriaLabelConfig['controls.fitView.ariaLabel'], exact: true }); return { async click() { clicked = true; } }; } });
+  assert.equal(clicked, true);
+});
+
+test('node separation derives the real mouse delta from observed overlap and keeps a visible gap', async () => {
+  const before = { stable: true, last: { document: { x: 66, width: 646 }, terminal: { x: 637, width: 739 }, source: { centerHit: false }, target: { centerHit: true } } };
+  const after = { stable: true, last: { document: { x: 30, width: 400 }, terminal: { x: 460, width: 450 }, source: { centerHit: true }, target: { centerHit: true } } };
+  const samples = [before, before, after], moves = [], receipt = {};
+  const page = { async evaluate() { return samples.shift(); }, locator() { return { async boundingBox() { return { x: 660, y: 100, width: 100, height: 20 }; } }; }, mouse: { async move(x, y) { moves.push({ x, y }); }, async down() {}, async up() {} }, getByRole() { return { async click() {} }; } };
+  await separateNodes(page, receipt);
+  assert.deepEqual(moves, [{ x: 710, y: 110 }, { x: 712, y: 110 }, { x: 835, y: 110 }]);
+  assert.equal(receipt.nodeSeparation.before.last.source.centerHit, false);
+  assert.equal(receipt.nodeSeparation.after.last.source.centerHit, true);
+  assert.equal(receipt.nodeSeparation.screenDelta, 123);
+});
+
+// Model the locked XYDrag input contract: startDrag anchors at the first
+// threshold-crossing event, and that event does not move the node. This catches
+// the observed loom004 loss of 688/12 CSS px; it is not a browser PASS claim.
+function thresholdDragPage({ shiftAtObservation = false, unstableActivation = false } = {}) {
+  let docX = 140, nodeX = 60, pointerX = 0, pressX = 0, anchorX = 0;
+  let pressed = false, active = false, evaluations = 0, fits = 0, released = 0;
+  const snapshot = () => ({ stable: !(unstableActivation && pressed), last: {
+    document: { x: docX, width: 560 }, terminal: { x: nodeX, width: 640 },
+    source: { centerHit: nodeX > docX + 560 }, target: { centerHit: true },
+  } });
+  return {
+    async evaluate() {
+      evaluations++;
+      if (shiftAtObservation && pressed) { docX += 20; nodeX += 8; }
+      return snapshot();
+    },
+    locator() { return { async boundingBox() { return { x: nodeX + 20, y: 100, width: 100, height: 20 }; } }; },
+    mouse: {
+      async move(x, _y, { steps = 1 } = {}) {
+        const from = pointerX;
+        for (let i = 1; i <= steps; i++) {
+          const next = from + (x - from) * i / steps;
+          if (pressed) {
+            if (!active && Math.abs(next - pressX) > 1) { active = true; anchorX = next; }
+            if (active) { nodeX += next - anchorX; anchorX = next; }
+          }
+          pointerX = next;
+        }
+      },
+      async down() { pressed = true; pressX = pointerX; active = false; },
+      async up() { pressed = false; released++; },
+    },
+    getByRole() { return { async click() { fits++; } }; },
+    result() { return { gap: nodeX - docX - 560, evaluations, fits, released, pressed }; },
+  };
+}
+test('threshold-consuming drag preserves the measured gap after activation instead of losing its first increment', async () => {
+  const page = thresholdDragPage(), receipt = {};
+  await separateNodes(page, receipt);
+  assert.equal(page.result().gap, 48);
+  assert.equal(page.result().released, 1);
+  assert.equal(page.result().fits, 1);
+});
+test('remaining displacement is recomputed from post-activation geometry', async () => {
+  const page = thresholdDragPage({ shiftAtObservation: true });
+  await separateNodes(page, {});
+  assert.equal(page.result().gap, 48);
+  assert.equal(page.result().evaluations, 3);
+});
+test('unstable activation geometry fails and releases the pointer without performing a full drag', async () => {
+  const page = thresholdDragPage({ unstableActivation: true });
+  await assert.rejects(separateNodes(page, {}), /REVIEW_GEOMETRY_UNSTABLE/);
+  assert.equal(page.result().released, 1);
+  assert.equal(page.result().fits, 0);
+  assert.equal(page.result().pressed, false);
+});

@@ -814,24 +814,54 @@ function DiffDownload({ run }: { run: Run }) {
   );
 }
 function ResultArchive({ run }: { run: Run }) {
+  const cache = useQueryClient();
+  const [unavailable, setUnavailable] = useState<string[]>([]);
+  const identity = (artifact: Pick<Artifact, 'run_id' | 'id' | 'sha256'>) =>
+    `${artifact.run_id}:${artifact.id}:${artifact.sha256}`;
   const archives = useQuery({
     queryKey: ['artifacts', run.id, run.state_version],
     queryFn: ({ signal }) =>
       request<{ items: Artifact[] }>(`/runs/${encodeURIComponent(run.id)}/artifacts`, { signal }),
     refetchInterval: ['succeeded', 'failed', 'cancelled'].includes(run.state) ? false : 5000,
   });
+  function expire(source: Pick<Artifact, 'run_id' | 'id' | 'sha256'>) {
+    if (
+      source.run_id !== run.id ||
+      !archives.data?.items.some((item) => identity(item) === identity(source))
+    )
+      return;
+    const key = identity(source);
+    setUnavailable((current) => (current.includes(key) ? current : [...current, key]));
+    void cache.invalidateQueries({ queryKey: ['artifacts', source.run_id] });
+  }
+  const items = archives.data?.items ?? [];
+  const hasKnownExpiry = items.some((item) => unavailable.includes(identity(item)));
+  const isExpiredDownload = (error: unknown) =>
+    error instanceof ApiError && error.status === 410 && error.message === 'artifact_expired';
   const download = useMutation({
-    mutationFn: async (artifactId: string) => {
+    mutationFn: async (source: Pick<Artifact, 'run_id' | 'id' | 'sha256'>) => {
       const response = await fetch(
-        `/api/v1/runs/${encodeURIComponent(run.id)}/artifacts/${encodeURIComponent(artifactId)}`,
+        `/api/v1/runs/${encodeURIComponent(source.run_id)}/artifacts/${encodeURIComponent(source.id)}`,
         { credentials: 'same-origin' },
       );
-      if (response.status === 410) throw new Error('artifact_expired');
-      if (!response.ok) throw new Error('archive_download_failed');
+      if (!response.ok) {
+        if (response.status === 401) throw new ApiError(401, 'authentication_required');
+        const body: unknown = await response.json().catch(() => null);
+        if (
+          response.status === 410 &&
+          body !== null &&
+          typeof body === 'object' &&
+          !Array.isArray(body) &&
+          'error' in body &&
+          body.error === 'artifact_expired'
+        )
+          throw new ApiError(410, 'artifact_expired');
+        throw new Error('archive_download_failed');
+      }
       const url = URL.createObjectURL(await response.blob());
       const link = document.createElement('a');
       link.href = url;
-      link.download = `run-${run.id}-result.json`;
+      link.download = `run-${source.run_id}-result.json`;
       document.body.append(link);
       try {
         link.click();
@@ -840,49 +870,56 @@ function ResultArchive({ run }: { run: Run }) {
         setTimeout(() => URL.revokeObjectURL(url), 1000);
       }
     },
-    onError: (error) => {
-      if (error.message === 'artifact_expired') void archives.refetch();
+    onError: (error, source) => {
+      if (isExpiredDownload(error)) expire(source);
+      if (error instanceof ApiError && error.status === 401)
+        void cache.invalidateQueries({ queryKey: ['session'] });
     },
   });
   return (
     <section className="archive" aria-label="成果封存">
       <h3>成果封存</h3>
-      {archives.isPending ? (
-        <p className="muted" role="status">
-          正在載入封存結果…
-        </p>
-      ) : archives.isError ? (
+      {archives.isError && (
         <>
           <p className="error" role="alert">
             無法載入封存結果。
           </p>
           <button onClick={() => void archives.refetch()}>重新載入封存</button>
         </>
-      ) : archives.data.items.length === 0 ? (
+      )}
+      {archives.isPending ? (
+        <p className="muted" role="status">
+          正在載入封存結果…
+        </p>
+      ) : archives.isError && !hasKnownExpiry ? null : items.length === 0 ? (
         <p className="muted">本次執行尚無封存結果。</p>
       ) : (
-        archives.data.items.map((artifact) => (
+        items.map((artifact) => (
           <div key={artifact.id}>
             <p className="muted">本次執行的目標、來源版本、檔案變更與驗證紀錄。</p>
-            {artifact.pruned_at ? (
+            {artifact.pruned_at || unavailable.includes(identity(artifact)) ? (
               <p className="muted">此封存已依保留期限清理；摘要與原始 diff 仍保留。</p>
             ) : (
-              <button onClick={() => download.mutate(artifact.id)} disabled={download.isPending}>
+              <button onClick={() => download.mutate(artifact)} disabled={download.isPending}>
                 {download.isPending ? '封存下載中…' : '下載封存結果'}
               </button>
             )}
             <p className="muted mono">
               {artifact.size} bytes · SHA-256: {artifact.sha256}
             </p>
-            {!artifact.pruned_at && (
-              <ExportPanel key={`${artifact.id}:${artifact.sha256}`} artifact={artifact} />
+            {!artifact.pruned_at && !unavailable.includes(identity(artifact)) && (
+              <ExportPanel
+                key={`${artifact.id}:${artifact.sha256}`}
+                artifact={artifact}
+                onExpired={expire}
+              />
             )}
           </div>
         ))
       )}
       {download.isError && (
         <p className="error" role="alert">
-          {download.error.message === 'artifact_expired'
+          {isExpiredDownload(download.error)
             ? '封存已到期，已更新可用狀態。'
             : '封存下載失敗，請確認登入狀態後重試。'}
         </p>

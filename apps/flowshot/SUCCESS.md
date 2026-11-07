@@ -90,3 +90,20 @@ M1 current evidence: candidate N03 functional checks pass, but the unchanged 1Mi
 M1 integration candidate verification: full Linux Docker CI/native build/tests, actual shell window/IPC and DB restart/corrupt-migration refusal passed on the integrated N02/N03 tree. This does not establish full reader UI, performance or dogfood acceptance. N02 remains implementing; N03 blocked; N04 todo. [ADR-005](docs/adr/ADR-005-render-performance-decision.md) records the renderer decision requested from the owner.
 
 Current owner delivery request: commit and merge the verified partial N02/N03 implementation. This is an incremental source delivery under AC-03, not AC-03/M1 acceptance. Keep the renderer blocked and tabs unimplemented; no usable/release tag. Before merge require independent final harness/publication review, current SDD/project-success checks and remote Ubuntu/Apple Silicon/Intel CI. Existing local native and real WebView evidence remains applicable to unchanged source.
+
+## T-0380 FE Round2 paired review — in progress
+
+[Approved bounded task](fe-review/tasks/round2/task.md): existing Flowshot shell preload and Loom complete review-only IPC/event fixtures; no product/native/dependency changes. Browser evidence cannot qualify native/Mac/real-vault/AI/mainline. Required frontend/native CI, actual isolated scenarios/cleanup and independent review remain pending.
+
+## Round2 paired FE review — 2026-10-24
+
+T0380 / R2-AC-11/E, paired task T-018. Approved scope: M1–M2: existing build-info promise preload, loading/ready/error synthetic shell and isolated review driver.
+Only scoped fe-review fixtures/drivers and these progress notes change; product/native IPC, frozen contracts, dependencies and original native/platform gates remain unchanged. Mainline remains incomplete and usable_tag none.
+
+Acceptance plan: test preload timing, locked SDK boundaries, unknown-command/invalid-argument refusal, per-context reset and owned disposal before browser use; then actual approved UI scenarios, three viewports/two preferences, loaded identity, health/overflow/axe evidence with incomplete/not-run retained. Root owns isolated runtime, existing native gates, CI/review/publication. Scope is Web simulation, not native/provider/durability/full Round3 acceptance.
+
+Historical initial checkpoint (superseded by the runtime evidence below): implementation started; fixture tests and actual browser gates pending. targets remains verified:false until observed R2 gates and cleanup pass. Preserve all failed attempts and product gaps.
+
+## FE Round2 evidence checkpoint — 2026-10-24
+
+Paired T0380 review-only flowshot runtime and retained local frontend gates now have scoped passing evidence in [round2 report](fe-review/tasks/round2/report.md). Final independent acceptance, current-head CI and PR598 merge/readback remain pending. Original native/product/mainline gaps and usable_tag:none remain unchanged. Known axe/incomplete/focus limits are explicit; this is not fullRound3 or realvault/PTY/AI/Mac acceptance.

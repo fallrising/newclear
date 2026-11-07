@@ -1,0 +1,7 @@
+{
+  "encoding": "utf-8",
+  "originalPath": ".team/pp1c-b-20261102/attempt1-start-capture-runtime.log",
+  "byteSize": 1203,
+  "sha256": "c2905cf6043079de74f3cf34f69fbdf8eaf59cd008f0d612ca935e7092721669",
+  "text": "Traceback (most recent call last):\n  File \"/home/ckc/test/codex/wt/newclear/cms-pp1c-b-20261101/apps/cms-scaffold/.team/pp1c-b-20261102/start-capture-runtime.py\", line 11, in <module>\n    receipt=json.loads(cmd([node,'scripts/local/prepare.mjs','--run-id',runid,'--api-image',image,'--node-image','sha256:6a8ca4b22705adf7134d2220ab8aadff634a6b76c816dba55e0409f8e5c180dc','--postgres-image','sha256:6a2e324ebe59af6031c4c1cd96c1d5072c2ebc36563d2196365e43b8297c062d']))\n                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/ckc/test/codex/wt/newclear/cms-pp1c-b-20261101/apps/cms-scaffold/.team/pp1c-b-20261102/start-capture-runtime.py\", line 7, in cmd\n    if r.returncode:raise RuntimeError('COMMAND_FAILED:'+a[0]+':'+str(r.returncode)+':'+r.stderr[-1000:])\n                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nRuntimeError: COMMAND_FAILED:/home/ckc/.local/node-v24.18.0/bin/node:3:PP1_LOCAL_ARTIFACT_INVALID\n\n"
+}

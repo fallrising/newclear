@@ -1,0 +1,120 @@
+{
+  "id": "commerce-shop-display",
+  "system": "commerce",
+  "edition": 1,
+  "name": {
+    "zh": "陈列与销售位置",
+    "en": "Shop display allocation"
+  },
+  "summary": {
+    "zh": "让有限展示位成为销售策略，而不是把库存一股脑倒进商店。",
+    "en": "Make limited display positions a selling decision rather than dumping all stock."
+  },
+  "rules": {
+    "zh": "玩家选择上架哪些商品及展示位置，开店后观察销售与顾客反应。展示位和补货时间有限，未上架的库存不会自动获得同等销售机会。",
+    "en": "Choose goods and display positions, then observe sales during opening hours. Display space and restocking time are limited; stored items do not get equal exposure."
+  },
+  "loop": [
+    {
+      "zh": "选择本轮商品",
+      "en": "Choose the assortment"
+    },
+    {
+      "zh": "安排展示位置",
+      "en": "Allocate displays"
+    },
+    {
+      "zh": "开店观察销售",
+      "en": "Open and observe"
+    },
+    {
+      "zh": "补货或更换陈列",
+      "en": "Restock or rotate"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "展示昂贵商品提高单笔收益，还是放便宜货加快周转？",
+      "en": "Display expensive goods for margin or cheaper goods for turnover?"
+    },
+    {
+      "zh": "保护稀有商品的位置，是否值得占用更好的展示资源？",
+      "en": "Does protecting rare stock justify using premium display space?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "展示位数量",
+        "en": "Display capacity"
+      },
+      "effect": {
+        "zh": "少量位置强化选品，大量位置降低换货频率。",
+        "en": "Few positions sharpen assortment choices; many reduce rotation."
+      }
+    },
+    {
+      "name": {
+        "zh": "位置差异",
+        "en": "Position differentiation"
+      },
+      "effect": {
+        "zh": "位置有功能差异才形成布局决策，否则只是装饰。",
+        "en": "Functional differences create layout decisions; identical slots mostly decorate."
+      }
+    }
+  ],
+  "tags": [
+    "spatial",
+    "economy",
+    "planning"
+  ],
+  "related": [
+    "allocation-shop-reservation",
+    "commerce-regional-arbitrage",
+    "commerce-timed-contracts",
+    "commerce-trade-route-programming"
+  ],
+  "contrast": {
+    "zh": "夜勤人的展示柜直接承担客群与防盗功能；露塞提娅把陈列与店面经营整体结合。",
+    "en": "Moonlighter gives showcases customer and security functions; Recettear integrates display with broader shop management."
+  },
+  "combination": {
+    "zh": "组合创意：古董店不同展台提供照明或防护，易碎高价品需要牺牲醒目的入口位置换安全。",
+    "en": "Design proposal: antique displays offer different lighting and protection, so fragile valuables trade entrance visibility for safety."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "只有两个展示位，仓库里有便宜畅销品和昂贵稀有品。",
+      "en": "Two display slots must serve cheap popular goods and an expensive rare item."
+    },
+    "action": {
+      "zh": "你各摆一种，开店后留意成交速度和剩余库存。",
+      "en": "Display one of each and observe sales speed and remaining stock."
+    },
+    "result": {
+      "zh": "便宜货很快卖完，稀有品还在；展示位的占用成本变得可见。",
+      "en": "The cheap goods sell out while the rare item remains, revealing the cost of occupying a slot."
+    },
+    "next": {
+      "zh": "决定补货畅销品，或给稀有品更多机会。",
+      "en": "Restock the popular item or give the rare one more time."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "做两格货架、四种商品和一队偏好不同的顾客，允许营业中补货。",
+      "en": "Build two shelf slots, four products, and customers with differing preferences; allow restocking during opening hours."
+    },
+    "pitfall": {
+      "zh": "先区别位置效果与价格效果，避免玩家不知道销量变化来自哪里。",
+      "en": "Separate placement effects from pricing effects so sales changes remain explainable."
+    },
+    "test": {
+      "zh": "限制一次补货机会，观察玩家是否依据销量改变陈列。",
+      "en": "Allow only one restock and see whether observed sales change the display choice."
+    }
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "version": 1,
+  "original": "T132/C13a/red.log",
+  "sha256": "8f1c8c3674edb9a6c864c82ca5b95d5cf646286ec6cba1e8745af837c4a75e59",
+  "byteSize": "655",
+  "encoding": "utf-8",
+  "text": "Exception in thread \"main\" java.io.FileNotFoundException: /home/ckc/.gradle/wrapper/dists/gradle-9.7.1-bin/1w1c7tv4s851m17nbqdsro2tv/gradle-9.7.1-bin.zip.lck (Read-only file system)\n\tat java.base/java.io.RandomAccessFile.open0(Native Method)\n\tat java.base/java.io.RandomAccessFile.open(RandomAccessFile.java:338)\n\tat java.base/java.io.RandomAccessFile.<init>(RandomAccessFile.java:257)\n\tat java.base/java.io.RandomAccessFile.<init>(RandomAccessFile.java:211)\n\tat org.gradle.wrapper.Install.createDist(SourceFile:24)\n\tat org.gradle.wrapper.GradleWrapperMain.lambda$prepareWrapper$0(SourceFile:2)\n\tat org.gradle.wrapper.GradleWrapperMain.main(SourceFile:2)\n"
+}

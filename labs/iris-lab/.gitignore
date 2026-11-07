@@ -1,0 +1,9 @@
+# Local preparation and execution data; never product evidence by default.
+/upstream/
+/models/
+/build/
+/runs/
+/local/
+/.cache/
+*.safetensors
+.env

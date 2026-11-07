@@ -1,0 +1,120 @@
+{
+  "id": "movement-target-bounce",
+  "system": "movement",
+  "edition": 3,
+  "name": {
+    "zh": "把可踩目标当作下一次起跳点",
+    "en": "Bounce from a target into the next jump"
+  },
+  "summary": {
+    "zh": "危险目标也能变成踏脚石，但必须从正确方向命中。",
+    "en": "A dangerous target can become a stepping stone if you hit it from the right direction."
+  },
+  "rules": {
+    "zh": "角色从上方向下命中允许借力的目标，就会获得新的向上运动。玩家要对准接触位置，并在弹起后马上规划下一落点；碰到目标的侧面或落空，通常无法获得同样的借力。",
+    "en": "A valid downward hit on a bounceable target launches the character upward. Align the contact and plan the next landing as soon as you rebound. Side contact or a missed hit does not provide the same boost."
+  },
+  "loop": [
+    {
+      "zh": "寻找可借力目标",
+      "en": "Find a bounceable target"
+    },
+    {
+      "zh": "从上方对准接触",
+      "en": "Align a downward hit"
+    },
+    {
+      "zh": "借弹起改变高度",
+      "en": "Use the rebound to gain height"
+    },
+    {
+      "zh": "接续落点或下一目标",
+      "en": "Continue to a landing or another target"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "绕到安全地面，还是冒险借移动敌人跳上更高的平台？",
+      "en": "Take the safe ground route or use a moving enemy to reach a higher platform?"
+    },
+    {
+      "zh": "弹起后直达出口，还是再踩一次拿到旁边的奖励？",
+      "en": "After bouncing, head for the exit or attempt another bounce for a nearby reward?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "有效接触范围",
+        "en": "Valid contact area"
+      },
+      "effect": {
+        "zh": "范围越宽越容易读懂借力，越窄越强调对准和时机。",
+        "en": "A wider contact area makes bouncing easier to read; a narrow one emphasizes alignment and timing."
+      }
+    },
+    {
+      "name": {
+        "zh": "弹起高度",
+        "en": "Rebound height"
+      },
+      "effect": {
+        "zh": "高度决定能连接哪些落点，也决定失败后是否仍有修正空间。",
+        "en": "Height determines reachable destinations and the room available to correct a failed approach."
+      }
+    }
+  ],
+  "tags": [
+    "timing",
+    "precision",
+    "spatial"
+  ],
+  "related": [
+    "exploration-grapple-swing",
+    "exploration-wall-jump",
+    "movement-auto-forward",
+    "movement-carry-object"
+  ],
+  "contrast": {
+    "zh": "《空洞骑士》要求按下攻击并让骨钉命中目标；《洞穴探险2》主要让脚底从上方接触敌人。相同的上升反馈来自不同的操作门槛。",
+    "en": "Hollow Knight requires an attack input and nail contact; Spelunky 2 primarily requires landing feet-first on an enemy. Similar upward feedback comes from different input requirements."
+  },
+  "combination": {
+    "zh": "设计提案：敌人先显示下一拍将移动的位置，玩家判断它会不会进入可踩范围，再决定用它跳过深坑。",
+    "en": "Design proposal: show where an enemy will move on the next beat, allowing players to decide whether it will become a usable stepping stone across a pit."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "教学示例：出口高出普通跳跃 1 格，一只慢速飞行目标从坑上经过。",
+      "en": "Teaching example: the exit is one tile above normal jumping reach; a slow flying target crosses the pit."
+    },
+    "action": {
+      "zh": "你等目标接近出口一侧，再跳到它上方并向下命中。",
+      "en": "Wait until the target approaches the exit side, then jump above it and strike downward."
+    },
+    "result": {
+      "zh": "角色弹起，获得足够高度到达出口台沿。",
+      "en": "The rebound provides enough height to reach the exit ledge."
+    },
+    "next": {
+      "zh": "另一个目标正向奖励移动，你可以继续借力，也可以先落地。",
+      "en": "Another target is moving toward a reward; chain another bounce or land safely."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "用一个匀速移动圆形目标、一个深坑和一个高台，只实现顶部接触反弹；先不加复杂战斗。",
+      "en": "Use one constant-speed circular target, one pit and one high ledge; implement only top-contact bouncing before adding combat."
+    },
+    "pitfall": {
+      "zh": "如果侧面和顶部接触反馈不一致却没有清楚提示，玩家会觉得借力随机。",
+      "en": "Without clear cues distinguishing top and side contact, bouncing can feel arbitrary."
+    },
+    "test": {
+      "zh": "观察玩家是否能在第二次尝试前指出应该等目标移动到哪里，以及应该从哪侧接近。",
+      "en": "Check whether, before a second attempt, players can explain where the target should be and from which direction they should approach."
+    }
+  }
+}

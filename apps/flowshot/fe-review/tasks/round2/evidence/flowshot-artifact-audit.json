@@ -1,0 +1,257 @@
+{
+  "runtime": "flowshot-001",
+  "runtimeStatus": "passed",
+  "screenshots": [
+    {
+      "id": "loading__desktop__light",
+      "sha256Match": true,
+      "dimensions": [
+        1440,
+        900
+      ]
+    },
+    {
+      "id": "ready__desktop__light",
+      "sha256Match": true,
+      "dimensions": [
+        1440,
+        900
+      ]
+    },
+    {
+      "id": "error__desktop__light",
+      "sha256Match": true,
+      "dimensions": [
+        1440,
+        900
+      ]
+    },
+    {
+      "id": "loading__desktop__dark",
+      "sha256Match": true,
+      "dimensions": [
+        1440,
+        900
+      ]
+    },
+    {
+      "id": "ready__desktop__dark",
+      "sha256Match": true,
+      "dimensions": [
+        1440,
+        900
+      ]
+    },
+    {
+      "id": "error__desktop__dark",
+      "sha256Match": true,
+      "dimensions": [
+        1440,
+        900
+      ]
+    },
+    {
+      "id": "loading__tablet__light",
+      "sha256Match": true,
+      "dimensions": [
+        834,
+        1112
+      ]
+    },
+    {
+      "id": "ready__tablet__light",
+      "sha256Match": true,
+      "dimensions": [
+        834,
+        1112
+      ]
+    },
+    {
+      "id": "error__tablet__light",
+      "sha256Match": true,
+      "dimensions": [
+        834,
+        1112
+      ]
+    },
+    {
+      "id": "loading__tablet__dark",
+      "sha256Match": true,
+      "dimensions": [
+        834,
+        1112
+      ]
+    },
+    {
+      "id": "ready__tablet__dark",
+      "sha256Match": true,
+      "dimensions": [
+        834,
+        1112
+      ]
+    },
+    {
+      "id": "error__tablet__dark",
+      "sha256Match": true,
+      "dimensions": [
+        834,
+        1112
+      ]
+    },
+    {
+      "id": "loading__mobile__light",
+      "sha256Match": true,
+      "dimensions": [
+        390,
+        844
+      ]
+    },
+    {
+      "id": "ready__mobile__light",
+      "sha256Match": true,
+      "dimensions": [
+        390,
+        844
+      ]
+    },
+    {
+      "id": "error__mobile__light",
+      "sha256Match": true,
+      "dimensions": [
+        390,
+        844
+      ]
+    },
+    {
+      "id": "loading__mobile__dark",
+      "sha256Match": true,
+      "dimensions": [
+        390,
+        844
+      ]
+    },
+    {
+      "id": "ready__mobile__dark",
+      "sha256Match": true,
+      "dimensions": [
+        390,
+        844
+      ]
+    },
+    {
+      "id": "error__mobile__dark",
+      "sha256Match": true,
+      "dimensions": [
+        390,
+        844
+      ]
+    },
+    {
+      "id": "long-ready__mobile__light",
+      "sha256Match": true,
+      "dimensions": [
+        390,
+        844
+      ]
+    }
+  ],
+  "sourceChecks": [
+    {
+      "runtimePath": "fe-review/preload.mjs",
+      "currentPath": "fe-review/preload.mjs",
+      "runtimeSha256": "50fd6a1cd727dcd0222643d8d988cba533e1319a8c29b8c046c88d0e81be5e37",
+      "currentSha256": "50fd6a1cd727dcd0222643d8d988cba533e1319a8c29b8c046c88d0e81be5e37",
+      "matches": true
+    },
+    {
+      "runtimePath": "fe-review/preload.test.mjs",
+      "currentPath": "fe-review/preload.node.mjs",
+      "runtimeSha256": "f03a6129db50820017a9914816702f8055284e89600335a51884893163b5cee7",
+      "currentSha256": "f03a6129db50820017a9914816702f8055284e89600335a51884893163b5cee7",
+      "matches": true
+    },
+    {
+      "runtimePath": "fe-review/runtime-guards.mjs",
+      "currentPath": "fe-review/runtime-guards.mjs",
+      "runtimeSha256": "b4c5fbe3f31ab2ce73d6246e8ca37ccf135a8ba7034cb4dd921c4eeb635e7b80",
+      "currentSha256": "b4c5fbe3f31ab2ce73d6246e8ca37ccf135a8ba7034cb4dd921c4eeb635e7b80",
+      "matches": true
+    },
+    {
+      "runtimePath": "fe-review/browser-runtime.mjs",
+      "currentPath": "fe-review/browser-runtime.mjs",
+      "runtimeSha256": "9e0a7638587d7dfdf1c5b3c0c6d826e747f754979ee31ce0b2ee1986839ef35d",
+      "currentSha256": "268fc690eca41a1b522912678315e70e8cc3e0b922f3f053fe37556a1d607b7f",
+      "matches": false,
+      "reconstructedRuntimeHashMatches": true
+    },
+    {
+      "runtimePath": "fe-review/run-review.mjs",
+      "currentPath": "fe-review/run-review.mjs",
+      "runtimeSha256": "7b2785a2b3216f84df3bb2ad022cd01384d2caf1e710876bc3dc74f00f1c18bf",
+      "currentSha256": "b0ac2d51e2b5a9449d070b8fd6bf6a26d421dec612d466bb7a54a2bd9aa19da7",
+      "matches": false,
+      "reconstructedRuntimeHashMatches": true
+    },
+    {
+      "runtimePath": "src/main.ts",
+      "currentPath": "src/main.ts",
+      "runtimeSha256": "fae059ef78005c3c097dffe9fc4626369d8fc6c2fb1fbfd2e4ada7f6833602cb",
+      "currentSha256": "fae059ef78005c3c097dffe9fc4626369d8fc6c2fb1fbfd2e4ada7f6833602cb",
+      "matches": true
+    },
+    {
+      "runtimePath": "src/launch-build-info.ts",
+      "currentPath": "src/launch-build-info.ts",
+      "runtimeSha256": "71f4f2fccb483904a0edd7c2ae39a0745115d1258e092123b8a905d1fa00369e",
+      "currentSha256": "71f4f2fccb483904a0edd7c2ae39a0745115d1258e092123b8a905d1fa00369e",
+      "matches": true
+    },
+    {
+      "runtimePath": "src/render.tsx",
+      "currentPath": "src/render.tsx",
+      "runtimeSha256": "0ccdbe211db759909365f2be3a99e19172ed0a946e14de724246941a4a0520b3",
+      "currentSha256": "0ccdbe211db759909365f2be3a99e19172ed0a946e14de724246941a4a0520b3",
+      "matches": true
+    },
+    {
+      "runtimePath": "src/App.tsx",
+      "currentPath": "src/App.tsx",
+      "runtimeSha256": "deca5131f7813114bee3cf74265fc72e9148658c8def95991c0c9dad3b49cb39",
+      "currentSha256": "deca5131f7813114bee3cf74265fc72e9148658c8def95991c0c9dad3b49cb39",
+      "matches": true
+    },
+    {
+      "runtimePath": "src/styles.css",
+      "currentPath": "src/styles.css",
+      "runtimeSha256": "b6e236fc1b4537aab1b534a22b6bcdc90abc1a75ece8843d1a96e7d138485f90",
+      "currentSha256": "b6e236fc1b4537aab1b534a22b6bcdc90abc1a75ece8843d1a96e7d138485f90",
+      "matches": true
+    },
+    {
+      "runtimePath": "package-lock.json",
+      "currentPath": "package-lock.json",
+      "runtimeSha256": "907d9bee0913e53104240ec4aec5cbd5c1bcb2588a327a67e8667135e2dd6b9e",
+      "currentSha256": "907d9bee0913e53104240ec4aec5cbd5c1bcb2588a327a67e8667135e2dd6b9e",
+      "matches": true
+    }
+  ],
+  "postRuntimeDelta": "Review node-test filename/sourceFiles string renamed; subsequent unit===loom-only hash-pinned Vite5 config loader added to paired runtime. Flowshot options/behavior unchanged. Both deltas reconstruct original hashes.",
+  "limits": [
+    "19 scans contain color-contrast incomplete",
+    "Native checks and pair acceptance tracked separately",
+    "Not full Round3/mainline acceptance"
+  ],
+  "summary": {
+    "captures": 19,
+    "hashesValid": true,
+    "violations": 0,
+    "incompleteScans": 19,
+    "overflow": 0,
+    "cleanup": {
+      "browserClosed": true,
+      "serverClosed": true,
+      "listenerAbsent": true
+    }
+  }
+}

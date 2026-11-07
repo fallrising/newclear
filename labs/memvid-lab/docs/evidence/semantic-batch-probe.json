@@ -1,0 +1,805 @@
+{
+  "put_many_ids": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    20,
+    21,
+    22,
+    23,
+    24,
+    25
+  ],
+  "frames": [
+    {
+      "uri": "mv2://notes/n01",
+      "frame": {
+        "id": 0,
+        "uri": "mv2://notes/n01",
+        "title": "桂花烏龍收納",
+        "timestamp": 1793297225,
+        "kind": null,
+        "track": null,
+        "tags": [],
+        "labels": [],
+        "payload_length": 0,
+        "extra_metadata": {
+          "fixture": "\"synthetic\"",
+          "memvid.embedding.dimension": "512",
+          "memvid.embedding.model": "Xenova/bge-small-zh-v1.5",
+          "memvid.embedding.normalized": "true",
+          "memvid.embedding.provider": "local-onnx"
+        }
+      }
+    },
+    {
+      "uri": "mv2://notes/n02",
+      "frame": {
+        "id": 1,
+        "uri": "mv2://notes/n02",
+        "title": "海邊散步取書",
+        "timestamp": 1793297225,
+        "kind": null,
+        "track": null,
+        "tags": [],
+        "labels": [],
+        "payload_length": 0,
+        "extra_metadata": {
+          "fixture": "\"synthetic\"",
+          "memvid.embedding.dimension": "512",
+          "memvid.embedding.model": "Xenova/bge-small-zh-v1.5",
+          "memvid.embedding.normalized": "true",
+          "memvid.embedding.provider": "local-onnx"
+        }
+      }
+    },
+    {
+      "uri": "mv2://notes/n03",
+      "frame": {
+        "id": 2,
+        "uri": "mv2://notes/n03",
+        "title": "單車保養收據",
+        "timestamp": 1793297225,
+        "kind": null,
+        "track": null,
+        "tags": [],
+        "labels": [],
+        "payload_length": 0,
+        "extra_metadata": {
+          "fixture": "\"synthetic\"",
+          "memvid.embedding.dimension": "512",
+          "memvid.embedding.model": "Xenova/bge-small-zh-v1.5",
+          "memvid.embedding.normalized": "true",
+          "memvid.embedding.provider": "local-onnx"
+        }
+      }
+    },
+    {
+      "uri": "mv2://notes/n04",
+      "frame": {
+        "id": 3,
+        "uri": "mv2://notes/n04",
+        "title": "陶藝體驗報到",
+        "timestamp": 1793297225,
+        "kind": null,
+        "track": null,
+        "tags": [],
+        "labels": [],
+        "payload_length": 0,
+        "extra_metadata": {
+          "fixture": "\"synthetic\"",
+          "memvid.embedding.dimension": "512",
+          "memvid.embedding.model": "Xenova/bge-small-zh-v1.5",
+          "memvid.embedding.normalized": "true",
+          "memvid.embedding.provider": "local-onnx"
+        }
+      }
+    },
+    {
+      "uri": "mv2://notes/n05",
+      "frame": {
+        "id": 4,
+        "uri": "mv2://notes/n05",
+        "title": "羅勒花盆標籤",
+        "timestamp": 1793297225,
+        "kind": null,
+        "track": null,
+        "tags": [],
+        "labels": [],
+        "payload_length": 0,
+        "extra_metadata": {
+          "fixture": "\"synthetic\"",
+          "memvid.embedding.dimension": "512",
+          "memvid.embedding.model": "Xenova/bge-small-zh-v1.5",
+          "memvid.embedding.normalized": "true",
+          "memvid.embedding.provider": "local-onnx"
+        }
+      }
+    },
+    {
+      "uri": "mv2://notes/n06",
+      "frame": {
+        "id": 5,
+        "uri": "mv2://notes/n06",
+        "title": "山城住宿備忘",
+        "timestamp": 1793297225,
+        "kind": null,
+        "track": null,
+        "tags": [],
+        "labels": [],
+        "payload_length": 0,
+        "extra_metadata": {
+          "fixture": "\"synthetic\"",
+          "memvid.embedding.dimension": "512",
+          "memvid.embedding.model": "Xenova/bge-small-zh-v1.5",
+          "memvid.embedding.normalized": "true",
+          "memvid.embedding.provider": "local-onnx"
+        }
+      }
+    },
+    {
+      "uri": "mv2://notes/n07",
+      "frame": {
+        "id": 6,
+        "uri": "mv2://notes/n07",
+        "title": "外套清洗紀錄",
+        "timestamp": 1793297225,
+        "kind": null,
+        "track": null,
+        "tags": [],
+        "labels": [],
+        "payload_length": 0,
+        "extra_metadata": {
+          "fixture": "\"synthetic\"",
+          "memvid.embedding.dimension": "512",
+          "memvid.embedding.model": "Xenova/bge-small-zh-v1.5",
+          "memvid.embedding.normalized": "true",
+          "memvid.embedding.provider": "local-onnx"
+        }
+      }
+    },
+    {
+      "uri": "mv2://notes/n08",
+      "frame": {
+        "id": 7,
+        "uri": "mv2://notes/n08",
+        "title": "包裝材料",
+        "timestamp": 1793297225,
+        "kind": null,
+        "track": null,
+        "tags": [],
+        "labels": [],
+        "payload_length": 0,
+        "extra_metadata": {
+          "fixture": "\"synthetic\"",
+          "memvid.embedding.dimension": "512",
+          "memvid.embedding.model": "Xenova/bge-small-zh-v1.5",
+          "memvid.embedding.normalized": "true",
+          "memvid.embedding.provider": "local-onnx"
+        }
+      }
+    },
+    {
+      "uri": "mv2://notes/n09",
+      "frame": {
+        "id": 8,
+        "uri": "mv2://notes/n09",
+        "title": "週末野餐用品",
+        "timestamp": 1793297225,
+        "kind": null,
+        "track": null,
+        "tags": [],
+        "labels": [],
+        "payload_length": 0,
+        "extra_metadata": {
+          "fixture": "\"synthetic\"",
+          "memvid.embedding.dimension": "512",
+          "memvid.embedding.model": "Xenova/bge-small-zh-v1.5",
+          "memvid.embedding.normalized": "true",
+          "memvid.embedding.provider": "local-onnx"
+        }
+      }
+    },
+    {
+      "uri": "mv2://notes/n10",
+      "frame": {
+        "id": 9,
+        "uri": "mv2://notes/n10",
+        "title": "週五電影",
+        "timestamp": 1793297225,
+        "kind": null,
+        "track": null,
+        "tags": [],
+        "labels": [],
+        "payload_length": 0,
+        "extra_metadata": {
+          "fixture": "\"synthetic\"",
+          "memvid.embedding.dimension": "512",
+          "memvid.embedding.model": "Xenova/bge-small-zh-v1.5",
+          "memvid.embedding.normalized": "true",
+          "memvid.embedding.provider": "local-onnx"
+        }
+      }
+    },
+    {
+      "uri": "mv2://notes/n11",
+      "frame": {
+        "id": 10,
+        "uri": "mv2://notes/n11",
+        "title": "筆芯整理",
+        "timestamp": 1793297225,
+        "kind": null,
+        "track": null,
+        "tags": [],
+        "labels": [],
+        "payload_length": 0,
+        "extra_metadata": {
+          "fixture": "\"synthetic\"",
+          "memvid.embedding.dimension": "512",
+          "memvid.embedding.model": "Xenova/bge-small-zh-v1.5",
+          "memvid.embedding.normalized": "true",
+          "memvid.embedding.provider": "local-onnx"
+        }
+      }
+    },
+    {
+      "uri": "mv2://notes/n12",
+      "frame": {
+        "id": 11,
+        "uri": "mv2://notes/n12",
+        "title": "展覽帶回的書",
+        "timestamp": 1793297225,
+        "kind": null,
+        "track": null,
+        "tags": [],
+        "labels": [],
+        "payload_length": 0,
+        "extra_metadata": {
+          "fixture": "\"synthetic\"",
+          "memvid.embedding.dimension": "512",
+          "memvid.embedding.model": "Xenova/bge-small-zh-v1.5",
+          "memvid.embedding.normalized": "true",
+          "memvid.embedding.provider": "local-onnx"
+        }
+      }
+    },
+    {
+      "uri": "mv2://notes/n13",
+      "frame": {
+        "id": 12,
+        "uri": "mv2://notes/n13",
+        "title": "日語課作業",
+        "timestamp": 1793297225,
+        "kind": null,
+        "track": null,
+        "tags": [],
+        "labels": [],
+        "payload_length": 0,
+        "extra_metadata": {
+          "fixture": "\"synthetic\"",
+          "memvid.embedding.dimension": "512",
+          "memvid.embedding.model": "Xenova/bge-small-zh-v1.5",
+          "memvid.embedding.normalized": "true",
+          "memvid.embedding.provider": "local-onnx"
+        }
+      }
+    },
+    {
+      "uri": "mv2://notes/n14",
+      "frame": {
+        "id": 13,
+        "uri": "mv2://notes/n14",
+        "title": "咖啡試飲",
+        "timestamp": 1793297225,
+        "kind": null,
+        "track": null,
+        "tags": [],
+        "labels": [],
+        "payload_length": 0,
+        "extra_metadata": {
+          "fixture": "\"synthetic\"",
+          "memvid.embedding.dimension": "512",
+          "memvid.embedding.model": "Xenova/bge-small-zh-v1.5",
+          "memvid.embedding.normalized": "true",
+          "memvid.embedding.provider": "local-onnx"
+        }
+      }
+    },
+    {
+      "uri": "mv2://notes/n15",
+      "frame": {
+        "id": 14,
+        "uri": "mv2://notes/n15",
+        "title": "空玻璃瓶去向",
+        "timestamp": 1793297225,
+        "kind": null,
+        "track": null,
+        "tags": [],
+        "labels": [],
+        "payload_length": 0,
+        "extra_metadata": {
+          "fixture": "\"synthetic\"",
+          "memvid.embedding.dimension": "512",
+          "memvid.embedding.model": "Xenova/bge-small-zh-v1.5",
+          "memvid.embedding.normalized": "true",
+          "memvid.embedding.provider": "local-onnx"
+        }
+      }
+    },
+    {
+      "uri": "mv2://notes/n16",
+      "frame": {
+        "id": 15,
+        "uri": "mv2://notes/n16",
+        "title": "縫紉材料位置",
+        "timestamp": 1793297225,
+        "kind": null,
+        "track": null,
+        "tags": [],
+        "labels": [],
+        "payload_length": 0,
+        "extra_metadata": {
+          "fixture": "\"synthetic\"",
+          "memvid.embedding.dimension": "512",
+          "memvid.embedding.model": "Xenova/bge-small-zh-v1.5",
+          "memvid.embedding.normalized": "true",
+          "memvid.embedding.provider": "local-onnx"
+        }
+      }
+    },
+    {
+      "uri": "mv2://notes/n17",
+      "frame": {
+        "id": 16,
+        "uri": "mv2://notes/n17",
+        "title": "練琴錄音備忘",
+        "timestamp": 1793297225,
+        "kind": null,
+        "track": null,
+        "tags": [],
+        "labels": [],
+        "payload_length": 0,
+        "extra_metadata": {
+          "fixture": "\"synthetic\"",
+          "memvid.embedding.dimension": "512",
+          "memvid.embedding.model": "Xenova/bge-small-zh-v1.5",
+          "memvid.embedding.normalized": "true",
+          "memvid.embedding.provider": "local-onnx"
+        }
+      }
+    },
+    {
+      "uri": "mv2://notes/n18",
+      "frame": {
+        "id": 17,
+        "uri": "mv2://notes/n18",
+        "title": "共享廚房筆記",
+        "timestamp": 1793297225,
+        "kind": null,
+        "track": null,
+        "tags": [],
+        "labels": [],
+        "payload_length": 0,
+        "extra_metadata": {
+          "fixture": "\"synthetic\"",
+          "memvid.embedding.dimension": "512",
+          "memvid.embedding.model": "Xenova/bge-small-zh-v1.5",
+          "memvid.embedding.normalized": "true",
+          "memvid.embedding.provider": "local-onnx"
+        }
+      }
+    },
+    {
+      "uri": "mv2://notes/n19",
+      "frame": {
+        "id": 18,
+        "uri": "mv2://notes/n19",
+        "title": "Photo Walk 報到",
+        "timestamp": 1793297226,
+        "kind": null,
+        "track": null,
+        "tags": [],
+        "labels": [],
+        "payload_length": 0,
+        "extra_metadata": {
+          "fixture": "\"synthetic\"",
+          "memvid.embedding.dimension": "512",
+          "memvid.embedding.model": "Xenova/bge-small-zh-v1.5",
+          "memvid.embedding.normalized": "true",
+          "memvid.embedding.provider": "local-onnx"
+        }
+      }
+    },
+    {
+      "uri": "mv2://notes/n20",
+      "frame": {
+        "id": 19,
+        "uri": "mv2://notes/n20",
+        "title": "SSD 備份紀錄",
+        "timestamp": 1793297226,
+        "kind": null,
+        "track": null,
+        "tags": [],
+        "labels": [],
+        "payload_length": 0,
+        "extra_metadata": {
+          "fixture": "\"synthetic\"",
+          "memvid.embedding.dimension": "512",
+          "memvid.embedding.model": "Xenova/bge-small-zh-v1.5",
+          "memvid.embedding.normalized": "true",
+          "memvid.embedding.provider": "local-onnx"
+        }
+      }
+    },
+    {
+      "uri": "mv2://notes/n21",
+      "frame": {
+        "id": 20,
+        "uri": "mv2://notes/n21",
+        "title": "家用設備標籤",
+        "timestamp": 1793297226,
+        "kind": null,
+        "track": null,
+        "tags": [],
+        "labels": [],
+        "payload_length": 0,
+        "extra_metadata": {
+          "fixture": "\"synthetic\"",
+          "memvid.embedding.dimension": "512",
+          "memvid.embedding.model": "Xenova/bge-small-zh-v1.5",
+          "memvid.embedding.normalized": "true",
+          "memvid.embedding.provider": "local-onnx"
+        }
+      }
+    },
+    {
+      "uri": "mv2://notes/n22",
+      "frame": {
+        "id": 21,
+        "uri": "mv2://notes/n22",
+        "title": "練習專案匯出",
+        "timestamp": 1793297226,
+        "kind": null,
+        "track": null,
+        "tags": [],
+        "labels": [],
+        "payload_length": 0,
+        "extra_metadata": {
+          "fixture": "\"synthetic\"",
+          "memvid.embedding.dimension": "512",
+          "memvid.embedding.model": "Xenova/bge-small-zh-v1.5",
+          "memvid.embedding.normalized": "true",
+          "memvid.embedding.provider": "local-onnx"
+        }
+      }
+    },
+    {
+      "uri": "mv2://notes/n23",
+      "frame": {
+        "id": 22,
+        "uri": "mv2://notes/n23",
+        "title": "線上工作坊",
+        "timestamp": 1793297226,
+        "kind": null,
+        "track": null,
+        "tags": [],
+        "labels": [],
+        "payload_length": 0,
+        "extra_metadata": {
+          "fixture": "\"synthetic\"",
+          "memvid.embedding.dimension": "512",
+          "memvid.embedding.model": "Xenova/bge-small-zh-v1.5",
+          "memvid.embedding.normalized": "true",
+          "memvid.embedding.provider": "local-onnx"
+        }
+      }
+    },
+    {
+      "uri": "mv2://notes/n24",
+      "frame": {
+        "id": 23,
+        "uri": "mv2://notes/n24",
+        "title": "桌遊收藏",
+        "timestamp": 1793297226,
+        "kind": null,
+        "track": null,
+        "tags": [],
+        "labels": [],
+        "payload_length": 0,
+        "extra_metadata": {
+          "fixture": "\"synthetic\"",
+          "memvid.embedding.dimension": "512",
+          "memvid.embedding.model": "Xenova/bge-small-zh-v1.5",
+          "memvid.embedding.normalized": "true",
+          "memvid.embedding.provider": "local-onnx"
+        }
+      }
+    }
+  ],
+  "hits": {
+    "query": "桂花烏龍收納",
+    "hits": [
+      {
+        "frame_id": 23,
+        "uri": "mv2://notes/n24",
+        "title": "桌遊收藏",
+        "rank": 1,
+        "score": 0.45213985443115234,
+        "matches": 1,
+        "snippet": "桌遊收藏 桌遊 Star Orchard 的繁中規則書收在盒蓋內側,遊戲人數標示為 2–4 人。擴充牌裝在獨立的紫色布袋。 title: 桌遊收藏 uri: mv2://notes/n24 fixture: \"synthetic\" memvid.embedding.dimension: 512 memvid.embedding.model: Xenova/bge-small-zh-v1.5 memvid.embedding.normalized: true memvid.embedding.provider: local-onnx",
+        "text": "桌遊收藏 桌遊 Star Orchard 的繁中規則書收在盒蓋內側,遊戲人數標示為 2–4 人。擴充牌裝在獨立的紫色布袋。 title: 桌遊收藏 uri: mv2://notes/n24 fixture: \"synthetic\" memvid.embedding.dimension: 512 memvid.embedding.model: Xenova/bge-small-zh-v1.5 memvid.embedding.normalized: true memvid.embedding.provider: local-onnx",
+        "tags": [],
+        "labels": [],
+        "track": null,
+        "created_at": "2026-10-29T18:07:06Z",
+        "content_dates": []
+      },
+      {
+        "frame_id": 19,
+        "uri": "mv2://notes/n20",
+        "title": "SSD 備份紀錄",
+        "rank": 2,
+        "score": 0.4390268921852112,
+        "matches": 1,
+        "snippet": "SSD 備份紀錄 相片備份存到標籤為 Archive-2 的 SSD,完成的是十月份相簿。連接線為 USB-C,SSD 收在書桌下方的防震包。 title: SSD 備份紀錄 uri: mv2://notes/n20 fixture: \"synthetic\" memvid.embedding.dimension: 512 memvid.embedding.model: Xenova/bge-small-zh-v1.5 memvid.embedding.normalized: true memvid.embedding.provider: local-onnx",
+        "text": "SSD 備份紀錄 相片備份存到標籤為 Archive-2 的 SSD,完成的是十月份相簿。連接線為 USB-C,SSD 收在書桌下方的防震包。 title: SSD 備份紀錄 uri: mv2://notes/n20 fixture: \"synthetic\" memvid.embedding.dimension: 512 memvid.embedding.model: Xenova/bge-small-zh-v1.5 memvid.embedding.normalized: true memvid.embedding.provider: local-onnx",
+        "tags": [],
+        "labels": [],
+        "track": null,
+        "created_at": "2026-10-29T18:07:06Z",
+        "content_dates": []
+      },
+      {
+        "frame_id": 18,
+        "uri": "mv2://notes/n19",
+        "title": "Photo Walk 報到",
+        "rank": 3,
+        "score": 0.4209214448928833,
+        "matches": 1,
+        "snippet": "Photo Walk 報到 Photo Walk P7 的集合時間是上午九點十分,集合處為南門鐘樓。這個預約報到要帶紙本確認單,現場會發借用的識別背帶。 title: Photo Walk 報到 uri: mv2://notes/n19 fixture: \"synthetic\" memvid.embedding.dimension: 512 memvid.embedding.model: Xenova/bge-small-zh-v1.5 memvid.embedding.normalized: true memvid.embedding.provider: local-onnx",
+        "text": "Photo Walk 報到 Photo Walk P7 的集合時間是上午九點十分,集合處為南門鐘樓。這個預約報到要帶紙本確認單,現場會發借用的識別背帶。 title: Photo Walk 報到 uri: mv2://notes/n19 fixture: \"synthetic\" memvid.embedding.dimension: 512 memvid.embedding.model: Xenova/bge-small-zh-v1.5 memvid.embedding.normalized: true memvid.embedding.provider: local-onnx",
+        "tags": [],
+        "labels": [],
+        "track": null,
+        "created_at": "2026-10-29T18:07:06Z",
+        "content_dates": []
+      },
+      {
+        "frame_id": 20,
+        "uri": "mv2://notes/n21",
+        "title": "家用設備標籤",
+        "rank": 4,
+        "score": 0.4134564995765686,
+        "matches": 1,
+        "snippet": "家用設備標籤 書房的閱讀燈型號是 Luma R2,暖光亮度記錄為 40%。客廳的同系列燈是 Luma R1,這次沒有記錄其亮度。 title: 家用設備標籤 uri: mv2://notes/n21 fixture: \"synthetic\" memvid.embedding.dimension: 512 memvid.embedding.model: Xenova/bge-small-zh-v1.5 memvid.embedding.normalized: true memvid.embedding.provider: local-onnx",
+        "text": "家用設備標籤 書房的閱讀燈型號是 Luma R2,暖光亮度記錄為 40%。客廳的同系列燈是 Luma R1,這次沒有記錄其亮度。 title: 家用設備標籤 uri: mv2://notes/n21 fixture: \"synthetic\" memvid.embedding.dimension: 512 memvid.embedding.model: Xenova/bge-small-zh-v1.5 memvid.embedding.normalized: true memvid.embedding.provider: local-onnx",
+        "tags": [],
+        "labels": [],
+        "track": null,
+        "created_at": "2026-10-29T18:07:06Z",
+        "content_dates": []
+      },
+      {
+        "frame_id": 21,
+        "uri": "mv2://notes/n22",
+        "title": "練習專案匯出",
+        "rank": 5,
+        "score": 0.3912610411643982,
+        "matches": 1,
+        "snippet": "練習專案匯出 練習專案 NoteBox 的 CSV 匯出使用 UTF-8 編碼,欄位順序是 title、date、body。這是本機練習資料,不含帳號或聯絡資訊。 title: 練習專案匯出 uri: mv2://notes/n22 fixture: \"synthetic\" memvid.embedding.dimension: 512 memvid.embedding.model: Xenova/bge-small-zh-v1.5 memvid.embedding.normalized: true memvid.embedding.provider: local-onnx",
+        "text": "練習專案匯出 練習專案 NoteBox 的 CSV 匯出使用 UTF-8 編碼,欄位順序是 title、date、body。這是本機練習資料,不含帳號或聯絡資訊。 title: 練習專案匯出 uri: mv2://notes/n22 fixture: \"synthetic\" memvid.embedding.dimension: 512 memvid.embedding.model: Xenova/bge-small-zh-v1.5 memvid.embedding.normalized: true memvid.embedding.provider: local-onnx",
+        "tags": [],
+        "labels": [],
+        "track": null,
+        "created_at": "2026-10-29T18:07:06Z",
+        "content_dates": []
+      }
+    ],
+    "took_ms": 0,
+    "total_hits": 5,
+    "engine": "hybrid",
+    "context": "### [1] notes/n24 — 桌遊收藏\n桌遊收藏\n桌遊 Star Orchard 的繁中規則書收在盒蓋內側,遊戲人數標示為 2–4 人。擴充牌裝在獨立的紫色布袋。\ntitle: 桌遊收藏\nuri: mv2://notes/n24\nfixture: \"synthetic\"\nmemvid.embedding.dimension: 512\nmemvid.embedding.model: Xenova/bge-small-zh-v1.5\nmemvid.embedding.normalized: true\nmemvid.embedding.provider: local-onnx\n(matches: 1)\n\n### [2] notes/n20 — SSD 備份紀錄\nSSD 備份紀錄\n相片備份存到標籤為 Archive-2 的 SSD,完成的是十月份相簿。連接線為 USB-C,SSD 收在書桌下方的防震包。\ntitle: SSD 備份紀錄\nuri: mv2://notes/n20\nfixture: \"synthetic\"\nmemvid.embedding.dimension: 512\nmemvid.embedding.model: Xenova/bge-small-zh-v1.5\nmemvid.embedding.normalized: true\nmemvid.embedding.provider: local-onnx\n(matches: 1)\n\n### [3] notes/n19 — Photo Walk 報到\nPhoto Walk 報到\nPhoto Walk P7 的集合時間是上午九點十分,集合處為南門鐘樓。這個預約報到要帶紙本確認單,現場會發借用的識別背帶。\ntitle: Photo Walk 報到\nuri: mv2://notes/n19\nfixture: \"synthetic\"\nmemvid.embedding.dimension: 512\nmemvid.embedding.model: Xenova/bge-small-zh-v1.5\nmemvid.embedding.normalized: true\nmemvid.embedding.provider: local-onnx\n(matches: 1)\n\n### [4] notes/n21 — 家用設備標籤\n家用設備標籤\n書房的閱讀燈型號是 Luma R2,暖光亮度記錄為 40%。客廳的同系列燈是 Luma R1,這次沒有記錄其亮度。\ntitle: 家用設備標籤\nuri: mv2://notes/n21\nfixture: \"synthetic\"\nmemvid.embedding.dimension: 512\nmemvid.embedding.model: Xenova/bge-small-zh-v1.5\nmemvid.embedding.normalized: true\nmemvid.embedding.provider: local-onnx\n(matches: 1)\n\n### [5] notes/n22 — 練習專案匯出\n練習專案匯出\n練習專案 NoteBox 的 CSV 匯出使用 UTF-8 編碼,欄位順序是 title、date、body。這是本機練習資料,不含帳號或聯絡資訊。\ntitle: 練習專案匯出\nuri: mv2://notes/n22\nfixture: \"synthetic\"\nmemvid.embedding.dimension: 512\nmemvid.embedding.model: Xenova/bge-small-zh-v1.5\nmemvid.embedding.normalized: true\nmemvid.embedding.provider: local-onnx\n(matches: 1)"
+  },
+  "timeline": [
+    {
+      "frame_id": 0,
+      "timestamp": 1793297225,
+      "preview": "桂花烏龍收納\n桂花烏龍放在廚房第二層抽屜的圓形白鐵罐。罐蓋貼著橘色圓點,旁邊的方罐裝紅茶。\ntitle: 桂花烏龍收納\nuri: mv2://notes/n01\nfixture: \"synthetic\"\nmemvid.embedding.d",
+      "uri": "mv2://notes/n01",
+      "child_frames": []
+    },
+    {
+      "frame_id": 1,
+      "timestamp": 1793297225,
+      "preview": "海邊散步取書\n圖書館預約的《海邊散步》已到館,取書位置是二樓自助取書櫃的第六格。借書證放在灰色帆布袋內袋。\ntitle: 海邊散步取書\nuri: mv2://notes/n02\nfixture: \"synthetic\"\nmemvid.emb",
+      "uri": "mv2://notes/n02",
+      "child_frames": []
+    },
+    {
+      "frame_id": 2,
+      "timestamp": 1793297225,
+      "preview": "單車保養收據\n這次單車保養更換後輪內胎,費用是二百八十元。紙本收據放在玄關藍色資料夾,前輪沒有更換。\ntitle: 單車保養收據\nuri: mv2://notes/n03\nfixture: \"synthetic\"\nmemvid.embedd",
+      "uri": "mv2://notes/n03",
+      "child_frames": []
+    },
+    {
+      "frame_id": 3,
+      "timestamp": 1793297225,
+      "preview": "陶藝體驗報到\n陶藝體驗預約在十一月八日下午兩點,地點是河岸工房。報到要帶紙本確認單;圍裙由工房提供。\ntitle: 陶藝體驗報到\nuri: mv2://notes/n04\nfixture: \"synthetic\"\nmemvid.embedd",
+      "uri": "mv2://notes/n04",
+      "child_frames": []
+    },
+    {
+      "frame_id": 4,
+      "timestamp": 1793297225,
+      "preview": "羅勒花盆標籤\n陽台右側長方盆種的是羅勒,白色圓盆種的是薄荷。羅勒的木牌上畫了三角形,兩盆沒有交換位置。\ntitle: 羅勒花盆標籤\nuri: mv2://notes/n05\nfixture: \"synthetic\"\nmemvid.embed",
+      "uri": "mv2://notes/n05",
+      "child_frames": []
+    },
+    {
+      "frame_id": 5,
+      "timestamp": 1793297225,
+      "preview": "山城住宿備忘\n山城旅行訂了兩晚的松影客棧,房間有吹風機,沒有洗衣機。行李清單中的備用布袋已放進側袋。\ntitle: 山城住宿備忘\nuri: mv2://notes/n06\nfixture: \"synthetic\"\nmemvid.embedd",
+      "uri": "mv2://notes/n06",
+      "child_frames": []
+    },
+    {
+      "frame_id": 6,
+      "timestamp": 1793297225,
+      "preview": "外套清洗紀錄\n米色外套清洗時用了最大的洗衣袋。洗衣袋現在掛在浴室門後,深藍色小袋仍放在洗衣籃裡。\ntitle: 外套清洗紀錄\nuri: mv2://notes/n07\nfixture: \"synthetic\"\nmemvid.embeddin",
+      "uri": "mv2://notes/n07",
+      "child_frames": []
+    },
+    {
+      "frame_id": 7,
+      "timestamp": 1793297225,
+      "preview": "包裝材料\n生日禮物包裝剩下的星星紙膠帶收進客廳矮櫃左抽屜。透明膠帶在書桌上,兩種膠帶分開收納。\ntitle: 包裝材料\nuri: mv2://notes/n08\nfixture: \"synthetic\"\nmemvid.embedding.d",
+      "uri": "mv2://notes/n08",
+      "child_frames": []
+    },
+    {
+      "frame_id": 8,
+      "timestamp": 1793297225,
+      "preview": "週末野餐用品\n綠色野餐墊已交給活動主辦的服務台保管,當天從北側入口領取。家裡留下的是灰色地墊。\ntitle: 週末野餐用品\nuri: mv2://notes/n09\nfixture: \"synthetic\"\nmemvid.embedding",
+      "uri": "mv2://notes/n09",
+      "child_frames": []
+    },
+    {
+      "frame_id": 9,
+      "timestamp": 1793297225,
+      "preview": "週五電影\n週五晚上的電影票是九排十二號,場次開始時間為七點二十分。取票用的紙本代碼夾在橘色記事本中。\ntitle: 週五電影\nuri: mv2://notes/n10\nfixture: \"synthetic\"\nmemvid.embeddin",
+      "uri": "mv2://notes/n10",
+      "child_frames": []
+    },
+    {
+      "frame_id": 10,
+      "timestamp": 1793297225,
+      "preview": "筆芯整理\n黑色鋼珠筆的替換筆芯在書桌右側透明盒,盒蓋貼著黑色方塊。藍色筆芯在另一個有藍點的小盒。\ntitle: 筆芯整理\nuri: mv2://notes/n11\nfixture: \"synthetic\"\nmemvid.embedding.",
+      "uri": "mv2://notes/n11",
+      "child_frames": []
+    },
+    {
+      "frame_id": 11,
+      "timestamp": 1793297225,
+      "preview": "展覽帶回的書\n《光的房間》展覽圖錄放在客廳書架第三層,封面是銀灰色。展覽摺頁另放進白色文件袋。\ntitle: 展覽帶回的書\nuri: mv2://notes/n12\nfixture: \"synthetic\"\nmemvid.embedding",
+      "uri": "mv2://notes/n12",
+      "child_frames": []
+    },
+    {
+      "frame_id": 12,
+      "timestamp": 1793297225,
+      "preview": "日語課作業\n日語課的聽力作業錄音存在平板的「語言練習」資料夾,檔名是「第三課慢速」。課堂講義則留在綠色活頁夾。\ntitle: 日語課作業\nuri: mv2://notes/n13\nfixture: \"synthetic\"\nmemvid.em",
+      "uri": "mv2://notes/n13",
+      "child_frames": []
+    },
+    {
+      "frame_id": 13,
+      "timestamp": 1793297225,
+      "preview": "咖啡試飲\n上次試飲最喜歡的咖啡豆來自霧丘烘焙,包裝標示榛果與可可風味。那包豆子的烘焙程度是中焙。\ntitle: 咖啡試飲\nuri: mv2://notes/n14\nfixture: \"synthetic\"\nmemvid.embedding.",
+      "uri": "mv2://notes/n14",
+      "child_frames": []
+    },
+    {
+      "frame_id": 14,
+      "timestamp": 1793297225,
+      "preview": "空玻璃瓶去向\n家中的空玻璃瓶已送到社區西門旁的回收點。紙箱這次沒有一起搬走,仍放在儲藏室。\ntitle: 空玻璃瓶去向\nuri: mv2://notes/n15\nfixture: \"synthetic\"\nmemvid.embedding.d",
+      "uri": "mv2://notes/n15",
+      "child_frames": []
+    },
+    {
+      "frame_id": 15,
+      "timestamp": 1793297225,
+      "preview": "縫紉材料位置\n做帆布收納袋剩下的黃色棉線收在紅色針線盒底層。袋子的紙樣折好放在盒蓋下。\ntitle: 縫紉材料位置\nuri: mv2://notes/n16\nfixture: \"synthetic\"\nmemvid.embedding.dim",
+      "uri": "mv2://notes/n16",
+      "child_frames": []
+    },
+    {
+      "frame_id": 16,
+      "timestamp": 1793297225,
+      "preview": "練琴錄音備忘\n木笛合奏的彩排錄音存在隨身錄音筆,名稱是「窗邊下午」。正式演出尚未錄音,這份只有彩排內容。\ntitle: 練琴錄音備忘\nuri: mv2://notes/n17\nfixture: \"synthetic\"\nmemvid.embe",
+      "uri": "mv2://notes/n17",
+      "child_frames": []
+    },
+    {
+      "frame_id": 17,
+      "timestamp": 1793297225,
+      "preview": "共享廚房筆記\n這次共享廚房聚會做了番茄麵,使用的是白色大鍋。聚會結束後,大鍋已歸還三樓器材櫃。\ntitle: 共享廚房筆記\nuri: mv2://notes/n18\nfixture: \"synthetic\"\nmemvid.embedding",
+      "uri": "mv2://notes/n18",
+      "child_frames": []
+    },
+    {
+      "frame_id": 18,
+      "timestamp": 1793297226,
+      "preview": "Photo Walk 報到\nPhoto Walk P7 的集合時間是上午九點十分,集合處為南門鐘樓。這個預約報到要帶紙本確認單,現場會發借用的識別背帶。\ntitle: Photo Walk 報到\nuri: mv2://notes/n19\nf",
+      "uri": "mv2://notes/n19",
+      "child_frames": []
+    },
+    {
+      "frame_id": 19,
+      "timestamp": 1793297226,
+      "preview": "SSD 備份紀錄\n相片備份存到標籤為 Archive-2 的 SSD,完成的是十月份相簿。連接線為 USB-C,SSD 收在書桌下方的防震包。\ntitle: SSD 備份紀錄\nuri: mv2://notes/n20\nfixture: \"s",
+      "uri": "mv2://notes/n20",
+      "child_frames": []
+    },
+    {
+      "frame_id": 20,
+      "timestamp": 1793297226,
+      "preview": "家用設備標籤\n書房的閱讀燈型號是 Luma R2,暖光亮度記錄為 40%。客廳的同系列燈是 Luma R1,這次沒有記錄其亮度。\ntitle: 家用設備標籤\nuri: mv2://notes/n21\nfixture: \"synthetic\"",
+      "uri": "mv2://notes/n21",
+      "child_frames": []
+    },
+    {
+      "frame_id": 21,
+      "timestamp": 1793297226,
+      "preview": "練習專案匯出\n練習專案 NoteBox 的 CSV 匯出使用 UTF-8 編碼,欄位順序是 title、date、body。這是本機練習資料,不含帳號或聯絡資訊。\ntitle: 練習專案匯出\nuri: mv2://notes/n22\nfix",
+      "uri": "mv2://notes/n22",
+      "child_frames": []
+    },
+    {
+      "frame_id": 22,
+      "timestamp": 1793297226,
+      "preview": "線上工作坊\nSketch 101 工作坊在十一月十二日 19:30 開始,報名方案包含活動後七天內可觀看的 replay。教材以 PDF 提供。\ntitle: 線上工作坊\nuri: mv2://notes/n23\nfixture: \"syn",
+      "uri": "mv2://notes/n23",
+      "child_frames": []
+    },
+    {
+      "frame_id": 23,
+      "timestamp": 1793297226,
+      "preview": "桌遊收藏\n桌遊 Star Orchard 的繁中規則書收在盒蓋內側,遊戲人數標示為 2–4 人。擴充牌裝在獨立的紫色布袋。\ntitle: 桌遊收藏\nuri: mv2://notes/n24\nfixture: \"synthetic\"\nmemv",
+      "uri": "mv2://notes/n24",
+      "child_frames": []
+    }
+  ],
+  "network": {
+    "mechanism": "Linux libseccomp",
+    "denied_syscalls": [
+      "socket",
+      "socketpair",
+      "connect",
+      "sendto",
+      "sendmsg",
+      "sendmmsg"
+    ],
+    "probes": {
+      "ipv4": "EPERM",
+      "ipv6": "EPERM"
+    },
+    "installed_before_sdk_import": true,
+    "inherited_by_subprocesses": true
+  }
+}

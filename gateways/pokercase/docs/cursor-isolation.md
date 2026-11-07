@@ -1,4 +1,14 @@
-# Cursor 執行隔離（T-0377）
+# Cursor Agent CLI (`cursor-agent`): execution decision and history
+
+## Current decision — 2026-11-02
+
+The owner selected **Cursor Agent CLI (`cursor-agent`)**, not the Cursor IDE, and removed Docker as a product requirement. This supersedes the container-only design below. Existing provider IDs (`cursor`, aliases `cu`/`cursor_agent`), flags and saved connections remain compatible; this documentation change does not rename the wire ID.
+
+**Implementation status:** the current adapter still contains the older container-only runner and rejects missing image/profile configuration. Direct CLI execution has not yet been implemented or accepted. Do not describe this as a working Docker-free route or enable it by passing a host binary as the container runtime. Claude completion is the current priority; the Cursor Agent CLI runtime migration is separate pending work. Historical isolation tests/reports remain evidence of the older implementation, not a requirement to run Docker now.
+
+Account-plugin exposure and local file/tool access must be described according to the selected CLI/version; cancelling Docker does not establish that these capabilities are absent. No new provider call, login, credential migration or execution is authorized by this document.
+
+## Historical container design and verification
 
 Owner 已決定保留 Cursor provider，授權以外部隔離取代不可靠的主機直接執行。此規格只涵蓋主機檔案／程序邊界；真實 Cursor 登入與完整帳號旅程仍待驗證。
 

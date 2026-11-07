@@ -1,0 +1,34 @@
+{
+  "schema_version": 1,
+  "kind": "source-only-reviewed-snapshot",
+  "desk_task": "T-0442",
+  "actual_product_source": "86350871766bbfbe9d29325b49aae659c2d74c92",
+  "fixed_binary_sha256": "13f2b192ed219566721a313779ed364b9a83ea45f1e88b8d6371bec8bf226085",
+  "private_bindings_included": false,
+  "files": {
+    "window.py.in": {
+      "original_sha256": "fde9f52e08e63174d6a16d4caf6808baad0b202de1c0403cade89a634cdc987e",
+      "template_sha256": "9880e03b2975539e7e5897870f500090e38bb2b765eda79e0fad33a27fa5c6fe"
+    },
+    "policy.mjs.in": {
+      "original_sha256": "291998258c1e702730f7aa63816ef6058fd5232cad103888280f5c4084592815",
+      "template_sha256": "291998258c1e702730f7aa63816ef6058fd5232cad103888280f5c4084592815"
+    },
+    "proxy.mjs.in": {
+      "original_sha256": "31e3d311374d2b9c824ff30c2d782ddf1374d622f7a60e07c433df03596a3d89",
+      "template_sha256": "600fe49621381d4e51fa92f2980f88c9262213c6a450ebc34e699b10d1b6c035"
+    },
+    "test_window.py.in": {
+      "original_sha256": "02715d02f5845b6e1aa44e832c85a9744699ae12deb0d18ef32a688a5b2510aa",
+      "template_sha256": "02715d02f5845b6e1aa44e832c85a9744699ae12deb0d18ef32a688a5b2510aa"
+    },
+    "policy.test.mjs.in": {
+      "original_sha256": "e8f3583426ba0f700a03426cbceb6eb356100772ca3e698a702969b488e8e704",
+      "template_sha256": "e8f3583426ba0f700a03426cbceb6eb356100772ca3e698a702969b488e8e704"
+    },
+    "proxy.integration.mjs.in": {
+      "original_sha256": "db605918e0a8319294927a75b8edb22e8fe307b1bb47f5f413affebcf06ab5b2",
+      "template_sha256": "1f380b8c740d9e3609f3c2356004e8a22d22c7e627ae60d24a482e86c5529d03"
+    }
+  }
+}

@@ -1,0 +1,641 @@
+{
+  "unit": "flowshot",
+  "mode": "read-only receipt/source/PNG hash audit, no runtime rerun",
+  "runAudits": [
+    {
+      "run": "flowshot-001",
+      "status": "passed",
+      "manifestSha256": "3def6b90dc5a77404c70e4d38f80aa1b3751801709520f3761eaae22665308f5",
+      "screenshots": [
+        {
+          "id": "loading__desktop__light",
+          "sha256": "87cbdfaeb4b72dbe659c313152bd1f66ae177cd324cd98c0af733288e80bcb54",
+          "hashBytesDimensionsMatch": true,
+          "dimensions": [
+            1440,
+            900
+          ]
+        },
+        {
+          "id": "ready__desktop__light",
+          "sha256": "5e0780ef83c0a2707facf8d505715706695870c08f7437fb6fb4a67e2f9aac33",
+          "hashBytesDimensionsMatch": true,
+          "dimensions": [
+            1440,
+            900
+          ]
+        },
+        {
+          "id": "error__desktop__light",
+          "sha256": "bdcb56378b745ba2fe8590c150c6eb97ce377e7ce55bf7c70d7692d7ab7f5b6c",
+          "hashBytesDimensionsMatch": true,
+          "dimensions": [
+            1440,
+            900
+          ]
+        },
+        {
+          "id": "loading__desktop__dark",
+          "sha256": "87cbdfaeb4b72dbe659c313152bd1f66ae177cd324cd98c0af733288e80bcb54",
+          "hashBytesDimensionsMatch": true,
+          "dimensions": [
+            1440,
+            900
+          ]
+        },
+        {
+          "id": "ready__desktop__dark",
+          "sha256": "5e0780ef83c0a2707facf8d505715706695870c08f7437fb6fb4a67e2f9aac33",
+          "hashBytesDimensionsMatch": true,
+          "dimensions": [
+            1440,
+            900
+          ]
+        },
+        {
+          "id": "error__desktop__dark",
+          "sha256": "bdcb56378b745ba2fe8590c150c6eb97ce377e7ce55bf7c70d7692d7ab7f5b6c",
+          "hashBytesDimensionsMatch": true,
+          "dimensions": [
+            1440,
+            900
+          ]
+        },
+        {
+          "id": "loading__tablet__light",
+          "sha256": "bb63005458c66aa1e6a5ad5d90f9072885b7f10c78b1b2e304e93477545858ad",
+          "hashBytesDimensionsMatch": true,
+          "dimensions": [
+            834,
+            1112
+          ]
+        },
+        {
+          "id": "ready__tablet__light",
+          "sha256": "27155b4cff448028f778ab4bbb9ae7a9ccf0ef527be5223c82608f2d6011b0aa",
+          "hashBytesDimensionsMatch": true,
+          "dimensions": [
+            834,
+            1112
+          ]
+        },
+        {
+          "id": "error__tablet__light",
+          "sha256": "5178c80881a60b72ad3b97a5ed6cbc558d5a2bc77cdb419a6257e5978bdb908b",
+          "hashBytesDimensionsMatch": true,
+          "dimensions": [
+            834,
+            1112
+          ]
+        },
+        {
+          "id": "loading__tablet__dark",
+          "sha256": "bb63005458c66aa1e6a5ad5d90f9072885b7f10c78b1b2e304e93477545858ad",
+          "hashBytesDimensionsMatch": true,
+          "dimensions": [
+            834,
+            1112
+          ]
+        },
+        {
+          "id": "ready__tablet__dark",
+          "sha256": "27155b4cff448028f778ab4bbb9ae7a9ccf0ef527be5223c82608f2d6011b0aa",
+          "hashBytesDimensionsMatch": true,
+          "dimensions": [
+            834,
+            1112
+          ]
+        },
+        {
+          "id": "error__tablet__dark",
+          "sha256": "5178c80881a60b72ad3b97a5ed6cbc558d5a2bc77cdb419a6257e5978bdb908b",
+          "hashBytesDimensionsMatch": true,
+          "dimensions": [
+            834,
+            1112
+          ]
+        },
+        {
+          "id": "loading__mobile__light",
+          "sha256": "c2443f48f56ef5215f5aae1912ce42a8c1b06d265be63daaeddbcbd50cd3cd1b",
+          "hashBytesDimensionsMatch": true,
+          "dimensions": [
+            390,
+            844
+          ]
+        },
+        {
+          "id": "ready__mobile__light",
+          "sha256": "74f6ca4978deec28ba2c436bd946f78eae1a01ccfc9b19979604418d2902b76c",
+          "hashBytesDimensionsMatch": true,
+          "dimensions": [
+            390,
+            844
+          ]
+        },
+        {
+          "id": "error__mobile__light",
+          "sha256": "dce91019cd7eb779fc234f2dfb93225d656d77c383904482c0d7a1f7db792b6f",
+          "hashBytesDimensionsMatch": true,
+          "dimensions": [
+            390,
+            844
+          ]
+        },
+        {
+          "id": "loading__mobile__dark",
+          "sha256": "c2443f48f56ef5215f5aae1912ce42a8c1b06d265be63daaeddbcbd50cd3cd1b",
+          "hashBytesDimensionsMatch": true,
+          "dimensions": [
+            390,
+            844
+          ]
+        },
+        {
+          "id": "ready__mobile__dark",
+          "sha256": "74f6ca4978deec28ba2c436bd946f78eae1a01ccfc9b19979604418d2902b76c",
+          "hashBytesDimensionsMatch": true,
+          "dimensions": [
+            390,
+            844
+          ]
+        },
+        {
+          "id": "error__mobile__dark",
+          "sha256": "dce91019cd7eb779fc234f2dfb93225d656d77c383904482c0d7a1f7db792b6f",
+          "hashBytesDimensionsMatch": true,
+          "dimensions": [
+            390,
+            844
+          ]
+        },
+        {
+          "id": "long-ready__mobile__light",
+          "sha256": "449730eb0c600ed1baf37c10bbea98d3a49d7cc046f05f70b99960b1da47d426",
+          "hashBytesDimensionsMatch": true,
+          "dimensions": [
+            390,
+            844
+          ]
+        }
+      ]
+    }
+  ],
+  "retainedAcceptedCaptures": [
+    {
+      "run": "flowshot-001",
+      "id": "loading__desktop__light",
+      "status": 200,
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "violations": [],
+      "incomplete": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "nodes": 5
+        }
+      ]
+    },
+    {
+      "run": "flowshot-001",
+      "id": "ready__desktop__light",
+      "status": 200,
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "violations": [],
+      "incomplete": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "nodes": 10
+        }
+      ]
+    },
+    {
+      "run": "flowshot-001",
+      "id": "error__desktop__light",
+      "status": 200,
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "violations": [],
+      "incomplete": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "nodes": 5
+        }
+      ]
+    },
+    {
+      "run": "flowshot-001",
+      "id": "loading__desktop__dark",
+      "status": 200,
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "violations": [],
+      "incomplete": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "nodes": 5
+        }
+      ]
+    },
+    {
+      "run": "flowshot-001",
+      "id": "ready__desktop__dark",
+      "status": 200,
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "violations": [],
+      "incomplete": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "nodes": 10
+        }
+      ]
+    },
+    {
+      "run": "flowshot-001",
+      "id": "error__desktop__dark",
+      "status": 200,
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "violations": [],
+      "incomplete": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "nodes": 5
+        }
+      ]
+    },
+    {
+      "run": "flowshot-001",
+      "id": "loading__tablet__light",
+      "status": 200,
+      "viewport": {
+        "width": 834,
+        "height": 1112
+      },
+      "violations": [],
+      "incomplete": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "nodes": 5
+        }
+      ]
+    },
+    {
+      "run": "flowshot-001",
+      "id": "ready__tablet__light",
+      "status": 200,
+      "viewport": {
+        "width": 834,
+        "height": 1112
+      },
+      "violations": [],
+      "incomplete": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "nodes": 10
+        }
+      ]
+    },
+    {
+      "run": "flowshot-001",
+      "id": "error__tablet__light",
+      "status": 200,
+      "viewport": {
+        "width": 834,
+        "height": 1112
+      },
+      "violations": [],
+      "incomplete": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "nodes": 5
+        }
+      ]
+    },
+    {
+      "run": "flowshot-001",
+      "id": "loading__tablet__dark",
+      "status": 200,
+      "viewport": {
+        "width": 834,
+        "height": 1112
+      },
+      "violations": [],
+      "incomplete": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "nodes": 5
+        }
+      ]
+    },
+    {
+      "run": "flowshot-001",
+      "id": "ready__tablet__dark",
+      "status": 200,
+      "viewport": {
+        "width": 834,
+        "height": 1112
+      },
+      "violations": [],
+      "incomplete": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "nodes": 10
+        }
+      ]
+    },
+    {
+      "run": "flowshot-001",
+      "id": "error__tablet__dark",
+      "status": 200,
+      "viewport": {
+        "width": 834,
+        "height": 1112
+      },
+      "violations": [],
+      "incomplete": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "nodes": 5
+        }
+      ]
+    },
+    {
+      "run": "flowshot-001",
+      "id": "loading__mobile__light",
+      "status": 200,
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "violations": [],
+      "incomplete": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "nodes": 5
+        }
+      ]
+    },
+    {
+      "run": "flowshot-001",
+      "id": "ready__mobile__light",
+      "status": 200,
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "violations": [],
+      "incomplete": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "nodes": 10
+        }
+      ]
+    },
+    {
+      "run": "flowshot-001",
+      "id": "error__mobile__light",
+      "status": 200,
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "violations": [],
+      "incomplete": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "nodes": 5
+        }
+      ]
+    },
+    {
+      "run": "flowshot-001",
+      "id": "loading__mobile__dark",
+      "status": 200,
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "violations": [],
+      "incomplete": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "nodes": 5
+        }
+      ]
+    },
+    {
+      "run": "flowshot-001",
+      "id": "ready__mobile__dark",
+      "status": 200,
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "violations": [],
+      "incomplete": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "nodes": 10
+        }
+      ]
+    },
+    {
+      "run": "flowshot-001",
+      "id": "error__mobile__dark",
+      "status": 200,
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "violations": [],
+      "incomplete": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "nodes": 5
+        }
+      ]
+    },
+    {
+      "run": "flowshot-001",
+      "id": "long-ready__mobile__light",
+      "status": 200,
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "violations": [],
+      "incomplete": [
+        {
+          "id": "color-contrast",
+          "impact": "serious",
+          "nodes": 10
+        }
+      ]
+    }
+  ],
+  "sourceProvenance": {
+    "retainedAuditSha256": "5fb95b7f243ca295843aaba4b304f35dd5cdb8cf1d9b74fe591e456181ed680e",
+    "currentSourceChecks": [
+      {
+        "path": "fe-review/preload.mjs",
+        "currentSha256": "50fd6a1cd727dcd0222643d8d988cba533e1319a8c29b8c046c88d0e81be5e37",
+        "matchesRetainedAudit": true,
+        "exactRuntimeBytes": true,
+        "reconstructedRuntimeHashMatches": null
+      },
+      {
+        "path": "fe-review/preload.node.mjs",
+        "currentSha256": "f03a6129db50820017a9914816702f8055284e89600335a51884893163b5cee7",
+        "matchesRetainedAudit": true,
+        "exactRuntimeBytes": true,
+        "reconstructedRuntimeHashMatches": null
+      },
+      {
+        "path": "fe-review/runtime-guards.mjs",
+        "currentSha256": "b4c5fbe3f31ab2ce73d6246e8ca37ccf135a8ba7034cb4dd921c4eeb635e7b80",
+        "matchesRetainedAudit": true,
+        "exactRuntimeBytes": true,
+        "reconstructedRuntimeHashMatches": null
+      },
+      {
+        "path": "fe-review/browser-runtime.mjs",
+        "currentSha256": "23adc88ebc6466a7f5616b43149ebab3d059fd7a47394c00a277047988c4ca3c",
+        "matchesRetainedAudit": true,
+        "exactRuntimeBytes": false,
+        "reconstructedRuntimeHashMatches": true
+      },
+      {
+        "path": "fe-review/run-review.mjs",
+        "currentSha256": "b0ac2d51e2b5a9449d070b8fd6bf6a26d421dec612d466bb7a54a2bd9aa19da7",
+        "matchesRetainedAudit": true,
+        "exactRuntimeBytes": false,
+        "reconstructedRuntimeHashMatches": true
+      },
+      {
+        "path": "src/main.ts",
+        "currentSha256": "fae059ef78005c3c097dffe9fc4626369d8fc6c2fb1fbfd2e4ada7f6833602cb",
+        "matchesRetainedAudit": true,
+        "exactRuntimeBytes": true,
+        "reconstructedRuntimeHashMatches": null
+      },
+      {
+        "path": "src/launch-build-info.ts",
+        "currentSha256": "71f4f2fccb483904a0edd7c2ae39a0745115d1258e092123b8a905d1fa00369e",
+        "matchesRetainedAudit": true,
+        "exactRuntimeBytes": true,
+        "reconstructedRuntimeHashMatches": null
+      },
+      {
+        "path": "src/render.tsx",
+        "currentSha256": "0ccdbe211db759909365f2be3a99e19172ed0a946e14de724246941a4a0520b3",
+        "matchesRetainedAudit": true,
+        "exactRuntimeBytes": true,
+        "reconstructedRuntimeHashMatches": null
+      },
+      {
+        "path": "src/App.tsx",
+        "currentSha256": "deca5131f7813114bee3cf74265fc72e9148658c8def95991c0c9dad3b49cb39",
+        "matchesRetainedAudit": true,
+        "exactRuntimeBytes": true,
+        "reconstructedRuntimeHashMatches": null
+      },
+      {
+        "path": "src/styles.css",
+        "currentSha256": "b6e236fc1b4537aab1b534a22b6bcdc90abc1a75ece8843d1a96e7d138485f90",
+        "matchesRetainedAudit": true,
+        "exactRuntimeBytes": true,
+        "reconstructedRuntimeHashMatches": null
+      },
+      {
+        "path": "package-lock.json",
+        "currentSha256": "907d9bee0913e53104240ec4aec5cbd5c1bcb2588a327a67e8667135e2dd6b9e",
+        "matchesRetainedAudit": true,
+        "exactRuntimeBytes": true,
+        "reconstructedRuntimeHashMatches": null
+      }
+    ],
+    "qualification": "Filename-only sourceFiles mapping, Loom-only hash-pinned Vite loader, Loom-only private failure details plus safe public failure site and explicit diagnostic result classification. Exact two reversible delta artifacts reconstruct original runtime hash. Flowshot successful behavior remains unchanged; no browser rerun."
+  },
+  "nativeChecks": [
+    {
+      "command": "npm run lint",
+      "exitCode": 0,
+      "elapsedSeconds": 3.878
+    },
+    {
+      "command": [
+        "npm",
+        "test"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 10.434
+    },
+    {
+      "command": [
+        "npm",
+        "run",
+        "build"
+      ],
+      "exitCode": 0,
+      "elapsedSeconds": 4.207
+    }
+  ],
+  "outerExecution": {
+    "exitCode": 0,
+    "elapsedSeconds": 19.768,
+    "containerRemoved": true,
+    "image": "sha256:47317f37e2082ffb77d8f37a24a0ff80a097c41b82500b6b19c4b784e90cc3fd"
+  },
+  "pending": [
+    "current-head required CI",
+    "independent final acceptance",
+    "normal merge and remote readback"
+  ],
+  "fullRound3Accepted": false,
+  "nativeProductAccepted": false,
+  "originalNativeReceipts": [
+    {
+      "file": "flowshot-native.json",
+      "sha256": "957b24f23f8607ad424b18d7d6e8e43d394b2bdca49669ddc5a1e64c721a60f4",
+      "byteIdenticalToRootOriginal": true
+    },
+    {
+      "file": "flowshot-final-native.json",
+      "sha256": "e0f343067091fc1df75656b0d6482e715bb88519f61259269b908fda49af6f20",
+      "byteIdenticalToRootOriginal": true
+    }
+  ]
+}

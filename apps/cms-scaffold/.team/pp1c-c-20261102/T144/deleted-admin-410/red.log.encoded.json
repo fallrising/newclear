@@ -1,0 +1,8 @@
+{
+  "version": 1,
+  "original": "T144/deleted-admin-410/red.log",
+  "sha256": "50962948f044bb4051b502840e6c3ab75828de6370ea3e212e7d9c5df601010f",
+  "byteSize": "933",
+  "encoding": "utf-8",
+  "text": "✖ T144_actual_deleted_admin_410_preserves_anonymous_404_and_bytes (10.493582ms)\nℹ tests 1\nℹ suites 0\nℹ pass 0\nℹ fail 1\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 73.065529\n\n✖ failing tests:\n\ntest at .team/pp1c-c-20261102/T144/fixture-client.test.mjs:120:1\n✖ T144_actual_deleted_admin_410_preserves_anonymous_404_and_bytes (10.493582ms)\n  Error: FIXTURE_HTTP_STATUS\n      at prepareSmokeFixture (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-c-target-20261102/apps/cms-scaffold/.team/pp1c-c-20261102/T144/fixture-client.mjs:125:102)\n      at async TestContext.<anonymous> (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-c-target-20261102/apps/cms-scaffold/.team/pp1c-c-20261102/T144/fixture-client.test.mjs:121:25)\n      at async Test.run (node:internal/test_runner/test:1332:7)\n      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:385:3) {\n    code: 'FIXTURE_HTTP_STATUS'\n  }\n"
+}

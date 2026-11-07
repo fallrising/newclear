@@ -1,0 +1,15 @@
+.venv/bin/python -m unittest discover -s tests -v
+test_corrupt_memory_fails (test_cli.CliBoundaries.test_corrupt_memory_fails) ... ok
+test_existing_output_is_not_modified (test_cli.CliBoundaries.test_existing_output_is_not_modified) ... ok
+test_full_profile_reports_missing_models_as_non_success (test_cli.CliBoundaries.test_full_profile_reports_missing_models_as_non_success) ... ok
+test_missing_memory_is_not_created (test_cli.CliBoundaries.test_missing_memory_is_not_created) ... ok
+test_network_denial_is_inherited_by_child (test_cli.CliBoundaries.test_network_denial_is_inherited_by_child) ... ok
+test_query_is_read_only_and_preserves_citation (test_cli.CliBoundaries.test_query_is_read_only_and_preserves_citation) ... ok
+test_tampered_model_is_rejected_without_repair (test_cli.CliBoundaries.test_tampered_model_is_rejected_without_repair) ... ok
+test_unknown_query_does_not_invent_sources (test_cli.CliBoundaries.test_unknown_query_does_not_invent_sources) ... ok
+
+----------------------------------------------------------------------
+Ran 8 tests in 4.564s
+
+OK
+.venv/bin/python -m py_compile lab.py offline.py scenarios.py advanced.py models.py native-whisper/prepare_core.py native-whisper/prepare_assets.py

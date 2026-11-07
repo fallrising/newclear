@@ -1,0 +1,8 @@
+{
+  "version": 1,
+  "original": "T131/T01a/red.log",
+  "sha256": "e8adf01522209a394be2b2803396fd19ca62e127a17ba68fdbdd071b471d7814",
+  "byteSize": "856",
+  "encoding": "utf-8",
+  "text": "✖ T131_T01_private_prepare_binds_source_without_port_or_service_start (275.141063ms)\nℹ tests 1\nℹ suites 0\nℹ pass 0\nℹ fail 1\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 348.26542\n\n✖ failing tests:\n\ntest at scripts/local/maintenance-workflow.test.mjs:615:1\n✖ T131_T01_private_prepare_binds_source_without_port_or_service_start (275.141063ms)\n  Error: ADAPTER_UNSEALED\n      at prepareRestore (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-c-target-20261102/apps/cms-scaffold/scripts/local/prepare.mjs:165:48)\n      at TestContext.<anonymous> (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-c-target-20261102/apps/cms-scaffold/scripts/local/maintenance-workflow.test.mjs:617:23)\n      at async Test.run (node:internal/test_runner/test:1332:7)\n      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:385:3)\n"
+}

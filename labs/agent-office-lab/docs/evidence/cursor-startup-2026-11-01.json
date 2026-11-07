@@ -1,0 +1,67 @@
+{
+  "status": "completed",
+  "provider": "cursor",
+  "version": "2026.10.22-27dcf5f",
+  "model_inference_verified": false,
+  "authentication_verified": false,
+  "credentials_loaded": false,
+  "prompt_supplied": false,
+  "external_network_denied": true,
+  "external_tcp_denial_verified": true,
+  "workspace_trust": "synthetic_fixture_only",
+  "source_sha256": {
+    "run_cursor_startup.py": "5d68bccaa0a257e571328dbbfd1166ef7d56ec184d2191b6f0c66f72680cd298",
+    "cursor_cli.py": "90fee7eab9f04b536a1ce0ebe75169509b200684c0e5e015c6ecae7fd1b229f2",
+    "grok_startup.py": "af5188f82d05ebfb0830bbe7a7cb0e3c6838e37cd947424252b8ac7ea9b4af72",
+    "run_grok_startup.py": "8b5b556ae1c5bb6f1232738b9fc6549c8df5de77945a04e14ee7efa15c1d02c5",
+    "office_cursor.mjs": "1bc2e3ffbb6b96832e706f94b0b34675e9a5a58f4ce2109b020ce1e6d615e269",
+    "cursor_office_policy.mjs": "f42c2027e3cbf02414cfd344197772272e81b5d702404ca10b959d6f93d4b0ec",
+    "remote_cli.py": "9a0ee26503ef76b003b9d8d387f6381acd1a043723374f62793a7f75bf97bb89",
+    "bin/cursor-agent": "7c7aaea9f378e6d67e8fd28acbbd090b6fbe75c88a9578ea3f2884719602d4b5"
+  },
+  "cleanup_errors": [],
+  "owned_processes_seen": 5,
+  "additional_processes_stopped": 0,
+  "cleanup_completed": true,
+  "elapsed_s": 12.512454708106816,
+  "recorded_at": "2026-10-31T18:46:31Z",
+  "scope": "credential-free native startup only",
+  "strict_network_isolation_verified": false,
+  "offline_tests": {
+    "node": 31,
+    "python": 24
+  },
+  "archive_extraction_verified": true,
+  "office": {
+    "status": "completed",
+    "states": [
+      "idle",
+      "needs_input"
+    ],
+    "task_completed": false,
+    "session_hook_verified": false,
+    "startup_verified": true,
+    "outcome": "login_required",
+    "native_login_screen_verified": true,
+    "workspace_hooks_installed": true,
+    "workspace_hooks_removed": true,
+    "cleanup_completed": true
+  },
+  "cli_pin": {
+    "version": "2026.10.22-27dcf5f",
+    "platform": "darwin-arm64",
+    "url": "https://downloads.cursor.com/lab/2026.10.22-27dcf5f/darwin/arm64/agent-cli-package.tar.gz",
+    "archive_sha256": "2f5b0a3dd5fb951cecffac813867d8a08d810e59837d59fd5f12d69b922398d7",
+    "runtime_tree_sha256": "b7e07eb6e5bd2ae712981c2e2766251e81fd71c10e1082f1e33d91302106072d",
+    "source": "https://cursor.com/install",
+    "entrypoint": "cursor-agent",
+    "package": "@anysphere/agent-cli-runtime"
+  },
+  "preflight": {
+    "compatible": true,
+    "network_denied": true,
+    "version": "2026.10.22-27dcf5f",
+    "authentication_verified": false,
+    "model_inference_verified": false
+  }
+}

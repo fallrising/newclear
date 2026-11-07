@@ -1,0 +1,120 @@
+{
+  "id": "progression-practice-based-growth",
+  "system": "progression",
+  "edition": 2,
+  "name": {
+    "zh": "做什么，就练强什么",
+    "en": "Practice-based skill growth"
+  },
+  "summary": {
+    "zh": "成长跟随实际行为，常做的事情自然变成特长。",
+    "en": "Repeated actions build the corresponding skill."
+  },
+  "rules": {
+    "zh": "行动成功时，相关技能获得经验，达到门槛后提高效率或开放新做法。经验不能任意分给别的技能，玩家需要在完成当前目标和练习薄弱能力之间分配时间。",
+    "en": "Successful actions grant experience to the skill used. Reaching a threshold improves efficiency or unlocks options. Experience cannot simply be assigned elsewhere, so time spent solving the current problem competes with practicing a weak skill."
+  },
+  "loop": [
+    {
+      "zh": "选择要做的事情",
+      "en": "Choose an activity"
+    },
+    {
+      "zh": "完成行动获得对应经验",
+      "en": "Earn matching experience"
+    },
+    {
+      "zh": "跨过技能门槛",
+      "en": "Reach a threshold"
+    },
+    {
+      "zh": "利用新效率或改练别项",
+      "en": "Use the gain or train elsewhere"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "用最熟练的办法快速完成任务，还是换不熟悉的办法顺便练习？",
+      "en": "Finish quickly with your strongest skill or practice a weaker approach?"
+    },
+    {
+      "zh": "专练一项提高产出，还是分散练习以应对更多任务？",
+      "en": "Specialize for efficiency or spread practice to handle more tasks?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "经验触发条件",
+        "en": "Experience trigger"
+      },
+      "effect": {
+        "zh": "只奖励有效行动可减少原地刷按钮，但条件必须容易看懂。",
+        "en": "Rewarding meaningful results discourages empty repetition, but the trigger must be clear."
+      }
+    },
+    {
+      "name": {
+        "zh": "成长带来的变化",
+        "en": "Skill benefit"
+      },
+      "effect": {
+        "zh": "只涨小数字容易无感；更省资源或新增做法更容易察觉。",
+        "en": "Tiny numeric gains can be obscure; lower costs or new actions are easier to notice."
+      }
+    }
+  ],
+  "tags": [
+    "progression",
+    "planning",
+    "time"
+  ],
+  "related": [
+    "progression-challenge-tiers",
+    "progression-death-loses-training",
+    "progression-evolution-recipes",
+    "progression-prestige-reset"
+  ],
+  "contrast": {
+    "zh": "《星露谷物语》让日常工作逐渐变熟练；《天际》还把各项技能增长汇入人物等级，练习会影响更广的成长节奏。",
+    "en": "Stardew Valley develops daily work skills; Skyrim also feeds skill increases into character level, linking practice to overall progression."
+  },
+  "combination": {
+    "zh": "设计提案：工坊订单同时给报酬和对应工艺经验，玩家可以接熟悉订单赚钱，也能接低利润订单练新手艺。",
+    "en": "Design proposal: workshop orders grant payment and matching craft experience, trading reliable income against practicing a new craft."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "木工经验为 8/10，缝纫为 1/10；今天只能完成两件工作。",
+      "en": "Carpentry is at 8/10 experience and sewing at 1/10; you can finish two jobs today."
+    },
+    "action": {
+      "zh": "你先做木盒，获得 2 点木工经验。",
+      "en": "Make a box and gain 2 carpentry experience."
+    },
+    "result": {
+      "zh": "木工升级，以后每件木制品少用 1 根木材。",
+      "en": "Carpentry improves; later wooden items use one less plank."
+    },
+    "next": {
+      "zh": "剩下一次工作机会，是继续用优势赚钱，还是练缝纫？",
+      "en": "Spend the remaining job on profitable carpentry or sewing practice?"
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "做两类工作、各自经验条和一个可见的成本下降门槛。",
+      "en": "Build two job types, separate experience bars and one visible cost-reduction threshold."
+    },
+    "pitfall": {
+      "zh": "别先加几十项技能；先确认每项都有值得重复的行动。",
+      "en": "Avoid dozens of skills before each one has an activity worth repeating."
+    },
+    "test": {
+      "zh": "玩家能否指出哪次行动带来了成长，并为练习主动换一次工作？",
+      "en": "Can players connect an action to a gain and deliberately switch jobs to train?"
+    }
+  }
+}

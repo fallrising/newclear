@@ -1,4 +1,86 @@
-# 現行停止點 — 2026-10-06
+# 最新接續 — PR659已合併，Worker成果真實性 browser本機驗收通過
+
+PR659正常合併760fffab，四項CI成功，45+756Python與118web通過。DUXdone板隨本次
+真正測試來源變更補入，原e4d4a11b候選保留；下方pending為歷史快照。
+[RTF契約](../tasks/379-result-truth/task.md)／[本機快照](../tasks/379-result-truth/report.md)
+補直接AT09UI證據，不聲稱新產品缺陷；scriptedruntime經實際Worker寫入failed／unknown／
+注入封存失敗的interrupted狀態，再由真實API與Chromium觀察。既有backend因果證據沿用。
+T114-browser1單一新情境含三種Worker結果4.0s通過，Ruff/format/strictTS/Prettier/重建資產通過；
+來源前後一致，owned helper與PostgreSQL已結束。子程序清理審查修正發生在runtime前，舊spec保留。
+獨立最終審查／必要CI／正常合併仍為門檻；全fake/live/M4/部署仍未完成。
+
+---
+
+# 最新接續 — PR658已合併，下載過期修正本機通過
+
+PR658正常合併d81a7d91，四項必要CI成功，45+756Python與103web通過。
+EUXdone任務板隨本次產品變更補入，原59a33fc8候選保留。下方pending為歷史快照。
+[DUX契約](../tasks/379-download-expiry/task.md)與[本機報告](../tasks/379-download-expiry/report.md)
+針對下載410僅refetch而未保留過期狀態的缺陷；已取得11fail/4pass真實RED。
+新browser helper使用合成歷史首次INSERT，保留immutable guard；舊archive-prune不執行。
+38項focusedweb、strictTS/format及重建資產後單一browser3.5s通過；兩個test-helper Ruff通過。
+來源凍結與前後一致、ownedruntime清理證據保留。獨立最終審查／必要CI／正常合併仍為門檻；全M4/live/部署未完成。
+
+---
+
+# 最新接續 — PR655已合併，過期匯出 UI 修正本機通過（2026-10-26）
+
+PR655已正常合併0b4e42d9，四項必要CI成功、45+756通過，BGCdone列隨本次真正產品變更補入；
+原ecd66b08本機候選保留。本次[EUX契約](../tasks/379-expired-export/task.md)先提交7ae9d2d9，
+取得真實RED6fail/12pass後，才修正預覽／授權410留下失效控制的UI問題。
+[本機快照](../tasks/379-expired-export/report.md)記錄30項focusedweb及重建資產後browser1/9.6s通過。
+TypeScript測試選項錯誤與A/Bfixture錯誤均已修正且原始證據保留；不改寫首次全綠。
+只改App/ExportPanel產品來源，後端授權／冪等／GC／schema／dependencies／CI不變。
+本次行為取代下方歷史BGC快照中的「先授權失敗，再點下載才更新」；不必再操作已失效下載。
+獨立最終審查與必要CI／正常合併仍為交付門檻；全M4／live／部署未完成。
+
+---
+
+# 最新接續 — PR653已合併，browser／GC／export整合本機通過（2026-10-26）
+
+PR653正常合併ada118988b909c6aa826a76da8939e1ec7451432；四項必要CI成功、hosted45+756，
+COMPdone板隨本次真正測試來源變更補入，原本機a36候選保留。下方pending屬歷史快照。
+
+[BGC01/02契約](../tasks/379-browser-retention/task.md)與[本機快照](../tasks/379-browser-retention/report.md)
+串接兩個已登入Chromium頁面、合成歷史首次INSERT、真實event/archive GC、export引用保護、
+410重連及過期控制拒絕。T102-browser3單一新情境9.8s通過；前兩次45s本文讀取逾時及初次lint失敗保留。
+產品來源未改；不重跑舊長測試。獨立審查、必要CI與正常合併仍為交付門檻。
+完整fake/live AT09/12/13、未知host residue、VM recovery／實際部署及M4仍未完成。
+
+---
+
+# 最新接續 — PR649 已合併，跨流程 fake 驗收本機通過（2026-10-26）
+
+[PR649](https://github.com/fallrising/newclear/pull/649) 已於2026-10-25T17:00:58Z正常合併，
+merge `ce5b5e6848884bf92ea0bca4c72f4acc877057f5`；四項必要CI全成功，hosted45+755通過。
+T0092done列隨本次真正測試來源變更補入，原本機候選保留；下方 pending 是歷史快照。
+
+新增 COMP01/02 串接同一DB的真實 terminal lifecycle→stale cleanup→recovery→
+明確批准的合成GitHub HTTP export→PR回覆斷線／只讀reconcile→native restore。
+T098-composite1：1項/2.234s通過；不改產品程式、不重跑舊長套件。
+[契約](../tasks/379-fake-composite/task.md)／[本機報告](../tasks/379-fake-composite/report.md)
+保留精確來源、前置審查修正及real/synthetic界線；T097已獨立接受，必要CI與合併仍是後續門檻。
+這不涵蓋GC操作整合、browser/full fake E2E、live VM/sandboxd/provider／部署或完整M4。
+
+---
+
+# 最新接續 — audit 已合併，stale cleanup 本機驗證完成（2026-10-25）
+
+手動 event retention 已由 PR633 合併；audit retention 已由 [PR641](https://github.com/fallrising/newclear/pull/641) 合併，必要 CI45 base／724 platform 通過。初次 hosted723測試中的 pause helper 失敗、實際 row-lock RED 與後續修正證據仍保留，見[任務板](tasks/BOARD.md)。下方舊交付段落的待 CI 狀態是歷史快照。
+
+下一片是[單一終態 binding 的明確批准清理](STALE-CLEANUP.md)，契約已獨立審查，實際 PostgreSQL／HTTP fault-before-release RED 已取得，本機28 focused、2 HTTP overlap、1 native roundtrip與12相關回歸已通過；原始 RED 與獨立審查要求的補測均保留。必要 CI／正常合併仍是後續交付門檻，見[本機快照](../tasks/379-stale-cleanup/report.md)。此處不表示 stale cleanup、AT-13/M4、實際部署或 live qualification 已完成。
+
+---
+
+# 本次 bounded event-retention 切片 — 2026-10-25
+
+T-087 在先行契約／獨立審查後，新增手動 `event-gc-preview`／`event-gc-apply`、migration017 永久 replay identity、原子前綴／floor 清理及保守 ownership 保護。Root-run 真 PostgreSQL focused24、native backup26、browser1 本機檢查通過；production freeze 未因環境 private-path 失敗而放寬 guard 或修改主機權限。T088 已接受 focused EVT-01–04；額外 regression 為初次644pass/4fail、targeted4pass，並非 clean full suite，export-lock 仍為 intermittent／原因未歸因；必要 CI／最終交付仍待完成，不能以本機切片稱作完整 AT-13/M4 或 AC-04。詳見 [契約／操作](EVENT-RETENTION.md)及[交付報告](../tasks/379-event-retention/report.md)。
+
+以下保留先前已交付切片與歷史停止點；不取代本次範圍和仍未完成的 live／整體 gate。
+
+---
+
+# 歷史停止點 — 2026-10-06
 
 本輪完成單節點操作手冊與隔離 control-plane 演練，範圍與重跑入口見 [SINGLE-NODE.md](SINGLE-NODE.md)。涵蓋同版 API／獨立 worker／Web build、初次設定、觀測、停寫/drain、native backup／空 DB restore、升級／回滾與故障排查。模型維持 local mock，billing 延後、金額 unknown；沒有實際主機部署或真 provider／GitHub export／KVM 操作。
 

@@ -1,0 +1,16 @@
+test_N01_same_file_same_label_uses_exact_id_and_provenance (test_node_source.NodeSource.test_N01_same_file_same_label_uses_exact_id_and_provenance) ... ok
+test_N02_adversarial_source_metadata_is_rejected (test_node_source.NodeSource.test_N02_adversarial_source_metadata_is_rejected) ... ok
+test_N02_expected_index_mismatch_has_no_source (test_node_source.NodeSource.test_N02_expected_index_mismatch_has_no_source) ... ok
+test_N02_help_and_default_reader (test_node_source.NodeSource.test_N02_help_and_default_reader) ... ok
+test_N02_invalid_options_rejected_before_cli_cache (test_node_source.NodeSource.test_N02_invalid_options_rejected_before_cli_cache) ... ok
+test_N02_no_label_fallback_unknown_and_duplicate_ids (test_node_source.NodeSource.test_N02_no_label_fallback_unknown_and_duplicate_ids) ... ok
+test_N03_cli_guard_rejects_old_index_even_when_node_id_survives (test_node_source.NodeSource.test_N03_cli_guard_rejects_old_index_even_when_node_id_survives) ... ok
+test_N03_cli_read_races_discard_success_and_error_diagnostics (test_node_source.NodeSource.test_N03_cli_read_races_discard_success_and_error_diagnostics) ... ok
+test_N03_exact_node_edit_refresh_and_index_guard (test_node_source_mcp.NodeSourceMCP.test_N03_exact_node_edit_refresh_and_index_guard) ... Executing <Task pending name='Task-2' coro=<NodeSourceMCP.test_N03_exact_node_edit_refresh_and_index_guard() running at <worktree>/labs/graphify-lab/tests/test_node_source_mcp.py:30> cb=[_run_until_complete_cb() at /usr/lib/python3.12/asyncio/base_events.py:182] created at /usr/lib/python3.12/asyncio/runners.py:100> took 0.434 seconds
+ok
+
+----------------------------------------------------------------------
+Ran 9 tests in 12.081s
+
+OK
+{"journey": "N-03", "status": "passed", "requests": 15, "initialize_and_list_included": true, "provider_requests": null, "tokens": null, "cost": null}

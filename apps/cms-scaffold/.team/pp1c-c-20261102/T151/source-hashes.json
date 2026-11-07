@@ -1,0 +1,20 @@
+{
+  "observedAt": "2026-11-02T18:59:59.985372+00:00",
+  "root": "/home/ckc/test/codex/wt/newclear/cms-pp1c-c-20261102/apps/cms-scaffold",
+  "files": {
+    "docs/v2/waves/PP1c.md": "684153b7e5e8be9cae3ac0c3f397988300c15d6a25ad052e905a62b45b0c3fb8",
+    "docs/v2/contracts/PP1c-local-adapters.md": "2e919a377e07f99d7b659fd6279b7cd12ccdf260c8666991533de3053c655253",
+    "docs/v2/contracts/PP1-recovery.md": "54210d23d42abb14ac6c0bbb83ef3f250db76cc52d979f49ba1c95ce33ee8e20",
+    "scripts/local/maintenance-store.mjs": "bc5f4d9ae1d58902b63c7f93761ed26755d9c80732f7ec00ffce8361908ce4ed",
+    "scripts/local/maintenance-workflow.mjs": "4978c280a56dbafb2440d08ec1ac1e8ed3448e00ac7a4eb0475ca93c7c6440fd",
+    "scripts/local/maintenance-helper.mjs": "421f4e954c5d2498a1aa7c414fed59d4b478319b4fdf15155826e9cc12b15c11",
+    "scripts/local/maintenance-workflow.test.mjs": "7961466f9a3a92f0dd705201f362a59c2235792b5bfffc9ee7cbbf4993e12b60",
+    "scripts/ops/local-bundle.mjs": "c5039e1071047b2096a6cd3f011345cfab5c1d5b6ce2159c84953708f02314f8",
+    "scripts/ops/local-recovery-verify.mjs": "05a6f0638095d3682b071872ade5642d4830fa1746f777e7af0e52e66d322daa",
+    "scripts/ops/recovery-protocol.mjs": "c7ce6f0d8c9285a613ddbb887e29c2ca672c92afc814161769318b2d9537f06f",
+    "scripts/ops/local-recovery.fixture.mjs": "b368657dfe397cd5f59a7ca42ca89dec64da1c0e835e2070ba27a312b4acc050",
+    "scripts/ops/local-recovery-verify.test.mjs": "56c29728bfdf7dcd86c268053af376e5c30a806e83405289a5048f6a4e7ef28a",
+    "services/cms-api/src/main/java/com/fallrising/cms/ops/RecoveryInventoryMain.java": "599587de8fd33133da2635bdaea9d4642f857356c52676042061e040cd6a2f26",
+    "services/cms-api/src/main/java/com/fallrising/cms/ops/RestoreSessionRevoker.java": "92f6da4e109fb921c3644d17c1f70fedd74cc61b2df40147dc57971d20e070da"
+  }
+}

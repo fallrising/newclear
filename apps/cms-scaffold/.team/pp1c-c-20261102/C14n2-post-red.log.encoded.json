@@ -1,0 +1,8 @@
+{
+  "version": 1,
+  "original": "C14n2-post-red.log",
+  "sha256": "fcb7487321dc4619c2b8f93072f2feb1ff612990a73908655cd603eae987a9fc",
+  "byteSize": "948",
+  "encoding": "utf-8",
+  "text": "✖ PP1c_C14n2_token_bound_commit_and_post_inventory_prove_exact_revocation (276.674133ms)\nℹ tests 1\nℹ suites 0\nℹ pass 0\nℹ fail 1\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 345.837075\n\n✖ failing tests:\n\ntest at scripts/ops/local-recovery-verify.test.mjs:202:1\n✖ PP1c_C14n2_token_bound_commit_and_post_inventory_prove_exact_revocation (276.674133ms)\n  Error: ADAPTER_UNSEALED\n      at Module.verifyRevokedBundle (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-c-20261102/apps/cms-scaffold/scripts/ops/local-recovery-verify.mjs:242:52)\n      at TestContext.<anonymous> (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-c-20261102/apps/cms-scaffold/scripts/ops/local-recovery-verify.test.mjs:203:57)\n      at async Test.run (node:internal/test_runner/test:1332:7)\n      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:385:3) {\n    code: 'ADAPTER_UNSEALED',\n    phase: null,\n    operationId: null\n  }\n"
+}

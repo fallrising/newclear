@@ -1,0 +1,120 @@
+{
+  "id": "defense-mobile-defender",
+  "system": "defense",
+  "edition": 2,
+  "name": {
+    "zh": "亲自赶到缺口补防",
+    "en": "Move a defender to the breach"
+  },
+  "summary": {
+    "zh": "固定防线顾不过来时，玩家本人就是可以移动的最后一道补丁。",
+    "en": "When fixed defenses cannot cover everything, the player becomes a mobile reserve."
+  },
+  "rules": {
+    "zh": "自动防御持续工作，玩家同时控制一个能移动、攻击或拦截的角色。不同入口出现危险时，玩家要决定赶往哪边，承担移动时间与离开另一条线的代价；敌人突破、设施受损和角色状态给出反馈。",
+    "en": "Automatic defenses keep working while the player controls a mobile character who can attack or intercept. Choose which entrance to reinforce, paying travel time and leaving another lane unsupported. Leaks, damaged structures and character state show the cost."
+  },
+  "loop": [
+    {
+      "zh": "观察哪条线先失守",
+      "en": "Identify the lane likely to fail first"
+    },
+    {
+      "zh": "赶往缺口并介入",
+      "en": "Move to the breach and intervene"
+    },
+    {
+      "zh": "暂时稳住局面",
+      "en": "Stabilize the local fight"
+    },
+    {
+      "zh": "转移或退回安全位置",
+      "en": "Rotate elsewhere or retreat to safety"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "救一座快倒的塔，还是拦住已经越过塔的敌人？",
+      "en": "Save a collapsing tower or intercept enemies already past it?"
+    },
+    {
+      "zh": "亲自补防节省建设费用，却把安全建立在持续操作上。",
+      "en": "Personal intervention saves construction costs but makes safety depend on continued attention."
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "移动速度",
+        "en": "Travel speed"
+      },
+      "effect": {
+        "zh": "速度越慢，换线越像承诺；速度快则更强调连续救火。",
+        "en": "Slow travel makes lane changes commitments; fast travel emphasizes frequent emergency response."
+      }
+    },
+    {
+      "name": {
+        "zh": "角色与塔的伤害占比",
+        "en": "Player versus tower contribution"
+      },
+      "effect": {
+        "zh": "角色太强会削弱布局意义；太弱则补防缺乏可感知的作用。",
+        "en": "An overpowering character undermines layouts; an ineffective one makes intervention feel pointless."
+      }
+    }
+  ],
+  "tags": [
+    "dexterity",
+    "planning",
+    "risk"
+  ],
+  "related": [
+    "defense-day-night-investment",
+    "defense-resistance-counters",
+    "combat-cover-flanking",
+    "combat-destructible-cover"
+  ],
+  "contrast": {
+    "zh": "王权陨落更接近俯视角的换线与近身补位；幽闭圣地2还需要瞄准与射击，个人操作的内容更重。",
+    "en": "Thronefall emphasizes top-down lane rotation and local intervention; Sanctum adds aiming and shooting, putting more weight on individual execution."
+  },
+  "combination": {
+    "zh": "组合提案：补防角色使用攻防共用耐力，冲刺赶路会削减到达后能挡下的攻击，让路线选择更有代价。",
+    "en": "Design proposal: use shared attack–defense stamina for the mobile defender; sprinting to a breach leaves less energy to block when arriving."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "左右两条路都有敌人，右边只剩一座残血塔。",
+      "en": "Both lanes are under attack, with one nearly destroyed tower on the right."
+    },
+    "action": {
+      "zh": "从左边撤出，冲到右边拦住最前面的敌人。",
+      "en": "Leave the left lane and rush right to intercept its leading enemy."
+    },
+    "result": {
+      "zh": "右边暂时稳住，但左边的推进速度开始增加。",
+      "en": "The right stabilizes, but enemies on the left begin advancing faster."
+    },
+    "next": {
+      "zh": "先补左边的建筑，还是继续靠自己来回跑？",
+      "en": "Reinforce the left with a building, or keep relying on personal rotations?"
+    }
+  },
+  "prototype": {
+    "scope": "medium",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "做两条短路线、自动箭塔和一个可移动攻击的圆形角色。",
+      "en": "Build two short lanes, automatic arrow towers and one movable attacking circle."
+    },
+    "pitfall": {
+      "zh": "先不加入复杂技能树；让缺口警告可读，避免玩家只能盯着两个角落。",
+      "en": "Skip elaborate skill trees; make breach warnings readable so players need not stare at two corners."
+    },
+    "test": {
+      "zh": "玩家是否能主动判断该去哪边，而不是随机奔跑碰巧救场？",
+      "en": "Can players deliberately choose a lane to save instead of running randomly into success?"
+    }
+  }
+}

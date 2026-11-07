@@ -1,0 +1,45 @@
+{
+  "task": "T-177",
+  "atUtc": "2026-11-06T19:59:14.772084+00:00",
+  "files": [
+    {
+      "path": "docs/v2/waves/PP1c.md",
+      "sha256": "759dca80b5199558d58e8183f577d9f4dd752a7126c5709456fc29a8c1725b26",
+      "expected": "759dca80b5199558d58e8183f577d9f4dd752a7126c5709456fc29a8c1725b26",
+      "matches": true
+    },
+    {
+      "path": "docs/v2/contracts/PP1c-local-adapters.md",
+      "sha256": "bd73d178ac5ac7a0ec3ce0c91e1815d232f7a01bfb18f761cbd6e6e9a1c51cab",
+      "expected": "bd73d178ac5ac7a0ec3ce0c91e1815d232f7a01bfb18f761cbd6e6e9a1c51cab",
+      "matches": true
+    },
+    {
+      "path": "docs/v2/decisions/pp1c-readonly-observation-20261106.md",
+      "sha256": "243318c74f5f2481a0e9d46e02880325d555a6ef25c066406c74997f6b7ddfaa",
+      "expected": "243318c74f5f2481a0e9d46e02880325d555a6ef25c066406c74997f6b7ddfaa",
+      "matches": true
+    }
+  ],
+  "counts": {
+    "docs/v2/waves/PP1c.md": {
+      "added": 6,
+      "removed": 0
+    },
+    "docs/v2/contracts/PP1c-local-adapters.md": {
+      "added": 24,
+      "removed": 0
+    },
+    "docs/v2/decisions/pp1c-readonly-observation-20261106.md": {
+      "added": 38,
+      "removed": 0
+    }
+  },
+  "ownerStatus": "PROPOSED/PENDING",
+  "findings": [
+    "I1 fixed profile role/single active helper clarity",
+    "I2 C17 readonly before recover order",
+    "I3 no-lock/registry continuity across awaits"
+  ],
+  "runtimeGitWrites": false
+}

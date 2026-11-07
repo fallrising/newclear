@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "hashes": {
+    "dev": "20e5aad0491620b6eacfb1b87cb479a994ce7a6ac5a5b0f49e233124a121c7d6",
+    "heldout": "190460ecf9c77997b7c21fc362069d41428a621e386a44218dec9520b6de787f",
+    "protocol": "4c4685ea5aba39c2b4c334fd8b7befd8cd8d52390088da3b5f796dd1c7f95c37"
+  },
+  "notes_per_split": 24,
+  "queries_per_split": 48,
+  "answerable_per_split": 24,
+  "unknown_per_split": 24,
+  "root_manual_review": "All48notes/96queryoracles read beforemodelinference; positivefacts supported andunknownfacts absent. Similarname negatives deliberatelydifferententities; no model/results usedbycorpusauthor. Notdoubleblind/populationrepresentative."
+}

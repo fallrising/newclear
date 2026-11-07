@@ -7,6 +7,9 @@ import { copy } from "./copy";
  */
 export function failureText(error: unknown): string {
   if (isApiError(error)) {
+    if (error.code === "SELF_DISABLE_FORBIDDEN") return copy["error.selfDisable"];
+    if (error.code === "SELF_DEMOTION_FORBIDDEN") return copy["error.selfDemotion"];
+    if (error.code === "CONFIRMATION_REQUIRED") return copy["error.confirmationRequired"];
     if (error.code === "LAST_ADMIN") return copy["error.lastAdmin"];
     if (error.status === 403) return copy["error.forbidden"];
   }

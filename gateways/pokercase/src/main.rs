@@ -1,13 +1,21 @@
 mod admin;
 mod agy;
+#[cfg(test)]
+mod antigravity_test_transport;
 mod borrowed;
 mod cancel;
 mod claude;
 mod claude_code;
 mod claude_mcp;
+mod claude_tui;
+mod claude_usage;
+mod cli_lines;
+mod cli_stderr;
+mod collection;
 mod config;
 mod cooldown;
 mod cursor_cli;
+mod cursor_usage;
 mod error;
 mod guard;
 mod http_client;
@@ -23,6 +31,8 @@ mod secrets;
 mod server;
 mod siwc;
 mod store;
+mod stream_budget;
+mod stream_usage;
 mod templates;
 mod token_saver;
 mod tui_app;
@@ -89,6 +99,14 @@ struct ServeArgs {
     /// Claude Code CLI used by the `claude` provider (default: `claude` on PATH)
     #[arg(long, env = "THINROUTER_CLAUDE_BIN")]
     claude_bin: Option<String>,
+    /// Claude transport: interactive TUI with response tap, or explicit legacy print
+    #[arg(
+        long,
+        env = "THINROUTER_CLAUDE_MODE",
+        value_enum,
+        default_value = "tui"
+    )]
+    claude_mode: claude_code::Mode,
     /// Concurrent Claude Code processes
     #[arg(long, env = "THINROUTER_CLAUDE_MAX_RUNS", default_value_t = 2)]
     claude_max_runs: usize,
@@ -176,6 +194,12 @@ enum Commands {
         #[arg(long)]
         callback_file: Option<std::path::PathBuf>,
     },
+    /// Internal: adapt an interactive Claude PTY to the gateway's event protocol
+    #[command(hide = true)]
+    ClaudeTuiHelper {
+        #[arg(trailing_var_arg = true, allow_hyphen_values = true, required = true)]
+        args: Vec<String>,
+    },
     /// Refresh OAuth tokens for imported connections
     Refresh {
         #[arg(long, env = "THINROUTER_DATA_DIR")]
@@ -214,6 +238,7 @@ async fn main() -> Result<()> {
                 allowed_hosts,
                 provider_base_overrides,
                 claude_bin,
+                claude_mode,
                 claude_max_runs,
                 claude_idle_secs,
                 cursor_bin,
@@ -237,6 +262,7 @@ async fn main() -> Result<()> {
             cfg.allowed_hosts = allowed_hosts;
             cfg.set_provider_base_overrides(&provider_base_overrides)?;
             cfg.claude_bin = claude_bin;
+            cfg.claude_mode = claude_mode;
             cfg.claude_max_runs = claude_max_runs;
             cfg.claude_idle_secs = claude_idle_secs;
             cfg.cursor_bin = cursor_bin;
@@ -321,6 +347,7 @@ async fn main() -> Result<()> {
             tools_file,
             callback_file,
         } => claude_mcp::run(&tools_file, callback_file.as_deref()).await,
+        Commands::ClaudeTuiHelper { args } => claude_tui::run(args).await,
         Commands::Refresh {
             data_dir,
             secrets_key,
@@ -496,7 +523,7 @@ fn doctor(cfg: &AppConfig) -> Result<()> {
     println!("  connections: {} (oauth_import: {oauth_n})", conns.len());
     println!("  routes     : {}", routes.len());
     println!("  api_keys   : {}", keys.len());
-    println!("  est. cost  : ${cost:.6}");
+    println!("  all-time  : {cost}");
     println!("ok");
     Ok(())
 }

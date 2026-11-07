@@ -1,0 +1,68 @@
+# 開發交接
+
+T-0025：完成 [Pi 原生問答確認檢查](docs/PI-QUESTION.md)。維持 Claude Opus 5.5 技術指導、兩個 Pi CLI（OpenAI GPT-5.5）平行實作；兩者到達 24 次請求上限後，由主導 agent 完成審查與整合。真實 Pi 同 session 的拒絕、接受、原生逾時與重複指令拒絕通過；只在接受後寫一次私有測試 marker，沒有模型產物。248 tests、兩輪 Chrome 原生驗收及 67 筆結果回歸通過；外層分別追蹤 43／35 個程序，全部退出、鎖釋放。結果保持 stopped，模型推論及 relay／遠端請求皆為零，未啟動 Strata 或建立付費 grant。開發委託用量另計，回報估算合計 2.98099 美元，非帳單。完成 AC-05／09／11 子集；模型驅動工具權限、其他 provider、遠端端到端與完整 MVP 仍 pending。[證據](docs/evidence/pi-question-2026-11-07.json)，交付見[任務板](docs/tasks/BOARD.md)。
+T-0024：完成 [Pi 遠端操作台一次性授權](docs/REMOTE-GRANT.md)。實際由 Claude Opus 5.5 指導，兩個 Pi CLI worker（OpenAI GPT-5.5）在獨立工作區平行實作；後端達 24 次請求上限後停止，主導 agent 補齊審查與整合。授權先由 CLI 建立、操作台明示接受，綁定固定任務與來源，消耗後不退還；重啟不重置、遠端重試保持 CLI。218 tests、五組 Chrome 測試替身流程、真實 Pi 本機 429／取消及 65 筆結果回歸通過。取消清理 3.521 秒；測試替身／429／取消分別追蹤 94／46／29 個程序，全部退出、鎖釋放。開發 agent 有遠端 API 用量；產品驗收零模型推論、零遠端請求、未建立真實付費 grant。遠端 UI 到 DeepSeek 產物仍待另次批准驗收，完整 MVP／安全驗收保持 pending。[證據](docs/evidence/remote-grant-2026-11-07.json)，交付見[任務板](docs/tasks/BOARD.md)。
+
+T-0023：完成 [Pi Office host 重啟驗收](docs/PI-HOST-RESTART.md)。真實 Pi 本機 429／六筆歷史後，對已追蹤 Office 主程序注入 SIGKILL；新 host 停泊工位為 interrupted，再次重啟與 Chrome 刷新不自動派工。明確一次性無 prompt 重新連接使用新 PID／同 session、保留六筆歷史，沒有追加請求或產物。195 tests、操作台及 63 筆結果回歸通過；首輪 runner 41.06 秒、三代 host、外層 83 個程序全退出、鎖釋放。正常關閉後兩個已追蹤背景程序經身分核對送 SIGTERM，再確認全退出。一次本機 429、零模型推論／外部請求。完成 AC-08／09／11 子集；不代表進行中的遠端串流恢復、任務續做或完整 MVP／安全驗收。[證據](docs/evidence/pi-host-restart-2026-11-06.json)，交付見[任務板](docs/tasks/BOARD.md)。
+
+T-0022：完成[本地單檔修改提案](docs/LOCAL-FILE-PROPOSAL.md)。可選擇已登記專案中的檔案、輸入修改需求，先讀取目標後產生完整替代內容；結果重新核對原文／提案 hash、計算差異並以原檔名下載。190 tests、真實 Strata 修正與 Chrome 選檔／差異／下載、62 筆結果回歸通過。測試將 add 的減法修正為加法，獨立 AST 核對通過、未執行生成程式；原目錄及快照保留。runner 42.92 秒、外層 73 個程序全退出、鎖釋放、swap 增量 44.19 MiB，guard 未觸發。離線命名衝突及測試暫存路徑問題於實測前修正，原限制未放寬；零遠端模型呼叫。提案仍需人工審閱，沒有自動套用或一般程式測試；完整 MVP／安全邊界仍 pending。[證據](docs/evidence/local-file-proposal-2026-11-03.json)，交付見[任務板](docs/tasks/BOARD.md)。
+
+T-0021：完成[本地文字任務](docs/LOCAL-TEXT-TASK.md)。可登記工作目錄、輸入要求，以 OpenCode／Strata 讀取有界文字快照並產生 output.md，在頁面查看及下載；原目錄不變。184 tests、真實本地推論及 61 筆結果回歸通過。最終獨立 HOME 任務 43.12 秒，Chrome 關閉／重開仍為同一工作，產物與下載 hash 一致，外層 71 個程序全部退出、鎖釋放、swap 增量 0。首次完整流程亦通過；中間兩次 swap guard 停止保留且全部清理，未放寬模型或資源限制。另保留啟動前路徑／選單測試失敗與唯讀文字換行斷言修正。僅完成本地文字流程；一般程式修改、遠端工位與完整安全驗收仍 pending。沒有使用 Claude 或遠端付費模型。[證據](docs/evidence/local-text-task-2026-11-02.json)，交付見[任務板](docs/tasks/BOARD.md)。
+
+T-0020：完成 [Pi 同 session 重新連接](docs/PI-RESUME.md)。真實 Pi 保存本機 429 的六筆歷史後，核對所屬 CLI 身分並停止；一次性原生 resume 以新 PID 接回相同 session、更新 hook token，保留原始歷史且無追加請求。177 tests、Chrome 操作台及 57 筆結果回歸通過；最終 runner 17.72 秒、外層 30 個程序全部退出、鎖釋放。首輪瀏覽器欄位筆誤失敗保留，修正後通過；兩輪原生檢查皆通過、零模型推論與付費呼叫。任務保持 stopped，原任務未完成；這是既有 Office host 內 CLI 重新連接子集，host crash／任務續做及完整 MVP 仍待驗。[證據](docs/evidence/pi-resume-2026-11-02.json)，交付見[任務板](docs/tasks/BOARD.md)。
+
+T-0019：完成[操作台跨入口與重啟狀態](docs/CONSOLE.md)。同一 checkout 的共用鎖區分 available／busy／cleanup_unconfirmed／unavailable；頁面提示阻擋原因，API 在啟動 runner 前重查，dispatcher 保留最終互斥。新增唯讀 `office_dispatch.py status`。171 tests 與 Chrome／真實 helper 程序驗收通過：另一入口持鎖、SIGKILL 後中斷、兩次操作台啟動、刷新與舊計畫拒絕、journal 位元組／修改時間不變、明確核對後歸檔及損壞狀態阻擋。所有 helper 全退出；沒有執行 provider、模型或付費請求。[證據](docs/evidence/console-restart-2026-11-02.json)，交付見[任務板](docs/tasks/BOARD.md)。這是控制層 AC-08／11 子集，不代表原生 provider crash／session 恢復通過；不接管、不自動解鎖或重跑。
+
+T-0018：完成 [Pi 原生取消與操作台驗收](docs/CANCEL.md)。真實 Pi 的第一個請求留在本機，確認 working／同 session 後走原生 worker.kill；worker.remove／原生 PID 退出 102 ms，整體取消清理 3.521 秒。最終外層追蹤 29 個程序全退出、執行鎖釋放；163 tests、55 筆結果及操作台／唯讀頁的取消分類、刷新、防重複與拒絕重試通過。任務為 cancelled，零本地／遠端模型推論或付費呼叫。首輪清理約 20.09 秒、第二輪背景子程序殘留均保留；修正後只對本次已追蹤且身分相符的後代送 SIGTERM，完整清理才解鎖。[證據](docs/evidence/pi-cancel-2026-11-02.json)，交付見[任務板](docs/tasks/BOARD.md)。Grok／Cursor 取消、Pi 權限／恢復、遠端端到端與完整安全驗收仍待完成。
+
+T-0017：完成[本機操作台](docs/CONSOLE.md)，接通四 provider 偵測／計畫、本地明確派工、原生終端與結果；遠端付費執行保持 CLI 流程。Chrome 實測 Pi 本機 429（任務仍 failed）及本地 OpenCode／Strata，終端開啟／刷新／再次開啟、重複提交拒絕、停止與產物 hash 通過。最終本地 runner 50.75 秒，外層追蹤 107 個程序全部退出、執行鎖釋放；159 tests、52 筆結果回讀通過，零遠端模型請求。首輪瀏覽器表單等待失敗、第二輪 swap guard 停止均保留；原限制未調整，最終重驗通過。[證據](docs/evidence/console-2026-11-02.json)，交付狀態見[任務板](docs/tasks/BOARD.md)。一般任務、完整四 provider UI／生命週期與安全驗收仍 pending，沒有 usable tag。
+
+T-0016：完成 [Pi 有界明確重試](docs/RETRY.md)。統一入口 retry 預設只顯示計畫；執行時重新核對最新失敗、完整清理、固定模式／fixture 與來源，同一任務最多兩次重試。真實 Pi 本機 429 的初次＋兩次重試通過：三個獨立 session 使用相同 input，原報告／事件不變，第三次及舊 parent 的六項請求全部拒絕且不新增 run。三次分別追蹤 41／35／46 個程序，全部退出、鎖釋放；各一次本機請求、零模型推論或外部請求。152 tests 與 46 筆結果瀏覽器關聯／分類／刷新通過。[證據](docs/evidence/pi-retry-2026-11-02.json)，交付狀態見[任務板](docs/tasks/BOARD.md)。其他 provider、原 session 恢復、UI 派工與完整 MVP 仍待驗。
+
+T-0015：完成 [Pi CLI crash 與明確重新啟動](docs/CRASH.md)。真實 Pi working 時將第一個請求留在本機，對核對歸屬的 CLI 注入 SIGKILL，原生狀態轉 exited 而非 done；任務保持 failed。最終 crash／新 session 啟動各追蹤 40／38 個程序，全部退出後釋放執行鎖；重複派工拒絕，觀察期沒有自動重跑。明確新 session 到 idle、零請求，與原 session 不同。上游 PTY 在 SIGKILL 後回 exit code 0，沒有據此判成功。141 tests、43 筆結果瀏覽器驗證通過，零遠端模型請求、未載入 owner key 或 Strata。[證據](docs/evidence/pi-crash-2026-11-01.json)，交付狀態見[任務板](docs/tasks/BOARD.md)。原 session 續做、其他 provider、顯式重試與完整 MVP 仍待驗。
+
+T-0014：完成[Pi 原生 401／429 故障驗收](docs/FAILURES.md)。本機注入錯誤，真實 Pi 呈現 needs_input／error 且從未 done；各一次本機請求、零外部模型請求、無產物或推論成功。發現並修正 Pi 過早判定清理：最終兩次 runner 與外層觀察均確認所屬程序全退出、鎖釋放；原兩次清理證據不足紀錄保留。結果頁標示注入來源，任務仍為失敗。135 tests 與 40 筆結果的瀏覽器核對通過。[證據](docs/evidence/pi-failures-2026-11-01.json)，交付狀態見[任務板](docs/tasks/BOARD.md)。完整 AC-07、其他 provider 及 MVP 仍 pending。
+
+模型使用說明：T-0013／17／21／22 執行本地 OpenCode／Strata；T-0014／15／16／18／20 僅執行原生 Pi CLI 與本機故障，未載入 Strata 或進行任何模型推論。MVP 必要 AC 共 11 項，四種 provider 的原受測合成任務 4 項通過，另外 7 項已有子集但保持 pending；不能以測試數換算產品完成率。本地 UI 派工／終端／結果子集已通過；下一階段補遠端入口整合、跨 provider 生命週期與完整安全驗收。
+
+目前剩餘主線：遠端新入口真實任務；跨 provider 權限、取消與恢復；其他 provider 的 CLI crash／故障與有界重試流程；遠端 UI 派工到結果；完整安全邊界驗收。Strata GitHub tool-loop 為獨立非 MVP 阻塞研究。
+
+T-0013：新派工入口的 OpenCode／Strata 真實本地任務與原生取消通過。最終 runner 整輪任務／取消驗收 54.95 秒、產物 hash 正確；原生取消與所屬程序退出 202 ms，全程追蹤 60 個程序，最後全部退出。另一次原生 working 後 Ctrl+C 正確顯示 cancelled／exit 130，10.399 秒後追蹤到的 23 個程序（含 runner）全部退出；這包含模型關閉，不是工位取消耗時。三次實測均拒絕重複派工、釋放執行鎖，資源 guard 未觸發，沒有遠端模型呼叫。122 tests 與 36 筆結果的瀏覽器篩選／產物／刷新通過。[證據](docs/evidence/local-dispatch-2026-11-01.json)，[操作](docs/DISPATCH.md)，交付狀態見[任務板](docs/tasks/BOARD.md)。遠端 provider 的新入口與取消／恢復仍待驗，完整 MVP 保持 incomplete。
+
+T-0012：新增[統一偵測與派工入口](docs/DISPATCH.md)。四個固定 CLI 的實際斷網版本／help 檢查通過；run 預設只顯示計畫，遠端執行須明示 execute 與 allow-remote。四個直接 runner 共用執行鎖，跨 exec 保留，清理未確認或強制中斷會阻擋下一次派工；不自動重試。117 項離線測試通過。本輪沒有新模型呼叫或啟動 Strata，完整派工到產物與跨 provider 生命週期尚未重驗。[證據](docs/evidence/dispatch-2026-11-01.json)，交付狀態見[任務板](docs/tasks/BOARD.md)。
+
+T-0011：新增[統一結果入口](docs/RESULTS.md)，以白名單回讀四 provider 原生紀錄、重新核對合成產物內容與 SHA-256，提供離線篩選與詳細頁。96 項離線測試通過，既有 33 筆 run 回讀保留成功／失敗／啟動檢查／未完成區別，四 provider 各有成功產物通過重驗；Chrome 篩選、詳細內容、刷新通過，零外部請求。沒有新增模型呼叫或重啟 Strata。[本輪證據](docs/evidence/results-console-2026-11-01.json)。完整 AC-09／AC-11 保持 pending；下一步仍是統一偵測／派工與跨 provider 生命週期。交付狀態見[任務板](docs/tasks/BOARD.md)。
+
+T-0010 最新：owner 再批准一次翻倍範圍後，Grok 1.0.70／grok-4.6 真實任務通過 AC-03，18.00 秒完成兩個 read_file 與一個 search_replace；同 session 模型、authenticated hooks、成功工具結果、end_turn Stop、精確產物 hash 與清理一致。[成功證據](docs/evidence/grok-completed-2026-11-01.json)。81 項離線測試通過；先前失敗保留，本次授權已使用、沒有自動重跑。交付及結案狀態見[任務板](docs/tasks/BOARD.md)。四 provider 各有合成任務證據，但統一產品流程、權限／取消／恢復及完整 MVP 尚未完成。
+
+以下為歷史交接；等待批准／draft 描述是當時狀態，以任務板最新紀錄為準。
+
+T-0010 的一次已授權 Grok 任務已執行，12.55 秒後因 lab 只識別 file_path、未識別原生 read_file 的 target_file 而停止；兩次讀取請求被拒，seed output 未變，AC-03 未通過。原生 session／模型／prompt 正確，程序與憑證副本清理完整。[失敗與離線修正](docs/evidence/grok-live-2026-11-01.json)：已支援無歧義路徑別名、兩檔並行讀取、按 tool ID 核對完成，保留四次工具 gate／唯一編輯；80 tests 通過。沒有追加付費重跑；PR #897 保持 draft，等新的單次批准。
+
+T-0010 已準備 Grok 1.0.70／grok-4.6 單任務 runner：原生 inspect 確認 hooks、已登入無 prompt 啟動與同 session 模型選擇、清理通過（12.52 秒）；78 項離線測試通過。[證據](docs/evidence/grok-ready-2026-11-01.json)、[單次範圍](docs/GROK-WORK.md)。沒有送模型 prompt；AC-03 仍 pending，等 owner 明確批准一次付費驗收。四工具 hook gate 會受原生 fail-open 行為限制，沒有 request／token／金額硬上限。
+
+T-0009-02 的第三次獨立授權任務通過 AC-13：Composer 2.5，15.57 秒，Read(input) → Read(result) → Write(result)，原生同 session／model、completed stop、37723 input／424 output tokens、精確產物 hash 與完整清理一致。[成功證據](docs/evidence/cursor-completed-2026-11-01.json)。前兩次失敗保留；本次授權已使用，沒有自動重跑。65 項離線測試通過；PR #878 待 CI／合併，完整 MVP 仍 incomplete。
+
+前次單次批准紀錄：240 秒期限下於 34.05 秒因第二個 Read 被邊界拒絕而停止，沒有產物；session／固定模型／hooks 有證據，清理完整。第二次讀取的目標未記錄，不能確認它是否為輸出檢查。已離線準備最多四次工具規則、預建空 result.json 與檔案分類診斷；65 tests 和無 prompt 啟動通過，尚未再次跑模型。[本輪證據](docs/evidence/cursor-bounded-2026-11-01.json)。AC-13 保持 pending、PR #878 保持 draft；下一次付費任務須新批准。
+
+T-0009-02 前次紀錄：owner 已批准且執行一次 Composer 2.5 任務，產物正確，但 lab 的 stop.loop_limit=0 讓原生 CLI 拒絕整份 hooks，沒有事件／用量／工具邊界證據，AC-13 未通過。[失敗及修正證據](docs/evidence/cursor-live-2026-11-01.json)。已停止並完整清理，未追加付費重跑。已改 loop_limit=1、仍不返回 followup_message；修正合法 beforeReadFile，並在 wrapper 增加固定 CLI 內純 schema validator 的實際預檢。63 tests、原生設定預檢與修正後無 prompt 啟動通過。PR #878 保持 draft，這次授權已使用；再執行 `--allow-remote` 必須得到 owner 的新批准，範圍及無金額硬上限見 [CURSOR-WORK](docs/CURSOR-WORK.md)。
+
+T-0009-02 先前準備紀錄：owner 已登入；原生 status authenticated、catalog 有 composer-2.5。已準備[一次有界任務](docs/CURSOR-WORK.md)，63 項離線測試與已登入無 prompt 啟動通過；[證據](docs/evidence/cursor-ready-2026-11-01.json)。完全斷網啟動曾回 internal error，允許 HTTPS metadata 後進入 Composer 2.5 待命畫面。沒有執行模型 prompt；等 owner 明確批准一次 120 秒／最多兩個工具的配額驗收。Cursor 不提供 runner 可保證的 request／token／金額硬上限；停止本機也不等於即時停止服務端計費。取得批准後執行 `python3 scripts/run_cursor_work.py --allow-remote` 一次，保留失敗，不自動重跑；AC-13 仍 pending，功能 PR 保持 draft，驗收後才合併與結案。
+
+T-0009 依 owner 要求新增 Cursor Agent 第四工位：固定官方 2026.10.22-27dcf5f、archive／runtime 摘要核對、隔離 HOME／CURSOR_CONFIG_DIR／file credential store、原生 Office PTY 與 workspace hooks。無憑證啟動 12.51 秒通過，hooks 安裝／移除、外部 TCP 拒絕與 5 個追蹤程序清理正確；55 項離線測試通過。[證據](docs/evidence/cursor-startup-2026-11-01.json)、[owner 登入命令](docs/CURSOR.md)。需 owner 自行 `python3 scripts/cursor_cli.py login`；未登入不是執行失敗，也沒有驗證 session hook／模型／任務。新增 AC-13，完整目標擴為四工位，保持單 run queue。下一步補有界 Cursor／Grok 真實任務；登入不代表付費授權，不重跑已通過的 Pi 任務。
+
+T-0008 已加入 Grok 無憑證啟動 runner：官方 1.0.70 進入原生登入畫面、Office needs_input、OS 拒絕外部 TCP、PTY 與額外背景程序清理通過，12.83 秒。47 項離線測試通過；[證據](docs/evidence/grok-startup-2026-11-01.json)、[命令及限制](docs/GROK-STARTUP.md)。故意不讀 owner auth；這不是登入失效，也沒有發出模型任務。第一次等 SessionStart 超時，後續以原生登入畫面＋needs_input 驗證未登入狀態，未把它算成 session／任務成功。下一步建立登入後的有界 Grok 任務 runner、工具與請求限制，再請 owner 確認具體的配額／付費驗收；尚無可直接執行的遠端命令。
+
+T-0007 的 Pi + DeepSeek 原生工位實測通過（AC-04）：owner 明確授權一次有界付費驗收，3 次 HTTP 200 請求，2147 input／204 output tokens，22.62 秒，agent_settled、session/model、read/write、產物 hash 與清理全部通過。[真實證據](docs/evidence/pi-live-2026-11-01.json)與[命令／限制](docs/PI-REMOTE.md)。41 項離線測試與零請求啟動也通過。此次授權已使用，不代表可再做付費重跑或 Grok 任務；下一步是 Grok 與剩餘 MVP，原 local-only demo 不變。
+
+T-0006 已準備官方 Grok Build 1.0.70／Pi 1.4.0 的 lab 內固定安裝、真實 CLI 版本與能力 probe、隔離 owner 登入設定入口；35 項離線測試通過。見[owner 命令](docs/REMOTE-SETUP.md)與[白名單證據](docs/evidence/remote-preflight-2026-11-01.json)。本輪沒有遠端模型請求，沒有重啟 Strata；需要 owner 完成 DeepSeek key／Grok 登入後，再接實際遠端 worker 與合成任務。不得把 CLI compatible 或合成金鑰格式解析當成 auth／推論通過。
+
+T-0005 的 OpenCode host crash／interrupted／手動恢復已完成真實驗收：四個獨立 host，舊 PTY 全退出、重複重啟不執行、lite 可見中斷、點開工位接回同 session 完成、完成後重啟不重跑。91.22 秒；既有生命週期回歸 62.96 秒通過，26 項離線測試通過；[證據及三次先前失敗](docs/evidence/restart.md)。adapter 依賴固定上游內部介面，沒有修改 vendor。完整三 provider AC-08 仍 pending。
+
+目前已有 Codex → Strata 本地讀寫與合成程式修復、Office 基底建置／614 tests，以及原生 Office → OpenCode → Strata 的檔案任務、同 session 後續任務取消與程序清理。這些是 2026-10-31 的歷史實測，[摘要與限制](docs/evidence/README.md) 保留成功及失敗範圍。同 session 續做不等於真正 restart/resume。
+
+下一步接官方 Grok Build 的有界任務，再補三工位流程與其餘生命週期；Pi + DeepSeek 的 AC-04 已通過，OpenCode 的權限、refresh、程序恢復與 host 重啟子集已有實測。官方 Grok 的隔離登入檔已存在，但尚未發出模型任務；遠端服務須顯式選擇，不可替私人任務自動 fallback。最後整合三工位入口、產物、錯誤、取消與安全邊界。
+
+依 [SETUP](docs/SETUP.md) 準備環境；`STRATA_HOME` 指向外部本機 Strata 根目錄。32K context、現有 Q2_0 量化及資源 guard 不任意變更。不要同時載入另一個大型模型、取消全部 sandbox、修改全域憑證，或將 mock 當成 live 證據。
+
+公開匯入只調整路徑選擇與內附監控腳本；舊 runs 保留於原工作區，沒有上傳。新增驗收先記本次範圍與 AC，最後補精簡公開證據。不要為確認相同歷史結果重跑昂貴推論；runtime 有相關變更才做針對性回歸。

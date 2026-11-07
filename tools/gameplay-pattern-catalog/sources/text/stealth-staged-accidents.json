@@ -1,0 +1,120 @@
+{
+  "id": "stealth-staged-accidents",
+  "system": "stealth",
+  "edition": 2,
+  "name": {
+    "zh": "安排环境事故",
+    "en": "Staging environmental accidents"
+  },
+  "summary": {
+    "zh": "先读懂物件与巡逻的关系，再让环境完成最后一步。",
+    "en": "Read props and patrol routes, then let the environment deliver the final action."
+  },
+  "rules": {
+    "zh": "场景中有可触发的危险物件，目标会在某些时刻进入影响范围。玩家观察路线、准备机关并等待合适窗口；成功取决于位置和因果顺序，而不只是瞄准目标。",
+    "en": "Hazardous props affect an area that a target may enter. Observe the route, prepare the interaction and wait for the right moment; position and event order matter as much as aiming."
+  },
+  "loop": [
+    {
+      "zh": "找出环境危险点",
+      "en": "Identify an environmental hazard"
+    },
+    {
+      "zh": "确认目标经过的时机",
+      "en": "Read when the target will pass"
+    },
+    {
+      "zh": "布置或接近触发位置",
+      "en": "Prepare or reach the trigger"
+    },
+    {
+      "zh": "触发后撤离",
+      "en": "Trigger and withdraw"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "等待目标自然经过最稳妥，还是主动引导以节省时间？",
+      "en": "Wait for the target’s natural route, or lure them in to save time?"
+    },
+    {
+      "zh": "危险范围里还有无关人物时，放弃本轮窗口还是换一种方法？",
+      "en": "If bystanders share the danger zone, skip this opening or choose another method?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "可触发窗口",
+        "en": "Trigger window"
+      },
+      "effect": {
+        "zh": "窗口越窄越像时机挑战；窗口宽时重点转向路线与准备。",
+        "en": "Narrow windows emphasize timing; wider ones emphasize route planning and setup."
+      }
+    },
+    {
+      "name": {
+        "zh": "危险范围可读性",
+        "en": "Hazard readability"
+      },
+      "effect": {
+        "zh": "明确作用区能让失败变成可理解的误算，而不是猜物理结果。",
+        "en": "A clear affected area makes failure an understandable miscalculation rather than a physics guess."
+      }
+    }
+  ],
+  "tags": [
+    "planning",
+    "timing",
+    "creativity"
+  ],
+  "related": [
+    "stealth-synchronized-actions",
+    "exploration-stealth-awareness",
+    "puzzles-paper-folding",
+    "puzzles-time-scrubbing"
+  ],
+  "contrast": {
+    "zh": "《杀手》把事故类型接入潜入评价；《赏金奇兵3》的任务把多处危险点编排成一张路线谜题。",
+    "en": "HITMAN connects accident types to stealth evaluation; the Desperados III mission arranges several hazards into a route puzzle."
+  },
+  "combination": {
+    "zh": "设计提案：用推箱子改变重物落点，先把障碍推到指定位置，再等待目标经过；机关可只造成非致命阻挡。",
+    "en": "Design proposal: use box pushing to change where a weight lands, then wait for the target; the result could be a nonlethal obstruction."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "吊起的货箱下是一条巡逻路，拉杆在墙后。",
+      "en": "A suspended crate hangs above a patrol route; its lever is behind a wall."
+    },
+    "action": {
+      "zh": "你先移到拉杆旁，等目标独自走进标记区域再拉动。",
+      "en": "Reach the lever and wait for the target to enter the marked area alone."
+    },
+    "result": {
+      "zh": "货箱落下封住通道，目标被困住，其他守卫还没赶到。",
+      "en": "The crate drops and blocks the passage, trapping the target before other guards arrive."
+    },
+    "next": {
+      "zh": "你趁新通路空出时取走文件并离开。",
+      "en": "Use the newly open route to take the document and leave."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "做一个固定巡逻目标、一个拉杆和一个明确标出的落物区域；先用确定性结果。",
+      "en": "Build one patrol, one lever and a marked falling-object zone with deterministic outcomes."
+    },
+    "pitfall": {
+      "zh": "不要用不可预测的物理碰撞决定成败；先保证相同布置产生相同结果。",
+      "en": "Avoid unpredictable physics deciding success; identical setups should produce identical outcomes."
+    },
+    "test": {
+      "zh": "玩家看过一次结果后，能否准确预测调整触发时机会影响谁？",
+      "en": "After one attempt, can players predict who will be affected by changing the trigger timing?"
+    }
+  }
+}

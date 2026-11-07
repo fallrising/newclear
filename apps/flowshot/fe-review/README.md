@@ -1,14 +1,7 @@
-# fe-review — flowshot
+# Flowshot review-only R2
 
-這個目錄是給 LLM agent 用的前端 review 工作包：定義如何檢查 flowshot 的 UI、如何產生 headless 截圖，以及報告放在哪裡。它不是給人的操作教學，也不改變元件的文檔檔位。
+Approved DESIGN M1–M2 supplies the existing foundation shell through its pre-import build-info promise seam. No product/native IPC changes. `run-review.mjs` owns a Vite server and browser in the root-provided isolated namespace; it is not a shared capture hook or native Tauri runner.
 
-**狀態：** 第 1 輪（文檔先行）：只有文件，尚未修改程式碼、啟動或截圖。
+Current browser evidence: [flowshot-001](runs/flowshot-001/capture.json), 19 captures (18 three-state combinations plus mobile long metadata), HTTP200/final `/` identity and state assertions, 19 valid PNG hashes, no observed horizontal overflow, no unexpected browser health events; [audit](tasks/round2/evidence/flowshot-artifact-audit.json). All 19 axe scans contain color-contrast incomplete (5 nodes for loading/error, 10 for ready/long-ready), despite zero violations. Full Round3 and product/native/Mac gates are not accepted by these results. Pair/native/publication status is tracked in [report](tasks/round2/report.md).
 
-| 檔案 | 用途 |
-| --- | --- |
-| [PROMPT.md](PROMPT.md) | 給 agent 的專案專屬指令 |
-| [REVIEW.md](REVIEW.md) | 活文件：目前輪次、矛盾點、需要放開或決定的點 |
-| [targets.json](targets.json) | `capture.mjs` 的擷取設定（啟動指令、port、頁面；`verified: false`） |
-| `runs/` | 每次執行一個 `<YYYY-MM-DD_HHMM>/` 子目錄：`REPORT.md`、`capture.json`；截圖不提交 |
-
-共用規範：[PROTOCOL.md](../../../docs/fe-review/PROTOCOL.md)；截圖腳本：`docs/fe-review/capture.mjs`。
+Use [PROMPT](PROMPT.md) for the actual invocation and boundaries. PNGs/raw logs are ignored and must remain preserved outside disposable caches. The `preload.node.mjs` and `runtime-guards.node.mjs` files use Node's runner, deliberately separate from existing Vitest discovery.

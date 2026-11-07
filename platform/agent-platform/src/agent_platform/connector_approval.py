@@ -92,6 +92,8 @@ def approve(service, run_id, request):
 
     with service.journal.locked(run_id):
         row = service.require(run_id, request.generation)
+        if row["input"].get("external_workspace"):
+            raise Problem(409, "external_workspace_approval_unsupported")
         service.guard(row)
         if request.expires_at.tzinfo is None:
             raise Problem(422, "approval_expiry_requires_timezone")

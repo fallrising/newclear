@@ -1,0 +1,13 @@
+{
+  "handwrittenChangedLines": 148,
+  "files": {
+    "maintenance-helper.mjs": 61,
+    "maintenance-workflow.test.mjs": 87
+  },
+  "sha256": {
+    "maintenance-helper.mjs": "75d319410378d0a1b5fe90afc7482777d699ec794274c96d2285ba3b15c9b43a",
+    "maintenance-workflow.test.mjs": "4b408fde3b5536db340294986723e2ab192ac700de463e4b964f78740b48759d"
+  },
+  "checks": "198/198 affected tests pass; baseline replay3Red retained, implementation drafted before integrationtests; not test-first claim",
+  "frozenAt": "2026-11-02T16:16:54.206628+00:00"
+}

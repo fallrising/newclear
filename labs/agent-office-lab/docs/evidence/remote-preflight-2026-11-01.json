@@ -1,0 +1,61 @@
+{
+  "checks": [
+    {
+      "provider": "pi",
+      "package": "@earendil-works/pi-coding-agent",
+      "pinned_version": "1.4.0",
+      "compatible": true,
+      "model_inference_verified": false,
+      "authentication_verified": false,
+      "network_denied": true,
+      "required_flags": [
+        "--model",
+        "--provider",
+        "--extension",
+        "--session-dir",
+        "--session-id",
+        "--no-extensions",
+        "--no-mcp",
+        "--no-context-files",
+        "--offline"
+      ],
+      "version": "1.4.0",
+      "executable_sha256": "e79626f2dd6f94aa45d30f3fa63cd84319a6eefcd150b353cfaf274366926774"
+    },
+    {
+      "provider": "grok",
+      "package": "@xai-official/grok",
+      "pinned_version": "1.0.70",
+      "compatible": true,
+      "model_inference_verified": false,
+      "authentication_verified": false,
+      "network_denied": true,
+      "required_flags": [
+        "--model",
+        "--resume",
+        "--session-id",
+        "--leader-socket",
+        "--no-alt-screen"
+      ],
+      "version": "1.0.70",
+      "executable_sha256": "1318858fefd9de11c5eb7e6a6f325aa7b0b6c1570981c9596085ed252fa68a51",
+      "native_adapter_trust_flag_accepted": true,
+      "workspace_trust_must_be_disclosed_before_task": true
+    }
+  ],
+  "remote_requests_sent": false,
+  "date": "2026-11-01",
+  "checked_at": "2026-10-31T17:52:04.745958+00:00",
+  "kind": "real_cli_preflight_no_model_inference",
+  "node_tests_passed": 23,
+  "python_tests_passed": 12,
+  "pi_synthetic_auth_schema_parsed": true,
+  "pi_configured_model_listed_offline": true,
+  "cloud_inference_verified": false,
+  "source_sha256": {
+    "scripts/remote_cli.py": "9a0ee26503ef76b003b9d8d387f6381acd1a043723374f62793a7f75bf97bb89",
+    "configs/pi-models.example.json": "1e92b1982f58a0e549ff6eb60d12d236b8e7ddd169a16c51aac8a5fa42895591",
+    "tools/pi/package-lock.json": "170e44e6ca1e0df2d161334439451005f8028edba7d13f29f2cc988d060062c7",
+    "tools/grok/package-lock.json": "d33ebc9240bd911dbbb1518b9feec780e172b59e9bd3d1b7f243c58aae7eaef5"
+  }
+}

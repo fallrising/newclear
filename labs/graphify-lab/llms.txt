@@ -1,0 +1,31 @@
+# Graphify lab
+
+> Fixed-version local code graphs, developer scenarios and one shared reference source/index per revision.
+
+Tier: ungraded
+Status: partial
+Interfaces: cli, mcp
+Entrypoint: python -m graphify_lab (reference CLI); python -m graphify_lab.workspace --source <directory> (local workspace CLI/stdio MCP)
+Auth: none
+Spec: none — experimental CLI with executable acceptance scenarios, not a network API
+
+Code-only Graphify analysis. Source snapshots remain the evidence; the graph is a derived index. No hosted service or deployment. Mutable workspace commands revalidate source/configuration; stdio MCP serves its startup snapshot and must restart after edits.
+
+## Interface reference
+
+- [README](https://github.com/fallrising/newclear/blob/main/labs/graphify-lab/README.md): execution commands and limits.
+- [SUCCESS](https://github.com/fallrising/newclear/blob/main/labs/graphify-lab/SUCCESS.md): acceptance status and evidence.
+
+## Optional
+
+- [SDD](https://github.com/fallrising/newclear/blob/main/labs/graphify-lab/SDD.md): design and scenario contract.
+
+- [Local workspace](https://github.com/fallrising/newclear/blob/main/labs/graphify-lab/docs/local-workspace.md): explicit source, shared cache, source readback and snapshot MCP.
+
+M4: workspace serve-live offers freshness checks, explicit refresh and directed calls-only paths. Original serve remains a fixed snapshot. See docs/local-workspace.md.
+
+- [修改影響與測試線索](docs/milestones/change-impact.md)：serve-live 的 change_impact、calls 證據與有界 Python 測試 hints。
+
+- [命令列分析](docs/milestones/cli-analysis.md)：workspace calls-path／impact 的JSON、退出碼及freshness契約。
+
+- [節點來源與索引確認](docs/milestones/node-source.md)：CLI source-node／live MCP source_node，exact ID回讀及可選index_id保護條件。

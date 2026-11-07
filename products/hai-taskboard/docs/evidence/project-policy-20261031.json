@@ -1,0 +1,469 @@
+{
+  "task": "T-0339",
+  "milestone": "HMPOL",
+  "snapshot_utc": "2026-10-31T18:41:56.080670+00:00",
+  "status": "local verification and code review accepted; PR CI/delivery pending",
+  "base": "f987cb85dc6a3ac4fc24ff8aaed53c73ff2d5fe2",
+  "docs_first_commit": "fffbff9c15afac7370e632230bf0b12e53b42cb7",
+  "latest_main_checked": "67267591",
+  "latest_main_hai_changes": false,
+  "code_files": {
+    "products/hai-taskboard/backend/cmd/taskboard/config.go": "d8a55eda35e7e227fcf5c36b5d96a589843f838a423b6e9ba5de5b5b772aa98c",
+    "products/hai-taskboard/backend/cmd/taskboard/policy_profiles.go": "c1ac5f7e384b2bfeed30a2e59fc4e7959d9b926bbbbeffeceffba582007772b4",
+    "products/hai-taskboard/backend/cmd/taskboard/policy_profiles_legacy_test.go": "590e9db4c90e111dbdb2697634bd3ff4b85371a42cb8fbeb8140dd0d144493e8",
+    "products/hai-taskboard/backend/cmd/taskboard/policy_profiles_test.go": "8c6d82dc64c0c5fc5880e6b2cb427c2916f6a506a141de74385adc7bff2e287e",
+    "products/hai-taskboard/backend/cmd/taskboard/runtime.go": "78e241b7e664a6d4ae08e7aa0bfacb88c3601991e2e565b447619c985f00cda1",
+    "products/hai-taskboard/backend/internal/application/port/policy_profile.go": "ed79e07fdffc264e016ed7f88052ea0cd31836f519981cee6b79a587320b7a31",
+    "products/hai-taskboard/backend/internal/application/port/policy_profile_test.go": "a60111597dc8018973f4985bdaf6a1696a42af1c6bcfaa4c07d9e7db94aefb4e",
+    "products/hai-taskboard/backend/internal/application/service/completion_description.go": "f2acce78439332e8bcc6b0543cecd5b3f7d3e25abf2e829a32cbcd7676d5fd17",
+    "products/hai-taskboard/backend/internal/application/service/current_input.go": "468e166b9f34171cbff08564bc83110ab3d56554cb587ac55196aed85b2f149a",
+    "products/hai-taskboard/backend/internal/application/service/current_input_test.go": "47726bd3786ab5249fef373465daf802c343106bc5857eb62f0c3ba23a6952ad",
+    "products/hai-taskboard/backend/internal/application/service/current_publication_test.go": "033650bca203a1481317ccf8af4c7ba460932d12ff3e2297f7bc91b74915b967",
+    "products/hai-taskboard/backend/internal/application/service/human_report.go": "428cf4ef6a332758477e5ddab559437a1b35bfcb2d7c6016f0b086ccbf43fafa",
+    "products/hai-taskboard/backend/internal/application/service/initial_acceptance.go": "4425017361b9808023a5effa0664c5cfe2865d91497d4c22a13ec2f1c05ca2a2",
+    "products/hai-taskboard/backend/internal/application/service/initial_description.go": "4bdbc92d10e742059f41079c182d9f3e5d1f0df586f36422949e05602eb60f74",
+    "products/hai-taskboard/backend/internal/application/service/integrity.go": "ba7d3f8af431213aac3fc198023e36c519ef98044b59f7d58a808a7c978e795e",
+    "products/hai-taskboard/backend/internal/application/service/policy.go": "a81bf9e07b53f25ab6ced8875ec54dd5c972b9b9938bac8b88c0b575bd3505ef",
+    "products/hai-taskboard/backend/internal/application/service/project_policy_test.go": "7b332de8a91d1d5ab64ecda12000ab2b6180f3f350438d0f1f3b3c5244099bfa",
+    "products/hai-taskboard/backend/internal/application/service/service.go": "1f695a43679625c5619f674bef1ef9e54b0f28d57cc5e2815760ce44a609c558",
+    "products/hai-taskboard/backend/internal/application/service/vertical.go": "6c046a2c481caa3ded0d24fb2577ed53529727c11d54b70a00c52b86f15ef2f6",
+    "products/hai-taskboard/backend/internal/domain/sqlite/migration.go": "65ca76099b4826683facab2d7ba0a3050ce40086ba4eb96cb9fa7bddb99b3ad4",
+    "products/hai-taskboard/backend/internal/domain/sqlite/migration_test.go": "a7a3aa8402dd1dcc2d278c8967adf5f9cb28dcd77faeab447e9bb7e7416c4011",
+    "products/hai-taskboard/backend/internal/domain/sqlite/migrations/0006_project_policies.sql": "eb4f27731942c071fda857687e58bdb6d644fb5b5630c0e29d5ad2df5443ffb3",
+    "products/hai-taskboard/backend/internal/domain/sqlite/policy_profile.go": "25ae9f1540f7e7589a2e584a5c96c2378d6d309768cb956c19142e79c84843b6",
+    "products/hai-taskboard/backend/internal/domain/sqlite/policy_profile_test.go": "1883516a59b378b24689f71823b7362791678b356e584ae7990f96c7d472ce2c",
+    "products/hai-taskboard/backend/internal/domain/sqlite/run_output_test.go": "79aa8feb3a06e16f8df6c5b39bef893124e0430bdcb939197a3d7678acc9ed15"
+  },
+  "backend_full_gate": {
+    "started_at_epoch": 1793471516.636315,
+    "elapsed_seconds": 405.732,
+    "exit_code": 0,
+    "inputs": 182,
+    "input_manifest_sha256": "2ee712834fa74907067dd06f6e07810ff913b836d592779d398f621d31d46feb",
+    "source_unchanged": true,
+    "command": "bash scripts/check-backend.sh",
+    "image": "fe-review-hai-go:20261024",
+    "image_digest": "sha256:a3f100d3404f142bff2f2b4e0ca7765eb88926043e9a3ce9ddfed7fa9b68d407"
+  },
+  "final_test_delta_binding": {
+    "full_gate_inputs": 182,
+    "unchanged_inputs": 180,
+    "only_changed_inputs": {
+      "products/hai-taskboard/backend/internal/application/port/policy_profile_test.go": {
+        "before": "91cfa1fbab36ecda0a007c0476cd96a7047d3747f9ee44a93982dd77a21f6db3",
+        "after": "a60111597dc8018973f4985bdaf6a1696a42af1c6bcfaa4c07d9e7db94aefb4e"
+      },
+      "products/hai-taskboard/backend/internal/domain/sqlite/run_output_test.go": {
+        "before": "e82d7a04e34459d56d90a35b1ee29a38b72a411cc99dda10d1c4c033882ecf06",
+        "after": "79aa8feb3a06e16f8df6c5b39bef893124e0430bdcb939197a3d7678acc9ed15"
+      }
+    },
+    "example": {
+      "path": "products/hai-taskboard/docs/examples/project-policies.json",
+      "sha256": "2c9a4b48703faeb47968806c5aa6ae109213c8b5a854e5df92897c82968f6c80"
+    },
+    "web_inputs_unchanged": 39,
+    "passed": true
+  },
+  "web": {
+    "commands": [
+      {
+        "label": "web-deps",
+        "argv": [
+          "timeout",
+          "300",
+          "docker",
+          "run",
+          "--rm",
+          "--name",
+          "hai-policy-deps-20261031",
+          "--read-only",
+          "--mount",
+          "type=bind,src=/home/ckc/test/codex/wt/newclear/hai-policy-20261031/products/hai-taskboard/web,dst=/workspace/web",
+          "--mount",
+          "type=bind,src=/home/ckc/.local/share/pnpm/store,dst=/pnpm/store",
+          "--tmpfs",
+          "/tmp:rw,exec,nosuid,nodev,size=1g,mode=1777",
+          "-w",
+          "/workspace/web",
+          "fe-review-hai-web:20261024",
+          "pnpm",
+          "install",
+          "--frozen-lockfile",
+          "--ignore-scripts"
+        ],
+        "exit_code": 0,
+        "elapsed_seconds": 3.371
+      },
+      {
+        "label": "web",
+        "argv": [
+          "timeout",
+          "1200",
+          "docker",
+          "run",
+          "--rm",
+          "--name",
+          "hai-policy-web-20261031",
+          "--network",
+          "none",
+          "--read-only",
+          "--mount",
+          "type=bind,src=/home/ckc/test/codex/wt/newclear/hai-policy-20261031,dst=/workspace,readonly",
+          "--mount",
+          "type=bind,src=/home/ckc/test/codex/wt/newclear/hai-policy-20261031/products/hai-taskboard/web,dst=/workspace/products/hai-taskboard/web",
+          "--mount",
+          "type=bind,src=/home/ckc/.local/share/pnpm/store,dst=/pnpm/store",
+          "--tmpfs",
+          "/tmp:rw,exec,nosuid,nodev,size=1g,mode=1777",
+          "-w",
+          "/workspace/products/hai-taskboard",
+          "fe-review-hai-web:20261024",
+          "bash",
+          "scripts/check-web.sh"
+        ],
+        "exit_code": 0,
+        "elapsed_seconds": 12.866
+      }
+    ],
+    "source_unchanged": true,
+    "inputs": 39
+  },
+  "api": {
+    "argv": [
+      "timeout",
+      "120",
+      "docker",
+      "run",
+      "--rm",
+      "--name",
+      "hai-policy-api-20261031",
+      "--network",
+      "none",
+      "--read-only",
+      "--mount",
+      "type=bind,src=/home/ckc/test/codex/wt/newclear/hai-policy-20261031/products/hai-taskboard/api,dst=/spec,readonly",
+      "--tmpfs",
+      "/tmp:rw,nosuid,nodev,size=128m,mode=1777",
+      "-w",
+      "/spec",
+      "redocly/cli:2.51.2@sha256:2dcc3939c2180e1da96db06a40aa079cb32c4ef3bac8b35ff061f2140322da64",
+      "lint",
+      "openapi.yaml"
+    ],
+    "exit_code": 0,
+    "elapsed_seconds": 5.686,
+    "source_sha256": "5b1e8b205393321e0c4c15e0d4ecc194805a9f68cd9e30d45694028ed194072c",
+    "source_unchanged": true
+  },
+  "reviews": [
+    {
+      "label": "plan",
+      "decision": "REWORK",
+      "requested_model": "claude-opus-5-5",
+      "requested_effort": "high",
+      "observed_models": [
+        "claude-opus-5-5"
+      ],
+      "elapsed_seconds": 159.099,
+      "exit_code": 0,
+      "timeout": false,
+      "prompt_sha256": "30bc0040fa4431aa633d367bf943b7c27a7ec6b55fda8a4bf5fb7216493a9308",
+      "result_sha256": "cb2d9f9d0a4361e0f9736729928391879b34d1d4609f4e27ec7f2e9ab6e404f1",
+      "permission_denials": [],
+      "subagents": {
+        "spawned": 0,
+        "requested": {
+          "background": 0,
+          "foreground": 0,
+          "unset": 0
+        },
+        "started_in_background": 0,
+        "max_depth": 0,
+        "spawned_by_subagents": 0,
+        "completed": 0,
+        "failed": 0,
+        "killed": {
+          "parent": 0,
+          "user": 0,
+          "system": 0
+        },
+        "refused": {
+          "depth_limit": 0,
+          "concurrency_limit": 0,
+          "budget": 0
+        },
+        "by_type": {}
+      },
+      "reported_model_usage": {
+        "claude-opus-5-5": {
+          "inputTokens": 2,
+          "outputTokens": 15110,
+          "cacheReadInputTokens": 1545,
+          "cacheCreationInputTokens": 50096,
+          "webSearchRequests": 0,
+          "costUSD": 0.703285,
+          "contextWindow": 1000000,
+          "maxOutputTokens": 128000,
+          "thinkingTokens": 12522,
+          "cacheCreationEphemeral5mInputTokens": 0,
+          "cacheCreationEphemeral1hInputTokens": 50096,
+          "canonicalModel": "claude-opus-5-5",
+          "provider": "firstParty",
+          "costBasis": "list"
+        }
+      }
+    },
+    {
+      "label": "plan-followup",
+      "decision": "ACCEPT",
+      "requested_model": "claude-opus-5-5",
+      "requested_effort": "high",
+      "observed_models": [
+        "claude-opus-5-5"
+      ],
+      "elapsed_seconds": 53.725,
+      "exit_code": 0,
+      "timeout": false,
+      "prompt_sha256": "b7036789436263493bc287c1071913c2e357dd872ef427114f7c95b886a5bff9",
+      "result_sha256": "97a569fd92e7ed3bc0cba308a12322df1577231e09fb24ca38eafcfb5dc0b006",
+      "permission_denials": [],
+      "subagents": {
+        "spawned": 0,
+        "requested": {
+          "background": 0,
+          "foreground": 0,
+          "unset": 0
+        },
+        "started_in_background": 0,
+        "max_depth": 0,
+        "spawned_by_subagents": 0,
+        "completed": 0,
+        "failed": 0,
+        "killed": {
+          "parent": 0,
+          "user": 0,
+          "system": 0
+        },
+        "refused": {
+          "depth_limit": 0,
+          "concurrency_limit": 0,
+          "budget": 0
+        },
+        "by_type": {}
+      },
+      "reported_model_usage": {
+        "claude-opus-5-5": {
+          "inputTokens": 2,
+          "outputTokens": 5538,
+          "cacheReadInputTokens": 1545,
+          "cacheCreationInputTokens": 16427,
+          "webSearchRequests": 0,
+          "costUSD": 0.24249300000000001,
+          "contextWindow": 1000000,
+          "maxOutputTokens": 128000,
+          "thinkingTokens": 3497,
+          "cacheCreationEphemeral5mInputTokens": 0,
+          "cacheCreationEphemeral1hInputTokens": 16427,
+          "canonicalModel": "claude-opus-5-5",
+          "provider": "firstParty",
+          "costBasis": "list"
+        }
+      }
+    },
+    {
+      "label": "code",
+      "decision": "REWORK",
+      "requested_model": "claude-opus-5-5",
+      "requested_effort": "high",
+      "observed_models": [
+        "claude-opus-5-5"
+      ],
+      "elapsed_seconds": 169.335,
+      "exit_code": 0,
+      "timeout": false,
+      "prompt_sha256": "2330980df7240943d0b61989217ea2554d7f3c4529b989035a988963c79886b7",
+      "result_sha256": "563e631b7e4a79b98cc68d4e8f924dc8961d775629f7af0be30f1ac585895294",
+      "permission_denials": [],
+      "subagents": {
+        "spawned": 0,
+        "requested": {
+          "background": 0,
+          "foreground": 0,
+          "unset": 0
+        },
+        "started_in_background": 0,
+        "max_depth": 0,
+        "spawned_by_subagents": 0,
+        "completed": 0,
+        "failed": 0,
+        "killed": {
+          "parent": 0,
+          "user": 0,
+          "system": 0
+        },
+        "refused": {
+          "depth_limit": 0,
+          "concurrency_limit": 0,
+          "budget": 0
+        },
+        "by_type": {}
+      },
+      "reported_model_usage": {
+        "claude-opus-5-5": {
+          "inputTokens": 2,
+          "outputTokens": 17472,
+          "cacheReadInputTokens": 1545,
+          "cacheCreationInputTokens": 108659,
+          "webSearchRequests": 0,
+          "costUSD": 1.2190290000000001,
+          "contextWindow": 1000000,
+          "maxOutputTokens": 128000,
+          "thinkingTokens": 14662,
+          "cacheCreationEphemeral5mInputTokens": 0,
+          "cacheCreationEphemeral1hInputTokens": 108659,
+          "canonicalModel": "claude-opus-5-5",
+          "provider": "firstParty",
+          "costBasis": "list"
+        }
+      }
+    },
+    {
+      "label": "code-followup",
+      "decision": "ACCEPT",
+      "requested_model": "claude-opus-5-5",
+      "requested_effort": "high",
+      "observed_models": [
+        "claude-opus-5-5"
+      ],
+      "elapsed_seconds": 32.136,
+      "exit_code": 0,
+      "timeout": false,
+      "prompt_sha256": "64f7fd7bea62cac5fe01c0c4cf6971efc532f278fbc517552f1228aa49f9a291",
+      "result_sha256": "064876b3db6958d67307b4d74dc70b01bfc9cc17e3340962c965125711eef458",
+      "permission_denials": [],
+      "subagents": {
+        "spawned": 0,
+        "requested": {
+          "background": 0,
+          "foreground": 0,
+          "unset": 0
+        },
+        "started_in_background": 0,
+        "max_depth": 0,
+        "spawned_by_subagents": 0,
+        "completed": 0,
+        "failed": 0,
+        "killed": {
+          "parent": 0,
+          "user": 0,
+          "system": 0
+        },
+        "refused": {
+          "depth_limit": 0,
+          "concurrency_limit": 0,
+          "budget": 0
+        },
+        "by_type": {}
+      },
+      "reported_model_usage": {
+        "claude-opus-5-5": {
+          "inputTokens": 2,
+          "outputTokens": 3074,
+          "cacheReadInputTokens": 1545,
+          "cacheCreationInputTokens": 23019,
+          "webSearchRequests": 0,
+          "costUSD": 0.245949,
+          "contextWindow": 1000000,
+          "maxOutputTokens": 128000,
+          "thinkingTokens": 1434,
+          "cacheCreationEphemeral5mInputTokens": 0,
+          "cacheCreationEphemeral1hInputTokens": 23019,
+          "canonicalModel": "claude-opus-5-5",
+          "provider": "firstParty",
+          "costBasis": "list"
+        }
+      }
+    }
+  ],
+  "source_audit": {
+    "base": "f987cb85dc6a3ac4fc24ff8aaed53c73ff2d5fe2",
+    "protected_files": {
+      "products/hai-taskboard/backend/internal/domain/sqlite/migrations/0001_v1.sql": {
+        "unchanged": true,
+        "sha256": "57d96955d3351de47b1a81696398cf9ddb843394eb5c004c6f79841117c7745c"
+      },
+      "products/hai-taskboard/backend/internal/domain/sqlite/migrations/0002_acceptance.sql": {
+        "unchanged": true,
+        "sha256": "5fbac05b24ba8bccedafb2857ff45934c88612e1ee6f550d12e4576fd2ea0b48"
+      },
+      "products/hai-taskboard/backend/internal/domain/sqlite/migrations/0003_run_inputs.sql": {
+        "unchanged": true,
+        "sha256": "77da66f51221f7af1a792ed40b2f1b3a04d0f706b737288f2c54a1def7fb48e7"
+      },
+      "products/hai-taskboard/backend/internal/domain/sqlite/migrations/0004_run_outputs.sql": {
+        "unchanged": true,
+        "sha256": "314e6826bae7cfd8bfd8a7cee0d61a07a574d65e06654a477590b8164a39ef7b"
+      },
+      "products/hai-taskboard/backend/internal/domain/sqlite/migrations/0005_human_reports.sql": {
+        "unchanged": true,
+        "sha256": "d0048fb2e1c067a85703dca3e41d2d83c20aa480306b39954a569b21761f51e3"
+      },
+      "products/hai-taskboard/backend/go.mod": {
+        "unchanged": true,
+        "sha256": "8c66a51fe39944f0a30e0952756dfd4b35824483af60a826ab9620d751691226"
+      },
+      "products/hai-taskboard/backend/go.sum": {
+        "unchanged": true,
+        "sha256": "59d6f9f0590f841c826c0c2003f906b038b16397a886eaef7a562ac031b68d6b"
+      },
+      "products/hai-taskboard/api/openapi.yaml": {
+        "unchanged": true,
+        "sha256": "5b1e8b205393321e0c4c15e0d4ecc194805a9f68cd9e30d45694028ed194072c"
+      },
+      ".github/workflows/hai-taskboard-ci.yml": {
+        "unchanged": true,
+        "sha256": "cbbe77084b147cad7fe2305aeba4070d718fb58890973d369a6d489f511cf928"
+      }
+    },
+    "direct_default_policy_references": [
+      {
+        "path": "products/hai-taskboard/backend/internal/application/service/policy.go",
+        "line": 52,
+        "content": "return s.config.Completion"
+      },
+      {
+        "path": "products/hai-taskboard/backend/internal/application/service/service.go",
+        "line": 42,
+        "content": "config.Completion.RevisionDigest.IsZero() || config.Completion.RecipeDigest.IsZero() || len(config.Completion.Checks) == 0 {"
+      },
+      {
+        "path": "products/hai-taskboard/backend/internal/application/service/service.go",
+        "line": 57,
+        "content": "config.Completion = config.Completion.clone()"
+      }
+    ],
+    "unexpected_default_policy_references": [],
+    "passed": true
+  },
+  "proof_limits": [
+    "Runtime same-process stop/start; not process-kill, backup or restore proof.",
+    "Replay/rejection count checks cover 13 named tables.",
+    "V5 migration snapshot covers all prior tables/schema with a V1-populated data fixture.",
+    "Legacy v1/v2 test seeds historical accepted storage; custom-policy completion uses actual HTTP.",
+    "No new browser, UI, coverage, provider, release or deployment."
+  ],
+  "accounting": {
+    "native_leaf_launches": 1,
+    "native_assignments": 3,
+    "external_cli_launches": 4,
+    "provider_requests": null,
+    "outer_tool_total": null,
+    "nested_tool_total": null,
+    "root_active_seconds": null,
+    "root_wait_seconds": null,
+    "actual_billing": null,
+    "note": "Reported CLI usage/list-price and worker command receipts are not actual billing or provider totals."
+  },
+  "delivery_authority": "products/hai-taskboard/docs/tasks/BOARD.md HMPOL"
+}

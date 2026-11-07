@@ -1,0 +1,120 @@
+{
+  "id": "combat-combo-variation",
+  "system": "combat",
+  "edition": 1,
+  "name": {
+    "zh": "连招变化奖励",
+    "en": "Combo variety rewards"
+  },
+  "summary": {
+    "zh": "不仅要求打赢，还用即时评价推动玩家尝试不同招式。",
+    "en": "Reward expressive attack variety alongside simply winning."
+  },
+  "rules": {
+    "zh": "将不同招式连在一起，维持命中与节奏，得到评价或分数。重复安全招式通常不如变化组合有价值；受击或断连可能损失累积收益。",
+    "en": "Link different moves while maintaining contact and rhythm to earn ratings or points. Repeating one safe move is often less valuable than varied sequences; damage or a broken chain can lose accumulated value."
+  },
+  "loop": [
+    {
+      "zh": "寻找起手空档",
+      "en": "Find an opening"
+    },
+    {
+      "zh": "串接不同招式",
+      "en": "Link varied moves"
+    },
+    {
+      "zh": "应对敌人反击",
+      "en": "Respond to retaliation"
+    },
+    {
+      "zh": "完成连招结算",
+      "en": "Finish and score the sequence"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "继续炫技能提高评价，提前收手却更安全。",
+      "en": "Extending a stylish chain improves the rating, while stopping early is safer."
+    },
+    {
+      "zh": "继续使用熟悉的招式，还是冒衔接失误的风险换一套动作？",
+      "en": "Repeat familiar moves, or risk a failed transition to vary the chain?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "重复惩罚",
+        "en": "Repetition penalty"
+      },
+      "effect": {
+        "zh": "惩罚越明显，玩家越有动力使用整个招式库。",
+        "en": "Stronger penalties encourage using the full moveset."
+      }
+    },
+    {
+      "name": {
+        "zh": "断连宽限",
+        "en": "Chain grace period"
+      },
+      "effect": {
+        "zh": "更宽松的时间允许观察敌人，更严格的时间鼓励持续进攻。",
+        "en": "Longer grace allows observation; shorter grace rewards continuous aggression."
+      }
+    }
+  ],
+  "tags": [
+    "dexterity",
+    "creativity",
+    "timing"
+  ],
+  "related": [
+    "combat-invulnerable-dodge",
+    "combat-posture-break",
+    "combat-stamina-budget",
+    "combat-surface-reactions"
+  ],
+  "contrast": {
+    "zh": "《鬼泣5》突出自由切换和招式多样性；《猎天使魔女》把预定连段与闪避续段紧密连接。",
+    "en": "Devil May Cry 5 emphasizes switching and variety; Bayonetta tightly links authored attack strings with dodge-based continuation."
+  },
+  "combination": {
+    "zh": "设计提案：两名角色接力时，前一人的击飞方向决定后一人的可用招式，评价奖励真正的配合。",
+    "en": "Design proposal: in a tag team, one character’s launch direction determines the next character’s follow-ups, rewarding coordination rather than alternating turns."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "连续使用同一招很安全，但评价增长已经变慢。",
+      "en": "Repeating one move is safe, but it is barely raising your rating."
+    },
+    "action": {
+      "zh": "你把轻击接到挑空，再换招式追击。",
+      "en": "Chain a light strike into a launch, then follow with a different move."
+    },
+    "result": {
+      "zh": "评价上升；如果继续追打时受击，就会失去部分累积优势。",
+      "en": "The rating rises, but taking a hit while extending the chain loses accumulated advantage."
+    },
+    "next": {
+      "zh": "看敌人动作决定延长连招，或收手保住当前成果。",
+      "en": "Read the enemy to decide whether to extend the chain or preserve the result."
+    }
+  },
+  "prototype": {
+    "scope": "medium",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "做三个可衔接动作、重复动作衰减和一条即时评价条。",
+      "en": "Build three chainable moves, reduced reward for repetition, and an immediate rating meter."
+    },
+    "pitfall": {
+      "zh": "大量招式并不能替代顺畅衔接；输入缓冲和动作取消规则要先统一。",
+      "en": "Many moves cannot replace reliable chaining; define input buffering and cancellation consistently."
+    },
+    "test": {
+      "zh": "比较有无评价奖励的试玩，观察玩家是否主动尝试不同衔接。",
+      "en": "Compare sessions with and without rating rewards and watch for voluntary variation."
+    }
+  }
+}

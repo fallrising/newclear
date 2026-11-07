@@ -1,0 +1,12 @@
+[
+  {
+    "path": "scripts/ops/local-restore.mjs",
+    "sha256": "aba3fee0a1c1b2fc10706c0069a03ffd0c12ae0251eedc68fd84231fd9f80620",
+    "bytes": 11293
+  },
+  {
+    "path": "scripts/ops/local-restore.test.mjs",
+    "sha256": "1b7c32d111ea4787b9c0ec20ab0107ee596ced2f934aa83036da1e9c15f1f836",
+    "bytes": 15867
+  }
+]

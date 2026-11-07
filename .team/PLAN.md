@@ -1,4 +1,73 @@
+# T-0442 Fanzloud M2 — 2026-11-01
+
+Spring Pool PR196 / T-0356: [bounded plan and evidence gate](spring-pool-pr196/PLAN.md).
+
+Owner explicitly requests M2; desk claim PR349 merged/read back 42e474182de3d64b0be8023d7f6ae26d02904ada.
+Base newclear d3207b3a97a5b223da501af1418e64e94745bf10. Preserve old dirty M1 worker tree.
+
+Objective: same Web selects real Claude and Codex, fixed-base repairs/results; two simultaneous
+isolated tasks, denial/cancel independence and cleanup. No M3, Cloud catalog, paid API,
+release, public deployment, additional lifecycle authority or resource expansion.
+
+Started 2026-11-01T04:15Z (approx); estimate 120–180 min active plus CI. Report every20min.
+Provider requests/tokens/cost unknown. Outer tool calls, nested tools, agents and waits
+are separate; historical aggregate not automatically measured, unknown where unavailable.
+One read-only route worker (20min), then at most one implementation worker and one
+fresh-context independent reviewer (20min each); no recursive delegation. Same problem
+initial+at most2 justified fixes; route live qualification once+at most1 justified correction.
+Coding max600s; currently one4CPU/4GiB VM only. Do independent code/single-route work first.
+Concurrent2 validation requires concrete owner resource approval. No time-implied approval.
+CI wait bounded30min per unchanged source; preserve pending status if exceeded.
+
+Order/gates:
+1. Normative M2 spec and route/source prerequisites; read-only official Codex capability audit.
+2. Focused RED/GREEN tests, minimal subscription adapter/catalog and multi-task Web changes.
+3. Single route actual Chromium/Rust/AP/VM/Codex bounded repair, no accepted M1 repeat.
+4. Approved concurrent resource experiment only after explicit approval; retain missing AC otherwise.
+5. Native tests, independent acceptance, evidence gate, authorized PR/CI/merge/readback,
+   desk/journal/handoff with exact limitations. Never label partial FN02/FN03 full acceptance.
+
+Current status2026-11-01T05:00Z: claim merged; independent ACCEPT_CODE after three
+review fixes. Native backup31, Codex protocol8, Web17, Rust fmt/clippy/workspace tests/
+binaries and project contract50 passed. Full AP lint/format+45base+809platform passed; actual second-vendor and
+parallel FN02/FN03 NOT_RUN. No live VM/provider started. Three bounded workers used:
+route audit then same worker prep; routing then same worker backup correction; independent
+review then focused correction review. No recursive agents. Parent owns final live/evidence.
+Initial red/config/backup failures retained; no checks weakened. Private CLI startup and
+synthetic Responses adversarial receipts distinguish actual binary from fake provider.
+
+Single-route evidence gate2026-11-01: ACCEPT_SINGLE_LIVE, overall PARTIAL. Actual
+Codex run142e9aee sourcea51a8663; four VM tools, fixed-base285-byte diffc5134c80...fdb,
+checks and downloaded patch tests passed. Hosted four workflows allgreen. AP backup
+created/verified; runtime0claims/VMM/cgroups, services stopped, capacity remains1.
+One additional10min evidence-only independent audit reviewed genuinely new live receipts;
+no repeated code review/provider. Concurrent approval question remains pending, not granted.
+
+---
+
 # Repository team ledger
+
+## HAI material-index implementation — T-0339 / 2026-11-01
+
+Owner approved reviewed D1/IDX-01..05/IDX-AC-01..06. Root owns normative/API/HTTP/integration and
+acceptance and port; one native core leaf in isolated worktree owns new SQLite files only,70minutes,
+no children/commits/network/provider calls. Model/effort inherit root. Root90–150active minutes,
+20minute checkpoints; Claude exact opus5.5/high no-tools480s+one actual-revision follow-up;
+CI20minute rounds, same failure initial+two new-hypothesis diagnoses. Named404 Red before code.
+Evidence maps fixed ACs; original failures retained. Full M2/UI/history not claimed, no new
+dependency/migration/provider/release/deploy. Aggregate tool/provider/billing/active-wait unknown.
+
+HMDTL local evidence-gate ACCEPT: root verified worker hashes/source, original194-input native
+full gate573.127s unchanged, five-file revision with actual corruption-before-capacity Red→Green,
+normal8.600s/race88.873s/vet/build5.854s. Web30/API/docs pass; Claude conditional ACCEPT249.363s
+then final ACCEPT91.023s, F1–F6 closed by source/test/doc evidence. Two code launches, no children;
+aggregate provider/tool/billing unknown. Exact-final-head full CI/merge/readback/ledger remain.
+
+## HAI detail-read contract — T-0339 / 2026-11-01
+
+Owner continues after verified coverage delivery. Root owns next bounded backend detail contract, M2 gap mapping and fixed acceptance; no UI/provider/dependency/release/deploy. One native read-only T001,10min/1800tokens/no children/no writes, audits schema/storage gaps. Root45–75active minutes with20minute checkpoints; Claude exact opus5.5/high no-tools480s initial plus one material-revision follow-up. Existing claim remains valid. New product semantics require concrete owner decision before implementation; no repeated policy/Git approval. CI20min rounds; original failures retained. BOARD HMDTL owns status.
+
+Root accepted the bounded native source inventory and Claude-reviewed proposal, not product behavior. Initial REWORK then ACCEPT; C1–C3 closed against original schema/writers. D1 asks whether to adopt separate material-index IDX-01..05/IDX-AC-01..06, retaining full detail/M2 gaps. Pending owner decision; docs delivery proceeds under existing authorization. All product oracles NotRun. Review dispositions and document evidence are in the product evidence report; aggregate tool/provider/billing/active-wait totals unknown.
 
 > 補救註記（2026-09-28）：本文件引用的部分 `.team` 紀錄或 evidence 的 SHA-256 是主機資訊遮蔽前的值；新舊對照見 [../docs/remediation/2026-09-host-info.md](../docs/remediation/2026-09-host-info.md)。
 
@@ -2048,6 +2117,10 @@ Phark T017 checkpoint 2026-10-24T11:57:46Z: source-specific shared12 captures an
 
 Goku592 merged8ae07bba141b68b24667dc061e69bfeed1f43ff3 at2026-10-24T11:17:09Z; R25/all6CI/scopedreadback passed. Carry actualGoku closure. Phark R26 FINAL ACCEPT and final source-specific native/runtime evidence complete; merge integrates already-accepted main without Phark runtime changes.
 
+## Fanzloud T020/T006R / T-0380 R2-AC-14 / 2026-10-24T12:23:53Z
+
+Root reviewed derivedSPEC-T006R/ReadyexistingCUtask against approvedDESIGN; noSDD/productsemantic expansion. Documentation gate accepted for implementation, runtime stillNOT_RUN. Roottrust001onlyenvironmentPASS3.824s/HTTPS+WSS+2negativecerts/allcleanup; sameimage/browser/trustsource mayreuse negativeproof. First25–30minauthor fixture/controllercontractgate, native/rootruntime separately; estimate125–195active+20–50wait/checkpoint20notdeadline/max2source-backeddiagnostics. Rootownsboards/environment/fullnative/Git/acceptance; fresh-context document-drivenreview beforefinalacceptance. Originalofflinefakefixture native tests permitted, nonewbackendbrowser/realCLI/provider/deps/controllerchange.
+
 ## Pokercase T021 / T-0380 R2-AC-12 / 2026-10-24T12:21:48Z
 
 Docs-first claim for already approved M1–M4; root owns environment/Git/native/acceptance, bounded author and independent review. Estimate90–150active +15–40wait;20mincheckpoint notdeadline,max2source-backed diagnostics. Preserve concurrent accepted backend changes. Productallowlist templates/style and measuredTUIlayout only; no provider/backend/credentials/newdependency/deploy. First25minfixture gate, no runtime before root sourcefreeze review.
@@ -2063,3 +2136,721 @@ ClarkQ PR600 normally merged6b444b00457591996db135e4ec6ab65b1d01ad4c at2026-10-2
 Pokercase visual checkpoint 2026-10-24T14:01:24+00:00: final2 native127 passed and repair001 passed12 current TUI/4terminal restoration+ownedabsence/14 keyboard journeys. Root actual screenshot review caught introduced narrow-column/very-tall-row regression despite old geometry success; scoped table/column minima fixed it. New CSS66ac524b/current binary21fce3fa: fmt/full127/clippy/build passed; visual00150.369s passed18 current table captures,14 journeys,all cleanup and outer container absence. Root inspected8 actual images, maximum synthetic row128.984375px. Existing24 shared captures remain immutable;6 unaffected login/dashboard captures and unchangedTUI have explicit hash/source provenance.13 current contrast-incomplete sets retained; one desktop usage computed-pair observation used incorrect390 viewport and is excluded pending targeted1440x900 supplement. Historical original404/sharedFAIL,login-settlementFAIL,rendererRED and visual regression are not erased. Final docs/R31/currentCI/normalmerge/readback remain pending; no fullR3 or wholecard completion claim.
 
 Pokercase prepublication 2026-10-24T14:14:40+00:00: R31 independent final ACCEPT, no unresolvedP1/P2; root42contracts/index, staged diff check and70-file822796-byte UTF8 payload/privacy scan passed before review-report addition. No raw runtime/private payload staged. One initial git-add wrong-cwd pathspec error caused no mutation/commit; corrected explicitworktree staging passed. Native127/current18Web+14journeys/12source-qualifiedTUI and corrected520computedpairs support originalM1–M4 only. CurrentCI/normalmerge/readback pending; no broadercompletionclaim.
+
+Pokercase delivery closure 2026-10-24T14:20:29+00:00: PR603 head0389438e merged05aeed43a3a49cc1b4a98f760e52fa2881c61064 at2026-10-24T14:18:11Z afterR31/all2CI/scopedremoteequality. OriginalM1–M4 delivered,17of19 units total. Private final archive10,778,372bytes SHA1d8d91cb5305f57740273f43935226dd9cbf2ef2d2e610c09fcf1c0a37e7e60f includes99PNG/72terminal artifacts/6attempts; previous archive retained, implementation worktree removed normally. This follow-up changes only factual delivery status/boards/receipt; no product/runtime/dependency/CI change. Flowshot/Loom598 andFanzloud604 staypartial awaitingthree unanswered ownerdecisions; no newretry or lockchange. Rootestimated8–12active plus boundedCIwait for closure; journal updates sameexistingrun.
+
+
+## Flowshot+Loom R2-AC-11/E claim 2026-10-24T11:22:03Z
+
+T018 approvedreviewonlypair; first25–30minFlowshotshellpreload/LoomlockedSDKcallbackproof, thenboundedscenarioexpansion. Planning105–165activepluswaitunknown,20mincheckpointnotdeadline/max2diagnostics. Rootenvironment/fullnative/Git/acceptance, nativeauthor-otherreview. No product/native/contract/deps/CIchanges; actualbrowserfixturecannotqualifynative/mainline. IndependentOjbPR596/PharkPR593 continue separately, rootintegratesboardclaims.
+
+
+Paired runtime now verified: Flowshot19 + retained Loom12 + approved0069captures, independent T028/T029 audit. Native green evidence reused; original failures and accessibility findings preserved. Current-head CI and normal PR598 merge/readback remain pending. Fanz bootstrap001-only passed; no canonical continuation authorized.
+
+
+## Fanzloud source continuation — 2026-10-26
+
+T-0380 R2-AC-14/E continues on owner instruction. Root integrates currentmain without touching original dirty worktrees. Bounded author T097 adds separately named safe v2 invalidation reasons and meaningful pure RED/GREEN; independent T098 reviews exact source and merge resolution. Preserve v1/005 evidence, strict gates and all other delivered unit records. No runtime retry, target promotion, full-round completion or usable release. Estimated source15min plus review6min and publication;20min progress checkpoint, not a new hard cap. Required CI cannot be bypassed.
+
+## Cloud Lab M0 — 2026-10-26
+
+Authority: owner directly approved documentation-first framework, knowledge tree, interfaces and migration planning. No runtime moves, archive, deployment or account changes.
+Base: 65bbadb7659437e8a14f029015313c6f5277ce35. Product mainline stays incomplete; document milestone is separate.
+Lead owns architecture, capability tree, source/migration mapping, acceptance, indexes and review decisions. T-810 writes proposed contracts in an isolated worktree; T-811 is read-only independent review after integration. Both native helpers use gpt-6.1-sol/high with fresh context, one call plus at most one bounded rework each; no nested delegation. Unknown quota/cost remains unknown.
+Journal integration not opted in; local task/report/evidence retains execution facts.
+Git authority: current session explicitly requires user authorization for commit/push/publication; prepare reviewable local artifacts and checks before resolving delivery authorization. No external Git mutation in M0 preparation.
+Required checks: project-success/index/llms validators, relative links and public boundary, synthetic contract walkthrough, independent review, git diff --check, evidence gate. Runtime/Cloudflare qualification belongs to later milestones.
+Status: in progress; contracts assigned; no acceptance decision yet.
+
+Cloud Lab M0 checkpoint: T-810 five contract documents integrated after one bounded rework (operation signatures, ScheduleSpec, transition guards). First integrated repo preflight passed 44 project contracts, 7 llms files, 132 links and 12 source pins. Initial index generation before contract integration correctly failed on the missing contracts/README link; after integration it passed without weakening checks.
+T-811 independent review reproduced checks and requested rework on reconciliation-only authority/fence acquisition plus receiver-derived late metadata. Lead accepted both findings, added query-only ClaimReconcile independent of original submit expiry, mode-aware lease renewal, immutable original submission mapping, and clarified native-vs-coordination attempts. Runtime tests remain out of scope. Focused follow-up review pending.
+
+Cloud Lab M0 decision: ACCEPT local documentation candidate after T-811 focused follow-up closed P2 (reconciliation authority/fence) and P3 (late metadata). Lead inspected all authored documentation and integration diffs; source histories and runtime boundaries remain intact. AC-01–05 may be passed for local documents; product AC-06–08 remain pending, no usable tag. Final bookkeeping/evidence/index checks run after status reconciliation. Git delivery remains unperformed pending current-session explicit authorization; do not represent local ACCEPT as merged delivery.
+
+Cloud Lab M0 Git authorization 2026-10-26T15:39:48Z: owner explicitly approved the proposed commit, push, PR review and normal merge. Prior pending-authorization entries above describe the earlier checkpoint only. Proceed with the reviewed documentation, required CI, remote content verification and board closeout; no runtime migration or deployment.
+
+## Cloud Lab M1 — 2026-10-26T15:52:01Z
+
+Owner authorized continued development and prior normal Git delivery preference persists. Lead owns Workers/D1, integration, docs and acceptance. T-812 bounded native gpt-6.1-sol/high runner builder, T-813 same UI builder, disjoint isolated worktrees; maximum one initial call + one rework each, 15 minutes per call, no nesting. T-814 independent native gpt-6-astra/high review, max initial + focused follow-up. Tools inherit workspace sandbox; scope is contractual, not OS isolation. Native agents supervised by lead interruption, no separate host hard timeout is available; no external CLI route. Live deployment, secrets provisioning, paid services, archival and usable tags are outside this development delivery. Cost/quota unknown. M1 acceptance is local implementation only; full AC06–08 remain pending live evidence.
+
+M1 local acceptance 2026-10-26T16:19:33Z: lead inspected all owned diffs and integrated author artifacts. T-814 initial REWORK identified dispatch-capability downgrade and sample-age freshness defects; red regressions reproduced both; implementation fixed; independent follow-up ACCEPT with31 Node+31 Python tests and focused adversarial checks. M1-I1–I4 accepted as local implementation, AC06–08 remain pending. Evidence gate maps scope to protocol/SQL, runner journal, dashboard and tests; no deployment/usable tag. Normal authorized branch/PR/CI/merge/readback continues, then board-only closeout.
+
+## Cloud Lab M1 live qualification — 2026-10-26T16:43:03Z
+
+Owner continued from local M1 delivery. Read-only account preflight found missing D1 API scopes (401); no remote mutation performed. Domain and runner selection requested asynchronously. Prepare reviewable private deployment bundle and bounded live probes while waiting; no arbitrary install/auth repair or guessed credentials. No local wrangler/workerd/Python3.11/browser available. Lead owns probe, integration, docs, authorization and accept/rework; T-815 native gpt-6.1-sol/high builder bounded to offline bundle; T-816 native gpt-6-astra/high independent read-only review. One initial call + at most one focused rework each, 12-minute supervised limit, no nesting, unknown cost/quota. Source worktrees isolated; contractual scopes are not OS isolation. Current user input is not blanket approval for changing unrelated apps or spending. Live outcomes remain pending until evidence exists; this work is a preparation delivery within the same T-0003, not full M1 completion.
+
+M1 preparation acceptance 2026-10-26T17:05:44Z: evidence gate inspected generator/probe, tests and all documentation diffs. T-815 offline contract maps to exact-copy/hash, private files, separated credentials/grants and ten passing tests. T-816 initial three P2 findings were reproduced and repaired; focused ACCEPT covers directory fsync/failure ordering, dangling Git markers and malformed nested responses/IDs/capabilities. Lead final-source-check reran31 Node+58 Python=89 tests, plus44 project contracts,7 llms,25 docs/191 links/12 pins and diff scope checks. Original failed runs retained. Accept T-0003 preparation rows1–3 only, contingent on normal CI/merge/readback; row4 and AC06–08 live remain pending missing D1/Workers Scripts scopes, domain and runner input. No remote provisioning, deployment, paid resources, archival or usable tag.
+
+## Cloud Lab selected-target preflight — 2026-10-26T18:01:36Z
+
+Owner instructed proceeding after domain/runner proposal; lead stated first suggested hostname and current non-root host as defaults. Private targets remain outside public Git. D1/Workers refreshed scopes verified by real read-only queries. No target conflicts found. Access app/policy/service-token write scopes were not included in prior OAuth grant; account subscriptions cannot be read through OAuth. Prepare exact private Access request and resource/runner plan before requesting the remaining consent. No paid-plan upgrade, replacement of existing resources, ingress attachment, scheduling or live success is inferred. Current task is a bounded preflight continuation of T-0003-4; lead handles it directly, no worker call for a documentation/private-plan change. Independent runtime acceptance remains required before any live completion claim.
+
+## Cloud Lab live qualification continuation — 2026-10-27
+
+Owner authorized continuation and reusable headless OAuth documentation. Access scopes now granted; owner confirms Workers Free and zero additional spend. Target selection unchanged and private. Lead owns isolated workerd/D1 qualification, private provisioning and bounded one-shot runner/probe. No paid upgrades, unrelated resources, Cron enablement, archival or usable tag. Before live publication use one independent read-only review with installed Codex CLI, exact gpt-6-astra/high, host timeout300s, initial plus at most one focused rework, answer<=1500tokens. Disable remote MCP/apps and delegation for review; preserve permission restrictions. Unknown model quota/cost remains unknown. Do not infer live acceptance from local tests. OAuth runbook records observed facts and unresolved invalid_target cause.
+
+Live checkpoint2026-10-27T11:36:44Z: T-817 initial REWORK exposed missing successful assets coverage; actual workerd RED then redirect:manual fix and exact-source GREEN, focused review ACCEPT. One cloud machine loop validated healthy, commands1/active0, schedule/firings/Cron off. Subsequent live Python default-UA1010 repaired with explicit product UA, two loopback RED then89GREEN. T-818 is a separate final integration review for this newly discovered client change/public claims, one180s read-only gpt-6-astra/high call only, same MCP/apps/no-delegation restrictions; not a third T-817 retry. D1 export delayed-poll failed; proposed bounded export download rejected by auto-review for missing explicit sensitive-transfer/destination authorization. Asked owner with precise new DB/private destination/isolation scope; no workaround or dependent action. Local journal online backup passed. Full AC06–08 stay pending.
+
+First-live delivery decision: ACCEPT the bounded compatibility fixes, reusable operation documentation and one-command live evidence after T817/T818 independent ACCEPT,89regressions and actual workerd8 pass. Final public/privacy/index checks and normal PR/CI/merge/readback remain delivery steps. Do not close T-0003-4 or AC06–08; human/mobile and D1 transfer approval remain pending, no usable tag. Original RED/configuration failures and automatic export rejection retained.
+
+## Cloud Lab isolated restore — 2026-10-27T12:26:10Z
+
+Owner explicitly approved the previously blocked new-Lab D1 export to the named private destination and restore to a separate unbound D1. No existing application DB, paid upgrade, live binding, schedule, grant extension or destructive cleanup. Lead owns receipts, export/import, exact schema/data comparison and journal reconciliation. This completes only the initial terminal-state restore subset of T-0003-4/AC08, not interrupted-work recovery or full mainline. Use one bounded180s gpt-6-astra/high read-only evidence review, no remote/private access, no delegation; unknown quota/cost remains unknown. Preserve prior rejection/failure and new explicit approval as separate history.
+
+Restore checkpoint: export/download and new isolated import complete. Snapshot had a new accepted active1 command; initial zero-active assumption failed before creating restore. Adapted explicit scope to preserve pending work, no dispatch. All6 application table rows/3named indexes equal; platform_cf_KV excluded explicitly per official docs. Remote integrity_check request SQLITE_AUTH retained, supported quick_check/foreign_key_check passed. Completed artifact/timestamps/reference/identity match journal, pending has no attempt/journal; all3Worker bindings exclude restore, live still source, Cronoff. T-819 one180s read-only evidence-claims review; no runtime changes and no full regression rerun claimed.
+
+Restore evidence gate: ACCEPT bounded snapshot restore and completed/pending reconciliation after direct receipt/schema/row/identity checks, isolation readback and T819 independent documentation ACCEPT. Full product/AC06–08 remain pending; no usable tag. Required documentation/privacy checks and normal Git CI/merge/readback continue; runtime unchanged.
+
+## Resident runner — 2026-10-27T16:13:27Z
+
+Owner requests continued development. Lead implements RR-01–05 (docs/resident-runner.md): one journal lock, bounded polling/backoff, fatal auth stop, explicit expiry window, graceful signals and same-journal restart; one selected user service and bounded live health command. No paid upgrades, grant extension, CF Cron or linger policy changes. T-820 independent read-only review uses installed Codex gpt-6-astra/high, host timeout300s, initial plus at most one focused rework, <=1500tokens; MCP/apps/delegation disabled. Unknown model quota/cost remains unknown. Full AC06–08 stay pending.
+
+Resident evidence gate: ACCEPT bounded RR-01–05 after 98GREEN, T820 code/evidence ACCEPT, private unit verification and one automatic live command; same-journal normal restart preserved all rows, D1 completed identities/artifacts/times/refs equal, expired old command never executed, active0 and schedulesoff. First missing-log review, wrapper syntax preflight, read-only SQL column error and artifact-shape assertion retained; no mutation replay to repair proof. Linger/boot/forced interruption/mobile/full AC06–08 remain pending. Lead-inspected final review events contain no failed calls. Normal Git/CI/merge/readback remains to complete delivery.
+
+## Recovery qualification — 2026-10-27
+
+Owner authorizes next interruption/lost-report task. Lead implements test fixtures and isolated actual-workerd harness for FR01–04, preserving exact journal and control snapshots. No live resource/credential/service mutation, production fault hooks, paid upgrade or Cron. T821 independent read-only gpt-6-astra/high review, host timeout300seconds, initial plus at most one focused rework, <=1500tokens, MCP/apps/delegation disabled; unknown quota/cost remains unknown. Full mainline stays incomplete.
+
+Recovery evidence gate ACCEPT bounded FR01–04:101GREEN, actual workerd/D1 three fault cases, exact journals and control reconciliation, T821 initial/focused ACCEPT. Preserve initial missing-fixture RED, successful-suite SQLite warnings, fixed empty-marker counting and missing-rg fallback. Final CI marker barrier tightened by lead after review and101tests rerun; harness/runtime unchanged, no third model call. Remote CF/power-loss/systemd/mobile/full AC remainpending; product runtime and live state untouched. Normal Git/CI/merge/readback continues.
+
+## Remote isolated recovery — 2026-10-28
+
+Owner approved next remote recovery/revocation task. RF01–04 scope in docs/remote-recovery.md: one separate short-lived Worker/D1/Access app/token; no paid upgrades, existing resource mutation, original grant renewal, Cron or linger. Lead owns bounded relay/test tool and private deployment/revocation receipts. T822 independent gpt-6-astra/high read-only review before remote faults,300second host timeout,initial plus one focused rework,<=1500tokens; no MCP/apps/delegation/private operator access. Unknown model quota/cost remains unknown. Full AC06–08 staypending.
+
+T822 initial REWORK: total shutdown and unsafe parent. Follow-up identified implicit HTTP reconnect race; its evidence read remained on old failed fixture log. Lead corrected separate checkout-guard unit isolation, captured socket shutdown and disabled auto_open; adding late-connect/send-cancel regression cases. A new bounded T823 transport/evidence review is authorized by lead for this newly identified race and exact final evidence: one300s gpt-6-astra/high read-only call only, same restrictions, <=1200tokens. This is an explicit new review decision, not an unrecorded T822 third retry. No cloud mutations yet.
+
+RF evidence gate: ACCEPT bounded RF01–04 after115GREEN and T823 local-code ACCEPT. Lead verified actual CF three cases, revoked new bot/runner403, reconciliation-only identity, exact D1/journals/artifacts/identities, stale409 and dedupe, retained3commands/active1unknown. New Access token disabled with fresh401 and unchanged expiry; three original Worker settings/schedules and original domains equal. Keep initial missing-tool RED, failed parent fixture/old-log review, and anonymous Access HTML preflight failure (before any submit) visible. Header-only private preflight fixed the latter without changing reviewed public code. No original credential renewal, paid upgrade, Cron/linger, cleanup or usable tag; full AC06–08 remainpending. Normal PR/CI/merge/readback continue.
+
+## Dashboard lifecycle qualification — 2026-10-28T04:36:02Z
+
+Owner approved continuation to dashboard/mobile workflow. UI01–04 in docs/dashboard-qualification.md: auth-expiry clearing/poll pause, uncertain-submit exact manual retry, real headless desktop/narrow layout and local actual Worker/D1 browser boundaries. Lead implements/tests; no installs, live deployment, credential renewal, paid upgrade or production auth weakening. Synthetic local browser is not real Access/mobile acceptance. T824 independent installed Codex gpt-6-astra/high read-only review,300s host timeout, initial plus one focused rework,<=1500tokens; no MCP/apps/network/private files/writes/delegation. Unknown model cost/quota remains unknown. Full AC06–08 staypending.
+
+T824 initial REWORK found uncertain retry identity loss on401/403 and obsolete responses invalidating a recovered session. Lead added three CI regressions (all RED) and browser U8 RED, then changed stale responses to silent generation-checked returns and preserved all unresolved retry payloads. UI-race-green121tests and U9 actual-browser10checks pass; use the one permitted focused follow-up with exact new logs/hashes. Earlier118tests/U7 remain historical.
+
+UI evidence gate ACCEPT bounded local UI01–04:121GREEN, U9 actual Chromium/workerd/D1/Python10checks, exact three asset hashes, final T824 ACCEPT. Original client RED, loopback permission errors, missing library/socket-path diagnostics, U1/U2 fixture mistakes, U3 auth UI RED, T824 initial REWORK, UI-race-red3fail and U8 pending RED all retained. Final reviewer events have no failed calls; browser GLib/DBus diagnostics remain explicit. No new installation, cloud mutation, live asset deployment, grant extension or paid upgrade. Full AC06–08 and physical mobile/Access remainpending; normal PR/CI/merge/readback continues.
+
+## Dashboard rollout — 2026-10-28T05:09:07Z
+
+Owner explicitly approved the proposed reviewed-asset deployment and real phone/Access workflow, asks to be told when help is required. DR01–04 uses exact PR697 assets/T824 acceptance, unchanged Worker modules and inherited secrets/DB/routing. No new grants, expiration extension, Cron, paid upgrade or unrelated changes. Lead owns private baseline/upload/readback/rollback receipts; owner alone performs physical phone login. T825 one180s independent gpt-6-astra/high read-only review of sanitized deployment evidence, no cloud/private access/writes/delegation; unknown model cost/quota stays unknown. Complete automatic work before requesting physical interaction. Full mainline remainspending.
+
+Dashboard rollout checkpoint: original baseline and exact source verified; bounded publish script syntax passed and rollback preview saved privately. Automatic approval review rejected original Worker publication before process creation because the prior reply did not explicitly establish deployment authorization and publication may disrupt service. No assets session/upload/publish executed; local-only preservation approved. Await explicit owner approval, then revalidate expiry and drift before any mutation. T825 remains planned, not executed; DR01–04 and full mainline remain incomplete. No bypass or alternative publication route.
+
+Dashboard rollout resume: owner explicitly approved original Lab Worker dashboard update with D1/Access/secrets/deadline retained and no paid plan. Prior approval rejection remains historical. Re-read expiry, resident, original version/settings/Access and grants before executing the saved bounded operator; post-deploy evidence and physical phone remain required.
+
+T825 initial launch rejected before execution for potential sensitive repo/evidence transfer. No model call occurred. Safer review plan: GitHub metadata verified public; supply only inline publication draft, sanitized lead checks and redacted operator after scanning against private profile identifiers/secrets. Disable shell/unified_exec/web/MCP/apps/delegation; no repo browsing or private receipt access. One180s call budget retained, review explicitly relies on lead checks rather than independent raw receipt/hash verification.
+
+T825 reduced inline proposal also rejected before process creation: automatic reviewer requires explicit owner authorization for private-derived summaries/operator transfer to the named external model despite redaction/public-repo proof. Stop that route; async owner question pending, no model calls or bypass. Deployment and automatic readbacks already passed independently; retain BLOCKED review and pending Git delivery.
+
+DR checkpoint evidence gate: lead accepts only automatic DR01–03 evidence: exact reviewed assets and unchanged modules, new version100%, original resources/settings/Access/domains and D1 rows equal, five anonymous302 plus two machine200, resident active and original expiry retained. DR04 pending owner phone. T825 BLOCKED awaiting explicit model-transfer approval; Git delivery pending, no usable tag. Documentation preflight initially failed an over-deep relative link and a new llms target absent from Git index; fixed link and staged target, then all six checks plus staged diff/privacy/source-boundary checks passed. CLI features-to-head inspection produced Broken pipe; subsequent complete capture succeeded, no model execution.
+
+T825 owner explicitly approved the proposed one180s gpt-6-astra/high inline sanitized review. Resume exactly that route with tools/web/MCP/apps/delegation disabled; retain both prior automatic rejections. Human/mobile observation remains separate and pending.
+
+T825 executed exactly once after explicit approval:63.8seconds, exit0, inline profile scan passed, no tool calls/stderr/turn errors. Reviewer REWORK requested evidence attribution,302 limits, resources projection definition and helper/no-replay limits. Lead corrected all five documentation findings without additional model call or deployment replay. Original reviewer REWORK remains; no independent re-review/ACCEPT claim. Lead accepts corrected bounded deployment documentation for normal Git delivery, retaining DR04/full mainline pending.
+
+## Cloud Lab client acceptance scope — 2026-10-28
+
+Owner explicitly waived physical-phone testing and asked the next step. Lead records this small documentation-only requirement change: desktop/browser human Access remains distinct from machine credentials, but physical phone no longer blocks development. No new reviewer/model call is needed for this owner-directed scope correction. No new grant, credential, Cron, runner or paid-plan mutation. Recommend sustained readonly operation next (credential/grant lifecycle, runner recovery, low-frequency scheduling, retention/quota); this recommendation is not implementation/deployment authorization. Preserve historical evidence and incomplete mainline; normal documentation checks and Git delivery apply.
+
+## Authorization lifecycle — 2026-10-28T14:04:41Z
+
+Owner approved continued development starting with authorization lifecycle. AL01–04: offline strict snapshot status, bounded same-scope grant renewal/revocation plans, private files and real SQLite guards; no cloud/credential/service/cron mutation. Lead owns implementation, RED/GREEN, docs and Git delivery. One native independent reviewer receives T826, synthetic source/evidence only, no private state/network/writes/delegation, <=1500token response, one initial plus one focused review if necessary. Inherited model/effort, unknown quota/cost, no external CLI or private deployment-derived material. Full product acceptance remains incomplete.
+
+AL checkpoint: initial20 authorization tests plus full37Node/104Python passed after normal loopback escalation (sandbox socket denials retained). T826 REWORK found revoked+missing expiry falsely complete; focused regression first fails both credential and Access cases. Lead fixes completeness from actual expiry presence and adds300s/30day boundary and unsafe-output-parent cases. CLI initially refused synthetic input under ancestor Git marker, as designed; retest uses a separate protected synthetic state directory without weakening checkout guard.
+
+AL evidence gate ACCEPT bounded AL01–04 after144GREEN, real synthetic CLI status/plan and T826 focused ACCEPT. Retain initial stub RED, human fixture capability mismatch, sandbox socket errors, checkout-protected CLI refusal and revoked-null-expiry RED. No Worker/runner/API/credential/service/paid mutation. Native reviewer reported no writes/network/private access; inherited permissions, not a new OS isolation claim. Lead accepts implementation/docs; normal PR/CI/merge/readback and postmerge board closure remain. Mainline incomplete.
+
+## Authorization source collection — 2026-10-28T14:39:47Z
+
+Owner continues development of read-only live collection. AS01–04: fixed request adapter via existing MCP; Worker DB binding, D1 grants/counts and selected Access token metadata; bounded pre/post drift checks, conservative timestamps/provenance and private output. HMAC/runner metadata unsupported remains null, never inferred fresh from old bundle. No cloud writes or credential/service changes. Lead implements/tests then conducts one bounded original-Lab read-only collection. T827 native independent reviewer sees only source and synthetic evidence, no private/cloud/network/writes/delegation; inherited model/effort/permissions (no stronger sandbox), <=1500tokens, initial plus one focused review. Unknown model cost/quota.
+
+AS synthetic checkpoint:160tests passed; T827 accepted scoped implementation with one low-priority root-fd leak if parent fsync fails. Lead reproduced with descriptor-leak RED, moved parent fsync before root open, and is rerunning final regression. No live calls executed yet; one focused source follow-up remains within budget.
+
+AS evidence gate ACCEPT bounded AS01–04:161GREEN and T827 focused source ACCEPT; lead verified one original-Lab five-read collection, unchanged pre/post projections, four expired grants and selected expired token, active0/schedulesoff, manifest/source hashes and private modes. HMAC/runner/Access policy/human session remain unknown or unverified. Preserve initial stub and descriptor-leak RED; no cloud writes, expiry extension, service/deployment/Cron/paid changes. Normal Git CI/merge/readback and board closure remain; full mainline incomplete.
+
+## Self authorization — 2026-10-28T15:15:10Z
+
+Owner continues next task. SA01–04 implements authenticated machine self metadata and isolated runner query CLI; runner process observation contract remains future, no false known stop. No deployment, cloud renewals, secrets, services or paid changes. Lead owns RED/GREEN and delivery. T828 one native read-only reviewer, inherited model/effort/permissions, source/synthetic logs only, no private files/network/writes/delegation; <=1500tokens initial plus one focused review. Unknown cost/quota. Full mainline remains incomplete.
+
+SA review checkpoint:173GREEN, initial T828 REWORK for post-return-only time bound. Lead reproduced real slow-stream1.960s RED against0.8s assertion, added fixed direct-TLS InspectionClient with total monotonic wait/captured socket shutdown/no reconnect/late-connect cancellation, then176GREEN. One focused review pending; DNS daemon limitation and existing SQLite warnings explicit. No live operations.
+
+SA evidence gate ACCEPT bounded source/local SA01–04 after176GREEN and T828 focused ACCEPT. Lead verified diff, source/CLI scope, no job or journal mutation in actual local HTTP test, fixed total transport bound and documented remaining unknowns. Preserve initial Node isolation error, three404 RED, Python missing-API RED, slow-stream RED and SQLite warnings. No cloud/private credential/service mutation. Normal Git/CI/merge/readback then board-only closeout remain; full mainline incomplete.
+
+## Resident observation — 2026-10-28T15:40:48Z
+
+Owner continues RO01–04: opt-in private Unix socket from actual resident, same-UID/kernel peer/process/lock/config validation, conservative stop metadata. Lead owns tests/implementation; no live service/deployment/renewal or cloud calls. T829 one native read-only reviewer, inherited model/effort/permissions, source/synthetic only, no writes/private state/network/delegation; <=1500tokens initial plus one focused review. Unknown cost/quota; full mainline incomplete.
+
+RO evidence gate ACCEPT bounded RO01–04 source/local after191GREEN and T829 ACCEPT. Real fixture resident/SIGTERM restart preserving journal inode/SIGKILL retained socket, kernel peer/start/boot/FLOCK, config/lock/challenge drift, conservative monotonic deadlines and slow-peer limits passed. Preserve initial9case RED and SQLite warnings. Reviewer briefly listed sibling AGENTS filename paths after rg unavailable; no sibling/private contents, writes, tests or live access; lead records deviation and accepts source findings. No cloud/service/deployment/credential mutation. Normal Git/CI/merge/readback and board closure remain; mainline incomplete.
+
+RO compatibility checkpoint: lead found optional nofollow chmod dependency after first ACCEPT. No Python3.11 executable available; official docs confirm platform-dependent support. Added RO-chmod-red simulated NotImplementedError, pinned socket inode using O_PATH/O_NOFOLLOW then chmod via proc fd, preserving inode cleanup. RO-final-regression192GREEN; one budgeted focused T829 review requested. Do not claim actual3.11testing.
+
+RO final evidence gate ACCEPT: focused T829 compatibility review accepts pinned inode chmod and192GREEN (41Node/151Python). ActualPython3.11not tested, documented; no further runtime changes after review. Complete normalGit delivery and closeout, retaining initial failures/deviation and fullmainline pending.
+
+RO Git delivery blocked — 2026-10-28T16:01:57Z: local feature commit f0f06bb96ce8d74715925e2a3dc89d1869838f97 is complete. Initial SSH push stalled; premature PR creation returned422 invalid head, with no PR created. Remote branch search returned absent. Lead verified and stopped only that push SSH child; Git exited128. A bounded-timeout retry was rejected before process creation by automatic approval review, citing explicit-user-authorization requirement for this Git push. No alternative push/API-write route attempted. Await exact approval to push this feature branch, run normalCI, merge and perform required board closeout; code/source checks remain accepted, no live changes.
+
+RO Git delivery resumed — 2026-10-28T17:04:03Z: owner explicitly approved push in response to the concrete request for this branch and normal PR/CI/merge/board closeout. Prior auto-review rejection remains history. Rechecked remote branch absent and clean local head559fb5e3; resume bounded SSH push after documentation-only approval update. Runtime remains exact reviewed192GREEN source; no deployment/renewal authority inferred.
+
+## Integrated authorization — 2026-10-28T17:18:26Z
+
+Owner continues IA01–04: correlate AS/SA/RO with conservative times and explicit unknowns; private snapshot/provenance/manifest plus integrity-checking status. Lead implements/tests; no live CF/service/deployment/renewal. T830 native read-only reviewer, inherited model/effort/permissions, source/synthetic only, no private/network/writes/delegation; <=1500tokens initial plus one focused review. Unknown cost/quota. Normal Git delivery follows existing approved continuation; full mainline incomplete.
+
+IA review checkpoint: initial210GREEN, additional negatives and214GREEN; T830 REWORK found unbound Access metadata retained for missing-config roles. Lead reproduced2failures in IA-binding-red, moved Access filtering across both roles, and is running full regression before one focused re-review. Initial stub RED and fixture HTTPS-mapping failure retained; no live operations.
+
+IA evidence gate ACCEPT bounded source/local IA01–04:214GREEN (42Node/172Python), final21case status assertions and T830 focused ACCEPT. Lead inspected actual diff, original two-failure RED, source-only limits and fixed missing-config Access binding. Preserve initial stub errors, fixture HTTPS-mapping failure and SQLite warnings. No live/cloud/service/credential changes. Normal PR/CI/merge/readback then board-only closeout remain; fullmainline pending, no usable tag.
+
+## Observation rollout preparation — 2026-10-28T17:49:23Z
+
+Owner continues the proposed deployment/rollback preparation. RP01–04 is documentation and private source candidate preparation, plus read-only current management/service metadata. No runtime source changes, cloud writes, authorization renewal, service install/start, secrets rotation, Cron or paid plans. Lead owns public/private boundary and Git delivery. T831 native independent reviewer receives only source/docs/synthetic manifest and lead check summaries, no private state/network/writes/delegation; inherited model/effort/permissions, <=1200tokens, initial plus one focused followup. Unknown cost/quota. Final request must name concrete future mutations; prior dashboard-only approval does not cover modules/authorization changes.
+
+RP evidence gate ACCEPT preparation only: twelve pinned source blobs and private modes verified, current version/DB/origin/audience metadata matches original target, expired grants/token/local key metadata and inactive runner recorded. Preserve spec syntax failure, sandbox user-bus denial, erroneous read-only delivery-column query and four intermediate-directory mode corrections. T831 ACCEPT source/public-doc review; no private reviewer access. Runtime unchanged,214tests historical. Normal Git/CI/merge/readback and board-only closeout remain; future module/expiry/service mutations require the concrete proposal approval, no live success claim.
+
+## Observation live execution — 2026-10-29T03:20:36Z
+
+Owner explicitly approved RP proposal after explanation of the two-hour cap. OL01–04 executes only originaltarget pinnedSA/RO/IA modules, originalAccess token duration, bot/runner HMAC+grant expiry, bounded resident start/stop and documented compensation. No human/scheduler renewal, commands submission, Cron, paid plan or key rotation. Lead owns private receipts, mutations and raw readback; T832 native independent review receives only sanitized public source/evidence summaries, no private state/network/writes/delegation. Inherited model/effort/permissions, <=1200tokens, initial plus one focused review, unknown cost/quota. Existing T831 plan review and T830 runtime review retained. Normal Git delivery applies.
+
+OL evidence gate ACCEPT bounded actual rollout/readback: Access expiry within120min ceiling; bot/runner HMAC+grant110min, CAS revisions1to2; pinnedWorker100% and originalsettings/metadata; realIA10management reads plus self/resident verified; validationresident stopped exit0/MainPID0/socketremoved; journal rows/inode and businessrows equal;5anonymousAccess302. Human/scheduler remain expired. Initial relative-journal and provider-routing-schema preflight failures preserved/reconciled before mutations. T832 ACCEPT public-doc review, no private/raw reviewer verification. No runtime source change,214tests historical; no naturalexpiry or rollbackexercise claim. Normal Git/CI/merge/readback and board closeout remain.
+
+## Service runner — 2026-10-29T05:03:15Z
+
+Owner approved next development item: separate routine service operation from short-lived submit authority using existing role separation. SR01–04 implements private config-bound policy, startup self verification, minimum absolute/monotonic deadlines, admission guard and journal-safe recovery. Lead owns implementation, RED/GREEN, documentation and normal Git delivery. No live cloud/service/expiry/secret/paid mutation. T833 one native read-only independent reviewer, inherited model/effort/permissions, fresh source/synthetic context, <=1500tokens, initial plus one focused followup, no private/network/writes/delegation. Unknown model cost/quota. Mainline remains incomplete.
+
+SR review checkpoint: initial234GREEN; T833 REWORK found server-ahead time applied only to remote expirations, allowing local policy deadlines to be exceeded. SR-skew-red reproduced four subcase failures for service_until/Access earliest and already-expired policies. Lead applies conservative observed time to minimum of all four deadlines; final regression pending. SR-observation-check20GREEN additionally verifies actual service socket deadlines and cleanup across journal-preserving restarts. Initial unit verification sandbox SO_PASSCRED denial retained; same synthetic unit passes normal elevated read-only verification, no installation.
+
+SR evidence gate ACCEPT bounded source/local SR01–04 after236GREEN (42Node/194Python) and T833 focused ACCEPT. Lead inspected final runtime diff, four-subcase skew RED and final logs; policy/config binding, all-four deadline clipping, actual HTTP/subprocess/kernel-socket restart and journal semantics passed. Initial missing-API RED, two fixture corrections, sandbox socket/unit denials and SQLite warnings retained. Python3.11 not executed. No live operations or renewal; normal PR/CI/merge/readback and board closure remain.
+
+## Service activation preparation — 2026-10-29T06:45:00Z
+
+Owner continues proposed preparation. SP01–04 adds offline metadata/config-bound proposal, explicit1–7day relative windows and request estimates, pinnedSR candidate and existingLab read-only observations. No live mutation, service install/start, renewal, secret rotation, Cron or paid plan. Lead implements/tests and owns private/public boundary. T834 one native independent read-only reviewer, inherited model/effort/permissions, fresh bounded source/synthetic context, <=1500tokens, initial plus one focused followup, no private/network/writes/delegation; unknown cost/quota. Full mainline incomplete.
+
+SP evidence gate ACCEPT preparation only:249GREEN(42Node/207Python), actual private CLI and unit verify, five read-only CF calls and six pinned Git blobs, original settings/deployment/token metadata equality, inactive service and retained journal. T834 ACCEPT public-source/synthetic review; raw private observations remain lead evidence, helper internals not independently reread. Initial missing-module RED and two private intermediate directory mode corrections retained. Proposal keeps stale snapshot and unknown credential/resident layers; no runtime policy, expiry mutation or service start. Python3.11/billing/live acceptance unverified. Normal PR/CI/merge/readback and board closure remain; actual7dayactivation requires explicit approval of concrete plan.
+
+## Routine service activation — 2026-10-29T07:09:17Z
+
+Owner explicitly approved SP seven-day/60second runner activation and documented compensation. SL01–04 executes originaltarget Access+runner HMAC/grant expiry-only changes, config-bound policy/unit/start and runner-only IA/readbacks; leave resident running on success. No human/bot/scheduler renewal, Cron/jobs, rotation or paidupgrade. Lead owns raw private receipts. T835 one native read-only public-evidence review, inherited model/effort/permissions, <=1200tokens, initial plus one focused followup; no private/network/writes/delegation. Subscription GET denied403 because OAuth cannot cover Billing endpoint; no retry/reconnect bypass, owner factual plan question pending, remaining readonly work continues.
+
+SL partial checkpoint — 2026-10-29T07:21:15Z: ten management reads plus Workers/D1 analytics acquired; original resources/identities/business rows and six source blobs match, inactive service/lock/completed journal preserved. Provider Billing403 is OAuth unsupported, not auto-review denial. Await owner factual Free-plan confirmation; prior seven-day execution approval remains valid. Receipt filename and asset routing field errors retained and corrected without mutation replay. No T0, renewal, unit install/start or cloud mutations. Fresh recollection required before later execution; T835 live evidence review and delivery pending.
+
+SL live checkpoint: owner confirmed still Workers Free and approved. Fresh preflight10reads, bounded Access, runner-only secret and one-rowCAS revision2to3 succeeded; T0 2026-10-29T07:24:26Z, service seven days, credential/grant+10min, actualAccess7d19m1s. Secret PUT changed only provider triggered_by annotation upload→secret; original strict assertion retained/reconciled, complete version resources/runtime configuration equal, no replay. IA runner/resident verified and bot not_configured; final07:28:20Z active/running/NRestarts0, original business/journal retained, fiveAccess302. Leave running. T835 public-evidence independent review and normal Git delivery remain.
+
+SL evidence gate ACCEPT bounded actual activation/readback and T835 public-evidence review. Lead checked raw receipts and diff; reviewer did not read private state or query live. Provider annotation exception is explicit, not hidden runtime drift. Local docs/contracts checks pass; no runtime changes or repeated local suite. Natural expiry/7dayuptime/billing/fullmainline remain unverified. Proceed normal Git delivery and board-only closure, keeping approved resident running.
+
+SL local validator checkpoint: llms initial run failed because the new evidence file was untracked and validator uses git ls-files; stage explicit scoped files and rerun. Preserve initial log; no validator weakening or link removal.
+
+## Low-frequency health schedule — 2026-10-29T08:06:27Z
+
+Owner confirmed development of low-frequency schedule/dashboard results. Lead owns source/tests/docs; no live writes during development. HS01–04: strict revision-bound15/60/1440minute policy with<=7day ceiling, fail closed, existing firing/CAS/admission boundaries, scope-read snapshot and honest stale/session UI. T836 native independent read-only source/synthetic reviewer, inherited model/effort/permissions, initial plus one focused review<=1500tokens; no private/network/writes/delegation, unknowncost/quota. No runtime dependencies, schema migration, generic cron, paidplan or role expansion. Existing normal Git delivery authorization persists.
+
+HS evidence gate ACCEPT local source: behavior7RED/UI4RED preserved, final265GREEN (58Node207Python), H2 actual Chromium/workerd12checks95API/errors[], source hashes and screenshot inspected. T836 ACCEPT plus focused acceptance of <=15second minute-boundary fixture wait; targeted5integrationGREEN. Initial wrong sign import/Node isolation and browser socket-path/localscheduled HTTP misuse retained; no runtime auth relaxation. No live mutation, dependencies or schema migration; local3.11/billing/liveCron/fullmainline unverified. Proceed normal Git/CI/merge/readback and board-only closure; concrete subsequent rollout scope documented.
+
+## Health schedule live activation — 2026-10-29T10:09:24Z
+
+Owner approved original Worker rollout, scheduler-only renewal,15minuteCron, fixed ceiling2026-11-05T07:24:26Z and bounded compensation. HL01–04 covers fresh original-resource/source/service checks, revision-bound deployment/renewal/Cron, first real scheduled command through existing runner, preservation/readback and delivery. No runner/human/bot/Access extension, schema migration, newresource or paidupgrade. Lead owns private receipts; one native read-only reviewer T837, inherited model/effort/permissions, fresh bounded public evidence, <=1500tokens initial plus one focused followup, no private/network/writes/delegation; unknowncost/quota. Actual deadline and first due fixed privately before mutations.
+
+HL checkpoint: two assets-upload-session POSTs returned providerHTTP500/code10013; four-read reconciliation before the single retry and finalnine-read preservation passed. No Worker/grant/schedule/Cron mutations reached; internal temporary session side effects unknown. Initial tokenfullcomparison failed solely last_seen_at from existing runner usage, reconciled without changing auth. Final10:15:50Z source/config/unit/policy/journal preserved, residentactive NRestarts0, self andkernel observation verified,3anonymousAccess302. Stop repeated upload attempts; HL01–04 remainsPARTIAL_PROVIDER_BLOCKED, no new owner approval needed within existing cutoff. T837 review covers honest partial report only, not live acceptance.
+
+HL evidence gate: ACCEPT documentation/preservation delivery only; deployment acceptance remainsPARTIAL_PROVIDER_BLOCKED (HL02–03 unmet). T837 accepts honest partial evidence; lead enforces min(approved ceiling,service policy,fresh conservative resident stop) in continuation and >=15minute margin at actual Cron write, resolving one-second configured/observed difference before any eventual activation. Required source/index/scope/task checks passed; report/finaldiff pending. No code suite rerun because publicruntime unchanged. No board closure orusabletag.
+
+HL final gate: T837 focused ACCEPT confirms public continuation bounds and report fidelity. Allsix local documentation/task/report/diff checks pass; selected14private literals absent from added public lines. Source runtime unchanged. Proceed evidence-onlyPR/CI/merge/readback, keepT0015 open because provider500 and first-real-Cron remain unresolved.
+
+## Fixed bot bridge — 2026-10-29T11:49:12Z
+
+Owner requests next development task. BC01–04 provides fixed JSON health.check/status caller using original API, durable exact submissions and explicit trusted submitflag. No model execution, arbitraryshell/URL/config input, Cloudflare writes, live renewal or paidplan. Lead implementsRGR/docs/integration; T838 one native read-only independent reviewer, inherited model/effort/permissions, initialplusonefocused followup<=1500tokens, publicsource/testlogs only, no private/network/writes/delegation; unknowncost/quota. HLprovider failure remains separate openT0015.
+
+BC evidence gate ACCEPT source/local:13stubRED→13GREEN, actualHTTP/CLI2GREEN, persistent-list corruption1RED fixed, full282GREEN; T838 initialP2REWORK for HTML401/403 parsing reproduced with actualHTTP RED, opt-in status-first transport and thirdHTTPcase fixed; final283GREEN(61Node222Python), T838 focusedACCEPT. Lead inspectedruntime/helperdiff and suppliedlogs; no newdependency/live/model calls. Rawfailures retained. Python3.11/Grok/liveauthorization/fullmainline pending; HL remainsopen. Proceed required docs/contractschecks and normalGit delivery/boardclosure forBC only.
+
+## MCP stdio tools — 2026-10-29T14:31:25Z
+
+Owner continues development. MT01–04 adds a local fixed MCP transport over BC bridge, no Kith authority change/model/live/paid operation. Lead owns implementation/RGR/docs/delivery. T839 one native independent read-only reviewer, inherited model/effort/permissions explicitly selected; fresh bounded public context, initial plus one focused followup<=1500tokens, five-minute review budget monitored by lead, no private/network/writes/delegation; unknown cost/quota, no OS isolation. Preserve existing HL provider blocker separately. Normal Git delivery authority persists.
+
+MT evidence gate ACCEPT source/local:13stub RED→13GREEN; expanded16Python plus actualstdio/HTTP/collector integration passed; full300GREEN(62Node238Python), zero failures/skips. T839 independentACCEPT; lead inspected newruntime/tests/docs and actuallogs, preserved initialRED. Runtime changes limited to new local adapter, no existing runtime/auth/cloud/model/paid mutations. Docs/index/task checks passed; finalreport/diff checks before delivery. Hostglobalfrequency, idleinput, kernelI/O, Python3.11 and realGrok/live acceptance limitations explicit. Optional descendant cleanup test remains followup, not unmetAC. Normal PR/CI/merge/readback then board-only closeout forMT; HL remainsopen.
+
+## Independent Grok connection — 2026-10-29T14:58:38Z
+
+Owner explicitly selects independent tool endpoint. GC01–04 registers pinned MT runtime as status-only Grok MCP, no model invocation or Cloudflare/auth/paid change. Lead owns private config backup/CAS/preservation and client/protocol/auth diagnostics; T840 one native read-only public-evidence reviewer with inherited model/effort/permissions, fresh bounded context, <=1500tokens initial plus one focused followup, <=5minutes monitored; no private/network/writes/delegation, unknowncost/quota. Client installation and doctor are distinct from natural-language model invocation and live authorization. Existing normal Git delivery authority persists.
+
+GC evidence gate ACCEPT connection/diagnosis only: Grok1.0.67 native doctor beforeexit1→afterexit0, protocol2025-11-25 and1tool; registered argv statusnot_found/check-32602; samebot selfauthorization exit1 retained. Fresh management read botgrant expired05:14:04Z, Access enabled through11-05T07:43:27Z; no HMAC expiry inference. Lead verified4pinnedsource hashes, configbackup/CAS/atomicreplace, other settings equal, state0700/DB0600, requests0. T840 independent public-evidence ACCEPT, private checks lead-owned. No model/cloudconfig/business/auth renewal actions; nonce sideeffects not claimed zero. Runtime unchanged, prior300tests not rerun; concrete native/protocol/preservation checks run. Proceed docs/task/report/diff checks, normalGit delivery and GC-only board closure; HL and live/model gates remainopen.
+
+## Bounded bot live validation — 2026-10-29T16:27:23Z
+
+Owner continues explicitly proposed bounded bot renewal plus one real health check. BL01–04 caps bot-only window at30minutes and existing fresh runner/Access limits, preserves role/scope/secret/generation, transiently enables registered MCP check then restores status-only. No model/paid/other-role renewal or assets rollout. Lead owns private receipts/operations and publicdocs; T841 native independent public-evidence reviewer, inherited model/effort/permissions, fresh bounded context <=1500tokens initialplusonefollowup, <=5minutes monitored, no private/network/writes/delegation; unknowncost/quota, notOSisolation. Normal Git authorization persists; HL separate.
+
+BL evidence gate ACCEPT bounded actual subset: fresh original deployment/settings/quietD1 and runner self/resident; bot-only HMAC/grant expires16:59:16Z from16:29:16Z, CASchanges1, unchanged keyvalue/generation/scope/otherroles/Access/runner. Native doctor2tools, one registered-MCP submit and10GETstatus, actual original resident validatedhealthy at16:31:08Z; finally restores original config, doctor1tool. First readback failed operator relativejournal path; runtime rule inspected and read-onlyv2 corrected, no repeatwrite/submit. Final16:33:43Z preservedoriginal3commands+exactly1completed/newbotrow, schedule/firings/code/settings/tokenimmutables/runnerlimits. T841 public-consistency ACCEPT; lead inspectedprivateactualreceipts. No model/paid or assets rollout, no localfullsuite rerun because runtime unchanged. Docs/task/privacy checks pass; finalreport/diff then normalGit delivery and BL-only closure. Naturalexpiry/Grokconversation/standingbot/HL/fullmainline pending.
+
+## Persistent bot policy — 2026-10-29T16:51:30Z
+
+Owner continues standing-policy development. BP01–04: private config-bound <=24h fixed lease, <=24 new IDs/240 calls, persistent reservations and intervals under existing journal lock, trusted MCP flag, explicit offline initialization. Lead implements RGR/docs/delivery. T842 native independent read-only reviewer, inherited model/effort/permissions, fresh bounded public context <=1500tokens initial plus one focused followup, five minutes monitored, no private/network/writes/delegation; unknowncost/quota, not OS isolation. Existing normal Git authority persists; no live/client/renewal/model/paid mutations. HL stays open.
+
+BP evidence gate ACCEPT source/local: initial missingAPI RED retained,14policyGREEN and316fullGREEN; T842 initialREWORK exposed expiry observation lost before rejection, two regression cases RED; persist high-water before reject, clarify owner-only permissions and test0400/0640. Final319GREEN(63Node256Python), actualstdio/HTTP timeout plus concurrent reconnect/samepayload/onecommand and3call exhaustion, T842 focusedACCEPT. Lead inspected full scoped diff/logs. Initial duplicated importedtests and SQLite resource warnings fixed, historical failures preserved. Five docs/task/diff checks passed; final reportcheck before normalGit delivery/boardclosure. No live/client/auth/model/paid writes; Python3.11/live policy/explicit renewal/fullmainline pending, HL remainsopen.
+
+## Explicit bot policy renewal — 2026-10-29T17:09:18Z
+
+Owner continues development and offers external help if needed. BR01–04: trusted old/new policy CLI, offline preview, expired-only CAS renewal with immutable old-policy/ledger/reservation receipt, atomic active budget transition, unchanged requests and preserved cross-window intervals/high-water. Lead owns implementation/RGR/docs/Git. T843 native independent read-only reviewer with inherited model/effort/permissions, fresh bounded public context, <=1500tokens initial plus one focused followup, five minutes monitored; no private/network/writes/delegation, unknowncost/quota, not OS isolation. Normal Git delivery authorized; no live/client/cloud/auth/model/paid changes; HL remains open.
+
+BR evidence gate ACCEPT source/local:14missingAPI RED, firstGREEN replay failed due strict JSON float archive; exactfloat.hex encoding fixed14GREEN, full334GREEN. T843 REWORK exposed non-dry-run already_applied losing observed expiry; explicit regression RED, persist high-water after validated receipt without replenishment, retain read-only preview. Final336GREEN(64Node272Python), actual8second lease/parallelCLI renewal/MCP ACK-loss originalcommand validated/replay still exhausted, T843 focusedACCEPT. Lead inspected full diff/logs. SQLite ResourceWarning and Node experimentalwarning retained; no test weakening. Final docs/task/report/diff then normalGit delivery/boardclosure. No live/client/auth/model/paid mutation; Python3.11/live activation/fullmainline pending; HL remainsopen.
+
+
+# T-0440 delivery plan
+
+Started: 2026-10-29T17:40:09.225260+00:00
+Scope: favicon response and one bounded Chromium run proving no favicon 404, stream failure closes before Refresh without automatic retry, Authenticate gap. Exclude Cloud/persistence/deploy/release.
+Estimate: 45–60 active minutes including review; checkpoints every 20 active minutes. CI wait at most 15 minutes per PR; failures retained, at most two justified fixes for one issue.
+
+1. Claim desk T-0440 through PR, then commit normative spec / SUCCESS / BOARD before code.
+2. Implement small embedded ICO route with unchanged CSP, route regression test; prepare focused browser harness using existing fixture and trusted isolated runtime.
+3. Independent fresh-context review, native checks and CI; fix supported findings.
+4. Execute one bounded browser attempt under current owner request, inspect receipts/screenshots; record limitations and failures honestly.
+5. Merge reviewed product/result PRs, update BOARD and desk completion, journal/handoff; verify remote content.
+
+Workers: bounded browser-harness worker in an isolated worktree (15 active minutes); root owns production Rust/icon. A separate fresh-context read-only acceptance reviewer follows integration. Explicit task files, no nested delegation.
+Tool accounting: tool/provider totals not yet measured; provider requests/tokens/cost null. Execution receipts and current-turn tools are sources; worker caps are not usage.
+
+Progress: desk PR302 merged/readback; normative docs commit 2d334cc7. Browser worker owns isolated fanz-followup-browser/fe-review scope (assignment in local handoff), 15 minute budget. Root owns production Rust/icon. Shared CSP already permits same-origin images, so no security widening needed. Initial cargo invocation blocked by sandbox sccache EPERM; native Red run launched using existing shared build cache, timeout 600 s.
+
+T0440 native evidence: favicon test RED (404 vs 200), then focused Rust 3/3 GREEN. Controller 10/10; cargo fmt, workspace clippy -D warnings, workspace all-targets/all-features tests and binary build all exit 0 (native-checks.json in local handoff). No runtime/browser yet.
+
+T0440 worker integration: six scoped fe-review files reviewed/copied from isolated worker. Worker report PARTIAL retained: sandbox EPERM failures, no runtime. Root full fe-review run outside sandbox passed 307/307, zero skipped (12.71 s); native source/HTTP checks remain green. Independent fresh-context review now active, bounded to 8 minutes. Browser remains NOT_RUN until review/CI.
+
+## Bounded bot activation preparation — 2026-10-29T17:31:43Z
+
+Owner continues proposed first activation preparation. BA01–04 pins BR/BP source, reads original client/state and fresh Cloudflare/self/resident metadata, creates private non-executable <=24h/24new/240call proposal with fixed parent deadlines and concrete activation/compensation. No live/client/cloud/auth/model/paid mutation, no policy initialization. Lead owns private evidence; T844 one native independent read-only public-evidence reviewer, inherited model/effort/permissions, fresh context <=1500tokens initial plus one focused followup, five minutes monitored; no private/network/writes/tests/delegation, unknowncost/quota, not OS isolation. Normal Git delivery persists; actual new standing-bot authorization requires concrete owner approval. HL remains separately open.
+
+BA evidence gate ACCEPT preparation only: pinnedBR fourblobs/ancestry, oldmanifest/config/client/state preservation, owner-only uninstalledTOML/proposal;11management readonly operations before/after equality, actualrunner self/resident verified, botselfexit1 and grant expired16:59:16Z retained. Residentstop11-05T07:24:25Z yields observedouterceiling07:22:25Z; runtimepolicy absent/no initialization, candidateMCP2tools but0calls, originalnative1tool. Initialprivate builder3caps assertion failed; originalAL contract/freshgrant5caps confirmed, v2 preserved samecandidate and completedproposal with no grant change. T844 public-consistencyACCEPT; lead checkedprivate originals. No runtimecode/fullsuite rerun/model/livewrites/paidchange. Finaldocs/task/report/diff then normalGit delivery and BA-only closure; actualbot-only24h activation requires newexplicit approval with documented compensation. HL remainsopen.
+
+T0440 runtime checkpoint 2026-10-29T17:54:54.908805+00:00: required source CI and independent source/launcher review passed. One followup-001 run on c973bcf3: PASS, 5.187s, two 12px gaps, favicon200x2, socket close/zero clients/1511.7ms quiet/explicit Refresh, no unexpected browser health failures, listener/resources/container cleaned. Root inspected both PNGs; actual independent acceptance and Git/ledger closure pending. No retries.
+
+T0440 evidence gate: ACCEPT AC-F01–F04. Independent actual review checked source hashes/CI-before-start/PNGs/receipt/cleanup; no blockers. Product code unchanged after runtime. Required checks passed; sandbox failures preserved as resolved environmental attempts. Final docs/acceptance now reflect actual evidence; normal PR/CI/merge/readback and ledger closure remain.
+
+## First bounded bot activation — 2026-10-29T17:58:50Z
+
+Owner explicitly approves BA proposal. BT01–04 executes bot-only <=24h original HMAC/grant expiry, first policy24IDs/240calls, pinned client and one real health validation; retains enabled entry on success. No other-role/Access/runner extension, model, Cron or paidchange. Lead owns private operations. T845 native independent public-evidence reviewer, inherited model/effort/permissions, fresh bounded context, <=1500tokens initial plus one focused followup, five-minute monitored limit, no private/network/writes/tests/delegation; unknowncost/quota, no OS isolation. Normal Git delivery authority persists. HL remains separate open.
+
+BT evidence gate ACCEPT bounded live subset: unique18:00:27Z T0/E+86400, originalbot-only HMAC/grantCAS3to4, originalcode/resources/settings and otherroles preserved, actualself verified after initialfailure and readonlyreconciliation. No mutationreplay/windowreset. Firstpolicy originalstate once, oldrequest retained, native2tools, onecheck/3status validatedhealthy18:02:29Z, persistentquota4calls/1new, final18:02:46Z preservation passed; retainenabled namedtool. Earlyprivate journalBLOB serialization failure beforewrites retained/v2fixed. T845 public-consistencyACCEPT; leadcheckedrawreceipts/fullscopeddiff. Runtimeunchanged/no local336testrerun/model/paidchange. Five docs/task/diff checks and10privateliterals passed; finalreport/diff then normalGit/CI/merge/readback andBT-onlyboardclosure. Naturalexpiry/model/billing/uptime/fullmainlinepending; HLseparateopen.
+
+## HAI Taskboard M0 baseline — 2026-10-29T17:47:11Z
+
+T-0339 owner continues development after reviewed remaining-work plan. Source `1e70824e24161bafacfc1eca33bb31ba7045df5a`; product BOARD owns HM0 status. Scope is M0 only: complete clause/code/test/gap matrix, pinned backend/web and existing real ConnectedApp baseline, exact contract-conflict proposals. No implementation, normative amendment, product acceptance, release or deployment.
+
+Lead owns main SDD/ADRs/SUCCESS/v0.2/AC-P0A inventory, native gates, integration and Git delivery. Two native bounded read-only auditors [T-001](hai-m0-20261029/T-001.md) and [T-002](hai-m0-20261029/T-002.md) use inherited model/effort, isolated worktrees, one report path each, maximum30minutes, initial plus one correction, no nested workers/Git/network/test runs. Exact model/provider/cost unavailable. Independent final review is a separate fresh native context, maximum10minutes plus one focused correction. Root estimate45–75active minutes, 20minute checkpoints, bounded20minute native/CI waits. Same failure permits at most two evidence-based diagnostics after initial reproduction. Existing claim and standing normal Git authorization persist.
+
+M0 local evidence gate ACCEPT: 72core/102miniHAI+3DOC/54v0.2/16P0A/4SUCCESS/6ADR/17APIoperations/68schemas mapped; two bounded audits integrated with original DONE-static/PARTIAL-execution status preserved. Root unchanged pinned backend full/race/vet/build, web30+safety8 and real Chromium13steps/30captures passed; Fake remainsDeveloping/Succeeded,Done0. Initial noexec/offline-store failures and extractor diagnostics retained; original source185files unchanged. T-003 fresh independent ACCEPT, nonblocking HANDOFF precedence included in Proposed C01. C01/C02/C06 not normative amendments; M1a requires accepted contract/task. Document links/clauses, project47/index8 and root20tests pass. Normal Git/required CI/merge/readback remains pending; no product AC promotion orusabletag.
+
+## Bot policy inspection — 2026-10-29T18:14:17Z
+
+BI01–04 adds separate read-only operator CLI over original config/policy/state, no network/quota/highwater mutation, bounded pending IDs and honest local-only admission. Lead owns source/RGR/docs; T846 one native independent source reviewer, inherited model/effort/permissions, fresh bounded context <=1500tokens initial plus one focusedfollowup, five-minute monitored budget, no private/network/writes/delegation. Unknowncost/quota, not OS isolation. No live installation/auth/newcommand/model/paid operation. Authorized Git delivery persists; HL separate open.
+
+BI evidence gate ACCEPT source/local:17missingAPI RED→17GREEN,19CLIexpanded GREEN; initialfullsuite sandbox socketsEPERM/Node abort/Python35errors retained, normal355GREEN. T846REWORK malformedSQLite missing-column traceback reproduced2CLI RED; IndexError normalization plus safe deepJSON rejection, separate quota/cooldown RED fixed. Deepfixture expectedcode initiallyoverstrict, Python3.13 safeSTATE_CORRUPT observed, not claimed recursiontraceback. Final23focusedGREEN/359fullGREEN(64Node295Python), T846focusedACCEPT. Actualoriginalstate CLI18:17:42Z quota4/240/1of24,2ACK/zero pending, state/config/policy/client hashes+mtime unchanged. No network/liveinstall/newcommand/auth/model/paidchanges. Lead inspectedsource/tests/rawlogs, scopes and limits. Five docs/task/diff checks passed; finalreport/privacy then normalGitdelivery/BI-onlyclosure. HL/model/fullmainline remainopen.
+
+## T-0442 P0 mainline — 2026-10-30
+
+Current bounded execution is recorded in [the T-0442 plan](fanz-p0-t0442/PLAN.md). Earlier plans above are preserved.
+
+## HAI M1a / T-0339 — 2026-10-30T03:58:51Z
+
+Owner explicitly approved C01/C02/C06 and requested latest design authority. Remote HAI tree remains
+PR799 at baseline6b7bf17c; no newer HAI main changes/open designPRs. Deliver owner-approved authority
+and preflight wording plus one authenticated snapshot-only completion preparation API, following
+products/hai-taskboard/docs/sdd/completion-preparation.md. Root owns specs/OpenAPI/BOARD/acceptance/Git;
+bounded native backend writer owns only named Go paths in its own worktree after contract review;
+independent reviewer owns report only. Product BOARD is sole current status. No M1b/M1c/M2/UI,
+new dependencies, real providers, release/deploy or archived-ledger edits.
+Estimate60–90root active minutes plus bounded writer30minutes/reviewer10minutes each contract/final;
+20minute progress checkpoints; max2reasoned diagnoses after initial failure; each command timeout;
+CI each round <=20minutes with resumable state on timeout. Provider requests/tokens/cost and total
+roottool counts unknown/null; local worker launches and command evidence recorded separately.
+Initial SSH sync stalled (stopped); SSH443 refused untrusted host key (not bypassed); existing HTTPS
+authentication succeeded using per-command config, no global change. Native tool guidelines read.
+
+M1a contract gate: T-001 independent ACCEPT including OpenAPI; fixed-digest Redocly lint0warnings,
+project47/index8 pass. Four named HTTP skeletons compiled404 Red and policy-classification Red
+retained by T-002 before production edits. Owner approval already covers precise C01/C02/C06;
+no additional approval needed. Snapshot semantics and all historical product gaps remain intact.
+
+M1a checkpoint2026-10-30T04:18Z: docs-first commit c651b83f, independent contract ACCEPT,
+OpenAPI lint/web30+build/project47/index8 green; seven-file bounded worker frozen and integrated
+with hash guards, real SQLite HTTP repeat/reopen/all-table no-write and policy/error negatives green.
+Initial root fullgate stopped137 during race after worker's final dot-ID delta; retained log is
+superseded evidence, not acceptance. Final unchanged native fullgate running on frozen source;
+author-independent final reviewer launched (10min). Remaining root verification/review/Git/CI and
+board/desk closeout remain within60–90minute estimate; exact active/wait/provider totals unknown.
+Refreshed remote main3afa8345: no HAI product changes since intake. No scope expansion.
+
+M1a local evidence gate ACCEPT2026-10-30T04:22Z: PREP-AC-01..04 mapped to actual focused/SQLite
+oracles and source; all7frozen hashes and185input hashes stable. Root final native backend full/race/
+vet/build exit0, web30gate/API lint and document contracts pass. T-003 independent ACCEPT with
+sharedoverflow evidence wording clarified. All originalRed/environment/superseded137 logs retained.
+This accepts local M1a only; exact-head CI/normal merge/readback and board/desk closure remain.
+
+## HL resume — 2026-10-30T03:13:47Z
+
+Owner continues and requests actionable blockers/all-done notice. Resume existing T0015/HL under original authorization/cutoff, fresh management/local source and latestBT version provenance. One new assets-session attempt after >16h and fullfresh preflight; on recurring500 stop, preserve/readback and prepare unsent provider inquiry. On success follow original guarded rollout/compensation; no additional grant/Access/runner/bot scope. T847 one native independent public-evidence reviewer, inherited model/effort/permissions, fresh <=1500tokens initial plus one focusedfollowup, five-minute monitored; no private/network/writes/tests/delegation, unknowncost/quota, not OS isolation. Mainline must remain incomplete unless all required evidence actually passes.
+
+HL real firing failed: admitted03:45:23Z but due-anchored dispatch deadline03:46:00Z, originalrunner saw expired_before_dispatch with no attempt. Approved compensation executed; active originalBT version and sixbindings match, latest-upload settings retain inactiveHS binding; no redundant settings mutation. Continue HW01–04 bounded source repair under docs/schedule-window.md: handler-relative60/120second budgets, due identity/dedupe preserved, actualpolicy cutoff retained. Lead owns RGR/source; T848 fresh native read-only source reviewer <=1500tokens initial+onefollowup,5minutes monitored, inherited settings, no writes/private/network/delegation. Original15minute/authority/no-paid bounds remain.
+
+HW source evidence gate ACCEPT: actualfailure safelycompensated03:51:05Z, T847PARTIAL/ACCEPT truthfulpreservation only. RED14=12pass2fail, callbacknow60/120 pluspolicyguardfix→14GREEN; full67Node+295Python362GREEN. T848sourceACCEPT; no renderer/runner/APIupperbound/schema/authscope change. Lead reviewedactualdiff/logs; normalPR/CI/merge/readback andfixedcandidate precede renewedlivewindow. HLremainsopen.
+
+M1a integration: concurrent main3afa8345 merged normally; append-only root PLAN conflict
+resolved retaining both HAI and unrelated HL entries. HAI product/runtime inputs unchanged.
+
+## HL corrected-window live continuation — 2026-10-30T04:02:17Z
+
+HW sourcePR809 mergedf3d08f90 after requiredCI on40e30aea andT848ACCEPT; sixcandidateblobs equalremote. OriginalboundedHL authority persists: sameWorker/assets,15minuteCron,originalcutoff,roles/secrets/service preserved; due-window defect repaired without wideningAPI60/120budgets. Fresh04:01:24Z preflight sixcommands/fourjournalrows/active0/scheduleoffrev3/Cronempty/selfresidentpassed. Lead will renewscheduler3→4, schedule3→4,newUTCquarterhour with>=15min margin, preservefailedrev2firing; newrealresult stillrequired. T849 freshnativepublicevidence review afteractualresult, <=1500tokens initial+onefollowup,5minutesmonitored, inheritedsettings/unknowncost, no private/network/writes/tests/delegation.
+
+HL corrected-window evidence gate ACCEPT: sourcePR809 fixed40e30aea/362tests/3CI/T848; fresh04:01preflight, revision4 activated04:02:35 with1644secpropagationmargin. Actualprovider due04:30/admit04:30:29, deadlines04:31:29/04:32:29, originalrunner completed04:31:06 validatedhealthy, firstterminal04:31:13 age7.67sec. Final04:31:44 sameIDchain/artifactbytes+digest/identity+externalref/API, old6commands+4journal+failedrev2firing preserved, one newcompleted, active0, samePID/NRestarts0, botledger/client/config/policy and othergrants/Access unchanged. Finalobservation38secold explicitlyhistorical; T849publicevidenceACCEPT, leadrawproof. NormalGitdelivery thenHL-onlyclosure; HWsourceclosureuses809timestamp. Fullmainline/human/model/fault/quota/naturalexpiry/billing remainpending.
+
+## HAI M1b — T-0339 / 2026-10-30T10:10:44Z
+
+Owner continued M1b and authorized Claude Code plan/code review. Routing only; product status in
+products/hai-taskboard/docs/tasks/BOARD.md HM1B. Root owns plan/API/docs/final gates and Git delivery.
+Named Claude reviews use cli-team's current direct installed no-tools packet workflow (same bounded
+profile as the preceding HAI plan), not unattended cli-workers dispatch. No separate dispatcher
+authority or live-route verification is inferred. Native team task/report validators and evidence gate
+still apply. Source kernel operation card f36635671c65fc63ba6db5a4741a2c3ff102821f, CLI2.1.312,
+claude-opus-5-5/high, safe-mode/no tools/MCP/no persistence;8minutes each plan/code, each at most
+one actual-revision follow-up. Root60–90active minutes/20minute checkpoints; optional Go leaf30minutes,
+no recursive work; CI20minutes. Exact total provider/tools/active-vs-wait unknown until observed.
+Scope/AC/test strategy: products/hai-taskboard/docs/plans/m1b-output-access-20261030.md.
+No runtime adapter/provider integration, M1c, M2, UI, dependencies/migrations/release/deploy.
+
+M1b evidence gate: local ACCEPT for ACCESS-AC-01..04. Sole native leaf supplied9frozenGo files and
+PARTIAL history-preserving report; root reviewed actual diff/logs and resolved required gates.
+Claude plan REWORK11points then ACCEPT; code REWORK2assertion gaps/no production defect then ACCEPT.
+Root original191-input full/race/vet/build passed; final3assertion-only test changes passed affected
+TestOutputAccess race suites, with every production input unchanged. Web30/API/docs passed.
+No new browser/full-product acceptance. Primary PR/CI/merge/readback and board/desk closure remain.
+
+## QV isolated application quota qualification — 2026-10-30T10:09:33Z
+
+Owner continues development and requests concrete assistance only when needed. Lead adds bounded API/Cron quota qualification per docs/quota-qualification.md; no live calls, deployment, credentials, renewal, deletion or paid plan. Lead owns tests and docs. T850 one fresh native read-only reviewer, inherited model/effort/permissions, <=1500tokens initial plus one focusedfollowup, five-minute monitored budget, unknowncost/quota; no private/network/writes/tests/Git/delegation. Native stop via interrupt is available; scope instructions are not OS isolation. Existing behavior qualification needs no fabricated RED; use disposable source mutations to demonstrate boundary assertions detect regressions, retain all results. Mainline/AC08 stays pending. Normal authorized PR/CI/merge/readback then board-only closeout.
+
+QV evidence gate ACCEPT 2026-10-30T10:16:15Z: lead-reviewed scoped diff,8focused/370fulltests, mutation final3/5/2fail detecting deliberate defects withsourcehashpreserved, document/task/index checks passed; T850independentACCEPT. Initial isolation/fixture and supersededmutation evidence retained. No runtime/live/authority/billing change. QV01–04 local scope accepted; normalGit delivery then boardclosure, fullmainline stays incomplete.
+
+## UO application usage observation — 2026-10-30T10:49:43Z
+
+Owner continues. Lead owns bounded source API/manual-dashboard work per docs/usage-observation.md and RGR/full/browser verification. No live mutation, authorization extension, provider token or paid plan. Single SELECT global quota snapshot requires every retained row to match reader scope; no filtered totals pretending to be global availability. Provider not_connected/null, manual-only UI with stale/auth race safeguards. T851 one fresh native independent readonly reviewer, inherited model/effort/permissions; <=1500tokens initial+onefocusedfollowup,5minutes monitored, unknowncost/quota, no writes/tests/network/private/Git/delegation; instructions not isolation. Existing cli-team and evidence gate apply. Normal authorized PR/CI/merge/readback and board closure, fullmainline incomplete.
+
+UO evidence gate ACCEPT 2026-10-30T11:04:05Z: initial54tests43pass11fail; implementation54GREEN, laterUO2browser failed validusageclock whilefull385passed. T851REWORK led deterministicclockRED, measuredRTT+roundingtolerance <=11s and >10sbootstrap rejection; final92Node+295Python387GREEN, UO3real-localbrowser14checks/103API/noerrors withassetsmatching, T851focusedACCEPT. Lead inspectedallscopeddiffs/logs/desktop. Originalfailuresretained. No live deployment/providerqueries/authoritychange. NormalGit then boardclosure; mainlineincomplete.
+
+## Cloud Lab UL deployment — 2026-10-31T10:01:16Z
+
+Owner繼續原Worker已授權更新；lead只部署PR827固定候選，保留所有角色期限、Cron及免費方案。T-0028／UL01–04；無runtime修改。獨立native reviewer T-852：fresh context、inherited model/effort/permissions，read-only公開證據，<=1500tokens＋一次focusedfollowup，5分鐘監控；cost/quota未知，無nesteddelegation，指令scope不是OS隔離。lead核對私人raw receipts，reviewer不得接觸憑證。驗證／接受及Git結果待填。
+
+### UL partial delivery decision
+
+T852 initial and sole focusedfollowup returned PARTIAL/REWORK on static-human versus read-scope wording and403 route inference. Lead corrected all four primary/residual locations, checked exact staged text; reviewer conditionally supported partial-record acceptance after the final two residual navigation fixes. Lead accepts documentation only, preserving both actual REWORK reports and failed/skipped checks. No fabricated independent ACCEPT. UL03 remainspartial/T0028open: asset200/bytes andusage200/human unavailable without separately approved human window. Live deployment100%,3modules exact, originalsettings/4grants/121terminal+1unknown/118journal preserved; unknown predateddeployment and continues blockingnewCron. Live boundary JSON is immutable sanitizedreceipt; source387/localbrowser14 historical, not rerun. Required docs checks and9private-literal scan passed; CI/Git readback pending. No authorityrenewal/paidchange/unknownclear.
+
+
+## HAI M1c — T-0339 / 2026-10-31T10:49:00Z
+
+Owner continues the next M1c slice; existing claim retained (desk continuation PR334 merged).
+Scope/AC authority: products/hai-taskboard/docs/plans/m1c-human-reports-20261031.md and BOARD HM1C.
+Newest Session/provider proposals retain Fake-only/M1c; no L1 acceptance is inferred. Root owns docs/API/plan, integration/gates and Git delivery. One native10minute read-only audit, then at most one bounded45minute implementation assignment with isolated worktree; no recursion. Claude plan/code each480seconds and one actual-revision follow-up, claude-opus-5-5/high. Native helper inherits parent settings, no override; actual provider totals unknown.
+Named Claude reviews use installed direct no-tools cli-team workflow, not unattended dispatcher. Kernel operation card pin f36635671c65fc63ba6db5a4741a2c3ff102821f read; CLI2.1.312 help/config checked, safe-mode/no tools/MCP/no persistence. No auth/config changes, installation or model fallback. Native task/report validators and evidence gate apply.
+Root90–120active minutes/20minute checkpoints; CI20minutes per round; repeated failure initial plus at most2 reasoned diagnoses. Scope excludes M2, UI, real provider, dependency/permission change, release/deploy. Accurate observed usage retained per invocation; aggregate tools/provider/billing/active-wait unknown/null.
+
+M1c plan gate ACCEPT: Claude initial REWORK4points; human-only policy, transient-failure recording and metadata capacity clarified. JSONv2 premise corrected by real pinned stdlib probe; follow-up ACCEPT. Native T002 read-only audit ACCEPT; T003 compiling Red retained and implementation authorized11:00:15Z through11:45:15Z. Root web/API/docs gates tracked separately; no product completion claim.
+
+M1c 11:20Z checkpoint: T003 finished within its45minute bound (11:00:15–11:17:12),17 frozen backend files copied with SHA256 checks. Root inspected production diff and repaired-test evidence; old migrations0001..0004 unchanged. Worker full five-package/focused/race/gofmt gates passed; root full backend running, web30tests and APIzero-warning gates passed. Claude no-tools code review running on frozen packet. Remaining final review disposition/docs, required PR CI and normal delivery/readback/ledger; still within90–120minute active-work estimate, exact active/wait uninstrumented. No new milestone/provider/UI/permission scope.
+
+M1c 11:38Z checkpoint: initial root full backend passed442.419s/168inputs; Claude code REWORK B1capability classification/B2exact failure and snapshot evidence/B3human completion consumption. Docs updated before T005. Same native leaf completed five-file correction by11:33Z with retained Red/focused/race, no new scope. Revised source integrated with17hash checks; full backend rerun active. Claude sole revision follow-up ACCEPT99.368s, no remaining concrete blocker; final backend/web/API/validators and required PR CI remain acceptance conditions. Raw original review/source/gates retained.
+
+M1c local evidence gate ACCEPT: revised fullbackend367.911s/168unchanged inputs, web30tests/39unchanged inputs, APIzero-warning, project49contracts/8indexes and task/report/document checks. Root compared all scoped files and acceptance oracles; T004 final review conditions are locally met. Final-head required CI, normal merge/readback and BOARD/desk closure still required. No full-product completion or subsequent milestone claim.
+
+M1c delivery integration: normal main49ac7a09 merge preserves the unrelated Agent Office Lab work;50project contracts/8indexes and20milestone Markdown/211links pass. All168backend/39web/17reviewed input hashes unchanged. No HAI contract drift.
+
+## HV human-only approved window — 2026-10-31
+
+Owner explicitly approved UL prepared1800second human-only window and requested steps. Generic authorization.py quiescence remains unchanged. Prepare isolated exact-human CAS with active-command/enabled-schedule guards on that grant; no unknown clear, Cron stop or role expansion. Private intent/before/after,10syntheticSQLite guard cases and one T853 independent readonly review before mutation. Fresh profile mapping must match approved proposal; end=min(actualnow+1800,residentstop), exactone affectedrow, unknownreply reconcile withoutretry. Review <=900tokens+onefollowup,5minute monitored; inherited model/effort/permissions, unknowncost/quota, no delegation. Existing T0028 remainsopen awaiting realhumanread.
+
+HV owner outcome: Safari manualusage observed12:18:35Z values122/84/1; independent boundedD1 read matches exactrollingwindow, no latercreatedcommands. Owner explicitly requested less granular/faster acceptance. Stop pendingConsole request; assethash notperformed, notclaimed. Accept functionalhumanread; no furtherowneraction/windowrenewal. Existingunknown remainspriority. Documentation/Git continuation remains pending; no allmainline completion claim.
+
+## UR source delivery — 2026-10-31T12:28:56Z
+
+Owner繼續開發且要求快速、減少人工驗證。Lead單一writer實作offline close_unknown計畫、Worker終局護欄、UI/bot投影；一個fresh native readonly reviewer T854，inherited model/effort/permissions、<=1500tokens+一個focusedfollowup、5分鐘監控，cost/quota未知，不委派／不碰private/network，指令scope不是OS隔離。RED→GREEN、完整現有回歸、實際SQLite跨語言CAS/late report/新Cron/idempotency；不再要求ownerConsole。保留HV/Safari未交付文件一起交付，UL依owner調整接受功能驗證但不偽稱assetbytes。未知原命令live結案與短暫runnerpause須另列具體批准，source批准不覆蓋。
+
+UR gate:400tests (96Node/304Python), focused8/2/16 and actual2cross-languageSQLite cycles passed; T854 initialsourceACCEPT and full-log focusedACCEPT accepted bylead. Original RED, privatefixtureancestor failure and syncspawn timeout retained. Lead realprivateCLI plan prepared using readonly originalD1/journal; no apply/deploy/stop/renew. Git delivery/candidate pin pending; UL Safari acceptance keeps assethash explicitly waived/unrun, no moreowner tests.
+
+
+## HAI M2 — T-0339 / 2026-10-31T12:24:40Z
+
+Owner continued after M1c. Source24af3ab7c7d6722314125cbe3ac009db57bd4ad1 has no HAI product diff from delivered M1c; desk claim unchanged at a1b1bf8. Root first resolves M2 contract scope, then docs-first implementation where accepted rules suffice. New policy/coverage decisions require exact proposal and approval before dependent production work. BOARD is sole product status; root owns specs, gates and Git delivery. One native10minute readonly audit T001; Claude installed direct no-tools cli-team plan/code review (not dispatcher), claude-opus-5-5/high each480seconds plus at most one revision followup; no recursion/model fallback. Root90–120active minute estimate,20minute progress checkpoints; CI20minutes per round, commands bounded; failure initial plus at most2evidence-based diagnoses. Unknown aggregate tools/provider/billing/active-wait remain null. No M3/UI/realprovider/dependencies/release/deploy. Current phase contract reconciliation, production unstarted.
+
+M2 plan gate: Claude initial REWORK then ACCEPT with five required predispatch document edits, all
+applied. Explicit legacy Draft HAI-FIRST001 remains frozen; fixture canonicalization retains old80
+replay arm and adds strict accepted120. Full caller inventory confirms only strict HTTP production
+ingresses for initial/human commands; no CLI/bootstrap bypass. Initial reviewer B2 decoder-sharing
+hypothesis corrected against full method. Root verified docs7files/159links,50project contracts/8indexes
+and fixed API lint. T002 isolated implementation dispatched after plan acceptance;40minute bound.
+Policy source and verified coverage remain proposed and cannot be counted as completed M2.
+
+M2 12:44Z checkpoint: docs-first84ec0598 committed after desk refresh; no HAI design drift/open HAI
+PR at intake. Worker meaningful command Red retained, then strict helper and compatibility union
+implemented. Root preliminary inspected all five production changes and new boundary/SQLite/HTTP
+tests. Three long-ID acceptance/Fake/human Evidence/Done flows now green; selected21table counts
+plus aggregate versions and Store/service reopen are the exact proof boundary, not crash/process or
+production artifact confinement. Original fixture/setup diagnostics retained. Worker affected tests/
+vet passed; race running. Root web30/39unchanged inputs, fixed API0warnings and docs checks passed.
+Remaining: local-only rule negative, freeze/final backend, Claude code review, normal CI/Git/readback
+and ledger closure. Policy direction question sent asynchronously; no answer or approval inferred.
+Work remains inside root90–120active-minute estimate; exact active/wait uninstrumented/null.
+
+M2 local evidence gate ACCEPT: ten frozen Go files,173input root fullbackend378.361s/exit0/unchanged;
+web30/39inputs unchanged, APIzero-warning, native report/task and document gates. Claude plan REWORK
+then ACCEPT with edits verified; code ACCEPT67.203s/no blockers, no follow-up. Root checked actual
+diff/source/hashes/logs, corrected reviewer full-table wording to21selected tables and documented
+invalid-UTF8 decoder-vector and existing-ID negative limits. ID-AC-04 still requires normal CI/merge/
+readback/BOARD/desk; full M2/product remains incomplete. Next contract question pending; no inference
+of approval or policy configuration implementation. Latest main843eaf97 has unrelated work only.
+
+## ULR approved live closure — 2026-10-31T17:57:09Z
+
+Owner explicitly approved compatible deployment, brief runner pause/drain, original unknown closure, original service resume and one new Cron verification. Lead executes fixed PR850 candidate, retains all grants/deadlines/Access/secrets/history/free plan; no source behavior change or repeat browser checks. Existing T854 source review applies; evidence audit of actual receipts follows. Scope ULR01–04 in T0030; live changes only within approved proposal.
+
+ULR live checks passed: 17:59:47Z runner stopped, compatible100%/3modules/settings at17:59:53Z, exact CAS changes1 and originalservice resumed17:59:54Z; new18:00Cron healthy/validated18:00:55Z. Final123commands/152firings/119journal/active0, old121terminal/151firings/118journal preserved. Initial rawmultipart parser failure retained/corrected without repeated GET or live write. T855 fresh readonly public-evidence audit, inherited model/effort/permissions, <=1000tokens plus onefocusedfollowup, five-minute monitored with native interruption; cost/quotaunknown; no private/network/writes/tests/delegation, instructions not OS isolation. Normal Git gates pending.
+
+ULR evidence gate ACCEPT 2026-10-31T18:04:12Z: lead inspected actual private raw management/SQL/journal/service receipts and final preservation; T855 independent public-evidence ACCEPT and actual index/task/diff checks passed. No production source edits, authority extension or billing change. Final PR/CI/readback and board closure remain.
+
+## Program: Fanzloud M1 executor T-0447 (2026-10-31T18:37:19Z)
+
+Owner approved bounded AP extension and private KVM host preparation; desk PR343 merged.
+Contract: platform/agent-platform/docs/EXTERNAL-WORKSPACE.md.
+Root owns docs, host preparation, trusted adapter, live qualification and parent Web wiring.
+One native worker owns AP source/tests in isolated fanz-executor-worker-20261031 worktree; task .team/fanz-executor-t0447/worker.md. No nested delegation.
+Independent reviewer after integration; gate EX-01/02/03 before parent Web acceptance.
+One VM4CPU/4GiB, coding10min, existing subscription only. Unknown never auto-retried.
+Status: implementation starting; all new gates pending.
+
+T-0447 EX02 actual VM/tools boundary passed; source.bundle moved from disappearing
+/tmp to trusted fixed control path following actual failed checkout+SDKstat evidence.
+All failed VM runs cancelled with confirmed cleanup. Real provider calls still0.
+Same implementation worker now receives gateway-worker.md (Rust-only isolated tree),
+root owns functional HTML/JS and live browser. One final browser coding invocation
+will jointly prove EX03/M1; no separate duplicated live coding probe.
+
+T-0447 source gate: integrated gateway/Rust workspace green; AP full native run
+retained backup019 fingerprint failures, independently derived exact new catalog
+and27 affected/negative cases now pass. Remote11 runtime/helper hashes match.
+Browser real login/catalog/logout and mocked unknown-submit reload refusal checked;
+real coding invocation still0. Preparing frozen source for one live Web run.
+## T-0339 immutable project policy — 2026-10-31
+
+Owner approved the concrete local JSON/exact-project/exact-AC/immutable accepted-policy direction. Root owns the specification, plan, integration and acceptance. BOARD HMPOL is the product progress authority. T-001 is one 10-minute read-only native audit; no recursive delegation. Claude Code claude-opus-5-5/high reviews the concrete plan and frozen code, each480s initial plus at most one actual-revision follow-up. Root active estimate120–150minutes,20minute checkpoints; CI each round20minutes. Failed checks retain evidence; initial failure plus at most two new-hypothesis diagnoses. No coverage/UI/provider/dependency/release/deploy. All implementation waits for the concrete plan review.
+
+Policy plan review: initial REWORK159.099s → revision ACCEPT53.725s; all blockers disposed before implementation. Root source-check corrects the reviewer's fixture-human overstatement; explicit authenticated human fixture evidence remains valid, automatic producer evidence does not. T002 is now ready for the reviewed contract.
+
+HMPOL-D03: T002 frozen 25-file implementation integrated byte-exact; affected tests/vet/race pass. Root source audit confirms old SQL 0001..0005/dependencies/API/CI unchanged and only construction/resolver direct default references. Claude code review REWORK found no production defect, but requires POL-AC-01 indented/key-reordered JSON equivalence proof. T003 is one separate <=20-minute test-only correction: exact canonical identity, documented example, V6 diagnostic; no production refactor. Root full gate is running on T002; final revision proof and code follow-up remain required.
+
+HMPOL-D04: T003 exact two-test correction integrated, other 23 worker files unchanged. Root full backend gate exit0 in405.732s on182 stable inputs; final binding preserves180 inputs and adds focused normal/race/vet proof for two test deltas plus the checked-in example hash. Claude code follow-up ACCEPT in32.136s after initial169.335s REWORK; no production defect/blocker remains. Web30/API/docs and source audit pass. Scoped worker reports accepted through evidence-gate; final complete CI on committed source, merge/readback/BOARD/desk remain required.
+
+
+HMPOL-D05: primary #868 merged c4264e14 after exact-head CI and 314-file remote readback. BOARD #880 CI exposed a fixed-index frontend logout-test failure (GET at index3). Root documents CI-FIX-01 before editing; route/method fixtures and semantic single-DELETE checks, with explicit valid refresh and logged-out result. Retain deterministic ordinal Red and initial incorrect secret-field assertion; correct to existing API token field. T004 is a separate <=5-minute independent read-only review by existing leaf, report-only worker scope. No product/API/dependency/CI change; new full web gate and exact final-head CI required before BOARD/desk closure.
+
+HMPOL-D06 local acceptance: T004 independent ACCEPT at test SHA65e6ebff, report verified; focused9tests and formatted fullweb30/format/lint/type/build pass12.996s. Backend/API/dependencies/CI byte-identical to primary reviewed55ec7b62. Original CI, deterministic Red, wrong-field assertion and Prettier failures retained. Root evidence-gate accepts CI-FIX-01 locally; required final-head CI and normal closure delivery remain.
+
+## FQ failure/retention qualification — 2026-10-31T18:39:23Z
+
+Owner continues after ULR. Lead sole writer for FQ01–04/T0031: matrix mapping, bounded local race/deadline/artifact-retention tests and no-delete retention design. No live actions/renewal/paid model/source deployment. T856 fresh native read-only inventory then one final scoped review, inherited model/effort/permissions, <=1500tokens each pass, five-minute monitored each with native interruption; unknowncost/quota, instructions not OS isolation. No private/network/tests/writes/delegation. Existing behavior tests use isolated source mutation rather than fabricated RED; any found behavior change requires actual RED→GREEN. Existing skill/evidence gates and normal authorized Git delivery apply.
+
+FQ evidence gate ACCEPT 2026-10-31T18:47:06Z: final107Node/304Python=411tests, focused11 and five mutation assertions3/1/1/1/1 with originalWorker unchanged; T856 final independentACCEPT. Initial default-isolation file-only result excluded from per-case count, sandboxPython35errors/Node native abort retained, permittedloopback rerunpassed without sourcechange/skip. Matrix14rows and no-delete retention design preserve actual gaps. Index/task/diff checks passed; Git integration then finalchecks/CI/merge/readback/board closure remain. No live changes.
+
+## DI artifact download integrity — 2026-10-31T19:06:07Z
+
+Owner continues. Lead sole writer for DI01–04/T0032: bounded rawartifact client, WebCrypto exact-byte verification, session/expiry/race guard and exactBlob; no Worker/API/runner/schema/authoritychanges. RGR, fullsuite and existing syntheticlocalbrowser qualification. One fresh readonly finalreviewer T857, inheritedmodel/effort/permissions, <=1500tokens+onefocusedfollowup, five-minute monitored/nativeinterrupt, unknowncost/quota, no delegation/private/network/writes/tests; instructions not OS isolation. Prior approved originaldashboard update scope persists; source qualification and any actual live deployment receipts kept separate, no newhumanwindow/ownerbrowserchecks or paidupgrade.
+
+DI source/local evidence gate ACCEPT 2026-10-31T19:13:43Z: RED11, initialGREEN42, final121Node/304Python=425, DI1 realbrowser15checks/104API/noerrors with exactbytes/digest and tamper rejection; T857 finalACCEPT. Initial socketpathfailure retained, shorttaskID correction only. Browser3asset hashes exact, document checks passed. Originaldashboard upload to follow qualified pinned source and prior approval, without runner pause/authority renewal; any live evidence separate.
+
+## RA rejection audit — 2026-11-01T04:27:29Z
+
+Owner continues after DI. Lead sole writer for RA01–04/T0033. Additive0002, bounded minimal4xx audit, no raw identities/content, explicit persistence header; no live authority/paid change. RED→GREEN, actual SQLite reopen/capacity/races and localworkerd plus full regression. One fresh read-only native reviewer T858 with inheritedmodel/effort/permissions, <=1500tokens plus onefocusedfollowup, five-minute monitored/nativeinterrupt, unknowncost/quota; no private/network/writes/tests/delegation. Natural language scope is not OS isolation. Existing approved Git delivery applies; live migration requires concrete candidate/readback boundary.
+
+RA source/local evidence gate ACCEPT 2026-11-01T04:32:32Z: RED7, correctedGREEN51, full130Node/304Python=434tests, finaltest-only durabilitytightening7pass and realRA2workerd9checks/6matchinghashes. T858 finalACCEPT. Initialfixture2fail andRA1 metadataassertionfailure retained/corrected without weakeningbusiness-roworacle. Lead source/authorization/evidence audit accepts; index50contracts/8llms/task/diff passed. GitCI/merge/readback remain; no live schema/deploy/renewal or paidupgrade.
+
+T-0447/M1 actual acceptance: one official subscription invocation on33e1eb70 produced
+285byte totals.py-only patch, real checks passed, browser five states/diff/download
+and zero errors; AP cleanup plus independent0claims/VM/cgroup/processes. Reviewer
+acceptedEX01–03/FN01/singleFN03. FN06 found reason/cancel and never-allocated display
+gaps; narrow correction plus realdenial/queuedcancel/noVM and labelledmockprojections
+passed; original success read back unchanged, no second coding CLI invocation. Final review/CI/merge
+and ledger closure remain. M2/M3/CloudAC04/AC05 not claimed.
+
+## RAL original-service audit rollout — 2026-11-01T04:48:04Z
+
+Owner continues the concrete stated next step after RA delivery. Lead applies pinnedPR889 additive0002 and originalWorker update with freshstate/history/authority preservation and one harmless machineGET rejection. No runnerstop/renewal/paidplan. Existing T858 source review applies; one fresh native readonly public-evidence reviewer T859, inheritedmodel/effort/permissions, <=1200tokens plus onefocusedfollowup, five-minute monitored/nativeinterrupt, unknowncost/quota; no private/network/tests/writes/delegation. Scope instructions not OSisolation. Lead verifies actual private receipts; normal Git/source readback and evidencegate required.
+
+RAL evidence gate ACCEPT 2026-11-01T04:54:31Z: original166commands/195firings/160journal preserved,4grants/Access/Cron/settings/deadlines retained, samePID/NRestarts. Additive0002 at04:49:29Z, originalWorker100percent/3exactmodules at04:49:45Z; final04:51:37Z. FirstGET nonJSON raw/statusnotretained, D1audit0; one diagnostic retry alignedrunnerUA and preservedrawbeforeparse,403/persisted exactrequest-ID auditrow. Root verifiedprivate receipts; T859 independentpublic ACCEPT.50contracts/8llms/task/diff/226links/64runtimeinputs and173private-literal scan passed. No newhealthjob/restart/renewal/paidupgrade; normalGit gates remain.
+
+
+## HAI M2 verified coverage — 2026-11-01 / T-0339
+
+BOARD HM2C owns status. Root prepares the concrete contract in
+`products/hai-taskboard/docs/plans/m2-verified-coverage-20261101.md`; production/OpenAPI wait
+for owner acceptance. Claude Code2.1.312 exact claude-opus-5-5/high is a no-tools independent
+plan reviewer (480s host deadline; at most one material revision follow-up), no writers/children.
+Initial sandbox invocation failed with EAI_AGAIN, zero reported model usage; raw failure retained.
+No-model outer DNS check succeeded; same bounded reviewer was submitted through normal escalation.
+Review acceptance is not product-contract approval. Root owns disposition and evidence gate,
+document checks, required PR CI/merge/readback and desk/handoff synchronization. Full M2 pending.
+
+Claude substantive plan137.257s REWORK → follow-up186.133s ACCEPT for owner presentation, not
+production approval. Root disposed all findings; final R1–R7 conditions incorporated without another
+model call, as reviewer explicitly allowed. Product COV-ACs remain NotRun; only proposal publication
+is accepted. See product evidence/m2-coverage-proposal-20261101.md for measured/unknown accounting.
+
+
+## HAI verified coverage implementation — T-0339 / HM2C / 2026-11-01
+
+Owner approved D1–D3. Normative entry products/hai-taskboard/docs/sdd/verified-coverage.md references
+the exact accepted contract and R1–R7; COV-AC01..06 fixed. Root owns docs/OpenAPI/HTTP and acceptance.
+One isolated native T-001 backend worker (70min,20min checkpoints, no children/no Git) owns
+application/domain/SQLite/local artifact core and real-store tests. Expected root90–150active minutes;
+Claude code review exact opus5.5/high480s plus at most one material follow-up; existing plan review
+retained, no redundant model plan call. CI20min rounds; same failure initial+two new-hypothesis diagnoses.
+No UI/provider/dependency/migration/release/deploy. Raw evidence and unknown accounting retained.
+
+
+HM2C integration: root inspected13 worker files and verified byte-exact hashes before integration.
+Original worker report remains PARTIAL solely for the transferred cursor regression task; root does not
+accept that report as DONE. Full native backend baseline passed600.763s on190 stable inputs; web30,
+API and document gates pass. Claude initial code review ACCEPT294.007s requires E1 revision oracle;
+root implements E1/C1/C2/C3/C6/C8/C9 plus cursor regression and lawful SQLite numeric boundaries,
+with retained Red→Green. Separate wt revision kept the full-gate source frozen. Final focused race,
+follow-up review, CI/merge/readback remain before root evidence-gate acceptance. No new product scope.
+
+
+HM2C local evidence-gate ACCEPT: final focused race164.111s, build/format, web30, API/docs pass;
+Claude follow-up ACCEPT148.581s with schema-specific subject bound, already-enforced epoch bounds
+proved by tests, and observation/headroom text closed without a third call as explicitly allowed.
+Root closed worker cursor PARTIAL by regression Red→Green. All original failures/source manifests
+preserved; exact-head full CI/merge/readback/BOARD/desk are the remaining delivery gate.
+
+## XR cross-snapshot restoration qualification — 2026-11-01T05:22:43Z
+
+Owner continues after RAL. Lead solewriter for XR01–04/T0035, isolated six-case actualworkerd/D1 plusPythonrunner andSQLiteonlinebackup. No live/private/networkauthority/paidchange. Test-first snapshotfixture, qualification before runtimefix if needed, fullregression and sourcehash preservation. One fresh native readonly reviewer T860, inheritedmodel/effort/permissions, <=1500tokens plus onefocusedfollowup, five-minute monitored/nativeinterrupt, unknowncost/quota; no tests/writes/private/network/delegation. Instructionscope notOSisolation. No originalrunnerstop or remoteexport/import claim.
+
+XR source/local evidence gate ACCEPT 2026-11-01T05:33:30Z: RED4→GREEN4,130Node/308Python=438tests; XR2 sixactualworkerd/Pythonrunner cases,zero restoredcollection/sourceunchanged,9hashes; XM1/XM2 badguardsdetected without productmutation; T860 finalACCEPT. XR1 metadata-countfailure retained andexplicitplatformtablefilterfixed, no weakenedapplicationoracle. Productruntime/liveauthority unchanged. NormalGit CI/merge/readback andboardclosure remain; fullmainlineincomplete.
+
+## T-0442 M2 approved pair continuation — 2026-11-01
+
+Same claimed task and existing scope. Parent owns runtime capacity/start/stop,
+shared15min deadline, evidence and delivery. One12min bounded native helper writes
+private cancellation/monitor script; one8min independent readonly preflight reviewer.
+No children; at most two focused corrections. Live max2 new CLI invocations under
+approved 2x4CPU4GiB zero-warm resources, then restore1. Native/source gates already
+passed for unchanged AP/Fanz bytes; verify acceptance scripts, inspect actual receipts,
+fresh-context independent acceptance and required CI before normal merge/readback.
+Estimated continuation45–75min plus CI; unknown metrics remain null. No M3.
+
+M2 pair evidence gate ACCEPT_M2_LIVE: fresh independent reviewer verifies actual
+Codex/Claude streams, prior Codex repair and current Claude same fixed-base diff,
+two actual VM/workspace denials and A/B/A overlap, Web cancelA thenB success after
+A cleanup. Original15min window retained, exactly2 new coding invocations; three
+pre-inference queued cancellations remain explicit. Capacity1 restored, no resources
+or services left. Final source/docs/CI/normal merge/readback and board closure remain.
+No M3, public URL, release or full-platform completion claim.
+
+## PS snapshot ordering — 2026-11-01T11:02:36Z
+
+Owner continues stated contract/polling alignment. Lead sole writer forPS01–04/T0036: bounded dashboard revision/consistency guard and durableoutbox ACKloss qualification, preserveM0 Event gap explicit, no live/provider/authoritychanges. RGR/fullsuite/actualbrowser. One freshnative readonlyreviewer T861, inheritedmodel/effort/permissions,<=1500tokens+one<=1000tokenfollowup,five-minute monitored/nativeinterrupt,unknowncost/quota,no writes/tests/network/private/delegation. Instruction scope notOSisolation;lead owns evidencegate and authorizedGit delivery.
+
+PS source/local evidence gate ACCEPT 2026-11-01T11:09:00Z:6behavioralRED/1existingpass→52dashboardGREEN;138Node/308Python=446full;actualPS1browser16checks/114API/noerrors/3assethashes. T861 finalACCEPT,437links/50contracts/8indexes/task/syntax/diff,67inputsfrozen. Initialisolationtestfailure andsandboxEPERM/nativeassertion retained;unchangedfullsuite passed via normal escalation. Sourceonly, no live/authority/paidchange;GitCI/merge/readbackandboardclosurefollow.
+
+## PSL original dashboard rollout — 2026-11-01T11:42:24Z
+
+Ownercontinues statednextstep afterPS and prior explicit originaldashboardapproval. Leadsoleoperator:pinPR9056files, freshstate, assetupload/publish only with3unchangedmodules, keepsecrets/D1/Access/Cron/deadlines, nopause/renewal/paidupgrade. ExistingT861sourceACCEPT/446tests/16browserchecks apply. Onefreshnative readonlypublic-evidence reviewerT862,inheritedmodel/effort/permissions,<=1200tokens+onefocusedfollowup,five-minute monitored/nativeinterrupt,unknowncost/quota; no private/network/tests/writes/delegation. InstructionsnotOSisolation;leadchecksprivate receipts.
+
+PSL evidence gate ACCEPT 2026-11-01T11:48:42Z:originaldashboardat100%11:44:40Z,manifest3/actualupload1,publishonce;final11:45:28Z preserves193commands/222firings/186journal/4grants/Access/Cron/deadlines,samePID/NRestarts,3exactunchangedmodules. Leadprivateaudit;T862initialREWORKstaleindexstatus→correctedfourentries→focusedACCEPT.51contracts/9indexes/task-report/diff/402links/67unchangedinputs/8privateliteralsscan. No newjob/renewal/restart/paidupgrade/humanwindow. NormalGitgatesremain.
+
+# T-0442 M3 durable-intent slice — 2026-11-01
+
+Owner continuation after accepted M2. Scope and failure semantics:
+platform/fanzloud/docs/specs/SPEC-M3-durable-intents.md, CU-M3-01–05.
+Parent owns gateway/Web integration, real process/AP/browser evidence and final delivery.
+One isolated store worker: .team/fanz-m3-t0442/store-task.md; one fresh acceptance reviewer
+after integration. No recursive delegation. Original M1/M2 dirty workers preserved.
+Estimated90–150 active minutes plus bounded CI;20min checkpoints. No VM/coding invocations.
+Tests first, transaction/security/fault checks, Rust/Web/native checks, real restart readback,
+independent acceptance, required CI/normal merge/readback/ledger/backup. No FN05/FN07 expansion.
+Result: independent ACCEPT_M3_MINIMUM on2e08fabe;339 native/26Web pass, actual
+confirmed admission/restarts and held real202/SIGKILL unknown lock, prior M2 result readback.
+Zero new coding/VM; two explicit queued tasks cancelled. Original summary-export UUID
+failure retained; read-only reconciliation accepted without rerun. API gap means unknown
+stays pending investigation without POST replay. Required CI/merge/readback/ledger remain.
+
+## RX remote D1 restore audit — 2026-11-01T14:31:46Z
+
+Ownercontinues statedremoteisolatedrestore. Leadsolewriter/operator: pureaudit withRGR/fullsuite; existinginactiveRFsource only, officialexport/privatebackup/importone newunboundD1; no sourcewrites/liveLab/authorityrenewal/paidupgrade/runnerexecution. Keepdatarestorevsreconcile/failover distinction. Onefreshnative readonlyreviewerT863,inheritedmodel/effort/permissions,<=1500tokens+one<=1000tokenfollowup,five-minute monitored/nativeinterrupt,unknowncost/quota,no tests/network/private/writes/delegation. NaturalinstructionsnotOSisolation;leadownsprivateverification/evidencegate/Git.
+
+RX scoped evidence gate ACCEPT_SOURCE_PARTIAL_REMOTE 2026-11-01T14:41:42Z:17focused/138Node+325Python=463full,69inputsfrozen,52contracts/9indexes/432links/diff. T863onecallACCEPTpureaudit/partialclaims; actualsource2completed/1unknown originaljournals readonly. Automaticapprovalreview rejected fullsensitiveexportdownloaddestination beforeexecution; explicitownerquestionpending, no export/newD1/import/journalbackup. No workaround/authority/liveLabchanges; RX02/03notdone; sourceGitdeliverycontinues.
+
+## RX authorized remote execution — 2026-11-01T14:53:29Z
+
+Owner explicitly approved full RF sensitive D1 export to established privateRX destination and one new unboundD1 import. Leadsoleoperator preserves rejected preapproval attempt, source/noauthority/noLab/nopaidchanges; freshpreflight, export/import bounded, exactschema/allrows/3onlinejournalbackups/audit, independentT864 publicevidencereview thennormalGitdelivery. T864freshnative inheritedmodel/effort/permissions,<=1500tokens+one<=1000followup,five-minute monitored/nativeinterrupt,unknowncost/quota; no private/network/tests/writes/delegation. InstructionsnotOSisolation. No source changes planned; prior463tests apply only with69inputhash equality.
+
+RX remote evidence gate ACCEPT_BOUNDED_DATA_RESTORE 2026-11-01T15:04:10Z:ownerexplicitapprovalafterrejection;officialexport2polls16454bytes,onecreate/upload/ingest,4way5tables/42rows/3explicit+6implicitindexes equal;3onlinejournalbackup exactBLOB/schema/sourcebytes,2completed/1unknownactive1started,0runner.6expiredgrants,4Workersettingsnobinding,optionalPagesGET403preserved/notexpanded.69inputsunchanged→historical463tests;52contracts/9indexes/436links/9privateliteralsscan. T864onecallACCEPT,leadprivateaudit. NormalGitgatesremain,nofailover/fullmainline/knownbillingclaims.
+
+## T-0442 M3 fixed candidate — 2026-11-01
+
+Parent owns Fanzloud GET-only immutable result archive inspection/download and tests;
+SPEC-M3-fixed-candidate CU-M3-C01–04, no AP code changes. Existing AP has no readonly
+reviewer admission/result contract: concrete dependency proposal before approval.
+One fresh-context independent reviewer after implementation, bounded15min +5min correction;
+no recursive delegation.60–90min estimate,20min checkpoints, build25min/CI30min; same
+issue max2 evidence-based fixes. Actual retained result browser GET-only, zero new task/
+CLI/VM. Old dirty workers/stores preserved. FN05/fullM3 not accepted by candidate alone.
+## Owner-requested Opus direction review — 2026-11-01T15:14:27Z
+
+Pause adding providerusage features while exact ClaudeOpus5.5 independently reviews originalintent/plan/results. T865 packetonly,claude2.1.307/modelclaude-opus-5-5/efforthigh; safe-mode/tools-empty/strict-emptyMCP/dontAsk/no persistence,480s hosttimeout+10s killgrace,maxUSD3,onecall/noauto-retry/fallback/no delegation. ExistingClaude login retained, no installation/authrepair/configedit. NativeCLItool controlsnotOSACL; modelreceivespublicpacketonly;leadowns findings validation and replan.
+
+DIR evidence gate ACCEPT_REPLAN 2026-11-01T15:28:07Z:exactOpus5.5/high/onecall125.5s/one modelturn/no toolsorMCP/exit0;CLIlistcost0.8600896actualbillunknown. Leadvalidates integrationdrift/staleindexes, rejects totalexpiry/freequotaassumptions/arbitrary7day24hour150linegates. README/SUCCESScurrent+singlehistory+knowledge-treecorrected;originalACGivenWhenThenpreserved,AC06historicalnotmodelblocked,mainlineincomplete.52contracts/9indexes/392links/task-report/diff;69runtimeinputsunchanged. InitialACformatvalidator andtrailingblank failures fixed/retained. No runtime/live/permission/AGENTSchanges;nextCFcatalog+overlap beforesecondcapability. NormalGitdeliveryremains.
+
+T-0442 fixed-candidate evidence gate: ACCEPT_FIXED_CANDIDATE_C01_C05 on4fa2f781.
+Real Chromium twice downloads same1932-byte AP archive/hash; no new task/coding/VM.
+Web33/native/checks pass; tool-truncated native log explicitly parent-attributed.
+One check-detail correction passed focused RED/GREEN; final review also accepted
+backup/ledger. T-0449 remains proposed/unclaimed; no AP edits. Required CI/Git delivery next.
+
+## T-0449 approved readonly review — 2026-11-01T16:44:02Z
+
+Claim PR382 merged; owner批准 bounded proposal. Parent owns Fanzloud specification/Web/durable route integration and live acceptance; one AP worker owns only agent-platform implementation/tests in isolated worktree. One later fresh reviewer, no recursion. Worker<=70active min,2evidenced corrections; build25min/CI30min. R01–05 gates require native tests+actual isolated cross-vendor review; max1VM4CPU/4GiB,20min window/last3cleanup,<=600s each/max3conditionalinvocations. Unknown never retry. No old dirty tree changes. Provider usage unknown.
+
+T-0449 actual checkpoint 2026-11-01T17:11:52.045902+00:00: source865ed05e, one Codex review accepted retained Claude candidate, exact result after Rust/AP restart; OS/Connector boundary and cleanup receipts passed. AP832/M0-45/finalDB12/Web38/native Rust pass. Final independent/CI pending; no new live rerun. Original unknownstore preserved; fullM3/FN07 open.
+
+T-0449 evidence gate: ACCEPT_READONLY_ACTUAL_AND_NATIVE from independent final review; R01/R04native, R02/R03actual, R05source+cleanup+sourceCI accepted. Source865ed05e all3requiredCI green. Finaldocshead CI/merge/readback/ledger remain delivery gates; no actual replay.
+
+T-0449 delivery gate: PR952 merged as `a69ff34ec173ee36284aceebcb417e560438569c` after finalhead967727b2 passed AP41330719757/Fanz41330719768/contracts41330719829; remote Fanzloud/AP bytes read back equal. R01–05 boundeddependency accepted; FN05-R closes, overallM3/FN07/T0442 remainopen. No live rerun.
+
+
+# T-0442 M3 recovery continuation
+
+Owner scope: investigate original unknown installation, complete independent work,
+prepare one bounded approval request when AP contract/live/credential changes are needed.
+Claim deskPR389 merged; source a502addb. No product implementation before AP scope approval.
+
+1. Inspect current governance/source and exact retained evidence — complete.
+2. Read-only original SQLite and credential impact checks — complete; no state changes.
+3. Correct operator guidance; propose U01–07 and finite maintenance/live phases — complete.
+4. One fresh-context reviewer, no private config access/delegation — ACCEPT_READINESS after one factual correction; report below.
+5. Scoped documentation checks, required CI, normal PR merge/readback; desk/journal/handoff — pending.
+
+Bounds:90–150min active+CI, same issue<=2 corrections, build25min/CI observation30min,
+zero live/model CLI/VM/credential mutations. Provider metrics and full tool totals unknown.
+Reviewer inherits native model/effort; no external CLI route or model override.
+Acceptance is readiness documentation only, never recovered installation or whole M3.
+
+## T-0442 approved reconciliation — 2026-11-02T12:15:04Z
+
+Orchestrator owns implementation and integration; one independent read-only reviewer,
+one correction follow-up, no nested workers. Approval: owner “批准。”/deskPR395.
+1. Fixed U01–07/wire contract and test skeletons; RED then AP/Rust/Web implementation.
+2. Native focused/full checks, independent source review, exact source qualification.
+3. Finite one-role DB rotation20min; original installation U0615min zero worker.
+4. U0730min one4CPU4GiB/zero-warm/max2CLI<=600s, final5min cleanup, owner confirmation.
+5. Independent evidence gate, required CI/normalPR delivery, ledger/backup/cleanup.
+Stop on unknown, mismatch, schema/consumer drift, failed prerequisite or spent window.
+No new runtime dependency/API spend/deploy/release. Tool/provider totals unknown.
+
+Approved continuation evidence: source86350871/PR983 all5necessaryCIgreen. One native
+reviewer/two turns accepted U01–06 and automated U07 after bounded corrections.
+Maintenance1.21s,U066.71s,U0741.06s/2CLI; oldunknown positively confirmed, exactrestart
+archives, zeroVM/claim/cgroup/reservation and stoppedservices. Ownerconfirmationpending;
+M3-U/FN07 remainsopen. Original Rustlogout failure and pre-main launcherfailure retained,
+no thresholdchange/unknownresend/windowreset. Required delivery-headCI/merge/readback
+and desk/journal/backup next; no more live execution authorized by these consumedintents.

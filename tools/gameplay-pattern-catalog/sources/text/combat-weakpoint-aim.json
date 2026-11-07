@@ -1,0 +1,120 @@
+{
+  "id": "combat-weakpoint-aim",
+  "system": "combat",
+  "edition": 1,
+  "name": {
+    "zh": "部位弱点瞄准",
+    "en": "Weak-point targeting"
+  },
+  "summary": {
+    "zh": "同一个敌人，不同命中位置会改变攻击价值。",
+    "en": "Where a hit lands changes its value against the same enemy."
+  },
+  "rules": {
+    "zh": "玩家识别弱点，选择角度和武器，把攻击打到高收益部位。弱点可能移动、被遮挡或要求特定伤害类型；命中特效与伤害差异帮助验证判断。",
+    "en": "Identify a vulnerable region, choose an angle and weapon, and land a valuable hit. Movement, cover or damage-type requirements complicate access; hit feedback confirms the choice."
+  },
+  "loop": [
+    {
+      "zh": "识别弱点",
+      "en": "Identify a weakness"
+    },
+    {
+      "zh": "创造射角或站位",
+      "en": "Create the angle"
+    },
+    {
+      "zh": "瞄准并命中",
+      "en": "Aim and hit"
+    },
+    {
+      "zh": "根据反馈调整",
+      "en": "Adjust from feedback"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "容易命中的躯干和收益更高的小目标之间，需要权衡命中率。",
+      "en": "A reliable body hit competes with a smaller, more valuable target."
+    },
+    {
+      "zh": "绕到弱点一侧能提高伤害，但可能进入更危险的攻击范围。",
+      "en": "Moving around to a weak region can improve damage while entering a dangerous attack arc."
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "弱点面积",
+        "en": "Target size"
+      },
+      "effect": {
+        "zh": "面积越小，越强调精度；移动越快，越强调预判。",
+        "en": "Smaller regions emphasize accuracy; faster movement emphasizes prediction."
+      }
+    },
+    {
+      "name": {
+        "zh": "弱点提示",
+        "en": "Weakness visibility"
+      },
+      "effect": {
+        "zh": "扫描提示降低记忆负担，隐藏弱点则鼓励实验。",
+        "en": "Scanning reduces memorization; hidden weaknesses encourage experimentation."
+      }
+    }
+  ],
+  "tags": [
+    "precision",
+    "information",
+    "risk"
+  ],
+  "related": [
+    "combat-intent-preview",
+    "combat-timed-parry",
+    "combat-cover-flanking",
+    "combat-destructible-cover"
+  ],
+  "contrast": {
+    "zh": "《地平线》强调扫描后的远程精准射击；《怪物猎人》把部位选择与武器类型、贴身站位联系起来。",
+    "en": "Horizon emphasizes precision after scanning; Monster Hunter links target regions to weapon type and close-range positioning."
+  },
+  "combination": {
+    "zh": "设计提案：侦察记录可在下一次远征中标注弱点，但标注不会替玩家瞄准，把知识收益和操作挑战分开。",
+    "en": "Design proposal: scouting notes reveal weak regions on a later expedition without aiming for the player, separating knowledge rewards from execution."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "敌人躯干很大，侧面的小核心却能承受更高伤害。",
+      "en": "The enemy has a large torso and a small side core that takes extra damage."
+    },
+    "action": {
+      "zh": "你绕到侧面，等核心露出来再瞄准开火。",
+      "en": "Move to its side, wait for the core to appear, and aim."
+    },
+    "result": {
+      "zh": "命中核心显示不同反馈；绕路期间你也进入了另一种攻击范围。",
+      "en": "A core hit gives distinct feedback, while repositioning exposes you to another attack."
+    },
+    "next": {
+      "zh": "根据剩余生命和安全距离，决定继续找角度还是打大目标。",
+      "en": "Use remaining health and safe distance to choose another precision shot or a torso hit."
+    }
+  },
+  "prototype": {
+    "scope": "medium",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "做一个带大、小两个命中区域的敌人，让弱点按固定动作露出。",
+      "en": "Build one enemy with large and small hit regions and a predictable weak-point exposure."
+    },
+    "pitfall": {
+      "zh": "别先增加大量枪械；瞄准辅助、遮挡和弱点可读性已经需要反复调整。",
+      "en": "Avoid many weapons initially; aim assistance, occlusion, and weak-point readability need tuning first."
+    },
+    "test": {
+      "zh": "检查玩家能否说明何时值得追求弱点，并在压力大时合理放弃。",
+      "en": "Check whether players explain when a weak-point attempt is worthwhile and abandon it under pressure."
+    }
+  }
+}

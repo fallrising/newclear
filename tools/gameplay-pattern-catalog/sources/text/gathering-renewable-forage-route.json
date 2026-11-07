@@ -1,0 +1,120 @@
+{
+  "id": "gathering-renewable-forage-route",
+  "system": "gathering",
+  "edition": 1,
+  "name": {
+    "zh": "野外资源复访",
+    "en": "Revisiting renewable forage"
+  },
+  "summary": {
+    "zh": "记住资源何时回来，把地图变成有节奏的采集路线。",
+    "en": "Remember when resources return and turn the map into a timed harvesting route."
+  },
+  "rules": {
+    "zh": "野外资源被采集后会在规则允许时再生，位置或刷新范围可被玩家记住。玩家根据再生周期和移动成本安排复访，避免过早空跑或错过季节性的高产期。",
+    "en": "Wild resources regenerate under specific rules after collection, with locations or spawn areas that can be learned. Players schedule revisits around regrowth and travel costs, avoiding empty trips or missed seasonal abundance."
+  },
+  "loop": [
+    {
+      "zh": "记录有效采集点",
+      "en": "Record productive spots"
+    },
+    {
+      "zh": "收集当前产出",
+      "en": "Collect current yields"
+    },
+    {
+      "zh": "等待或做其他事",
+      "en": "Wait or pursue another task"
+    },
+    {
+      "zh": "按周期复访",
+      "en": "Revisit on a suitable schedule"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "固定巡回路线可靠，还是去未探索区域寻找更好点位？",
+      "en": "Follow a reliable circuit or explore for better spots?"
+    },
+    {
+      "zh": "现在去少拿一点，还是等多个点同时成熟再出发？",
+      "en": "Collect a small amount now or wait for several locations to replenish?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "再生周期",
+        "en": "Regrowth interval"
+      },
+      "effect": {
+        "zh": "固定周期容易形成计划；波动周期增加路线冗余需求。",
+        "en": "Fixed cycles support planning; variable cycles require redundant routes."
+      }
+    },
+    {
+      "name": {
+        "zh": "季节依赖",
+        "en": "Season dependence"
+      },
+      "effect": {
+        "zh": "强季节性迫使换路线和储备；常年刷新更适合稳定日常。",
+        "en": "Strong seasonality encourages route changes and reserves; year-round respawns support steady routines."
+      }
+    }
+  ],
+  "tags": [
+    "time",
+    "planning",
+    "discovery"
+  ],
+  "related": [
+    "gathering-depth-targeting",
+    "gathering-oxygen-gathering",
+    "gathering-tool-hardness",
+    "commerce-timed-contracts"
+  ],
+  "contrast": {
+    "zh": "饥荒有容易记住的持久资源节点；星露谷更多是对区域刷新与季节品种的巡查。",
+    "en": "DST offers persistent, memorable nodes; Stardew emphasizes checking areas and seasonal forage varieties."
+  },
+  "combination": {
+    "zh": "组合创意：商人每三天经过一次，野果两天成熟一次；玩家调整巡回路线让鲜果恰好赶上收购日。",
+    "en": "Design proposal: traders arrive every three days while fruit ripens every two, making route timing determine freshness at sale."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "林中三个采集点恢复时间不同，其中一个昨天刚采过。",
+      "en": "Three forest gathering spots regenerate at different times; one was harvested yesterday."
+    },
+    "action": {
+      "zh": "你先去已恢复的两个点，把第三个留到明天顺路拜访。",
+      "en": "Visit the two replenished spots and leave the third for tomorrow’s route."
+    },
+    "result": {
+      "zh": "减少一次空跑，采集记录更新了下次可用时间。",
+      "en": "You avoid an empty trip, and the log updates the next availability."
+    },
+    "next": {
+      "zh": "结合新任务调整巡回路线，避免固定路线变成惯性。",
+      "en": "Adjust the circuit around new tasks instead of following it automatically."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "用三个地图节点、不同恢复周期和行程成本，给玩家简单的上次采集记录。",
+      "en": "Use three map nodes with different regeneration periods and travel costs, plus a simple last-visit log."
+    },
+    "pitfall": {
+      "zh": "所有节点同周期同产量时容易只剩每日打卡，先制造路线与周期的交叉。",
+      "en": "Identical cycles and yields become daily check-ins; introduce interacting route and timing choices."
+    },
+    "test": {
+      "zh": "改变一个点的恢复周期后，玩家是否调整访问顺序并减少空跑？",
+      "en": "When one location’s cycle changes, do players revise the visit order and avoid empty trips?"
+    }
+  }
+}

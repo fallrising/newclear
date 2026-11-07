@@ -1,0 +1,7 @@
+{
+  "encoding": "utf-8",
+  "originalPath": ".team/pp1c-b-20261102/profile-build.log",
+  "byteSize": 1098,
+  "sha256": "ab5fb8805a35d4899f4ea4cda7833ddfb0f3a71110f374c8a60d88e1f7ef51e3",
+  "text": "DEPRECATED: The legacy builder is deprecated and will be removed in a future release.\n            Install the buildx component to build images with BuildKit:\n            https://docs.docker.com/go/buildx/\n\nSending build context to Docker daemon  41.55MB\r\r\nStep 1/5 : FROM sha256:1ad1f859e141f2296a7d49457414f84c2813ad8439e5b836cc0d9963ab491e09\n ---> 1ad1f859e141\nStep 2/5 : WORKDIR /app\n ---> Running in 44003cb2dae3\n ---> Removed intermediate container 44003cb2dae3\n ---> d14a4d09755f\nStep 3/5 : COPY app.jar /app/app.jar\n ---> e140f6866815\nStep 4/5 : LABEL org.cms.pp1.source-commit=\"b0bf709fb687f4a23df868a8d123e5fa447959a3\" org.cms.pp1.jar-sha256=\"3f9e46de95da6282a695b707826bb98d71f63f9a9aa459266ec0e8ac704293a9\" org.cms.pp1.base-image=\"sha256:1ad1f859e141f2296a7d49457414f84c2813ad8439e5b836cc0d9963ab491e09\"\n ---> Running in 77afe5617b0f\n ---> Removed intermediate container 77afe5617b0f\n ---> 52977b77888d\nStep 5/5 : ENTRYPOINT [\"java\",\"-jar\",\"/app/app.jar\"]\n ---> Running in 17efd518f981\n ---> Removed intermediate container 17efd518f981\n ---> 27cb00b13e5f\nSuccessfully built 27cb00b13e5f\n"
+}

@@ -1,0 +1,8 @@
+{
+  "version": 1,
+  "original": "T131/T02b/green2.log",
+  "sha256": "56b3d93b3c9d0a67365cdeb7686ac80afa1a302fa8b1395bf81c2303ebd2b803",
+  "byteSize": "214",
+  "encoding": "utf-8",
+  "text": "✔ T131_T02_factory_creates_PG_first_and_only_after_blank_creates_stopped_services (615.288854ms)\nℹ tests 1\nℹ suites 0\nℹ pass 1\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 687.906775\n"
+}

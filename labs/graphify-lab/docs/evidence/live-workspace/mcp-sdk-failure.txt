@@ -1,0 +1,56 @@
+test_L04_same_session_edit_refresh_failure_recovery (test_live_mcp.LiveMCPJourney.test_L04_same_session_edit_refresh_failure_recovery) ... ERROR
+
+======================================================================
+ERROR: test_L04_same_session_edit_refresh_failure_recovery (test_live_mcp.LiveMCPJourney.test_L04_same_session_edit_refresh_failure_recovery)
+----------------------------------------------------------------------
+  + Exception Group Traceback (most recent call last):
+  |   File "/usr/lib/python3.12/unittest/async_case.py", line 90, in _callTestMethod
+  |     if self._callMaybeAsync(method) is not None:
+  |        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/usr/lib/python3.12/unittest/async_case.py", line 112, in _callMaybeAsync
+  |     return self._asyncioRunner.run(
+  |            ^^^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/usr/lib/python3.12/asyncio/runners.py", line 118, in run
+  |     return self._loop.run_until_complete(task)
+  |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/usr/lib/python3.12/asyncio/base_events.py", line 687, in run_until_complete
+  |     return future.result()
+  |            ^^^^^^^^^^^^^^^
+  |   File "<repo>/labs/graphify-lab/tests/test_live_mcp.py", line 37, in test_L04_same_session_edit_refresh_failure_recovery
+  |     async with stdio_client(params, errlog=log) as (read, write):
+  |   File "/usr/lib/python3.12/contextlib.py", line 231, in __aexit__
+  |     await self.gen.athrow(value)
+  |   File "<repo>/labs/graphify-lab/.venv/lib/python3.12/site-packages/mcp/client/stdio.py", line 201, in stdio_client
+  |     async with anyio.create_task_group() as tg:
+  |   File "<repo>/labs/graphify-lab/.venv/lib/python3.12/site-packages/anyio/_backends/_asyncio.py", line 847, in __aexit__
+  |     raise BaseExceptionGroup(
+  | ExceptionGroup: unhandled errors in a TaskGroup (1 sub-exception)
+  +-+---------------- 1 ----------------
+    | Exception Group Traceback (most recent call last):
+    |   File "<repo>/labs/graphify-lab/.venv/lib/python3.12/site-packages/mcp/client/stdio.py", line 205, in stdio_client
+    |     yield read_stream, write_stream
+    |   File "<repo>/labs/graphify-lab/tests/test_live_mcp.py", line 39, in test_L04_same_session_edit_refresh_failure_recovery
+    |     async with ClientSession(read, write, read_timeout_seconds=timeout) as session:
+    |   File "<repo>/labs/graphify-lab/.venv/lib/python3.12/site-packages/mcp/client/session.py", line 514, in __aexit__
+    |     result = await self._task_group.__aexit__(exc_type, exc_val, exc_tb)
+    |              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "<repo>/labs/graphify-lab/.venv/lib/python3.12/site-packages/anyio/_backends/_asyncio.py", line 847, in __aexit__
+    |     raise BaseExceptionGroup(
+    | ExceptionGroup: unhandled errors in a TaskGroup (1 sub-exception)
+    +-+---------------- 1 ----------------
+      | Traceback (most recent call last):
+      |   File "<repo>/labs/graphify-lab/tests/test_live_mcp.py", line 52, in test_L04_same_session_edit_refresh_failure_recovery
+      |     initial = await call('workspace_status')
+      |               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      |   File "<repo>/labs/graphify-lab/tests/test_live_mcp.py", line 46, in call
+      |     self.assertEqual(bool(response.isError), error, response)
+      |                           ^^^^^^^^^^^^^^^^
+      |   File "<repo>/labs/graphify-lab/.venv/lib/python3.12/site-packages/pydantic/main.py", line 1105, in __getattr__
+      |     raise AttributeError(f'{type(self).__name__!r} object has no attribute {item!r}')
+      | AttributeError: 'CallToolResult' object has no attribute 'isError'. Did you mean: 'is_error'?
+      +------------------------------------
+
+----------------------------------------------------------------------
+Ran 1 test in 1.126s
+
+FAILED (errors=1)

@@ -1,0 +1,11 @@
+✔ HTTP/WS accept only exact namespace loopback origin; credentials and other ports/protocols refuse (0.814446ms)
+✔ safe failure classification never emits arbitrary error, URL or path content (0.245769ms)
+✔ browser rejection and hanging close still attempt every owned resource and fail closed (11.28817ms)
+ℹ tests 3
+ℹ suites 0
+ℹ pass 3
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 62.009768

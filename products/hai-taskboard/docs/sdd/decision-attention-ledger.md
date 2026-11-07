@@ -105,7 +105,7 @@ not copy the private ledger's rules.
   `todo`→`Ready`, `doing`→`Developing`, `blocked`→ blocker, `review`→`Review`, `done`→`Done`,
   `dropped`→`Canceled`. The mapping is part of the versioned profile.
 - **HAI-LEDGER-005** — Moving authority for a project from the ledger to HAI Taskboard is a separate,
-  explicit, one-time migration per project, consistent with the bootstrap rule in `.team/PLAN.md`.
+  explicit, one-time migration per project, consistent with the bootstrap authority rule in `../SDD.md` and current `../tasks/BOARD.md`.
   It is not part of this slice.
 - **HAI-LEDGER-006** — Imported text is untrusted data (HAI-BOUNDARY-004); it is rendered, never
   executed or interpreted as instructions.

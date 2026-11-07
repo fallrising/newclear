@@ -1,8 +1,11 @@
 package command
 
 import (
+	"math"
 	"slices"
 	"strings"
+	"unicode"
+	"unicode/utf8"
 
 	"github.com/fallrising/newclear/products/hai-taskboard/backend/internal/domain"
 )
@@ -84,6 +87,20 @@ type canonicalQACommand struct {
 	SubjectDigest string `json:"completion_subject_digest"`
 }
 
+type canonicalReopenCommand struct {
+	canonicalMetadata
+	WorkItemID  string `json:"work_item_id"`
+	TargetPhase string `json:"target_phase"`
+	Reason      string `json:"reason"`
+}
+
+type canonicalReworkCommand struct {
+	canonicalMetadata
+	WorkItemID    string `json:"work_item_id"`
+	SubjectDigest string `json:"subject_digest"`
+	Reason        string `json:"reason"`
+}
+
 type canonicalCancelCommand struct {
 	canonicalMetadata
 	WorkItemID string `json:"work_item_id"`
@@ -139,8 +156,10 @@ func CanonicalPublishFixtureReview(value PublishFixtureReview) ([]byte, domain.D
 func CanonicalPublishFixtureEvidence(value PublishFixtureEvidence) ([]byte, domain.Digest, error) {
 	metadata, err := canonicalizeMetadata(value.Metadata, PublishEvidenceOperation, value.ProjectID)
 	evidence := value.Evidence
+	// Retain the historical text80 arm for exact recorded replay. New writes
+	// still require membership in the current accepted Run input in the service.
 	if err != nil || value.ExpectedVersion == 0 || !runIDPattern.MatchString(string(value.RunID)) || value.LeaseEpoch == 0 || value.RestoreGeneration == 0 ||
-		!validText(string(evidence.ID), 80) || evidence.SubjectDigest.IsZero() || !validText(string(evidence.ACID), 80) || evidence.ACRevisionDigest.IsZero() ||
+		!validText(string(evidence.ID), 80) || evidence.SubjectDigest.IsZero() || (!validText(string(evidence.ACID), 80) && !domain.ValidACID(string(evidence.ACID))) || evidence.ACRevisionDigest.IsZero() ||
 		!oneOf(evidence.ObservationVerdict, "Passing", "Failing", "Inconclusive", "Error") || !oneOf(evidence.ReviewDisposition, "Pending", "Accepted", "Rejected") ||
 		!oneOf(evidence.Applicability, "Fresh", "Stale", "Unknown") || !oneOf(evidence.MaterialAvailability, "Present", "Missing", "Quarantined") ||
 		!validText(string(evidence.VerifierID), 120) || !oneOf(evidence.VerifierClass, "producer", "independent", "human") ||
@@ -196,6 +215,38 @@ func CanonicalRequestCancellation(value RequestCancellation) ([]byte, domain.Dig
 		return nil, domain.Digest{}, ErrInvalidCommand
 	}
 	return marshalCanonical(canonicalCancelCommand{canonicalMetadata: metadata, WorkItemID: string(value.WorkItemID), RunID: string(value.RunID), Reason: value.Reason})
+}
+
+func CanonicalRequestRework(value RequestRework) ([]byte, domain.Digest, error) {
+	metadata, err := canonicalizeMetadata(value.Metadata, RequestReworkOperation, value.ProjectID)
+	if err != nil || value.ExpectedVersion == 0 || value.ExpectedVersion >= math.MaxInt64 || !workItemIDPattern.MatchString(string(value.WorkItemID)) || value.SubjectDigest.IsZero() || !ValidReworkReason(value.Reason) {
+		return nil, domain.Digest{}, ErrInvalidCommand
+	}
+	return marshalCanonical(canonicalReworkCommand{canonicalMetadata: metadata, WorkItemID: string(value.WorkItemID), SubjectDigest: canonicalSHA256(value.SubjectDigest), Reason: value.Reason})
+}
+
+func CanonicalReopenWorkItem(value ReopenWorkItem) ([]byte, domain.Digest, error) {
+	metadata, err := canonicalizeMetadata(value.Metadata, ReopenWorkItemOperation, value.ProjectID)
+	if err != nil || value.ExpectedVersion == 0 || value.ExpectedVersion >= math.MaxInt64 || !workItemIDPattern.MatchString(string(value.WorkItemID)) ||
+		(value.TargetPhase != domain.PhaseDraft && value.TargetPhase != domain.PhaseReady) || !ValidReworkReason(value.Reason) {
+		return nil, domain.Digest{}, ErrInvalidCommand
+	}
+	return marshalCanonical(canonicalReopenCommand{canonicalMetadata: metadata, WorkItemID: string(value.WorkItemID), TargetPhase: string(value.TargetPhase), Reason: value.Reason})
+}
+
+// ValidReworkReason accepts 1..2000 code points of UTF-8 text; tab and newline
+// are the only permitted control characters. 2000 four-byte code points bound
+// the encoding at 8000 bytes.
+func ValidReworkReason(value string) bool {
+	if value == "" || !utf8.ValidString(value) || utf8.RuneCountInString(value) > 2000 {
+		return false
+	}
+	for _, character := range value {
+		if unicode.IsControl(character) && character != '\t' && character != '\n' {
+			return false
+		}
+	}
+	return true
 }
 
 func canonicalArtifacts(projectID domain.ProjectID, source []ArtifactLocator) ([]canonicalArtifact, error) {

@@ -1,0 +1,12 @@
+[
+  {
+    "path": ".team/pp1c-c-20261102/T144/fixture-client.mjs",
+    "sha256": "3426c9143d99dad9a8690c60856a99b861dcd3c12e46733f48de75b34dd58477",
+    "bytes": 13965
+  },
+  {
+    "path": ".team/pp1c-c-20261102/T144/fixture-client.test.mjs",
+    "sha256": "8c948105caac4668a9a59b7a6462a1dada2d062b5f917a609dc212b56773b0dd",
+    "bytes": 12598
+  }
+]

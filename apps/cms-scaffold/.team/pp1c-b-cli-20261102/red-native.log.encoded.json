@@ -1,0 +1,5 @@
+{
+  "encoding": "utf-8",
+  "sha256": "2145c57d3492f57787825d90c6441cdd1ac9b51b1e3c5b406580dc3ba43757ea",
+  "content": "✖ scripts/ops/local-bundle.test.mjs (109.179329ms)\nℹ tests 1\nℹ suites 0\nℹ pass 0\nℹ fail 1\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 116.09461\n\n✖ failing tests:\n\ntest at scripts/ops/local-bundle.test.mjs:1:1\n✖ scripts/ops/local-bundle.test.mjs (109.179329ms)\n  'test failed'\n"
+}

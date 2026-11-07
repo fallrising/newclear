@@ -1,0 +1,120 @@
+{
+  "id": "deckbuilding-duplicate-investment",
+  "system": "deckbuilding",
+  "edition": 2,
+  "name": {
+    "zh": "复制已经养好的牌",
+    "en": "Copying an invested card"
+  },
+  "summary": {
+    "zh": "复制不只是多一张牌，也能把此前的强化一起复制出去。",
+    "en": "A duplicate can multiply the value of upgrades already invested in a card."
+  },
+  "rules": {
+    "zh": "在稀有机会中，玩家从已有牌中挑一张，生成保留其允许属性的副本。复制提高该功能的出现频率，也可能放大之前的升级投入；副本仍会增加牌库体积和使用成本。",
+    "en": "At a scarce opportunity, copy an owned card with the properties the game preserves. Duplication increases access and can multiply earlier upgrades, while still adding deck size and play costs."
+  },
+  "loop": [
+    {
+      "zh": "先集中资源养牌",
+      "en": "Invest in a useful card"
+    },
+    {
+      "zh": "找到复制机会",
+      "en": "Reach a duplication opportunity"
+    },
+    {
+      "zh": "选择复制目标",
+      "en": "Choose the target"
+    },
+    {
+      "zh": "调整重复功能的比例",
+      "en": "Rebalance the duplicated role"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "复制最强攻击，还是复制唯一能让整套组合启动的辅助牌？",
+      "en": "Copy the biggest attack or the unique card that starts the engine?"
+    },
+    {
+      "zh": "要先升级再复制，还是立即复制以保证接下来的生存？",
+      "en": "Upgrade before copying, or duplicate now to survive the next encounter?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "继承属性范围",
+        "en": "Copied properties"
+      },
+      "effect": {
+        "zh": "若副本继承强化，早期集中投资更有价值。",
+        "en": "Preserving upgrades makes earlier concentrated investment more valuable."
+      }
+    },
+    {
+      "name": {
+        "zh": "复制机会频率",
+        "en": "Duplication frequency"
+      },
+      "effect": {
+        "zh": "越频繁越容易形成重复牌组，需要关注费用与功能覆盖。",
+        "en": "Frequent copying encourages repetitive decks and exposes cost or coverage problems."
+      }
+    }
+  ],
+  "tags": [
+    "planning",
+    "progression",
+    "optimization"
+  ],
+  "related": [
+    "automation-production-chain",
+    "deckbuilding-card-upgrade",
+    "deckbuilding-dice-allocation",
+    "deckbuilding-opening-hand-control"
+  ],
+  "contrast": {
+    "zh": "前者通过获得一个特定遗物触发；后者把复制机会摆在路线规划中，玩家可以提前为它准备。",
+    "en": "The first is attached to a particular relic; the second is a route destination that can shape earlier investment."
+  },
+  "combination": {
+    "zh": "设计提案：把强化过的生产机器写成卡牌蓝图，复制它能加速扩建，也会重复耗能问题。",
+    "en": "Design proposal: Copy an upgraded machine-card blueprint to expand production while inheriting its energy demands."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "编辑示例：玩家把护盾牌从挡三点升级到了挡五点。",
+      "en": "Editorial example: a shield card has been upgraded from three block to five."
+    },
+    "action": {
+      "zh": "到达复制节点时，选择这张强化护盾。",
+      "en": "At a duplication node, choose the improved shield."
+    },
+    "result": {
+      "zh": "牌库出现第二张挡五点的护盾，而非未强化版本。",
+      "en": "The deck gains a second five-block shield rather than a base copy."
+    },
+    "next": {
+      "zh": "下一次奖励优先补攻击，避免护盾过多。",
+      "en": "Prioritize damage in later rewards to avoid too much defense."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "做六张可升级牌和一次复制节点，明确显示副本继承的属性。",
+      "en": "Use six upgradable cards and one copy node, previewing preserved properties."
+    },
+    "pitfall": {
+      "zh": "不要允许复制过程再次触发自身复制；先限定一次操作产生一个普通副本。",
+      "en": "Prevent copying from recursively triggering another copy."
+    },
+    "test": {
+      "zh": "玩家会因未来复制机会改变当前升级对象，且知道副本仍需支付出牌费用。",
+      "en": "Players change an upgrade choice because of a future copy and remember its play cost."
+    }
+  }
+}

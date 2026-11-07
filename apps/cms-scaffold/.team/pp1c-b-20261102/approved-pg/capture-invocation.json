@@ -1,0 +1,12 @@
+{
+  "runId": "bfe98fc8cd8d474880c9f92f1ce6367c",
+  "operationId": "7e301694-fa4e-46ef-a6db-3bd0e90f40b6",
+  "command": "JAVA_HOME=/home/ckc/.cache/devbox/toolchains/jdk-25.0.5+8 timeout 900 /home/ckc/.local/bin/node .team/pp1c-b-20261102/approved-pg/capture-observed.mjs > .team/pp1c-b-20261102/approved-pg/capture-live.log 2>&1",
+  "exit": 0,
+  "startedAt": "2026-11-02T13:53:28.685Z",
+  "endedAt": "2026-11-02T13:56:08.900Z",
+  "driverPath": ".team/pp1c-b-20261102/approved-pg/capture-observed.mjs",
+  "driverSha256": "cbbe032bbb8ba415329ac06f859a101c2bf824d83131baf22c40a86cb4a6e649",
+  "resultSha256": "5f3e129ba54f5ccc11ef39119cb4b40327cc7145ae2246fc507f9a35ac1b1dc2",
+  "note": "Hash recorded at review readback; no driver edits after capture8 invocation. capture-live.mjs is retained earlier attempt1-3 driver; capture-observed.mjs produced attempts4-8 trace."
+}

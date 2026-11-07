@@ -1,0 +1,133 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cloud-lab.example/contracts/bot-response.schema.json",
+  "title": "Cloud Lab bot result projection",
+  "oneOf": [
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "request_id",
+        "operation",
+        "state",
+        "code",
+        "command_id",
+        "verified",
+        "health",
+        "observed_at"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "cloudlab.bot-response.v1"
+        },
+        "request_id": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+        },
+        "operation": {
+          "enum": [
+            "health.check",
+            "health.status"
+          ]
+        },
+        "state": {
+          "enum": [
+            "not_found",
+            "accepted",
+            "dispatching",
+            "unknown",
+            "validated",
+            "stale",
+            "unverified",
+            "cancelled_before_dispatch",
+            "expired_before_dispatch",
+            "unconfirmed",
+            "denied",
+            "error"
+          ]
+        },
+        "code": {
+          "type": "string",
+          "pattern": "^[A-Z_]+$"
+        },
+        "command_id": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 128,
+          "pattern": "^[A-Za-z0-9_-]+$"
+        },
+        "verified": {
+          "type": "boolean"
+        },
+        "health": {
+          "enum": [
+            null,
+            "healthy",
+            "unhealthy"
+          ]
+        },
+        "observed_at": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "state": {
+                "const": "validated"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "verified": {
+                "const": true
+              },
+              "health": {
+                "enum": [
+                  "healthy",
+                  "unhealthy"
+                ]
+              }
+            }
+          },
+          "else": {
+            "properties": {
+              "verified": {
+                "const": false
+              },
+              "health": {
+                "const": null
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "code"
+      ],
+      "properties": {
+        "schema_version": {
+          "const": "cloudlab.bot-error.v1"
+        },
+        "code": {
+          "type": "string",
+          "pattern": "^[A-Z_]+$"
+        }
+      }
+    }
+  ]
+}

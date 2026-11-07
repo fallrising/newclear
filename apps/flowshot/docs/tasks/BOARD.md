@@ -53,3 +53,11 @@ Direct owner continuation instruction; M0 development evidence accepted, PR #512
 M1 current blocker: N03 is blocked by the unchanged 1MiB/<300ms gate (actual WebKit 7975/9139ms on the measured optimized candidate). Functional review corrections passed root frontend checks; T012 profiles the parser without changing the fixture/oracle. N02 targeted repairs passed independent review and integrated Linux checks; the real picker/tree/open/asset WebView journey passed at179ms for500 rendered rows from5000 files. Product composition and Mac-specific checks remain. N04 remains gated; no three-day KB trial or M1 merge is claimed.
 
 Owner-authorized partial-code checkpoint: publish and merge the current N02/N03 implementation with passing regression checks. This checkpoint does not complete R01/R02, unlock N04, revise the300ms contract or satisfy M1. The original performance failure and missing real-KB/platform evidence remain explicit.
+
+## T-0380
+
+| ID | Task | AC | Status | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| FLOWSHOT-FE2-1 | Paired synthetic Web R2 delivered in PR598 | R2-AC-11/E | done | 2026-10-24T11:22:03Z | 2026-10-24T17:33:41Z | 2026-10-24T17:34:24Z |
+
+Final paired delivery: [PR598](https://github.com/fallrising/newclear/pull/598) reviewed head `679e91e58d4a9a0c93e0c963d4e925118ca59e29` normally merged `3169fbb48bc1b79e4d4865471c27c6df2d76ac56` at 2026-10-24T17:33:41Z. Independent T028 accepted the integrated candidate; all five current CI checks passed and fetched component/plan/board content matched. Component reports/results retain the pre-merge evidence snapshot; this ledger records final publication. Scoped synthetic Web R2 only; full Round3/native product acceptance remains separate.

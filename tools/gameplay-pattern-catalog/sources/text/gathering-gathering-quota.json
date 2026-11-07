@@ -1,0 +1,120 @@
+{
+  "id": "gathering-gathering-quota",
+  "system": "gathering",
+  "edition": 1,
+  "name": {
+    "zh": "采集配额与收手判断",
+    "en": "Gathering quotas and stopping decisions"
+  },
+  "summary": {
+    "zh": "数量目标已经达成，接下来这一镐还值不值得？",
+    "en": "The quantity target is met: is another swing still worthwhile?"
+  },
+  "rules": {
+    "zh": "采集目标以所需数量和进度计数器明确反馈。达标后玩家可以停止采集、返程交付或启动撤离，也可以继续获取额外材料；关键取舍是下一份收获是否值得剩余时间与补给。",
+    "en": "A required quantity and progress counter define the gathering goal. Once it is met, players can stop gathering, return to hand in, or initiate extraction, but may collect extra materials; the decision is whether another haul justifies the remaining time and supplies."
+  },
+  "loop": [
+    {
+      "zh": "确定目标数量",
+      "en": "Set the required quantity"
+    },
+    {
+      "zh": "采集并观察计数",
+      "en": "Gather and watch progress"
+    },
+    {
+      "zh": "确认配额达成",
+      "en": "Confirm the quota is met"
+    },
+    {
+      "zh": "继续采集或收手返程",
+      "en": "Keep gathering or stop and return"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "达标后，眼前额外资源的价值能抵偿绕路和消耗吗？",
+      "en": "After meeting the quota, is a nearby extra resource worth its detour and supply cost?"
+    },
+    {
+      "zh": "剩余时间与补给够拿下一处资源再返回吗？",
+      "en": "Is there enough time and supply to reach one more deposit and return?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "配额大小",
+        "en": "Quota size"
+      },
+      "effect": {
+        "zh": "小配额让玩家频繁决定是否收手；大配额强调连续采集路线与补给规划。",
+        "en": "Small quotas create frequent stopping decisions; large quotas emphasize sustained routes and supply planning."
+      }
+    },
+    {
+      "name": {
+        "zh": "额外资源价值",
+        "en": "Value of surplus resources"
+      },
+      "effect": {
+        "zh": "超额收获仍有用会鼓励继续采集；价值低则促使达标后尽快返回。",
+        "en": "Useful surplus encourages continued gathering; low-value surplus favors returning as soon as the target is met."
+      }
+    }
+  ],
+  "tags": [
+    "risk",
+    "planning",
+    "optimization"
+  ],
+  "related": [
+    "gathering-depth-targeting",
+    "gathering-oxygen-gathering",
+    "gathering-salvage-dismantling",
+    "gathering-supply-mining"
+  ],
+  "contrast": {
+    "zh": "深岩银河达标后要决定何时呼叫撤离，再穿越洞穴返回；星露谷的采集计数达标后可结束这项工作，把剩余体力用于别的日程。",
+    "en": "Deep Rock asks when to call extraction and then navigate back through caves; Stardew lets players stop a completed collection task and spend remaining energy on other activities."
+  },
+  "combination": {
+    "zh": "组合创意：探险队要带回三种矿各一份，达标后地图仍留有可见富矿；玩家选择安全回营，或消耗备用氧气带回升级材料。",
+    "en": "Design proposal: an expedition needs one sample of each of three ores. After completing the set, visible rich veins tempt players to spend reserve oxygen on upgrade materials rather than return safely."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "任务要10块矿，你刚好集齐，但岔路里还有一处高价值矿。",
+      "en": "The contract needs ten ore and you have ten; a valuable deposit lies down a side path."
+    },
+    "action": {
+      "zh": "你比较剩余补给与返程距离，决定先带着已完成的任务撤回。",
+      "en": "Compare supplies with the return distance and leave with the completed objective."
+    },
+    "result": {
+      "zh": "任务能稳定兑现，额外收益则被主动放弃。",
+      "en": "The main reward is secured while optional profit is deliberately left behind."
+    },
+    "next": {
+      "zh": "下次准备更多补给，再决定是否尝试超额采集。",
+      "en": "Bring more supplies next time before considering extra collection."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "做一个明确数量目标、两个额外资源点和不断缩减的行动预算。",
+      "en": "Use a clear collection target, two optional deposits and a shrinking action budget."
+    },
+    "pitfall": {
+      "zh": "若达标后继续采没有任何风险或成本，“是否收手”就只剩假选择。",
+      "en": "If extra collection after the target has no cost or risk, stopping is not a meaningful choice."
+    },
+    "test": {
+      "zh": "用两种不同返程风险测试，看玩家是否会在同样达标时做出不同选择。",
+      "en": "Test two return-risk levels and see whether players make different choices after meeting the same quota."
+    }
+  }
+}

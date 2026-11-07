@@ -17,14 +17,14 @@ import time
 from contextlib import asynccontextmanager, contextmanager
 from datetime import UTC, datetime
 from pathlib import Path
-from typing import Literal
+from typing import Annotated, Literal
 from urllib.parse import urlencode
 from uuid import UUID, uuid4
 
 from fastapi import Depends, FastAPI, Header, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
-from pydantic import Field
+from pydantic import Field, StringConstraints, model_validator
 
 from agent_platform_m0.contracts import OPENHANDS_BINARY_SHA256, OPENHANDS_SHA, OPENHANDS_VERSION
 from agent_platform_m0.kvm_lifecycle import Host
@@ -54,7 +54,37 @@ class Allocate(Input):
     require_approval: bool = False
     model_transport: bool = False
     tool_transport: bool = False
+    external_workspace: bool = Field(default=False, exclude_if=lambda value: value is False)
     verification: VerificationPolicy = Field(default_factory=VerificationPolicy)
+    purpose: Literal["coding", "review"] = Field(
+        default="coding", exclude_if=lambda value: value == "coding"
+    )
+    review_candidate: Annotated[str, StringConstraints(strip_whitespace=False)] | None = Field(
+        default=None, max_length=32768, exclude_if=lambda value: value is None
+    )
+    candidate_sha256: str | None = Field(
+        default=None, pattern=r"^[0-9a-f]{64}$", exclude_if=lambda value: value is None
+    )
+
+    @model_validator(mode="after")
+    def candidate_binding(self):
+        from .review import candidate_bytes
+
+        if self.purpose == "review":
+            if (
+                not self.external_workspace
+                or self.model_transport
+                or self.tool_transport
+                or self.review_candidate is None
+            ):
+                raise ValueError("review_allocation_invalid")
+            try:
+                candidate_bytes(self.review_candidate.encode("utf-8"), self.candidate_sha256)
+            except Problem:
+                raise ValueError("review_allocation_invalid") from None
+        elif self.review_candidate is not None or self.candidate_sha256 is not None:
+            raise ValueError("review_allocation_invalid")
+        return self
 
 
 class ModelExchange(Input):
@@ -150,9 +180,9 @@ class Connector:
         return {
             "node_id": "cocoon-local",
             "template_digest": self.config["template"],
-            "slots": 4,
-            "cpu": 16,
-            "memory_bytes": 16 * 1024**3,
+            "slots": self.config.get("max_claims", 4),
+            "cpu": self.config.get("max_claims", 4) * 4,
+            "memory_bytes": self.config.get("max_claims", 4) * 4 * 1024**3,
             "egress_policy_sha256": egress["policy_sha256"],
             "repositories": [
                 {k: v for k, v in e.items() if k in {"canonical_repo", "base_sha", "sha256"}}
@@ -173,7 +203,10 @@ class Connector:
         return row
 
     def guard(self, row, *, stopping=False, controlling=False):
+        from .connector_cleanup import check_admission
+
         self.fences.require(row["run_id"], row["generation"])
+        check_admission(row, stopping=stopping)
         if row.get("pause", {}).get("hold") and not (stopping or controlling):
             raise Problem(409, "sandbox_pause_requested")
         if row.get("cancel_requested") and not stopping:
@@ -201,9 +234,18 @@ class Connector:
         return self.client.attach(value["owner"], value["id"], value["token"])
 
     def allocate(self, run_id, request):
+        if request.external_workspace:
+            if self.config.get("external_workspace_enabled") is not True:
+                raise Problem(409, "external_workspace_not_enabled")
+            if request.require_approval or request.model_transport or request.tool_transport:
+                raise Problem(422, "external_workspace_transport_conflict")
+            if request.verification.mode == "fixture-m2":
+                raise Problem(422, "external_workspace_requires_verification_policy")
         if request.tool_transport and self.config.get("tool_transport_fixture") is not True:
             raise Problem(409, "tool_fixture_not_enabled")
         data = request.model_dump(mode="json")
+        if not request.external_workspace:
+            data.pop("external_workspace", None)
         if not request.tool_transport:
             # Preserve durable allocation hashes for default/legacy runs.
             data.pop("tool_transport")
@@ -216,6 +258,11 @@ class Connector:
             raise Problem(422, "repository_revision_not_registered")
         if request.deadline.tzinfo is None:
             raise Problem(422, "deadline_requires_timezone")
+        if (
+            request.external_workspace
+            and not 0 < (request.deadline - datetime.now(UTC)).total_seconds() <= 600
+        ):
+            raise Problem(422, "external_workspace_deadline_invalid")
         with self.journal.locked(run_id), self.admission:
             self.fences.require(run_id, request.generation)
             row = self.journal.read(run_id)
@@ -246,7 +293,9 @@ class Connector:
                 unresolved = [r for r in pending if blocks_new_admission(r, run_id)]
                 if unresolved:
                     raise Problem(409, "unresolved_allocation_blocks_admission")
-                if max(len(self.client.sandboxes()), len(self.host.vms())) >= 4:
+                if max(len(self.client.sandboxes()), len(self.host.vms())) >= self.config.get(
+                    "max_claims", 4
+                ):
                     raise Problem(409, "node_capacity_unavailable")
                 self.check_host_reserve()
                 self.guard(row)
@@ -317,6 +366,10 @@ class Connector:
             listener.close()
 
     def prepare(self, row):
+        if row["input"].get("external_workspace"):
+            from .connector_workspace import prepare
+
+            return prepare(self, row)
         sb = self.handle(row)
         if (
             sb.exec("sha256sum", "/usr/local/bin/openhands-agent-server", timeout=15).split()[0]
@@ -470,11 +523,17 @@ class Connector:
         }
 
     def isolation(self, row, *, terminal=False):
+        if row.get("input", {}).get("external_workspace"):
+            from .connector_workspace import attest as external_attest
+
+            return external_attest(self, row)
         proof = attest(self, row, terminal=terminal)
         self.network(row)
         return proof
 
     def prompt(self, row, goal):
+        if row.get("input", {}).get("external_workspace"):
+            raise Problem(409, "external_workspace_prompt_unsupported")
         self.isolation(row)
         with self.relay(row) as http:
             path = "/api/conversations/" + row["run_id"]
@@ -521,6 +580,8 @@ class Connector:
     def events(self, run_id, generation, cursor):
         with self.journal.locked(run_id):
             row = self.require(run_id, generation)
+            if row["input"].get("external_workspace"):
+                raise Problem(409, "external_workspace_events_unsupported")
             if row["operations"].get("release", {}).get("state") == "completed":
                 raise Problem(409, "sandbox_already_released")
             self.network(row)
@@ -635,6 +696,10 @@ class Connector:
             return response
 
     def result(self, row):
+        if row.get("input", {}).get("external_workspace"):
+            from .connector_workspace import result
+
+            return result(self, row)
         self.isolation(row, terminal=True)
         sb = self.handle(row)
         with self.relay(row) as http:
@@ -694,6 +759,14 @@ class Connector:
             ) <= datetime.now(UTC):
                 raise Problem(409, "run_deadline_expired")
             prerequisites = {"prepare": "allocate", "prompt": "prepare", "result": "prompt"}
+            if row["input"].get("external_workspace"):
+                prerequisites["result"] = "prepare"
+                if request.action != "release" and any(
+                    op["state"] != "completed"
+                    for name, op in row["operations"].items()
+                    if name != request.action
+                ):
+                    raise Problem(409, "connector_operation_uncertain")
             prerequisite = prerequisites.get(request.action)
             if prerequisite and row["operations"].get(prerequisite, {}).get("state") != "completed":
                 raise Problem(409, "connector_prerequisite_unconfirmed")
@@ -743,7 +816,9 @@ def create_connector(config, service=None):
         if request.headers.get("origin"):
             return JSONResponse({"error": "browser_origin_forbidden"}, status_code=403)
         tool = request.url.path.endswith("/tool")
-        if tool and (
+        workspace = request.url.path.endswith("/workspace")
+        private_tool = tool or workspace
+        if private_tool and (
             request.url.query
             or "origin" in request.headers
             or "cookie" in request.headers
@@ -757,7 +832,13 @@ def create_connector(config, service=None):
         limit = (
             1024 * 1024 + 4096
             if tool
-            else (384 * 1024 if request.url.path.endswith("/model") else 65536)
+            else (
+                256 * 1024
+                if workspace
+                else 384 * 1024
+                if request.url.path.endswith("/model")
+                else 65536
+            )
         )
 
         async def read_body():
@@ -770,11 +851,23 @@ def create_connector(config, service=None):
             return b"".join(chunks)
 
         try:
-            request._body = await asyncio.wait_for(read_body(), 5) if tool else await read_body()
+            request._body = (
+                await asyncio.wait_for(read_body(), 5) if private_tool else await read_body()
+            )
             if tool:
                 from .connector_tool import validate_wire
 
                 validate_wire(request._body)
+            if workspace:
+                from .connector_workspace import validate_wire as validate_workspace_wire
+
+                validate_workspace_wire(request._body)
+            if request.url.path.endswith(
+                ("/cleanup-preview", "/cleanup-lookup", "/cleanup-apply", "/cleanup-lease")
+            ):
+                from .stale_cleanup_contract import loads
+
+                loads(request._body)
         except Problem as exc:
             return JSONResponse({"error": exc.code}, status_code=exc.status)
         except (ValueError, RecursionError, TimeoutError):
@@ -827,6 +920,12 @@ def create_connector(config, service=None):
 
     from .connector_tool import ToolExchange
     from .connector_tool import exchange as tool_exchange
+    from .connector_workspace import WorkspaceOperation
+    from .connector_workspace import exchange as workspace_exchange
+
+    @app.post("/v1/runs/{run_id}/workspace")
+    def workspace(run_id: UUID, data: WorkspaceOperation, _=auth):
+        return workspace_exchange(service, run_id, data)
 
     @app.post("/v1/runs/{run_id}/tool")
     def tool_channel(run_id: UUID, data: ToolExchange, _=auth):
@@ -841,6 +940,62 @@ def create_connector(config, service=None):
     @app.post("/v1/runs/{run_id}/operations")
     def mutate(run_id: UUID, data: Mutation, _=auth):
         return service.mutate(run_id, data)
+
+    @app.post("/v1/runs/{run_id}/cleanup-preview")
+    def cleanup_preview(run_id: UUID, data: dict, _=auth):
+        from .connector_cleanup import preview
+
+        return preview(service, run_id, data)
+
+    @app.post("/v1/runs/{run_id}/cleanup-lookup")
+    def cleanup_lookup(run_id: UUID, data: dict, _=auth):
+        from .connector_cleanup import lookup
+        from .stale_cleanup_contract import fail
+
+        if (
+            set(data) != {"plan", "generation", "lease_until", "resume"}
+            or type(data["plan"]) is not dict
+            or data["plan"].get("run_id") != str(run_id)
+            or type(data["resume"]) is not bool
+        ):
+            fail()
+        return lookup(
+            service, data["plan"], data["generation"], data["lease_until"], data["resume"]
+        )
+
+    @app.put("/v1/runs/{run_id}/cleanup-lease")
+    def cleanup_lease(run_id: UUID, data: dict, _=auth):
+        from .connector_cleanup import grant
+        from .stale_cleanup_contract import fail
+
+        if (
+            set(data) != {"plan", "lease_until"}
+            or type(data["plan"]) is not dict
+            or data["plan"].get("run_id") != str(run_id)
+        ):
+            fail()
+        return grant(service, data["plan"], data["lease_until"])
+
+    @app.post("/v1/runs/{run_id}/cleanup-apply")
+    def cleanup_apply(run_id: UUID, data: dict, _=auth):
+        from .connector_cleanup import apply
+        from .stale_cleanup_contract import fail, hash_text
+
+        if (
+            set(data) != {"plan", "generation", "db_digest", "observe_only"}
+            or type(data["plan"]) is not dict
+            or data["plan"].get("run_id") != str(run_id)
+            or type(data["observe_only"]) is not bool
+        ):
+            fail()
+        hash_text(data["db_digest"])
+        return apply(
+            service,
+            data["plan"],
+            data["generation"],
+            data["db_digest"],
+            observe_only=data["observe_only"],
+        )
 
     @app.get("/v1/runs/{run_id}/events")
     def events(run_id: UUID, generation: int, cursor: str | None = None, _=auth):

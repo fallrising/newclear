@@ -1,0 +1,78 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Gameplay pattern frontmatter v2",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "id",
+    "title",
+    "title_en",
+    "category",
+    "source_category",
+    "tags",
+    "summary",
+    "note_status",
+    "related",
+    "sources"
+  ],
+  "properties": {
+    "schema_version": {"type": "integer", "const": 2},
+    "id": {"type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$", "maxLength": 100},
+    "title": {"type": "string", "minLength": 1, "maxLength": 100},
+    "title_en": {"type": "string", "minLength": 1, "maxLength": 120},
+    "category": {
+      "type": "string",
+      "enum": [
+        "farming", "fishing", "cooking", "gathering", "automation", "building",
+        "inventory", "puzzles", "combat", "exploration", "relationships",
+        "allocation", "commerce", "deckbuilding", "progression", "survival",
+        "stealth", "defense", "cooperation", "ecology", "matching",
+        "projectiles", "movement", "command", "narrative", "incremental",
+        "rhythm", "driving"
+      ]
+    },
+    "source_category": {
+      "type": "string",
+      "enum": [
+        "farming", "fishing", "cooking", "gathering", "automation", "building",
+        "inventory", "puzzles", "combat", "exploration", "relationships",
+        "allocation", "commerce", "deckbuilding", "progression", "survival",
+        "stealth", "defense", "cooperation", "ecology", "matching",
+        "projectiles", "movement", "command", "narrative", "incremental",
+        "rhythm", "driving"
+      ]
+    },
+    "tags": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 8,
+      "uniqueItems": true,
+      "items": {"type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"}
+    },
+    "summary": {"type": "string", "minLength": 1, "maxLength": 240},
+    "note_status": {"enum": ["pending", "draft", "reviewed"]},
+    "related": {
+      "type": "array",
+      "maxItems": 6,
+      "uniqueItems": true,
+      "items": {"type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"}
+    },
+    "sources": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 5,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["title", "url", "accessed", "access_method"],
+        "properties": {
+          "title": {"type": "string", "minLength": 1, "maxLength": 200},
+          "url": {"type": "string", "format": "uri", "pattern": "^https://[^\\s<>\"\\\\?#]+$"},
+          "accessed": {"type": "string", "format": "date"},
+          "access_method": {"enum": ["page-text", "search-index-excerpt"]}
+        }
+      }
+    }
+  }
+}

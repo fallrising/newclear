@@ -1,0 +1,97 @@
+[
+  {
+    "command": "node --test scripts/ops/local-media.test.mjs",
+    "redirectedOutput": "H03a1-red.log",
+    "retainedArtifact": "H03a1-red.log"
+  },
+  {
+    "command": "node --test scripts/ops/local-media.test.mjs",
+    "redirectedOutput": "H03a1-green.log",
+    "retainedArtifact": "H03a1-green.log"
+  },
+  {
+    "command": "node --test --test-isolation=none --test-reporter=spec scripts/ops/local-media.test.mjs",
+    "redirectedOutput": "H03a1-named-green.log",
+    "retainedArtifact": "H03a1-named-green.log"
+  },
+  {
+    "command": "node --test --test-isolation=none scripts/ops/local-media.test.mjs",
+    "redirectedOutput": "H03a1-scaffold-named-red.log",
+    "retainedArtifact": "H03a1-scaffold-named-red.log.json"
+  },
+  {
+    "command": "node --test --test-isolation=none scripts/ops/local-media.test.mjs",
+    "redirectedOutput": "H03a1-final-green.log",
+    "retainedArtifact": "H03a1-final-green.log"
+  },
+  {
+    "command": "node --test --test-isolation=none --test-name-pattern=H03a2 scripts/ops/local-media.test.mjs",
+    "redirectedOutput": "H03a2-red.log",
+    "retainedArtifact": "H03a2-red.log.json"
+  },
+  {
+    "command": "node --test --test-isolation=none scripts/ops/local-media.test.mjs",
+    "redirectedOutput": "H03a2-green.log",
+    "retainedArtifact": "H03a2-green.log.json"
+  },
+  {
+    "command": "node --test --test-isolation=none scripts/ops/local-media.test.mjs",
+    "redirectedOutput": "H03a2-corrected-green.log",
+    "retainedArtifact": "H03a2-corrected-green.log.json"
+  },
+  {
+    "command": "node --test scripts/ops/local-media.test.mjs",
+    "redirectedOutput": "H03a2-host-green.log",
+    "retainedArtifact": "H03a2-host-green.log"
+  },
+  {
+    "command": "node --test scripts/ops/local-media.test.mjs",
+    "redirectedOutput": "H03a2-final-green.log",
+    "retainedArtifact": "H03a2-final-green.log"
+  },
+  {
+    "command": "node --test --test-name-pattern=H03b scripts/ops/local-media.test.mjs",
+    "redirectedOutput": "H03b-fixture-syntax-failure.log",
+    "retainedArtifact": "H03b-fixture-syntax-failure.log"
+  },
+  {
+    "command": "node --test --test-name-pattern=H03b scripts/ops/local-media.test.mjs",
+    "redirectedOutput": "H03b-red.log",
+    "retainedArtifact": "H03b-red.log.json"
+  },
+  {
+    "command": "node --test scripts/ops/local-media.test.mjs",
+    "redirectedOutput": "H03b-green.log",
+    "retainedArtifact": "H03b-green.log"
+  },
+  {
+    "command": "node --test --test-name-pattern=H03b_restore_receipt scripts/ops/local-media.test.mjs",
+    "redirectedOutput": "H03b-output-red.log",
+    "retainedArtifact": "H03b-output-red.log"
+  },
+  {
+    "command": "node --test scripts/ops/local-media.test.mjs",
+    "redirectedOutput": "H03b-final-green.log",
+    "retainedArtifact": "H03b-final-green.log"
+  },
+  {
+    "command": "node --test --test-name-pattern=H03b_mode_drift scripts/ops/local-media.test.mjs",
+    "redirectedOutput": "H03b-mode-red.log",
+    "retainedArtifact": "H03b-mode-red.log"
+  },
+  {
+    "command": "node --test --test-name-pattern=H03b_diagnostic scripts/ops/local-media.test.mjs",
+    "redirectedOutput": "H03b-diagnostic-red.log",
+    "retainedArtifact": "H03b-diagnostic-red.log"
+  },
+  {
+    "command": "node --test scripts/ops/local-media.test.mjs scripts/ops/recovery-protocol.test.mjs scripts/local/maintenance-guard.test.mjs scripts/local/maintenance-target.test.mjs scripts/local/maintenance.test.mjs",
+    "redirectedOutput": "final-regressions.log",
+    "retainedArtifact": "final-regressions.log"
+  },
+  {
+    "command": "node --test scripts/ops/local-media.test.mjs scripts/ops/recovery-protocol.test.mjs scripts/local/maintenance-guard.test.mjs scripts/local/maintenance-target.test.mjs scripts/local/maintenance.test.mjs",
+    "redirectedOutput": "final-regressions-verified.log",
+    "retainedArtifact": "final-regressions-verified.log"
+  }
+]

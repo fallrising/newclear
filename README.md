@@ -2,7 +2,7 @@
 
 `fallrising` 的公開技術作品集。這裡是這些專案的 canonical 位置——先前散落在數十個獨立 repository 的內容,已收斂至此。
 
-給 LLM agent 的入口是 [`llms.txt`](llms.txt)：一次 fetch 取得全部專案索引，各專案自己的 `llms.txt` 再宣告 status、介面型態、entrypoint、auth 與機器可讀契約的位置。格式與必填欄位見 [agent-facing capability files](docs/specs/llms-txt.md)。目前已有 capability file 的是 `systems/clarkq`、`products/kith`、`systems/snail`、`products/goku`，其餘專案仍只有 README。
+給 LLM agent 的入口是 [`llms.txt`](llms.txt)：一次 fetch 取得全部專案索引，各專案自己的 `llms.txt` 再宣告 status、介面型態、entrypoint、auth 與機器可讀契約的位置。格式與必填欄位見 [agent-facing capability files](docs/specs/llms-txt.md)。目前已有 capability file 的是 `systems/clarkq`、`products/kith`、`systems/snail`、`products/goku`、`labs/iris-lab`；iris-lab 為 spec-only，其餘專案仍只有 README。
 
 根目錄的 [GitHub Actions workflows](.github/workflows/) 是 monorepo 的 canonical CI entry points；component 目錄中保留的 workflow 是原始 repository 歷史，GitHub 不會將其當作 monorepo CI 執行。已接線 component 的範圍與驗證規則見 [Monorepo CI specification](docs/specs/monorepo-ci.md)。
 
@@ -39,7 +39,9 @@
 
 | 路徑 | 說明 | 技術 | 文檔檔 |
 | --- | --- | --- | --- |
+| [`gateways/edge-relay`](gateways/edge-relay/) | 通用反向應用通道與可插拔 ntfy/Bark 通知（SDD-only，未實作） | TypeScript、Workers、Durable Objects（規劃） | 未分級 |
 | [`gateways/pokercase`](gateways/pokercase/) | Multi-provider LLM gateway（thinrouter） | Rust, SQLite | C |
+| [`systems/agent-secrets`](systems/agent-secrets/) | HSM 概念的加密秘密 Store 與 Agent 受控憑證 Broker SDD；未實作 | Workers, KV, TypeScript（規劃） | 未分級 |
 | [`systems/clarkq`](systems/clarkq/) | HTTP FIFO queue | Go | C |
 | [`systems/snail`](systems/snail/) | RESP2 相容 in-memory data server | Rust | C |
 | [`systems/ojbquay`](systems/ojbquay/) | Kafka-based messaging control/data plane | Java, Kafka, gRPC | C |
@@ -54,6 +56,8 @@
 | [`platform/agent-platform`](platform/agent-platform/) | 自託管多 agent 工作平台（OpenHands Agent Canvas 範本） | React, Python, PostgreSQL, Cocoon | A |
 | [`platform/agent-workforce`](platform/agent-workforce/) | 跨產品數位工作者：M1 離線核心與有界 M2 原生 adapter；完整 M2／跨產品整合仍有缺口 | Python、SQLite；可替換 adapters | A |
 | [`platform/dim-gate`](platform/dim-gate/) | CMDB 核心企業運維自助平台前端（demo） | React, TypeScript | A |
+| [`platform/spring-pool`](platform/spring-pool/) | 單人版本化腳本庫與 runbook 編排；不執行腳本（開發中） | Hono, Rust/Wasm；Workers, D1 | A |
+| [`platform/cloud-lab`](platform/cloud-lab/) | 個人CF工具整合入口：固定node-health歷史閉環、Access看板與bot；既有工具盤點及重複判定已整理，inventory報告adapter已上線，4個Worker用途已對照；多VPS唯讀agent來源與設計已整理。主線未完成、當前授權另見元件SUCCESS | Workers Web APIs、D1、Python、原生網頁 | 未分級 |
 | [`platform/edge-ops`](platform/edge-ops/) | Cloudflare 主機監控、受控作業與可選初始化（SDD + M0 契約層，無部署） | TypeScript, Go；Workers, D1, DO, R2, React（規劃） | A |
 | [`platform/signal-hub`](platform/signal-hub/) | 個人事件中樞／戰情室：CloudEvents 事件庫、規則生成指標看板、訂閱投遞（M3 runtime） | Go, SQLite, React | A |
 | [`platform/ice-maker`](platform/ice-maker/) | Local-first 個人工程知識編譯器 | Python | A |
@@ -64,6 +68,8 @@
 | [`apps/cloudform`](apps/cloudform/) | Terraform-schema-driven cloud provisioning form designer | TypeScript, Java | D |
 | [`apps/cms-scaffold`](apps/cms-scaffold/) | 可重複使用的 CMS kernel（API + Front/Back/Admin） | Java, React, PostgreSQL | C |
 | [`tools/codex-usage`](tools/codex-usage/) | Agent Usage 統一唯讀總覽：重用 Codex／Claude 來源，分清訂閱額度、本機統計與 API 支出 | Python, Codex App Server | A |
+| [`tools/gameplay-pattern-catalog`](tools/gameplay-pattern-catalog/) | 以 Gameplay Atlas 公開快照為分母的繁中設計模式筆記、來源 manifest 與靜態網站（Draft，未部署） | Python、原生 JavaScript | 未分級 |
+| [`tools/motion-prompt`](tools/motion-prompt/) | 繁中／英文動態術語圖鑑：固定 120 項來源與驗收規格，網站待整合 | 原生 JavaScript, Canvas | 未分級 |
 | [`tools/streaming-converter`](tools/streaming-converter/) | FFmpeg HLS conversion 與 web player | Bash, FFmpeg | D |
 
 ### 契約、範例與實驗
@@ -72,6 +78,10 @@
 | --- | --- | --- |
 | [`specs/fleet`](specs/fleet/) | **可執行**的 Fleet Catalog（`fleet.yaml`、Compose、agents、Cloudflare）。路徑在 `specs/`，但內容是系統元件／公開契約，**不是**根目錄文檔。見 [taxonomy](docs/taxonomy.md)。 | B |
 | [`examples/bite-pi`](examples/bite-pi/) | Pi agent 公開示範 | D |
+| [`labs/agent-office-lab`](labs/agent-office-lab/) | 本地優先的三 provider Office 實驗：OpenCode 原生任務已驗證，完整 MVP 待完成 | 未分級 |
+| [`labs/memvid-lab`](labs/memvid-lab/) | 固定 Memvid 的 11 類場景＋PDF／語意／CLIP／Whisper（15 項實跑通過並已合併；繁中筆記實測不建議直接採用） | 未分級 |
+| [`labs/token-economizer-lab`](labs/token-economizer-lab/) | 真 TokenEconomizer 固定版本 hooks／CLI 離線實驗；合成 traces、無 provider 呼叫 | 未分級 |
+| [`labs/graphify-lab`](labs/graphify-lab/) | Graphify 開發場景、固定參考程式碼與索引單份共用實驗 | 未分級 |
 | [`labs/bee-swarm`](labs/bee-swarm/) | AI 角色協作 workflow 模擬（歷史） | D |
 | [`labs/aweshore`](labs/aweshore/) | 個人筆記／PKM 早期嘗試（已停止） | D |
 | [`labs/eru-vps-mvp`](labs/eru-vps-mvp/) | Project Eru 四機 VPS MVP 實驗 | A |
@@ -81,6 +91,7 @@
 | [`labs/zircon-godot`](labs/zircon-godot/) | 傳奇 3 Godot/C# fork 的固定版本研究、SDD 與分階段學習實驗（runtime 未驗證） | A |
 | [`labs/pg-jev-router`](labs/pg-jev-router/) | pg-jev 輸入判斷、攔截與模型分流實驗；真 extension + 合成 provider | A |
 | [`labs/browser-fingerprint`](labs/browser-fingerprint/) | Go mock CRUD 與瀏覽器設備／操作觀測，支援私人 Quick Tunnel | 未分級 |
+| [`labs/iris-lab`](labs/iris-lab/) | 固定 Iris／模型版本的原生生圖實驗 SDD、教學與平台研究；runtime 未實作 | 未分級 |
 | [`labs/m4-seat`](labs/m4-seat/) | M4 Max 48GB MacBook Pro 的單人推論座位方案；無 runtime | 未分級 |
 | [`labs/retro-economy`](labs/retro-economy/) | 原創復古 RPG 的小鎮經濟、職業分工與交易玩法 SDD；未實作 | 未分級 |
 | [`labs/handwired-learning`](labs/handwired-learning/) | 普通 JS 與固定數值圖對照的入門實驗 SDD；未實作 | 未分級 |

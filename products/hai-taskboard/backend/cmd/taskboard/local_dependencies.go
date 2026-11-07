@@ -200,35 +200,88 @@ func (store *localArtifactStore) createTemporary() (string, *os.File, error) {
 }
 
 func (store *localArtifactStore) openValidated(expected domain.Digest) (*os.File, error) {
+	return store.openValidatedWith(expected, store.root.Open)
+}
+
+// Keeping the descriptor open operation explicit allows deterministic coverage
+// of objects removed after Lstat without weakening root-relative access.
+func (store *localArtifactStore) openValidatedWith(expected domain.Digest, open func(string) (*os.File, error)) (*os.File, error) {
+	file, err := store.openObject(expected, open)
+	if err != nil {
+		return nil, err
+	}
+	closeWithError := func(err error) (*os.File, error) { _ = file.Close(); return nil, err }
+	contents, err := io.ReadAll(io.LimitReader(file, maximumArtifactBytes+1))
+	if err != nil {
+		return closeWithError(fmt.Errorf("read artifact: %w", err))
+	}
+	if len(contents) == 0 || len(contents) > maximumArtifactBytes || domain.HashBytes(contents) != expected {
+		return closeWithError(fmt.Errorf("artifact object failed integrity validation: %w", port.ErrArtifactUnavailable))
+	}
+	if _, err := file.Seek(0, io.SeekStart); err != nil {
+		return closeWithError(fmt.Errorf("rewind artifact object: %w", err))
+	}
+	return file, nil
+}
+
+// OpenBounded performs no content read. It pins the same root-relative object
+// identity as Open, rejects size mismatches before bytes, and leaves hashing to
+// the caller's single declared-size-plus-one bounded read.
+func (store *localArtifactStore) OpenBounded(ctx context.Context, digest domain.Digest, declared uint64) (io.ReadCloser, error) {
+	if store == nil || digest.IsZero() {
+		return nil, errors.New("artifact identity is invalid")
+	}
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
+	if err := store.checkRootIdentity(); err != nil {
+		return nil, err
+	}
+	file, err := store.openObject(digest, store.root.Open)
+	if err != nil {
+		return nil, err
+	}
+	info, err := file.Stat()
+	if err != nil {
+		_ = file.Close()
+		return nil, fmt.Errorf("stat artifact: %w", err)
+	}
+	if uint64(info.Size()) != declared {
+		_ = file.Close()
+		return nil, fmt.Errorf("artifact size differs from locator: %w", port.ErrArtifactUnavailable)
+	}
+	return file, nil
+}
+
+func (store *localArtifactStore) openObject(expected domain.Digest, open func(string) (*os.File, error)) (*os.File, error) {
 	name := expected.String()
 	if !validArtifactName(name) {
 		return nil, errors.New("artifact name is unsafe")
 	}
 	pathInfo, err := store.root.Lstat(name)
-	if err != nil || !pathInfo.Mode().IsRegular() || pathInfo.Mode()&os.ModeSymlink != 0 ||
-		pathInfo.Size() < 1 || pathInfo.Size() > maximumArtifactBytes {
-		return nil, errors.New("artifact object is unsafe")
-	}
-	file, err := store.root.Open(name)
 	if err != nil {
-		return nil, errors.New("open artifact")
+		return nil, fmt.Errorf("inspect artifact: %w", err)
+	}
+	if !pathInfo.Mode().IsRegular() || pathInfo.Mode()&os.ModeSymlink != 0 || pathInfo.Size() < 1 || pathInfo.Size() > maximumArtifactBytes {
+		return nil, fmt.Errorf("artifact object is unsafe: %w", port.ErrArtifactUnavailable)
+	}
+	file, err := open(name)
+	if err != nil {
+		return nil, fmt.Errorf("open artifact: %w", err)
 	}
 	closeWithError := func(err error) (*os.File, error) {
 		_ = file.Close()
 		return nil, err
 	}
 	openedInfo, err := file.Stat()
-	if err != nil || !openedInfo.Mode().IsRegular() || !os.SameFile(pathInfo, openedInfo) ||
+	if err != nil {
+		return closeWithError(fmt.Errorf("stat artifact: %w", err))
+	}
+	if !openedInfo.Mode().IsRegular() || !os.SameFile(pathInfo, openedInfo) ||
 		openedInfo.Size() < 1 || openedInfo.Size() > maximumArtifactBytes {
-		return closeWithError(errors.New("artifact object changed during open"))
+		return closeWithError(fmt.Errorf("artifact object changed during open: %w", port.ErrArtifactUnavailable))
 	}
-	contents, err := io.ReadAll(io.LimitReader(file, maximumArtifactBytes+1))
-	if err != nil || len(contents) == 0 || len(contents) > maximumArtifactBytes || domain.HashBytes(contents) != expected {
-		return closeWithError(errors.New("artifact object failed integrity validation"))
-	}
-	if _, err := file.Seek(0, io.SeekStart); err != nil {
-		return closeWithError(errors.New("rewind artifact object"))
-	}
+
 	return file, nil
 }
 
@@ -412,3 +465,5 @@ var _ port.IDSource = cryptoIDSource{}
 var _ port.ArtifactStore = (*localArtifactStore)(nil)
 var _ httpapi.SessionAuthority = (*localSessionAuthority)(nil)
 var _ httpapi.ProjectionSource = unavailableProjectionSource{}
+
+var _ port.BoundedArtifactReader = (*localArtifactStore)(nil)

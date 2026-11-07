@@ -1,0 +1,8 @@
+{
+  "version": 1,
+  "original": "factory-subnet-fixture/jdbc-followup.diff",
+  "sha256": "9f930f226255e12742b05cfc9f4db66483d4a9a36b807b55657894565b78b68b",
+  "byteSize": "768",
+  "encoding": "utf-8",
+  "text": "--- jdbc-before.mjs\n+++ jdbc-after.mjs\n@@ -907,7 +907,7 @@\n   assert.equal(f.targetCalls.filter(a=>a[0]==='network'&&a[1]==='create').length,2);\n   assert.equal(context.inspection.target.networkIds.web,f.childState.networks[0].Id);\n   assert.equal(context.inspection.target.networkIds.data,f.childState.networks[1].Id);\n-  assert.equal(context.connection.jdbcUrl,'jdbc:postgresql://192.168.241.2:5432/cms');\n+  assert.equal(context.connection.jdbcUrl,'jdbc:postgresql://192.168.240.66:5432/cms');\n });\n for(const fault of ['web-id','data-id','subnet'])test(`T146 factory rejects Compose network ${fault} drift before PG start`,async t=>{\n   const f=await childRuntimeFixture(t,false),{createRestoreTarget}=await import('./restore-target.mjs'),original=f.deps.command;\n"
+}

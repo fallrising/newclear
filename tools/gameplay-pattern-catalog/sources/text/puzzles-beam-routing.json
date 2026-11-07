@@ -1,0 +1,120 @@
+{
+  "id": "puzzles-beam-routing",
+  "system": "puzzles",
+  "edition": 1,
+  "name": {
+    "zh": "光束路径与接收器",
+    "en": "Routing beams to receivers"
+  },
+  "summary": {
+    "zh": "移动少量中继物，让整条能量路径成立。",
+    "en": "Move a few relays to complete an energy path."
+  },
+  "rules": {
+    "zh": "光束需要到达指定接收器才能打开通路。玩家调整中继、反射物或传送路径，避免遮挡，并检查多个接收器是否需要同时满足；可见光线让错误容易定位。",
+    "en": "A beam must reach a receiver to open a route. Adjust relays, reflectors or portal paths, avoid obstruction and check simultaneous requirements; visible beams reveal broken links."
+  },
+  "loop": [
+    {
+      "zh": "定位光源与接收器",
+      "en": "Locate source and receiver"
+    },
+    {
+      "zh": "摆放中继或反射物",
+      "en": "Place relays or reflectors"
+    },
+    {
+      "zh": "检查遮挡与连接",
+      "en": "Check occlusion and links"
+    },
+    {
+      "zh": "通电后穿过通路",
+      "en": "Power the route and pass"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "中继应靠近光源，还是能看到多个目标的交汇点？",
+      "en": "Place a relay near the source or at a multi-target junction?"
+    },
+    {
+      "zh": "拿走中继后，门会不会把自己关住？",
+      "en": "Will taking a relay close the door behind you?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "同时目标数",
+        "en": "Simultaneous targets"
+      },
+      "effect": {
+        "zh": "多目标同时开启要求网络规划；依次开启偏路线题。",
+        "en": "Simultaneous targets demand networks; sequential ones favor routes."
+      }
+    },
+    {
+      "name": {
+        "zh": "遮挡规则",
+        "en": "Occlusion"
+      },
+      "effect": {
+        "zh": "角色可挡光会增加时机与协作；否则更偏静态推理。",
+        "en": "Character occlusion adds timing and cooperation; ignoring it favors static reasoning."
+      }
+    }
+  ],
+  "tags": [
+    "spatial",
+    "optimization",
+    "planning"
+  ],
+  "related": [
+    "automation-aerial-logistics",
+    "automation-belt-routing",
+    "automation-flow-splitting",
+    "farming-irrigation-layout"
+  ],
+  "contrast": {
+    "zh": "塔罗斯强调连接器网络与视线；传送门让光路跨越常规空间遮挡。",
+    "en": "Talos emphasizes relay networks; Portal lets beam paths bypass normal spatial obstructions."
+  },
+  "combination": {
+    "zh": "组合提案：地下农场用反射镜供光，移动灌溉设备可能挡住光束。",
+    "en": "Design proposal: mirrors light a cave farm, while moving irrigation devices can obstruct the beams."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "光源被一堵墙挡住，门旁接收器还没亮。",
+      "en": "A wall blocks the light source and the receiver beside the door is dark."
+    },
+    "action": {
+      "zh": "你把反射器放到转角，让光线绕过墙照向接收器。",
+      "en": "Place a reflector at the corner to route the beam around the wall."
+    },
+    "result": {
+      "zh": "接收器亮起，门打开；移走反射器又会断光。",
+      "en": "The receiver lights up and opens the door; removing the reflector breaks the beam."
+    },
+    "next": {
+      "zh": "安排一条保持光路的通过路线，再去处理下一扇门。",
+      "en": "Find a route through that preserves the beam, then tackle the next door."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "在二维格子上实现一个光源、两个可旋转反射器与一个接收器。",
+      "en": "Use a 2D grid with one source, two rotating reflectors, and one receiver."
+    },
+    "pitfall": {
+      "zh": "先别增加颜色混合与动态遮挡；基础光路必须能被一眼追踪。",
+      "en": "Defer color mixing and moving blockers until the basic light path can be followed at a glance."
+    },
+    "test": {
+      "zh": "光路断开时，玩家能否指出具体断点并只移动必要的物体。",
+      "en": "When the beam breaks, can players locate the break and move only the necessary object?"
+    }
+  }
+}

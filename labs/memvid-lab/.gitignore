@@ -1,0 +1,6 @@
+/.venv/
+/work/
+/__pycache__/
+**/__pycache__/
+*.mv2
+*.mv2.session

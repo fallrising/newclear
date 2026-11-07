@@ -1,0 +1,11 @@
+{
+  "sourceRunId": "cabbc95e0d5440d3ac4416323dece4a7",
+  "startedAt": "2026-11-02T18:03:46.859029+00:00",
+  "command": "timeout 900 /home/ckc/.local/bin/node .team/pp1c-c-20261102/runtime/run-core.mjs",
+  "defaultProductAdapters": true,
+  "sha256": {
+    ".team/pp1c-c-20261102/runtime/run-core.mjs": "4ae448f7e82b08f9735e2f8b27bdbb9ac3529d31242477525031ef1cca2872ac",
+    "scripts/local/restore-target.mjs": "842819c037e77982f5e89f7a64f62214db9f9711c48d7d18e1a39a2586df18c2",
+    "scripts/local/maintenance-workflow.test.mjs": "ba49fb22ff834ed4f95e3bb8e31b7989747580a3515b9d5d18add749a5186341"
+  }
+}

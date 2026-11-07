@@ -83,6 +83,7 @@ Each component receives one independent workflow with `pull_request`, `push` to 
 | Edge Ops | `edge-ops-ci.yml` | `platform/edge-ops/**`, `.github/workflows/edge-ops-ci.yml` | Node 24.18.0 backend `npm ci`, `npm run typecheck`, `npm test`; root demo-chain `npm run check`; backend `npm run test:workerd` for local workerd/D1 HTTP smoke; Go 1.24.7 agent `gofmt` check, `go vet`, `go test -count=1 ./...`; web `npm ci`, React `npm run build`, Chromium installation and Playwright `npm run test:e2e`, with browser evidence retained; synthetic local resources, no Cloudflare credentials or deploy |
 | cc-quota | `cc-quota-ci.yml` | `tools/cc-quota/**`, `.github/workflows/cc-quota-ci.yml` | Python 3 stdlib `unittest` offline suite (no network or credentials); `bash -n install.sh` |
 | mkfk | `mkfk-ci.yml` | `systems/mkfk/**`, `.github/workflows/mkfk-ci.yml` | Go from `go.mod`: `make fmt-check vet test test-race test-model test-integration`; `make test-chaos CHAOS_PROFILE=short` with its output uploaded as an artifact; `make demo` (three-broker Compose on a locally built `FROM scratch` image, no registry pull, loopback-only ports) followed by `make demo-down DELETE_DATA=1` |
+| Spring Pool | `spring-pool-ci.yml` | `platform/spring-pool/**`, `.github/workflows/spring-pool-ci.yml` | Pinned Node/Rust; native validation/export tests, type/format/build, compiled Wasm + local workerd/D1 integration, desktop/mobile browser journeys and responsive PNG/browser-health evidence; synthetic fixtures only, no Cloudflare token or deploy |
 
 All listed workflows use `permissions.contents: read`. None introduce deploy, publish, or secret-backed jobs.
 
@@ -152,6 +153,18 @@ release behavior and workflow permissions/concurrency/timeouts are unchanged.
 - Static assertions for triggers, path filters, permissions, concurrency, timeouts, and forbidden release/deploy/publish or credential use
 - Representative native gates: shell syntax; clean web install/lint/build where dependencies are available; component build/test commands where runtime prerequisites are available
 - `git diff --check`
+
+## Memvid memory lab
+
+`.github/workflows/memvid-lab-ci.yml` is scoped to `labs/memvid-lab/**` and itself.
+It installs hash-pinned Python dependencies, runs actual SDK/CLI boundary regressions,
+prepares fixed public model assets and a locked Rust 1.90.0 native Whisper helper,
+then executes all eleven memory scenarios plus PDF, local text embeddings, native
+CLIP and Whisper-to-memory under a process-local Linux seccomp network deny.
+Whisper uses an explicit, reviewed patch to select its prepared model cache; the
+patch does not alter inference. Downloads happen only during preparation. The job
+has read-only permissions, a 20-minute timeout and no secret, deployment or publish
+step. It retains only a compact JSON report for seven days.
 
 ## pg-jev router lab
 

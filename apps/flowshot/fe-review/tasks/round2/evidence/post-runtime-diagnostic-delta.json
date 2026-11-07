@@ -1,0 +1,22 @@
+{
+  "beforeSha256": "268fc690eca41a1b522912678315e70e8cc3e0b922f3f053fe37556a1d607b7f",
+  "afterSha256": "23adc88ebc6466a7f5616b43149ebab3d059fd7a47394c00a277047988c4ca3c",
+  "changes": [
+    {
+      "before": "receipt.status = 'passed';",
+      "after": "receipt.status = receipt.diagnosticOnly ? 'diagnostic-passed' : 'passed';"
+    },
+    {
+      "before": "  } catch (error) { receipt.status = 'failed'; receipt.failure = { stage: receipt.stage, reason: safeReason(error) }; }",
+      "after": "  } catch (error) {\n    receipt.status = 'failed';\n    receipt.failure = { stage: receipt.stage, reason: safeReason(error), site: error?.stack?.match(/(?:run-review|ui-steps|preload|browser-runtime|runtime-guards)\\.mjs:\\d+:\\d+/)?.[0] ?? null };\n    if (unit === 'loom') {\n      // This task has only synthetic content. Details stay in ignored 0700 state, never public JSON.\n      await writeFile(join(output, '.state/failure-diagnostic.json'), JSON.stringify({ name: error?.name, message: String(error?.message ?? '').slice(0, 8000), stack: String(error?.stack ?? '').slice(0, 12000) }, null, 2), { mode: 0o600 }).catch(() => undefined);\n      const active = [...contexts].at(-1)?.pages().at(-1);\n      if (active) receipt.failure.fixture = await active.evaluate(() => window.__LOOM_REVIEW__?.snapshot() ?? null).catch(() => null);\n    }\n  }"
+    },
+    {
+      "before": "receipt.status === 'passed'",
+      "after": "['passed', 'diagnostic-passed'].includes(receipt.status)"
+    }
+  ],
+  "reconstructedPreviousHashMatches": true,
+  "reconstructedRuntimeSha256": "9e0a7638587d7dfdf1c5b3c0c6d826e747f754979ee31ce0b2ee1986839ef35d",
+  "reconstructedOriginalRuntimeHashMatches": true,
+  "scope": "Loom-only private failure diagnostic; safe failure-site field; explicit diagnostic-only result classification. Flowshot never sets diagnosticOnly, successful Flowshot path unchanged. No browser rerun; original runtime immutable."
+}

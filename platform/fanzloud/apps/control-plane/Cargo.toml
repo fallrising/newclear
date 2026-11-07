@@ -11,6 +11,7 @@ base64 = "0.22"
 bytes = "1"
 codebox-agent-codex = { version = "=0.0.0", path = "../../crates/codebox-agent-codex" }
 codebox-domain = { version = "=0.0.0", path = "../../crates/codebox-domain" }
+codebox-event-store = { version = "=0.0.0", path = "../../crates/codebox-event-store" }
 codebox-session-runtime = { version = "=0.0.0", path = "../../crates/codebox-session-runtime" }
 getrandom = "0.4"
 futures-util = { version = "0.3", features = ["sink"] }

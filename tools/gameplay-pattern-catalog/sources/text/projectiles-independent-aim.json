@@ -1,0 +1,120 @@
+{
+  "id": "projectiles-independent-aim",
+  "system": "projectiles",
+  "edition": 3,
+  "name": {
+    "zh": "朝一个方向走，朝另一个方向打",
+    "en": "Move one way, aim another"
+  },
+  "summary": {
+    "zh": "移动决定自己在哪，瞄准决定攻击去哪，两件事同时做。",
+    "en": "Movement chooses your position while aiming independently chooses where attacks go."
+  },
+  "rules": {
+    "zh": "玩家分别控制移动方向与攻击方向，可以边后退边攻击追兵，也能绕着目标移动。敌人逼近、弹道和场地边界持续改变安全位置；玩家既要保留射线，也要避免退进死角。",
+    "en": "Control movement and attack direction separately to retreat while firing or circle a target. Approaching enemies, shots and boundaries change the safe position, so the player must preserve a firing line without backing into a corner."
+  },
+  "loop": [
+    {
+      "zh": "看清威胁和可走空间",
+      "en": "Read threats and available space"
+    },
+    {
+      "zh": "移动到较安全的位置",
+      "en": "Move toward safer space"
+    },
+    {
+      "zh": "把攻击保持在目标身上",
+      "en": "Keep aim on the target"
+    },
+    {
+      "zh": "按新位置重新选路线",
+      "en": "Choose the next route from the new position"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "直线后退容易持续命中，但身后是否还有路？",
+      "en": "Retreating straight keeps aim simple, but is there room behind you?"
+    },
+    {
+      "zh": "绕圈能保持距离，也可能把原本分散的敌人带到一起。",
+      "en": "Circling preserves distance but can pull scattered enemies together."
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "移动时的攻击限制",
+        "en": "Attacking while moving"
+      },
+      "effect": {
+        "zh": "完全独立便于持续绕行；减速或转向限制会制造短暂的停留风险。",
+        "en": "Full independence supports sustained circling; slowdown or turning limits create brief exposure."
+      }
+    },
+    {
+      "name": {
+        "zh": "场地边界与障碍",
+        "en": "Boundaries and obstacles"
+      },
+      "effect": {
+        "zh": "宽阔场地重视跟瞄，小场地会增加选路和预留退路的分量。",
+        "en": "Open areas emphasize tracking; tight spaces emphasize route choice and escape room."
+      }
+    }
+  ],
+  "tags": [
+    "dexterity",
+    "spatial",
+    "precision"
+  ],
+  "related": [
+    "projectiles-ballistic-arc",
+    "projectiles-graze-reward",
+    "projectiles-wall-ricochet",
+    "projectiles-active-reload"
+  ],
+  "contrast": {
+    "zh": "挺进地牢主要在平面上安排退路；Noita 还要处理上下高度与悬浮余量。",
+    "en": "Gungeon organizes escape on a plane; Noita adds vertical positioning and limited levitation."
+  },
+  "combination": {
+    "zh": "组合提案：搬运战利品降低移动速度，但不降低转动准星的速度，让玩家决定继续边打边带走，还是丢下一部分货物拉开距离。",
+    "en": "Design proposal: loot weight slows movement without slowing aim, forcing a choice between fighting while carrying everything and dropping cargo to regain distance."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "三名追兵从左侧靠近，右边有一条窄通道。",
+      "en": "Three pursuers approach from the left; a narrow exit lies to the right."
+    },
+    "action": {
+      "zh": "向右后退，同时把准星留在最接近的追兵上。",
+      "en": "Retreat right while keeping aim on the nearest pursuer."
+    },
+    "result": {
+      "zh": "前排追兵倒下，但角色已接近通道入口。",
+      "en": "The first pursuer falls, but the player reaches the narrow entrance."
+    },
+    "next": {
+      "zh": "决定穿过通道继续退，还是先转向绕开另一名追兵。",
+      "en": "Choose whether to enter the passage or turn around another pursuer."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "先做一个平面房间、鼠标瞄准、方向键移动和三名直线追赶的敌人。",
+      "en": "Build one flat room with pointer aim, directional movement and three simple pursuers."
+    },
+    "pitfall": {
+      "zh": "角色朝向、枪口与准星若不一致，玩家会误判发射方向。",
+      "en": "A mismatch among facing, muzzle and cursor makes shot direction hard to read."
+    },
+    "test": {
+      "zh": "玩家能否边退边命中，并主动为下一次后退留空间？",
+      "en": "Can players hit while retreating and deliberately preserve room for the next retreat?"
+    }
+  }
+}

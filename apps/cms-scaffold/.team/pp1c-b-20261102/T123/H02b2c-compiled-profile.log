@@ -1,0 +1,12 @@
+✔ PP1C_H02b2a_same_image_private_profile_returns_observed_versions (54.505215ms)
+✔ PP1C_H02b2a_profile_rejects_pg-version (30.164631ms)
+✔ PP1C_H02b2a_profile_rejects_server (23.203281ms)
+✔ PP1C_H02b2a_profile_rejects_policy (11.798389ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 4
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 151.05551

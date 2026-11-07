@@ -1,0 +1,30 @@
+test_C01_real_cli_matches_mcp_readers_and_provenance (test_workspace_analysis.WorkspaceAnalysis.test_C01_real_cli_matches_mcp_readers_and_provenance) ...
+  test_C01_real_cli_matches_mcp_readers_and_provenance (test_workspace_analysis.WorkspaceAnalysis.test_C01_real_cli_matches_mcp_readers_and_provenance) (command='calls-path') ... FAIL
+  test_C01_real_cli_matches_mcp_readers_and_provenance (test_workspace_analysis.WorkspaceAnalysis.test_C01_real_cli_matches_mcp_readers_and_provenance) (command='impact') ... FAIL
+
+======================================================================
+FAIL: test_C01_real_cli_matches_mcp_readers_and_provenance (test_workspace_analysis.WorkspaceAnalysis.test_C01_real_cli_matches_mcp_readers_and_provenance) (command='calls-path')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "<repo>/labs/graphify-lab/tests/test_workspace_analysis.py", line 51, in test_C01_real_cli_matches_mcp_readers_and_provenance
+    self.assertEqual(result.returncode, 0, result.stderr)
+AssertionError: 2 != 0 : usage: workspace.py [-h] --source SOURCE [--cache CACHE]
+                    {locate,query,explain,source,serve,serve-live} ...
+workspace.py: error: argument command: invalid choice: 'calls-path' (choose from 'locate', 'query', 'explain', 'source', 'serve', 'serve-live')
+
+
+======================================================================
+FAIL: test_C01_real_cli_matches_mcp_readers_and_provenance (test_workspace_analysis.WorkspaceAnalysis.test_C01_real_cli_matches_mcp_readers_and_provenance) (command='impact')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "<repo>/labs/graphify-lab/tests/test_workspace_analysis.py", line 51, in test_C01_real_cli_matches_mcp_readers_and_provenance
+    self.assertEqual(result.returncode, 0, result.stderr)
+AssertionError: 2 != 0 : usage: workspace.py [-h] --source SOURCE [--cache CACHE]
+                    {locate,query,explain,source,serve,serve-live} ...
+workspace.py: error: argument command: invalid choice: 'impact' (choose from 'locate', 'query', 'explain', 'source', 'serve', 'serve-live')
+
+
+----------------------------------------------------------------------
+Ran 1 test in 0.130s
+
+FAILED (failures=2)

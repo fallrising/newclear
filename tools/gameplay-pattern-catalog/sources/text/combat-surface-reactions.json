@@ -1,0 +1,120 @@
+{
+  "id": "combat-surface-reactions",
+  "system": "combat",
+  "edition": 1,
+  "name": {
+    "zh": "地表元素连锁",
+    "en": "Reactive combat surfaces"
+  },
+  "summary": {
+    "zh": "技能不仅打人，还能改写脚下的战场。",
+    "en": "An ability can transform the battlefield as well as damage a target."
+  },
+  "rules": {
+    "zh": "先铺设或发现水、油等地表，再用火、冰、电等效果改变其状态。变换后的区域影响敌我走位和状态；施放顺序与覆盖范围比单个技能伤害更重要。",
+    "en": "Create or find surfaces such as water and oil, then change them with fire, ice or electricity. The new area affects movement and conditions on both sides, making order and coverage matter."
+  },
+  "loop": [
+    {
+      "zh": "检查地表与站位",
+      "en": "Inspect surfaces and positions"
+    },
+    {
+      "zh": "铺设可反应介质",
+      "en": "Place a reactive surface"
+    },
+    {
+      "zh": "施加元素触发变化",
+      "en": "Apply a transforming element"
+    },
+    {
+      "zh": "利用或避开新区域",
+      "en": "Exploit or avoid the new area"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "连锁会波及友军，最强组合未必适合当前站位。",
+      "en": "Reactions can affect allies, so the strongest combination may be wrong for the current formation."
+    },
+    {
+      "zh": "先造地表再攻击要付出两步，何时值得提前布置？",
+      "en": "Setup takes extra actions; when does preparing the field pay off?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "反应持续时间",
+        "en": "Reaction duration"
+      },
+      "effect": {
+        "zh": "持续越久，战斗越像改造地形；短持续更偏即时连招。",
+        "en": "Long duration makes combat about reshaping terrain; short duration favors immediate combos."
+      }
+    },
+    {
+      "name": {
+        "zh": "友方影响",
+        "en": "Friendly exposure"
+      },
+      "effect": {
+        "zh": "友军也受影响时，范围规划的重要性明显提高。",
+        "en": "Affecting allies increases the importance of area planning."
+      }
+    }
+  ],
+  "tags": [
+    "planning",
+    "creativity",
+    "spatial"
+  ],
+  "related": [
+    "combat-action-points",
+    "combat-cover-flanking",
+    "combat-destructible-cover",
+    "combat-forced-movement"
+  ],
+  "contrast": {
+    "zh": "《原罪2》把地表变化密集嵌入战斗；《博德之门3》还需结合移动、回合动作与角色状态理解收益。",
+    "en": "Original Sin 2 densely integrates surface transformations; Baldur’s Gate 3 also asks players to account for movement, action economy and character conditions."
+  },
+  "combination": {
+    "zh": "设计提案：地牢的蒸汽既可遮挡射线，也可推动机关；一次灭火能同时改变战斗和通路。",
+    "en": "Design proposal: dungeon steam both blocks sightlines and powers machinery, so extinguishing a fire changes combat and access together."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "敌人与队友站在相邻地块，你手上有铺油和点火两种能力。",
+      "en": "An enemy and ally occupy nearby tiles; you can spread oil and ignite it."
+    },
+    "action": {
+      "zh": "你先把油铺在敌人的路线，再选择不波及队友的位置点火。",
+      "en": "Spread oil along the enemy route, then ignite a position that avoids your ally."
+    },
+    "result": {
+      "zh": "地面变成火区，敌人受威胁，友军原来的近路也可能被封住。",
+      "en": "The ground burns, threatening the enemy and possibly blocking your ally’s shortcut."
+    },
+    "next": {
+      "zh": "根据新地表调整走位，寻找下一次能利用的环境状态。",
+      "en": "Reposition around the changed surface and look for another useful environmental state."
+    }
+  },
+  "prototype": {
+    "scope": "medium",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "只实现水、油、火三种地表和一张格子地图，用规则表明确转换结果。",
+      "en": "Use a grid with only water, oil, and fire, and an explicit table of state changes."
+    },
+    "pitfall": {
+      "zh": "每增加一种元素都会增加交互组合；先限制传播范围和持续时间。",
+      "en": "Each element adds interactions; constrain spread and duration before expanding the set."
+    },
+    "test": {
+      "zh": "观察玩家是否为地表效果改变施放顺序，并能预测友军受到的影响。",
+      "en": "See whether players change casting order for surface effects and predict consequences for allies."
+    }
+  }
+}

@@ -1,0 +1,118 @@
+{
+  "full": {
+    "status": "passed",
+    "recorded_at": "2026-10-29T18:17:54.574032+00:00",
+    "passed": 7,
+    "failed": 0,
+    "limitations": [
+      "This bounded trial does not establish full static-analysis correctness or LLM answer quality.",
+      "Byte counts are logical regular-file bytes; no compression, allocated-block or token claims.",
+      "The storage comparisons are calculated counterfactuals from measured sizes, not ten physical clones.",
+      "The environment/dependencies are shared and reported separately, excluded from both source/index comparisons.",
+      "Index keys include the absolute source location; relocation requires rebuilding the graph.",
+      "References are immutable by validation, not chmod; cooperating POSIX processes share locks.",
+      "Static source analysis is not proof of runtime reachability or a complete test selection system.",
+      "Cross-repository typed member-call success is a TypeScript fixture; it is not arbitrary HTTP service resolution.",
+      "Graphify query performs graph neighborhood retrieval; rg performs exact text matching. Latencies are not equivalent quality scores.",
+      "Five repeated samples are descriptive local timings, not a statistically representative performance benchmark.",
+      "Reported logical bytes are file contents, not allocated filesystem blocks, dependency footprint, or token counts.",
+      "Upstream path exits 0 when both nodes exist but no directed path exists; consumers must inspect the answer, not only the exit status.",
+      "Graphify query token_budget is a soft budget and can be exceeded; this suite records response bytes, not a hard token ceiling.",
+      "Native HTML export contains a vis-network script URL on unpkg.com; generation and embedded data are verified, browser interaction and CDN availability are not.",
+      "Fixture provenance is the recorded content hashes. An upstream graph built inside a Git checkout can inherit the enclosing Git HEAD even when the fixture is untracked."
+    ],
+    "input_sha256": {
+      "graphify_lab/__init__.py": "7818a2e71bc37b4db68f9ba2cf0011ca1ca59032000a71ba5dc1022bf2434d7c",
+      "graphify_lab/__main__.py": "84f41856c87b1970c6cd28d069032a21a48940217576b48f12ff49f8195bb5bb",
+      "graphify_lab/cache.py": "9b3c601c5a063c42c1cf71c2ae3d1a89552cdaf4c81209bb5f07f52797174ed3",
+      "graphify_lab/call_paths.py": "9e7e3fa3a9c28cfb450990f0954117f819ed730a357a5cb79906fc8f02d2ae90",
+      "graphify_lab/live_mcp.py": "d8f7b90312ace14bbc89c0f09c2d19202eb58631b3db4b0af1aa22350bba8847",
+      "graphify_lab/live_state.py": "4b82670bd1aa8373f95fa94664174dceb0af03403527fdc4500dbeb79b4c91a1",
+      "graphify_lab/pilot.py": "9a6a0240fc32d8cf6d0f9561f9f7739faef3813fefb9d767c75067b05733acc1",
+      "graphify_lab/scenarios.py": "0ea0830765ff4deb3d1ef3c785262f30bf53d7d6a89635d94c37bd519cf41b56",
+      "graphify_lab/source.py": "a88486d49a2ebfa6f803f7031fda96369853ea0acd6079cf1e22895197865ff2",
+      "graphify_lab/workspace.py": "1f3ed2de4279404191ec3042406f8f6b1282a3b028de4bb3ad4aa6cac6079b8f",
+      "graphify_lab/workspace_trial.py": "b613d7133d1c579ac0c7640b0ab831f7231cd94fb0af7335a32a72d2538d8813",
+      "requirements.lock": "e1017e7f7f0aa7c8432dae8c241f2516233d203e2996db2a04855a72f45e9a9e",
+      "references.lock.json": "2cb567f26a4399c0e7eee062b1f708204e3ef5d87462483881b42b256113fabd",
+      "fixtures/README.md": "40a45c5a9d78327e4be2c19a6d91b61fad3438f38f78f4c7fc9afe0190549a2c",
+      "fixtures/python-shop/api.py": "7136740c77a40b7ef6ad47949563dab725ed0ff21612f42e59e371ba610c099d",
+      "fixtures/python-shop/orders.py": "a233bfabda56e27f32c32db03d223b7223576125766fa57d99ff5d797d2d18b9",
+      "fixtures/python-shop/pricing.py": "bbf781e53f164f3cb8c6433c023bfa8dc72fb6c1612ceff9571ab8179db0c635",
+      "fixtures/python-shop/tests/test_orders.py": "3ee78f1d9d9f438329c0e131b5cba868ca936da38ccda1ca7c222e7be2d4fe22",
+      "fixtures/ts-consumer/app.ts": "0a9571af290a51fab0a4c57dd2491b5e052627f7bf51cc1ca540b4664116c4e2",
+      "fixtures/ts-duplicate/invoice.ts": "acbf5f7b0a66fb955af8e7574af19d1b8bfce44e5a7be005a3e5839f6358a132",
+      "fixtures/ts-sdk/invoice.ts": "4f5810e487b2a0ca702a3bb1a2e8a1de07b0c91cd7945a0accb22039ae95c1d4"
+    },
+    "raw_report_sha256": "558b502266dce36ab8194495d29c479f6857b1770ccb83f6b1c41e0a80e94305"
+  },
+  "pilot": {
+    "status": "passed",
+    "recorded_at": "2026-10-29T18:17:53.688468+00:00",
+    "baseline": "c31f0de93ddfdd5113f8db2e0a5e16fc206b2ca7",
+    "graph": {
+      "nodes": 159,
+      "edges": 470,
+      "sha256": "d27c935750cf47643184345e8a5af7f9191ec6fa516e43641c4993fb30cc26a0",
+      "bytes": 162091
+    },
+    "limitations": [
+      "Known-task replay on one public component; no blind evaluation or causal productivity claim.",
+      "Graphify returns graph neighborhoods; rg returns matching lines. Command timings are different operations.",
+      "AST direct-name calls are source evidence, not proof of runtime reachability or complete dependencies.",
+      "No baseline code is imported or executed; only the installed pinned Graphify processes it.",
+      "Graphify Git metadata can inherit the enclosing checkout; the source manifest identifies the actual frozen baseline.",
+      "Token budgets are upstream settings, not measured tokens. No provider or cost instrumentation is available."
+    ],
+    "measurements": {
+      "snapshot_at": "2026-10-29T18:18:02.359188+00:00",
+      "coverage": "This pilot process only; local child commands and explicit MCP requests. Excludes orchestrator/agent and provider activity.",
+      "recorded_cli_commands_observed": 10,
+      "git_read_commands_observed": 9,
+      "mcp_protocol_requests_observed": 6,
+      "outer_tool_calls": null,
+      "agent_starts": null,
+      "provider_requests": null,
+      "tokens": null,
+      "cost": null,
+      "agent_elapsed_seconds": null,
+      "command_retries": 0,
+      "pilot_elapsed_seconds": 8.670739
+    },
+    "raw_report_sha256": "a4e2e824ba1011363ad5f7e6fdf6dd333240d511702cb45a0fe121bac0f8b054"
+  },
+  "workspace": {
+    "status": "passed",
+    "recorded_at": "2026-10-29T18:17:54.657541+00:00",
+    "graph": {
+      "nodes": 222,
+      "edges": 550,
+      "sha256": "4c794d5013aa80d71d6cf39f16efda10de71b75b9ba2e7db39fa46ba93e0b61b",
+      "bytes": 198510
+    },
+    "limitations": [
+      "One known public component and helper chain; not a blind or comprehensive evaluation.",
+      "Serve validates a snapshot at startup; source edits require restarting the MCP session.",
+      "Calls edges and AST source checks do not establish complete runtime semantics.",
+      "Shortest path considers containment too; the end-to-end route may use the file node. Each adjacent helper call is separately checked through real MCP shortest_path.",
+      "Source is read and parsed, never imported, built, or executed.",
+      "Per-operation elapsed time and bytes are observations, not speed or token-saving claims.",
+      "No global client configuration or model API is used. Provider/tokens/cost are unmeasured."
+    ],
+    "measurements": {
+      "snapshot_at": "2026-10-29T18:18:10.042889+00:00",
+      "coverage": "This trial process and explicit CLI/MCP operations only; excludes orchestrator and providers.",
+      "cli_commands_observed": 13,
+      "mcp_requests_observed": 6,
+      "mcp_notifications_included": false,
+      "command_retries": 0,
+      "outer_tool_calls": null,
+      "agent_starts": null,
+      "provider_requests": null,
+      "tokens": null,
+      "cost": null,
+      "elapsed_seconds": 15.385368
+    },
+    "raw_report_sha256": "3909cb21e535624fb225b85b12db1bef177a880e974cf36d92fc155e5d1aa9d7"
+  }
+}

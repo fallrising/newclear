@@ -1,0 +1,13 @@
+{
+  "at": "2026-11-02T19:26:59.511774+00:00",
+  "archive": "/home/ckc/test/backup/cms-pp1c-c-20261102-bindings-capacity/source-evidence.tar.gz",
+  "sha256": "0b761e4433a7dd8609ba24d23bcc68978ff0765bc6a8b24542531c9215ae1a77",
+  "selectedFiles": 2464,
+  "tarEntries": 2470,
+  "node": "751/751,0fail/cancel/skip,68932.156479ms",
+  "review": "T154DONE bounded fixes only",
+  "productUncommitted": true,
+  "ownerDecision": "PR1012 pending; no C/D acceptance",
+  "priorSnapshotPreserved": "d58f1ff91d57d681edf7ea7d402f5bddb6e720ec1c91008c29815bec8fe8615d",
+  "rawRuntime": "excluded; preserved local/pp1 and Docker volumes/locks"
+}

@@ -1,0 +1,8 @@
+{
+  "version": 1,
+  "original": "web-final-driver.log",
+  "sha256": "3b69e8eb206172d050a3d721005ef52a440b667a133a01faacda081deac58c9b",
+  "byteSize": "820",
+  "encoding": "utf-8",
+  "text": "{\"command\": [\"npm\", \"test\"], \"startedAt\": \"2026-11-02T17:57:32.741180+00:00\", \"exit\": 0, \"elapsedSeconds\": 170.35825468995608}\n{\"command\": [\"npm\", \"run\", \"lint\"], \"startedAt\": \"2026-11-02T18:00:23.099848+00:00\", \"exit\": 0, \"elapsedSeconds\": 9.763289282098413}\n{\"command\": [\"npm\", \"run\", \"typecheck\"], \"startedAt\": \"2026-11-02T18:00:32.863533+00:00\", \"exit\": 0, \"elapsedSeconds\": 25.008948522154242}\n{\"command\": [\"npm\", \"run\", \"build\"], \"startedAt\": \"2026-11-02T18:00:57.872977+00:00\", \"exit\": 0, \"elapsedSeconds\": 12.023302875924855}\n{\"command\": [\"npm\", \"run\", \"test:bundle\"], \"startedAt\": \"2026-11-02T18:01:09.896727+00:00\", \"exit\": 0, \"elapsedSeconds\": 0.16427165688946843}\n{\"command\": [\"npm\", \"run\", \"measure:bundle\"], \"startedAt\": \"2026-11-02T18:01:10.061457+00:00\", \"exit\": 0, \"elapsedSeconds\": 1.2702486070338637}\n"
+}

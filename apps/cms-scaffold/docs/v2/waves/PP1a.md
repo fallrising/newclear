@@ -100,6 +100,8 @@ ingress使用已驗證可執行host Node24.18 binary的既有Linux工具image（
 
 `docker/pp1-api.Dockerfile`只ARG BASE_IMAGE（既有含JRE25/curl的本地API image完整sha256 ID，build前後核對其完整ID，不pull）FROM它，WORKDIR/app，COPY services/cms-api/build/libs/*.jar /app/app.jar，EXPOSE8080與ENTRYPOINT java -jar。健康檢查不用假設新base含curl：沿現有API image有curl作BASE_IMAGE並確認JRE25。本波固定沿現有API runtime image為BASE_IMAGE（含JRE25/curl），覆蓋app.jar；不改base package或安裝curl。Dockerfile用PP1_SOURCE_COMMIT／PP1_JAR_SHA256與唯一BASE_IMAGE參數寫org.cms.pp1.source-commit／jar-sha256／base-image labels；BASE_IMAGE必完整sha256 ID，同一值直接用於FROM與base-image label，沒有第二份base ID輸入；prepare要求source等於HEAD、jarSHA等於本工作樹唯一bootJar、base是本機Linuximage。receipt與artifacts保存apiBuild，verify比對labels且對owned API固定exec sha256sum /app/app.jar核對實際jar；ingressscript也記hash並核对。dirty=true仍明示未提交建置，不宣稱HEAD已包含dirty內容。build後記新imageID、jarSHA與baseID。正式rebuild供應链與base更新留後續正式runtime規格，不能聲稱已封存正式release。
 
+2026-11-01 owner 本機續作例外（本次對話明確回覆「批准。」）：歷史驗證映像不存在時，root 可在 shared cache 或拋棄式本機映像準備既定 JDK/JRE25、PostgreSQL16 與 browser/NSS 工具，包括 JRE base 所需 curl。開始 run 前核對來源 digest、package versions 與完整結果 image IDs。此例外只替代舊映像／工具已存在的前提；不改產品 runtime dependency／lockfile、全機信任、privileged／hostnetwork 或公開 DB/API ports。prepare／Compose／browser launch 仍只接收已核對且已存在的完整 IDs，不自動 pull；同來源 JAR／dist／ingress、scoped TLS、fresh volumes、秘密傳遞及所有原驗收斷言保留。不授權部署或 release。具體批准提案與原準備過程見 `.team/resume-20261101/PLAN.md`。
+
 API正常Flyway migrate全新庫，再seed catalog/roles；無principal/permission/session/entry/media/navigation，允許catalog。bootstrap未做，匿名受限端點應拒絕且Admin可見登入畫面；不能靠demo登入驗收。PP1b fresh-init的raw identity freshness可接受catalog已存在；不得沿用早期「所有content catalog也空」的host草案限制來誤認衝突。
 
 ### 5.3 實跑與browser

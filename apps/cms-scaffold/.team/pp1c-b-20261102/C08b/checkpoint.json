@@ -1,0 +1,24 @@
+{
+  "card": "C08b",
+  "changes": {
+    "local-bundle.mjs": {
+      "added": 75,
+      "removed": 1,
+      "sha256": "14924b440430061e232dad3d26ae90039d38751dbb899bf5f5aa88370f8f8a6b"
+    },
+    "local-bundle.test.mjs": {
+      "added": 40,
+      "removed": 2,
+      "sha256": "84400311e867078bb7c05bf474364700d36b6b2b58d651dab45fb65c1a14c061"
+    }
+  },
+  "total": 118,
+  "tests": "20/20 focused pass",
+  "sources": {
+    "pp1c-pg-backup-archiver.h": "8aee5413c3aad66c7301274b362236f2d64aabc49b2bbe293aab4c2f33499ab9",
+    "pp1c-pg-backup-archiver.c": "0bd089b6ce1c800b3e791170726669aa2db8452c116dfb719890278a49032322",
+    "pp1c-pg-backup-custom.c": "b82b4ba0edaa10991ece118012c6e471a43f1b8b22365aebb0dd7d420180b9da"
+  },
+  "official_source_base": "https://github.com/postgres/postgres/tree/REL_16_STABLE/src/bin/pg_dump",
+  "scope": "framing/compression completeness only; real PG16 archive compatibility accepted and truncated copy rejected (real-archive.log)"
+}

@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.fallrising.cms.ops.RecoveryInventoryMainTests" tests="16" skipped="0" failures="0" errors="0" timestamp="2026-11-02T14:33:22.771Z" hostname="hrv" time="0.166">
+  <properties/>
+  <testcase name="pp1cSymlinkRequestRejectedBeforeConnection()" classname="com.fallrising.cms.ops.RecoveryInventoryMainTests" time="0.036"/>
+  <testcase name="pp1cReceiptIsNotEmittedWhenRollbackFails()" classname="com.fallrising.cms.ops.RecoveryInventoryMainTests" time="0.028"/>
+  <testcase name="pp1cDatabaseFailureNeverLeaksCauseOrPrintsSuccess()" classname="com.fallrising.cms.ops.RecoveryInventoryMainTests" time="0.006"/>
+  <testcase name="pp1cPermitMustEndAtEof()" classname="com.fallrising.cms.ops.RecoveryInventoryMainTests" time="0.008"/>
+  <testcase name="pp1cFixedArgumentsRejectCallerSelectedRequest()" classname="com.fallrising.cms.ops.RecoveryInventoryMainTests" time="0.005"/>
+  <testcase name="pp1cDuplicateAndNoncanonicalRequestRejected()" classname="com.fallrising.cms.ops.RecoveryInventoryMainTests" time="0.006"/>
+  <testcase name="pp1cPermitMismatchAndTrailingBytesNeverInspect()" classname="com.fallrising.cms.ops.RecoveryInventoryMainTests" time="0.007"/>
+  <testcase name="pp1cCanonicalBytesMatchNodeProtocolVector()" classname="com.fallrising.cms.ops.RecoveryInventoryMainTests" time="0.004"/>
+  <testcase name="pp1cOversizeRequestRejectedBeforeConnection()" classname="com.fallrising.cms.ops.RecoveryInventoryMainTests" time="0.005"/>
+  <testcase name="pp1cExistingOutputIsNeverOverwritten()" classname="com.fallrising.cms.ops.RecoveryInventoryMainTests" time="0.006"/>
+  <testcase name="pp1cUnsafeRequestAndSecretFailBeforeDatabase()" classname="com.fallrising.cms.ops.RecoveryInventoryMainTests" time="0.003"/>
+  <testcase name="pp1cSuccessBindsReadyPermitAndWritesPrivateArtifactBeforeResult()" classname="com.fallrising.cms.ops.RecoveryInventoryMainTests" time="0.017"/>
+  <testcase name="pp1cMalformedRequestRejectedBeforeConnection()" classname="com.fallrising.cms.ops.RecoveryInventoryMainTests" time="0.007"/>
+  <testcase name="pp1cEmptyPermitRollsBackAndClosesWithoutInspection()" classname="com.fallrising.cms.ops.RecoveryInventoryMainTests" time="0.007"/>
+  <testcase name="pp1cWrongBackendHashRejectsPermit()" classname="com.fallrising.cms.ops.RecoveryInventoryMainTests" time="0.007"/>
+  <testcase name="pp1cLinkedSecretRejectedBeforeConnection()" classname="com.fallrising.cms.ops.RecoveryInventoryMainTests" time="0.004"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[INPUT_INVALID
+CAPTURE_FAILED
+CAPTURE_FAILED
+INPUT_INVALID
+INPUT_INVALID
+INPUT_INVALID
+INPUT_INVALID
+INPUT_INVALID
+INPUT_INVALID
+INPUT_INVALID
+INPUT_INVALID
+CAPTURE_FAILED
+INPUT_INVALID
+INPUT_INVALID
+INPUT_INVALID
+INPUT_INVALID
+INPUT_INVALID
+INPUT_INVALID
+INPUT_INVALID
+INPUT_INVALID
+]]></system-err>
+</testsuite>

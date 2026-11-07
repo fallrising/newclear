@@ -1,0 +1,8 @@
+{
+  "version": 1,
+  "original": "C14n2-wrapper-red.log",
+  "sha256": "942c46014fe4e8268f237fd0266577ce3685a2e948ac20e7dbcf378e1d173d21",
+  "byteSize": "1101",
+  "encoding": "utf-8",
+  "text": "✖ PP1c_C14n2_real_registry_REVOKE_wrapper_uses_private_raw_material_and_authority (1267.478965ms)\nℹ tests 1\nℹ suites 0\nℹ pass 0\nℹ fail 1\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 1337.860199\n\n✖ failing tests:\n\ntest at scripts/local/maintenance-workflow.test.mjs:862:1\n✖ PP1c_C14n2_real_registry_REVOKE_wrapper_uses_private_raw_material_and_authority (1267.478965ms)\n  Error: ADAPTER_UNSEALED\n      at requirePolicy (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-c-20261102/apps/cms-scaffold/scripts/local/maintenance-helper.mjs:13:52)\n      at runOwnedHelper (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-c-20261102/apps/cms-scaffold/scripts/local/maintenance-helper.mjs:542:3)\n      at TestContext.<anonymous> (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-c-20261102/apps/cms-scaffold/scripts/local/maintenance-workflow.test.mjs:863:70)\n      at async Test.run (node:internal/test_runner/test:1332:7)\n      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:385:3) {\n    code: 'ADAPTER_UNSEALED',\n    phase: null,\n    operationId: null\n  }\n"
+}

@@ -1,6 +1,6 @@
 # Portfolio
 
-只記錄**現行**決策。被取代的條文直接刪除，歷史以 git log 為準。最後更新：2026-10-17。
+只記錄**現行**決策。被取代的條文直接刪除，歷史以 git log 為準。最後更新：2026-10-24。
 
 > **權威來源**：投入決策（做不做）以 owner 的私人項目帳本為準；本檔是它的**公開摘要**，
 > 不再是第二份決策來源。兩者不一致時以帳本為準，並回頭修正本檔。帳本裡的目標、計畫與任務內容不在此公開。
@@ -38,6 +38,7 @@
 | `kernel/personal/relayvault` | 未知 | — | v0.2 release 需先完成 production no-overwrite cutover，並另行授權。 |
 | `newclear/products/kith` | 在用 | A | 人機群聊。不復活 `labs/bee-swarm`；不擴充 `platform/fanzloud` 或 `gateways/pokercase` 的原始碼來承載房間。 |
 | `newclear/platform/agent-platform` | 未知 | A | 自管多任務 agent Web 工作台，範本 OpenHands Agent Canvas，整合 Cocoon sandbox。與 `fanzloud`、`kith` 責任分開，不改動它們的實作；不是部署宣告。見 [README](platform/agent-platform/README.md)。 |
+| `newclear/platform/spring-pool` | 未知 | A | 有界 MVP：單人腳本版本庫、固定版本 runbook、Markdown 匯出；不含執行器或遠端命令。開發中，尚未宣稱部署或驗收。見 [README](platform/spring-pool/README.md)。 |
 | `newclear/platform/agent-workforce` | 未知 | A | 2026-10-11 本次投入限跨產品數位工作者 SDD：多帳號／權益／資源、原生調用、持久訊息／會話與恢復；重用 Kith 的聊天及可選執行後端，工作完成仍由外部工作系統決定。未實作、未配置帳號、未部署。見 [README](platform/agent-workforce/README.md)。 |
 | `newclear/platform/edge-ops` | 未知 | A | Cloudflare + Host Agent 主機監控／受控操作設計；SDD + M0 契約層（TS/Go 共用向量、D1 transaction spike），無 runtime 或 live deployment。預設 monitor-only；既有 OneVPS／OneFleet authority 不變，真實主機變更另行授權。見 [README](platform/edge-ops/README.md)。 |
 | `newclear/platform/signal-hub` | 未知 | A | 個人事件中樞：已提供事件寫入、來源新鮮度、看板、規則指標與門檻事件；投遞與封存待後續里程碑。部署另行授權。見 [README](platform/signal-hub/README.md)。 |
@@ -79,7 +80,7 @@ fe-review 例外：C 檔元件可以在 [fe-review](docs/fe-review/README.md) �
 | `newclear/systems/snail` | 未知 | C | 保留 benchmark 歷史。 |
 | `newclear/systems/ojbquay` | 未知 | C | 維持現有環境，不擴建。 |
 | `newclear/systems/wotar` | 未知 | C | security-sensitive E2EE client；恢復時不能只靠 local suite 維護。 |
-| `newclear/platform/fanzloud` | 未知 | C | 不投資 cloud execution layer。archive source 的 open PR #3/#4 保存決策待決。 |
+| `newclear/platform/fanzloud` | 開發中 | A | 2026-10-31 owner 要求廠商中立主線重校；[SDD](platform/fanzloud/SDD.md) 提案由 Fanzloud 提供 Web、優先重用 Agent Platform 隔離執行，owner 已批准（PR849）；已批准 T-0447 executor／私人 KVM 依賴，M1 真瀏覽器單任務已產生實際 diff 與通過檢查；第二廠商／並行／持久恢復尚未驗。既有 P0 fake 已驗、live 未跑；不是部署宣告。見 [SUCCESS](platform/fanzloud/SUCCESS.md)。 |
 | `newclear/apps/loom` | 未知 | C | 不做 plugin/runtime backlog。 |
 | `newclear/apps/flowshot` | 未知 | C | `agent/sdd-baseline` 去留待決。 |
 | `newclear/platform/dim-gate` | 未知 | A | CMDB 運維自助平台前端 demo；檔位仍為 A，是否降為 C 待決。 |
@@ -112,7 +113,10 @@ fe-review 例外：C 檔元件可以在 [fe-review](docs/fe-review/README.md) �
 
 | 元件 | 使用 | 檔位 | 範圍與限制 |
 | --- | --- | --- | --- |
+| `newclear/tools/motion-prompt` | 未知 | 未分級 | 完整雙語靜態圖鑑改作；固定來源與驗收規格，長期投入未分級。見 [README](tools/motion-prompt/README.md)。 |
+| `newclear/platform/cloud-lab` | 未知 | 未分級 | Owner 2026-10-26 指示文件先行後繼續 M1 開發：知識樹、共同介面、Workers/D1、唯讀 runner 與看板已有首輪真實閉環及隔離還原證據；常駐與完整驗收進行中，不搬程式或接管現有 authority。長期投入另按里程碑決定。見 [README](platform/cloud-lab/README.md)。 |
 | `newclear/labs/browser-fingerprint` | 未知 | 未分級 | 有界的瀏覽器設備／操作觀測實驗：Go mock CRUD、既有五步操作教學、分析工具與公開／私人 Quick Tunnel 啟動方式；未決定長期投入。見 [README](labs/browser-fingerprint/README.md)。 |
+| `newclear/labs/iris-lab` | 未知 | 未分級 | 本輪限固定 Iris／模型版本研究、SDD 與驗收設計；尚無 runtime 或實機出圖，長期投入待決。見 [README](labs/iris-lab/README.md)。 |
 | `newclear/labs/m4-seat` | 未知 | 未分級 | 只收錄 M4 Max 48GB 單人座位的運行方案與驗收清單。沒有 runtime，沒有在目標機器計時，不授權部署或 24/7 服務。見 [README](labs/m4-seat/README.md)。 |
 
 ## 重疊與 canonical 邊界
@@ -138,7 +142,7 @@ study repo 合併進去。
 `agent-workforce` 擁有跨產品的工作者／帳號／資源綁定、持久通信與調用協調；本次只到 SDD。Kith 的聊天／個人訂閱喚醒規則、Agent Platform 的隔離 Run、HAI Taskboard 的交付驗收各自保留；Workforce 只透過 adapter 與外部 references 接合，不另造工作完成權威。
 
 `kernel/agents/codex-team-superpowers` 是可驗證的 workflow canonical。`agent-platform`（自管 agent 工作台）、`kith`（人機群聊）、
-`fanzloud`（personal BYOS／Codex Cloud，休眠）責任分開。`pokercase` 不加入 agent orchestration。
+`fanzloud`（personal BYOS／Codex Cloud，僅 P0 主線復工）責任分開。`pokercase` 不加入 agent orchestration。
 
 ### 個人自動化與傳輸
 
@@ -166,3 +170,5 @@ edge 擁有 request／effect admission，policy 擁有 feature resolution／eval
    Goku `copilot`／`gemini`、Flowshot `agent/sdd-baseline`、Bee Swarm `project-restructure`？Phark 的保存 branch 是否視為被 PR #10/#11 取代？
 3. archived `config_center` 歷史中曝光的 n8n PostgreSQL／basic-auth credential 是否已輪換？repo 已 archive 不等於風險已解除。
 4. 繼續投入目前有 16 項，遠超過 2026-09-05 提議的 3 條戰線上限。還要設上限嗎？要的話，上限是多少？
+
+2026-10-31 T-0442：上述 Fanzloud／Agent Platform／Workforce 責任分開的基準有一份[明示調整提案](platform/fanzloud/docs/adr/ADR-0008-provider-neutral-mainline.md)。批准前不改相鄰專案責任或實作；不以跨專案整合之名同時啟動三套未完成產品。

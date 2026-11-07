@@ -1,0 +1,120 @@
+{
+  "id": "automation-blueprint-reuse",
+  "system": "automation",
+  "edition": 1,
+  "name": {
+    "zh": "生产模块蓝图复用",
+    "en": "Reusable factory blueprints"
+  },
+  "summary": {
+    "zh": "把验证过的生产单元保存下来，快速复制并适配新场地。",
+    "en": "Save a proven production module, then replicate and adapt it elsewhere."
+  },
+  "rules": {
+    "zh": "玩家先搭出能运行的模块，再记录布局与配置并重复放置。材料、可用空间和外部连接仍需满足；复制后用产出表现检验接口是否接好。",
+    "en": "Players build a working module, save its layout and settings, then place copies. Materials, space and external connections still matter; output verifies that interfaces are connected."
+  },
+  "loop": [
+    {
+      "zh": "试做一个模块",
+      "en": "Prototype one module"
+    },
+    {
+      "zh": "保存布局",
+      "en": "Save the layout"
+    },
+    {
+      "zh": "选择位置并复制",
+      "en": "Place a copy"
+    },
+    {
+      "zh": "接好外部接口",
+      "en": "Connect external interfaces"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "通用模块适应面广，但可能不如定制布局紧凑。",
+      "en": "A reusable module fits more situations but may be less compact than a custom layout."
+    },
+    {
+      "zh": "先复制一份测试接口，还是一次铺满以节省操作？原模块有错会跟着复制多少次？",
+      "en": "Test one copy and its connections, or place many at once? How many copies would inherit an existing fault?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "模板尺寸",
+        "en": "Template size"
+      },
+      "effect": {
+        "zh": "小模板鼓励接口标准化，大模板降低重复劳动。",
+        "en": "Small templates reward standardized interfaces; large ones reduce repetition."
+      }
+    },
+    {
+      "name": {
+        "zh": "复制成本",
+        "en": "Replication cost"
+      },
+      "effect": {
+        "zh": "保留材料成本让蓝图省操作而不跳过资源经营。",
+        "en": "Keeping material costs makes blueprints save actions without bypassing resource management."
+      }
+    }
+  ],
+  "tags": [
+    "creativity",
+    "planning",
+    "optimization"
+  ],
+  "related": [
+    "automation-aerial-logistics",
+    "automation-belt-routing",
+    "automation-byproduct-loop",
+    "automation-conditional-control"
+  ],
+  "contrast": {
+    "zh": "Factorio从现有世界框选并安排后续建造；Satisfactory先在指定设计空间制作模板。",
+    "en": "Factorio captures layouts in the world for later construction; Satisfactory uses a designated design volume."
+  },
+  "combination": {
+    "zh": "让玩家把通过压力测试的防灾设施存为模块，下一个关卡改变地形，要求重新安排接口。",
+    "en": "Let players save disaster-proof modules after stress tests, then rearrange their interfaces for new terrain."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "你已经搭好一套能稳定做铁板的小产线，现在需要三倍产量。",
+      "en": "One small plate line works reliably, and you now need three times its output."
+    },
+    "action": {
+      "zh": "你保存这一模块，在空地复制两份，再逐个接通输入和电力。",
+      "en": "Save the module, place two copies and connect their input and power one at a time."
+    },
+    "result": {
+      "zh": "布局不用重搭，但接口没接好的副本仍不能生产。",
+      "en": "Layouts need no rebuilding, but unconnected copies still cannot run."
+    },
+    "next": {
+      "zh": "确认新模块稳定后更新蓝图，避免继续复制旧问题。",
+      "en": "Once the new copies work, update the blueprint rather than reproducing old faults."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "做小网格上的框选、保存与放置，并检查材料和占位；先只支持几种建筑。",
+      "en": "Implement selection, saving and placement on a small grid with material and occupancy checks, supporting a few building types."
+    },
+    "pitfall": {
+      "zh": "旋转、镜像、跨层与版本兼容会增加保存格式复杂度，先把原样复制做可靠。",
+      "en": "Rotation, mirroring, multiple floors and version compatibility complicate saves; make exact copying reliable first."
+    },
+    "test": {
+      "zh": "玩家复制后是否会检查接口，且发现原模块错误后能修正而非继续放大故障？",
+      "en": "Do players inspect interfaces after copying and correct the source module when a repeated fault appears?"
+    }
+  }
+}

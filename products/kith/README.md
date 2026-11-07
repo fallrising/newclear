@@ -28,6 +28,8 @@
 
 ## 設計探索
 
+- [Agent 活動視圖與辦公室動畫：開發計畫](docs/plans/agent-activity-office.md)：本房活動卡、查看紀錄與提及入口，再以同一資料呈現 2D 工位。此次為文件里程碑；程式尚未實作，公開 demo 與真實房間資料分開。追蹤 [#629](https://github.com/fallrising/newclear/issues/629)。
+
 - [Cloudflare 閱讀與快記模組：MVP 計畫](docs/plans/cloudflare-reading-capture.md)：階段 1 已實作 operator 私人 `/captures` 快記與收件匣、冪等重送／衝突及本機草稿；RC-01～04 本地 CF 桌面／手機驗證見 [#456 報告](tasks/456-reading-capture-phase1/report.md)。[0007 migration](migrations/0007_reading_capture.sql) 經隔離 D1 驗證納入；沒有套用正式環境或部署。完全斷網重載須待連線恢復才能開啟介面並取回草稿；沒有離線隊列。階段 2 已加入私人 `/reading`、原文筆記 revision CAS、固定 commit 建置、自動更新及可恢復的 D1→Git 匯出；RC-01～07 十二項本地驗收通過。操作與 Linux／Git 衝突限制見 [reading/README](reading/README.md)，證據見 [#463 報告](tasks/463-reading-capture-phase2/report.md)。專用憑證可在閱讀頁建立／撤銷；新 migration 0008 只增加雜湊憑證表。正式內容 repo、憑證、週期排程及部署須另行接線，這次沒有執行。
 
 ## 規格章節

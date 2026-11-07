@@ -1,0 +1,120 @@
+{
+  "id": "progression-challenge-tiers",
+  "system": "progression",
+  "edition": 2,
+  "name": {
+    "zh": "通关后追加难度条件",
+    "en": "Escalating challenge conditions"
+  },
+  "summary": {
+    "zh": "熟悉规则后，给同一套挑战再加一道限制。",
+    "en": "Add another constraint after mastering the base challenge."
+  },
+  "rules": {
+    "zh": "玩家完成基础挑战后，解锁更难的层级或自行挑选限制条件，例如更少治疗或更强敌人。新一轮沿用熟悉内容，却要求调整策略；界面应明确本轮额外改变了什么。",
+    "en": "After completing the base challenge, unlock tougher tiers or choose added restrictions such as less healing or stronger enemies. Familiar content now demands a revised strategy, and the interface states exactly what changed."
+  },
+  "loop": [
+    {
+      "zh": "完成当前挑战",
+      "en": "Complete the current challenge"
+    },
+    {
+      "zh": "查看新增限制",
+      "en": "Read the added restriction"
+    },
+    {
+      "zh": "调整方案再次挑战",
+      "en": "Adapt and retry"
+    },
+    {
+      "zh": "记录完成条件并继续加难",
+      "en": "Record success and escalate"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "提升难度争取新目标，还是停留在熟悉层级练习薄弱环节？",
+      "en": "Raise difficulty for a new goal or practice a weakness at a familiar level?"
+    },
+    {
+      "zh": "如果能自选限制，削减补给和加强敌人，哪一种更能由当前能力承担？",
+      "en": "When restrictions are selectable, can the current setup handle fewer supplies or stronger enemies better?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "限制是否累积",
+        "en": "Cumulative restrictions"
+      },
+      "effect": {
+        "zh": "累积限制更考验整体熟练度；独立限制更便于练习单一问题。",
+        "en": "Stacked restrictions test overall mastery; independent ones isolate a skill."
+      }
+    },
+    {
+      "name": {
+        "zh": "新增条件的可见性",
+        "en": "Modifier visibility"
+      },
+      "effect": {
+        "zh": "开局列清改变，能让失败归因于具体限制，而不是感觉游戏突然不公平。",
+        "en": "A clear start-of-run list makes losses attributable to specific changes."
+      }
+    }
+  ],
+  "tags": [
+    "progression",
+    "risk",
+    "planning"
+  ],
+  "related": [
+    "progression-death-loses-training",
+    "progression-evolution-recipes",
+    "progression-permanent-run-currency",
+    "progression-practice-based-growth"
+  ],
+  "contrast": {
+    "zh": "《杀戮尖塔》主要沿固定层级逐步累加；《哈迪斯》让玩家自己拼出难度条件，更强调选择哪种压力。",
+    "en": "Slay the Spire largely follows fixed cumulative tiers; Hades lets players compose conditions and choose the kind of pressure."
+  },
+  "combination": {
+    "zh": "设计提案：洞穴通关后开放“照明燃料减半”条件；路线仍相同，但玩家必须改带物资和折返时机。",
+    "en": "Design proposal: unlock a half-lighting-fuel challenge for a familiar cave, requiring different supplies and turnaround timing."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "你已通过三间房；下一级新增“每次治疗只能恢复 1 点”，原本是 3 点。",
+      "en": "You cleared three rooms; the next tier reduces healing from 3 health to 1."
+    },
+    "action": {
+      "zh": "你放弃依赖治疗的道具，改选能挡一次伤害的护盾。",
+      "en": "Replace a healing-focused item with a shield that blocks one hit."
+    },
+    "result": {
+      "zh": "同一个敌人仍按旧节奏攻击，但失误更难补回。",
+      "en": "The enemy keeps its familiar rhythm, but mistakes are harder to repair."
+    },
+    "next": {
+      "zh": "通关后再决定接受下一个条件，或留在这里练稳定性。",
+      "en": "After winning, add another condition or practice consistency here."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "做一个已经能通关的短挑战，再加两项可分别开关的明确限制。",
+      "en": "Build a beatable short challenge, then two clearly stated modifiers that can be toggled separately."
+    },
+    "pitfall": {
+      "zh": "别只无限加血量；优先让限制改变选择，而不是延长重复操作。",
+      "en": "Avoid only increasing health; modifiers should change decisions instead of prolonging repetition."
+    },
+    "test": {
+      "zh": "开启限制后，玩家是否改变了一项准备或行动，而非只是多打几次？",
+      "en": "Does enabling a modifier change a preparation or action instead of merely adding repetitions?"
+    }
+  }
+}

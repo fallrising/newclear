@@ -1,0 +1,6 @@
+{
+  "changedLines": 2,
+  "totalFixtureChangedLines": 6,
+  "sha256": "57d5bfe068a0a013ed19a64e5042202f2597a072a53c430d1e30f9a692e07b98",
+  "cause": "Existing T146 exact jdbcUrl expectation still referenced old /24 fixture; corrected to fixed /26 tuple without weakening assertion."
+}

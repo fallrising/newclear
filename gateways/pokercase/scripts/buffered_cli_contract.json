@@ -1,0 +1,1873 @@
+{
+  "schema_version": 1,
+  "stage_inventory": [
+    "protocols",
+    "raw_quality",
+    "cancellation",
+    "collection_limit",
+    "fallback",
+    "tool_sessions",
+    "storage_restart",
+    "admission",
+    "surfaces"
+  ],
+  "case_inventory": [
+    "claude_chat",
+    "claude_messages",
+    "claude_responses",
+    "claude_partial",
+    "claude_missing",
+    "claude_zero",
+    "claude_invalid",
+    "claude_error",
+    "claude_eof",
+    "claude_incomplete",
+    "claude_unknown",
+    "claude_cancel_before",
+    "claude_cancel_after",
+    "claude_limit",
+    "claude_fallback",
+    "cursor_chat",
+    "cursor_messages",
+    "cursor_responses",
+    "cursor_partial",
+    "cursor_missing",
+    "cursor_zero",
+    "cursor_invalid",
+    "cursor_error",
+    "cursor_eof",
+    "cursor_cancel_before",
+    "cursor_cancel_after",
+    "cursor_limit",
+    "cursor_fallback",
+    "claude_tool_chat",
+    "claude_tool_messages",
+    "claude_tool_responses",
+    "claude_live_saved_resume",
+    "claude_resume_retry",
+    "claude_reserve_fresh",
+    "claude_finalization_restart",
+    "cursor_reserve_fresh",
+    "cursor_finalization_restart",
+    "claude_reserve_live",
+    "claude_reserve_tool",
+    "claude_reserve_saved",
+    "cursor_tool_refusal_chat",
+    "cursor_tool_refusal_messages",
+    "cursor_tool_refusal_responses",
+    "cursor_image_refusal",
+    "cursor_disabled_refusal"
+  ],
+  "cases": [
+    {
+      "name": "claude_chat",
+      "stage": "protocols",
+      "provider": "claude",
+      "fixture_model": "complete",
+      "rows": [
+        {
+          "usage_source": "claude_code_stream_event_v1",
+          "outcome": "succeeded",
+          "usage_status": "complete",
+          "prompt_tokens": 17,
+          "completion_tokens": 5,
+          "reported_usage": {
+            "input_tokens": 12,
+            "output_tokens": 5,
+            "cache_read_input_tokens": 3,
+            "cache_creation_input_tokens": 2
+          },
+          "status": null,
+          "headers_ms": null,
+          "estimated_cost_usd": null,
+          "first_output_present": true,
+          "cli_ready_present": true,
+          "total_observed_present": true,
+          "error": null
+        }
+      ],
+      "counts": {
+        "client_requests": 1,
+        "actual_spawns": 1,
+        "actual_user_inputs": 1,
+        "actual_tool_dispatches": 0,
+        "preflight_refusals": 0
+      },
+      "wire_statuses": [
+        200
+      ],
+      "wire_text": "Hello from the offline gateway."
+    },
+    {
+      "name": "claude_messages",
+      "stage": "protocols",
+      "provider": "claude",
+      "fixture_model": "complete",
+      "rows": [
+        {
+          "usage_source": "claude_code_stream_event_v1",
+          "outcome": "succeeded",
+          "usage_status": "complete",
+          "prompt_tokens": 17,
+          "completion_tokens": 5,
+          "reported_usage": {
+            "input_tokens": 12,
+            "output_tokens": 5,
+            "cache_read_input_tokens": 3,
+            "cache_creation_input_tokens": 2
+          },
+          "status": null,
+          "headers_ms": null,
+          "estimated_cost_usd": null,
+          "first_output_present": true,
+          "cli_ready_present": true,
+          "total_observed_present": true,
+          "error": null
+        }
+      ],
+      "counts": {
+        "client_requests": 1,
+        "actual_spawns": 1,
+        "actual_user_inputs": 1,
+        "actual_tool_dispatches": 0,
+        "preflight_refusals": 0
+      },
+      "wire_statuses": [
+        200
+      ],
+      "wire_text": "Hello from the offline gateway."
+    },
+    {
+      "name": "claude_responses",
+      "stage": "protocols",
+      "provider": "claude",
+      "fixture_model": "complete",
+      "rows": [
+        {
+          "usage_source": "claude_code_stream_event_v1",
+          "outcome": "succeeded",
+          "usage_status": "complete",
+          "prompt_tokens": 17,
+          "completion_tokens": 5,
+          "reported_usage": {
+            "input_tokens": 12,
+            "output_tokens": 5,
+            "cache_read_input_tokens": 3,
+            "cache_creation_input_tokens": 2
+          },
+          "status": null,
+          "headers_ms": null,
+          "estimated_cost_usd": null,
+          "first_output_present": true,
+          "cli_ready_present": true,
+          "total_observed_present": true,
+          "error": null
+        }
+      ],
+      "counts": {
+        "client_requests": 1,
+        "actual_spawns": 1,
+        "actual_user_inputs": 1,
+        "actual_tool_dispatches": 0,
+        "preflight_refusals": 0
+      },
+      "wire_statuses": [
+        200
+      ],
+      "wire_text": "Hello from the offline gateway."
+    },
+    {
+      "name": "claude_partial",
+      "stage": "raw_quality",
+      "provider": "claude",
+      "fixture_model": "partial",
+      "rows": [
+        {
+          "usage_source": "claude_code_stream_event_v1",
+          "outcome": "succeeded",
+          "usage_status": "partial",
+          "prompt_tokens": null,
+          "completion_tokens": 5,
+          "reported_usage": {
+            "input_tokens": 12,
+            "output_tokens": 5,
+            "cache_read_input_tokens": null,
+            "cache_creation_input_tokens": null
+          },
+          "status": null,
+          "headers_ms": null,
+          "estimated_cost_usd": null,
+          "first_output_present": true,
+          "cli_ready_present": true,
+          "total_observed_present": true,
+          "error": null
+        }
+      ],
+      "counts": {
+        "client_requests": 1,
+        "actual_spawns": 1,
+        "actual_user_inputs": 1,
+        "actual_tool_dispatches": 0,
+        "preflight_refusals": 0
+      },
+      "wire_statuses": [
+        200
+      ],
+      "wire_text": "Hello from the offline gateway."
+    },
+    {
+      "name": "claude_missing",
+      "stage": "raw_quality",
+      "provider": "claude",
+      "fixture_model": "missing",
+      "rows": [
+        {
+          "usage_source": "claude_code_stream_event_v1",
+          "outcome": "succeeded",
+          "usage_status": "missing",
+          "prompt_tokens": null,
+          "completion_tokens": null,
+          "reported_usage": null,
+          "status": null,
+          "headers_ms": null,
+          "estimated_cost_usd": null,
+          "first_output_present": true,
+          "cli_ready_present": true,
+          "total_observed_present": true,
+          "error": null
+        }
+      ],
+      "counts": {
+        "client_requests": 1,
+        "actual_spawns": 1,
+        "actual_user_inputs": 1,
+        "actual_tool_dispatches": 0,
+        "preflight_refusals": 0
+      },
+      "wire_statuses": [
+        200
+      ],
+      "wire_text": "Hello from the offline gateway."
+    },
+    {
+      "name": "claude_zero",
+      "stage": "raw_quality",
+      "provider": "claude",
+      "fixture_model": "zero",
+      "rows": [
+        {
+          "usage_source": "claude_code_stream_event_v1",
+          "outcome": "succeeded",
+          "usage_status": "complete",
+          "prompt_tokens": 0,
+          "completion_tokens": 0,
+          "reported_usage": {
+            "input_tokens": 0,
+            "output_tokens": 0,
+            "cache_read_input_tokens": 0,
+            "cache_creation_input_tokens": 0
+          },
+          "status": null,
+          "headers_ms": null,
+          "estimated_cost_usd": null,
+          "first_output_present": true,
+          "cli_ready_present": true,
+          "total_observed_present": true,
+          "error": null
+        }
+      ],
+      "counts": {
+        "client_requests": 1,
+        "actual_spawns": 1,
+        "actual_user_inputs": 1,
+        "actual_tool_dispatches": 0,
+        "preflight_refusals": 0
+      },
+      "wire_statuses": [
+        200
+      ],
+      "wire_text": "Hello from the offline gateway."
+    },
+    {
+      "name": "claude_invalid",
+      "stage": "raw_quality",
+      "provider": "claude",
+      "fixture_model": "invalid",
+      "rows": [
+        {
+          "usage_source": "claude_code_stream_event_v1",
+          "outcome": "succeeded",
+          "usage_status": "invalid",
+          "prompt_tokens": null,
+          "completion_tokens": 5,
+          "reported_usage": {
+            "input_tokens": null,
+            "output_tokens": 5,
+            "cache_read_input_tokens": 3,
+            "cache_creation_input_tokens": 2
+          },
+          "status": null,
+          "headers_ms": null,
+          "estimated_cost_usd": null,
+          "first_output_present": true,
+          "cli_ready_present": true,
+          "total_observed_present": true,
+          "error": "stream_invalid_usage"
+        }
+      ],
+      "counts": {
+        "client_requests": 1,
+        "actual_spawns": 1,
+        "actual_user_inputs": 1,
+        "actual_tool_dispatches": 0,
+        "preflight_refusals": 0
+      },
+      "wire_statuses": [
+        200
+      ],
+      "wire_text": "Hello from the offline gateway."
+    },
+    {
+      "name": "claude_error",
+      "stage": "raw_quality",
+      "provider": "claude",
+      "fixture_model": "error",
+      "rows": [
+        {
+          "usage_source": "claude_code_stream_event_v1",
+          "outcome": "failed",
+          "usage_status": "partial",
+          "prompt_tokens": 17,
+          "completion_tokens": 0,
+          "reported_usage": {
+            "input_tokens": 12,
+            "output_tokens": 0,
+            "cache_read_input_tokens": 3,
+            "cache_creation_input_tokens": 2
+          },
+          "status": null,
+          "headers_ms": null,
+          "estimated_cost_usd": null,
+          "first_output_present": true,
+          "cli_ready_present": true,
+          "total_observed_present": true,
+          "error": "stream_error"
+        }
+      ],
+      "counts": {
+        "client_requests": 1,
+        "actual_spawns": 1,
+        "actual_user_inputs": 1,
+        "actual_tool_dispatches": 0,
+        "preflight_refusals": 0
+      },
+      "wire_statuses": [
+        502
+      ],
+      "wire_text": "Hello from the offline gateway."
+    },
+    {
+      "name": "claude_eof",
+      "stage": "raw_quality",
+      "provider": "claude",
+      "fixture_model": "eof",
+      "rows": [
+        {
+          "usage_source": "claude_code_stream_event_v1",
+          "outcome": "failed",
+          "usage_status": "partial",
+          "prompt_tokens": 17,
+          "completion_tokens": 0,
+          "reported_usage": {
+            "input_tokens": 12,
+            "output_tokens": 0,
+            "cache_read_input_tokens": 3,
+            "cache_creation_input_tokens": 2
+          },
+          "status": null,
+          "headers_ms": null,
+          "estimated_cost_usd": null,
+          "first_output_present": true,
+          "cli_ready_present": true,
+          "total_observed_present": true,
+          "error": "stream_incomplete"
+        }
+      ],
+      "counts": {
+        "client_requests": 1,
+        "actual_spawns": 1,
+        "actual_user_inputs": 1,
+        "actual_tool_dispatches": 0,
+        "preflight_refusals": 0
+      },
+      "wire_statuses": [
+        200
+      ],
+      "wire_text": "Hello from the offline gateway."
+    },
+    {
+      "name": "claude_incomplete",
+      "stage": "raw_quality",
+      "provider": "claude",
+      "fixture_model": "incomplete",
+      "rows": [
+        {
+          "usage_source": "claude_code_stream_event_v1",
+          "outcome": "incomplete",
+          "usage_status": "complete",
+          "prompt_tokens": 17,
+          "completion_tokens": 5,
+          "reported_usage": {
+            "input_tokens": 12,
+            "output_tokens": 5,
+            "cache_read_input_tokens": 3,
+            "cache_creation_input_tokens": 2
+          },
+          "status": null,
+          "headers_ms": null,
+          "estimated_cost_usd": null,
+          "first_output_present": true,
+          "cli_ready_present": true,
+          "total_observed_present": true,
+          "error": null
+        }
+      ],
+      "counts": {
+        "client_requests": 1,
+        "actual_spawns": 1,
+        "actual_user_inputs": 1,
+        "actual_tool_dispatches": 0,
+        "preflight_refusals": 0
+      },
+      "wire_statuses": [
+        200
+      ],
+      "wire_text": "Hello from the offline gateway."
+    },
+    {
+      "name": "claude_unknown",
+      "stage": "raw_quality",
+      "provider": "claude",
+      "fixture_model": "unknown",
+      "rows": [
+        {
+          "usage_source": "claude_code_stream_event_v1",
+          "outcome": "unknown",
+          "usage_status": "complete",
+          "prompt_tokens": 17,
+          "completion_tokens": 5,
+          "reported_usage": {
+            "input_tokens": 12,
+            "output_tokens": 5,
+            "cache_read_input_tokens": 3,
+            "cache_creation_input_tokens": 2
+          },
+          "status": null,
+          "headers_ms": null,
+          "estimated_cost_usd": null,
+          "first_output_present": true,
+          "cli_ready_present": true,
+          "total_observed_present": true,
+          "error": null
+        }
+      ],
+      "counts": {
+        "client_requests": 1,
+        "actual_spawns": 1,
+        "actual_user_inputs": 1,
+        "actual_tool_dispatches": 0,
+        "preflight_refusals": 0
+      },
+      "wire_statuses": [
+        200
+      ],
+      "wire_text": "Hello from the offline gateway."
+    },
+    {
+      "name": "claude_cancel_before",
+      "stage": "cancellation",
+      "provider": "claude",
+      "fixture_model": "cancel_before",
+      "rows": [
+        {
+          "usage_source": "claude_code_stream_event_v1",
+          "outcome": "cancelled",
+          "usage_status": "missing",
+          "prompt_tokens": null,
+          "completion_tokens": null,
+          "reported_usage": null,
+          "status": null,
+          "headers_ms": null,
+          "estimated_cost_usd": null,
+          "first_output_present": false,
+          "cli_ready_present": false,
+          "total_observed_present": true,
+          "error": "stream_cancelled"
+        }
+      ],
+      "counts": {
+        "client_requests": 1,
+        "actual_spawns": 1,
+        "actual_user_inputs": 1,
+        "actual_tool_dispatches": 0,
+        "preflight_refusals": 0
+      },
+      "wire_statuses": [
+        null
+      ],
+      "wire_text": "Hello from the offline gateway."
+    },
+    {
+      "name": "claude_cancel_after",
+      "stage": "cancellation",
+      "provider": "claude",
+      "fixture_model": "cancel_after",
+      "rows": [
+        {
+          "usage_source": "claude_code_stream_event_v1",
+          "outcome": "cancelled",
+          "usage_status": "partial",
+          "prompt_tokens": 17,
+          "completion_tokens": 0,
+          "reported_usage": {
+            "input_tokens": 12,
+            "output_tokens": 0,
+            "cache_read_input_tokens": 3,
+            "cache_creation_input_tokens": 2
+          },
+          "status": null,
+          "headers_ms": null,
+          "estimated_cost_usd": null,
+          "first_output_present": true,
+          "cli_ready_present": true,
+          "total_observed_present": true,
+          "error": "stream_cancelled"
+        }
+      ],
+      "counts": {
+        "client_requests": 1,
+        "actual_spawns": 1,
+        "actual_user_inputs": 1,
+        "actual_tool_dispatches": 0,
+        "preflight_refusals": 0
+      },
+      "wire_statuses": [
+        null
+      ],
+      "wire_text": "Hello from the offline gateway."
+    },
+    {
+      "name": "claude_limit",
+      "stage": "collection_limit",
+      "provider": "claude",
+      "fixture_model": "limit",
+      "rows": [
+        {
+          "usage_source": "claude_code_stream_event_v1",
+          "outcome": "failed",
+          "usage_status": "partial",
+          "prompt_tokens": 17,
+          "completion_tokens": 0,
+          "reported_usage": {
+            "input_tokens": 12,
+            "output_tokens": 0,
+            "cache_read_input_tokens": 3,
+            "cache_creation_input_tokens": 2
+          },
+          "status": null,
+          "headers_ms": null,
+          "estimated_cost_usd": null,
+          "first_output_present": true,
+          "cli_ready_present": true,
+          "total_observed_present": true,
+          "error": "stream_conversion_failed"
+        }
+      ],
+      "counts": {
+        "client_requests": 1,
+        "actual_spawns": 1,
+        "actual_user_inputs": 1,
+        "actual_tool_dispatches": 0,
+        "preflight_refusals": 0
+      },
+      "wire_statuses": [
+        502
+      ],
+      "wire_text": "Hello from the offline gateway."
+    },
+    {
+      "name": "claude_fallback",
+      "stage": "fallback",
+      "provider": "claude",
+      "fixture_model": "complete",
+      "rows": [
+        {
+          "usage_source": "claude_code_stream_event_v1",
+          "outcome": "failed",
+          "usage_status": "missing",
+          "prompt_tokens": null,
+          "completion_tokens": null,
+          "reported_usage": null,
+          "status": null,
+          "headers_ms": null,
+          "estimated_cost_usd": null,
+          "first_output_present": false,
+          "cli_ready_present": false,
+          "total_observed_present": true,
+          "error": "stream_error"
+        },
+        {
+          "usage_source": "claude_code_stream_event_v1",
+          "outcome": "succeeded",
+          "usage_status": "complete",
+          "prompt_tokens": 17,
+          "completion_tokens": 5,
+          "reported_usage": {
+            "input_tokens": 12,
+            "output_tokens": 5,
+            "cache_read_input_tokens": 3,
+            "cache_creation_input_tokens": 2
+          },
+          "status": null,
+          "headers_ms": null,
+          "estimated_cost_usd": null,
+          "first_output_present": true,
+          "cli_ready_present": true,
+          "total_observed_present": true,
+          "error": null
+        }
+      ],
+      "counts": {
+        "client_requests": 1,
+        "actual_spawns": 2,
+        "actual_user_inputs": 2,
+        "actual_tool_dispatches": 0,
+        "preflight_refusals": 0
+      },
+      "wire_statuses": [
+        200
+      ],
+      "wire_text": "Hello from the offline gateway."
+    },
+    {
+      "name": "cursor_chat",
+      "stage": "protocols",
+      "provider": "cursor",
+      "fixture_model": "complete",
+      "rows": [
+        {
+          "usage_source": "cursor_cli_result_v1",
+          "outcome": "succeeded",
+          "usage_status": "partial",
+          "prompt_tokens": null,
+          "completion_tokens": 33,
+          "reported_usage": {
+            "input_tokens": 9359,
+            "output_tokens": 33,
+            "cache_read_input_tokens": 3328,
+            "cache_creation_input_tokens": 0
+          },
+          "status": null,
+          "headers_ms": null,
+          "estimated_cost_usd": null,
+          "first_output_present": true,
+          "cli_ready_present": true,
+          "total_observed_present": true,
+          "error": null
+        }
+      ],
+      "counts": {
+        "client_requests": 1,
+        "actual_spawns": 1,
+        "actual_user_inputs": 0,
+        "actual_tool_dispatches": 0,
+        "preflight_refusals": 0
+      },
+      "wire_statuses": [
+        200
+      ],
+      "wire_text": "Hello from the offline gateway."
+    },
+    {
+      "name": "cursor_messages",
+      "stage": "protocols",
+      "provider": "cursor",
+      "fixture_model": "complete",
+      "rows": [
+        {
+          "usage_source": "cursor_cli_result_v1",
+          "outcome": "succeeded",
+          "usage_status": "partial",
+          "prompt_tokens": null,
+          "completion_tokens": 33,
+          "reported_usage": {
+            "input_tokens": 9359,
+            "output_tokens": 33,
+            "cache_read_input_tokens": 3328,
+            "cache_creation_input_tokens": 0
+          },
+          "status": null,
+          "headers_ms": null,
+          "estimated_cost_usd": null,
+          "first_output_present": true,
+          "cli_ready_present": true,
+          "total_observed_present": true,
+          "error": null
+        }
+      ],
+      "counts": {
+        "client_requests": 1,
+        "actual_spawns": 1,
+        "actual_user_inputs": 0,
+        "actual_tool_dispatches": 0,
+        "preflight_refusals": 0
+      },
+      "wire_statuses": [
+        200
+      ],
+      "wire_text": "Hello from the offline gateway."
+    },
+    {
+      "name": "cursor_responses",
+      "stage": "protocols",
+      "provider": "cursor",
+      "fixture_model": "complete",
+      "rows": [
+        {
+          "usage_source": "cursor_cli_result_v1",
+          "outcome": "succeeded",
+          "usage_status": "partial",
+          "prompt_tokens": null,
+          "completion_tokens": 33,
+          "reported_usage": {
+            "input_tokens": 9359,
+            "output_tokens": 33,
+            "cache_read_input_tokens": 3328,
+            "cache_creation_input_tokens": 0
+          },
+          "status": null,
+          "headers_ms": null,
+          "estimated_cost_usd": null,
+          "first_output_present": true,
+          "cli_ready_present": true,
+          "total_observed_present": true,
+          "error": null
+        }
+      ],
+      "counts": {
+        "client_requests": 1,
+        "actual_spawns": 1,
+        "actual_user_inputs": 0,
+        "actual_tool_dispatches": 0,
+        "preflight_refusals": 0
+      },
+      "wire_statuses": [
+        200
+      ],
+      "wire_text": "Hello from the offline gateway."
+    },
+    {
+      "name": "cursor_partial",
+      "stage": "raw_quality",
+      "provider": "cursor",
+      "fixture_model": "partial",
+      "rows": [
+        {
+          "usage_source": "cursor_cli_result_v1",
+          "outcome": "succeeded",
+          "usage_status": "partial",
+          "prompt_tokens": null,
+          "completion_tokens": 7,
+          "reported_usage": {
+            "input_tokens": null,
+            "output_tokens": 7,
+            "cache_read_input_tokens": null,
+            "cache_creation_input_tokens": null
+          },
+          "status": null,
+          "headers_ms": null,
+          "estimated_cost_usd": null,
+          "first_output_present": true,
+          "cli_ready_present": true,
+          "total_observed_present": true,
+          "error": null
+        }
+      ],
+      "counts": {
+        "client_requests": 1,
+        "actual_spawns": 1,
+        "actual_user_inputs": 0,
+        "actual_tool_dispatches": 0,
+        "preflight_refusals": 0
+      },
+      "wire_statuses": [
+        200
+      ],
+      "wire_text": "Hello from the offline gateway."
+    },
+    {
+      "name": "cursor_missing",
+      "stage": "raw_quality",
+      "provider": "cursor",
+      "fixture_model": "missing",
+      "rows": [
+        {
+          "usage_source": "cursor_cli_result_v1",
+          "outcome": "succeeded",
+          "usage_status": "missing",
+          "prompt_tokens": null,
+          "completion_tokens": null,
+          "reported_usage": null,
+          "status": null,
+          "headers_ms": null,
+          "estimated_cost_usd": null,
+          "first_output_present": true,
+          "cli_ready_present": true,
+          "total_observed_present": true,
+          "error": null
+        }
+      ],
+      "counts": {
+        "client_requests": 1,
+        "actual_spawns": 1,
+        "actual_user_inputs": 0,
+        "actual_tool_dispatches": 0,
+        "preflight_refusals": 0
+      },
+      "wire_statuses": [
+        200
+      ],
+      "wire_text": "Hello from the offline gateway."
+    },
+    {
+      "name": "cursor_zero",
+      "stage": "raw_quality",
+      "provider": "cursor",
+      "fixture_model": "zero",
+      "rows": [
+        {
+          "usage_source": "cursor_cli_result_v1",
+          "outcome": "succeeded",
+          "usage_status": "partial",
+          "prompt_tokens": null,
+          "completion_tokens": 0,
+          "reported_usage": {
+            "input_tokens": 0,
+            "output_tokens": 0,
+            "cache_read_input_tokens": 0,
+            "cache_creation_input_tokens": 0
+          },
+          "status": null,
+          "headers_ms": null,
+          "estimated_cost_usd": null,
+          "first_output_present": true,
+          "cli_ready_present": true,
+          "total_observed_present": true,
+          "error": null
+        }
+      ],
+      "counts": {
+        "client_requests": 1,
+        "actual_spawns": 1,
+        "actual_user_inputs": 0,
+        "actual_tool_dispatches": 0,
+        "preflight_refusals": 0
+      },
+      "wire_statuses": [
+        200
+      ],
+      "wire_text": "Hello from the offline gateway."
+    },
+    {
+      "name": "cursor_invalid",
+      "stage": "raw_quality",
+      "provider": "cursor",
+      "fixture_model": "invalid",
+      "rows": [
+        {
+          "usage_source": "cursor_cli_result_v1",
+          "outcome": "succeeded",
+          "usage_status": "invalid",
+          "prompt_tokens": null,
+          "completion_tokens": 7,
+          "reported_usage": {
+            "input_tokens": null,
+            "output_tokens": 7,
+            "cache_read_input_tokens": null,
+            "cache_creation_input_tokens": null
+          },
+          "status": null,
+          "headers_ms": null,
+          "estimated_cost_usd": null,
+          "first_output_present": true,
+          "cli_ready_present": true,
+          "total_observed_present": true,
+          "error": "stream_invalid_usage"
+        }
+      ],
+      "counts": {
+        "client_requests": 1,
+        "actual_spawns": 1,
+        "actual_user_inputs": 0,
+        "actual_tool_dispatches": 0,
+        "preflight_refusals": 0
+      },
+      "wire_statuses": [
+        200
+      ],
+      "wire_text": "Hello from the offline gateway."
+    },
+    {
+      "name": "cursor_error",
+      "stage": "raw_quality",
+      "provider": "cursor",
+      "fixture_model": "error",
+      "rows": [
+        {
+          "usage_source": "cursor_cli_result_v1",
+          "outcome": "failed",
+          "usage_status": "partial",
+          "prompt_tokens": null,
+          "completion_tokens": 33,
+          "reported_usage": {
+            "input_tokens": 9359,
+            "output_tokens": 33,
+            "cache_read_input_tokens": 3328,
+            "cache_creation_input_tokens": 0
+          },
+          "status": null,
+          "headers_ms": null,
+          "estimated_cost_usd": null,
+          "first_output_present": true,
+          "cli_ready_present": true,
+          "total_observed_present": true,
+          "error": "stream_error"
+        }
+      ],
+      "counts": {
+        "client_requests": 1,
+        "actual_spawns": 1,
+        "actual_user_inputs": 0,
+        "actual_tool_dispatches": 0,
+        "preflight_refusals": 0
+      },
+      "wire_statuses": [
+        502
+      ],
+      "wire_text": "Hello from the offline gateway."
+    },
+    {
+      "name": "cursor_eof",
+      "stage": "raw_quality",
+      "provider": "cursor",
+      "fixture_model": "eof",
+      "rows": [
+        {
+          "usage_source": "cursor_cli_result_v1",
+          "outcome": "failed",
+          "usage_status": "missing",
+          "prompt_tokens": null,
+          "completion_tokens": null,
+          "reported_usage": null,
+          "status": null,
+          "headers_ms": null,
+          "estimated_cost_usd": null,
+          "first_output_present": true,
+          "cli_ready_present": true,
+          "total_observed_present": true,
+          "error": "stream_incomplete"
+        }
+      ],
+      "counts": {
+        "client_requests": 1,
+        "actual_spawns": 1,
+        "actual_user_inputs": 0,
+        "actual_tool_dispatches": 0,
+        "preflight_refusals": 0
+      },
+      "wire_statuses": [
+        502
+      ],
+      "wire_text": "Hello from the offline gateway."
+    },
+    {
+      "name": "cursor_cancel_before",
+      "stage": "cancellation",
+      "provider": "cursor",
+      "fixture_model": "cancel_before",
+      "rows": [
+        {
+          "usage_source": "cursor_cli_result_v1",
+          "outcome": "cancelled",
+          "usage_status": "missing",
+          "prompt_tokens": null,
+          "completion_tokens": null,
+          "reported_usage": null,
+          "status": null,
+          "headers_ms": null,
+          "estimated_cost_usd": null,
+          "first_output_present": false,
+          "cli_ready_present": false,
+          "total_observed_present": true,
+          "error": "stream_cancelled"
+        }
+      ],
+      "counts": {
+        "client_requests": 1,
+        "actual_spawns": 1,
+        "actual_user_inputs": 0,
+        "actual_tool_dispatches": 0,
+        "preflight_refusals": 0
+      },
+      "wire_statuses": [
+        null
+      ],
+      "wire_text": "Hello from the offline gateway."
+    },
+    {
+      "name": "cursor_cancel_after",
+      "stage": "cancellation",
+      "provider": "cursor",
+      "fixture_model": "cancel_after",
+      "rows": [
+        {
+          "usage_source": "cursor_cli_result_v1",
+          "outcome": "cancelled",
+          "usage_status": "missing",
+          "prompt_tokens": null,
+          "completion_tokens": null,
+          "reported_usage": null,
+          "status": null,
+          "headers_ms": null,
+          "estimated_cost_usd": null,
+          "first_output_present": true,
+          "cli_ready_present": true,
+          "total_observed_present": true,
+          "error": "stream_cancelled"
+        }
+      ],
+      "counts": {
+        "client_requests": 1,
+        "actual_spawns": 1,
+        "actual_user_inputs": 0,
+        "actual_tool_dispatches": 0,
+        "preflight_refusals": 0
+      },
+      "wire_statuses": [
+        null
+      ],
+      "wire_text": "Hello from the offline gateway."
+    },
+    {
+      "name": "cursor_limit",
+      "stage": "collection_limit",
+      "provider": "cursor",
+      "fixture_model": "limit",
+      "rows": [
+        {
+          "usage_source": "cursor_cli_result_v1",
+          "outcome": "failed",
+          "usage_status": "missing",
+          "prompt_tokens": null,
+          "completion_tokens": null,
+          "reported_usage": null,
+          "status": null,
+          "headers_ms": null,
+          "estimated_cost_usd": null,
+          "first_output_present": true,
+          "cli_ready_present": true,
+          "total_observed_present": true,
+          "error": "stream_conversion_failed"
+        }
+      ],
+      "counts": {
+        "client_requests": 1,
+        "actual_spawns": 1,
+        "actual_user_inputs": 0,
+        "actual_tool_dispatches": 0,
+        "preflight_refusals": 0
+      },
+      "wire_statuses": [
+        502
+      ],
+      "wire_text": "Hello from the offline gateway."
+    },
+    {
+      "name": "cursor_fallback",
+      "stage": "fallback",
+      "provider": "cursor",
+      "fixture_model": "complete",
+      "rows": [
+        {
+          "usage_source": "cursor_cli_result_v1",
+          "outcome": "failed",
+          "usage_status": "missing",
+          "prompt_tokens": null,
+          "completion_tokens": null,
+          "reported_usage": null,
+          "status": null,
+          "headers_ms": null,
+          "estimated_cost_usd": null,
+          "first_output_present": false,
+          "cli_ready_present": false,
+          "total_observed_present": true,
+          "error": "stream_incomplete"
+        },
+        {
+          "usage_source": "cursor_cli_result_v1",
+          "outcome": "succeeded",
+          "usage_status": "partial",
+          "prompt_tokens": null,
+          "completion_tokens": 33,
+          "reported_usage": {
+            "input_tokens": 9359,
+            "output_tokens": 33,
+            "cache_read_input_tokens": 3328,
+            "cache_creation_input_tokens": 0
+          },
+          "status": null,
+          "headers_ms": null,
+          "estimated_cost_usd": null,
+          "first_output_present": true,
+          "cli_ready_present": true,
+          "total_observed_present": true,
+          "error": null
+        }
+      ],
+      "counts": {
+        "client_requests": 1,
+        "actual_spawns": 2,
+        "actual_user_inputs": 0,
+        "actual_tool_dispatches": 0,
+        "preflight_refusals": 0
+      },
+      "wire_statuses": [
+        200
+      ],
+      "wire_text": "Hello from the offline gateway."
+    },
+    {
+      "name": "claude_tool_chat",
+      "stage": "tool_sessions",
+      "provider": "claude",
+      "fixture_model": "tool",
+      "rows": [
+        {
+          "usage_source": "claude_code_stream_event_v1",
+          "outcome": "succeeded",
+          "usage_status": "complete",
+          "prompt_tokens": 17,
+          "completion_tokens": 5,
+          "reported_usage": {
+            "input_tokens": 12,
+            "output_tokens": 5,
+            "cache_read_input_tokens": 3,
+            "cache_creation_input_tokens": 2
+          },
+          "status": null,
+          "headers_ms": null,
+          "estimated_cost_usd": null,
+          "first_output_present": true,
+          "cli_ready_present": true,
+          "total_observed_present": true,
+          "error": null
+        },
+        {
+          "usage_source": "claude_code_stream_event_v1",
+          "outcome": "succeeded",
+          "usage_status": "complete",
+          "prompt_tokens": 17,
+          "completion_tokens": 5,
+          "reported_usage": {
+            "input_tokens": 12,
+            "output_tokens": 5,
+            "cache_read_input_tokens": 3,
+            "cache_creation_input_tokens": 2
+          },
+          "status": null,
+          "headers_ms": null,
+          "estimated_cost_usd": null,
+          "first_output_present": true,
+          "cli_ready_present": true,
+          "total_observed_present": true,
+          "error": null
+        }
+      ],
+      "counts": {
+        "client_requests": 2,
+        "actual_spawns": 1,
+        "actual_user_inputs": 1,
+        "actual_tool_dispatches": 1,
+        "preflight_refusals": 0
+      },
+      "wire_statuses": [
+        200,
+        200
+      ],
+      "wire_text": "Tool result: 5."
+    },
+    {
+      "name": "claude_tool_messages",
+      "stage": "tool_sessions",
+      "provider": "claude",
+      "fixture_model": "tool",
+      "rows": [
+        {
+          "usage_source": "claude_code_stream_event_v1",
+          "outcome": "succeeded",
+          "usage_status": "complete",
+          "prompt_tokens": 17,
+          "completion_tokens": 5,
+          "reported_usage": {
+            "input_tokens": 12,
+            "output_tokens": 5,
+            "cache_read_input_tokens": 3,
+            "cache_creation_input_tokens": 2
+          },
+          "status": null,
+          "headers_ms": null,
+          "estimated_cost_usd": null,
+          "first_output_present": true,
+          "cli_ready_present": true,
+          "total_observed_present": true,
+          "error": null
+        },
+        {
+          "usage_source": "claude_code_stream_event_v1",
+          "outcome": "succeeded",
+          "usage_status": "complete",
+          "prompt_tokens": 17,
+          "completion_tokens": 5,
+          "reported_usage": {
+            "input_tokens": 12,
+            "output_tokens": 5,
+            "cache_read_input_tokens": 3,
+            "cache_creation_input_tokens": 2
+          },
+          "status": null,
+          "headers_ms": null,
+          "estimated_cost_usd": null,
+          "first_output_present": true,
+          "cli_ready_present": true,
+          "total_observed_present": true,
+          "error": null
+        }
+      ],
+      "counts": {
+        "client_requests": 2,
+        "actual_spawns": 1,
+        "actual_user_inputs": 1,
+        "actual_tool_dispatches": 1,
+        "preflight_refusals": 0
+      },
+      "wire_statuses": [
+        200,
+        200
+      ],
+      "wire_text": "Tool result: 5."
+    },
+    {
+      "name": "claude_tool_responses",
+      "stage": "tool_sessions",
+      "provider": "claude",
+      "fixture_model": "tool",
+      "rows": [
+        {
+          "usage_source": "claude_code_stream_event_v1",
+          "outcome": "succeeded",
+          "usage_status": "complete",
+          "prompt_tokens": 17,
+          "completion_tokens": 5,
+          "reported_usage": {
+            "input_tokens": 12,
+            "output_tokens": 5,
+            "cache_read_input_tokens": 3,
+            "cache_creation_input_tokens": 2
+          },
+          "status": null,
+          "headers_ms": null,
+          "estimated_cost_usd": null,
+          "first_output_present": true,
+          "cli_ready_present": true,
+          "total_observed_present": true,
+          "error": null
+        },
+        {
+          "usage_source": "claude_code_stream_event_v1",
+          "outcome": "succeeded",
+          "usage_status": "complete",
+          "prompt_tokens": 17,
+          "completion_tokens": 5,
+          "reported_usage": {
+            "input_tokens": 12,
+            "output_tokens": 5,
+            "cache_read_input_tokens": 3,
+            "cache_creation_input_tokens": 2
+          },
+          "status": null,
+          "headers_ms": null,
+          "estimated_cost_usd": null,
+          "first_output_present": true,
+          "cli_ready_present": true,
+          "total_observed_present": true,
+          "error": null
+        }
+      ],
+      "counts": {
+        "client_requests": 2,
+        "actual_spawns": 1,
+        "actual_user_inputs": 1,
+        "actual_tool_dispatches": 1,
+        "preflight_refusals": 0
+      },
+      "wire_statuses": [
+        200,
+        200
+      ],
+      "wire_text": "Tool result: 5."
+    },
+    {
+      "name": "claude_live_saved_resume",
+      "stage": "tool_sessions",
+      "provider": "claude",
+      "fixture_model": "reuse",
+      "rows": [
+        {
+          "usage_source": "claude_code_stream_event_v1",
+          "outcome": "succeeded",
+          "usage_status": "complete",
+          "prompt_tokens": 17,
+          "completion_tokens": 5,
+          "reported_usage": {
+            "input_tokens": 12,
+            "output_tokens": 5,
+            "cache_read_input_tokens": 3,
+            "cache_creation_input_tokens": 2
+          },
+          "status": null,
+          "headers_ms": null,
+          "estimated_cost_usd": null,
+          "first_output_present": true,
+          "cli_ready_present": true,
+          "total_observed_present": true,
+          "error": null
+        },
+        {
+          "usage_source": "claude_code_stream_event_v1",
+          "outcome": "succeeded",
+          "usage_status": "complete",
+          "prompt_tokens": 17,
+          "completion_tokens": 5,
+          "reported_usage": {
+            "input_tokens": 12,
+            "output_tokens": 5,
+            "cache_read_input_tokens": 3,
+            "cache_creation_input_tokens": 2
+          },
+          "status": null,
+          "headers_ms": null,
+          "estimated_cost_usd": null,
+          "first_output_present": true,
+          "cli_ready_present": true,
+          "total_observed_present": true,
+          "error": null
+        },
+        {
+          "usage_source": "claude_code_stream_event_v1",
+          "outcome": "succeeded",
+          "usage_status": "complete",
+          "prompt_tokens": 17,
+          "completion_tokens": 5,
+          "reported_usage": {
+            "input_tokens": 12,
+            "output_tokens": 5,
+            "cache_read_input_tokens": 3,
+            "cache_creation_input_tokens": 2
+          },
+          "status": null,
+          "headers_ms": null,
+          "estimated_cost_usd": null,
+          "first_output_present": true,
+          "cli_ready_present": true,
+          "total_observed_present": true,
+          "error": null
+        }
+      ],
+      "counts": {
+        "client_requests": 3,
+        "actual_spawns": 2,
+        "actual_user_inputs": 3,
+        "actual_tool_dispatches": 0,
+        "preflight_refusals": 0
+      },
+      "wire_statuses": [
+        200,
+        200,
+        200
+      ],
+      "wire_text": "Hello from the offline gateway."
+    },
+    {
+      "name": "claude_resume_retry",
+      "stage": "tool_sessions",
+      "provider": "claude",
+      "fixture_model": "resume_retry",
+      "rows": [
+        {
+          "usage_source": "claude_code_stream_event_v1",
+          "outcome": "succeeded",
+          "usage_status": "complete",
+          "prompt_tokens": 17,
+          "completion_tokens": 5,
+          "reported_usage": {
+            "input_tokens": 12,
+            "output_tokens": 5,
+            "cache_read_input_tokens": 3,
+            "cache_creation_input_tokens": 2
+          },
+          "status": null,
+          "headers_ms": null,
+          "estimated_cost_usd": null,
+          "first_output_present": true,
+          "cli_ready_present": true,
+          "total_observed_present": true,
+          "error": null
+        },
+        {
+          "usage_source": "claude_code_stream_event_v1",
+          "outcome": "failed",
+          "usage_status": "missing",
+          "prompt_tokens": null,
+          "completion_tokens": null,
+          "reported_usage": null,
+          "status": null,
+          "headers_ms": null,
+          "estimated_cost_usd": null,
+          "first_output_present": false,
+          "cli_ready_present": false,
+          "total_observed_present": true,
+          "error": "stream_incomplete"
+        },
+        {
+          "usage_source": "claude_code_stream_event_v1",
+          "outcome": "succeeded",
+          "usage_status": "complete",
+          "prompt_tokens": 17,
+          "completion_tokens": 5,
+          "reported_usage": {
+            "input_tokens": 12,
+            "output_tokens": 5,
+            "cache_read_input_tokens": 3,
+            "cache_creation_input_tokens": 2
+          },
+          "status": null,
+          "headers_ms": null,
+          "estimated_cost_usd": null,
+          "first_output_present": true,
+          "cli_ready_present": true,
+          "total_observed_present": true,
+          "error": null
+        }
+      ],
+      "counts": {
+        "client_requests": 2,
+        "actual_spawns": 3,
+        "actual_user_inputs": 2,
+        "actual_tool_dispatches": 0,
+        "preflight_refusals": 0
+      },
+      "wire_statuses": [
+        200,
+        200
+      ],
+      "wire_text": "Hello from the offline gateway."
+    },
+    {
+      "name": "claude_reserve_fresh",
+      "stage": "storage_restart",
+      "provider": "claude",
+      "fixture_model": "complete",
+      "rows": [],
+      "counts": {
+        "client_requests": 1,
+        "actual_spawns": 0,
+        "actual_user_inputs": 0,
+        "actual_tool_dispatches": 0,
+        "preflight_refusals": 0
+      },
+      "wire_statuses": [
+        503
+      ],
+      "wire_text": "Hello from the offline gateway."
+    },
+    {
+      "name": "claude_finalization_restart",
+      "stage": "storage_restart",
+      "provider": "claude",
+      "fixture_model": "complete",
+      "rows": [
+        {
+          "usage_source": "claude_code_stream_event_v1",
+          "outcome": "interrupted",
+          "usage_status": "missing",
+          "prompt_tokens": null,
+          "completion_tokens": null,
+          "reported_usage": null,
+          "status": null,
+          "headers_ms": null,
+          "estimated_cost_usd": null,
+          "first_output_present": false,
+          "cli_ready_present": true,
+          "total_observed_present": false,
+          "error": "stream_interrupted"
+        }
+      ],
+      "counts": {
+        "client_requests": 1,
+        "actual_spawns": 1,
+        "actual_user_inputs": 1,
+        "actual_tool_dispatches": 0,
+        "preflight_refusals": 0
+      },
+      "wire_statuses": [
+        200
+      ],
+      "wire_text": "Hello from the offline gateway."
+    },
+    {
+      "name": "cursor_reserve_fresh",
+      "stage": "storage_restart",
+      "provider": "cursor",
+      "fixture_model": "complete",
+      "rows": [],
+      "counts": {
+        "client_requests": 1,
+        "actual_spawns": 0,
+        "actual_user_inputs": 0,
+        "actual_tool_dispatches": 0,
+        "preflight_refusals": 0
+      },
+      "wire_statuses": [
+        503
+      ],
+      "wire_text": "Hello from the offline gateway."
+    },
+    {
+      "name": "cursor_finalization_restart",
+      "stage": "storage_restart",
+      "provider": "cursor",
+      "fixture_model": "complete",
+      "rows": [
+        {
+          "usage_source": "cursor_cli_result_v1",
+          "outcome": "interrupted",
+          "usage_status": "missing",
+          "prompt_tokens": null,
+          "completion_tokens": null,
+          "reported_usage": null,
+          "status": null,
+          "headers_ms": null,
+          "estimated_cost_usd": null,
+          "first_output_present": false,
+          "cli_ready_present": true,
+          "total_observed_present": false,
+          "error": "stream_interrupted"
+        }
+      ],
+      "counts": {
+        "client_requests": 1,
+        "actual_spawns": 1,
+        "actual_user_inputs": 0,
+        "actual_tool_dispatches": 0,
+        "preflight_refusals": 0
+      },
+      "wire_statuses": [
+        200
+      ],
+      "wire_text": "Hello from the offline gateway."
+    },
+    {
+      "name": "claude_reserve_live",
+      "stage": "storage_restart",
+      "provider": "claude",
+      "fixture_model": "reuse",
+      "rows": [
+        {
+          "usage_source": "claude_code_stream_event_v1",
+          "outcome": "succeeded",
+          "usage_status": "complete",
+          "prompt_tokens": 17,
+          "completion_tokens": 5,
+          "reported_usage": {
+            "input_tokens": 12,
+            "output_tokens": 5,
+            "cache_read_input_tokens": 3,
+            "cache_creation_input_tokens": 2
+          },
+          "status": null,
+          "headers_ms": null,
+          "estimated_cost_usd": null,
+          "first_output_present": true,
+          "cli_ready_present": true,
+          "total_observed_present": true,
+          "error": null
+        },
+        {
+          "usage_source": "claude_code_stream_event_v1",
+          "outcome": "succeeded",
+          "usage_status": "complete",
+          "prompt_tokens": 17,
+          "completion_tokens": 5,
+          "reported_usage": {
+            "input_tokens": 12,
+            "output_tokens": 5,
+            "cache_read_input_tokens": 3,
+            "cache_creation_input_tokens": 2
+          },
+          "status": null,
+          "headers_ms": null,
+          "estimated_cost_usd": null,
+          "first_output_present": true,
+          "cli_ready_present": true,
+          "total_observed_present": true,
+          "error": null
+        }
+      ],
+      "counts": {
+        "client_requests": 3,
+        "actual_spawns": 1,
+        "actual_user_inputs": 2,
+        "actual_tool_dispatches": 0,
+        "preflight_refusals": 0
+      },
+      "wire_statuses": [
+        200,
+        503,
+        200
+      ],
+      "wire_text": "Hello from the offline gateway."
+    },
+    {
+      "name": "claude_reserve_tool",
+      "stage": "storage_restart",
+      "provider": "claude",
+      "fixture_model": "tool",
+      "rows": [
+        {
+          "usage_source": "claude_code_stream_event_v1",
+          "outcome": "succeeded",
+          "usage_status": "complete",
+          "prompt_tokens": 17,
+          "completion_tokens": 5,
+          "reported_usage": {
+            "input_tokens": 12,
+            "output_tokens": 5,
+            "cache_read_input_tokens": 3,
+            "cache_creation_input_tokens": 2
+          },
+          "status": null,
+          "headers_ms": null,
+          "estimated_cost_usd": null,
+          "first_output_present": true,
+          "cli_ready_present": true,
+          "total_observed_present": true,
+          "error": null
+        },
+        {
+          "usage_source": "claude_code_stream_event_v1",
+          "outcome": "succeeded",
+          "usage_status": "complete",
+          "prompt_tokens": 17,
+          "completion_tokens": 5,
+          "reported_usage": {
+            "input_tokens": 12,
+            "output_tokens": 5,
+            "cache_read_input_tokens": 3,
+            "cache_creation_input_tokens": 2
+          },
+          "status": null,
+          "headers_ms": null,
+          "estimated_cost_usd": null,
+          "first_output_present": true,
+          "cli_ready_present": true,
+          "total_observed_present": true,
+          "error": null
+        }
+      ],
+      "counts": {
+        "client_requests": 3,
+        "actual_spawns": 1,
+        "actual_user_inputs": 1,
+        "actual_tool_dispatches": 1,
+        "preflight_refusals": 0
+      },
+      "wire_statuses": [
+        200,
+        503,
+        200
+      ],
+      "wire_text": "Tool result: 5."
+    },
+    {
+      "name": "claude_reserve_saved",
+      "stage": "storage_restart",
+      "provider": "claude",
+      "fixture_model": "reuse",
+      "rows": [
+        {
+          "usage_source": "claude_code_stream_event_v1",
+          "outcome": "succeeded",
+          "usage_status": "complete",
+          "prompt_tokens": 17,
+          "completion_tokens": 5,
+          "reported_usage": {
+            "input_tokens": 12,
+            "output_tokens": 5,
+            "cache_read_input_tokens": 3,
+            "cache_creation_input_tokens": 2
+          },
+          "status": null,
+          "headers_ms": null,
+          "estimated_cost_usd": null,
+          "first_output_present": true,
+          "cli_ready_present": true,
+          "total_observed_present": true,
+          "error": null
+        },
+        {
+          "usage_source": "claude_code_stream_event_v1",
+          "outcome": "succeeded",
+          "usage_status": "complete",
+          "prompt_tokens": 17,
+          "completion_tokens": 5,
+          "reported_usage": {
+            "input_tokens": 12,
+            "output_tokens": 5,
+            "cache_read_input_tokens": 3,
+            "cache_creation_input_tokens": 2
+          },
+          "status": null,
+          "headers_ms": null,
+          "estimated_cost_usd": null,
+          "first_output_present": true,
+          "cli_ready_present": true,
+          "total_observed_present": true,
+          "error": null
+        }
+      ],
+      "counts": {
+        "client_requests": 3,
+        "actual_spawns": 2,
+        "actual_user_inputs": 2,
+        "actual_tool_dispatches": 0,
+        "preflight_refusals": 0
+      },
+      "wire_statuses": [
+        200,
+        503,
+        200
+      ],
+      "wire_text": "Hello from the offline gateway."
+    },
+    {
+      "name": "cursor_tool_refusal_chat",
+      "stage": "admission",
+      "provider": "cursor",
+      "fixture_model": "complete",
+      "rows": [],
+      "counts": {
+        "client_requests": 1,
+        "actual_spawns": 0,
+        "actual_user_inputs": 0,
+        "actual_tool_dispatches": 0,
+        "preflight_refusals": 1
+      },
+      "wire_statuses": [
+        501
+      ],
+      "wire_text": "Hello from the offline gateway."
+    },
+    {
+      "name": "cursor_tool_refusal_messages",
+      "stage": "admission",
+      "provider": "cursor",
+      "fixture_model": "complete",
+      "rows": [],
+      "counts": {
+        "client_requests": 1,
+        "actual_spawns": 0,
+        "actual_user_inputs": 0,
+        "actual_tool_dispatches": 0,
+        "preflight_refusals": 1
+      },
+      "wire_statuses": [
+        501
+      ],
+      "wire_text": "Hello from the offline gateway."
+    },
+    {
+      "name": "cursor_tool_refusal_responses",
+      "stage": "admission",
+      "provider": "cursor",
+      "fixture_model": "complete",
+      "rows": [],
+      "counts": {
+        "client_requests": 1,
+        "actual_spawns": 0,
+        "actual_user_inputs": 0,
+        "actual_tool_dispatches": 0,
+        "preflight_refusals": 1
+      },
+      "wire_statuses": [
+        501
+      ],
+      "wire_text": "Hello from the offline gateway."
+    },
+    {
+      "name": "cursor_image_refusal",
+      "stage": "admission",
+      "provider": "cursor",
+      "fixture_model": "complete",
+      "rows": [],
+      "counts": {
+        "client_requests": 1,
+        "actual_spawns": 0,
+        "actual_user_inputs": 0,
+        "actual_tool_dispatches": 0,
+        "preflight_refusals": 1
+      },
+      "wire_statuses": [
+        501
+      ],
+      "wire_text": "Hello from the offline gateway."
+    },
+    {
+      "name": "cursor_disabled_refusal",
+      "stage": "admission",
+      "provider": "cursor",
+      "fixture_model": "complete",
+      "rows": [],
+      "counts": {
+        "client_requests": 1,
+        "actual_spawns": 0,
+        "actual_user_inputs": 0,
+        "actual_tool_dispatches": 0,
+        "preflight_refusals": 1
+      },
+      "wire_statuses": [
+        503
+      ],
+      "wire_text": "Hello from the offline gateway."
+    }
+  ],
+  "row_shape": "events API with reported_usage object; raw SQLite retained separately",
+  "status": "fixed-before-full-runtime",
+  "scope": {
+    "events_limit": 100,
+    "csv_limit": 1000,
+    "web_event_limit": 50,
+    "json_day_bucket_limit": 30,
+    "web_day_bucket_limit": 14,
+    "denominator": "stored_event_attempt_rows"
+  }
+}

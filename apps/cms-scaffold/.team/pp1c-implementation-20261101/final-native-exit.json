@@ -1,0 +1,16 @@
+{
+  "command": [
+    "timeout",
+    "900",
+    "./gradlew",
+    "test",
+    "integrationTest",
+    ":services:cms-api:bootJar",
+    "--no-daemon",
+    "--no-parallel"
+  ],
+  "startedAt": "2026-11-01T17:27:07.101236+00:00",
+  "endedAt": "2026-11-01T17:33:06.879390+00:00",
+  "elapsedSeconds": 359.778153605992,
+  "exitCode": 0
+}

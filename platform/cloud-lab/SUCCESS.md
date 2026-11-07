@@ -1,0 +1,74 @@
+---
+project: platform/cloud-lab
+purpose: 以共同契約與知識樹組合個人 Cloudflare 工具、遠端運維及代理能力
+kind: application
+mainline: incomplete
+usable_tag: none
+reviewed: 2026-11-02
+source_commit: 2b9a0136cef3e5872a643446da40ebfe0ea24175
+---
+
+# Cloud Lab 成功契約
+
+## 主線與範圍
+
+單operator的CF工具整合與非同步運維入口，逐步連接既有應用、運維與agent平台；不是只建造一個健康檢查器。原設計見[SDD](SDD.md)，2026-11-01重排見[方向審查與近期計畫](docs/direction-review.md)。
+
+M0知識樹與介面已完成；M1固定node-health profile已實作／部署並有多層驗證，長期整合目標仍未完成。`source_commit`是本次審查輸入基準，不代表這份文件的新commit或目前live版本。歷史逐輪紀錄移至[單一歷史頁](docs/milestone-history.md)。
+
+## 驗收條件
+
+| AC | 範圍 | 狀態 | 證據與剩餘範圍 |
+| --- | --- | --- | --- |
+| AC-01 | Given 現有能力與來源，When 沿知識樹閱讀，Then 每個能力有責任者、契約、來源／實作與證據或明示缺口 | passed | [M0證據](docs/evidence/m0-review.md)；本次修正入口的過時狀態 |
+| AC-02 | Given UI／bot／schedule 與既有 executor，When 追蹤合成命令，Then 准入、去重、attempt、取消、未知及驗證由明確 owner 處理 | passed | M0設計及[M1實作](docs/evidence/m1-implementation.md)，限固定profile |
+| AC-03 | Given CF 元件及既有平台，When 分配狀態與部署責任，Then 無雙重 run／host／workload／Done 權威 | passed | [架構](docs/architecture.md)；未接管host/workload/agent lifecycle |
+| AC-04 | Given 每個候選來源，When 決定歸位／抽取／adapter／reference，Then 有目標與阻擋，封存必須通過接替及回退 gate | passed | [遷移表](docs/migration.md)；只代表設計，尚未完成實際整合或封存 |
+| AC-05 | Given 完整文件候選，When 跑既有索引驗證與獨立審查，Then 導航一致、沒有 runtime 成功冒稱，所有未實作事項保留 | passed | M0證據；本次修正README／知識樹／狀態索引，不把歷史部署寫成當前可用 |
+| AC-06 | Given 授權 caller 與一台真實 runner，When API／排程提交固定唯讀檢查，Then 同一 command 可追蹤、去重、驗證並在看板顯示 | historical | [首輪API](docs/evidence/m1-first-live.md)、[Cron](docs/evidence/m1-health-schedule-window-live.md)、[bot](docs/evidence/m1-bot-activation-live.md)、[Safari讀取](docs/evidence/m1-usage-live.md)、[看板更新](docs/evidence/m1-snapshot-rollout.md)。已有閉環證據；**Grok模型對話不是此AC的門檻**。日常授權可用性另見近期計畫，不把到期窗口當現行可用。 |
+| AC-07 | Given 重複投遞、失聯、取消及恢復，When 執行與回報競爭，Then 不重做未知副作用且停止／未知／驗證狀態誠實可見 | pending | [十四列矩陣](docs/failure-matrix.md)逐列區分local／歷史remote。已有固定profile保障；新adapter的故障語義在接入時驗，不無限追加現有recipe的故障演練。 |
+| AC-08 | Given 私人入口、受限預算與備份，When 撤權、超限或隔離還原，Then 存取被限制、成本／缺漏可見且未完成工作先對帳 | pending | Access／撤權、應用配額、[RX遠端資料還原](docs/evidence/m1-remote-restore.md)已驗；provider實際用量／帳單unknown、保留上限需營運處置。這些缺口不得再遮蔽既有工具整合。 |
+
+`historical`表示具名實際證據存在，並非剛重跑、當前授權有效或owner整體產品驗收；未把完整mainline改為complete。
+
+## 現況與缺口
+
+- 已有一個Worker/D1控制面、一個non-root runner、一種固定健康recipe、15分鐘schedule、看板、獨立bot工具；沒有任意shell或通用recipe registry。
+- ML上線後human讀取／盤點上傳至2026-12-02T12:00:00Z；bot仍過期，resident政策仍截止2026-11-05T07:24:25Z。配置回讀不等於真人登入或程序存活證明。
+- [CF工具目錄](docs/tool-catalog.md)已核對64個連線可見repo並比較Edge Ops；這是文件導航，尚無runtime工具目錄、來源搬遷、重複退役或agent平台adapter。
+- 保留Access/HMAC/scoped grants、unknown不重播、單一writer、journal與既有測試。暫停新增授權層、provider API接線、Event/seq、active failover與模板平台。
+- 先交付日常使用方案、CF來源處置目錄、第二種有用的唯讀能力；各自範圍與停止條件以[近期計畫](docs/direction-review.md)為準。
+
+## 本輪盤點範圍（CAT）
+
+| AC | Given / When / Then | 狀態 | 證據／邊界 |
+| --- | --- | --- | --- |
+| CAT-01 | Given GitHub連線可見來源，When完整分頁及固定來源盤點，Then範圍、用途、API／Cron、證據、owner與缺口可追溯 | passed | [目錄與公開快照](docs/tool-catalog.md)；64repo／41public／23private，非全帳號或當前部署普查 |
+| CAT-02 | Given Edge Ops與node-health，When比較實際行為，Then有具體保留／reference建議並保留不可替代責任 | passed | 目錄逐項比較；不抽共用collector、不退役Edge Ops；caller全量調查未做 |
+| CAT-03 | Given原整合目標，When選第二種能力，Then有界接入沿用既有來源且不新增付費或第二controller | passed | 建議接既有GET-only資源盤點報告；JSON介面／看板接入與live驗收未執行 |
+
+本輪只驗收文件盤點與建議，不提升原主線資格；審查與實際檢查見[T-866報告](../../.team/reports/T-866.md)。
+
+## 本輪開發範圍（IR）
+
+Owner繼續開發第二種能力：既有CF inventory JSON→有界D1快照→看板。驗收IR-01～04、權限與停止條件見[報告契約](docs/inventory-report.md)；IR-01～04已完成來源實作與本機驗證，見[T-867報告](../../.team/reports/T-867.md)。原producer37項及consumer471項測試通過，真實本機workerd／D1／Chromium七組閉環通過。既有憑證的真實GET讀取於2026-11-02T11:39:31Z得到HTTP_403，六區段均為unknown；沒有取得可讀的帳號資源快照。live發布與新scope未執行。
+
+## 啟動與驗證
+
+[本機啟動](docs/quickstart.md)、[操作紀錄](docs/live-operations.md)、[M1實作契約](docs/m1-implementation.md)。測試由既有launcher執行`python3 platform/cloud-lab/tools/check.py`；本次實際執行146項Node與325項Python測試；本機驗證不等於live已更新。
+
+## 可用版本
+
+`mainline: incomplete`、`usable_tag: none`保持。技術閉環證據、目前授權可用、原始整合目標與owner整體驗收分開記錄；不因多次merge或更多測試自動升級為完整平台。
+
+## 本輪真實盤點接入（MC）
+
+MC-01：現有MCP固定GET收集，原producer重用既有比較與分頁驗證，保留收集時間與unknown。MC-02：真實報告通過既有consumer驗證與本機隔離保存／讀回，不公開私人資源明細。MC-03：查核原部署及授權，準備可審查的live變更／回退與日常授權提案。來源接入與本機驗證完成，見[T868報告](../../.team/reports/T-868.md)；live發布、schema或grant變更尚未執行。[上線提案](docs/inventory-activation.md)已列出候選與人類scope／期限。
+
+## 本輪盤點上線（ML）
+
+Owner已明確「批准上線」：ML-01核對已審候選與原部署、保留bindings/Access/secrets/Cron；ML-02原D1新增快照表並匯入重新收集的真實報告；ML-03發布原Worker／資產並CAS設定human讀取／盤點上傳至2026-12-02T12:00:00Z；ML-04回讀與公開／私人證據收尾。其他grants與期限不變，不新增付費方案。ML-01～04操作與回讀通過，見[上線證據](docs/evidence/inventory-live.md)及[T869報告](../../.team/reports/T-869.md)；獨立證據審查ACCEPT、文件檢查通過；Git交付見任務板。歷史MC／IR未部署敘述只描述各自里程碑。
+
+## 本輪工具目錄與多VPS agent設計（CA）
+
+Owner要求繼續把已盤點CF資源對應用途／入口／觸發／來源，並查核active repo中可沿用的主機agent設計。CA-01保存部署資源與來源對照及未確認項，私人細節不進公開Git；CA-02以連線可見未封存repo為active候選，核對真實runner存活與候選實作／設計成熟度；CA-03提出多VPS最小接入方案、權責與可驗收切片。CA-01完成[部署用途對照](docs/service-catalog.md)與私人精確入口清單；CA-02確認原runner運行並查核11個active候選及具名agent程式；CA-03交付[多VPS設計](docs/host-agent-design.md)。此輪只有來源查核與文件設計，不批量安裝、改權限／live schema、開付費服務或搬遷／封存；獨立審查修正時鐘邊界後ACCEPT、文件檢查通過，證據見[T871](../../.team/reports/T-871.md)，Git交付見任務板。

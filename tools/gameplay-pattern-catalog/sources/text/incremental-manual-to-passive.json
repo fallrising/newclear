@@ -1,0 +1,120 @@
+{
+  "id": "incremental-manual-to-passive",
+  "system": "incremental",
+  "edition": 3,
+  "name": {
+    "zh": "先亲手赚，再买自动收益",
+    "en": "Earn by hand, then buy passive output"
+  },
+  "summary": {
+    "zh": "把第一笔劳动换成持续收入，重新决定时间该花在哪里。",
+    "en": "Turn the first manual earnings into a continuing income, then reconsider where to spend attention."
+  },
+  "rules": {
+    "zh": "玩家先用点击等直接动作取得资源，再花资源买持续产出的单位。自动收入开始后，手动操作仍可补充收益；玩家在继续操作、购买更多产出和攒钱买下一项之间循环取舍。这里关注手动与自动收入的交接，不涉及复杂生产线。",
+    "en": "Earn resources through a direct action such as clicking, then buy units that keep producing. Manual input can still supplement automatic income. Decide whether to act, buy another producer or save for a different purchase. The focus is the handoff from manual to passive output, not a production chain."
+  },
+  "loop": [
+    {
+      "zh": "亲手取得启动资源",
+      "en": "Earn the starting resource"
+    },
+    {
+      "zh": "买下第一份自动产出",
+      "en": "Buy the first passive producer"
+    },
+    {
+      "zh": "观察收入与等待时间",
+      "en": "Compare income and waiting time"
+    },
+    {
+      "zh": "决定补点收入还是继续投资",
+      "en": "Act again or invest further"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "现在买便宜的自动产出，还是再操作一会儿买更有效率的一项？",
+      "en": "Buy a cheap producer now or keep acting until a more efficient one is affordable?"
+    },
+    {
+      "zh": "自动收入足够后，继续操作带来的额外收益还值得注意力吗？",
+      "en": "Once passive income grows, is the extra manual gain worth the attention?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "自动收入回本时间",
+        "en": "Producer payback time"
+      },
+      "effect": {
+        "zh": "回本短会很快把重心移到投资；回本长让手动操作保留更久的作用。",
+        "en": "Short payback shifts attention toward investment sooner; long payback keeps manual input relevant."
+      }
+    },
+    {
+      "name": {
+        "zh": "手动收益随成长变化",
+        "en": "Manual scaling"
+      },
+      "effect": {
+        "zh": "手动收益完全不增长会迅速失去意义；同步增长则保留随时介入的理由。",
+        "en": "Flat manual rewards soon become irrelevant; scaling them preserves a reason to intervene."
+      }
+    }
+  ],
+  "tags": [
+    "economy",
+    "progression",
+    "time"
+  ],
+  "related": [
+    "incremental-farm-or-push",
+    "incremental-offline-window",
+    "incremental-quantity-milestones",
+    "incremental-spend-time-advance"
+  ],
+  "contrast": {
+    "zh": "饼干点点乐直接把资源投入每秒产量；点击英雄先把投入变成伤害，再通过击败敌人转成金币。",
+    "en": "Cookie Clicker converts investment directly into production per second; Clicker Heroes converts it into damage, then gold from defeated enemies."
+  },
+  "combination": {
+    "zh": "组合提案：第一台自动机器可以贷款购买，但每轮要还固定费用，迫使玩家判断现在自动化是否真的负担得起。",
+    "en": "Design proposal: finance the first producer with a loan that requires a fixed payment each round, making early automation a solvency decision."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "每次手工制作得1枚币，已有10枚币，机器售价10枚且每轮产2枚。",
+      "en": "Each manual craft earns one coin. You have ten; a machine costs ten and yields two each round."
+    },
+    "action": {
+      "zh": "玩家买机器，再手工做两次。",
+      "en": "Buy the machine, then craft twice by hand."
+    },
+    "result": {
+      "zh": "下一轮得到机器的2枚和手工的2枚，已有4枚。",
+      "en": "The next round combines two machine coins with two manual coins, totaling four."
+    },
+    "next": {
+      "zh": "下一台机器更贵，玩家决定继续手做还是等待机器攒够。",
+      "en": "The next machine costs more; decide whether to craft or wait for income."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "做一个手动按钮、一种货币和一个可购买的自动计时器。",
+      "en": "Build one manual button, one currency and one purchasable income timer."
+    },
+    "pitfall": {
+      "zh": "不要先堆几十种升级，先让玩家看懂手动收益与每秒收益的区别。",
+      "en": "Avoid dozens of upgrades before players can distinguish manual rewards from income per second."
+    },
+    "test": {
+      "zh": "玩家买到自动产出后，是否会主动改变操作频率？",
+      "en": "Does buying a passive producer change how often players choose to act?"
+    }
+  }
+}

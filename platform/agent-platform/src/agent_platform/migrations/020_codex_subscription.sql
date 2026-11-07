@@ -1,0 +1,13 @@
+ALTER TABLE agent_profile_revisions DROP CONSTRAINT supported_profile;
+ALTER TABLE agent_profile_revisions ADD CONSTRAINT supported_profile CHECK (
+ (backend='fake' AND model_ref='fixture:m1' AND template_digest='fixture:m1') OR
+ (backend='openhands' AND model_ref IN ('fixture:m2','openai-compatible:chat-completions')
+  AND template_digest ~ '@sha256:[a-f0-9]{64}$') OR
+ (backend='claude-subscription' AND model_ref='claude-subscription:claude-opus-5-5'
+  AND template_digest ~ '@sha256:[a-f0-9]{64}$') OR
+ (backend='codex-subscription' AND model_ref='codex-subscription:gpt-6.1-sol'
+  AND template_digest ~ '@sha256:[a-f0-9]{64}$')
+);
+ALTER TABLE runs DROP CONSTRAINT runs_backend_check;
+ALTER TABLE runs ADD CONSTRAINT runs_backend_check
+ CHECK (backend IN ('fake','openhands','claude-subscription','codex-subscription'));

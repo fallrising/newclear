@@ -213,6 +213,8 @@ export interface paths {
          *     - 403 LAST_ADMIN: the change would leave no active admin.
          *     - 403 SURFACE_FORBIDDEN, FORBIDDEN: as listPrincipals.
          *     - 404 PRINCIPAL_NOT_FOUND: no principal with this id.
+         *
+         *     403 SELF_DISABLE_FORBIDDEN: 目標是呼叫者且新 status=disabled；先於 LAST_ADMIN 拒絕，資料與 session 不變。
          */
         patch: operations["patchPrincipal"];
         trace?: never;
@@ -232,6 +234,8 @@ export interface paths {
          *     - 403 LAST_ADMIN: the principal is the last active admin.
          *     - 403 SURFACE_FORBIDDEN, FORBIDDEN: as listPrincipals.
          *     - 404 PRINCIPAL_NOT_FOUND: no principal with this id.
+         *
+         *     403 SELF_DISABLE_FORBIDDEN: 不允許停用呼叫者自己；先於 LAST_ADMIN 拒絕，資料與 session 不變。
          */
         post: operations["disablePrincipal"];
         delete?: never;
@@ -278,6 +282,8 @@ export interface paths {
          *     - 403 LAST_ADMIN: the change would leave no active admin.
          *     - 403 SURFACE_FORBIDDEN, FORBIDDEN: as listPrincipals.
          *     - 404 PRINCIPAL_NOT_FOUND: no principal with this id.
+         *
+         *     403 SELF_DEMOTION_FORBIDDEN: 目標是呼叫者、目前有 admin 且新集合沒有 admin；先於 LAST_ADMIN 拒絕。保留 admin 時可合法修改其他角色。
          */
         put: operations["replacePrincipalRoles"];
         post?: never;
@@ -996,6 +1002,8 @@ export interface paths {
          *     - 403 FORBIDDEN: caller does not hold the admin role.
          *     - 404 ENTRY_NOT_FOUND: entry missing.
          *     - 409 REF_CONSTRAINT: another entry still references this entry.
+         *
+         *     Q-25：確認JSON body的confirmPhrase=DELETE且confirmId=目標UUID或非空slug；400 CONFIRMATION_REQUIRED時沒有狀態變更，拒絕審計獨立保存。先surface/action/role，再找目標，再確認，再既有ref/交易刪除。415 MEDIA_TYPE_NOT_SUPPORTED:非JSON內容類型。
          */
         post: operations["purgeEntry"];
         delete?: never;
@@ -1303,7 +1311,7 @@ export interface components {
          * @description Every `error.code` the API can return. Media codes were lowercase until BW5 (BQ-07).
          * @enum {string}
          */
-        ErrorCode: "UNAUTHENTICATED" | "INVALID_CREDENTIALS" | "SESSION_EXPIRED" | "ACCOUNT_DISABLED" | "ACCOUNT_LOCKED" | "CSRF_FAILED" | "FORBIDDEN" | "SURFACE_FORBIDDEN" | "VALIDATION_FAILED" | "LAST_ADMIN" | "ENTRY_NOT_FOUND" | "CONTENT_TYPE_NOT_FOUND" | "NAVIGATION_NOT_FOUND" | "AUDIT_EVENT_NOT_FOUND" | "PRINCIPAL_NOT_FOUND" | "AUDIENCE_PARAM_REJECTED" | "INVALID_STATE_TRANSITION" | "SLUG_CONFLICT" | "VERSION_CONFLICT" | "VERSION_REQUIRED" | "TYPE_DISABLED" | "TYPE_IN_USE" | "REF_CONSTRAINT" | "SINGLETON_EXISTS" | "SLUG_REQUIRED" | "FIELD_VALIDATION" | "REF_TARGET_NOT_FOUND" | "REF_TARGET_WRONG_TYPE" | "PRINCIPAL_REF_UNRESOLVED" | "MEDIA_NOT_FOUND" | "MEDIA_VARIANT_NOT_AVAILABLE" | "MEDIA_UNSUPPORTED_TYPE" | "MEDIA_QUOTA_EXCEEDED" | "MEDIA_FILE_TOO_LARGE" | "MEDIA_GONE" | "ROUTE_NOT_FOUND" | "METHOD_NOT_ALLOWED" | "MEDIA_TYPE_NOT_SUPPORTED" | "RATE_LIMITED" | "INTERNAL_ERROR";
+        ErrorCode: "UNAUTHENTICATED" | "INVALID_CREDENTIALS" | "SESSION_EXPIRED" | "ACCOUNT_DISABLED" | "ACCOUNT_LOCKED" | "CSRF_FAILED" | "FORBIDDEN" | "SURFACE_FORBIDDEN" | "VALIDATION_FAILED" | "LAST_ADMIN" | "ENTRY_NOT_FOUND" | "CONTENT_TYPE_NOT_FOUND" | "NAVIGATION_NOT_FOUND" | "AUDIT_EVENT_NOT_FOUND" | "PRINCIPAL_NOT_FOUND" | "AUDIENCE_PARAM_REJECTED" | "INVALID_STATE_TRANSITION" | "SLUG_CONFLICT" | "VERSION_CONFLICT" | "VERSION_REQUIRED" | "TYPE_DISABLED" | "TYPE_IN_USE" | "REF_CONSTRAINT" | "SINGLETON_EXISTS" | "SLUG_REQUIRED" | "FIELD_VALIDATION" | "REF_TARGET_NOT_FOUND" | "REF_TARGET_WRONG_TYPE" | "PRINCIPAL_REF_UNRESOLVED" | "MEDIA_NOT_FOUND" | "MEDIA_VARIANT_NOT_AVAILABLE" | "MEDIA_UNSUPPORTED_TYPE" | "MEDIA_QUOTA_EXCEEDED" | "MEDIA_FILE_TOO_LARGE" | "MEDIA_GONE" | "ROUTE_NOT_FOUND" | "METHOD_NOT_ALLOWED" | "MEDIA_TYPE_NOT_SUPPORTED" | "RATE_LIMITED" | "INTERNAL_ERROR" | "SELF_DISABLE_FORBIDDEN" | "SELF_DEMOTION_FORBIDDEN" | "CONFIRMATION_REQUIRED";
         ErrorEnvelope: {
             /** @description Echo of X-Request-Id, or a server-generated UUID. */
             requestId: string;
@@ -1939,6 +1947,14 @@ export interface components {
             file: string;
             title?: string;
             altText?: string;
+        };
+        PurgeEntryRequest: {
+            /** @enum {string} */
+            confirmPhrase: "DELETE";
+            /** @description 逐字等於路徑UUID的canonical字串，或目標非空slug；不trim、不忽略大小寫。 */
+            confirmId: string;
+        } & {
+            [key: string]: unknown;
         };
     };
     responses: {
@@ -3531,7 +3547,18 @@ export interface operations {
             };
             cookie?: never;
         };
-        requestBody?: never;
+        /** @description 缺body或缺/錯任一確認欄位均由業務閘門回400 CONFIRMATION_REQUIRED，不允許無確認成功。 */
+        requestBody?: {
+            content: {
+                /**
+                 * @example {
+                 *       "confirmPhrase": "DELETE",
+                 *       "confirmId": "30000000-0000-4000-8000-000000000001"
+                 *     }
+                 */
+                "application/json": components["schemas"]["PurgeEntryRequest"];
+            };
+        };
         responses: {
             /** @description Hard deleted with audit */
             204: {
@@ -3545,6 +3572,7 @@ export interface operations {
             403: components["responses"]["Error403"];
             404: components["responses"]["Error404"];
             409: components["responses"]["Error409"];
+            415: components["responses"]["Error415"];
             500: components["responses"]["Error500"];
         };
     };

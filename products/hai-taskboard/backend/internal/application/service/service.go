@@ -8,6 +8,7 @@ import (
 	json "encoding/json/v2"
 	"errors"
 	"fmt"
+	"maps"
 	"slices"
 	"strings"
 	"time"
@@ -44,6 +45,14 @@ func New(
 	declaration := executor.Declaration().Clone()
 	if !validExecutorDeclaration(declaration) {
 		return nil, errors.New("P0-A requires a declared fake/v1 executor")
+	}
+	config.ProjectPolicies = maps.Clone(config.ProjectPolicies)
+	for project, profile := range config.ProjectPolicies {
+		verified, err := port.DecodePolicyProfile(profile.CanonicalJSON(), profile.Digest())
+		if err != nil || verified.Material().ProjectID != project {
+			return nil, errors.New("invalid project completion policy")
+		}
+		config.ProjectPolicies[project] = verified
 	}
 	config.Completion = config.Completion.clone()
 	return &Service{
@@ -145,8 +154,11 @@ func (service *Service) DispatchRun(ctx context.Context, principal domain.ActorI
 			if material.ActiveOrUnknownRun {
 				return mutation{}, domain.Rejection{Code: domain.CodeActiveOrUnknownRun}
 			}
+			if err := redispatchAllowed(material, value.ExpectedVersion, now); err != nil {
+				return mutation{}, err
+			}
 			next, err := material.WorkItem.Transition(domain.PhaseDeveloping, domain.TransitionGuards{
-				ExpectedVersion: value.ExpectedVersion, ExplicitStart: true,
+				ExpectedVersion: value.ExpectedVersion, ExplicitStart: true, PriorRunsSettled: true,
 			})
 			if err != nil {
 				return mutation{}, err
@@ -254,6 +266,27 @@ func (service *Service) CompleteWorkItem(ctx context.Context, principal domain.A
 			result := command.Result{Type: "WorkItemCompleted", ProjectID: value.ProjectID, WorkItemID: value.WorkItemID, Version: completion.WorkItem.Version(), Phase: completion.WorkItem.Phase()}
 			return changeMutation(value.ProjectID, "work_item", string(value.WorkItemID), completion.WorkItem.Version(), result, completion.Record.SubjectDigest()), nil
 		})
+}
+
+// redispatchAllowed applies the settled and strict-order guards whenever the
+// WorkItem already has Runs (Developing redispatch, or Ready after reopen).
+// Ready without Runs is unchanged; every other phase is not a dispatch source,
+// after the domain's version-first precedence.
+func redispatchAllowed(material port.CompletionMaterial, expectedVersion uint64, now time.Time) error {
+	item := material.WorkItem
+	switch {
+	case item.Phase() == domain.PhaseReady && material.Runs.Count == 0:
+		return nil
+	case item.Version() != expectedVersion:
+		return domain.Rejection{Code: domain.CodeVersionConflict}
+	case item.Phase() != domain.PhaseDeveloping && item.Phase() != domain.PhaseReady:
+		return domain.Rejection{Code: domain.CodeInvalidTransition}
+	case material.Runs.Count == 0 || !material.Runs.AllSettled:
+		return command.NewError(command.CodeLifecycleRejected, "every existing Run must be settled before redispatch", false, nil, nil)
+	case now.UnixNano() <= material.Runs.LatestCreatedAtNS:
+		return command.NewError(command.CodeLifecycleRejected, "server clock is not after the latest Run", true, nil, nil)
+	}
+	return nil
 }
 
 func validExecutorDeclaration(declaration port.ExecutorDeclaration) bool {
@@ -587,7 +620,8 @@ func (service *Service) completionInput(
 	material port.CompletionMaterial,
 	now time.Time,
 ) (domain.CompletionInput, selectedCompletion, error) {
-	current, err := currentSubject(material, service.config.Completion)
+	policy := service.completionFor(material.WorkItem.ProjectID())
+	current, err := currentSubject(material, policy)
 	if err != nil {
 		switch {
 		case !material.CandidatePresent || !material.RunPresent:
@@ -598,10 +632,25 @@ func (service *Service) completionInput(
 			return domain.CompletionInput{}, selectedCompletion{}, domain.StorageCorruptionError{Reason: "invalid current completion subject"}
 		}
 	}
+	input, selected, err := assembleCompletionInput(principal, value, material, policy, current, now)
+	if err != nil {
+		return domain.CompletionInput{}, selectedCompletion{}, err
+	}
+	recordID, err := service.nextID(port.IDCompletionRecord)
+	if err != nil {
+		return domain.CompletionInput{}, selectedCompletion{}, err
+	}
+	input.RecordID = domain.CompletionRecordID(recordID)
+	return input, selected, nil
+}
+
+// assembleCompletionInput is pure: the reader supplies its exact prospective or
+// current subject and policy; only the command wrapper allocates a record ID.
+func assembleCompletionInput(principal domain.ActorID, value command.CompleteWorkItem, material port.CompletionMaterial, policy CompletionPolicy, current domain.CompletionSubject, now time.Time) (domain.CompletionInput, selectedCompletion, error) {
 	requirements := make([]domain.CheckRequirement, 0, len(material.RequiredACRevisions))
 	revisions := make(map[domain.ACID]domain.Digest, len(material.RequiredACRevisions))
 	for _, requirement := range material.RequiredACRevisions {
-		rule, ok := service.config.Completion.Checks[requirement.ACID]
+		rule, ok := policy.Checks[requirement.ACID]
 		if !ok || rule.VerifierClass == "" {
 			return domain.CompletionInput{}, selectedCompletion{}, command.NewError(command.CodeDoneGateUnsatisfied, "verification policy is incomplete", false, []domain.RejectionCode{domain.CodeEvidenceMissing}, nil)
 		}
@@ -619,14 +668,14 @@ func (service *Service) completionInput(
 		artifactAvailability[artifact.Digest] = artifact.Availability
 	}
 	for _, persisted := range material.Evidence {
-		rule, required := service.config.Completion.Checks[persisted.ACID]
+		rule, required := policy.Checks[persisted.ACID]
 		revision, bound := revisions[persisted.ACID]
 		if !required || !bound || revision != persisted.ACRevisionDigest || persisted.SubjectDigest != current.Digest() || persisted.VerifierClass != rule.VerifierClass {
 			continue
 		}
 		applicability := domain.EvidenceApplicability(persisted.Applicability)
 		availability := domain.EvidenceAvailability(persisted.Availability)
-		if persisted.RecipeDigest != service.config.Completion.RecipeDigest ||
+		if persisted.RecipeDigest != policy.RecipeDigest ||
 			(!rule.EnvironmentDigest.IsZero() && persisted.EnvironmentDigest != rule.EnvironmentDigest) {
 			applicability = domain.EvidenceStale
 		}
@@ -678,10 +727,6 @@ func (service *Service) completionInput(
 		}
 	}
 
-	recordID, err := service.nextID(port.IDCompletionRecord)
-	if err != nil {
-		return domain.CompletionInput{}, selectedCompletion{}, err
-	}
 	return domain.CompletionInput{
 		WorkItem: material.WorkItem, ExpectedVersion: value.ExpectedVersion,
 		RequestedSubject: value.Subject, CurrentSubject: current,
@@ -689,8 +734,8 @@ func (service *Service) completionInput(
 		CandidateAvailable: material.CandidateAvailable,
 		ActiveOrUnknownRun: material.ActiveOrUnknownRun,
 		RequiredChecks:     requirements, Evidence: evidence, Review: review,
-		ApprovalRequired: service.config.Completion.ApprovalRequired, Approval: approval,
-		Now: now, RecordID: domain.CompletionRecordID(recordID),
+		ApprovalRequired: policy.ApprovalRequired, Approval: approval,
+		Now: now,
 	}, selected, nil
 }
 

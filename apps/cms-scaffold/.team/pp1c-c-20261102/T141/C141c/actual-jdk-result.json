@@ -1,0 +1,6 @@
+{
+  "status": 0,
+  "signal": null,
+  "stderrBytes": 0,
+  "stdout": "{\"sessionAbsoluteSeconds\":\"43200\",\"sessionMaxSeconds\":\"604800\"}\n"
+}

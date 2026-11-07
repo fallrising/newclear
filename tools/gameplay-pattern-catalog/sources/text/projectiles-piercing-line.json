@@ -1,0 +1,120 @@
+{
+  "id": "projectiles-piercing-line",
+  "system": "projectiles",
+  "edition": 3,
+  "name": {
+    "zh": "让多个目标排进同一条弹道",
+    "en": "Line up targets for a piercing shot"
+  },
+  "summary": {
+    "zh": "一发不在第一个目标处停下，站位就能换来额外命中。",
+    "en": "A shot continues beyond the first target, making alignment valuable."
+  },
+  "rules": {
+    "zh": "贯穿弹命中目标后继续前进，直到耗尽穿透次数、距离或能量。玩家移动到能把敌人排成一线的位置，再决定立即射击还是等队形更集中；命中顺序和衰减影响后排收益。",
+    "en": "A piercing shot continues until its penetration count, distance or energy runs out. Reposition to align enemies, then fire now or wait for a better line; hit order and decay determine the value against later targets."
+  },
+  "loop": [
+    {
+      "zh": "观察目标之间的相对位置",
+      "en": "Read the positions between targets"
+    },
+    {
+      "zh": "调整站位形成一条线",
+      "en": "Reposition to make a line"
+    },
+    {
+      "zh": "发射并查看贯穿结果",
+      "en": "Fire and inspect the penetration"
+    },
+    {
+      "zh": "趁敌人重新散开再选位置",
+      "en": "Choose a new position as enemies spread"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "先打掉前排威胁，还是等后排靠近后一起贯穿？",
+      "en": "Remove the front threat now or wait to catch the rear target too?"
+    },
+    {
+      "zh": "为了多打一人而绕到侧面，是否会暴露给另一组敌人？",
+      "en": "Does moving sideways for another hit expose you to a different group?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "贯穿上限",
+        "en": "Penetration limit"
+      },
+      "effect": {
+        "zh": "上限低强调精确排队；上限高更依赖场地和敌群密度来控制收益。",
+        "en": "A low limit rewards precise alignment; a high one makes terrain and crowd density central to balance."
+      }
+    },
+    {
+      "name": {
+        "zh": "逐目标伤害衰减",
+        "en": "Damage decay per target"
+      },
+      "effect": {
+        "zh": "衰减明显时，玩家还要决定把谁放在第一命中位。",
+        "en": "Strong decay makes the identity of the first target important."
+      }
+    }
+  ],
+  "tags": [
+    "spatial",
+    "planning",
+    "optimization"
+  ],
+  "related": [
+    "combat-action-points",
+    "combat-combat-deck-cycle",
+    "combat-cover-flanking",
+    "combat-destructible-cover"
+  ],
+  "contrast": {
+    "zh": "泰拉瑞亚的例子重点在同线多目标；线圈枪还把地形穿透和残留伤害轨迹接到同一发攻击上。",
+    "en": "Terraria emphasizes aligned enemies; the Coil Gun adds terrain penetration and a lingering damage trail."
+  },
+  "combination": {
+    "zh": "组合提案：先用低伤害推拉把敌人挤到一条通道，再消耗一枚珍贵贯穿弹；控制行动的价值由后续命中数体现。",
+    "en": "Design proposal: use a low-damage push or pull to align enemies, then spend a scarce piercing round, making setup value visible in the later hit count."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "三个敌人散成三角形，只剩一枚贯穿弹。",
+      "en": "Three enemies form a triangle and one piercing round remains."
+    },
+    "action": {
+      "zh": "玩家侧移，引前两个敌人沿窄道追来。",
+      "en": "The player sidesteps and draws two enemies into a narrow lane."
+    },
+    "result": {
+      "zh": "开火贯穿两人，第三人仍留在侧面。",
+      "en": "The shot hits two enemies; the third remains to the side."
+    },
+    "next": {
+      "zh": "根据剩余威胁选择继续引位，或换普通武器处理。",
+      "en": "Choose another alignment setup or switch to an ordinary weapon."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "先做三个圆形目标、一次最多命中两人的直线弹，以及命中次序标记。",
+      "en": "Build three circular targets, a straight shot that hits at most two, and a visible hit-order marker."
+    },
+    "pitfall": {
+      "zh": "同一弹丸不可每帧重复伤害同一目标；命中与继续穿过的反馈要分清。",
+      "en": "Prevent repeated per-frame hits on the same target and distinguish a hit from continued travel."
+    },
+    "test": {
+      "zh": "玩家是否为了第二次命中主动改变站位，而不是只提高射速？",
+      "en": "Do players change position for a second hit rather than merely firing faster?"
+    }
+  }
+}

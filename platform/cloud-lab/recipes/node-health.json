@@ -1,0 +1,1 @@
+{"recipe_id":"node-health","version":"1.0.0","owner":"python-node-health","profile":"unprivileged-read-only","collector":"python-os-health","healthy_policy":"load_1m_milli<=cpu_count*2000;disk_free_percent>=10","timeout_seconds":10,"output_budget_bytes":16384,"verification":"schema-freshness-scope-v1"}

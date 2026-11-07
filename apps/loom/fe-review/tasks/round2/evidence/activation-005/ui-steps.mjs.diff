@@ -1,0 +1,26 @@
+--- ui-steps.mjs.before
++++ ui-steps.mjs
+@@ -67,7 +67,22 @@
+     const bounds = await header.boundingBox(); assert.ok(bounds, 'REVIEW_NODE_BOUNDS');
+     const x = bounds.x + bounds.width / 2, y = bounds.y + bounds.height / 2;
+     await page.mouse.move(x, y); await page.mouse.down();
+-    await page.mouse.move(x + screenDelta, y, { steps: 12 }); await page.mouse.up();
++    try {
++      // Locked XYDrag starts at the first event exceeding its 1 px threshold;
++      // that event only anchors the drag. Do not spend the required node delta
++      // on it. Observe the actual resulting geometry before the full movement.
++      const activationX = x + 2;
++      await page.mouse.move(activationX, y);
++      const activated = await page.evaluate(observeStableHandles);
++      if (receipt) receipt.nodeSeparation.activated = activated;
++      assert.equal(activated.stable, true, 'REVIEW_GEOMETRY_UNSTABLE');
++      assert.ok(activated.last.document && activated.last.terminal, 'REVIEW_NODE_BOUNDS');
++      const remainingDelta = Math.max(0, activated.last.document.x + activated.last.document.width + 48 - activated.last.terminal.x);
++      if (receipt) receipt.nodeSeparation.activation = { pixels: 2, remainingDelta };
++      await page.mouse.move(activationX + remainingDelta, y, { steps: 12 });
++    } finally {
++      await page.mouse.up();
++    }
+   }
+   await fit(page);
+   const after = await page.evaluate(observeStableHandles);

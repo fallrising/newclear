@@ -91,6 +91,33 @@ pub fn anthropic_to_openai_response(body: &Bytes) -> AppResult<Bytes> {
 /// Convert Anthropic `/v1/messages` body to OpenAI `/v1/chat/completions` body.
 /// Keeps tool_use / tool_result (call ids preserved) and images.
 pub fn anthropic_to_openai(body: &Bytes) -> AppResult<Bytes> {
+    anthropic_to_openai_inner(body, false)
+}
+
+pub(crate) const INLINE_INSTRUCTION: &str = "_thinrouter_inline_instruction";
+
+/// Internal Claude-only provenance. Public Chat/Responses annotations are never
+/// trusted; Messages provenance is rebuilt from the original prepared body.
+pub(crate) fn prepare_claude_code_chat(
+    mut chat: Value,
+    anthropic_body: Option<&Bytes>,
+) -> AppResult<Value> {
+    if let Some(body) = anthropic_body {
+        return Ok(serde_json::from_slice(&anthropic_to_openai_inner(
+            body, true,
+        )?)?);
+    }
+    if let Some(messages) = chat.get_mut("messages").and_then(Value::as_array_mut) {
+        for message in messages {
+            if let Some(object) = message.as_object_mut() {
+                object.remove(INLINE_INSTRUCTION);
+            }
+        }
+    }
+    Ok(chat)
+}
+
+fn anthropic_to_openai_inner(body: &Bytes, preserve_inline: bool) -> AppResult<Bytes> {
     let v: Value = serde_json::from_slice(body)
         .map_err(|e| AppError::BadRequest(format!("invalid JSON body: {e}")))?;
     let obj = v
@@ -126,7 +153,13 @@ pub fn anthropic_to_openai(body: &Bytes) -> AppResult<Bytes> {
 
     for m in anth_messages {
         let role = m.get("role").and_then(|r| r.as_str()).unwrap_or("user");
+        let start = messages.len();
         match m.get("content") {
+            // The official client can inline instructions as blocks initially,
+            // then replay them as strings. Preserve their role in both forms.
+            Some(Value::Array(blocks)) if matches!(role, "system" | "developer") => {
+                messages.push(json!({"role": role, "content": blocks_to_text(blocks)}));
+            }
             Some(Value::Array(blocks)) if role == "assistant" => {
                 messages.push(assistant_blocks_to_chat(blocks));
             }
@@ -134,6 +167,11 @@ pub fn anthropic_to_openai(body: &Bytes) -> AppResult<Bytes> {
             Some(Value::String(s)) => messages.push(json!({"role": role, "content": s})),
             Some(other) => messages.push(json!({"role": role, "content": other})),
             None => messages.push(json!({"role": role, "content": ""})),
+        }
+        if preserve_inline && matches!(role, "system" | "developer") {
+            for message in &mut messages[start..] {
+                message[INLINE_INSTRUCTION] = json!(true);
+            }
         }
     }
 
@@ -420,6 +458,7 @@ pub struct StreamTranslateState {
     pub model: String,
     pub message_start_sent: bool,
     pub message_stop_sent: bool,
+    failed: bool,
     open: Option<OpenBlock>,
     next_block: usize,
     stop_reason: Option<String>,
@@ -428,11 +467,15 @@ pub struct StreamTranslateState {
 }
 
 impl StreamTranslateState {
+    pub(crate) fn is_failed(&self) -> bool {
+        self.failed
+    }
     pub fn new(model: impl Into<String>) -> Self {
         Self {
             model: model.into(),
             message_start_sent: false,
             message_stop_sent: false,
+            failed: false,
             open: None,
             next_block: 0,
             stop_reason: None,
@@ -491,11 +534,23 @@ impl StreamTranslateState {
 
     /// EOF may complete Chat streams only after an explicit finish reason.
     pub fn on_end(&mut self) -> Vec<String> {
+        self.end_with_error(crate::error::INCOMPLETE_STREAM_MESSAGE)
+    }
+
+    pub(crate) fn on_stall(&mut self) -> Vec<String> {
+        self.end_with_error(crate::error::STALLED_STREAM_MESSAGE)
+    }
+
+    pub(crate) fn on_read_error(&mut self) -> Vec<String> {
+        self.end_with_error(crate::error::READ_FAILED_STREAM_MESSAGE)
+    }
+
+    fn end_with_error(&mut self, message: &str) -> Vec<String> {
         if self.message_stop_sent || self.stop_reason.is_some() {
             return self.stop();
         }
         openai_sse_chunk_to_anthropic(
-            &json!({"error": {"type": "api_error", "message": crate::error::INCOMPLETE_STREAM_MESSAGE}}).to_string(),
+            &json!({"error": {"type": "api_error", "message": message}}).to_string(),
             self,
         )
     }
@@ -541,6 +596,7 @@ pub fn openai_sse_chunk_to_anthropic(data: &str, state: &mut StreamTranslateStat
             &json!({"type": "error", "error": {"type": "api_error", "message": err.get("message").cloned().unwrap_or_else(|| err.clone())}}),
         ));
         state.message_stop_sent = true;
+        state.failed = true;
         return events;
     }
     if !state.message_start_sent {
@@ -705,6 +761,7 @@ pub fn anthropic_sse_to_message(records: &[String], model: &str) -> Bytes {
 
 /// Anthropic Messages SSE → `chat.completion.chunk` records (text and tool_use).
 pub struct AnthropicToChatStream {
+    budget: crate::stream_budget::RetainedBudget,
     id: String,
     model: String,
     created: i64,
@@ -713,11 +770,21 @@ pub struct AnthropicToChatStream {
     finish: Option<String>,
     usage: (i64, i64),
     done: bool,
+    failed: bool,
 }
 
 impl AnthropicToChatStream {
+    pub(crate) fn is_failed(&self) -> bool {
+        self.failed
+    }
+
+    pub(crate) fn is_done(&self) -> bool {
+        self.done
+    }
+
     pub fn new(model: impl Into<String>) -> Self {
         Self {
+            budget: Default::default(),
             id: "chatcmpl-thinrouter".into(),
             model: model.into(),
             created: chrono::Utc::now().timestamp(),
@@ -725,6 +792,7 @@ impl AnthropicToChatStream {
             finish: None,
             usage: (0, 0),
             done: false,
+            failed: false,
         }
     }
 
@@ -783,6 +851,10 @@ impl AnthropicToChatStream {
             "content_block_start" => {
                 if ev.pointer("/content_block/type").and_then(|t| t.as_str()) == Some("tool_use") {
                     let idx = ev.get("index").and_then(|i| i.as_i64()).unwrap_or(0);
+                    if !self.tools.contains_key(&idx) && !self.budget.charge(0, 1) {
+                        self.tools = Default::default();
+                        return self.on_data(&json!({"type":"error","error":{"type":"api_error","message":crate::error::STATE_LIMIT_STREAM_MESSAGE}}).to_string());
+                    }
                     let n = self.tools.len();
                     self.tools.insert(idx, n);
                     out.push(self.chunk(
@@ -820,6 +892,7 @@ impl AnthropicToChatStream {
             }
             "message_stop" => out.extend(self.finish()),
             "error" => {
+                self.failed = true;
                 out.push(format!(
                     "data: {}",
                     json!({"error": ev.get("error").cloned().unwrap_or(Value::Null)})
@@ -833,12 +906,24 @@ impl AnthropicToChatStream {
     }
 
     pub fn on_end(&mut self) -> Vec<String> {
+        self.end_with_error(crate::error::INCOMPLETE_STREAM_MESSAGE)
+    }
+
+    pub(crate) fn on_stall(&mut self) -> Vec<String> {
+        self.end_with_error(crate::error::STALLED_STREAM_MESSAGE)
+    }
+
+    pub(crate) fn on_read_error(&mut self) -> Vec<String> {
+        self.end_with_error(crate::error::READ_FAILED_STREAM_MESSAGE)
+    }
+
+    fn end_with_error(&mut self, message: &str) -> Vec<String> {
         if self.done {
             return Vec::new();
         }
         self.on_data(
             &json!({"type": "error", "error": {
-                "type": "api_error", "message": crate::error::INCOMPLETE_STREAM_MESSAGE
+                "type": "api_error", "message": message
             }})
             .to_string(),
         )
@@ -867,6 +952,116 @@ pub fn extract_anthropic_model_stream(body: &Bytes) -> AppResult<(String, bool)>
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn dc1_adapter_provenance_is_reconstructed_and_generic_conversion_is_unmarked() {
+        let body = Bytes::from(
+            json!({"model":"m", "system":"same words", "messages":[
+                {"role":"system", "content":[{"type":"text","text":"same words"}]},
+                {"role":"user", "content":"question", "_thinrouter_inline_instruction":true},
+                {"role":"developer", "content":"later", "_thinrouter_inline_instruction":false}
+            ]})
+            .to_string(),
+        );
+        let generic: Value = serde_json::from_slice(&anthropic_to_openai(&body).unwrap()).unwrap();
+        assert!(generic["messages"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .all(|m| m.get(INLINE_INSTRUCTION).is_none()));
+        let annotated = prepare_claude_code_chat(Value::Null, Some(&body)).unwrap();
+        assert!(
+            annotated["messages"][0].get(INLINE_INSTRUCTION).is_none(),
+            "top-level stays stable"
+        );
+        assert_eq!(
+            annotated["messages"][1][INLINE_INSTRUCTION], true,
+            "inline before first user retains provenance"
+        );
+        assert!(
+            annotated["messages"][2].get(INLINE_INSTRUCTION).is_none(),
+            "user spoof ignored"
+        );
+        assert_eq!(
+            annotated["messages"][3][INLINE_INSTRUCTION], true,
+            "inline origin overrides spoof"
+        );
+        let mut unmarked = annotated;
+        for m in unmarked["messages"].as_array_mut().unwrap() {
+            m.as_object_mut().unwrap().remove(INLINE_INSTRUCTION);
+        }
+        assert_eq!(unmarked, generic, "no other conversion changes");
+        let spoof = json!({"messages":[{"role":"system","content":"strict", "_thinrouter_inline_instruction":true},
+            {"role":"developer","content":"strict too", "_thinrouter_inline_instruction":true}]});
+        let cleaned = prepare_claude_code_chat(spoof, None).unwrap();
+        assert!(cleaned["messages"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .all(|m| m.get(INLINE_INSTRUCTION).is_none()));
+    }
+
+    #[test]
+    fn rs2_anthropic_tool_map_limits_new_indexes_but_not_streamed_text() {
+        let mut stream = AnthropicToChatStream::new("m");
+        stream.budget = crate::stream_budget::RetainedBudget::limited(0, 2);
+        let tool = |i| {
+            json!({"type":"content_block_start","index":i,"content_block":{"type":"tool_use","id":"c","name":"f"}}).to_string()
+        };
+        for i in [0, 1, 0, 1] {
+            assert!(!stream
+                .on_data(&tool(i))
+                .join("")
+                .contains(crate::error::STATE_LIMIT_STREAM_MESSAGE));
+        }
+        for _ in 0..3 {
+            let out = stream
+                .on_data(
+                    &json!({"type":"content_block_delta","delta":{"text":"unretained text"}})
+                        .to_string(),
+                )
+                .join("");
+            assert!(out.contains("unretained text"));
+            assert!(!out.contains(crate::error::STATE_LIMIT_STREAM_MESSAGE));
+        }
+        let out = stream.on_data(&tool(2)).join("\n");
+        assert!(out.contains(crate::error::STATE_LIMIT_STREAM_MESSAGE));
+        assert!(stream.tools.is_empty() && stream.is_done());
+        assert!(stream.on_end().is_empty());
+    }
+
+    #[test]
+    fn nr1_inline_instruction_blocks_preserve_roles_and_order() {
+        for role in ["system", "developer"] {
+            let request = |content: Value| {
+                Bytes::from(
+                    json!({
+                        "model": "m", "system": "top-level instruction",
+                        "messages": [
+                            {"role": "user", "content": "first turn"},
+                            {"role": role, "content": content},
+                            {"role": "assistant", "content": "answer"},
+                            {"role": "user", "content": "next turn"}
+                        ]
+                    })
+                    .to_string(),
+                )
+            };
+            let blocks = json!([
+                {"type": "text", "text": "instruction one", "cache_control": {"type": "ephemeral"}},
+                {"type": "text", "text": "instruction two"}
+            ]);
+            let actual: Value =
+                serde_json::from_slice(&anthropic_to_openai(&request(blocks)).unwrap()).unwrap();
+            let equivalent: Value = serde_json::from_slice(
+                &anthropic_to_openai(&request(json!("instruction one\ninstruction two"))).unwrap(),
+            )
+            .unwrap();
+            assert_eq!(actual["messages"][2]["role"], role);
+            assert_eq!(actual, equivalent);
+            assert_eq!(actual["messages"][0]["content"], "top-level instruction");
+            assert_eq!(actual["messages"][4]["content"], "next turn");
+        }
+    }
 
     #[test]
     fn convert_basic_request() {

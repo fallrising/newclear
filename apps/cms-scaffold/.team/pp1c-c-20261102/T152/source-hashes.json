@@ -1,0 +1,8 @@
+{
+  "scripts/local/maintenance-helper.mjs": "1841eb903edabaa7f4254291729a15a0b8c5f97e3c689038a682f558a7525f87",
+  "scripts/local/maintenance-workflow.test.mjs": "c219ffbac8ecefcf2d1e63b28f8b3e9cbb5b8f880a42fa0aa54299cdf49fd208",
+  "scripts/local/maintenance-helper-session.test.mjs": "7ba36abe88b6f8a33d19ec59f7acc6544b9e4a929c60a12bcac0753410021fa5",
+  "scripts/ops/local-recovery-verify.mjs": "32b4bec7c2f27e260a9cf06565a6804820f349fa574d988ddcb100b55335b54f",
+  "scripts/ops/local-recovery.fixture.mjs": "14f759ecd3bfd505bc40de4f16ee1e961d91e2ac71cfbb47f61cb234b013b689",
+  "scripts/ops/local-recovery-verify.test.mjs": "8143ec0986fba0a77984063820aab7d9181561b55abbb17d95f25125eb89cc6c"
+}

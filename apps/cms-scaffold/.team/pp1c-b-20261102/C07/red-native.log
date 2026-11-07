@@ -1,0 +1,23 @@
+✖ PP1c_C07_complete_capture_is_private_and_preserves_original_service_policy (8.834003ms)
+ℹ tests 1
+ℹ suites 0
+ℹ pass 0
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 76.933662
+
+✖ failing tests:
+
+test at scripts/ops/local-bundle.test.mjs:81:1
+✖ PP1c_C07_complete_capture_is_private_and_preserves_original_service_policy (8.834003ms)
+  Error: ADAPTER_UNSEALED
+      at captureLocal (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-20261101/apps/cms-scaffold/scripts/ops/local-bundle.mjs:3:79)
+      at TestContext.<anonymous> (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-20261101/apps/cms-scaffold/scripts/ops/local-bundle.test.mjs:82:46)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:385:3) {
+    code: 'ADAPTER_UNSEALED',
+    phase: null,
+    operationId: null
+  }

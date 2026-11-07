@@ -1,0 +1,32 @@
+{
+  "date": "2026-11-01",
+  "kind": "native_startup_without_inference",
+  "run": "pi-work-20261031T180727833939Z",
+  "source_sha256": "79fe2692b4a83a1b8852612f1e3533251b6b3e3e8aa424f1ab6a1287116c47a5",
+  "status": "completed",
+  "elapsed_s": 22.578193624969572,
+  "model_inference_verified": false,
+  "requests": 0,
+  "cleanup_errors": [],
+  "office": {
+    "startup_verified": true,
+    "states": [
+      "starting",
+      "idle"
+    ],
+    "authenticated_session_hook": true,
+    "cleanup_completed": true
+  },
+  "runtime_sources_sha256": {
+    "scripts/run_pi_work.py": "7015cd1f201e2f6974daec2e10f2b536147722753f757179ff650b864ef17b7e",
+    "scripts/deepseek_relay.py": "8d3372fe3e908d6603e6bca4217e52dcdff463f2f718aad20c05b64e2bffe9f9",
+    "scripts/office_pi.mjs": "b5d303a2dcc7baccb7e8f4350cd4c33322f70914249aaaae84c1deb77b609e3b",
+    "scripts/pi_boundary.mjs": "9abe611f1d8d8752b0bd83aafc0d3fbca0403fcb39028d84a3ba251fcf70dbd7",
+    "scripts/pi_office_policy.mjs": "92df34ccce91baf2ec0e300f551b2793ce0a764c14a0719c9a2f7cc698c65a15",
+    "scripts/remote_cli.py": "9a0ee26503ef76b003b9d8d387f6381acd1a043723374f62793a7f75bf97bb89",
+    "scripts/bin/pi": "11b34e97c56e5a553cfeca0ac7faa8bfeb1fa084398043c179e24257d9a7ede8"
+  },
+  "node_tests_passed": 25,
+  "python_tests_passed": 16,
+  "live_acceptance": "pending_owner_authorization"
+}

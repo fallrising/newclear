@@ -63,6 +63,84 @@ M7只有精確manifest與clean receipt才可恢復原scope；一般M1–M6禁止
 
 ## Issue548: bounded failure diagnostics (maintenance)
 
+### M5 kernel owner continuation (T081, 2026-10-25)
+
+Required CI40109462879 failed at durable_wait/observer/child_missing before any
+frozen target or SIGKILL. Exact vanished generation/role remains unknown.
+The independently reviewed [M5 contract](docs/SDD-M5.md#m5-kernel-owner-amendment-t081-phase-a)
+was committed as00d3881249d24e933c40b8e21806244cf81b75a0 before implementation.
+The M5-private runner registers source/version/setup/CLI and daemon launches,
+separates incomplete liveness from strict target admission, and adds actual
+kernel ECHILD to the unchanged per-generation root-first SIGKILL/root-9 and
+GET-only original readback obligations. Generic owner/crash helper and M4 inputs
+remain unchanged. Final normal0 and single-use original-deadline deletion remain.
+
+AC-M5K1: registered launches/sole waits/closed gates/ECHILD.
+AC-M5K2: strict complete retained-live/newly admitted target union, immutable
+restart/deletion authority and every original crash/readback guard.
+AC-M5K3: bounded typed lifecycle evidence and honest failed partial observations.
+AC-M5K4: causal/adversarial tests, independent review, full offline and original M5.
+All four local implementation/qualification gates pass on source freeze
+`d27e1207a388a8d691b0632a46ee896250a8e4d0bf509042cf4ff28ff3f27913`:
+57 focused,353 full Python3.11.17/PYTHONPATH-absent tests, independent21 focused
+plus actual deadline/retained-union probes, stable hashes and actual ECHILD.
+One original-artifact M5 run passes26.747s: all five M5/seven functional controls,
+two actual root-first SIGKILL targets/root-9, six GET-only original readbacks,
+5+14 direct waits, both kernel closures, final root0 and exact owned removal.
+
+The superseded640b source passed351 tests but failed independent actual collector
+cutoff review. Both delayed-wait REDs, shutdown-schema RED and initial fixture
+shape failures are preserved; their passes do not qualify the corrected source.
+See [actual report](docs/evidence/2026-10-25-m5-kernel-closure.json),
+[source binding](docs/evidence/2026-10-25-m5-kernel-closure-source.json) and
+[implementation report](tasks/548-m5-kernel-closure/report.md).
+Required exact-head CI and normal merge remain separate delivery gates. Historical
+AC-05 attribution, whole-mainline acceptance and usable_tag:none remain open.
+
+### M4 kernel closure continuation (contract baseline, T077)
+
+This proposed implementation replaces M4's sampled descendant ownership with a
+fresh same-PID exec runner, checked subreaper and single-use kernel-owned epochs.
+It does not change generic Process/command, M1–M3/M5–M7, storage measurement,
+upstream, workload or existing historical reports. Exact contract/schema/constants:
+[SDD-M4 kernel closure amendment](docs/SDD-M4.md#m4-kernel-closure-amendment-t077).
+
+AC-K1: every M4 subprocess, including source identity/version/setup, belongs to a
+bounded main-thread registry; three cold boundaries require closed launches,
+completed waits/drains, checked policy and actual ECHILD before snapshots.
+AC-K2: immutable single-use receipts govern snapshot/epoch progression and fresh
+final cleanup; authority/cancel/identity/policy/live-child uncertainty forbids
+snapshot/removal. Ordinary workload/metadata failure never becomes success and
+permits removal only after fresh verified closure and unchanged scope authority.
+AC-K3: strict additive lifecycle evidence separates incomplete sampled liveness
+from whole-tree kernel closure, preserves actual daemon identities/status and
+rejects forged counts/types/private fields. AC-K4: causal/adversarial focused
+tests, independent review, one full offline gate and one authorized original M4
+qualification bind the resulting behavior to exact source/artifact evidence.
+
+The committed baseline began with all AC-K checks not_run; root reviewed and
+committed it before releasing implementation. The evidence below supersedes that
+initial state. Historical AC-05 attribution and whole-mainline acceptance remain
+separate from this bounded current-source qualification.
+
+Phase B candidate evidence: root committed the contract baseline before release.
+AC-K1–K3 have51 focused offline passes on Python3.11.17, including actual
+three-generation kernel closure, unchanged generic refusal under the same causal
+fixture, stable-child/transient-helper sampling, live orphan blocking and typed
+authority failures. Production/test source digest:
+`57be515883f0933712f89517a2ac7526d1b82eff79544c48d839e9603247a566`.
+The earlier893611 source had331 root offline passes but was superseded after
+review reproduced expired receipt/seal authorization. Two actual RED/GREEN cases
+now verify immutable original deadlines; CLI output retains the original bounded
+tail-ring semantics. Root reports332 full offline passes and T078 independent
+ACCEPT on the corrected source. One original-artifact M4 qualification passed in61.007s: all five M4 and eight
+functional checks, three closed epochs/snapshots and verified owned removal.
+AC-K1–K4 local implementation/qualification checks are passed; hosted CI and normal
+PR merge remain delivery gates. See [actual report](docs/evidence/2026-10-24-m4-kernel-closure.json),
+[source binding](docs/evidence/2026-10-24-m4-kernel-closure-source.json) and
+[implementation report](tasks/548-m4-kernel-closure/report.md). This does not
+reconstruct the historical exact generation/edge or grant whole-mainline acceptance.
+
 ### Observation reason retention (2026-10-24 continuation)
 
 Scope: preserve the fixed observation reason already recorded by Process when

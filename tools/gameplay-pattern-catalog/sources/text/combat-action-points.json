@@ -1,0 +1,120 @@
+{
+  "id": "combat-action-points",
+  "system": "combat",
+  "edition": 2,
+  "name": {
+    "zh": "移动攻击共用行动点",
+    "en": "Shared action points"
+  },
+  "summary": {
+    "zh": "每回合预算有限，走近一点就可能少打一次。",
+    "en": "A limited turn budget makes movement compete with attacks."
+  },
+  "rules": {
+    "zh": "回合开始给角色固定行动点，移动、攻击和辅助动作消耗这份预算。玩家选择动作顺序，并在资源耗尽前完成目的；下一回合恢复预算。各动作是否结束回合必须明确，不能只靠点数暗示。",
+    "en": "At turn start, grant a fixed action budget shared by movement, attacks and support. Players sequence actions before the budget runs out; it refreshes next turn. Explicitly show actions that end a turn rather than implying everything through point cost."
+  },
+  "loop": [
+    {
+      "zh": "查看本回合预算",
+      "en": "Read the turn budget"
+    },
+    {
+      "zh": "估算位置和动作成本",
+      "en": "Estimate position and action costs"
+    },
+    {
+      "zh": "按顺序执行",
+      "en": "Execute the sequence"
+    },
+    {
+      "zh": "结束回合恢复预算",
+      "en": "End the turn and refresh"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "多走一步换更好的射角，还是原地多攻击一次？",
+      "en": "Spend movement for a better angle or attack again from here?"
+    },
+    {
+      "zh": "先装填保证下一轮，还是把最后一点留给当前攻击？",
+      "en": "Reload for the next round or spend the last point attacking now?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "每回合点数",
+        "en": "Points per turn"
+      },
+      "effect": {
+        "zh": "点数少时取舍明显；点数多时组合丰富，但每回合思考更长。",
+        "en": "Small budgets sharpen trade-offs; larger budgets add combinations and planning time."
+      }
+    },
+    {
+      "name": {
+        "zh": "动作结束规则",
+        "en": "Turn-ending actions"
+      },
+      "effect": {
+        "zh": "统一消费更易理解，特殊结束回合的动作需要醒目标识。",
+        "en": "Uniform costs are easier to learn; exceptions that end a turn need clear labels."
+      }
+    }
+  ],
+  "tags": [
+    "planning",
+    "economy",
+    "spatial"
+  ],
+  "related": [
+    "combat-cover-flanking",
+    "combat-destructible-cover",
+    "combat-forced-movement",
+    "combat-friendly-fire"
+  ],
+  "contrast": {
+    "zh": "《幽浮2》让动作顺序和结束回合规则很重要；《战争机器：战术小队》允许更自由地重复动作。",
+    "en": "XCOM 2 emphasizes order and turn-ending actions; Gears Tactics permits freer repetition."
+  },
+  "combination": {
+    "zh": "把背包中装备的重量转成移动成本，让配装直接影响每回合可用的行动组合。",
+    "en": "Let equipment weight affect movement cost, connecting loadout to each turn’s action combinations."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "你有3点行动，走到掩体花1点，射击花1点，弹匣只剩一发。",
+      "en": "You have 3 points; cover costs 1 move, a shot costs 1, and only one bullet remains."
+    },
+    "action": {
+      "zh": "先移动，再射击，最后用1点装填。",
+      "en": "Move, shoot, then spend the last point reloading."
+    },
+    "result": {
+      "zh": "这一轮只打了一次，但结束在掩体里且弹药充足。",
+      "en": "You attack once but finish in cover with a full magazine."
+    },
+    "next": {
+      "zh": "下一轮可以留在原地连续攻击，或把预算用于撤退。",
+      "en": "Next turn you can attack repeatedly or budget for retreat."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "先做一名角色、三个动作和三个行动点；用数字显示执行后的余额。",
+      "en": "Start with one unit, three actions and three points; preview the remaining balance."
+    },
+    "pitfall": {
+      "zh": "不同动作暗藏结束回合效果，容易让玩家误操作。",
+      "en": "Unsignaled turn-ending effects cause accidental commitments."
+    },
+    "test": {
+      "zh": "观察玩家能否在点击前准确说出还能做几个动作。",
+      "en": "Check whether players can predict their remaining actions before clicking."
+    }
+  }
+}

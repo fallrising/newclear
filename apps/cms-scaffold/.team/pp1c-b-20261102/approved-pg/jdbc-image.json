@@ -1,0 +1,10 @@
+{
+  "sourceCommit": "b0bf709fb687f4a23df868a8d123e5fa447959a3",
+  "worktreeDirty": true,
+  "jarSha256": "5c0c0ed56acd8af8cf24778bb65a1c9dcdb000f25ed75577a8df708f2a31453a",
+  "mainSourceSha256": "76082316e3e4ec4fee12e3d47dbaa423b40b6b3d11e10b39d418a85ecce280f8",
+  "mainClassSha256": "3095712d2698fed04916eb928a6713d3d1da01fff5e7e6feac3f4269339aae5b",
+  "base": "sha256:1ad1f859e141f2296a7d49457414f84c2813ad8439e5b836cc0d9963ab491e09",
+  "image": "sha256:ece9024935ac3ce38da05a020b6a8b1322969cf08dca11233884e7938e18331c",
+  "observedAt": "2026-11-02T13:05:12.319770+00:00"
+}

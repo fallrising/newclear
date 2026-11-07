@@ -1,0 +1,10 @@
+{
+  "maintenance-target.mjs": {
+    "changedLines": 49,
+    "sha256": "0e4822f1fd22375414e3cbafdd68511760ca1063af9b47c34121cdf1b2110d51"
+  },
+  "maintenance-target.test.mjs": {
+    "changedLines": 61,
+    "sha256": "e004ab2fe91f2c1a955676f3c93f732edf665e43084c7db98c3a8830d2b29170"
+  }
+}

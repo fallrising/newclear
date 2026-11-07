@@ -1,0 +1,89 @@
+{
+  "date": "2026-10-31",
+  "kind": "allowlisted_live_acceptance_summary",
+  "run": "local-work-20261031T121622692763Z",
+  "source_sha256": "14fc5e37c6164fd7e7044cb0329a85369d31bd13ef509d200ec85de500ca8b3a",
+  "status": "completed",
+  "elapsed_s": 64.30444066715427,
+  "cloud_fallback": false,
+  "strict_network_isolation_verified": false,
+  "cleanup_errors": [],
+  "office": {
+    "status": "completed",
+    "states": [
+      "idle",
+      "working",
+      "needs_input",
+      "working",
+      "done",
+      "exited",
+      "idle",
+      "working",
+      "needs_input",
+      "working",
+      "done"
+    ],
+    "permission_roundtrips": [
+      {
+        "kind": "edit",
+        "replied": true,
+        "continued": true
+      },
+      {
+        "kind": "edit",
+        "replied": true,
+        "continued": true
+      }
+    ],
+    "refresh_without_rerun": true,
+    "resume_verified": true,
+    "resume": {
+      "same_session": true,
+      "new_process": true,
+      "old_processes_exited": true,
+      "native_usage_hydrated": true,
+      "original_artifact_unchanged": true,
+      "output_before": 209,
+      "output_after": 340,
+      "artifact_sha256": "3f000f4d1f7e8560759f6be95b26d2351c468da268eb517d0f9effaca51ade34"
+    },
+    "permission_wait_verified": true,
+    "cleanup_completed": true,
+    "artifact_sha256": "3f000f4d1f7e8560759f6be95b26d2351c468da268eb517d0f9effaca51ade34",
+    "file_task_passed": true,
+    "model_inference_verified": true
+  },
+  "resources": {
+    "samples": 13,
+    "pressure_levels": [
+      1
+    ],
+    "max_swap_delta_mib": 0.0
+  },
+  "runtime_sources_sha256": {
+    "scripts/run_local_work.py": "fe46f5c3ba686a9f8e14414b6ded9c292cb6609ea81457694723ed4068370267",
+    "scripts/permission_probe.mjs": "b05e5e388a03e9f77600e1abcaf9e886bf440fe3867a0bd41cd0e97856bdd9b1",
+    "scripts/office_opencode.mjs": "3f9bbb59b3f3d81619fc47a7c565eec63d134ce4d23cb70062d7255f326bdc20",
+    "scripts/local_opencode.py": "f06c9914743d0bfb079ad2cc5afa2ea124ce49661f272f5618887c345273fd46",
+    "scripts/local_office_policy.mjs": "0a3648cbec6e39c1f7f01c5f6d60d8388987c7b39f4bc04342f5d9d3f29dcf20",
+    "scripts/bin/opencode": "8b1315eb0cbbf062233e7542b44c5b5232958490a7b2b0152f7cba40179174a7"
+  },
+  "earlier_attempts": [
+    {
+      "run": "local-work-20261031T121119787622Z",
+      "source_sha256": "45b8b8b2d7943d5d36ccf425910d053f126d1706331ce3f73886b954c50b3214",
+      "status": "failed",
+      "cleanup_errors": [],
+      "reason": "Stopped after finding observer attached to legacy hook instead of the HTTP router generic hook"
+    },
+    {
+      "run": "local-work-20261031T121240991185Z",
+      "source_sha256": "4fec0861d8698fac5f0da3a9d52250cb0e7e344362bb856d75fbd62530fb08ad",
+      "status": "failed",
+      "cleanup_errors": [],
+      "reason": "Resource guard stopped after sustained memory warning; permission and refresh passed, resume prompt was sent before TUI readiness"
+    }
+  ],
+  "node_tests_passed": 12,
+  "python_tests_passed": 3
+}

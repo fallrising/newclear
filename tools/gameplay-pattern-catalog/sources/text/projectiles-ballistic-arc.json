@@ -1,0 +1,120 @@
+{
+  "id": "projectiles-ballistic-arc",
+  "system": "projectiles",
+  "edition": 3,
+  "name": {
+    "zh": "抬高准星，修正抛物线落点",
+    "en": "Aim higher to correct a falling trajectory"
+  },
+  "summary": {
+    "zh": "瞄准的是未来落点，发射方向不一定正对目标。",
+    "en": "Aim for a future impact point rather than pointing directly at the target."
+  },
+  "rules": {
+    "zh": "投射物飞行需要时间，并会在途中下坠。玩家调整发射角度，先观察一次落点，再修正高低和提前量；目标移动或距离变化后，原来的瞄法需要重新估计。",
+    "en": "A projectile takes time to travel and falls along the way. Adjust elevation, observe an impact and correct height or lead. Moving targets and changing distance require a new estimate."
+  },
+  "loop": [
+    {
+      "zh": "估计距离和移动方向",
+      "en": "Estimate distance and target motion"
+    },
+    {
+      "zh": "抬高或提前瞄准",
+      "en": "Aim above or ahead"
+    },
+    {
+      "zh": "观察飞行与落点",
+      "en": "Watch the flight and impact"
+    },
+    {
+      "zh": "按偏差修正下一发",
+      "en": "Correct the next shot from the miss"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "直接低角度出手更快，高角度能越过障碍但飞得更久。",
+      "en": "A low arc arrives sooner; a high arc can clear obstacles but takes longer."
+    },
+    {
+      "zh": "先打一发校准，还是为节省弹药靠近后再射？",
+      "en": "Spend a ranging shot or move closer to conserve ammunition?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "飞行速度与下坠",
+        "en": "Speed and drop"
+      },
+      "effect": {
+        "zh": "下坠明显会强化距离判断；速度过慢则会让移动目标难以预测。",
+        "en": "Visible drop emphasizes distance judgment; very slow travel makes moving targets harder to predict."
+      }
+    },
+    {
+      "name": {
+        "zh": "轨迹预览长度",
+        "en": "Trajectory-preview length"
+      },
+      "effect": {
+        "zh": "完整预览降低计算负担；只显示前段会保留远处落点的试探。",
+        "en": "A full preview reduces calculation; a short preview preserves uncertainty at long range."
+      }
+    }
+  ],
+  "tags": [
+    "precision",
+    "spatial",
+    "information"
+  ],
+  "related": [
+    "projectiles-independent-aim",
+    "projectiles-wall-ricochet",
+    "projectiles-charged-release",
+    "projectiles-graze-reward"
+  ],
+  "contrast": {
+    "zh": "盗贼之海的炮击还发生在移动舰船上；Valheim 的弓箭让角色自己选择射击距离和站位。",
+    "en": "Sea of Thieves adds a moving ship; Valheim gives the character direct control over firing distance and position."
+  },
+  "combination": {
+    "zh": "组合提案：用抛物线投球点亮接收器，有些必须越过墙顶，有些只能从侧面进入；玩家通过试投修正角度。",
+    "en": "Design proposal: arc a ball into receivers, some above walls and others accessible only from the side, using trial impacts to refine the angle."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "目标在墙后，第一发砸中了墙面。",
+      "en": "A target stands beyond a wall and the first shot hits the wall."
+    },
+    "action": {
+      "zh": "提高发射角，保持力度不变再投一次。",
+      "en": "Increase the angle while keeping launch strength unchanged."
+    },
+    "result": {
+      "zh": "投射物越过墙，却落在目标后方。",
+      "en": "The projectile clears the wall but lands beyond the target."
+    },
+    "next": {
+      "zh": "决定减小力度，还是移动发射位置缩短距离。",
+      "en": "Choose a weaker launch or a new firing position."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "先做二维固定发射点、一道墙和三个距离不同的靶子，可重看上一条轨迹。",
+      "en": "Build a fixed 2D launcher, one wall and three target distances, with the previous trajectory visible."
+    },
+    "pitfall": {
+      "zh": "镜头视角和发射点偏移容易造成准星与实际轨迹不一致。",
+      "en": "Camera perspective and muzzle offsets can make the reticle disagree with the actual path."
+    },
+    "test": {
+      "zh": "玩家是否能根据上一次落点，有方向地修正下一次投射？",
+      "en": "Can players make a deliberate correction from the previous impact?"
+    }
+  }
+}

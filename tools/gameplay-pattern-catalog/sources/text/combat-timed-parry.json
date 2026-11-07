@@ -1,0 +1,120 @@
+{
+  "id": "combat-timed-parry",
+  "system": "combat",
+  "edition": 1,
+  "name": {
+    "zh": "瞬间招架",
+    "en": "Timed parries"
+  },
+  "summary": {
+    "zh": "把防御从持续按住，变成一次有风险的时机判断。",
+    "en": "Turn defense into a risky timing decision instead of a held state."
+  },
+  "rules": {
+    "zh": "观察攻击前摇，在命中前的短窗口输入招架。成功改变双方优势或返还进攻机会；过早可能只是普通格挡，过晚则受伤，具体结果由游戏规则决定。",
+    "en": "Read the wind-up and parry inside a brief window before impact. Success changes initiative or creates retaliation; early input may become a normal block, while late input can mean damage."
+  },
+  "loop": [
+    {
+      "zh": "识别来招",
+      "en": "Identify the attack"
+    },
+    {
+      "zh": "等待命中窗口",
+      "en": "Wait for the timing window"
+    },
+    {
+      "zh": "输入招架",
+      "en": "Commit to the parry"
+    },
+    {
+      "zh": "利用反击机会",
+      "en": "Exploit the opening"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "招架可换取优势，但躲开往往更稳；对陌生招式要不要冒险？",
+      "en": "A parry may win initiative while evasion is safer; is an unfamiliar attack worth the risk?"
+    },
+    {
+      "zh": "连续攻击要求分辨节奏，不能用一次成功代替整串判断。",
+      "en": "A multi-hit string asks for repeated rhythm recognition, not one successful input."
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "判定宽度",
+        "en": "Timing window"
+      },
+      "effect": {
+        "zh": "窗口越窄，熟练度差异越大，也更依赖清楚的音画提示。",
+        "en": "Narrow windows increase the skill gap and the need for readable audiovisual cues."
+      }
+    },
+    {
+      "name": {
+        "zh": "失败保底",
+        "en": "Failure fallback"
+      },
+      "effect": {
+        "zh": "过早输入仍能格挡，可鼓励新手尝试；完全失防则提高赌博感。",
+        "en": "Allowing early input to block encourages practice; complete failure makes it more of a gamble."
+      }
+    }
+  ],
+  "tags": [
+    "timing",
+    "precision",
+    "risk"
+  ],
+  "related": [
+    "combat-posture-break",
+    "combat-stamina-budget",
+    "combat-weakpoint-aim",
+    "combat-combo-variation"
+  ],
+  "contrast": {
+    "zh": "《只狼》把弹开串成持续对攻；《死亡细胞》的盾牌招架还承担弹丸反射与装备效果触发。",
+    "en": "Sekiro turns deflection into an extended exchange; Dead Cells shield parries also reflect projectiles and interact with equipment effects."
+  },
+  "combination": {
+    "zh": "设计提案：节拍机关也使用同一招架输入，先在无伤场景教会节奏，再在战斗中测试识别能力。",
+    "en": "Design proposal: use the parry input for harmless rhythmic machinery, teaching timing before testing recognition in combat."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "敌人举刀蓄力；你可以后退，也可以等刀落下时招架。",
+      "en": "An enemy raises its blade; retreat or wait and parry as it comes down."
+    },
+    "action": {
+      "zh": "你观察刀的动作，在将要命中时按下防御。",
+      "en": "Read the blade movement and press defense just before contact."
+    },
+    "result": {
+      "zh": "成功会让敌人露出破绽，按晚则受伤；声音与特效立即区分结果。",
+      "en": "Success exposes the enemy; a late input hurts you. Sound and effects distinguish the outcomes."
+    },
+    "next": {
+      "zh": "趁破绽反击，再观察下一招是否仍是相同节奏。",
+      "en": "Counter during the opening, then check whether the next attack uses the same timing."
+    }
+  },
+  "prototype": {
+    "scope": "medium",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "先做一名敌人的两种可辨认招式、招架判定和明确的成功反馈。",
+      "en": "Start with two readable enemy attacks, a parry check, and unmistakable success feedback."
+    },
+    "pitfall": {
+      "zh": "动画、命中时刻和输入判定必须对齐；先别用随机延迟增加难度。",
+      "en": "Align animation, contact, and input timing before adding unpredictable delays."
+    },
+    "test": {
+      "zh": "失败后让玩家说明按早还是按晚，检查他们能否凭反馈修正下一次操作。",
+      "en": "After a miss, ask whether it was early or late and see whether feedback guides the next attempt."
+    }
+  }
+}

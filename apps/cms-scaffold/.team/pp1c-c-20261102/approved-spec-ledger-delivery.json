@@ -1,0 +1,24 @@
+[
+  {
+    "repo": "desk",
+    "pr": 415,
+    "head": "8eff2dff44d0761261490a44893bfb8aba049b40",
+    "merge": "84560db325b6fb11bc083dc2dae88d4d319ad225",
+    "ciRun": 42244459298,
+    "ciHeadSha": "8eff2dff44d0761261490a44893bfb8aba049b40",
+    "conclusion": "success",
+    "changedContentRemoteDiffEmpty": true,
+    "readbackAt": "2026-11-06T15:37:09.783592+00:00"
+  },
+  {
+    "repo": "journal",
+    "pr": 250,
+    "head": "904b82745294f3e4a8132a824e6cf94026ca71be",
+    "merge": "181ce4fd8562c13278d2daa933ecbb0203b36b32",
+    "ciRun": 42244475253,
+    "ciHeadSha": "904b82745294f3e4a8132a824e6cf94026ca71be",
+    "conclusion": "success",
+    "changedContentRemoteDiffEmpty": true,
+    "readbackAt": "2026-11-06T15:37:11.001168+00:00"
+  }
+]

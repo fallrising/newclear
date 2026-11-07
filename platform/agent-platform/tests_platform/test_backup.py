@@ -13,17 +13,20 @@ from unittest import mock
 from uuid import uuid4
 
 import psycopg
+import test_runtime
 from backup_fixture import NativeClient
 from fastapi.testclient import TestClient
 from psycopg import sql
 from psycopg.conninfo import conninfo_to_dict, make_conninfo
 from test_control_plane import URL, PlatformFixture
 
-from agent_platform import archive_retention, backup
+from agent_platform import archive_retention, audit_retention, backup, event_retention
 from agent_platform.api import create_app
+from agent_platform.connector_recovery import STOP_KEYS
 from agent_platform.db import Database
 from agent_platform.domain import Problem
 from agent_platform.result_archive import read_archive
+from agent_platform.store import Store, event
 from agent_platform.worker import Worker
 
 
@@ -71,6 +74,297 @@ class BackupTests(PlatformFixture):
         return backup.restore_backup(
             self.target_url, self.bundle, offline=True, confirm_database=self.target_name
         )
+
+    def subscription_histories(self, *, confirmed=False):
+        test_runtime.RuntimeTests.clear_catalog(self)
+        self.addCleanup(test_runtime.RuntimeTests.clear_catalog, self)
+        test_runtime.RuntimeTests.real_profile(self)
+        expected = []
+        for backend, model in (
+            ("claude-subscription", "claude-subscription:claude-opus-5-5"),
+            ("codex-subscription", "codex-subscription:gpt-6.1-sol"),
+        ):
+            response = self.post(
+                "/agent-profiles",
+                {
+                    "name": backend,
+                    "backend": backend,
+                    "deadline_seconds": 600,
+                    "verification": {
+                        "mode": "commands",
+                        "revision": "backup-v1",
+                        "checks": [{"id": "test", "argv": ["true"], "timeout_seconds": 1}],
+                    },
+                },
+            )
+            self.assertEqual(response.status_code, 201, response.text)
+            profile = response.json()
+            self.assertEqual(profile["model_ref"], model)
+            self.payload["profile_revision"] = profile["id"]
+            run = self.create()["run"]
+            if confirmed:
+                # Only runtime/provider effects are mocked. Worker state, leases,
+                # result archive, cleanup and native dump/restore use the real DB.
+                connector = mock.Mock()
+                connector.allocate.return_value = {
+                    "handle": "fixture-owned-" + run["id"],
+                    "lease_deadline": "2099-01-01T00:00:00Z",
+                    "vm_id": "fixture-vm-" + run["id"],
+                }
+                operations = {
+                    "prepare": {"ref": run["id"], "model_transport": False},
+                    "result": {
+                        "execution_mode": "cocoon-external",
+                        "summary": "Synthetic runtime result for native backup coverage",
+                        "verification": {"status": "passed", "reason": "mock runtime only"},
+                    },
+                    "release": {
+                        "observed_state": "stopped",
+                        "proof": {key: True for key in STOP_KEYS},
+                    },
+                }
+                connector.operation.side_effect = lambda _, action, results=operations: results[
+                    action
+                ]
+                driver = mock.Mock()
+                argument = (
+                    "subscription" if backend == "claude-subscription" else "codex_subscription"
+                )
+                worker = Worker(self.db, connector, **{argument: driver})
+                self.assertTrue(worker.run_once())
+                driver.execute.assert_called_once()
+                connector.allocate.assert_called_once()
+                self.assertEqual(
+                    [call.args[1] for call in connector.operation.call_args_list],
+                    ["prepare", "result", "release"],
+                )
+            else:
+                cancelled = self.post(
+                    f"/runs/{run['id']}/actions",
+                    {"action": "cancel", "expected_state_version": run["state_version"]},
+                )
+                self.assertEqual(cancelled.status_code, 202, cancelled.text)
+            expected.append(Store(self.db).run(run["id"]))
+        with self.db.transaction() as conn:
+            conn.execute("UPDATE runtime_capacity SET draining=true")
+        return expected
+
+    def subscription_roundtrip(self, *, confirmed=False):
+        expected = self.subscription_histories(confirmed=confirmed)
+        before = self.snapshot(URL)
+        self.make_backup()
+        self.restore()
+        target = Database(self.target_url)
+        target.open()
+        self.addCleanup(target.close)
+        self.assertEqual(self.snapshot(self.target_url), before)
+        for run in expected:
+            self.assertEqual(Store(target).run(run["id"]), run)
+            self.assertEqual(run["execution_mode"], "cocoon-external")
+            self.assertEqual(run["state"], "succeeded" if confirmed else "cancelled")
+            self.assertEqual(run["cleanup_state"], "confirmed" if confirmed else "not_allocated")
+
+    def test_real_native_roundtrip_preserves_subscription_profiles_and_cancelled_runs(self):
+        self.subscription_roundtrip()
+
+    def test_real_native_roundtrip_preserves_confirmed_subscription_histories(self):
+        self.subscription_roundtrip(confirmed=True)
+
+    def test_queued_subscription_cancellation_requires_exact_never_admitted_proof(self):
+        histories = self.subscription_histories()
+        for run in histories:
+            for statement in (
+                "UPDATE runs SET generation=2 WHERE id=%s",
+                "UPDATE runs SET cancel_command_id=NULL WHERE id=%s",
+                "UPDATE runs SET cancel_requested_at=NULL WHERE id=%s",
+                "UPDATE runs SET cancel_completed_at=NULL WHERE id=%s",
+                "UPDATE runs SET cancel_completed_at=cancel_requested_at-interval '1 second' "
+                "WHERE id=%s",
+                "UPDATE runs SET reason=NULL WHERE id=%s",
+                "UPDATE runs SET state='failed' WHERE id=%s",
+                "UPDATE runs SET backend_ref='unknown' WHERE id=%s",
+                "UPDATE runs SET backend_cursor='unknown' WHERE id=%s",
+                "UPDATE runs SET cleanup_state='unknown' WHERE id=%s",
+                "UPDATE jobs SET generation=0 WHERE run_id=%s",
+                "UPDATE jobs SET attempts=1 WHERE run_id=%s",
+                "UPDATE jobs SET lease_owner=gen_random_uuid() WHERE run_id=%s",
+                "UPDATE jobs SET lease_until=now() WHERE run_id=%s",
+                "DELETE FROM jobs WHERE run_id=%s",
+                "UPDATE commands SET route='unrelated' "
+                "WHERE id=(SELECT cancel_command_id FROM runs WHERE id=%s)",
+                "UPDATE commands SET expected_version=NULL "
+                "WHERE id=(SELECT cancel_command_id FROM runs WHERE id=%s)",
+                "UPDATE commands SET result=NULL "
+                "WHERE id=(SELECT cancel_command_id FROM runs WHERE id=%s)",
+                "UPDATE commands SET result=jsonb_set(result,'{body,status}','\"pending\"') "
+                "WHERE id=(SELECT cancel_command_id FROM runs WHERE id=%s)",
+                "UPDATE commands SET run_id=NULL "
+                "WHERE id=(SELECT cancel_command_id FROM runs WHERE id=%s)",
+                "INSERT INTO adapter_operations(operation_id,run_id,kind,result) "
+                "VALUES ('uncertain',%s,'allocate','{}'::jsonb)",
+            ):
+                with self.subTest(backend=run["backend"], statement=statement):
+                    with psycopg.connect(URL) as conn:
+                        backup._quiescent(conn)
+                        conn.execute(statement, (run["id"],))
+                        with self.assertRaisesRegex(ValueError, "backup_source_active"):
+                            backup._quiescent(conn)
+                        conn.rollback()
+
+    def test_confirmed_subscription_history_requires_matching_cleanup_proof(self):
+        histories = self.subscription_histories(confirmed=True)
+        for run in histories:
+            for statement in (
+                "UPDATE runs SET generation=generation+1 WHERE id=%s",
+                "UPDATE runs SET cleanup_state='unknown' WHERE id=%s",
+                "UPDATE sandbox_bindings SET cleanup_state='unknown' WHERE run_id=%s",
+                "UPDATE sandbox_bindings SET desired_state='running' WHERE run_id=%s",
+                "UPDATE sandbox_bindings SET observed_state='unknown' WHERE run_id=%s",
+                "UPDATE sandbox_bindings SET provider_handle='pending:unknown' WHERE run_id=%s",
+                "UPDATE sandbox_bindings SET node_id='fake-local' WHERE run_id=%s",
+                "UPDATE resource_reservations SET released_at=NULL "
+                "WHERE sandbox_id=(SELECT sandbox_id FROM runs WHERE id=%s)",
+                "DELETE FROM resource_reservations "
+                "WHERE sandbox_id=(SELECT sandbox_id FROM runs WHERE id=%s)",
+            ):
+                with self.subTest(backend=run["backend"], statement=statement):
+                    with psycopg.connect(URL) as conn:
+                        backup._quiescent(conn)
+                        conn.execute(statement, (run["id"],))
+                        with self.assertRaisesRegex(ValueError, "backup_source_active"):
+                            backup._quiescent(conn)
+                        conn.rollback()
+
+    def test_real_native_roundtrip_preserves_pruned_event_replay_identity(self):
+        original = self.completed()
+        run_id = uuid4()
+        with self.db.transaction() as conn:
+            conn.execute(
+                "INSERT INTO runs(id,task_id,attempt_no,base_sha,profile_revision,goal,"
+                "state,deadline,last_event_seq,result) SELECT %s,task_id,2,base_sha,"
+                "profile_revision,goal,'succeeded',deadline,last_event_seq,result "
+                "FROM runs WHERE id=%s",
+                (run_id, original),
+            )
+            conn.execute(
+                "INSERT INTO run_event_identities SELECT %s,seq,gen_random_uuid(),source,"
+                "source_event_id,type,created_at-interval '31 days' FROM run_events "
+                "WHERE run_id=%s",
+                (run_id, original),
+            )
+            conn.execute(
+                "INSERT INTO run_events SELECT i.run_id,i.seq,i.event_id,i.source,"
+                "i.source_event_id,i.type,e.payload,i.created_at FROM run_event_identities i "
+                "JOIN run_events e ON e.run_id=%s AND e.seq=i.seq WHERE i.run_id=%s",
+                (original, run_id),
+            )
+            identity = conn.execute(
+                "SELECT * FROM run_event_identities WHERE run_id=%s ORDER BY seq LIMIT 1",
+                (run_id,),
+            ).fetchone()
+        plan = event_retention.preview(self.db)
+        receipt = event_retention.apply(self.db, plan, approval_digest=plan["approval_digest"])
+        before = Store(self.db).run(run_id)
+        self.make_backup()
+        self.restore()
+        target = Database(self.target_url)
+        target.open()
+        self.addCleanup(target.close)
+        restored = Store(target).run(run_id)
+        self.assertEqual(restored, before)
+        self.assertEqual(restored["event_floor"], restored["last_event_seq"] + 1)
+        with target.transaction() as conn:
+            saved = conn.execute(
+                "SELECT plan,receipt FROM event_gc_receipts WHERE approval_digest=%s",
+                (plan["approval_digest"],),
+            ).fetchone()
+            # Internal receipt integrity remains verifiable after restore; apply still
+            # refuses the old database's approval before considering receipt replay.
+            self.assertEqual(event_retention._replay(conn, plan, saved), receipt)
+            self.assertEqual(
+                conn.execute(
+                    "SELECT count(*) AS n FROM run_events WHERE run_id=%s", (run_id,)
+                ).fetchone()["n"],
+                0,
+            )
+            duplicate = event(
+                conn,
+                run_id,
+                "different",
+                {},
+                source=identity["source"],
+                source_id=identity["source_event_id"],
+            )
+        self.assertEqual(
+            (duplicate["event_id"], duplicate["seq"]), (identity["event_id"], identity["seq"])
+        )
+        self.assertIsNone(duplicate["payload"])
+        self.assertEqual(Store(target).run(run_id)["last_event_seq"], before["last_event_seq"])
+        with self.assertRaisesRegex(ValueError, "identity_changed"):
+            event_retention.apply(target, plan, approval_digest=plan["approval_digest"])
+
+    def test_real_native_roundtrip_preserves_expired_audit_evidence_and_control(self):
+        run_id = self.completed()
+        audit_id = uuid4()
+        with self.db.transaction() as conn:
+            command = conn.execute(
+                "SELECT id,idempotency_key FROM commands WHERE route='tasks.create'"
+            ).fetchone()
+            conn.execute(
+                "INSERT INTO audit_events(id,actor,action,target,decision,created_at) "
+                "VALUES (%s,%s,'tasks.create',%s,'allow',now()-interval '91 days')",
+                (audit_id, self.operator, str(command["id"])),
+            )
+        plan = audit_retention.preview(self.db)
+        receipt = audit_retention.apply(self.db, plan, approval_digest=plan["approval_digest"])
+        self.assertEqual(receipt["count"], 1)
+        before = self.snapshot(URL)
+        self.make_backup()
+        self.restore()
+        target = Database(self.target_url)
+        target.open()
+        self.addCleanup(target.close)
+        # Full row JSON for every durable table, not column/catalog metadata.
+        self.assertEqual(self.snapshot(self.target_url), before)
+        self.assertEqual(Store(target).run(run_id), Store(self.db).run(run_id))
+        with target.transaction() as conn:
+            self.assertIsNone(
+                conn.execute("SELECT id FROM audit_events WHERE id=%s", (audit_id,)).fetchone()
+            )
+            saved = conn.execute(
+                "SELECT plan,receipt FROM audit_gc_receipts WHERE approval_digest=%s",
+                (plan["approval_digest"],),
+            ).fetchone()
+            self.assertEqual(audit_retention._replay(conn, plan, saved), receipt)
+        with self.assertRaisesRegex(ValueError, "identity_changed"):
+            audit_retention.apply(target, plan, approval_digest=plan["approval_digest"])
+        with self.assertRaises(psycopg.Error):
+            with target.transaction() as conn:
+                conn.execute(
+                    "INSERT INTO audit_events(id,action,decision) VALUES (%s,'reuse','allow')",
+                    (audit_id,),
+                )
+        client = self.restored_client(target, run_id)
+        session = client.get("/api/v1/session").json()
+        replay = client.post(
+            "/api/v1/tasks",
+            json=self.payload,
+            headers={
+                "Origin": self.settings.origin,
+                "X-CSRF-Token": session["csrf_token"],
+                "Idempotency-Key": command["idempotency_key"],
+            },
+        )
+        self.assertEqual(replay.status_code, 202, replay.text)
+        self.assertEqual(replay.json()["run"]["id"], run_id)
+        with target.transaction() as conn:
+            self.assertEqual(conn.execute("SELECT count(*) AS n FROM runs").fetchone()["n"], 1)
+            self.assertGreater(
+                conn.execute(
+                    "SELECT count(*) AS n FROM audit_events WHERE action='session.created'"
+                ).fetchone()["n"],
+                0,
+            )
 
     def test_real_native_roundtrip_preserves_archive_and_all_history(self):
         run_id = self.completed()

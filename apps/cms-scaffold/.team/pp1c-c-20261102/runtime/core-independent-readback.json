@@ -1,0 +1,28 @@
+{
+  "sourceRunId": "09860f34e2c9401faf34262917313412",
+  "targetRunId": "f7a78e84c0394c329a48ca1eca3ebfb4",
+  "operationId": "20e17004-08a1-48dc-a5ef-4f41637204f5",
+  "backupId": "pp1-20261106T154613835Z-7f113a04c944542e9f39342ed14ee324",
+  "all20TablesAndDerivedHashesRecomputed": true,
+  "sourceBeforeAfterByteExact": true,
+  "targetRawMatchesApprovedFinitePolicy": true,
+  "sourceRawDbSnapshotSha256": "5234b2c65a08ac3b6d545d26be34f97b8e68caa9ca51bda8b7cba40b36974b38",
+  "targetPreRevokeRawDbSnapshotSha256": "88efabb7b8b312aea55942831004689fb8d9e328115f04376da43274f8b1f808",
+  "onlyExactRevokeAndOneAuthDelta": true,
+  "revokedCount": "2",
+  "artifactSha256": {
+    "db.dump": "f1404249ea45d2af32dfde522202d65397e1960e5d3c47850e5682a6ef1a9f0d",
+    "inventory.json": "831e24ec14e25d8631c838821f73d133fe65ae40b58ec2f29cc58f8df8f37cad",
+    "media.package": "f464bd7e257ac02e7934119dd1133003ead4fb76842d1a8e554457d459f2a4c0",
+    "manifest.json": "e5a9db63f652fd093745d4656ced41664e8eb4b5249845c71f5c1fd9d891cad9",
+    "local-complete.json": "ca75bd5702412baf9ecf8443edc346ddb1a0f1f504727e549d0de7a988ec1ea5"
+  },
+  "rawComparisonSha256": "50a35dfcac7ea1aabebaf8c19e18ce0b9f5d8c7a3ab1232545789337956c36e1",
+  "commitReceiptSha256": "e18e9470e0845960543568080b4ea790d08c9d491858a6d3f043bbc80f5b7e1d",
+  "fileCount": "17",
+  "mediaHeaderSha256": "224f92d2a57b05ae05db4a3e9225cefbdfc3729a316a1ec37c06cd561b11f592",
+  "allSixContainersStopped": true,
+  "targetAppsNeverStarted": true,
+  "lockRetained": true,
+  "fullDProof": false
+}

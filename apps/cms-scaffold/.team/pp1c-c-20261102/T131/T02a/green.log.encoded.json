@@ -1,0 +1,8 @@
+{
+  "version": 1,
+  "original": "T131/T02a/green.log",
+  "sha256": "eeb66ab8218c72d3617c1d4ed00b6aedb0a53ca66ba5be9305494e6f111b1922",
+  "byteSize": "196",
+  "encoding": "utf-8",
+  "text": "✔ T131_T02_reserved_child_inspection_is_token_bound_and_stopped (324.121166ms)\nℹ tests 1\nℹ suites 0\nℹ pass 1\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 394.674624\n"
+}

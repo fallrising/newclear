@@ -1,0 +1,8 @@
+{
+  "version": 1,
+  "original": "T147/empty-network/maintenance-target.test.mjs.diff",
+  "sha256": "099780f95c6254aaccc2d2ee09f344afb4f9e4d2ff7b5e1df9590607e4beda07",
+  "byteSize": "1443",
+  "encoding": "utf-8",
+  "text": "--- maintenance-target.test.mjs.before\n+++ maintenance-target.test.mjs.after\n@@ -436,3 +436,18 @@\n     assert.equal(f.state.copies.length, 0);\n   }\n });\n+\n+test('T147_source_inspection_allows_unrelated_created_empty_network_ID',async t=>{\n+  const f=await fixture(t);f.state.containers.push({Id:full(0),Config:{Labels:{}},State:{Status:'created',Running:false},\n+    NetworkSettings:{Networks:{unrelated_data:{NetworkID:'',IPAddress:'',EndpointID:''}}},Mounts:[]});\n+  const result=await inspectTarget(f.root,f.deps,{apiState:'running'});assert.equal(result.target.runId,runId);\n+});\n+for(const shared of ['full-id','name','db-mount','media-mount'])test(`T147_source_inspection_rejects_shared_${shared}`,async t=>{\n+  const f=await fixture(t),foreign={Id:full(0),Config:{Labels:{}},State:{Status:'created',Running:false},\n+    NetworkSettings:{Networks:{unrelated_data:{NetworkID:''}}},Mounts:[]};\n+  if(shared==='full-id')foreign.NetworkSettings.Networks.unrelated_data.NetworkID=f.state.networks[1].Id;\n+  if(shared==='name')foreign.NetworkSettings.Networks={[f.state.networks[0].Name]:{NetworkID:''}};\n+  if(shared.endsWith('mount')){const volume=f.state.volumes[shared==='db-mount'?0:1];\n+    foreign.Mounts=[{Type:'volume',Name:volume.Name,Source:volume.Mountpoint,Destination:'/foreign',RW:true}];}\n+  f.state.containers.push(foreign);await assert.rejects(inspectTarget(f.root,f.deps,{apiState:'running'}),/QUIESCENCE_NOT_PROVEN/);\n+});\n"
+}

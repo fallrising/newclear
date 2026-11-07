@@ -1,0 +1,120 @@
+{
+  "id": "puzzles-scene-deduction",
+  "system": "puzzles",
+  "edition": 1,
+  "name": {
+    "zh": "多线索还原事件",
+    "en": "Reconstructing events from evidence"
+  },
+  "summary": {
+    "zh": "把零散可见事实连成一个可以检验的解释。",
+    "en": "Connect visible facts into a testable account."
+  },
+  "rules": {
+    "zh": "玩家检查可回访的场景，收集人物、物件、语言和时间线索，再填写身份、行为或因果关系。系统验证解释是否匹配证据，发现矛盾后可以返回场景继续观察。",
+    "en": "Inspect revisitable scenes for people, objects, dialogue and timing, then assign identities, actions or causes. Validation tests the account against evidence; contradictions prompt another visit."
+  },
+  "loop": [
+    {
+      "zh": "观察并记下事实",
+      "en": "Inspect and record facts"
+    },
+    {
+      "zh": "跨场景对照线索",
+      "en": "Cross-reference evidence"
+    },
+    {
+      "zh": "提出身份与因果判断",
+      "en": "Assign identities and causes"
+    },
+    {
+      "zh": "验证并修正矛盾",
+      "en": "Validate and resolve contradictions"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "先确认少量可靠身份，还是同时提出完整故事？",
+      "en": "Anchor reliable identities first or propose a complete story?"
+    },
+    {
+      "zh": "装束与口音只是倾向吗，能否找到另一条支持？",
+      "en": "Are clothing and accents only tendencies, and is there corroboration?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "验证粒度",
+        "en": "Validation granularity"
+      },
+      "effect": {
+        "zh": "逐项反馈减少卡关；成组确认抑制枚举。",
+        "en": "Per-field feedback reduces stalls; grouped checks discourage brute force."
+      }
+    },
+    {
+      "name": {
+        "zh": "回访成本",
+        "en": "Revisit cost"
+      },
+      "effect": {
+        "zh": "快速回访鼓励交叉验证；高成本把推理变成记忆考试。",
+        "en": "Quick revisits encourage cross-checking; costly ones become memory tests."
+      }
+    }
+  ],
+  "tags": [
+    "information",
+    "narrative",
+    "discovery"
+  ],
+  "related": [
+    "puzzles-language-decoding",
+    "puzzles-visual-rule-learning",
+    "commerce-interpret-orders",
+    "puzzles-box-pushing"
+  ],
+  "contrast": {
+    "zh": "奥伯拉丁强调跨场景身份关联；黄金偶像案把词语变成可填写的事件解释。",
+    "en": "Obra Dinn emphasizes identities across scenes; Golden Idol turns words into explicit event reconstructions."
+  },
+  "combination": {
+    "zh": "组合提案：经营侦探所，用有限预算委托取证，允许不同证据组合支持同一结论。",
+    "en": "Design proposal: run a detective agency with limited investigative funds and alternative evidence paths to the same conclusion."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "现场有破杯、两个人的证词和一张时间不同的收据。",
+      "en": "A scene contains a broken cup, two testimonies, and a receipt with a conflicting time."
+    },
+    "action": {
+      "zh": "你对照收据时间，排除一个人所说的事件顺序。",
+      "en": "Compare the receipt time to rule out one stated sequence of events."
+    },
+    "result": {
+      "zh": "一条假设出现矛盾，另一个解释能同时符合三处证据。",
+      "en": "One hypothesis conflicts with the evidence while another fits all three clues."
+    },
+    "next": {
+      "zh": "填入目前确认的关系，再回现场寻找还缺的最后一条证据。",
+      "en": "Record the supported relationship and revisit the scene for the missing final clue."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "做一个静态场景、三名人物、六条线索与一组可填写的结论。",
+      "en": "Build one static scene, three people, six clues, and a fillable conclusion."
+    },
+    "pitfall": {
+      "zh": "先验证证据能唯一支持答案；增加人物和文本会迅速增加校对成本。",
+      "en": "Verify that evidence supports a unique answer before more people and text multiply consistency work."
+    },
+    "test": {
+      "zh": "让玩家为每条结论指出依据；靠试遍选项通过的部分需要补充线索。",
+      "en": "Ask for evidence behind each conclusion; add clues wherever success comes from trying every option."
+    }
+  }
+}

@@ -1,0 +1,130 @@
+{
+  "id": "rhythm-streak-multiplier",
+  "system": "rhythm",
+  "edition": 3,
+  "name": {
+    "zh": "连续合拍，保住收益倍率",
+    "en": "Keep a multiplier through accurate streaks"
+  },
+  "summary": {
+    "zh": "一连串稳定表现会让后面的行动更值钱，也让下一次失误更可惜。",
+    "en": "A steady run makes later actions more valuable and the next mistake more costly."
+  },
+  "rules": {
+    "zh": "系统记录一段连续合格的行动，达到条件就提高伤害、得分或资源收益；失误会降低或重置这份奖励。玩家不只要完成眼前动作，还要决定是否为了额外收益冒着断连风险。本条关注累积成果的保留，不以每招不同或单次踩准拍点作为完整玩法。",
+    "en": "Track consecutive qualifying actions and increase damage, score or resource rewards at thresholds. Mistakes reduce or reset that bonus. Players consider both the current action and the risk of losing accumulated value. This rule concerns preserving a streak, rather than requiring varied moves or judging one beat in isolation."
+  },
+  "loop": [
+    {
+      "zh": "连续完成合格行动",
+      "en": "Perform consecutive qualifying actions"
+    },
+    {
+      "zh": "看到倍率逐步提高",
+      "en": "Watch the multiplier increase"
+    },
+    {
+      "zh": "选择稳住连锁或挑战更难目标",
+      "en": "Protect the streak or attempt a harder target"
+    },
+    {
+      "zh": "保住奖励，或失误后重新积累",
+      "en": "Keep the bonus or rebuild after a mistake"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "倍率已经很高时，先处理容易命中的目标，还是冒险追击更高收益的目标？",
+      "en": "With a high multiplier, choose an easy target or pursue a riskier, more valuable one?"
+    },
+    {
+      "zh": "当前局面容易受伤断连，要绕路维持节奏，还是接受掉倍率换一个更好位置？",
+      "en": "If the current route risks damage and a broken streak, detour to preserve it or trade the multiplier for better positioning?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "升级门槛与上限",
+        "en": "Thresholds and cap"
+      },
+      "effect": {
+        "zh": "门槛低能快速建立正反馈；上限高会让高手与新手的收益差距变大。",
+        "en": "Low thresholds establish feedback quickly; high caps widen the reward gap between skilled and new players."
+      }
+    },
+    {
+      "name": {
+        "zh": "断连惩罚",
+        "en": "Streak-loss penalty"
+      },
+      "effect": {
+        "zh": "掉一级比全清零更容易恢复；惩罚应与玩家投入的连续时间相称。",
+        "en": "Dropping one tier is easier to recover from than a full reset; the penalty should fit the time invested."
+      }
+    },
+    {
+      "name": {
+        "zh": "奖励的用途",
+        "en": "Reward type"
+      },
+      "effect": {
+        "zh": "只加分主要服务挑战成绩；提高伤害或收入会进一步改变之后的战斗与购买能力。",
+        "en": "Score bonuses mainly support performance goals; damage or income bonuses also change later combat and purchasing power."
+      }
+    }
+  ],
+  "tags": [
+    "timing",
+    "risk",
+    "progression"
+  ],
+  "related": [
+    "rhythm-cue-response",
+    "rhythm-hidden-beats",
+    "rhythm-onbeat-actions",
+    "rhythm-sustain-notes"
+  ],
+  "contrast": {
+    "zh": "Hellsinger 用伤害和音乐层次立即奖励连贯表现；节奏地牢把稳定表现转换成金币收益，影响地牢内的购买选择。",
+    "en": "Hellsinger rewards consistency through immediate damage and musical layers; NecroDancer turns it into gold that affects dungeon purchases."
+  },
+  "combination": {
+    "zh": "组合提案：配装容量只够选择“断连只掉一级”或“最高倍率更高”其中一件，玩家在容易保住与收益更高之间选自己的风险。",
+    "en": "Design proposal: equipment capacity fits either “lose only one tier on a mistake” or “raise the multiplier cap,” letting players choose stability or greater upside."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "教学示例：连续命中三次升到两倍奖励，漏拍会降回一倍；面前有一个近目标和一个远目标。",
+      "en": "Teaching example: three consecutive hits unlock double rewards, while a miss resets the bonus; a near target and a distant target are available."
+    },
+    "action": {
+      "zh": "玩家已连中两次，先选更容易把握的近目标。",
+      "en": "With two hits in the streak, the player selects the easier nearby target."
+    },
+    "result": {
+      "zh": "第三次命中让倍率亮到两倍，下一次成功会拿到更多奖励。",
+      "en": "The third hit lights up the double multiplier, increasing the next success’s reward."
+    },
+    "next": {
+      "zh": "现在追击远目标更有价值，但一旦失手也会失去刚攒出的倍率。",
+      "en": "The distant target is now more valuable, but a mistake would lose the newly earned multiplier."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "用一个键、两档奖励和一个可见连中计数；只设一种断连原因，先测试玩家是否看懂收益变化。",
+      "en": "Use one key, two reward tiers and a visible streak counter. Start with one streak-breaking condition and test whether reward changes are understood."
+    },
+    "pitfall": {
+      "zh": "倍率掉落若没有指出原因，会让玩家把正常失误误解为系统随意扣奖。",
+      "en": "A multiplier drop without a clear cause can feel like arbitrary reward removal."
+    },
+    "test": {
+      "zh": "倍率快升级或已经很高时，玩家是否会主动改变目标选择来保住它？",
+      "en": "Do players deliberately change target choice when a multiplier is near a threshold or already high?"
+    }
+  }
+}

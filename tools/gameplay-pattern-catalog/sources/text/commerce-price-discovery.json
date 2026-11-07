@@ -1,0 +1,120 @@
+{
+  "id": "commerce-price-discovery",
+  "system": "commerce",
+  "edition": 1,
+  "name": {
+    "zh": "价格试探",
+    "en": "Price discovery"
+  },
+  "summary": {
+    "zh": "根据顾客反应逐步找到可接受的售价，而不是直接查看标准答案。",
+    "en": "Infer acceptable prices from customer reactions instead of a fixed answer sheet."
+  },
+  "rules": {
+    "zh": "玩家给待售物定价，观察顾客是否接受及情绪反馈。更高价格提高单笔收益，却可能失去成交；把观察转化为下一轮报价才形成学习循环。",
+    "en": "Set an asking price and watch acceptance and reactions. Higher prices improve individual margins but may lose sales; use observations to update the next quote."
+  },
+  "loop": [
+    {
+      "zh": "选品并估价",
+      "en": "Choose and estimate"
+    },
+    {
+      "zh": "报出试探价格",
+      "en": "Post a test price"
+    },
+    {
+      "zh": "观察顾客反应",
+      "en": "Observe customers"
+    },
+    {
+      "zh": "调整下一次报价",
+      "en": "Adjust the next price"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "先用低价确保成交，还是为获取上限信息承担流失？",
+      "en": "Secure a low-price sale or risk losing it to learn the ceiling?"
+    },
+    {
+      "zh": "一个顾客接受高价，能否代表其他顾客也接受？",
+      "en": "Does one high-price sale generalize to other customers?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "反馈分辨率",
+        "en": "Feedback precision"
+      },
+      "effect": {
+        "zh": "细分表情方便收敛价格，模糊反馈保留试探空间。",
+        "en": "Detailed reactions narrow the price range; vague feedback preserves uncertainty."
+      }
+    },
+    {
+      "name": {
+        "zh": "顾客差异",
+        "en": "Customer variation"
+      },
+      "effect": {
+        "zh": "不同预算让定价无法一次求解，也增加理解成本。",
+        "en": "Different budgets prevent a single solved price but increase complexity."
+      }
+    }
+  ],
+  "tags": [
+    "economy",
+    "information",
+    "risk"
+  ],
+  "related": [
+    "commerce-auction-bidding",
+    "commerce-debt-pressure",
+    "commerce-dynamic-market",
+    "commerce-haggling"
+  ],
+  "contrast": {
+    "zh": "夜勤人把试探放在货架上的群体浏览中；露塞提娅把试探放在逐客交易里。",
+    "en": "Moonlighter embeds testing in shelf browsing; Recettear embeds it in individual transactions."
+  },
+  "combination": {
+    "zh": "组合创意：稀有矿石没有统一标价，矿工需先向不同工坊少量试卖，逐步画出各行业的需求地图。",
+    "en": "Design proposal: rare ore lacks a universal price; miners test small sales to workshops and gradually map demand across industries."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "你不知道矿石能卖多贵，先标价 20，第一位顾客马上买走。",
+      "en": "You do not know the ore’s price ceiling; at 20, the first customer buys immediately."
+    },
+    "action": {
+      "zh": "你把下一块调到 30，观察新顾客的反应。",
+      "en": "Raise the next piece to 30 and observe the customer."
+    },
+    "result": {
+      "zh": "顾客犹豫后离开，这次没收入，却缩小了可接受价格的范围。",
+      "en": "The customer hesitates and leaves: no sale, but a narrower likely price range."
+    },
+    "next": {
+      "zh": "结合库存与现金需要，下一轮尝试中间价或恢复低价。",
+      "en": "Use stock and cash needs to choose an intermediate price or return to the lower price."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "做一种商品、三类购买预算与明确的嫌贵、满意、惊喜反应。",
+      "en": "Build one product, three customer budgets, and clear expensive, acceptable, and bargain reactions."
+    },
+    "pitfall": {
+      "zh": "如果每次反馈直接显示答案，就没有试探；如果完全随机，又无法学习。",
+      "en": "An exact answer removes discovery, while wholly random reactions prevent learning."
+    },
+    "test": {
+      "zh": "观察玩家是否利用前次反应调整报价，而非无规律地来回改价。",
+      "en": "See whether players adjust prices from previous reactions instead of changing them arbitrarily."
+    }
+  }
+}

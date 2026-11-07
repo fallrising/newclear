@@ -1,0 +1,119 @@
+{
+  "id": "survival-fatigue-rest",
+  "system": "survival",
+  "edition": 2,
+  "name": {
+    "zh": "疲劳积累与睡眠安排",
+    "en": "Fatigue and sleep planning"
+  },
+  "summary": {
+    "zh": "把睡觉放进日程，而不是等角色撑不住再补救。",
+    "en": "Schedule sleep before exhaustion chooses for you."
+  },
+  "rules": {
+    "zh": "行动和清醒时间累积疲劳，削弱后续效率。玩家选择何时休息、休息多久以及在哪里睡；睡醒后的精力、时间和环境变化共同决定下一段活动。",
+    "en": "Activity and time awake build fatigue and weaken later performance. Choose when, how long and where to sleep; restored energy, elapsed time and changed surroundings shape the next outing."
+  },
+  "loop": [
+    {
+      "zh": "估计剩余精力",
+      "en": "Estimate remaining energy"
+    },
+    {
+      "zh": "安排返程或临时休息",
+      "en": "Return or find a resting place"
+    },
+    {
+      "zh": "睡眠推进世界时间",
+      "en": "Sleep while world time advances"
+    },
+    {
+      "zh": "按醒来状态重排行程",
+      "en": "Replan after waking"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "再做一件事能带回收益，但可能错过安全返程时间。",
+      "en": "One more task may pay, but cost the safe return window."
+    },
+    {
+      "zh": "短睡保住白天，长睡减少下一次中断。",
+      "en": "A short sleep preserves daylight; a long sleep delays the next interruption."
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "疲劳对行动的影响",
+        "en": "Fatigue penalties"
+      },
+      "effect": {
+        "zh": "先影响搬运或战斗会迫使提前安排；只在归零惩罚容易拖到最后一刻。",
+        "en": "Early carrying or combat penalties encourage planning; zero-only penalties invite delay."
+      }
+    },
+    {
+      "name": {
+        "zh": "睡眠恢复曲线",
+        "en": "Recovery curve"
+      },
+      "effect": {
+        "zh": "前半段恢复快，鼓励小睡；越睡越有效则鼓励完整休整。",
+        "en": "Fast early recovery favors naps; increasing returns favor full rests."
+      }
+    }
+  ],
+  "tags": [
+    "planning",
+    "risk"
+  ],
+  "related": [
+    "survival-bleeding-triage",
+    "survival-competing-needs",
+    "survival-limb-impairment",
+    "survival-safe-water"
+  ],
+  "contrast": {
+    "zh": "漫漫长夜让疲劳直接改变搬运预算；僵尸毁灭工程还要考虑睡眠地点与周围威胁。",
+    "en": "The Long Dark changes carrying capacity; Project Zomboid also makes the resting location and nearby threats important."
+  },
+  "combination": {
+    "zh": "设计提案：限时委托允许分段交货，玩家要在赶工和睡眠恢复之间安排两次出行。",
+    "en": "Design proposal: allow staged contract deliveries, making players schedule two trips around work and sleep."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "演示设定：天黑前剩三轮，送货需两轮，精力只够一轮。",
+      "en": "Example: three turns until dark, a two-turn delivery, one turn of energy."
+    },
+    "action": {
+      "zh": "先睡一轮恢复精力。",
+      "en": "Sleep for one turn to recover."
+    },
+    "result": {
+      "zh": "能完成送货，但已没有绕路余量。",
+      "en": "Delivery is now possible, with no detour margin."
+    },
+    "next": {
+      "zh": "下次接单先比较距离与休息需求。",
+      "en": "Compare distance and rest needs before the next contract."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "只做白天倒计时、精力条和三个地点，睡眠按轮恢复。",
+      "en": "Use a daylight clock, energy meter and three locations, with turn-based sleep."
+    },
+    "pitfall": {
+      "zh": "把睡觉做成长时间无法操作的等待会打断体验；允许加速。",
+      "en": "Long idle waits interrupt play; allow fast-forward."
+    },
+    "test": {
+      "zh": "观察玩家是否在精力耗尽前主动返程。",
+      "en": "Observe whether players return before reaching exhaustion."
+    }
+  }
+}

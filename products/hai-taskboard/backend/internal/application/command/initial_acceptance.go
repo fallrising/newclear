@@ -55,7 +55,7 @@ func CanonicalAcceptInitialSpecification(v AcceptInitialSpecification) ([]byte, 
 	total := 0
 	for i, a := range acs {
 		total += len(a.Content)
-		if !validText(string(a.ACID), 120) || len(a.Content) > 64<<10 || total > 512<<10 || (i > 0 && acs[i-1].ACID == a.ACID) {
+		if !domain.ValidACID(string(a.ACID)) || len(a.Content) > 64<<10 || total > 512<<10 || (i > 0 && acs[i-1].ACID == a.ACID) {
 			return nil, domain.Digest{}, ErrInvalidCommand
 		}
 	}

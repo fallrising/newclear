@@ -1,0 +1,120 @@
+{
+  "id": "stealth-light-shadow",
+  "system": "stealth",
+  "edition": 2,
+  "name": {
+    "zh": "沿着阴影移动",
+    "en": "Moving through light and shadow"
+  },
+  "summary": {
+    "zh": "地面上的明暗，决定哪里适合停留、哪里必须快速通过。",
+    "en": "Light and shadow tell you where to wait and where to cross quickly."
+  },
+  "rules": {
+    "zh": "光照改变角色被看见的难度，玩家在暗区停留、观察，再穿过亮区。可交互灯具还能改变安全路线；画面或指示器必须说明角色目前是否藏在阴影里。",
+    "en": "Light changes how easily the character is seen. Wait and observe in darkness, then cross exposed areas; interactive lights can change the safe route. Show clearly whether the character is currently in shadow."
+  },
+  "loop": [
+    {
+      "zh": "找出亮区与暗区",
+      "en": "Read lit and dark areas"
+    },
+    {
+      "zh": "在暗处观察巡逻",
+      "en": "Watch patrols from darkness"
+    },
+    {
+      "zh": "选择时机穿过亮区",
+      "en": "Time the exposed crossing"
+    },
+    {
+      "zh": "抵达下一处阴影",
+      "en": "Reach the next shadow"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "走短但明亮的通路，还是沿更长的暗区绕行？",
+      "en": "Take the short exposed route or the longer dark one?"
+    },
+    {
+      "zh": "关灯能创造安全区，但执行关灯的过程是否更危险？",
+      "en": "A light can be disabled, but is reaching it riskier than crossing normally?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "光照对发现速度的影响",
+        "en": "Detection effect of light"
+      },
+      "effect": {
+        "zh": "差距过小会让明暗沦为装饰，过大则可能让暗处成为绝对安全区。",
+        "en": "Too little difference makes lighting cosmetic; too much may make darkness completely safe."
+      }
+    },
+    {
+      "name": {
+        "zh": "安全区间距",
+        "en": "Distance between safe patches"
+      },
+      "effect": {
+        "zh": "间距越大，越需要等待守卫转向，并计划中途退路。",
+        "en": "Larger gaps require better patrol timing and fallback plans."
+      }
+    }
+  ],
+  "tags": [
+    "spatial",
+    "timing",
+    "information"
+  ],
+  "related": [
+    "exploration-stealth-awareness",
+    "stealth-sound-lures",
+    "stealth-hiding-spots",
+    "stealth-synchronized-actions"
+  ],
+  "contrast": {
+    "zh": "《神偷》用专门指示器传达隐蔽状态；《忍者印记》把反馈放在玩家一直注视的角色身上。",
+    "en": "Thief uses a dedicated meter; Mark of the Ninja places feedback on the character the player is already watching."
+  },
+  "combination": {
+    "zh": "设计提案：玩家的灯能发现道路标记，却也暴露位置；在开灯读路与关灯潜行之间切换。",
+    "en": "Design proposal: a lamp reveals route markings but exposes the player, creating a switch between reading the route and moving unseen."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "走廊有两片阴影，中间亮地需要两秒才能穿过。",
+      "en": "Two shadows are separated by a lit corridor that takes two seconds to cross."
+    },
+    "action": {
+      "zh": "你等守卫转身后，从第一片阴影跑向第二片。",
+      "en": "Wait for the guard to turn, then move between the shadows."
+    },
+    "result": {
+      "zh": "你在守卫回头前进入暗处，隐蔽标记重新亮起。",
+      "en": "Reach darkness before the guard looks back and regain the hidden indicator."
+    },
+    "next": {
+      "zh": "下一段亮地更长，需要先找能改变灯光的开关。",
+      "en": "The next exposed stretch is longer; look for a light switch first."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "用二维地图放两片暗区、一片亮区和一名转头守卫；先用区域标签计算可见性。",
+      "en": "Use a 2D map with two dark zones, one lit zone and a turning guard; calculate visibility from zone tags first."
+    },
+    "pitfall": {
+      "zh": "先别追求真实光线渲染；视觉上很暗但规则判定很亮，会使玩家觉得不公平。",
+      "en": "Do not start with realistic lighting; a dark-looking area that counts as lit undermines trust."
+    },
+    "test": {
+      "zh": "隐藏指示器暂时遮住后，玩家能否仅凭画面预测哪里更安全？",
+      "en": "With the indicator briefly hidden, can players predict safer positions from the scene?"
+    }
+  }
+}

@@ -142,3 +142,53 @@ func (tx transaction) loadOutputArtifact(ctx context.Context, d domain.Digest) (
 	}
 	return a, nil
 }
+
+var _ port.RunOutputReadTransaction = transaction{}
+
+func (tx transaction) LoadScopedRunOutputs(ctx context.Context, project domain.ProjectID, item domain.WorkItemID, run domain.RunID) ([]port.RunOutput, error) {
+	var present int
+	if err := tx.conn.QueryRowContext(ctx, `SELECT 1 FROM runs WHERE project_id=? AND work_item_id=? AND run_id=?`, project, item, run).Scan(&present); err != nil {
+		return nil, normalizeError(err)
+	}
+	outputs, err := tx.LoadRunOutputs(ctx, project, run)
+	if err != nil {
+		return nil, err
+	}
+	for _, output := range outputs {
+		if !validOutputReadMetadata(output.Artifact) {
+			return nil, outputCorruption()
+		}
+	}
+	return outputs, nil
+}
+
+func (tx transaction) LoadProjectRunOutput(ctx context.Context, project domain.ProjectID, digest domain.Digest) (port.RunOutput, error) {
+	var run domain.RunID
+	err := tx.conn.QueryRowContext(ctx, `SELECT CASE WHEN length(CAST(run_id AS BLOB)) BETWEEN 1 AND 80 THEN run_id ELSE NULL END FROM run_output_artifacts WHERE project_id=? AND artifact_digest=? ORDER BY run_id LIMIT 1`, project, digest.String()).Scan(&run)
+	if errors.Is(err, sql.ErrNoRows) {
+		return port.RunOutput{}, port.ErrNotFound
+	}
+	if err != nil {
+		return port.RunOutput{}, outputReadError(ctx, err)
+	}
+	outputs, err := tx.LoadRunOutputs(ctx, project, run)
+	if err != nil {
+		return port.RunOutput{}, err
+	}
+	for _, output := range outputs {
+		if !validOutputReadMetadata(output.Artifact) {
+			return port.RunOutput{}, outputCorruption()
+		}
+	}
+	for _, output := range outputs {
+		if output.ArtifactDigest == digest {
+			return output, nil
+		}
+	}
+	return port.RunOutput{}, outputCorruption()
+}
+
+func validOutputReadMetadata(a port.Artifact) bool {
+	media, _, err := mime.ParseMediaType(a.MediaType)
+	return err == nil && strings.Count(media, "/") == 1 && a.ByteLength <= 10<<20
+}

@@ -1,0 +1,161 @@
+{
+  "schema": 1,
+  "result": "passed",
+  "scenarios": [
+    {
+      "id": "micro-skills",
+      "status": "passed",
+      "mode": "envfacts; no proposer",
+      "rendered_after_sessions": [
+        false,
+        false,
+        false,
+        true
+      ],
+      "injected_fact": "# environment facts learned from earlier sessions in this repository\n- `pytest …` fails here with command not found; `python -m pytest …` works.\n",
+      "retired_after_contradictions": 2,
+      "duplicate_session_ignored": true,
+      "cli": "(nothing injected yet: no fact has cleared its firing gate)\n\nfacts tracked:\n  RETIRED   fire=  4/6          form_repair:run_tests:pytest\n"
+    },
+    {
+      "id": "tool-pruning",
+      "status": "passed",
+      "host": "claude schema (synthetic)",
+      "prompts_per_session": 5,
+      "proposal_by_session": [
+        [],
+        [
+          "CronCreate"
+        ]
+      ],
+      "protected_and_ever_used_preserved": true,
+      "high_risk_deferred": true,
+      "apply": "added: CronCreate\nin <sandbox>/toolprune/repo/.claude/settings.local.json -- takes effect from the next session.\n",
+      "restore": "removed: CronCreate (from the next session); kept from now on (`toolprune apply CronCreate` removes one again)\n",
+      "original_rules_preserved": true,
+      "settings_after_restore": {
+        "permissions": {
+          "deny": [
+            "Bash(rm -rf:*)"
+          ],
+          "allow": [
+            "Read"
+          ]
+        },
+        "model": "user-choice"
+      },
+      "evidence_boundaries": {
+        "single-long": {
+          "prompts_per_session": [
+            10,
+            1
+          ],
+          "proposals": [
+            [],
+            [
+              "CronCreate"
+            ]
+          ]
+        },
+        "five-short": {
+          "prompts_per_session": [
+            1,
+            1,
+            1,
+            1,
+            1
+          ],
+          "proposals": [
+            [],
+            [],
+            [],
+            [],
+            [
+              "CronCreate"
+            ]
+          ]
+        },
+        "high-risk": {
+          "prompts_per_session": [
+            15,
+            15
+          ],
+          "proposals": [
+            [],
+            [
+              "NotebookEdit"
+            ]
+          ]
+        }
+      },
+      "invalid_json_and_symlink_refused": true
+    },
+    {
+      "id": "loop-guard",
+      "status": "passed",
+      "mode": "real hooks, synthetic paused judge state; hard backstop only",
+      "cold_events": 0,
+      "green_training_turns": 5,
+      "training_calls_per_turn": 8,
+      "nudge_at_call": 25,
+      "notice_at_call": 36,
+      "automatic_stop": false,
+      "productive_80_call_events": 0,
+      "nudge": {
+        "hookSpecificOutput": {
+          "hookEventName": "PostToolUse",
+          "additionalContext": "Process check (automated): so far you've made 13 edits across 1 file(s) (most to `a.py`) and run 12 verification(s), and the same failure has recurred 11 time(s) without the tests going green. This looks like a repetitive loop. Do NOT stop — instead step back and try a MATERIALLY DIFFERENT hypothesis: re-read the failing test's expectation, consider a different file or root cause than the ones you've been editing, and verify the new hypothesis directly before editing again."
+        },
+        "systemMessage": "TokenEconomizer nudged this turn (cum-backstop): the same failure kept recurring."
+      },
+      "notice": {
+        "systemMessage": "TokenEconomizer: this turn still looks stuck after a redirect (cum-backstop, 36 tool calls). Press Esc to interrupt it.",
+        "hookSpecificOutput": {
+          "hookEventName": "PostToolUse",
+          "additionalContext": "TokenEconomizer, a plugin the user runs, has a notice for them, and their main view does not show plugin messages. Put this line, word for word, in your next message to the user, and again in your final reply:\n\nTokenEconomizer: this turn still looks stuck after a redirect (cum-backstop, 36 tool calls). Press Esc to interrupt it.\n\nIt is for the user to act on; it does not change your task."
+        }
+      }
+    },
+    {
+      "id": "accounting-and-cli",
+      "status": "passed",
+      "input": "synthetic usage",
+      "raw_tokens": 11700,
+      "explicit_illustrative_weights": {
+        "input": 1,
+        "cache_read": 0.1,
+        "cache_write": 1.25,
+        "output": 5
+      },
+      "weighted_input_equivalents": 3625.0,
+      "illustrative_sidecall_equivalents": 350.0,
+      "total_including_illustrative_sidecall": 3975.0,
+      "not_current_prices_or_measured_savings": true,
+      "config": "{\n  \"enabled\": true,\n  \"microskills\": {\n    \"state\": \"off\",\n    \"microskills\": \"off\",\n    \"microskills_max_facts\": 4,\n    \"microskills_max_tokens\": 150,\n    \"microskills_propose_every\": 3\n  },\n  \"toolprune\": {\n    \"state\": \"off\",\n    \"toolprune\": \"off\",\n    \"toolprune_evidence\": 10,\n    \"toolprune_min_sessions\": 2,\n    \"toolprune_sessions\": 5,\n    \"toolprune_quiet_minutes\": 60,\n    \"toolprune_protect\": []\n  },\n  \"loopguard\": {\n    \"state\": \"off\",\n    \"loopguard\": \"off\",\n    \"loopguard_aggr\": \"default\",\n    \"loopguard_nudges\": 1,\n    \"thresholds\": {\n      \"min_turns\": 20,\n      \"edit_churn\": 4,\n      \"distinct_edit_files\": 3,\n      \"error_outputs\": 6,\n      \"stagnation\": 0.2,\n      \"envelope_margin\": 1.25,\n      \"envelope_pct\": 90,\n      \"envelope_min_samples\": 5,\n      \"judge_confidence\": 0.7,\n      \"backstop_mult\": 2.5,\n      \"gate_min_turns\": 18,\n      \"gate_error_outputs\": 8\n    },\n    \"pinned\": []\n  },\n  \"other\": {\n    \"mode\": \"interactive\",\n    \"repomap\": \"off\",\n    \"repomap_tokens\": 2048,\n    \"repomap_python\": \"\",\n    \"repomap_timeout\": 8,\n    \"paid_model\": \"\",\n    \"pi_extensions\": [],\n    \"pi_cli\": \"\",\n    \"shadow\": false,\n    \"vocabulary\": \"auto\"\n  },\n  \"warnings\": []\n}\n",
+      "cli_status": "TokenEconomizer -- lab/demo (claude)\n  repository   <sandbox>/accounting/repo, identified by its origin remote (example.invalid/lab/demo)\n  state        <sandbox>/accounting/home/repos/demo-aab8349d37/claude\n  config       microskills=off toolprune=off loopguard=off repomap=off mode=interactive shadow=False\n  sessions     0 folded, 0 effective tokens, plugin overhead 0 (0.0%)\n  microskills  0 fact(s) injected at session start (0 sessions learned from)\n  toolprune    0 sessions (0 prompts) observed, catalog: none yet; proposed tools: -; applied: -\n  loopguard    envelope not learned yet (0 ended-green turns); 0 redirect(s), 0 still-stuck notice(s) over 0 turns\n"
+    }
+  ],
+  "assertions": 36,
+  "execution": "real pinned TokenEconomizer package/hooks/CLI; synthetic inputs",
+  "provider_calls": 0,
+  "real_savings_measured": false,
+  "runtime_guard": {
+    "blocked_attempts": [],
+    "network": "denied",
+    "subprocess": "denied",
+    "environment": "credential-free allowlist",
+    "writes": "fresh sandbox only"
+  },
+  "not_exercised": [
+    "live host installation and tool-schema removal",
+    "model-backed proposer",
+    "model judge quality",
+    "provider billing or task-quality A/B",
+    "Codex/Copilot/Pi/opencode live integrations"
+  ],
+  "upstream": {
+    "repository": "https://github.com/microsoft/TokenEconomizer.git",
+    "commit": "c53a4a6dcdebaeb9df6fcaa5c7026f0401cd8f23",
+    "package_files_verified": 59
+  }
+}

@@ -1,0 +1,120 @@
+{
+  "id": "projectiles-graze-reward",
+  "system": "projectiles",
+  "edition": 3,
+  "name": {
+    "zh": "擦着危险边缘移动来换资源",
+    "en": "Graze danger to earn a resource"
+  },
+  "summary": {
+    "zh": "安全躲开不再是唯一目标，靠近但不碰到也有收益。",
+    "en": "Avoidance is not the only goal: getting close without contact earns value."
+  },
+  "rules": {
+    "zh": "角色外侧有一圈比受伤判定更大的擦弹区域。危险物进入这一区域而未真正命中时给予能量或其他资源，玩家再花掉资源获得反击或续航；需要清楚区分擦过、受伤和已领取奖励。",
+    "en": "A graze zone extends beyond the damage hitbox. A hazard entering it without a hit grants energy or another resource, which can fund a counterattack or sustain. Clearly distinguish grazing, taking damage and a reward already collected."
+  },
+  "loop": [
+    {
+      "zh": "看清弹道与安全空隙",
+      "en": "Read trajectories and safe gaps"
+    },
+    {
+      "zh": "靠近边缘而不碰到中心",
+      "en": "Approach the edge without touching the hitbox"
+    },
+    {
+      "zh": "取得擦弹资源",
+      "en": "Gain the graze resource"
+    },
+    {
+      "zh": "使用资源后寻找下一次机会",
+      "en": "Spend it and look for another opportunity"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "远离弹幕更稳，贴近弹幕能加快反击，但自己是否有足够容错？",
+      "en": "Distance is safer; grazing accelerates a counterattack, but can you afford the risk?"
+    },
+    {
+      "zh": "资源已经够用时，继续贴近是否还值得？",
+      "en": "Once enough resource is available, is further proximity still worth it?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "受伤区与擦弹区间距",
+        "en": "Gap between damage and graze zones"
+      },
+      "effect": {
+        "zh": "间距越宽越容易学会；过窄时视觉误差会让失败难以理解。",
+        "en": "A wider gap is easier to learn; a tiny gap makes visual error difficult to interpret."
+      }
+    },
+    {
+      "name": {
+        "zh": "重复计奖规则",
+        "en": "Repeat-reward rule"
+      },
+      "effect": {
+        "zh": "同一危险只给一次奖励能避免原地刷取；持续计奖则需额外限制停留风险。",
+        "en": "One reward per hazard prevents stationary farming; continuous rewards need additional limits or exposure."
+      }
+    }
+  ],
+  "tags": [
+    "dexterity",
+    "risk",
+    "precision"
+  ],
+  "related": [
+    "projectiles-active-reload",
+    "projectiles-charged-release",
+    "projectiles-independent-aim",
+    "projectiles-maintain-lock"
+  ],
+  "contrast": {
+    "zh": "Graze Counter GM 主要把擦弹转成反击火力；东方月神夜把它接到角色续航与时间能力。",
+    "en": "Graze Counter GM mainly converts proximity into counterattack power; Luna Nights connects it to sustain and time abilities."
+  },
+  "combination": {
+    "zh": "组合提案：敌人的下一条弹道提前画出，玩家先规划擦过边缘的路线，再用赚到的能量消除下一轮的一部分弹幕。",
+    "en": "Design proposal: preview an enemy’s next projectile path, let players plan a grazing route, then spend earned energy to erase part of the following barrage."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "一串慢速弹幕经过身边，能量还差一点才能反击。",
+      "en": "A slow stream passes nearby and the counter gauge is almost ready."
+    },
+    "action": {
+      "zh": "玩家向弹幕外缘靠近，不进入受伤区域。",
+      "en": "The player approaches its edge without entering the damage hitbox."
+    },
+    "result": {
+      "zh": "擦弹提示出现，能量达到反击要求。",
+      "en": "A graze cue appears and the gauge reaches the counter threshold."
+    },
+    "next": {
+      "zh": "玩家撤到安全处释放反击，再决定是否为下一次充能冒险。",
+      "en": "Retreat, release the counter, then decide whether to risk another charge."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "先做一种慢速弹、清楚可见的两圈判定，以及每颗弹只能给一次能量的规则。",
+      "en": "Start with one slow bullet, visible damage and graze circles, and one reward per bullet."
+    },
+    "pitfall": {
+      "zh": "不能把大角色图像当作受伤范围；判定与提示不清会让擦弹显得像随机受伤。",
+      "en": "Do not equate a large sprite with the damage hitbox; unclear cues make grazing feel like random damage."
+    },
+    "test": {
+      "zh": "玩家能否主动选择安全躲避或擦弹，并解释什么时候收益不值得风险？",
+      "en": "Can players deliberately choose safety or grazing and explain when the reward is not worth the risk?"
+    }
+  }
+}

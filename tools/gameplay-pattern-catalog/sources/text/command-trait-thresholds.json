@@ -1,0 +1,119 @@
+{
+  "id": "command-trait-thresholds",
+  "system": "command",
+  "edition": 3,
+  "name": {
+    "zh": "凑够不同成员触发团队加成",
+    "en": "Reach team bonuses with distinct members"
+  },
+  "summary": {
+    "zh": "让一个较弱成员也可能成为阵容缺少的最后一块。",
+    "en": "A weaker recruit can complete a valuable team bonus."
+  },
+  "rules": {
+    "zh": "单位带有阵营或职业标签，场上符合条件的不同成员达到门槛时触发团队效果。玩家在个人强度、标签数量和上场名额间取舍；界面应说明缺谁、差几个，以及换人会失去哪档效果。",
+    "en": "Units carry faction or class tags. Enough distinct eligible members activate a team effect. Balance individual strength, tag counts and roster slots, with clear feedback on missing members and bonuses lost by a swap."
+  },
+  "loop": [
+    {
+      "zh": "检查已有标签人数",
+      "en": "Count active tag members"
+    },
+    {
+      "zh": "选择补标签或补强度",
+      "en": "Choose a tag completion or a stronger unit"
+    },
+    {
+      "zh": "触发或失去门槛效果",
+      "en": "Activate or lose a threshold bonus"
+    },
+    {
+      "zh": "按战况重组成员",
+      "en": "Rebuild around the result"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "换上弱单位凑出团队加成，是否比单独的强单位更值？",
+      "en": "Is a weak unit that completes a bonus worth more than a stronger standalone unit?"
+    },
+    {
+      "zh": "追求一条高档加成，还是多条低档加成？",
+      "en": "Pursue one high threshold or several smaller bonuses?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "门槛梯度",
+        "en": "Threshold spacing"
+      },
+      "effect": {
+        "zh": "间隔大意味着更长的投入期，成型前可能更弱。",
+        "en": "Wider gaps require longer investment and a weaker transition."
+      }
+    },
+    {
+      "name": {
+        "zh": "加成覆盖对象",
+        "en": "Bonus recipients"
+      },
+      "effect": {
+        "zh": "只惠及同类更强调专精，惠及全队更鼓励混搭。",
+        "en": "Tag-only benefits encourage specialization; teamwide effects support mixing."
+      }
+    }
+  ],
+  "tags": [
+    "planning",
+    "optimization"
+  ],
+  "related": [
+    "command-focus-fire",
+    "command-frontline-shielding",
+    "command-initiative-order",
+    "command-prebattle-formation"
+  ],
+  "contrast": {
+    "zh": "云顶之弈用特质组织阵容，刀塔霸业用联盟组织；具体门槛与奖励不同，核心共同点是用有限席位凑规则条件。",
+    "en": "TFT uses traits and Underlords alliances; their thresholds and rewards differ, but both make roster slots satisfy rule conditions."
+  },
+  "combination": {
+    "zh": "组合提案：能力槽位同样有限，玩家必须在装备强力单体能力与携带补足团队标签的徽章之间选择。",
+    "en": "Design proposal: limited ability slots force a choice between a strong personal skill and an emblem that completes a team tag."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "场上已有两名工匠，三名可让全队获得护盾。",
+      "en": "Two artisans are deployed; three would grant the team a shield."
+    },
+    "action": {
+      "zh": "换下高伤害佣兵，放入第三名工匠。",
+      "en": "Replace a high-damage mercenary with a third artisan."
+    },
+    "result": {
+      "zh": "护盾生效，但单体输出下降。",
+      "en": "The shield activates while direct damage falls."
+    },
+    "next": {
+      "zh": "若敌人伤害很低，就考虑换回佣兵加快结束。",
+      "en": "Against low damage, consider restoring the mercenary to end fights faster."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "六名单位、两个标签、一个人数门槛，用数字结算战斗即可。",
+      "en": "Use six units, two tags and one threshold; resolve combat numerically."
+    },
+    "pitfall": {
+      "zh": "标签与例外太多会把决策变成记忆考试。",
+      "en": "Too many tags and exceptions turn decisions into memorization."
+    },
+    "test": {
+      "zh": "玩家会不会为补门槛保留看似较弱的单位？",
+      "en": "Do players keep a seemingly weak unit to complete a threshold?"
+    }
+  }
+}

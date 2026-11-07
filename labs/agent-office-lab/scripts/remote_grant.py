@@ -31,10 +31,10 @@ TTL_MAX = 1800
 KEYS = {'version', 'id', 'provider', 'task', 'model', 'pinned_version', 'limits',
         'source_sha256', 'uid', 'lab', 'created_at', 'expires_at', 'max_runs'}
 SOURCE_NAMES = tuple(dict.fromkeys((
-    'remote_grant.py', 'office_dispatch.py', 'office_console.py', 'office_console.js', 'office_results.py', 'run_pi_work.py', 'office_pi.mjs', 'office_pi_host.mjs', 'office_pi_restart.mjs',
+    'remote_grant.py', 'office_dispatch.py', 'office_console.py', 'office_console.js', 'office_results.py', 'run_pi_work.py', 'office_pi.mjs', 'office_pi_host.mjs', 'office_pi_restart.mjs', 'office_pi_question.mjs',
     'manual_recovery.mjs', 'deepseek_relay.py', 'pi_retry.py', 'execution_slot.py',
     'process_ownership.py', 'remote_cli.py', 'pi_boundary.mjs', 'pi_office_policy.mjs',
-    'pi_session_evidence.mjs', 'bin/pi'
+    'pi_session_evidence.mjs', 'pi_question_check.mjs', 'bin/pi'
 )))
 
 

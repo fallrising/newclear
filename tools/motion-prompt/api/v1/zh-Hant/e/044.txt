@@ -1,0 +1,24 @@
+// Motion Prompt #044 · MIT License (c) 2026 Shohei Ohtaki · ./#044
+//
+// 交叉溶接（Cross dissolve）
+// 分類組: camera (鏡頭運動與轉場) · element 20 · 分類: 轉場
+// 示範內容: 下一畫面疊在目前畫面上，不透明度逐漸提高，中途兩幕互相透出。
+// 動作／視覺規格:
+//   - 接點：1.5 s 至 3.0 s，共 1.5 s；下一畫面的不透明度從 0→100%。
+//   - 緩動：二次方 ease-in-out（約 cubic-bezier(0.45,0,0.55,1)），2.25 s 時達 50%。
+//   - 前一畫面在底層保持完全不透明，下一畫面疊在上方；不是先把前一畫面淡出。
+//   - 攝影機：兩幕皆固定（A 高度 1.4 m；B 高度 1.6 m、俯仰 +0.1 rad），主體也不移動。
+//   - 0–1.5 s 只顯示前一幕，3.0–4.7 s 只顯示下一幕。
+//   - 每 4.7 s 交替 A→B、B→A（往返 9.4 s）；右上角顯示「A→B」或「B→A」。
+// 使用情境: 適合柔和地表達時間或地點變化，或進入回憶。
+// 關鍵字: cross dissolve, dissolve, crossfade, fade, opacity, blend, transition
+// 尺寸: 539x208 px · 週期: 9.4 s
+// 需要: kit camera -> ./api/v1/kit/zh-Hant/camera.js
+// 本地示範: ./?lang=zh-Hant#044
+//
+// cells[i](k, w, h, u)：k = CanvasRenderingContext2D，呼叫端先清除畫布並以 save/restore 包覆；w、h 為尺寸，u 為 [0, cycle) 內的秒數。畫面只取決於 u。
+// 下方是元素程式碼；CELLS、常數與輔助函式位於 kit。
+
+// @element 20
+
+CELLS[19] = shot(abCell((k, w, h, u, A, B) => blend(k, kk => A(kk, w, h), kk => B(kk, w, h), eIOs(P(u, 1.5, 3.0)))));

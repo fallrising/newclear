@@ -1,0 +1,19 @@
+Please use "Tracking shot" from "Camera moves & transitions".
+Motion Prompt #029 · camera/tracking-shot
+
+Meaning: Move along with the subject
+Example request (adapt to your project): Tracking shot from the side, moving along with the walking person at the same speed.
+What this demo shows: The camera moves sideways at the same speed as a walking person; the person stays centred while nearer posts sweep past faster.
+Demo specification (independent of the example request):
+- Camera: moves right at a constant 1.7 m/s (x = -4.0 m → +4.0 m in 4.7 s); height 1.3 m, facing straight ahead; no easing
+- Subject: a person walks at the same x as the camera (7.5 m away) and stays in the centre of frame; legs and arms swing by sin(u×7)×0.42 rad
+- Parallax: posts every 1.6 m at 4 m depth sweep left fastest, then trees, then buildings (48 m away); mountains hardly move
+- Top-right readout shows "→ 1.7m/s"
+- Repeat: jumps back to the start every 4.7 s (posts and ground grid line up at the seam; background buildings and trees jump)
+When to use it: To follow a walking or running subject and keep the sense of movement while showing their action.
+
+Local demo: ./?lang=en#029
+Local specification and code: ./api/v1/en/e/029.txt
+Local helper code: ./api/v1/kit/en/camera.js
+Keep the demo geometry, timing and easing unless I explicitly request changes. Adapt text, colours and assets to my project.
+Upstream source: https://github.com/showheyohtaki/motion-prompt (MIT, Shohei Ohtaki).

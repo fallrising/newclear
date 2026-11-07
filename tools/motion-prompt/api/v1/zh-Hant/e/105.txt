@@ -1,0 +1,45 @@
+// Motion Prompt #105 · MIT License (c) 2026 Shohei Ohtaki · ./#105
+//
+// 散景（Bokeh）
+// 分類組: photo (攝影效果、打光與風格) · element 09 · 分類: 鏡頭與相機效果
+// 示範內容: 光圈打開時，對焦人物保持清晰，後方建築變柔，路燈與遠處燈光擴散成大型淡色圓斑。
+// 動作／視覺規格:
+//   - 場景 2：街角的建築、樹木與路燈（x 114、292、494）位於 y 132–162 的道路後方；人物站在左前方，腳位於 x 176、y 200，身高 124 px。背景轉暗，天空為 #E7E5E1。
+//   - 人物以外的背景模糊量：0 → 6 px。
+//   - 光點包含三盞路燈（尺寸 1.25）與另外 12 個每隔 45 px 的光點；後者 y 44–114、尺寸 0.6–1.2，採固定亂數種子；圓斑半徑 = (2.4 + 15 × effect) × size。
+//   - 圓斑不透明度 100% → 55%；路燈為琥珀色 #FFC75A，遠方燈光為 #FFE3A3，搭配 1.2 px 琥珀色邊緣。
+//   - 人物保持清晰；右上光圈讀值 f/16 → f/1.4，共 8 級。
+//   - 時間：0.4 s 到 1.4 s 漸入，維持至 4.0 s，於 4.8 s 前退去；每輪 = 5 s，採 cubic ease-in-out，約為 cubic-bezier(0.65,0,0.35,1)。
+// 使用情境: 適合讓人物或產品從背景中突出，增添柔和、歡慶的夜晚氣氛。
+// 關鍵字: bokeh, shallow depth of field, background blur, wide aperture, f/1.4, out of focus, lights
+// 尺寸: 539x208 px · 週期: 5 s
+// 需要: kit photo -> ./api/v1/kit/zh-Hant/photo.js
+// 本地示範: ./?lang=zh-Hant#105
+//
+// cells[i](k, w, h, u)：k = CanvasRenderingContext2D，呼叫端先清除畫布並以 save/restore 包覆；w、h 為尺寸，u 為 [0, cycle) 內的秒數。畫面只取決於 u。
+// 下方是元素程式碼；CELLS、常數與輔助函式位於 kit。
+
+// @element 09
+
+CELLS[8] = cell((k, u) => {
+  const a = env(u), p = pal(BASE, DIM, a);
+  const [B, kb] = layer('bokeh'); stageStreet(kb, p, { person: false });
+  const [Bb, kbb] = layer('bokeh-b'); kbb.filter = `blur(${(6 * a).toFixed(2)}px)`; kbb.drawImage(B, 0, 0); kbb.filter = 'none';
+  k.drawImage(B, 0, 0); k.drawImage(Bb, 0, 0);
+
+  const pts = once('bokeh-pts', () => {
+    const o = LAMPS.map(x => [x + 9, ROAD - 53, 1.25, 0]), r = rng(9);
+    for (let i = 0; i < 12; i++) o.push([22 + i * 45 + r() * 20, 44 + r() * 70, 0.6 + r() * 0.6, 1]);
+    return o;
+  });
+  k.save();
+  for (const [x, y, s, w] of pts) {
+    const r = (2.4 + 15 * a) * s;
+    k.globalAlpha = lerp(1, 0.55, a); k.fillStyle = w ? BASE.glow : BASE.lit; k.beginPath(); k.arc(x, y, r, 0, TAU); k.fill();
+    k.globalAlpha = 0.7 * a; k.strokeStyle = BASE.lit; k.lineWidth = 1.2; k.stroke();
+  }
+  k.restore();
+  figure(pen(k), FIG[0], FIG[1], FIG[2], p.person);
+  const stops = ['f/16', 'f/11', 'f/8', 'f/5.6', 'f/4', 'f/2.8', 'f/2', 'f/1.4'];
+  hud(k, stops[Math.round(a * 7)]);
+});

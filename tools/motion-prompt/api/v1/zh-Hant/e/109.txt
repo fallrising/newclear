@@ -1,0 +1,43 @@
+// Motion Prompt #109 · MIT License (c) 2026 Shohei Ohtaki · ./#109
+//
+// 鏡頭耀光（Lens flare）
+// 分類組: photo (攝影效果、打光與風格) · element 13 · 分類: 鏡頭與相機效果
+// 示範內容: 太陽從建築後方露出時，周圍出現放射光線；光點、六角形與光圈沿太陽穿過畫面中心排列到對側。
+// 動作／視覺規格:
+//   - 場景 2：街角的建築、樹木與路燈（x 114、292、494）位於 y 132–162 的道路後方；人物站在左前方，腳位於 x 176、y 200，身高 124 px。
+//   - 太陽半徑 13 px，從建築後方 (x 428, y 74) 移至開闊天空 (x 474, y 30)。
+//   - 8 條放射光線從距太陽中心 17 px 處開始，交替延伸至 26 px 或 44 px；長度為 9 px 與 27 px，琥珀色、厚 1.6 px、不透明度 75%。
+//   - 耀光沿太陽穿過中心的直線排列於 t = 0.45、0.8、1.15、1.45、1.75、2.0，t = 1 為中心；依序為 7 px 圓形、13 px 六角形、5 px 圓形、22 px 六角形、9 px 圓形與 30 px 光圈，光圈線寬 3 px。
+//   - 色彩為琥珀色 #FFC75A 與 #FFE3A3，不透明度 40–70% × 效果強度。
+//   - 時間：0.4 s 到 1.4 s 漸入，維持至 4.0 s，於 4.8 s 前退去；每輪 = 5 s，採 cubic ease-in-out，約為 cubic-bezier(0.65,0,0.35,1)。
+// 使用情境: 適合加入眩光、夏日陽光或電影般的光線感。
+// 關鍵字: lens flare, flare, ghosting, sun flare, starburst, cinematic
+// 尺寸: 539x208 px · 週期: 5 s
+// 需要: kit photo -> ./api/v1/kit/zh-Hant/photo.js
+// 本地示範: ./?lang=zh-Hant#109
+//
+// cells[i](k, w, h, u)：k = CanvasRenderingContext2D，呼叫端先清除畫布並以 save/restore 包覆；w、h 為尺寸，u 為 [0, cycle) 內的秒數。畫面只取決於 u。
+// 下方是元素程式碼；CELLS、常數與輔助函式位於 kit。
+
+// @element 13
+
+CELLS[12] = cell((k, u) => {
+  const a = env(u), sx = lerp(428, 474, a), sy = lerp(74, 30, a);
+  stageStreet(k, BASE, { sun: [sx, sy, 13, 1] });
+  const cx = CW / 2, cy = CH / 2, dx = cx - sx, dy = cy - sy;
+  k.save();
+
+  k.globalAlpha = 0.75 * a; k.strokeStyle = BASE.lit; k.lineWidth = 1.6; k.lineCap = 'round';
+  for (let i = 0; i < 8; i++) { const t = i / 8 * TAU + 0.2, L = i % 2 ? 26 : 44; k.beginPath(); k.moveTo(sx + Math.cos(t) * 17, sy + Math.sin(t) * 17); k.lineTo(sx + Math.cos(t) * L, sy + Math.sin(t) * L); k.stroke(); }
+
+  const G = [[0.45, 7, 'c', 0.6], [0.8, 13, 'h', 0.55], [1.15, 5, 'c', 0.7], [1.45, 22, 'h', 0.4], [1.75, 9, 'c', 0.55], [2.0, 30, 'r', 0.55]];
+  for (const [t, r, kind, al] of G) {
+    const x = sx + dx * t, y = sy + dy * t;
+    k.globalAlpha = al * a;
+    if (kind === 'r') { k.strokeStyle = BASE.lit; k.lineWidth = 3; k.beginPath(); k.arc(x, y, r, 0, TAU); k.stroke(); continue; }
+    k.fillStyle = kind === 'h' ? BASE.glow : BASE.lit; k.beginPath();
+    if (kind === 'h') for (let i = 0; i < 6; i++) { const t2 = i / 6 * TAU; k.lineTo(x + Math.cos(t2) * r, y + Math.sin(t2) * r); } else k.arc(x, y, r, 0, TAU);
+    k.closePath(); k.fill();
+  }
+  k.restore();
+});

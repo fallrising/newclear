@@ -1,0 +1,45 @@
+// Motion Prompt #001 · MIT License (c) 2026 Shohei Ohtaki · ./#001
+//
+// 彈入（Pop-in）
+// 分類組: motion (動態圖像與動畫效果) · element 01 · 分類: 登場與文字
+// 示範內容: 應用程式圖示彈入，稍後通知徽章也跟著彈入。
+// 動作／視覺規格:
+//   - 每 2.35 s 彈入一次（每個 4.7 s 週期共兩次：先是珊瑚色底的星星，再是藍色底的愛心）。
+//   - 圖示：116 px 圓角正方形（圓角半徑 30）。從 0.28 s 開始，以彈簧曲線 1 − e^(−6.5t)·cos(15t) 將縮放由 0→1，最高約 1.26。
+//   - 同時，旋轉從 −0.35 rad（約 −20°）→0，彈簧曲線為 1 − e^(−6t)·cos(11t)。
+//   - 徽章：半徑 25 的黃色圓形，內有「1」，位於圖示右上方（+52, −52）。從 0.62 s 開始，以彈簧曲線 1 − e^(−7t)·cos(17t) 出現。
+//   - 退場：1.86–2.12 s。縮放乘上 (1 − backIn, s = 2.2)，先略微膨脹，再縮至 0。
+//   - 地面陰影：62 × 8 橢圓，跟著圖示縮放（限制在 0–1）。
+// 使用情境: 適合圖示、按鈕或徽章等小元素，為進場增加輕巧的節奏。
+// 關鍵字: pop, pop-in, spring, bounce, scale, icon, badge, entrance
+// 尺寸: 539x208 px · 週期: 4.7 s
+// 需要: kit motion -> ./api/v1/kit/zh-Hant/motion.js
+// 本地示範: ./?lang=zh-Hant#001
+//
+// cells[i](k, w, h, u)：k = CanvasRenderingContext2D，呼叫端先清除畫布並以 save/restore 包覆；w、h 為尺寸，u 為 [0, cycle) 內的秒數。畫面只取決於 u。
+// 下方是元素程式碼；CELLS、常數與輔助函式位於 kit。
+
+// @element 01
+
+CELLS[0] = (k, w, h, u) => {
+  stage(k);
+  const T = CYC / 2, n = Math.floor(u / T), lu = u - n * T, X = w / 2, Y = h / 2 + 4, S = 116;
+  const col = n % 2 ? C.blue : C.coral;
+  const out = backIn(P(lu, 1.86, 2.12), 2.2);
+  const sc = spring(lu - 0.28, 15, 6.5) * (1 - out);
+  const rot = (1 - spring(lu - 0.28, 11, 6)) * -0.35;
+
+  k.fillStyle = 'rgba(0,0,0,.28)'; k.beginPath(); k.ellipse(X, Y + 78, 62 * clamp(sc), 8 * clamp(sc), 0, 0, 7); k.fill();
+  if (sc > 0.002) {
+    k.save(); k.translate(X, Y); k.rotate(rot); k.scale(sc, sc);
+    k.fillStyle = col; rr(k, -S / 2, -S / 2, S, S, 30); k.fill();
+    k.fillStyle = 'rgba(255,255,255,.16)'; rr(k, -S / 2, -S / 2, S, S / 2, [30, 30, 0, 0]); k.fill();
+    k.fillStyle = '#fff';
+    if (n % 2) { k.save(); k.translate(0, 2); heartPath(k, 30); k.fill(); k.restore(); }
+    else { star(k, 0, 2, 36, 0, 0.48); k.lineJoin = 'round'; k.strokeStyle = '#fff'; k.lineWidth = 6; k.stroke(); k.fill(); }
+    k.restore();
+
+    const bs = spring(lu - 0.62, 17, 7) * (1 - out);
+    if (bs > 0.002) { k.save(); k.translate(X + 52 * sc, Y - 52 * sc); k.scale(bs, bs); k.fillStyle = C.yel; k.beginPath(); k.arc(0, 0, 25, 0, 7); k.fill(); k.strokeStyle = C.navy; k.lineWidth = 5; k.stroke(); txt(k, '1', 0, 2, `800 30px ${DISP}`, C.navy, 'center', 'middle'); k.restore(); }
+  }
+};

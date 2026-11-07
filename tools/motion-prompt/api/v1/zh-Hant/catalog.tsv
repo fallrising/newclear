@@ -1,0 +1,121 @@
+# Motion Prompt catalog (zh-Hant) · 120 elements · ./ · columns: id	pack	category	title	tags	summary
+001	motion	登場與文字	彈入（Pop-in）	pop,pop-in,spring,bounce,scale,icon,badge,entrance	應用程式圖示彈入，稍後通知徽章也跟著彈入。
+002	motion	登場與文字	交錯進場（Stagger）	stagger,sequence,delay,cascade,bar-chart,list,entrance	圖表長條由左至右依序升起，每根略有延遲。
+003	motion	登場與文字	放射迸發（Burst）	burst,explosion,radial,like,heart,celebrate,accent,sparkle	按讚愛心填上顏色，同時圓環、線條與圓點向外迸發。
+004	motion	登場與文字	線條描繪（Line draw）	line-draw,trim-path,stroke,draw-on,chart,path,write-on	圖表線條逐漸畫出，稍後從起點開始擦除。
+005	motion	登場與文字	遮罩揭露（Mask reveal）	mask,reveal,clip,wipe,title,text,slide-up,headline	標題文字從一條分隔線所標示的不可見邊界後方滑出。
+006	motion	登場與文字	打字機效果（Typewriter）	typewriter,typing,text,cursor,input,prompt,chat,type-on	輸入欄逐字出現文字，接著送出按鈕亮起並被按下。
+007	motion	登場與文字	數字遞增（Count-up）	count-up,counter,number,odometer,stats,kpi,progress	數字快速增加，最後準確停在目標值。
+008	motion	登場與文字	動態文字編排（Kinetic typography）	kinetic-typography,text,typography,lyric,word,bounce,spin,slam	文字用動作表達語意：伸展、彈跳、旋轉，最後重重落下。
+009	motion	動態修飾	緩動（Easing）	easing,ease-in-out,cubic-bezier,linear,timing,curve,acceleration	兩個正方形用相同時間走完相同距離：上方等速，下方使用緩動。
+010	motion	動態修飾	超越後回穩（Overshoot）	overshoot,spring,bounce,settle,elastic,gauge,meter,needle	儀表指針越過目標、回擺，最後穩定停住。
+011	motion	動態修飾	擠壓與拉伸（Squash & stretch）	squash,stretch,squash-and-stretch,bounce,character,ball,animation-principle	彈跳角色落地時壓扁，起跳時拉長。
+012	motion	動態修飾	形狀變形（Shape morph）	morph,morphing,shape,path,interpolate,transform,icon	形狀連同顏色，依序由圓形變為正方形、星形與愛心。
+013	motion	動態修飾	液態動態（Liquid motion）	liquid,blob,goo,gooey,metaball,fluid,organic,drip	團塊拉長、分裂成液滴，再融合為一體。
+014	motion	動態修飾	動態拖尾（Motion trail）	trail,motion-trail,echo,afterimage,ghost,path,speed	球沿八字形移動，後方留下逐漸淡去的副本軌跡。
+015	motion	動態修飾	粒子效果（Particles）	particles,confetti,emitter,fountain,gravity,celebration,sparks	粒子持續從發射點向上噴出、散開並落下。
+016	motion	動態修飾	視差（Parallax）	parallax,depth,layers,pan,2.5d,background,landscape	風景橫向平移，近層移動較多、遠層較少，產生空間深度。
+017	motion	轉場與重點效果	遮罩轉場（Mask transition）	mask,transition,iris,wipe,shape-wipe,reveal,scene-change	圓形或星形視窗逐漸擴大，內部顯示下一個場景。
+018	motion	轉場與重點效果	圖形轉場（Shape transition）	shape-transition,transition,wipe,bands,stripes,cover,scene-change	彩色色帶掃過並遮住畫面，離開時顯露下一個場景。
+019	motion	轉場與重點效果	液態轉場（Liquid transition）	liquid,transition,drip,paint,goo,fluid,wipe,scene-change	像油漆的液體從頂部滴落、流入，填滿畫面後成為下一幕。
+020	motion	轉場與重點效果	穿越式放大轉場（Zoom through）	zoom,zoom-through,transition,push-in,scale,tunnel,scene-change	視角衝進字母 O 的孔洞，穿出後進入下一幕。
+021	motion	轉場與重點效果	翻面（Flip）	flip,card,3d,rotate,turn,reveal,question-answer	卡片繞垂直軸翻轉，顯示另一面。
+022	motion	轉場與重點效果	掃光（Light sweep）	light-sweep,shine,sheen,glint,highlight,logo,badge,premium	光帶斜向掠過標誌徽章的表面。
+023	motion	轉場與重點效果	故障干擾（Glitch）	glitch,rgb-split,chromatic-aberration,distortion,digital,error,slice	文字切片橫向錯位、色彩分離並出現小色條，但不做亮度閃爍。
+024	motion	轉場與重點效果	撞擊震動（Impact shake）	shake,impact,camera-shake,slam,drop,thud,headline,emphasis	厚重標題板落地，撞擊讓整個畫面震動。
+025	camera	鏡頭運動	水平搖鏡（Pan）	pan,panning,yaw,rotate,horizontal,camera move,reveal	攝影機留在原地，從左向右轉動；因為是旋轉，遠近圖層在此示範中以相同角度橫移。
+026	camera	鏡頭運動	垂直搖鏡（Tilt）	tilt,tilt up,pitch,vertical,look up,camera move	攝影機位置不變，從地面人物向上仰轉至塔頂。
+027	camera	鏡頭運動	推軌靠近（Dolly in）	dolly,dolly in,push in,track in,move forward,parallax,camera move	攝影機本身向主體靠近；近物快速放大並掠過，遠山幾乎不變。
+028	camera	鏡頭運動	變焦拉近（Zoom in）	zoom,zoom in,focal length,lens,magnify,telephoto,camera move	攝影機不移動，只增加焦距，因此整個畫面以相同比例放大。
+029	camera	鏡頭運動	跟拍鏡頭（Tracking shot）	tracking,tracking shot,follow,truck,lateral,sideways,parallax,walk	攝影機以人物步行速度橫移；人物維持置中，較近的柱子快速掠過。
+030	camera	鏡頭運動	環繞鏡頭（Orbit (Arc shot)）	orbit,arc shot,circle,360,rotate around,revolve,camera move	攝影機沿圓周繞行主體，人物維持置中，後方樹木與建築橫向移動。
+031	camera	鏡頭運動	搖臂升鏡（Crane up）	crane,crane up,jib,boom up,rise,high angle,camera move	攝影機升高，同時向下俯拍，最後俯視人物。
+032	camera	鏡頭運動	推軌變焦（眩暈效果）（Dolly zoom (Vertigo)）	dolly zoom,vertigo,zolly,push pull,background stretch,unease,camera move	攝影機向後退，同時按比例變焦拉近；人物大小保持不變，只有背景逼近。
+033	camera	拍攝方式與時間效果	轉移焦點（Rack focus）	rack focus,focus pull,pull focus,depth of field,blur,bokeh,foreground	攝影機不移動，焦點從前景花朵轉至後方人物，清晰與模糊的對象互換。
+034	camera	拍攝方式與時間效果	手持攝影（Handheld）	handheld,camera shake,shaky,documentary,wobble,noise,realism	整個畫面有細微、不規則的晃動，像用手握住攝影機而非架在腳架上。
+035	camera	拍攝方式與時間效果	第一人稱無人機鏡頭（FPV drone shot）	fpv,drone,fly through,first person,banking,speed,aerial	第一人稱視角低空快速飛過兩排樹木，左右傾斜轉彎。
+036	camera	拍攝方式與時間效果	荷蘭角（傾斜構圖）（Dutch angle）	dutch angle,dutch tilt,canted angle,oblique,roll,tension,tilted horizon	原本水平的攝影機繞鏡頭軸旋轉，保持地平線傾斜的構圖。
+037	camera	拍攝方式與時間效果	慢動作（Slow motion）	slow motion,slow-mo,slomo,high frame rate,120fps,time stretch,jump	固定鏡頭前，人物緩慢跳起、落下，葉片也緩慢飄落，整段動作被拉長。
+038	camera	拍攝方式與時間效果	速度漸變（Speed ramp）	speed ramp,time remap,ramping,fast to slow,variable speed,velocity	同一鏡頭內，播放速度由快平滑轉慢，左下曲線顯示速度。
+039	camera	拍攝方式與時間效果	縮時攝影（Time-lapse）	time-lapse,timelapse,fast forward,time compression,sun,clouds,day to night	固定鏡頭將 06:00 至 18:00 濃縮成幾秒，太陽、雲、人物與影子快速移動。
+040	camera	拍攝方式與時間效果	定格（Freeze frame）	freeze frame,still frame,pause,hold,stop motion,highlight	人物跳到最高點時畫面停止，1.4 s 後從同一影格繼續。
+041	camera	轉場	跳接（Jump cut）	jump cut,cut,time skip,same framing,vlog,ellipsis,edit	攝影機位置與構圖不變，人物位置與時鐘卻跳變，略過同一場景中的時間。
+042	camera	轉場	匹配剪接（Match cut）	match cut,graphic match,shape match,cut,transition,edit	拋出的球在下一鏡頭變成同位置、同大小的太陽，靠共同形狀銜接不同場景。
+043	camera	轉場	甩鏡轉場（Whip pan）	whip pan,swish pan,motion blur,fast pan,transition,energy	攝影機快速橫向甩動，在拉成條紋的模糊中換成下一幕。
+044	camera	轉場	交叉溶接（Cross dissolve）	cross dissolve,dissolve,crossfade,fade,opacity,blend,transition	下一畫面疊在目前畫面上，不透明度逐漸提高，中途兩幕互相透出。
+045	camera	轉場	擦拭轉場（Wipe）	wipe,linear wipe,reveal,clip,edge,left to right,transition	垂直邊界由左至右移動，經過後由下一畫面取代目前畫面。
+046	camera	轉場	突切（Smash cut）	smash cut,hard cut,abrupt,contrast,quiet to loud,comedy,transition	安靜睡眠場景毫無預警地切入強烈場景，音量表也同時跳高。
+047	camera	轉場	聲音先行剪接（J-cut）（J-cut）	j-cut,j cut,split edit,audio lead,sound first,audio transition,edit	下一幕聲音先開始，畫面稍後切換；上方展示畫面，下方是影像與音訊時間軸。
+048	camera	轉場	聲音延續剪接（L-cut）（L-cut）	l-cut,l cut,split edit,audio lag,sound carries over,audio transition,edit	畫面切換後，前一幕聲音仍延續片刻；上方展示畫面，下方是影像與音訊時間軸。
+049	ui	展開與浮層	模態對話框（Modal dialog）	modal,modal-dialog,dialog,popup,overlay,backdrop,lightbox,confirm	點選開啟後，整頁變暗，小視窗略微放大至中央；點選 × 關閉。
+050	ui	展開與浮層	側邊抽屜（Drawer (Off-canvas)）	drawer,off-canvas,offcanvas,side-menu,navigation-drawer,sheet,sidebar,slide-in	點選選單後，高面板由左側滑入；點選外側便滑回。
+051	ui	展開與浮層	底部面板（Bottom sheet）	bottom-sheet,sheet,modal-sheet,mobile,slide-up,drag-to-dismiss,panel	手指點選查看詳情後，面板從底部升起；向下拖曳把手將其關閉。
+052	ui	展開與浮層	手風琴式摺疊區塊（Accordion）	accordion,collapsible,expand,collapse,disclosure,faq,details	點選三個標題中的第一個，內容展開並推開下方列；再次點選便收合。
+053	ui	展開與浮層	下拉選單（Dropdown (select)）	dropdown,dropdown-menu,select,picker,combobox,options,form	點選欄位後，下方顯示四個選項；選擇名古屋後，清單關閉並填入欄位。
+054	ui	展開與浮層	工具提示（Tooltip）	tooltip,hint,hover,help,info,title	游標停在問號圖示上方時，深色氣泡顯示簡短說明；離開後消失。
+055	ui	展開與浮層	浮動面板（Popover）	popover,popup,callout,bubble,flyout,overlay	點選詳情後，右側開啟帶指示尖角的白色小面板；點選內部確定關閉。
+056	ui	展開與浮層	短暫通知（Toast notification）	toast,snackbar,notification,alert,message,auto-dismiss	點選儲存後，深色通知滑入右下角；剩餘時間條歸零時滑出。
+057	ui	選取與切換	分頁標籤（Tabs）	tabs,tab-bar,tabbed,navigation,switch-view,underline	依序點選概覽、價格、評論，藍色底線跟著滑動，下方內容切換。
+058	ui	選取與切換	輪播（Carousel）	carousel,slider,slideshow,gallery,swipe,paging-dots	每次點右箭頭，三張圖片的整列向左移一格，下方位置點也切換。
+059	ui	選取與切換	切換開關（Toggle switch）	toggle,switch,toggle-switch,on-off,boolean,settings	三列設定中的前兩個開關依序開啟，再依序關閉。
+060	ui	選取與切換	分段控制項（Segmented control）	segmented-control,segmented-button,button-group,toggle-group,switcher,view-switch	點選日、週或月時，藍色選取底色滑動，下方長條圖高度跟著改變。
+061	ui	選取與切換	篩選標籤（Filter chips）	chips,filter-chips,tags,filter,facets,pills	點選最新與免費後，標籤變藍並出現勾號，不符合條件的卡片淡出。
+062	ui	選取與切換	範圍滑桿（Range slider）	range-slider,slider,dual-thumb,min-max,price-filter,range	價格滑桿左把手往右、右把手往左，縮小範圍後再回復。
+063	ui	選取與切換	數值步進器（Stepper (+/−)）	stepper,quantity,number-input,increment,decrement,plus-minus,spin-button	連按三次 +，數字由 1 增至 4；再連按三次 − 回到 1，每次都有輕微彈動。
+064	ui	選取與切換	分頁導覽（Pagination）	pagination,pager,page-numbers,paging,next-prev,navigation	依序點選頁碼 2、3，藍圓移動且上方清單切換，最後回到 1。
+065	ui	導覽與狀態	漢堡選單（Hamburger menu）	hamburger-menu,hamburger,menu-icon,nav-toggle,mobile-menu,menu	點選頁首右側三線圖示後變成 ×，選單從頁首下方展開；再次點選關閉。
+066	ui	導覽與狀態	麵包屑導覽（Breadcrumbs）	breadcrumbs,breadcrumb,trail,hierarchy,navigation,path	點選路徑中的課程，回到清單；再點卡片，返回詳細頁。
+067	ui	導覽與狀態	大型選單（Mega menu）	mega-menu,megamenu,dropdown-navigation,navigation,header-menu,multi-column	游標停在產品上時，全寬面板向下展開，顯示三欄連結與圖片；移開後收合。
+068	ui	導覽與狀態	步驟指示器（Step indicator）	step-indicator,stepper,steps,progress-steps,wizard,multi-step,checkout	每點一次下一步，四個圓形步驟中的下一個變成勾號，藍線向後延伸。
+069	ui	導覽與狀態	骨架畫面（Skeleton screen）	skeleton,skeleton-screen,placeholder,shimmer,loading,ghost-content	點重新整理後，清單變成相同形狀的灰色區塊並出現掃光；載入結束後恢復內容。
+070	ui	導覽與狀態	載入轉圈（Spinner）	spinner,loading,loader,activity-indicator,progress-circle,busy	點送出後，白色遮罩覆蓋卡片，中央藍弧旋轉；完成時變成勾號，再淡出。
+071	ui	導覽與狀態	計數徽章（Badge）	badge,notification-badge,counter,count,dot,unread	每次通知抵達，頁首鈴鐺的藍點依序計數 1、2、3；點鈴鐺清除。
+072	ui	導覽與狀態	空狀態畫面（Empty state）	empty-state,no-data,zero-state,blank-state,no-results,onboarding	點垃圾桶刪除兩列後，出現空盒插圖、目前沒有內容文字與新增按鈕。
+073	lp	捲動效果	視差捲動（Parallax scrolling）	parallax,parallax-scrolling,scroll,depth,layers,hero,background	頁面向下捲動時，標題正常向上移動，天空與太陽、遠山及近山則移動得比較慢。
+074	lp	捲動效果	捲入淡現（Fade-in on scroll）	fade-in,scroll-reveal,reveal-on-scroll,intersection-observer,aos,entrance,scroll	隨頁面捲動，標題、卡片與內文進入可視區域時，分別向上移至定位並淡入。
+075	lp	捲動效果	黏附式頁首（Sticky header）	sticky,sticky-header,fixed-header,position-sticky,navigation,header,scroll	公告列隨頁面捲走，下方頁首抵達頂緣後停住，內容在它下面繼續捲動。
+076	lp	捲動效果	區塊固定捲動（Pinning）	pin,pinning,scrolltrigger,gsap,scroll-driven,steps,storytelling	深藍區塊填滿可視區域後停住；繼續捲動會讓數字與照片依序切換 1→2→3，之後區塊再繼續捲走。
+077	lp	捲動效果	橫向捲動（Horizontal scroll）	horizontal-scroll,sideways,scrolltrigger,pin,gallery,portfolio,scroll	頁面向下捲動時，區塊保持固定，四張帶編號的作品卡片向左移動。
+078	lp	捲動效果	捲動吸附（Scroll snap）	scroll-snap,snap,full-page,sections,css,mandatory,scroll	小幅捲動後，頁面自動完成剩餘位移，讓下一區塊的頂緣對齊可視區域頂部。
+079	lp	捲動效果	閱讀進度條（Scroll progress bar）	progress-bar,reading-progress,scroll-progress,indicator,scroll-driven,article	文章逐段向下閱讀時，頂部線條從左側延伸，到頁尾時填滿整條。
+080	lp	捲動效果	螢光筆標記動畫（Highlighter animation）	highlighter,marker,text-highlight,emphasis,scroll-reveal,copy,underline	文案捲入可視區域時，黃色螢光筆筆畫從左到右覆蓋關鍵字的下半部。
+081	lp	懸停與點擊互動	游標懸停上浮（Hover lift）	hover,lift,float,card,shadow,translatey,interaction	只有游標下的卡片會稍微升起，陰影擴散；游標離開時回到原位。
+082	lp	懸停與點擊互動	懸停圖片放大（Image zoom on hover）	hover,zoom,image,scale,overflow-hidden,thumbnail,gallery	游標下的照片慢慢放大，外框尺寸不變；游標離開時縮回。
+083	lp	懸停與點擊互動	游標跟隨效果（Cursor follower）	cursor,custom-cursor,cursor-follower,mouse-follow,lerp,trail,interaction	游標在頁面上移動時，橘色圓形落後一小段距離跟隨。
+084	lp	懸停與點擊互動	磁吸按鈕（Magnetic button）	magnetic,magnetic-button,hover,cursor,elastic,cta,interaction	游標靠近時，按鈕被吸引並跟隨；游標離開後，按鈕彈動回到原位。
+085	lp	懸停與點擊互動	點擊漣漪（Ripple effect）	ripple,ink-ripple,material,click,tap,feedback,button	每次點擊都會從點擊位置擴散白色圓形，填滿按鈕後消失。
+086	lp	懸停與點擊互動	底線動畫（Underline animation）	underline,hover,link,navigation,menu,text-link,scalex	游標所在的連結下方，橘色底線從左側延伸；游標離開時，線條向右收縮消失。
+087	lp	懸停與點擊互動	前後對照滑桿（Before/after slider）	before-after,image-comparison,slider,drag,compare,clip,photo	左右拖曳照片中央的線，改變左側灰階「處理前」與右側彩色「處理後」的顯示比例。
+088	lp	懸停與點擊互動	離站意圖彈窗（Exit-intent popup）	exit-intent,popup,mouseleave,coupon,conversion,retention,lp	游標移向頁面上方的分頁與關閉按鈕時，頁面變暗並開啟「等一下！」彈窗；按 × 關閉。
+089	lp	載入、導覽與循環動態	預載入畫面（Preloader）	preloader,loading-screen,loader,percentage,intro,splash,curtain	深藍畫面中，標誌下的數字從 0% 增至 100%；接著畫面向上移走，露出逐漸淡入的頁面。
+090	lp	載入、導覽與循環動態	延遲載入（Lazy loading）	lazy-loading,lazy-load,images,placeholder,performance,spinner,gallery	灰色占位區捲入畫面時，中央出現旋轉指示器，圖片載入後淡入；最上排一開始就已載入。
+091	lp	載入、導覽與循環動態	無限捲動（Infinite scroll）	infinite-scroll,endless-scroll,load-more,feed,pagination,spinner,list	捲至清單末端會出現旋轉指示器，接著新增三筆項目，讓閱讀繼續。
+092	lp	載入、導覽與循環動態	頁面轉場（Page transition）	page-transition,transition,view-transitions,navigation,wipe,barba,spa	點擊作品清單卡片後，橘色面板從左側掃入；網址切換後，面板在詳情頁向右退出。「返回清單」以相同方式返回。
+093	lp	載入、導覽與循環動態	平滑捲動（Smooth scroll）	smooth-scroll,scroll-behavior,anchor-link,in-page-link,back-to-top,navigation	點擊選單中的「方案」後，頁面平順向下移到方案區；右下角向上箭頭則平順捲回頂部。
+094	lp	載入、導覽與循環動態	跑馬燈（Marquee）	marquee,ticker,infinite-loop,scrolling-text,logo-strip,band,loop	深藍色帶狀區域內，大型服務名稱以橘色圓點分隔，不間斷地向左移動。
+095	lp	載入、導覽與循環動態	流動漸層（Animated gradient）	gradient,animated-gradient,mesh-gradient,background,hero,ambient,loop	標題後方，柔和的橘色、淺橘、藍色與淺藍色塊沿環形路徑漂移，持續改變融合方式。
+096	lp	載入、導覽與循環動態	輕盈漂浮（Floating animation）	floating,float,bob,hover-animation,keyframes,translatey,decoration,loop	標題旁的手機、愛心徽章與評分標籤各自錯開節奏輕柔浮動，手機下方的陰影隨之放大縮小。
+097	photo	打光與時段	逆光（Backlighting）	backlighting,backlit,contre-jour,sun behind,haze,glow,halo	太陽從畫面外移到人物頭部正後方；人物輪廓出現細亮邊，畫面覆上淡暖色薄霧，朝向鏡頭的一側變暗。
+098	photo	打光與時段	輪廓光（Rim light）	rim light,rim lighting,edge light,backlight,kicker,outline,studio	周圍變暗，人物左右後方的兩盞燈只在頭部與肩膀兩側畫出細亮邊；右下方俯視圖顯示兩盞燈的位置。
+099	photo	打光與時段	剪影（Silhouette）	silhouette,backlit,sunset,contre-jour,black shape,underexposed	以明亮暮色天空為曝光基準後，人物、建築、路燈與樹木變成沒有細節的黑色形狀，只有天空保持明亮。
+100	photo	打光與時段	分割光（Split lighting）	split lighting,side light,portrait lighting,half face,dramatic,chiaroscuro	光源從接近正面的 20° 移至正側面 90°；頭部陰影從月牙狀擴大至恰好一半，沿中央分開臉部。
+101	photo	打光與時段	林布蘭光（Rembrandt lighting）	rembrandt lighting,portrait lighting,triangle,45 degree light,chiaroscuro,painterly	光源位於側面 45°、上方 45°；右半張臉落入陰影，只在陰影側臉頰留下小型倒三角形亮部。
+102	photo	打光與時段	蝴蝶光（Butterfly lighting）	butterfly lighting,paramount lighting,beauty lighting,portrait lighting,overhead light,glamour	正面高處的燈光亮起，臉部兩側均勻受光，只在下巴下方形成小而對稱的陰影。
+103	photo	打光與時段	黃金時刻（Golden hour）	golden hour,magic hour,sunset light,warm light,long shadows,low sun	太陽降至地平線上方；天空與地面轉橘，人物左側受光，路燈與樹木的陰影向右拉長。
+104	photo	打光與時段	藍調時刻（Blue hour）	blue hour,twilight,dusk,night city,cityscape,deep blue sky	太陽落下後，天空變成兩段深藍色，窗戶與路燈亮起琥珀光，人物變為深藍色輪廓。
+105	photo	鏡頭與相機效果	散景（Bokeh）	bokeh,shallow depth of field,background blur,wide aperture,f/1.4,out of focus,lights	光圈打開時，對焦人物保持清晰，後方建築變柔，路燈與遠處燈光擴散成大型淡色圓斑。
+106	photo	鏡頭與相機效果	移軸模型效果（Tilt-shift）	tilt-shift,miniature,miniature effect,fake miniature,selective focus,toy town,focus band	街景的上方與下方變模糊，只有中間包含道路、汽車與小人物的區域保持清晰，讓街道看起來像模型。
+107	photo	鏡頭與相機效果	長時間曝光（Long exposure）	long exposure,light trails,slow shutter,night photography,car trails,motion	街景轉為夜晚，移動的汽車幾乎消失，紅色尾燈線在車後延伸，對向車道則出現白色與琥珀色光線。
+108	photo	鏡頭與相機效果	追焦攝影（Panning shot）	panning,panning shot,motion blur,speed,sports photography,slow shutter	鏡頭跟隨移動汽車，讓車子保持在畫面中央且清晰，只有後方建築、樹木與路燈橫向拖影。
+109	photo	鏡頭與相機效果	鏡頭耀光（Lens flare）	lens flare,flare,ghosting,sun flare,starburst,cinematic	太陽從建築後方露出時，周圍出現放射光線；光點、六角形與光圈沿太陽穿過畫面中心排列到對側。
+110	photo	鏡頭與相機效果	魚眼鏡頭（Fisheye lens）	fisheye,fisheye lens,barrel distortion,ultra wide,8mm,distortion	街景中央向外膨脹，建築的垂直線與道路線條向外彎曲，四個角落保持原位。
+111	photo	鏡頭與相機效果	色差（Chromatic aberration）	chromatic aberration,color fringing,rgb split,lens aberration,fringe,glitch	街景拆成紅、綠、藍三層，再以略不同尺寸疊合；人物、建築與路燈邊緣出現紅色與青色色邊，越靠近兩側越明顯。
+112	photo	鏡頭與相機效果	暗角（Vignette）	vignette,vignetting,dark corners,edge darkening,lens falloff,focus	畫面從四角平順變暗，中央人物與道路保持明亮。
+113	photo	色調與後製風格	高調影像（High-key）	high-key,high key,bright,white background,airy,low contrast	景色與人物變成接近白色的淺色，陰影非常淡；右下直方圖的峰值移向右端。
+114	photo	色調與後製風格	低調影像（Low-key）	low-key,low key,dark,black background,moody,dramatic,chiaroscuro	大部分畫面沉入黑暗，太陽消失；只有胸像受側光照亮的右側邊緣保持明亮，直方圖峰值移向左端。
+115	photo	色調與後製風格	黑白影像（Black and white）	black and white,monochrome,b&w,grayscale,desaturated,classic	同一片景色的色彩逐漸退去，太陽與人物受光處變成灰色，只靠亮度區分形狀。
+116	photo	色調與後製風格	雙色調（Duotone）	duotone,two-tone,gradient map,color overlay,poster,graphic	同一片景色的色彩被替換為兩色之間的範圍：暗部靛藍、亮部粉紅。
+117	photo	色調與後製風格	青橘色調（Teal and orange）	teal and orange,orange and teal,cinematic,color grading,blockbuster,film look	同一片景色的天空、山丘、地面與陰影中的人物偏向青色，人物受光邊緣與太陽偏橘，形成互補色對比。
+118	photo	色調與後製風格	底片顆粒（Film grain）	film grain,grain,noise,analog,35mm film,texture,warm tone	同一片景色的整個畫面出現細顆粒，色彩稍微偏向溫暖奶油色。
+119	photo	色調與後製風格	漏光（Light leak）	light leak,film leak,vintage,analog,lomo,warm glow	同一片景色的右側邊緣滲入一道漏光，內側淡黃、邊緣紅色，緩慢擺動。
+120	photo	色調與後製風格	雙重曝光（Double exposure）	double exposure,multiple exposure,blend,silhouette,surreal,composite	背景轉白，山丘、房屋、樹木與太陽的景色縮小後，只出現在胸像輪廓內。

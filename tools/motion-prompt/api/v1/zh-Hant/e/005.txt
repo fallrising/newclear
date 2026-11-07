@@ -1,0 +1,38 @@
+// Motion Prompt #005 · MIT License (c) 2026 Shohei Ohtaki · ./#005
+//
+// 遮罩揭露（Mask reveal）
+// 分類組: motion (動態圖像與動畫效果) · element 05 · 分類: 登場與文字
+// 示範內容: 標題文字從一條分隔線所標示的不可見邊界後方滑出。
+// 動作／視覺規格:
+//   - 每 2.35 s 一輪。分隔線（珊瑚色、380 × 6、y = 124）：於 0.1–0.5 s 從中央展開（三次方 ease-in-out），於 2.05–2.3 s 縮回。
+//   - 上方文字（粗體 98 px、白色）：裁切在分隔線上方區域（y 8–119）；於 0.35–1.0 s 從下方 120 px 處向上移入定位，採五次方 ease-out。
+//   - 下方文字（32 px、黃色）：裁切在分隔線下方區域（y 129–181）；於 0.55–1.15 s 從上方 60 px 處向下移入定位，採五次方 ease-out。
+//   - 退場：上方文字於 1.7–2.05 s 向上移動 150 px（backIn, s = 1.2，先略往下沉）；下方文字於 1.75–2.05 s 向下移動 70 px（三次方 ease-in）。
+//   - 不透明度維持不變；文字只因離開裁切區域而隱藏。
+// 使用情境: 適合以乾淨、沉穩的方式呈現標題與小標。
+// 關鍵字: mask, reveal, clip, wipe, title, text, slide-up, headline
+// 尺寸: 539x208 px · 週期: 4.7 s
+// 需要: kit motion -> ./api/v1/kit/zh-Hant/motion.js
+// 本地示範: ./?lang=zh-Hant#005
+//
+// cells[i](k, w, h, u)：k = CanvasRenderingContext2D，呼叫端先清除畫布並以 save/restore 包覆；w、h 為尺寸，u 為 [0, cycle) 內的秒數。畫面只取決於 u。
+// 下方是元素程式碼；CELLS、常數與輔助函式位於 kit。
+
+// @element 05
+
+CELLS[4] = (k, w, h, u) => {
+  stage(k);
+  const T = CYC / 2, lu = mod(u, T), X = w / 2, LY = 124;
+  const lg = eIO(P(lu, 0.1, 0.5)) * (1 - eIO(P(lu, 2.05, 2.3)));
+
+  const up = (1 - eOut5(P(lu, 0.35, 1.0))) * 120 + backIn(P(lu, 1.7, 2.05), 1.2) * -150;
+  k.save(); k.beginPath(); k.rect(0, 8, w, LY - 8 - 5); k.clip();
+  txt(k, "你好！", X, LY - 14 + up, `800 98px ${DISP}`, '#fff', 'center', 'alphabetic', '1px');
+  k.restore();
+
+  const dn = (1 - eOut5(P(lu, 0.55, 1.15))) * -60 + eIn(P(lu, 1.75, 2.05)) * 70;
+  k.save(); k.beginPath(); k.rect(0, LY + 5, w, 52); k.clip();
+  txt(k, "初次見面", X, LY + 44 + dn, `700 32px ${JP}`, C.yel, 'center', 'alphabetic', '6px');
+  k.restore();
+  if (lg > 0.005) { k.fillStyle = C.coral; rr(k, X - 190 * lg, LY - 3, 380 * lg, 6, 3); k.fill(); }
+};

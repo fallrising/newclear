@@ -1,0 +1,37 @@
+// Motion Prompt #066 · MIT License (c) 2026 Shohei Ohtaki · ./#066
+//
+// 麵包屑導覽（Breadcrumbs）
+// 分類組: ui (UI 元件) · element 18 · 分類: 導覽與狀態
+// 示範內容: 點選路徑中的課程，回到清單；再點卡片，返回詳細頁。
+// 動作／視覺規格:
+//   - 542×191 卡片上每 4.5 s 循環。頂部以 17 px 顯示首頁 › 課程 › 網頁設計；連結藍色，目前頁黑色粗體，y 46 有分隔線。
+//   - 游標停留在課程上（0.9–1.2 s 顯示底線），於 1.0 s 點擊。
+//   - 返回上層的進度於 1.0–1.25 s 以 easeInOutCubic 從 0→1；› 網頁設計淡出，課程成為黑色粗體的目前頁。
+//   - 內容從詳細頁的標題與文字，交叉淡化成三張帶風景圖的卡片（158×118）。
+//   - 返回：游標移至首張卡片（2.45–2.8 s 顯示藍框），2.7 s 點擊；詳細頁於 2.7–2.95 s 恢復。
+// 使用情境: 適合階層較深的網站，標示所在位置並提供往上返回的路徑。
+// 關鍵字: breadcrumbs, breadcrumb, trail, hierarchy, navigation, path
+// 尺寸: 542x191 px · 週期: 4.5 s
+// 需要: kit ui -> ./api/v1/kit/zh-Hant/ui.js
+// 本地示範: ./?lang=zh-Hant#066
+//
+// cells[i](k, w, h, u)：k = CanvasRenderingContext2D，呼叫端先清除畫布並以 save/restore 包覆；w、h 為尺寸，u 為 [0, cycle) 內的秒數。畫面只取決於 u。
+// 下方是元素程式碼；CELLS、常數與輔助函式位於 kit。
+
+// @element 18
+
+CELLS[17] = ui((w, h, t) => {
+  const up = eio(seg(t, 1.0, 1.25)) * (1 - eio(seg(t, 2.7, 2.95)));
+  let x = 24; const y = 24;
+  text("首頁", x, y, 17, C.blue, 600); x += tw("首頁", 17, 600) + 10; text('›', x, y, 17, '#aaa', 500); x += 18;
+  const kx = x, kw = tw("課程", 17, 700);
+  const hoverK = t > .9 && t < 1.2;
+  text("課程", x, y, 17, up > .5 ? C.ink : C.blue, up > .5 ? 700 : 600); if (hoverK) { X.fillStyle = C.blue; X.fillRect(x, y + 12, kw, 2); }
+  x += kw + 10;
+  X.globalAlpha = 1 - up; text('›', x, y, 17, '#aaa', 500); text("網頁製作", x + 18, y, 17, C.ink, 700); X.globalAlpha = 1;
+  X.fillStyle = C.line; X.fillRect(24, 46, 494, 1.5);
+
+  if (up < 1) { X.save(); X.globalAlpha = 1 - up; bar(24, 64, 200, C.ink, 13); bar(24, 92, 494); bar(24, 110, 420); fillRR(24, 132, 494, 48, 8, C.block); X.restore(); }
+  if (up > 0) { X.save(); X.globalAlpha = up; for (let k = 0; k < 3; k++) { const cx = 24 + k * 168, hov = k === 0 && t > 2.45 && t < 2.8; strokeRR(cx, 62, 158, 118, 8, hov ? C.blue : C.line2, hov ? 2 : 1.5); mountains(cx + 10, 72, 138, 58, k % 2); bar(cx + 10, 142, 90, k === 0 ? C.sb : C.line2, 10); bar(cx + 10, 160, 120, C.line, 7); } X.restore(); }
+  pointer([[.3, w + 30, h + 30], [.95, kx + kw / 2, 30], [1.6, kx + kw / 2, 30], [2.4, 104, 120], [3.1, 104, 120], [3.9, w + 30, h + 30]], [1.0, 2.7], t);
+});

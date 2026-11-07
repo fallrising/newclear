@@ -1,0 +1,39 @@
+// Motion Prompt #051 · MIT License (c) 2026 Shohei Ohtaki · ./#051
+//
+// 底部面板（Bottom sheet）
+// 分類組: ui (UI 元件) · element 03 · 分類: 展開與浮層
+// 示範內容: 手指點選查看詳情後，面板從底部升起；向下拖曳把手將其關閉。
+// 動作／視覺規格:
+//   - 542×191 卡片上每 4.5 s 循環。手指（半透明圓、半徑 17、白框）於 1.0 s 點選底部中央膠囊按鈕（170×36）。
+//   - 開啟量：於 1.05–1.45 s 以 easeOutCubic 從 0→1；全卡片 rgba(18,20,28) 遮罩不透明度為 0.36·a。
+//   - 面板：白色、高 136、上角半徑 18，頂緣 y = 191 − 136·a；陰影模糊 22、y 偏移 −4，頂部中央有 52×6 拖曳把手。
+//   - 內容：粗標題列與兩列帶 26×26 圖示的項目。
+//   - 關閉：手指於 2.75 s 抵達把手 (271, 68)，於 3.0–3.6 s 下拉；a 乘上 (1 − 3.0–3.6 s 期間的 easeInOutCubic)，面板跟著手指滑出底部。
+// 使用情境: 適合在手機上顯示詳細資訊或選項，同時保留目前畫面的脈絡。
+// 關鍵字: bottom-sheet, sheet, modal-sheet, mobile, slide-up, drag-to-dismiss, panel
+// 尺寸: 542x191 px · 週期: 4.5 s
+// 需要: kit ui -> ./api/v1/kit/zh-Hant/ui.js
+// 本地示範: ./?lang=zh-Hant#051
+//
+// cells[i](k, w, h, u)：k = CanvasRenderingContext2D，呼叫端先清除畫布並以 save/restore 包覆；w、h 為尺寸，u 為 [0, cycle) 內的秒數。畫面只取決於 u。
+// 下方是元素程式碼；CELLS、常數與輔助函式位於 kit。
+
+// @element 03
+
+CELLS[2] = ui((w, h, t) => {
+  pageLines(24, 16, 494); fillRR(24, 76, 239, 54, 8, C.block); fillRR(279, 76, 239, 54, 8, C.block);
+  fillRR(186, 144, 170, 36, 18, C.blue); text("查看詳情", 271, 162, 15, '#fff', 600, 'center');
+  const open = eo(seg(t, 1.05, 1.45));
+  const drag = eio(seg(t, 3.0, 3.6));
+  const a = open * (1 - drag);
+  if (open > 0 && a > 0.001) {
+    X.fillStyle = `rgba(18,20,28,${.36 * a})`; X.fillRect(0, 0, w, h);
+    const sh = 136, sy = h - sh * a;
+    shadowed(() => { rr(0, sy, w, sh + 20, 18); X.fillStyle = '#fff'; X.fill(); }, 22, -4, .2);
+    fillRR(w / 2 - 26, sy + 10, 52, 6, 3, C.line2);
+    bar(28, sy + 30, 160, C.ink, 11);
+    for (let i = 0; i < 2; i++) { const y = sy + 56 + i * 36; fillRR(28, y, 26, 26, 6, i ? C.mb : C.blue); bar(66, y + 4, 220, C.line); bar(66, y + 17, 140, C.line, 7); }
+  }
+  const sy = h - 136 * a;
+  finger([[.3, 271, 162], [1.6, 271, 162], [2.75, w / 2, h - 136 + 13], [3.0, w / 2, h - 136 + 13], [3.6, w / 2, h + 10]], [1.0, 3.0], t, (t > .6 && t < 1.6) || (t > 2.75 && t < 3.6));
+});

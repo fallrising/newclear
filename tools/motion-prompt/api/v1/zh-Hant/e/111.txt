@@ -1,0 +1,32 @@
+// Motion Prompt #111 · MIT License (c) 2026 Shohei Ohtaki · ./#111
+//
+// 色差（Chromatic aberration）
+// 分類組: photo (攝影效果、打光與風格) · element 15 · 分類: 鏡頭與相機效果
+// 示範內容: 街景拆成紅、綠、藍三層，再以略不同尺寸疊合；人物、建築與路燈邊緣出現紅色與青色色邊，越靠近兩側越明顯。
+// 動作／視覺規格:
+//   - 場景 2：街角的建築、樹木與路燈（x 114、292、494）位於 y 132–162 的道路後方；人物站在左前方，腳位於 x 176、y 200，身高 124 px。
+//   - 分色：影像分別與紅色 #FF0000、綠色 #00FF00、藍色 #0000FF 相乘形成三份，再於黑底上以加色方式疊回。
+//   - 以中心縮放：紅色 1 + 2s、綠色 1 + s、藍色 1，其中 s = 0 → 0.02。
+//   - 位移：左右邊緣的紅、藍兩層相隔約 11 px，中心為 0。
+//   - 時間：0.4 s 到 1.4 s 漸入，維持至 4.0 s，於 4.8 s 前退去；每輪 = 5 s，採 cubic ease-in-out，約為 cubic-bezier(0.65,0,0.35,1)。
+// 使用情境: 適合增加老鏡頭、VHS 或故障畫面般的不完美質感。
+// 關鍵字: chromatic aberration, color fringing, rgb split, lens aberration, fringe, glitch
+// 尺寸: 539x208 px · 週期: 5 s
+// 需要: kit photo -> ./api/v1/kit/zh-Hant/photo.js
+// 本地示範: ./?lang=zh-Hant#111
+//
+// cells[i](k, w, h, u)：k = CanvasRenderingContext2D，呼叫端先清除畫布並以 save/restore 包覆；w、h 為尺寸，u 為 [0, cycle) 內的秒數。畫面只取決於 u。
+// 下方是元素程式碼；CELLS、常數與輔助函式位於 kit。
+
+// @element 15
+
+CELLS[14] = cell((k, u) => {
+  const a = env(u), s = 0.02 * a, cx = CW / 2, cy = CH / 2;
+  if (s < 0.0005) { stageStreet(k, BASE); return; }
+  const [S, ks] = layer('ca'); stageStreet(ks, BASE);
+  k.fillStyle = '#000000'; k.fillRect(0, 0, CW, CH);
+  for (const [col, sc] of [['#FF0000', 1 + 2 * s], ['#00FF00', 1 + s], ['#0000FF', 1]]) {
+    const [L, kl] = layer('ca-' + col); kl.drawImage(S, 0, 0); kl.globalCompositeOperation = 'multiply'; kl.fillStyle = col; kl.fillRect(0, 0, CW, CH); kl.globalCompositeOperation = 'source-over';
+    k.save(); k.globalCompositeOperation = 'lighter'; k.translate(cx, cy); k.scale(sc, sc); k.translate(-cx, -cy); k.drawImage(L, 0, 0); k.restore();
+  }
+});

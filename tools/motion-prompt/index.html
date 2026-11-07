@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Motion Prompt｜動態與視覺術語圖鑑</title>
+<meta name="description" content="觀看 120 個動畫與視覺示範，認識名稱、意思與規格。選好效果，直接複製繁中或英文提示詞交給 AI。">
+<meta name="color-scheme" content="light dark">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="assets/site.css">
+</head>
+<body>
+<a class="skip" href="#gallery" data-t="skip">跳至示範圖鑑</a>
+
+<header class="top">
+  <div class="wrap top-in">
+    <a class="logo" href="./" aria-label="Motion Prompt">Motion Prompt</a>
+    <nav class="top-nav" aria-label="網站導覽" data-t-attr="aria-label:navLabel">
+      <a class="top-link top-how" href="#how" data-t="navHow">如何使用</a>
+      <div class="seg" role="group" aria-label="介面語言" data-t-attr="aria-label:langLabel">
+        <button type="button" class="seg-b" data-lang="zh-Hant" aria-pressed="true" aria-label="繁體中文" lang="zh-Hant">繁中</button>
+        <button type="button" class="seg-b" data-lang="en" aria-pressed="false" aria-label="English" lang="en">EN</button>
+      </div>
+      <button type="button" class="icon-b" id="theme" aria-label="切換深色模式">
+        <svg class="i-moon" viewbox="0 0 20 20" width="18" height="18" aria-hidden="true"><path d="M16.5 12.3A7 7 0 0 1 7.7 3.5a.6.6 0 0 0-.8-.7 7.6 7.6 0 1 0 10.3 10.3.6.6 0 0 0-.7-.8z" fill="currentColor"></path></svg>
+        <svg class="i-sun" viewbox="0 0 20 20" width="18" height="18" aria-hidden="true"><circle cx="10" cy="10" r="3.6" fill="currentColor"></circle><g stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M10 2v2M10 16v2M2 10h2M16 10h2M4.3 4.3l1.4 1.4M14.3 14.3l1.4 1.4M4.3 15.7l1.4-1.4M14.3 5.7l1.4-1.4"></path></g></svg>
+      </button>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <section class="hero wrap" aria-labelledby="hero-h">
+    <div class="hero-copy">
+      <p class="eyebrow" data-t="eyebrow">繁中＋英文 · 動態與視覺術語圖鑑</p>
+      <h1 id="hero-h" data-t="h1">知道想要的效果，
+找到描述它的詞。</h1>
+      <p class="lead" data-t="lead">觀看 120 個動畫與視覺示範，認識名稱、意思與規格。選好效果，直接複製繁中或英文提示詞交給 AI。</p>
+      <dl class="facts">
+        <div>
+<dt data-t="factMoves">項術語</dt>
+<dd id="fact-count"></dd>
+</div>
+        <div>
+<dt data-t="factPacks">個分類組</dt>
+<dd id="fact-packs"></dd>
+</div>
+        <div>
+<dt data-t="factLicense">授權</dt>
+<dd>MIT</dd>
+</div>
+      </dl>
+    <a class="btn btn-main hero-cta" href="#gallery" data-t="browse">開始探索</a><p class="hero-hint" data-t="heroHint">看見效果 → 找到名稱 → 複製提示詞</p>
+</div>
+    </section>
+
+  <section id="gallery" class="gallery" aria-labelledby="gallery-h">
+    <h2 id="gallery-h" class="sr" data-t="galleryH">探索效果</h2>
+    <div class="tools">
+      <div class="wrap tools-in">
+        <div class="chips" id="packs" role="group" aria-label="依分類組篩選" data-t-attr="aria-label:packFilterLabel"></div>
+        <div class="tools-side">
+          <label class="search">
+            <span class="sr" data-t="searchLabel">搜尋示範</span>
+            <svg viewbox="0 0 20 20" width="16" height="16" aria-hidden="true"><circle cx="8.5" cy="8.5" r="5.5" fill="none" stroke="currentColor" stroke-width="1.7"></circle><path d="M13 13l4.5 4.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"></path></svg>
+            <input type="search" id="q" autocomplete="off" spellcheck="false" placeholder="搜尋繁中、英文、關鍵字或 #編號" data-t-attr="placeholder:searchPh">
+          </label>
+          <button type="button" class="btn btn-ghost playtoggle" id="play" aria-pressed="true">
+            <svg class="i-pause" viewbox="0 0 16 16" width="14" height="14" aria-hidden="true"><rect x="3" y="2.5" width="3.6" height="11" rx="1" fill="currentColor"></rect><rect x="9.4" y="2.5" width="3.6" height="11" rx="1" fill="currentColor"></rect></svg>
+            <svg class="i-play" viewbox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M4 2.6v10.8a.6.6 0 0 0 .9.5l9-5.4a.6.6 0 0 0 0-1l-9-5.4a.6.6 0 0 0-.9.5z" fill="currentColor"></path></svg>
+            <span id="play-t">暫停</span>
+          </button>
+        </div>
+        <div class="chips chips-sub" id="cats" role="group" aria-label="依子分類篩選" data-t-attr="aria-label:catFilterLabel" hidden></div>
+      </div>
+    </div>
+    <div class="wrap">
+      <p class="count" id="count" role="status" aria-live="polite"></p>
+      <div id="grid"></div>
+      <p class="empty" id="empty" hidden data-t="empty">找不到符合的效果。試試其他名稱、關鍵字或編號。</p>
+      <noscript><p>此圖鑑需要 JavaScript。靜態清單：<a href="api/v1/zh-Hant/catalog.tsv">繁體中文</a> · <a href="api/v1/en/catalog.tsv">English</a>.</p></noscript>
+</div>
+  </section>
+
+  <section id="how" class="how wrap" aria-labelledby="how-h">
+    <h2 id="how-h" class="sec-h" data-t="howH">從畫面到提示詞</h2>
+    <ol class="steps">
+      <li>
+<span class="step-n" aria-hidden="true">1</span><h3 data-t="s1h">觀看與搜尋</h3>
+<p data-t="s1p">以繁中、英文或編號搜尋，也可以按分類瀏覽。點擊示範，查看意思、用途與實際規格。</p>
+</li>
+      <li>
+<span class="step-n" aria-hidden="true">2</span><h3 data-t="s2h">選取與組合</h3>
+<p data-t="s2p">按「選取」加入清單，可加入多項並填寫用途備註。切換介面語言仍會保留搜尋、選取與備註。</p>
+</li>
+      <li>
+<span class="step-n" aria-hidden="true">3</span><h3 data-t="s3h">選擇語言並複製</h3>
+<p data-t="s3p">提示詞可獨立選擇繁中或英文。複製單項或整份選取清單，再貼到你使用的 AI 工具。</p>
+</li>
+    </ol>
+    <div class="how-more"><div>
+<h3 data-t="implH">關於示範</h3>
+<p data-t="implP">示範以 Canvas 2D 在本機繪製，不需要帳號或外部服務。尊重系統的減少動態設定，也可隨時暫停。</p>
+<p><span data-t="localLinks">本地資料</span>: <a href="api/v1/catalog.json">catalog.json</a> · <a id="tsv-link" href="api/v1/zh-Hant/catalog.tsv">catalog.tsv</a></p>
+</div></div></section>
+</main>
+
+<footer class="foot"><div class="wrap foot-in">
+<p>Motion Prompt · MIT License © 2026 <span data-t="authorName">Shohei Ohtaki</span></p>
+<p data-t="adaptation">由 newclear 維護的在地化改作，非原作者官方繁中版。</p>
+<p class="foot-links"><a href="https://github.com/showheyohtaki/motion-prompt" rel="noopener" data-t="upstream">上游來源</a><a href="https://github.com/fallrising/newclear/tree/main/tools/motion-prompt" rel="noopener" data-t="localSource">本地原始碼</a><a href="UPSTREAM.md">UPSTREAM.md</a><a href="LICENSE">MIT</a><a href="THIRD-PARTY-NOTICES.md">Third-party notices</a></p>
+<p><span data-t="thanks1">動畫示範與可複製提示詞的形式，啟發自</span> <a href="https://lucianlabs.dev/uxui-prompt/" rel="noopener">Lucian UX/UI Prompt</a><span data-t="thanks2">。感謝原始創作。</span></p>
+</div></footer><aside class="tray" id="tray" aria-labelledby="tray-count" hidden>
+  <div class="wrap tray-in">
+    <div class="tray-top">
+      <button type="button" class="tray-toggle" id="tray-toggle" aria-expanded="true" aria-controls="tray-body">
+        <span class="tray-count" id="tray-count">已選取 120 項</span>
+        <svg class="tray-chev" viewbox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M3.5 10l4.5-4.5 4.5 4.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+      </button>
+      <button type="button" class="btn btn-s btn-main tray-main" id="tray-main">複製選取提示詞</button>
+    </div>
+    <div class="tray-body" id="tray-body">
+      <ol class="tray-list" id="tray-list"></ol>
+      <p class="tray-empty" id="tray-empty" data-t="trayEmpty" hidden>按示範上的「選取」即可加入清單。</p>
+      <div class="tray-row">
+        <label class="copy-language"><span data-t="copyLang">提示詞語言</span><select data-copy-lang=""><option value="zh-Hant" data-t="zhOption">繁體中文</option>
+<option value="en" data-t="enOption">English</option></select></label><label class="tray-note">
+          <span class="tray-note-l" data-t="noteLabel">用途備註（選填）</span>
+          <input type="text" id="tray-note" maxlength="300" autocomplete="off" placeholder="例如：用於開場標題" data-t-attr="placeholder:notePh">
+        </label>
+        <div class="tray-acts">
+          <button type="button" class="btn btn-s" id="tray-copy" data-t="copyPicked" hidden>複製選取提示詞</button>
+          <button type="button" class="btn btn-s" id="tray-share" data-t="shareUrl">複製選取清單連結</button>
+          <button type="button" class="btn btn-s btn-ghost" id="tray-clear" data-t="clearAll">清除選取</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<dialog class="detail" id="detail" aria-labelledby="d-name">
+  <div class="d-bar">
+    <p class="d-id"><span id="d-id">#000</span><span class="d-where" id="d-where"></span></p>
+    <div class="d-nav">
+      <div class="seg" role="group" data-t-attr="aria-label:langLabel" aria-label="介面語言">
+<button class="seg-b" type="button" data-lang="zh-Hant" lang="zh-Hant" aria-label="繁體中文">繁中</button><button class="seg-b" type="button" data-lang="en" lang="en" aria-label="English">EN</button>
+</div>
+<button type="button" class="icon-b playtoggle" id="d-play" aria-pressed="true" aria-label="暫停">
+        <svg class="i-pause" viewbox="0 0 16 16" width="14" height="14" aria-hidden="true"><rect x="3" y="2.5" width="3.6" height="11" rx="1" fill="currentColor"></rect><rect x="9.4" y="2.5" width="3.6" height="11" rx="1" fill="currentColor"></rect></svg>
+        <svg class="i-play" viewbox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M4 2.6v10.8a.6.6 0 0 0 .9.5l9-5.4a.6.6 0 0 0 0-1l-9-5.4a.6.6 0 0 0-.9.5z" fill="currentColor"></path></svg>
+      </button>
+      <button type="button" class="icon-b" id="d-prev" aria-label="上一項術語"><svg viewbox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M10 3L5 8l5 5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg></button>
+      <button type="button" class="icon-b" id="d-next" aria-label="下一項術語"><svg viewbox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M6 3l5 5-5 5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg></button>
+      <button type="button" class="icon-b" id="d-close" aria-label="關閉"><svg viewbox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M3.5 3.5l9 9M12.5 3.5l-9 9" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path></svg></button>
+    </div>
+  </div>
+  <div class="d-body">
+    <div class="d-stage"><canvas id="d-canvas" aria-hidden="true"></canvas></div>
+    <div class="d-head">
+      <h2 id="d-name" tabindex="-1"></h2>
+      <p class="d-sub" id="d-sub"></p>
+      <p class="d-meaning" id="d-meaning"></p>
+      <p class="d-summary" id="d-summary"></p>
+    </div>
+    <div class="d-main">
+      <h3 id="d-ask-h" data-t="dAsk">向 AI 描述的例句</h3>
+      <p class="d-ask" id="d-ask"></p>
+      <p class="example-note" data-t="exampleNote">提問例句可依需求調整；下方規格對應實際示範，兩者參數可能不同。</p>
+<h3 data-t="dSpec">動作／視覺規格</h3>
+      <ul class="d-spec" id="d-spec"></ul>
+      <h3 data-t="dUse">使用情境</h3>
+      <p id="d-use"></p>
+      <ul class="d-tags" id="d-tags" aria-label="英文關鍵字" data-t-attr="aria-label:tagsLabel"></ul>
+    </div>
+    <div class="d-side">
+      <label class="copy-language"><span data-t="copyLang">提示詞語言</span><select data-copy-lang=""><option value="zh-Hant" data-t="zhOption">繁體中文</option>
+<option value="en" data-t="enOption">English</option></select></label><button type="button" class="btn btn-pick" id="d-pick" aria-pressed="false"><span class="pick-box" aria-hidden="true"><svg viewbox="0 0 16 16" width="14" height="14"><path d="M3.5 8.4l3 3 6-6.6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"></path></svg></span><span id="d-pick-t">選取</span></button>
+      <button type="button" class="btn btn-main" id="d-copy-prompt" data-t="copyPrompt">複製提示詞</button>
+      <button type="button" class="btn" id="d-copy-code" data-t="copyCode">複製程式碼</button>
+      <pre class="d-prompt" id="d-prompt" tabindex="0" aria-label="即將複製的提示詞" data-t-attr="aria-label:promptLabel"></pre>
+      <details class="d-code">
+        <summary data-t="showCode">查看程式碼</summary>
+        <pre id="d-code" tabindex="0"></pre>
+      </details>
+      <p class="d-links"><a id="d-kit" href="#"></a><a id="d-txt" href="#"></a></p>
+      <p class="sr" id="d-live" role="status" aria-live="polite"></p>
+    </div>
+  </div>
+</dialog>
+
+<p class="sr" id="live" role="status" aria-live="polite"></p>
+
+<script src="assets/runtime.js"></script>
+<script src="assets/catalog.js"></script>
+<script src="assets/locale.js"></script><script src="assets/site.js"></script>
+</body>
+</html>

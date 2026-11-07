@@ -1,0 +1,47 @@
+// Motion Prompt #072 · MIT License (c) 2026 Shohei Ohtaki · ./#072
+//
+// 空狀態畫面（Empty state）
+// 分類組: ui (UI 元件) · element 24 · 分類: 導覽與狀態
+// 示範內容: 點垃圾桶刪除兩列後，出現空盒插圖、目前沒有內容文字與新增按鈕。
+// 動作／視覺規格:
+//   - 542×191 卡片上每 4.5 s 循環。兩列清單（494×48、圓角半徑 8），右側各有垃圾桶圖示。
+//   - 游標於 0.95 s 與 1.65 s 點垃圾桶；各列在 0.3 s 內左移 60 px 並淡出（easeInOutCubic），第二列向上移動 58 px 填入首列位置。
+//   - 於 1.95–2.3 s 線性淡入空狀態，同時上移 8 px：藍色線條收件匣、16 px 的目前沒有內容文字，以及藍色新增按鈕（112×34）。
+//   - 游標於 3.3 s 點新增；空狀態於 3.25–3.45 s 淡出，兩列清單於 3.35–3.7 s 以 easeOutCubic 從左側返回。
+// 使用情境: 適合首次使用或沒有搜尋結果的頁面，告訴使用者接下來能做什麼。
+// 關鍵字: empty-state, no-data, zero-state, blank-state, no-results, onboarding
+// 尺寸: 542x191 px · 週期: 4.5 s
+// 需要: kit ui -> ./api/v1/kit/zh-Hant/ui.js
+// 本地示範: ./?lang=zh-Hant#072
+//
+// cells[i](k, w, h, u)：k = CanvasRenderingContext2D，呼叫端先清除畫布並以 save/restore 包覆；w、h 為尺寸，u 為 [0, cycle) 內的秒數。畫面只取決於 u。
+// 下方是元素程式碼；CELLS、常數與輔助函式位於 kit。
+
+// @element 24
+
+CELLS[23] = ui((w, h, t) => {
+  const r1 = eio(seg(t, 0.95, 1.25)), r2 = eio(seg(t, 1.65, 1.95));
+  const back = eo(seg(t, 3.35, 3.7));
+  const empty = seg(t, 1.95, 2.3) * (1 - seg(t, 3.25, 3.45));
+  bar(24, 14, 130, C.line2, 11);
+  const rows = [[r1, 0], [r2, 1]];
+  rows.forEach(([g, i]) => {
+    const gone = back > 0 ? 1 - back : g; if (gone >= 1) return;
+    const y = 40 + i * 58 - (i === 1 ? 58 * (back > 0 ? 0 : r1) : 0);
+    X.save(); X.globalAlpha = 1 - gone; X.translate(-60 * gone, 0);
+    strokeRR(24, y, 494, 48, 8, C.line2, 1.5); ring(48, y + 24, 9, C.line2, 2); bar(70, y + 12, 200, C.line2, 10); bar(70, y + 28, 140, C.line, 7);
+
+    X.strokeStyle = '#888'; X.lineWidth = 2; X.lineJoin = 'round'; X.strokeRect(476, y + 18, 16, 18); X.beginPath(); X.moveTo(472, y + 17); X.lineTo(496, y + 17); X.moveTo(480, y + 13); X.lineTo(488, y + 13); X.stroke();
+    X.restore();
+  });
+  if (empty > 0) {
+    X.save(); X.globalAlpha = empty; const cy = 70 + 8 * (1 - empty);
+    X.strokeStyle = C.blue; X.lineWidth = 2.6; X.lineJoin = 'round';
+    X.beginPath(); X.moveTo(w / 2 - 26, cy - 4); X.lineTo(w / 2 - 18, cy - 22); X.lineTo(w / 2 + 18, cy - 22); X.lineTo(w / 2 + 26, cy - 4); X.lineTo(w / 2 + 26, cy + 16); X.lineTo(w / 2 - 26, cy + 16); X.closePath(); X.stroke();
+    X.beginPath(); X.moveTo(w / 2 - 26, cy - 4); X.lineTo(w / 2 - 9, cy - 4); X.lineTo(w / 2 - 6, cy + 3); X.lineTo(w / 2 + 6, cy + 3); X.lineTo(w / 2 + 9, cy - 4); X.lineTo(w / 2 + 26, cy - 4); X.stroke();
+    text("目前沒有內容", w / 2, cy + 40, 16, '#555', 600, 'center');
+    fillRR(w / 2 - 56, cy + 62, 112, 34, 8, C.blue); text("新增", w / 2, cy + 79, 15, '#fff', 600, 'center');
+    X.restore();
+  }
+  pointer([[.3, w + 30, h + 30], [.9, 486, 67], [1.25, 486, 67], [1.6, 486, 67], [2.4, 486, 67], [3.2, w / 2 + 4, 156], [3.5, w / 2 + 4, 156], [4.2, w + 30, h + 30]], [0.95, 1.65, 3.3], t);
+});

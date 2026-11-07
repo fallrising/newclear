@@ -1,0 +1,42 @@
+// Motion Prompt #075 · MIT License (c) 2026 Shohei Ohtaki · ./#075
+//
+// 黏附式頁首（Sticky header）
+// 分類組: lp (網頁與登陸頁效果) · element 03 · 分類: 捲動效果
+// 示範內容: 公告列隨頁面捲走，下方頁首抵達頂緣後停住，內容在它下面繼續捲動。
+// 動作／視覺規格:
+//   - 捲動：0.4–1.3 s 從 0→110 px，1.9–2.8 s 從 110→250 px，3.4–4.4 s 從 250→0（cubic ease-in-out）。
+//   - 最頂端為 22 px 深藍公告列；下方是 34 px 頁首，含標誌、三個選單項目與按鈕。
+//   - 頁首位置 = max(22 − scroll, 0)：公告列消失後，頁首停在頂緣（position: sticky; top: 0）。
+//   - 接下來的 24 px 捲動範圍內，頁首下方的 12 px 陰影由不透明度 0 淡入至 0.16。
+//   - 照片、標題與三張卡片在頁首下方正常捲動。
+// 使用情境: 適合長頁面，讓導覽選單與行動按鈕隨時可用。
+// 關鍵字: sticky, sticky-header, fixed-header, position-sticky, navigation, header, scroll
+// 尺寸: 539x208 px · 週期: 4.8 s
+// 需要: kit lp -> ./api/v1/kit/zh-Hant/lp.js
+// 本地示範: ./?lang=zh-Hant#075
+//
+// cells[i](k, w, h, u)：k = CanvasRenderingContext2D，呼叫端先清除畫布並以 save/restore 包覆；w、h 為尺寸，u 為 [0, cycle) 內的秒數。畫面只取決於 u。
+// 下方是元素程式碼；CELLS、常數與輔助函式位於 kit。
+
+// @element 03
+
+CELLS[2] = (k, w, h, u) => {
+  frame(k);
+  const y = steps([[0.4, 0], [1.3, 110], [1.9, 110], [2.8, 250], [3.4, 250], [4.4, 0]], u);
+  const STRIP = 22;
+  view(k, () => {
+    k.save(); k.translate(0, -y);
+    pic(k, 24, 70, 214, 112, 0, 8);
+    txt(k, "展開新的日常，", 262, 104, `800 22px ${JP}`, C.ink); bars(k, 262, 120, 210, 3); btn(k, 262, 160, 100, 26, "了解更多");
+    k.fillStyle = C.soft; k.fillRect(0, 212, VW, 240);
+    txt(k, "特色", VW / 2, 246, `800 18px ${JP}`, C.ink, 'center');
+    for (let i = 0; i < 3; i++) { const x = 34 + i * 152; k.fillStyle = '#fff'; rr(k, x, 262, 136, 120, 8); k.fill(); pic(k, x + 8, 270, 120, 58, i, 5); bars(k, x + 10, 340, 110, 3, C.faint, 6, 11); }
+    k.fillStyle = C.ink; k.fillRect(0, 0, VW, STRIP);
+    txt(k, "限時優惠實施中", VW / 2, STRIP / 2 + 0.5, `600 11px ${JP}`, '#fff', 'center', 'middle');
+    k.restore();
+    const hy = Math.max(STRIP - y, 0), sh = clamp((y - STRIP) / 24);
+    if (sh > 0) { const g = k.createLinearGradient(0, hy + 34, 0, hy + 46); g.addColorStop(0, `rgba(28,35,51,${0.16 * sh})`); g.addColorStop(1, 'rgba(28,35,51,0)'); k.fillStyle = g; k.fillRect(0, hy + 34, VW, 12); }
+    header(k, hy);
+    sbar(k, y / 250, 0.42);
+  });
+};

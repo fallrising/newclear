@@ -1,0 +1,39 @@
+// Motion Prompt #067 · MIT License (c) 2026 Shohei Ohtaki · ./#067
+//
+// 大型選單（Mega menu）
+// 分類組: ui (UI 元件) · element 19 · 分類: 導覽與狀態
+// 示範內容: 游標停在產品上時，全寬面板向下展開，顯示三欄連結與圖片；移開後收合。
+// 動作／視覺規格:
+//   - 542×191 卡片上每 4.5 s 循環。頁首高 42，產品、價格、支援標籤為 16 px，各有向下箭頭。
+//   - 游標只停留：1.0 s 抵達產品；開啟量 a 於 1.05–1.3 s 以 easeOutCubic 從 0→1，產品變藍並加底線。
+//   - 面板：白色、全寬、高 146，在頁首下方下降 12 px 定位，同時依 a 淡入；陰影模糊 18、y 偏移 8。
+//   - 內容：三欄相隔 130 px，各有藍色標題與三個連結，右側為 104×112 圖片；游標下移，第二欄的第二個連結於 1.75 至 2.9 s 淡藍反白。
+//   - 關閉：游標從 2.9 s 起離開面板，於 3.15–3.4 s 淡出（1 − easeInOutCubic）。
+// 使用情境: 適合產品或區域眾多的網站，讓訪客一次看到整體分類。
+// 關鍵字: mega-menu, megamenu, dropdown-navigation, navigation, header-menu, multi-column
+// 尺寸: 542x191 px · 週期: 4.5 s
+// 需要: kit ui -> ./api/v1/kit/zh-Hant/ui.js
+// 本地示範: ./?lang=zh-Hant#067
+//
+// cells[i](k, w, h, u)：k = CanvasRenderingContext2D，呼叫端先清除畫布並以 save/restore 包覆；w、h 為尺寸，u 為 [0, cycle) 內的秒數。畫面只取決於 u。
+// 下方是元素程式碼；CELLS、常數與輔助函式位於 kit。
+
+// @element 19
+
+CELLS[18] = ui((w, h, t) => {
+  const a = eo(seg(t, 1.05, 1.3)) * (1 - eio(seg(t, 3.15, 3.4)));
+  pageLines(24, 62, 494); fillRR(24, 130, 494, 50, 8, C.block);
+  X.fillStyle = '#fff'; X.fillRect(0, 0, w, 42); X.fillStyle = C.line; X.fillRect(0, 42, w, 1.5);
+  fillRR(24, 14, 70, 16, 4, C.mb);
+  const nav = [["產品", 190], ["方案", 262], ["支援", 334]];
+  nav.forEach(([s, x], i) => { const on = i === 0 && a > .3; text(s, x, 22, 16, on ? C.blue : '#555', on ? 700 : 600); if (on) fillRR(x, 36, tw(s, 16, 700), 3, 1.5, C.blue); chevron(x + tw(s, 16, 700) + 10, 22, 3.5, 0, on ? C.blue : '#999', 1.8); });
+  if (a > 0) {
+    X.save(); X.globalAlpha = a; X.beginPath(); X.rect(0, 43, w, h); X.clip(); const py = 43 - 12 * (1 - a);
+    shadowed(() => { X.fillStyle = '#fff'; X.fillRect(0, py, w, 146); }, 18, 8, .16);
+    for (let c = 0; c < 3; c++) { const cx = 24 + c * 130; bar(cx, py + 16, 80, C.blue, 10); for (let k = 0; k < 3; k++) { const hov = c === 1 && k === 1 && t > 1.75 && t < 2.9; if (hov) fillRR(cx - 6, py + 34 + k * 26, 112, 22, 5, C.lb); bar(cx, py + 40 + k * 26, [90, 70, 100][(k + c) % 3], hov ? C.sb : C.line2, 9); } }
+    mountains(414, py + 14, 104, 112);
+    X.restore();
+  }
+
+  pointer([[.3, w + 30, h + 30], [1.0, 205, 26], [1.4, 205, 26], [1.8, 196, 98], [2.9, 196, 98], [3.2, 300, 200], [3.9, w + 30, h + 30]], [], t);
+});

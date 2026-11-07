@@ -1,0 +1,39 @@
+// Motion Prompt #015 · MIT License (c) 2026 Shohei Ohtaki · ./#015
+//
+// 粒子效果（Particles）
+// 分類組: motion (動態圖像與動畫效果) · element 15 · 分類: 動態修飾
+// 示範內容: 粒子持續從發射點向上噴出、散開並落下。
+// 動作／視覺規格:
+//   - 84 個粒子，從底部中央發射（水平中心、底邊上方 20 px）。
+//   - 初速：水平 ±190 px/s、向上 250–400 px/s。重力 470 px/s²（拋物線軌跡）。
+//   - 各粒子以 2.35 s 或約 1.57 s 為週期重複，起始偏移為固定種子的亂數，每次播放結果相同。
+//   - 生命期最多 1.5 s：前 0.06 s 淡入，最後 30% 淡出；縮放 1.15→0.7。
+//   - 形狀為圓形、正方形與三角形（尺寸 5–11 px），使用藍、珊瑚、黃、薄荷綠，旋轉速度最多 ±4.5 rad/s。
+// 使用情境: 適合以類似彩紙或火花的效果，增添慶祝氣氛與活力。
+// 關鍵字: particles, confetti, emitter, fountain, gravity, celebration, sparks
+// 尺寸: 539x208 px · 週期: 4.7 s
+// 需要: kit motion -> ./api/v1/kit/zh-Hant/motion.js
+// 本地示範: ./?lang=zh-Hant#015
+//
+// cells[i](k, w, h, u)：k = CanvasRenderingContext2D，呼叫端先清除畫布並以 save/restore 包覆；w、h 為尺寸，u 為 [0, cycle) 內的秒數。畫面只取決於 u。
+// 下方是元素程式碼；CELLS、常數與輔助函式位於 kit。
+
+// @element 15
+
+const PARTS = (() => { const R = rand(15), a = []; for (let i = 0; i < 84; i++) { const n = R() < 0.5 ? 2 : 3; a.push({ T: CYC / n, ph: R() * CYC, vx: (R() - 0.5) * 2 * 190, vy: -(250 + R() * 150), sz: 5 + R() * 6, col: PAL[i % 4], kind: i % 3, spin: (R() - 0.5) * 9 }); } return a; })();
+CELLS[14] = (k, w, h, u) => {
+  stage(k);
+  const X = w / 2, Y = h - 20, G = 470;
+  for (const p of PARTS) {
+    const t = mod(u + p.ph, p.T), life = Math.min(p.T, 1.5); if (t > life) continue;
+    const x = X + p.vx * t, y = Y + p.vy * t + 0.5 * G * t * t, a = Math.min(1, t / 0.06) * (1 - smooth(P(t, life * 0.7, life))), sc = lerp(1.15, 0.7, t / life);
+    k.globalAlpha = a; k.fillStyle = p.col; k.save(); k.translate(x, y); k.rotate(t * p.spin); k.scale(sc, sc);
+    if (p.kind === 0) { k.beginPath(); k.arc(0, 0, p.sz, 0, 7); k.fill(); }
+    else if (p.kind === 1) { k.fillRect(-p.sz, -p.sz, p.sz * 2, p.sz * 2); }
+    else { k.beginPath(); k.moveTo(0, -p.sz * 1.3); k.lineTo(p.sz * 1.2, p.sz); k.lineTo(-p.sz * 1.2, p.sz); k.closePath(); k.fill(); }
+    k.restore();
+  }
+  k.globalAlpha = 1;
+  k.fillStyle = C.navy3; rr(k, X - 70, h - 12, 140, 30, 10); k.fill();
+  k.fillStyle = '#fff'; rr(k, X - 30, h - 22, 60, 30, 10); k.fill();
+};

@@ -1,0 +1,36 @@
+// Motion Prompt #106 · MIT License (c) 2026 Shohei Ohtaki · ./#106
+//
+// 移軸模型效果（Tilt-shift）
+// 分類組: photo (攝影效果、打光與風格) · element 10 · 分類: 鏡頭與相機效果
+// 示範內容: 街景的上方與下方變模糊，只有中間包含道路、汽車與小人物的區域保持清晰，讓街道看起來像模型。
+// 動作／視覺規格:
+//   - 街角的建築、樹木與路燈位於 y 132–162 的道路後方，不含大型人物；四個高 23–26 px 的小人物站在人行道上，腳位於 y 172；汽車每 5 s 從 x −60 開到 600。
+//   - 清晰帶：y 66–176 保持清楚。
+//   - 模糊：y 0–42 與 y 190–208 從 0 → 7 px；y 42–66 與 y 176–190 從 0 → 3 px。
+//   - 清晰帶邊界有虛線，線段 6 px、間隙 5 px，#8E8E93、不透明度 75%。
+//   - 時間：0.4 s 到 1.4 s 漸入，維持至 4.0 s，於 4.8 s 前退去；每輪 = 5 s，採 cubic ease-in-out，約為 cubic-bezier(0.65,0,0.35,1)。
+// 使用情境: 適合將城市或活動場景呈現為玩具模型世界。
+// 關鍵字: tilt-shift, miniature, miniature effect, fake miniature, selective focus, toy town, focus band
+// 尺寸: 539x208 px · 週期: 5 s
+// 需要: kit photo -> ./api/v1/kit/zh-Hant/photo.js
+// 本地示範: ./?lang=zh-Hant#106
+//
+// cells[i](k, w, h, u)：k = CanvasRenderingContext2D，呼叫端先清除畫布並以 save/restore 包覆；w、h 為尺寸，u 為 [0, cycle) 內的秒數。畫面只取決於 u。
+// 下方是元素程式碼；CELLS、常數與輔助函式位於 kit。
+
+// @element 10
+
+CELLS[9] = cell((k, u) => {
+  const a = env(u), carX = lerp(-60, 600, u / CYC);
+  const minis = D => { [[196, 26], [322, 26], [340, 23], [452, 25]].forEach(([x, h]) => figure(D, x, 172, h, BASE.person)); };
+  const [S, ks] = layer('tilt'); stageStreet(ks, BASE, { car: carX, person: false, after: minis });
+  const [B1, k1] = layer('tilt-1'); k1.filter = `blur(${(3 * a).toFixed(2)}px)`; k1.drawImage(S, 0, 0); k1.filter = 'none';
+  const [B2, k2] = layer('tilt-2'); k2.filter = `blur(${(7 * a).toFixed(2)}px)`; k2.drawImage(S, 0, 0); k2.filter = 'none';
+  k.drawImage(S, 0, 0);
+  const band = (img, y0, y1) => { k.save(); k.beginPath(); k.rect(0, y0, CW, y1 - y0); k.clip(); k.drawImage(img, 0, 0); k.restore(); };
+  band(B2, 0, 42); band(B1, 42, 66); band(B1, 176, 190); band(B2, 190, CH);
+
+  k.save(); k.globalAlpha = 0.75 * a; k.strokeStyle = '#8E8E93'; k.lineWidth = 1.4; k.setLineDash([6, 5]);
+  k.beginPath(); k.moveTo(0, 66); k.lineTo(CW, 66); k.moveTo(0, 176); k.lineTo(CW, 176); k.stroke(); k.setLineDash([]);
+  k.restore();
+});

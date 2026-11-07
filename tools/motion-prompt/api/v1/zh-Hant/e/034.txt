@@ -1,0 +1,30 @@
+// Motion Prompt #034 · MIT License (c) 2026 Shohei Ohtaki · ./#034
+//
+// 手持攝影（Handheld）
+// 分類組: camera (鏡頭運動與轉場) · element 10 · 分類: 拍攝方式與時間效果
+// 示範內容: 整個畫面有細微、不規則的晃動，像用手握住攝影機而非架在腳架上。
+// 動作／視覺規格:
+//   - 攝影機：位置近乎固定；水平偏角、俯仰、翻滾與高度各疊加不同週期的正弦波（T = 2π×u/4.7）。
+//   - 水平偏角（rad）= 0.016·sin(3T) + 0.008·sin(7T+1) + 0.004·sin(13T+2)，最多約 ±1.6°。
+//   - 俯仰角（rad）= 0.012·sin(4T+2) + 0.006·sin(9T+0.5) + 0.003·sin(17T+1.2)，最多約 ±1.2°。
+//   - 翻滾角（rad）= 0.02·sin(5T+1) + 0.008·sin(11T+3)，最多約 ±1.6°；高度 = 1.5 + 0.03·sin(6T) m。
+//   - 主體：人物靜止站在前方 6.5 m；晃動持續進行，無緩動或停留。
+//   - 各頻率倍數皆為整數，因此每 4.7 s 無縫循環；右上角顯示手持狀態。
+// 使用情境: 適合營造紀錄片質感或身在現場的感覺。
+// 關鍵字: handheld, camera shake, shaky, documentary, wobble, noise, realism
+// 尺寸: 539x208 px · 週期: 9.4 s
+// 需要: kit camera -> ./api/v1/kit/zh-Hant/camera.js
+// 本地示範: ./?lang=zh-Hant#034
+//
+// cells[i](k, w, h, u)：k = CanvasRenderingContext2D，呼叫端先清除畫布並以 save/restore 包覆；w、h 為尺寸，u 為 [0, cycle) 內的秒數。畫面只取決於 u。
+// 下方是元素程式碼；CELLS、常數與輔助函式位於 kit。
+
+// @element 10
+
+CELLS[9] = shot((k, w, h, u) => {
+  const T = u * 2 * Math.PI / CYC;
+  const n = (a, b, c2) => Math.sin(T * a + b) * c2;
+  const yaw = n(3, 0, .016) + n(7, 1, .008) + n(13, 2, .004), pitch = n(4, 2, .012) + n(9, .5, .006) + n(17, 1.2, .003), roll = n(5, 1, .02) + n(11, 3, .008);
+  world(k, w, h, cam({ yaw, pitch, roll, y: 1.5 + n(6, 0, .03) }), { person: { z: 6.5 } });
+  return "手持";
+});

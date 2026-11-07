@@ -1,0 +1,26 @@
+// Motion Prompt #116 · MIT License (c) 2026 Shohei Ohtaki · ./#116
+//
+// 雙色調（Duotone）
+// 分類組: photo (攝影效果、打光與風格) · element 20 · 分類: 色調與後製風格
+// 示範內容: 同一片景色的色彩被替換為兩色之間的範圍：暗部靛藍、亮部粉紅。
+// 動作／視覺規格:
+//   - 場景 3：左側為胸像，頭部中心 x 140、y 82、半徑 28 px；右側有山丘、房屋、樹木與太陽，太陽位於 x 432、y 54、半徑 15 px。
+//   - 兩個端點色：暗部 #1F2A5C、亮部 #FF9FB2。
+//   - 轉換：由各色彩亮度 L 計算 t = ((L − 70) / 180)^2.4，再以 t 混合兩色，拉開亮部色調的差異。
+//   - 時間：0.4 s 到 1.4 s 漸入，維持至 4.0 s，於 4.8 s 前退去；每輪 = 5 s，採 cubic ease-in-out，約為 cubic-bezier(0.65,0,0.35,1)。
+// 使用情境: 適合用品牌色統一海報、音樂封面或社群圖片。
+// 關鍵字: duotone, two-tone, gradient map, color overlay, poster, graphic
+// 尺寸: 539x208 px · 週期: 5 s
+// 需要: kit photo -> ./api/v1/kit/zh-Hant/photo.js
+// 本地示範: ./?lang=zh-Hant#116
+//
+// cells[i](k, w, h, u)：k = CanvasRenderingContext2D，呼叫端先清除畫布並以 save/restore 包覆；w、h 為尺寸，u 為 [0, cycle) 內的秒數。畫面只取決於 u。
+// 下方是元素程式碼；CELLS、常數與輔助函式位於 kit。
+
+// @element 20
+
+CELLS[19] = cell((k, u) => {
+  const a = env(u);
+  const DUO = mapPal(BASE, c => mixc('#1F2A5C', '#FF9FB2', Math.pow(clamp((lum(c) - 70) / (250 - 70)), 2.4)));
+  stageLand(k, pal(BASE, DUO, a));
+});

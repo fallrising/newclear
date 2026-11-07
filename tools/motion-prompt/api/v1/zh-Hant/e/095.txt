@@ -1,0 +1,37 @@
+// Motion Prompt #095 · MIT License (c) 2026 Shohei Ohtaki · ./#095
+//
+// 流動漸層（Animated gradient）
+// 分類組: lp (網頁與登陸頁效果) · element 23 · 分類: 載入、導覽與循環動態
+// 示範內容: 標題後方，柔和的橘色、淺橘、藍色與淺藍色塊沿環形路徑漂移，持續改變融合方式。
+// 動作／視覺規格:
+//   - 底色為 #FFF1EB，上方疊加四個放射漸層，從中央色彩漸變至邊緣透明，每個不透明度為 0.85。
+//   - 橘色半徑 230、淺橘 #FFB08F 半徑 210、藍色半徑 240、淺藍 #9DB6FB 半徑 200。
+//   - 各中心每 4.8 s 沿橢圓走一圈：x 半徑為 70、60、80、50；y 半徑為 30、40、30、35；起始角度為 0、2.1、4.2、1.0 rad。
+//   - 白色標題（34 px）與按鈕置於上方，只有漸層移動。
+// 使用情境: 適合不使用照片，也想在主視覺或標題後方加入動態與色彩。
+// 關鍵字: gradient, animated-gradient, mesh-gradient, background, hero, ambient, loop
+// 尺寸: 539x208 px · 週期: 4.8 s
+// 需要: kit lp -> ./api/v1/kit/zh-Hant/lp.js
+// 本地示範: ./?lang=zh-Hant#095
+//
+// cells[i](k, w, h, u)：k = CanvasRenderingContext2D，呼叫端先清除畫布並以 save/restore 包覆；w、h 為尺寸，u 為 [0, cycle) 內的秒數。畫面只取決於 u。
+// 下方是元素程式碼；CELLS、常數與輔助函式位於 kit。
+
+// @element 23
+
+CELLS[22] = (k, w, h, u) => {
+  frame(k);
+  const a = 2 * Math.PI * u / CYC;
+  const BLOBS = [[C.acc, 150, 60, 230, 70, 30, 0], ['#FFB08F', 380, 40, 210, 60, 40, 2.1], [C.blue, 330, 150, 240, 80, 30, 4.2], ['#9DB6FB', 90, 170, 200, 50, 35, 1.0]];
+  view(k, () => {
+    k.fillStyle = '#FFF1EB'; k.fillRect(0, 0, VW, VH);
+    for (const [col, x0, y0, r, ax, ay, ph] of BLOBS) {
+      const x = x0 + ax * Math.cos(a + ph), y = y0 + ay * Math.sin(a + ph);
+      const g = k.createRadialGradient(x, y, 0, x, y, r); g.addColorStop(0, col); g.addColorStop(1, 'rgba(255,255,255,0)');
+      k.globalAlpha = 0.85; k.fillStyle = g; k.fillRect(0, 0, VW, VH); k.globalAlpha = 1;
+    }
+    txt(k, 'Hello, Future.', 40, 82, `800 34px ${EN}`, '#fff', 'left', 'alphabetic', '1px');
+    bars(k, 40, 100, 200, 2, 'rgba(255,255,255,.8)', 6, 12, 0.6);
+    btn(k, 40, 128, 104, 26, "開始", '#fff', C.ink);
+  });
+};

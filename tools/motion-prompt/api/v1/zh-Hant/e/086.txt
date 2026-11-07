@@ -1,0 +1,42 @@
+// Motion Prompt #086 · MIT License (c) 2026 Shohei Ohtaki · ./#086
+//
+// 底線動畫（Underline animation）
+// 分類組: lp (網頁與登陸頁效果) · element 14 · 分類: 懸停與點擊互動
+// 示範內容: 游標所在的連結下方，橘色底線從左側延伸；游標離開時，線條向右收縮消失。
+// 動作／視覺規格:
+//   - 三個連結使用 20 px 粗體，間距 56；游標由左到右各停留約 1 s，命中區域左右各比文字多 6 px。
+//   - 橘色底線厚 3，位於基準線下方 8 px。
+//   - 懸停時，寬度在 0.3 s 內從左端由 0→100%（cubic ease-out）。
+//   - 離開時，左端在 0.3 s 內向右移動，讓線條向右退出，如以右側為 transform-origin 的 scaleX。
+// 使用情境: 適合選單與文字連結，以低調方式指出游標位置。
+// 關鍵字: underline, hover, link, navigation, menu, text-link, scalex
+// 尺寸: 539x208 px · 週期: 4.8 s
+// 需要: kit lp -> ./api/v1/kit/zh-Hant/lp.js
+// 本地示範: ./?lang=zh-Hant#086
+//
+// cells[i](k, w, h, u)：k = CanvasRenderingContext2D，呼叫端先清除畫布並以 save/restore 包覆；w、h 為尺寸，u 為 [0, cycle) 內的秒數。畫面只取決於 u。
+// 下方是元素程式碼；CELLS、常數與輔助函式位於 kit。
+
+// @element 14
+
+CELLS[13] = (k, w, h, u) => {
+  frame(k);
+  const LINKS = ["服務", "成果", "關於我們"], F = `800 20px ${JP}`, GAP = 56, LY = 84, DUR = 0.3;
+  const cur = t => path([[0, 120, 150], [0.45, 170, 80], [1.3, 186, 84], [1.55, 268, 80], [2.4, 282, 84], [2.65, 372, 80], [3.5, 390, 84], [3.95, 430, 150], [4.8, 120, 150]], t);
+  view(k, () => {
+    logo(k, 22, 28); bars(k, 90, 132, 331, 2, C.faint, 6, 12, 0.6);
+    k.font = F; const ws = LINKS.map(s => k.measureText(s).width); let x = (VW - ws.reduce((a, b) => a + b, 0) - GAP * (LINKS.length - 1)) / 2;
+    LINKS.forEach((s, i) => {
+      const x0 = x, x1 = x + ws[i], inside = t => { const [a, b] = cur(t); return a > x0 - 6 && a < x1 + 6 && b > LY - 22 && b < LY + 14; };
+      txt(k, s, x0, LY, F, C.ink);
+
+      const on = inside(u); let tc = null; for (let j = 0, t = u; j < 600; j++, t -= 1 / 120) if (inside(t - 1 / 120) !== on) { tc = t; break; }
+      if (tc !== null) {
+        const q = eOut(P(u, tc, tc + DUR)), a = on ? 0 : q, b = on ? q : 1;
+        if (b > a) { k.fillStyle = C.acc; k.fillRect(x0 + ws[i] * a, LY + 8, ws[i] * (b - a), 3); }
+      }
+      x += ws[i] + GAP;
+    });
+    const [cx, cy] = cur(u); cursor(k, cx, cy);
+  });
+};

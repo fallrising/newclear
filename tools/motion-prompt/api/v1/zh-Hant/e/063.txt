@@ -1,0 +1,37 @@
+// Motion Prompt #063 · MIT License (c) 2026 Shohei Ohtaki · ./#063
+//
+// 數值步進器（Stepper (+/−)）
+// 分類組: ui (UI 元件) · element 15 · 分類: 選取與切換
+// 示範內容: 連按三次 +，數字由 1 增至 4；再連按三次 − 回到 1，每次都有輕微彈動。
+// 動作／視覺規格:
+//   - 542×191 卡片上每 4.5 s 循環。200×60 框（圓角半徑 12）位於 (171, 52)；左側 60 px 為 −，右側 60 px 為藍色 +，中央是粗體 30 px 數字。
+//   - 點擊：0.9, 1.35, 1.8 s 按 +（1→4）；2.8, 3.25, 3.7 s 按 −（4→1）。
+//   - 每次點擊前 0.05 s 至之後 0.15 s，按下區塊顯示淡藍色。
+//   - 數字：每次按下後，在 0.25 s 內線性從縮放 1.18 回到 1，期間為藍色。
+// 使用情境: 適合數量、來賓人數等逐一調整的小整數。
+// 關鍵字: stepper, quantity, number-input, increment, decrement, plus-minus, spin-button
+// 尺寸: 542x191 px · 週期: 4.5 s
+// 需要: kit ui -> ./api/v1/kit/zh-Hant/ui.js
+// 本地示範: ./?lang=zh-Hant#063
+//
+// cells[i](k, w, h, u)：k = CanvasRenderingContext2D，呼叫端先清除畫布並以 save/restore 包覆；w、h 為尺寸，u 為 [0, cycle) 內的秒數。畫面只取決於 u。
+// 下方是元素程式碼；CELLS、常數與輔助函式位於 kit。
+
+// @element 15
+
+CELLS[14] = ui((w, h, t) => {
+  bar(171, 24, 90, C.line2, 10);
+  const plus = [.9, 1.35, 1.8], minus = [2.8, 3.25, 3.7];
+  let n = 1; plus.forEach(c => { if (t >= c) n++; }); minus.forEach(c => { if (t >= c) n--; });
+  const last = [...plus, ...minus].filter(c => t >= c).pop();
+  const pop = last !== undefined ? 1 - seg(t, last, last + .25) : 0;
+  const bx = 171, by = 52, bw = 200, bh = 60;
+  strokeRR(bx, by, bw, bh, 12, C.line2, 1.8);
+  const pressP = plus.some(c => t >= c - .05 && t < c + .15), pressM = minus.some(c => t >= c - .05 && t < c + .15);
+  if (pressM) fillRR(bx + 2, by + 2, 58, bh - 4, 10, C.lb); if (pressP) fillRR(bx + bw - 60, by + 2, 58, bh - 4, 10, C.lb);
+  X.fillStyle = C.line2; X.fillRect(bx + 60, by + 10, 1.5, bh - 20); X.fillRect(bx + bw - 61, by + 10, 1.5, bh - 20);
+  text('−', bx + 30, by + bh / 2, 30, '#555', 500, 'center', NUMF); text('+', bx + bw - 30, by + bh / 2, 30, C.blue, 500, 'center', NUMF);
+  X.save(); X.translate(bx + bw / 2, by + bh / 2 + 1); X.scale(1 + .18 * pop, 1 + .18 * pop); text(String(n), 0, 0, 30, pop > .05 ? C.blue : C.ink, 700, 'center', NUMF); X.restore();
+  bar(171, 136, 200, C.line); bar(171, 154, 140, C.line);
+  pointer([[.3, w + 30, h + 30], [.85, 342, 86], [2.3, 342, 86], [2.75, 202, 86], [3.75, 202, 86], [4.3, w + 30, h + 30]], [...plus, ...minus], t);
+});

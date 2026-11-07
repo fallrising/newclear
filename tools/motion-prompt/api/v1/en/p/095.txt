@@ -1,0 +1,18 @@
+Please use "Animated gradient" from "Landing page & web effects".
+Motion Prompt #095 · lp/animated-gradient
+
+Meaning: Background colours keep drifting and blending
+Example request (adapt to your project): Give the hero an animated gradient background: orange and blue slowly blending, one loop every 10 s.
+What this demo shows: Behind the headline, soft patches of orange, light orange, blue and light blue drift in circles and keep blending differently.
+Demo specification (independent of the example request):
+- Base colour #FFF1EB, with four radial gradients on top (centre colour → transparent at the edge, each at 0.85 opacity).
+- Orange (radius 230), light orange #FFB08F (210), blue (240), light blue #9DB6FB (200).
+- Each centre travels an ellipse once per 4.8 s (x radii 70, 60, 80, 50; y radii 30, 40, 30, 35; start angles 0, 2.1, 4.2, 1.0 rad).
+- A white headline (34 px) and a button sit on top; only the gradient moves.
+When to use it: Use it to add movement and colour behind a hero or heading without using a photo.
+
+Local demo: ./?lang=en#095
+Local specification and code: ./api/v1/en/e/095.txt
+Local helper code: ./api/v1/kit/en/lp.js
+Keep the demo geometry, timing and easing unless I explicitly request changes. Adapt text, colours and assets to my project.
+Upstream source: https://github.com/showheyohtaki/motion-prompt (MIT, Shohei Ohtaki).

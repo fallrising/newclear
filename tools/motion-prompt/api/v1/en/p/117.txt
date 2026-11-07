@@ -1,0 +1,18 @@
+Please use "Teal and orange" from "Photo looks, lighting & styles".
+Motion Prompt #117 · photo/teal-and-orange
+
+Meaning: Pushes shadows to teal and skin and highlights to orange
+Example request (adapt to your project): Person walking in the city with a cinematic teal and orange grade: shadows and sky toward teal, skin and sunlight toward orange.
+What this demo shows: In the same landscape the sky, hills, ground and the shadowed figure shift to teal while the sunlit edge of the figure and the sun shift to orange, a complementary contrast.
+Demo specification (independent of the example request):
+- Scene 3: a bust on the left (head centre x 140, y 82, radius 28 px) and hills, a house, trees and the sun (x 432, y 54, radius 15 px) on the right.
+- Teal: sky #CFE6E3, hills #8CC1BE and #62A2A1, ground #3F8083, trees #2F6A6E, figure #1D4E53
+- Orange: the light on the figure #FF9248, sun #FF8236, sun rings #FFC48C
+- Timing: the effect comes in from 0.4 s to 1.4 s, holds until 4.0 s and is gone again by 4.8 s (one pass = 5 s, cubic ease-in-out (about cubic-bezier(0.65,0,0.35,1)))
+When to use it: For a blockbuster, trailer-like look with strong colour contrast.
+
+Local demo: ./?lang=en#117
+Local specification and code: ./api/v1/en/e/117.txt
+Local helper code: ./api/v1/kit/en/photo.js
+Keep the demo geometry, timing and easing unless I explicitly request changes. Adapt text, colours and assets to my project.
+Upstream source: https://github.com/showheyohtaki/motion-prompt (MIT, Shohei Ohtaki).

@@ -1,0 +1,19 @@
+Please use "Step indicator" from "UI component names".
+Motion Prompt #068 · ui/step-indicator
+
+Meaning: Shows which step of a process you are on
+Example request (adapt to your project): Add a step indicator above the sign-up form with four steps: Details, Review, Payment, Done; completed steps show a check.
+What this demo shows: Each click on "Next" turns the next of four step circles into a check and extends the blue line to the following step.
+Demo specification (independent of the example request):
+- 4.5 s cycle on a 542×191 card. Four steps ("Details, Review, Payment, Done" in the selected language) at x 80, 207, 334, 461, y 35; circles of radius 17 joined by a 4 px grey line.
+- The cursor clicks "Next" (110×38, bottom right) at 0.9, 1.7 and 2.5 s.
+- On each click the current step becomes a blue circle with a white check and the next becomes the current one (blue circle, white number). Steps not reached are white with a grey rim.
+- The blue line grows 127 px per click over 0.3 s with easeInOutCubic; after the third click all four are checked.
+- Reset: the indicator fades out over 3.75–4.05 s and fades back in at step 1 over 4.05–4.3 s.
+When to use it: Use it in multi-step flows such as sign-up or checkout to show progress and what is left.
+
+Local demo: ./?lang=en#068
+Local specification and code: ./api/v1/en/e/068.txt
+Local helper code: ./api/v1/kit/en/ui.js
+Keep the demo geometry, timing and easing unless I explicitly request changes. Adapt text, colours and assets to my project.
+Upstream source: https://github.com/showheyohtaki/motion-prompt (MIT, Shohei Ohtaki).

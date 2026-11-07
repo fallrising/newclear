@@ -1,0 +1,34 @@
+// Motion Prompt #082 · MIT License (c) 2026 Shohei Ohtaki · ./#082
+//
+// 懸停圖片放大（Image zoom on hover）
+// 分類組: lp (網頁與登陸頁效果) · element 10 · 分類: 懸停與點擊互動
+// 示範內容: 游標下的照片慢慢放大，外框尺寸不變；游標離開時縮回。
+// 動作／視覺規格:
+//   - 兩個照片框各 222 × 118，圓角半徑 8；游標先在左圖、再在右圖各停留約 1.5 s。
+//   - 懸停時內容以中心為基準，在 0.5 s 內從 1→1.15 縮放（cubic ease-out）；離開時以 0.5 s 返回。
+//   - 外框之外的內容會裁切（overflow: hidden）；框與圖說不移動。
+// 使用情境: 適合照片網格，如作品、商品或文章縮圖，提示即將選取的項目。
+// 關鍵字: hover, zoom, image, scale, overflow-hidden, thumbnail, gallery
+// 尺寸: 539x208 px · 週期: 4.8 s
+// 需要: kit lp -> ./api/v1/kit/zh-Hant/lp.js
+// 本地示範: ./?lang=zh-Hant#082
+//
+// cells[i](k, w, h, u)：k = CanvasRenderingContext2D，呼叫端先清除畫布並以 save/restore 包覆；w、h 為尺寸，u 為 [0, cycle) 內的秒數。畫面只取決於 u。
+// 下方是元素程式碼；CELLS、常數與輔助函式位於 kit。
+
+// @element 10
+
+CELLS[9] = (k, w, h, u) => {
+  frame(k);
+  const FX = [22, 267], FY = 16, FW = 222, FH = 118, ZOOM = 0.15;
+  const cur = t => path([[0, 60, 160], [0.5, 120, 70], [1.8, 140, 84], [2.2, 370, 70], [3.4, 390, 84], [3.9, 470, 160], [4.8, 60, 160]], t);
+  view(k, () => {
+    for (let i = 0; i < 2; i++) {
+      const inside = t => { const [x, y] = cur(t); return x > FX[i] && x < FX[i] + FW && y > FY && y < FY + FH; };
+      const q = trans(inside, u, 0.5);
+      pic(k, FX[i], FY, FW, FH, i, 8, 1 + ZOOM * q);
+      txt(k, ["夏日山屋", "海邊咖啡館"][i], FX[i], FY + FH + 20, `800 13px ${JP}`, C.ink); bars(k, FX[i], FY + FH + 28, 150, 1);
+    }
+    const [cx, cy] = cur(u); cursor(k, cx, cy);
+  });
+};

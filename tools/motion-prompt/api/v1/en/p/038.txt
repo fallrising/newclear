@@ -1,0 +1,20 @@
+Please use "Speed ramp" from "Camera moves & transitions".
+Motion Prompt #038 · camera/speed-ramp
+
+Meaning: Change speed mid-shot
+Example request (adapt to your project): Speed ramp: normal speed, slowing at the top of the jump, then back to normal.
+What this demo shows: Within one shot the playback speed changes smoothly from fast to slow; a graph at bottom left shows the speed.
+Demo specification (independent of the example request):
+- Camera: completely fixed (height 1.3 m); only the playback speed changes
+- Playback speed: 2.4× → 0.25×; the change takes 0.7 s (1.2 s to 1.9 s) with a quadratic ease-in-out (about cubic-bezier(0.45,0,0.55,1))
+- Subject: a person 8 m away runs from 6 m left toward the right; x = -6 + footage time × 2.0 m; they close in quickly during the fast section
+- Jump: a parabola while x is between -1.5 m and 2.5 m, peak 0.99 m, arms raised; take-off at about 0.94 s, most of the airtime plays in slow motion, landing at about 3.68 s
+- Graph: a 120×40 px speed curve at bottom left with a blue dot (radius 5 px) at the current time
+- Return: stops at 4.2 s, then cross-fades back over the last 0.5 s; top-right readout shows the rate (×2.4 → ×0.3)
+When to use it: To slow down only the key part of an action while keeping the lead-in quick.
+
+Local demo: ./?lang=en#038
+Local specification and code: ./api/v1/en/e/038.txt
+Local helper code: ./api/v1/kit/en/camera.js
+Keep the demo geometry, timing and easing unless I explicitly request changes. Adapt text, colours and assets to my project.
+Upstream source: https://github.com/showheyohtaki/motion-prompt (MIT, Shohei Ohtaki).

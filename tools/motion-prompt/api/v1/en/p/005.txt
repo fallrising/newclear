@@ -1,0 +1,19 @@
+Please use "Mask reveal" from "Motion graphics moves".
+Motion Prompt #005 · motion/mask-reveal
+
+Meaning: Text rises into view from behind an invisible edge
+Example request (adapt to your project): Bring the title in with a mask reveal from below, 0.6 s, each line slightly after the one before.
+What this demo shows: Headline text slides out from behind an invisible edge marked by a single line.
+Demo specification (independent of the example request):
+- One pass per 2.35 s. Divider line (coral, 380 × 6, y = 124): grows from the centre at 0.1–0.5 s (cubic ease-in-out), shrinks away at 2.05–2.3 s.
+- Top text (bold 98 px, white): clipped to the area above the line (y 8–119); moves up into place from 120 px below at 0.35–1.0 s, quintic ease-out.
+- Bottom text (32 px, yellow): clipped to the area below the line (y 129–181); moves down into place from 60 px above at 0.55–1.15 s, quintic ease-out.
+- Exit: top text moves 150 px up at 1.7–2.05 s (backIn, s = 1.2, dipping slightly first); bottom text moves 70 px down at 1.75–2.05 s (cubic ease-in).
+- Opacity never changes; the text is hidden only by leaving the clip area.
+When to use it: Use it for titles and headings that should appear in a clean, composed way.
+
+Local demo: ./?lang=en#005
+Local specification and code: ./api/v1/en/e/005.txt
+Local helper code: ./api/v1/kit/en/motion.js
+Keep the demo geometry, timing and easing unless I explicitly request changes. Adapt text, colours and assets to my project.
+Upstream source: https://github.com/showheyohtaki/motion-prompt (MIT, Shohei Ohtaki).

@@ -1,0 +1,120 @@
+{
+  "id": "building-terrain-shaping",
+  "system": "building",
+  "edition": 1,
+  "name": {
+    "zh": "地形塑造",
+    "en": "Terrain shaping"
+  },
+  "summary": {
+    "zh": "直接改动高低与地面形状，为建筑和水流创造条件。",
+    "en": "Reshape elevation and ground for buildings and water."
+  },
+  "rules": {
+    "zh": "玩家抬高、削低或填补地形，取得可用空间和通路。工具与材料限制改造，结果改变可建造位置、坡度和水路。",
+    "en": "Players raise, lower or fill terrain to create space and routes. Tools and materials constrain changes to buildable land, slopes and waterways."
+  },
+  "loop": [
+    {
+      "zh": "识别地形问题",
+      "en": "Identify terrain issues"
+    },
+    {
+      "zh": "选择挖除或填筑",
+      "en": "Choose excavation or fill"
+    },
+    {
+      "zh": "局部施工",
+      "en": "Reshape locally"
+    },
+    {
+      "zh": "检查改造结果",
+      "en": "Inspect results"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "顺应地形省成本，平整后更便于布局。",
+      "en": "Following terrain saves cost; flattening simplifies layout."
+    },
+    {
+      "zh": "局部改造快，却可能把水路问题推到邻区。",
+      "en": "Local changes can displace water problems elsewhere."
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "改造成本",
+        "en": "Reshaping cost"
+      },
+      "effect": {
+        "zh": "高成本鼓励适应自然，低成本鼓励造型。",
+        "en": "High costs reward adaptation; low costs encourage expression."
+      }
+    },
+    {
+      "name": {
+        "zh": "可逆性",
+        "en": "Reversibility"
+      },
+      "effect": {
+        "zh": "容易恢复适合实验，不可逆改造需要更清楚的预览。",
+        "en": "Easy restoration encourages experiments; irreversible changes demand previews."
+      }
+    }
+  ],
+  "tags": [
+    "spatial",
+    "creativity",
+    "planning"
+  ],
+  "related": [
+    "building-access-network",
+    "building-modular-snapping",
+    "building-room-requirements",
+    "building-service-coverage"
+  ],
+  "contrast": {
+    "zh": "Valheim从脚下局部整平入手；Timberborn将块状改造接入水利和聚落规划。",
+    "en": "Valheim emphasizes local preparation; Timberborn links block excavation to water and settlement planning."
+  },
+  "combination": {
+    "zh": "给悬崖村落有限填土量，在耕地、道路和蓄水池之间分配工程额度。",
+    "en": "Give a cliff village limited earthworks to divide among farmland, roads and reservoirs."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "房屋预览放不下，前半块地是斜坡，后半块被水沟隔开。",
+      "en": "A house cannot be placed: a slope occupies one side and a ditch cuts through the other."
+    },
+    "action": {
+      "zh": "你只平整房屋需要的范围，保留旁边水沟作为排水通道。",
+      "en": "Level only the required footprint, keeping a nearby channel for drainage."
+    },
+    "result": {
+      "zh": "可建造区域扩大，但填土消耗材料并改变原有地面。",
+      "en": "The buildable area expands, spending fill material and changing the terrain."
+    },
+    "next": {
+      "zh": "检查道路和排水是否仍通，再安排下一栋建筑。",
+      "en": "Check that access and drainage still work before planning the next building."
+    }
+  },
+  "prototype": {
+    "scope": "medium",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "先做格子高度、填挖成本和建筑平整条件，暂不加入真实地形网格变形。",
+      "en": "Use tile heights, cut/fill costs and building-level requirements before adding deformable terrain meshes."
+    },
+    "pitfall": {
+      "zh": "若地形变化还联动水流、导航与植被，每次修改都会触发更多系统，需逐层扩展。",
+      "en": "Terrain linked to water, navigation and vegetation triggers many updates; expand those links gradually."
+    },
+    "test": {
+      "zh": "玩家是否愿意局部改造以节省材料，并能预见哪条通路会受到影响？",
+      "en": "Do players use limited earthworks to save materials and anticipate affected routes?"
+    }
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "handwrittenChangedLines": 166,
+  "files": {
+    "scripts/ops/local-recovery-verify.mjs": 90,
+    "scripts/ops/local-recovery-verify.test.mjs": 64,
+    "scripts/ops/local-recovery.fixture.mjs": 5,
+    "scripts/local/maintenance-helper.mjs": 7
+  },
+  "sha256": {
+    "scripts/ops/local-recovery-verify.mjs": "0ae0ba8cfc1f2468e47c1df36df1f653945d686b90778b5b96e2e200767ac641",
+    "scripts/ops/local-recovery-verify.test.mjs": "1ab60393d08a03592ab276cf2cb8c55e529398bf38ddaede6e3cb500ad804d12",
+    "scripts/ops/local-recovery.fixture.mjs": "306c9e1006d143f7f6ae9ff43422549946c9292fd849261783f82ed1fc4661a1",
+    "scripts/local/maintenance-helper.mjs": "9503c024b5ca175bfbf298047db4089e0acdf9ffed9347de9fa5a5527942af27"
+  },
+  "checks": "18/18 focused pass; lineage/copy/material Reds preserved; no actual restore claim",
+  "frozenAt": "2026-11-02T14:47:40.087259+00:00"
+}

@@ -1,0 +1,48 @@
+{
+  "requests": [
+    {
+      "mode": "INVENTORY",
+      "side": "source",
+      "releaseId": "sha256:c77db33818be74674006328f990531543584983cb2ffe13351b605eb60ecfc15",
+      "operationId": "20e17004-08a1-48dc-a5ef-4f41637204f5",
+      "targetId": "pp1-local:09860f34e2c9401faf34262917313412"
+    },
+    {
+      "mode": "INVENTORY",
+      "side": "target",
+      "releaseId": "sha256:c77db33818be74674006328f990531543584983cb2ffe13351b605eb60ecfc15",
+      "operationId": "20e17004-08a1-48dc-a5ef-4f41637204f5",
+      "targetId": "pp1-local:f7a78e84c0394c329a48ca1eca3ebfb4"
+    },
+    {
+      "mode": "INVENTORY",
+      "side": "source",
+      "releaseId": "sha256:c77db33818be74674006328f990531543584983cb2ffe13351b605eb60ecfc15",
+      "operationId": "20e17004-08a1-48dc-a5ef-4f41637204f5",
+      "targetId": "pp1-local:09860f34e2c9401faf34262917313412"
+    },
+    {
+      "mode": "INVENTORY",
+      "side": "source",
+      "releaseId": "sha256:c77db33818be74674006328f990531543584983cb2ffe13351b605eb60ecfc15",
+      "operationId": "20e17004-08a1-48dc-a5ef-4f41637204f5",
+      "targetId": "pp1-local:09860f34e2c9401faf34262917313412"
+    },
+    {
+      "mode": "INVENTORY",
+      "side": "target",
+      "releaseId": "sha256:c77db33818be74674006328f990531543584983cb2ffe13351b605eb60ecfc15",
+      "operationId": "20e17004-08a1-48dc-a5ef-4f41637204f5",
+      "targetId": "pp1-local:f7a78e84c0394c329a48ca1eca3ebfb4"
+    },
+    {
+      "mode": "REVOKE_SESSIONS",
+      "side": "target",
+      "releaseId": "sha256:c77db33818be74674006328f990531543584983cb2ffe13351b605eb60ecfc15",
+      "operationId": "20e17004-08a1-48dc-a5ef-4f41637204f5",
+      "targetId": "pp1-local:f7a78e84c0394c329a48ca1eca3ebfb4"
+    }
+  ],
+  "oldImageValuedC5RequestsUnchanged": true,
+  "noCredentialsCopied": true
+}

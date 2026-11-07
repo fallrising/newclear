@@ -1,0 +1,27 @@
+{
+  "source": "gh REST GET actions/runs/id; plugin commit-query omitted per-run head_sha",
+  "runs": [
+    {
+      "id": 42242685752,
+      "name": "CMS Scaffold CI",
+      "head_sha": "6359544f58b72dd4c8c33ac6538bdfd0bf2f6dd9",
+      "status": "completed",
+      "conclusion": "success",
+      "event": "pull_request",
+      "html_url": "https://github.com/fallrising/newclear/actions/runs/42242685752",
+      "run_attempt": 1,
+      "updated_at": "2026-11-06T15:29:04Z"
+    },
+    {
+      "id": 42242685787,
+      "name": "Project success contracts",
+      "head_sha": "6359544f58b72dd4c8c33ac6538bdfd0bf2f6dd9",
+      "status": "completed",
+      "conclusion": "success",
+      "event": "pull_request",
+      "html_url": "https://github.com/fallrising/newclear/actions/runs/42242685787",
+      "run_attempt": 1,
+      "updated_at": "2026-11-06T15:24:17Z"
+    }
+  ]
+}

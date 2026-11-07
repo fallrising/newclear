@@ -8,6 +8,9 @@ reviewed: 2026-10-21
 source_commit: b97319d74f8442b5173ef42be72a0aa757d87df0
 ---
 
+> **2026-11-01 current checkpoint**: Approved T-0449 readonly review passed its single actual window on `865ed05e`: retained Claude candidate → Codex verdict, exact result after Rust/AP restart, readonly/secret/network boundaries and cleanup. [Evidence](../fanzloud/docs/acceptance/M3-readonly-review.md). Independent ACCEPT_READONLY_ACTUAL_AND_NATIVE; PR952 merged as `a69ff34ec173ee36284aceebcb417e560438569c` after finalhead967727b2 passed AP41330719757/Fanz41330719768/contracts41330719829; remote Fanzloud/AP bytes read back equal.; full M3/FN07 remains open. Earlier dated checkpoints are historical.
+
+
 # Agent Platform 成功契約
 
 ## 主線與範圍
@@ -217,3 +220,45 @@ after actual Worker outcomes; existing backend behavior is unchanged.
 | RTF-02 | passed (local) | Same single scenario4.0s includes persist exception→interrupted/resultless/noarchive/held1/no release; reload/live observations unchanged; freshbuild/type/format/Ruff passed |
 
 No SQL-state rewrite/trigger bypass or new product RED claim. Fullfake/live/M4 remains open.
+
+## Bounded scope: T-0447 Fanzloud M1 external workspace
+
+Owner approved the [external workspace contract](docs/EXTERNAL-WORKSPACE.md).
+EX-01 contract, EX-02 real isolated workspace and EX-03 real subscription coding
+are pending; no whole-platform or Fanzloud Web completion claim.
+
+T-0447 EX01–03 have actual external-workspace evidence in [Fanzloud M1 acceptance](../fanzloud/docs/acceptance/M1-isolated.md): one official subscription CLI repair, fixed-base checks/diff, secret/egress/sequence isolation and observed cleanup. This does not close the remaining Agent Platform mainline or M4.
+
+## T-0442 M2 — 2026-11-01 active scope
+
+Owner requests the approved second-vendor/two-task milestone. [M2 contract](../fanzloud/docs/specs/SPEC-M2-two-vendors.md) fixes scope and checks before implementation. Codex tool/credential separation and concurrent isolation are NOT_RUN. Existing host authority remains one4CPU/4GiB VM and coding<=600s; parallel2 requires separate approval. No M3, API spend, public deployment or release.
+
+M2 checkpoint2026-11-01: sourcea51a8663 actual Codex Web run142e9aee passed
+fixed-base repair/check/download and confirmed cleanup; code and single-live independent
+reviews accepted, native and hosted CI green. Two simultaneous workspaces/current shared
+Claude route remain pending explicit resource approval. max_claims remains1; temporary
+services stopped, no resident URL, no M3/AC05 or full platform completion claim.
+
+M2 concurrent checkpoint2026-11-01: owner-approved bounded pair on d008fc47 passed actual
+Claude repair, Codex cancellation, two live isolated workspaces, secret/network/traversal
+denials and cancelA/completeB. Both cleaned; capacity restored1 and services stopped.
+See [M2 acceptance](../fanzloud/docs/acceptance/M2-two-vendors.md). Fresh independent ACCEPT_M2_LIVE; final PR906 delivery pending.
+Earlier pending-resource text is historical. M3/AC05 not started; mainline incomplete.
+
+## T-0449 approved FN05 readonly dependency
+
+Owner approval2026-11-01; [contract](../fanzloud/docs/specs/SPEC-M3-readonly-review.md) CU-M3-R01–04 and R01–05 govern this bounded extension. AP lifecycle/lease remains unique; candidate-only readonly review and explicit one-rework/two-review ceiling. Actual source865ed05e: one Codex review of retained Claude candidate accepted; exact archive reopened after Rust/AP restart, readonly OS/Connector boundaries and cleanup proven. Independent ACCEPT_READONLY_ACTUAL_AND_NATIVE; PR952 merged as `a69ff34ec173ee36284aceebcb417e560438569c` after finalhead967727b2 passed AP41330719757/Fanz41330719768/contracts41330719829; remote Fanzloud/AP bytes read back equal.; no full platform acceptance. Max1VM4CPU/4GiB,20min window, no new API spend/deploy/release.
+
+## T-0442 approved original-intent recovery — 2026-11-02
+
+Owner approved U01–07 via deskPR395. Scope: authenticated read-only AP command evidence
+and explicit Fanzloud confirmation using the original store; no new execution authority,
+schema or dependency. [Wire contract](../fanzloud/docs/specs/SPEC-M3-recovery.md) and
+[approved limits](../fanzloud/docs/specs/PROPOSAL-M3-recovery.md) fix tests and windows.
+U01–06 and automated U07 independently accepted on86350871/PR983. Original SQLite
+positively reconciled; one-role rotation verified; same-Web Claude writer→Codex accept
+review and exact restart downloads passed.2CLI,41.06s live including cleanup; services
+stopped, zeroVM/claims/cgroups/reservations. Owner operation confirmation pending;
+fullM3/FN07/platform and oldCloudAC04 incomplete. See
+[M3 evidence](../fanzloud/docs/acceptance/M3-reconciliation.md). Earlier readiness
+statements are historical and superseded by this approved actual checkpoint.

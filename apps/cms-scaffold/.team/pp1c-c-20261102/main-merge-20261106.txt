@@ -1,0 +1,5 @@
+error: The following untracked working tree files would be overwritten by merge:
+	apps/cms-scaffold/.team/pp1c-b-cli-20261102/local-bundle.mjs.diff
+Please move or remove them before you merge.
+Aborting
+Merge with strategy ort failed.

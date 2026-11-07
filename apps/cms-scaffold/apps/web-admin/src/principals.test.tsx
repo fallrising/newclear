@@ -1,10 +1,18 @@
 import { act, fireEvent, screen, waitFor, within } from "@testing-library/react";
-import { keys } from "@cms/api";
+import { ApiError, keys } from "@cms/api";
 import { db, setScenario, setUser } from "@cms/mocks";
 import { describe, expect, it } from "vitest";
 import { IDS, recordRequests, renderRoute, writes } from "./test-utils";
+import { failureText } from "./errors";
 
 describe("web-admin principals", () => {
+  it("PP1-FM05 uses specific SELF copy before the generic 403", () => {
+    expect(failureText(new ApiError(403, "SELF_DISABLE_FORBIDDEN", "private server message"))).toBe("無法停用自己的帳號。");
+    expect(failureText(new ApiError(403, "SELF_DEMOTION_FORBIDDEN", "private server message"))).toBe("無法移除自己的管理員角色。");
+    expect(failureText(new ApiError(400, "CONFIRMATION_REQUIRED", "private server message"))).toBe("請重新確認要永久刪除的內容。");
+    expect(failureText(new ApiError(403, "FORBIDDEN", "private server message"))).toBe("你沒有執行這個操作的權限。");
+  });
+
   it("surface-admin §4.4 lists principals; status tab, search and page live in the URL", async () => {
     setUser("seed-admin");
     db.principals.find((p) => p.id === IDS.editorAlbum)!.status = "locked";

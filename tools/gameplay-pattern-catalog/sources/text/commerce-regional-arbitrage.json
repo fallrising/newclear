@@ -1,0 +1,120 @@
+{
+  "id": "commerce-regional-arbitrage",
+  "system": "commerce",
+  "edition": 1,
+  "name": {
+    "zh": "地区价差运输",
+    "en": "Regional arbitrage"
+  },
+  "summary": {
+    "zh": "在地点之间搬运商品，赚取扣除路途成本后的差价。",
+    "en": "Move goods between places to earn the spread after travel costs."
+  },
+  "rules": {
+    "zh": "玩家比较不同地点的进货价与卖价，选择货物和路线。运力、补给、危险和买方需求限制收益；回到港口的净利润才是真正结果。",
+    "en": "Compare purchase and sale prices across locations, then choose cargo and a route. Capacity, supplies, hazards and demand constrain profit; the net return matters more than the headline spread."
+  },
+  "loop": [
+    {
+      "zh": "发现地区价差",
+      "en": "Find a regional spread"
+    },
+    {
+      "zh": "采购并留足补给",
+      "en": "Buy cargo and supplies"
+    },
+    {
+      "zh": "完成运输",
+      "en": "Transport goods"
+    },
+    {
+      "zh": "出售并核算净利",
+      "en": "Sell and calculate net return"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "远处价差更大，是否覆盖多出的风险与补给？",
+      "en": "Does the distant spread cover extra risk and supplies?"
+    },
+    {
+      "zh": "装满高价值货，还是留下应急空间？",
+      "en": "Fill the hold with value or reserve emergency capacity?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "路途开销",
+        "en": "Travel overhead"
+      },
+      "effect": {
+        "zh": "持续补给成本会淘汰表面盈利却路途过长的路线。",
+        "en": "Ongoing supplies eliminate routes that look profitable only before travel."
+      }
+    },
+    {
+      "name": {
+        "zh": "地区稀缺性",
+        "en": "Regional scarcity"
+      },
+      "effect": {
+        "zh": "商品分布差异越大，探索新市场越有价值。",
+        "en": "Greater local differences make discovering markets worthwhile."
+      }
+    }
+  ],
+  "tags": [
+    "economy",
+    "planning",
+    "risk"
+  ],
+  "related": [
+    "allocation-shop-reservation",
+    "commerce-auction-bidding",
+    "commerce-debt-pressure",
+    "commerce-dynamic-market"
+  ],
+  "contrast": {
+    "zh": "无光之海把路线与生存风险绑定；大航海家4更强调持续商业网络的扩张。",
+    "en": "Sunless Sea binds routes to survival risk; Patrician emphasizes expanding a continuing commercial network."
+  },
+  "combination": {
+    "zh": "组合创意：山区诊所急需草药，最快路线需要攀爬轻装；高价订单与携带量形成直接冲突。",
+    "en": "Design proposal: a mountain clinic pays well for herbs, but the fastest route requires light climbing gear, putting cargo volume against delivery value."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "港口甲卖盐 5，港口乙买盐 9，单趟补给要花 10。",
+      "en": "Port A sells salt for 5 and port B buys it for 9; supplies cost 10 per trip."
+    },
+    "action": {
+      "zh": "你装十份盐，选较安全的航线出发。",
+      "en": "Load ten salt units and choose the safer route."
+    },
+    "result": {
+      "zh": "抵达卖出收入 90，扣掉进货 50 和补给 10，净赚 30。",
+      "en": "Sell for 90, subtract 50 for stock and 10 for supplies, and earn 30 net."
+    },
+    "next": {
+      "zh": "比较返程货物与下一处需求，规划下一趟净收益。",
+      "en": "Compare return cargo and demand elsewhere to plan the next net return."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "做三个地点、三种商品、固定运力与可见路费，用菜单完成运输。",
+      "en": "Use three locations, three goods, fixed capacity, and visible travel costs, with menu-based transport."
+    },
+    "pitfall": {
+      "zh": "先验证贸易取舍；自由航海、战斗和动态经济会把一个小机制扩成大游戏。",
+      "en": "Validate trade decisions before free sailing, combat, and dynamic economics expand the project."
+    },
+    "test": {
+      "zh": "加入一条价差大但路费高的路线，观察玩家是否会计算净收益。",
+      "en": "Add a high-spread, high-cost route and see whether players compare net returns."
+    }
+  }
+}

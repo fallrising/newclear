@@ -1,0 +1,120 @@
+{
+  "id": "relationships-companion-approval",
+  "system": "relationships",
+  "edition": 1,
+  "name": {
+    "zh": "同伴立场反馈",
+    "en": "Companion approval"
+  },
+  "summary": {
+    "zh": "让队友对玩家的选择表达不同判断，形成队伍内部的取舍。",
+    "en": "Companions judge choices differently, creating trade-offs inside the party."
+  },
+  "rules": {
+    "zh": "玩家在任务和对话中表态；相关同伴按自己的价值观增加或降低认可。反应会影响后续交流与关系，但不是一根全世界通用的善恶条。",
+    "en": "Make decisions in quests and dialogue. Relevant companions approve or disapprove according to their own values, changing future relationships rather than a universal morality score."
+  },
+  "loop": [
+    {
+      "zh": "遇到价值冲突",
+      "en": "Face a conflict"
+    },
+    {
+      "zh": "考虑同伴立场",
+      "en": "Consider companions"
+    },
+    {
+      "zh": "作出选择",
+      "en": "Choose an action"
+    },
+    {
+      "zh": "接收个人反应",
+      "en": "Read individual reactions"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "坚持自己的角色，还是为了喜欢的同伴改变决定？",
+      "en": "Stay in character or accommodate a favorite companion?"
+    },
+    {
+      "zh": "带谁参与这次任务，会改变哪些关系风险？",
+      "en": "Which companions make this mission socially risky?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "反馈可见程度",
+        "en": "Feedback visibility"
+      },
+      "effect": {
+        "zh": "立即显示增减便于学习，也容易变成迎合数值。",
+        "en": "Immediate feedback teaches preferences but encourages approval farming."
+      }
+    },
+    {
+      "name": {
+        "zh": "离队阈值",
+        "en": "Departure threshold"
+      },
+      "effect": {
+        "zh": "严厉阈值让分歧有重量，也提高试错成本。",
+        "en": "Strict departure rules make conflict matter but penalize experimentation."
+      }
+    }
+  ],
+  "tags": [
+    "narrative",
+    "risk",
+    "cooperation"
+  ],
+  "related": [
+    "relationships-faction-reputation",
+    "relationships-persuasion-checks",
+    "relationships-relationship-commitment",
+    "relationships-secrets-leverage"
+  ],
+  "contrast": {
+    "zh": "两者都让人物价值观成为规则；起源的礼物系统提供额外的关系修复渠道。",
+    "en": "Both encode personal values; Origins also offers gifts as another relationship-repair channel."
+  },
+  "combination": {
+    "zh": "组合创意：战术撤退可保住队伍，却让崇尚荣誉的伙伴不满；让战斗目标与人物目标偶尔冲突。",
+    "en": "Design proposal: retreat saves the party but disappoints an honor-driven companion, occasionally putting tactical and personal goals in conflict."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "队友甲重视守约，队友乙更在意报酬，雇主提出临时加价换目标。",
+      "en": "One companion values promises, another payment; an employer offers more money to change the target."
+    },
+    "action": {
+      "zh": "你决定守住原承诺，并说明自己的理由。",
+      "en": "Keep the original promise and explain your reasoning."
+    },
+    "result": {
+      "zh": "甲表示认可，乙抱怨损失，两段关系出现不同变化。",
+      "en": "One companion approves and the other complains, changing their relationships differently."
+    },
+    "next": {
+      "zh": "继续任务前考虑谁同行，以及是否需要和不满的队友谈谈。",
+      "en": "Before continuing, choose companions and consider discussing the disagreement."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "做两名立场不同的同伴、三个有冲突的选择和各自独立的反馈记录。",
+      "en": "Build two companions with conflicting values, three difficult choices, and separate response records."
+    },
+    "pitfall": {
+      "zh": "避免把所有选择都写成明显善恶题；立场差异应让两方都有可理解的理由。",
+      "en": "Avoid obvious good-versus-evil choices; give both positions understandable reasons."
+    },
+    "test": {
+      "zh": "让玩家预测两人的反应，观察他们能否理解立场却仍作出自己的选择。",
+      "en": "Ask players to predict both responses and see whether they understand the values yet choose independently."
+    }
+  }
+}

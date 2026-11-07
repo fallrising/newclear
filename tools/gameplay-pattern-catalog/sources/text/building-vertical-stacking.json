@@ -1,0 +1,120 @@
+{
+  "id": "building-vertical-stacking",
+  "system": "building",
+  "edition": 1,
+  "name": {
+    "zh": "垂直空间叠建",
+    "en": "Vertical stacking"
+  },
+  "summary": {
+    "zh": "平面放不下时，把功能层叠起来，再解决上下连接。",
+    "en": "Stack functions when land is scarce, then connect the floors."
+  },
+  "rules": {
+    "zh": "玩家在可承载的平台或结构上继续建设，把同一地块用于多层功能。可叠建资格与上下通路限制布局；通过可用面积和运输便利检验成果。",
+    "en": "Players build above valid platforms or structures to reuse one footprint. Stackability and vertical access constrain layouts; useful space and transport convenience provide feedback."
+  },
+  "loop": [
+    {
+      "zh": "选择有效底座",
+      "en": "Choose a valid base"
+    },
+    {
+      "zh": "分配楼层功能",
+      "en": "Assign floor functions"
+    },
+    {
+      "zh": "建设竖向通路",
+      "en": "Build vertical access"
+    },
+    {
+      "zh": "检验通行供料",
+      "en": "Check access and supply"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "向上扩建省土地，却增加层间移动。",
+      "en": "Building up saves land but adds movement between levels."
+    },
+    {
+      "zh": "预留竖井方便扩张，但降低当前空间利用率。",
+      "en": "Reserved shafts ease expansion but use current space."
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "高度限制",
+        "en": "Height limit"
+      },
+      "effect": {
+        "zh": "低上限强调楼层分配，高上限容许复杂竖向城市。",
+        "en": "Low limits emphasize allocation; high limits enable vertical cities."
+      }
+    },
+    {
+      "name": {
+        "zh": "竖向运输成本",
+        "en": "Vertical movement cost"
+      },
+      "effect": {
+        "zh": "上下运输昂贵时，相邻工序更值得放在同层。",
+        "en": "Expensive vertical movement rewards related processes sharing a floor."
+      }
+    }
+  ],
+  "tags": [
+    "spatial",
+    "creativity",
+    "optimization"
+  ],
+  "related": [
+    "building-access-network",
+    "building-modular-snapping",
+    "building-service-coverage",
+    "building-terrain-shaping"
+  ],
+  "contrast": {
+    "zh": "Timberborn依赖有效表面与居民路径；Satisfactory围绕设备和物流接口组织楼层。",
+    "en": "Timberborn depends on valid surfaces and resident paths; Satisfactory organizes floors around machines and logistics."
+  },
+  "combination": {
+    "zh": "在固定地块内建设垂直市场，将加工、零售和配送层按物流需求排列。",
+    "en": "Build a vertical market on a fixed footprint, arranging workshops, retail and dispatch by logistics."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "地面只剩一块空地，但你还需要储物区和加工区。",
+      "en": "Only one ground footprint remains, but you still need storage and processing space."
+    },
+    "action": {
+      "zh": "你在底层放储物，在上层放工坊，并预留楼梯连接。",
+      "en": "Place storage below, the workshop above and a staircase between them."
+    },
+    "result": {
+      "zh": "同一地块容纳更多功能，不过搬运增加了一段上下楼路程。",
+      "en": "The footprint supports more functions, but transport now includes vertical travel."
+    },
+    "next": {
+      "zh": "看哪种搬运最频繁，再调整楼层用途。",
+      "en": "Review the most frequent transfers and rearrange floor functions accordingly."
+    }
+  },
+  "prototype": {
+    "scope": "medium",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "先做两层固定网格、可承载标记和一个楼梯节点，用层切换代替复杂3D。",
+      "en": "Use two fixed grids, support flags and one stair node, switching floors instead of building complex 3D navigation."
+    },
+    "pitfall": {
+      "zh": "楼层遮挡、承重、跨层寻路与输入选择容易互相干扰，先用清楚的层视图。",
+      "en": "Occlusion, support, inter-floor pathfinding and selection can interfere; start with clear floor views."
+    },
+    "test": {
+      "zh": "玩家是否会为楼梯预留位置，并因搬运路线调整某层用途？",
+      "en": "Do players reserve stair space and rearrange floor uses to improve transport?"
+    }
+  }
+}

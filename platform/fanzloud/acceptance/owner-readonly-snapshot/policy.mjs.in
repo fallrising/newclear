@@ -1,0 +1,10 @@
+const runs=new Set(['9c20ec74-f940-46fd-81e6-064b9dee93eb','54dc092e-a174-4af6-a48c-ac0ab54b3a33','acd1054a-080c-4104-9f70-e06e5b73f60b']);
+const reads=new Set(['/','/assets/isolated.js','/assets/candidate.js','/assets/p0.css','/favicon.ico','/api/v1/session','/api/v1/projects','/api/v1/agent-profiles','/api/v1/runtime','/api/v1/submissions','/api/v1/tasks']);
+export function allowed(method,path){
+ if(typeof path!=='string'||!path.startsWith('/')||/[?%#\\\s]/.test(path)||path.includes('//'))return false;
+ if(path==='/api/v1/session')return ['GET','POST','DELETE'].includes(method);
+ if(method!=='GET')return false;
+ if(reads.has(path))return true;
+ const m=/^\/api\/v1\/runs\/([0-9a-f-]{36})(?:\/(result\.diff|artifacts)(?:\/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}))?)?$/.exec(path);
+ return Boolean(m&&runs.has(m[1])&&(!m[3]||m[2]==='artifacts'));
+}

@@ -71,13 +71,29 @@ pub async fn run(mut cfg: AppConfig) -> Result<()> {
     if let Some(path) = cfg.ensure_admin_token()? {
         info!(path = %path.display(), "admin token file (read it to log in; never logged)");
     }
+    // Only the serving process recovers pending attempts. Doctor/CLI Store::open
+    // calls must not interrupt a live request; a second server cannot own recovery.
+    let usage_owner = std::fs::OpenOptions::new()
+        .read(true)
+        .write(true)
+        .create(true)
+        .truncate(false)
+        .open(cfg.db_path().with_extension("usage-lock"))?;
+    usage_owner
+        .try_lock()
+        .map_err(|_| anyhow::anyhow!("usage_store_in_use"))?;
     let store = Store::open(&cfg.db_path(), cfg.secrets_key.clone())?;
+    store.recover_stream_attempts()?;
     let http = http_client::build_http_client()?;
 
     let state = AppState {
         cfg: cfg.clone(),
         store: store.clone(),
         proxy: ProxyState {
+            #[cfg(test)]
+            refresh_transport: None,
+            #[cfg(test)]
+            agy_transport: None,
             http,
             store: store.clone(),
             cooldown: CooldownMap::new(),
@@ -91,6 +107,7 @@ pub async fn run(mut cfg: AppConfig) -> Result<()> {
                 &cfg.data_dir,
                 cfg.claude_max_runs,
             )
+            .with_mode(cfg.claude_mode)
             .with_idle(std::time::Duration::from_secs(cfg.claude_idle_secs.max(1)))
             .with_store(store.clone()),
             cursor_cli: crate::cursor_cli::CursorCli::new(
@@ -122,17 +139,17 @@ pub async fn run(mut cfg: AppConfig) -> Result<()> {
     }
     let app = build_app(state);
 
-    info!(%addr, data_dir = %cfg.data_dir.display(), "thinrouter listening");
-    info!("  proxy     : http://{addr}/v1/chat/completions");
-    info!("  claude    : http://{addr}/v1/messages");
-    info!("  responses : http://{addr}/v1/responses");
-    info!("  admin     : http://{addr}/admin");
     if cfg.token_saver {
         info!(max_chars = cfg.token_saver_max_chars, "token-saver enabled");
     }
 
     let listener = tokio::net::TcpListener::bind(addr).await?;
     let bound = listener.local_addr()?;
+    info!(addr = %bound, data_dir = %cfg.data_dir.display(), "thinrouter listening");
+    info!("  proxy     : http://{bound}/v1/chat/completions");
+    info!("  claude    : http://{bound}/v1/messages");
+    info!("  responses : http://{bound}/v1/responses");
+    info!("  admin     : http://{bound}/admin");
     let host = if bound.ip().is_unspecified() {
         "127.0.0.1".to_string()
     } else {

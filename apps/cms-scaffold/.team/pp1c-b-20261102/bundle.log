@@ -1,0 +1,5 @@
+
+> test:bundle
+> node scripts/check-bundles.mjs
+
+test:bundle passed: web-front, web-back, web-admin

@@ -1,0 +1,25 @@
+Original local log SHA256: b780da290a1f036efc6fb31370daa5a661168c463eb70a7050a14d1d9d603658
+
+> Task :services:cms-api:test FAILED
+RecoveryInventoryTests > PP1c_checksumMismatchRejected() FAILED
+    org.opentest4j.AssertionFailedError at RecoveryInventoryTests.java:99
+RecoveryInventoryTests > PP1c_decodedImageNeedsAllVariants() FAILED
+    org.opentest4j.AssertionFailedError at RecoveryInventoryTests.java:99
+RecoveryInventoryTests > PP1c_symlinkRejectedWithoutFollowing() FAILED
+    org.opentest4j.AssertionFailedError at RecoveryInventoryTests.java:99
+RecoveryInventoryTests > PP1c_extraRelationRejected() FAILED
+    org.opentest4j.AssertionFailedError at RecoveryInventoryTests.java:99
+RecoveryInventoryTests > PP1c_pdfDeletedAndOrphanRemainUnchanged() FAILED
+    org.opentest4j.AssertionFailedError at RecoveryInventoryTests.java:73
+RecoveryInventoryTests > PP1c_hardlinkRejected() FAILED
+    org.opentest4j.AssertionFailedError at RecoveryInventoryTests.java:99
+RecoveryInventoryTests > PP1c_missingOriginalRejected() FAILED
+    org.opentest4j.AssertionFailedError at RecoveryInventoryTests.java:99
+RecoveryInventoryTests > PP1c_decodeNullImageHasOnlyOriginal() FAILED
+    org.opentest4j.AssertionFailedError at RecoveryInventoryTests.java:82
+RecoveryInventoryTests > PP1c_sourceChangedDuringInventoryRejected() FAILED
+    org.opentest4j.AssertionFailedError at RecoveryInventoryTests.java:99
+RecoveryInventoryTests > PP1c_unsafePathRejectedWithoutChangingSource() FAILED
+    org.opentest4j.AssertionFailedError at RecoveryInventoryTests.java:99
+10 tests completed, 10 failed
+BUILD FAILED in 14s

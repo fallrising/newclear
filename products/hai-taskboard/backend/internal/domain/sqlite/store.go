@@ -509,6 +509,16 @@ WHERE c.project_id=? AND (?='' OR c.candidate_id=?) AND (?='' OR c.run_id=?) AND
 		return port.CompletionMaterial{}, normalizeError(err)
 	}
 	material.ActiveOrUnknownRun = activeOrUnknown != 0
+	if err := tx.conn.QueryRowContext(ctx, `SELECT count(*), coalesce(min(observed_state IN ('Succeeded','Failed') AND reconciliation_state='None' AND side_effect_outcome='Confirmed' AND desired_action<>'CancelRequested'),1) FROM runs WHERE project_id=? AND work_item_id=?`, query.ProjectID, query.WorkItemID).Scan(&material.Runs.Count, &material.Runs.AllSettled); err != nil {
+		return port.CompletionMaterial{}, normalizeError(err)
+	}
+	if material.Runs.Count > 0 {
+		var hasCandidate int
+		if err := tx.conn.QueryRowContext(ctx, `SELECT r.run_id, r.created_at_ns, EXISTS(SELECT 1 FROM candidates c WHERE c.project_id=r.project_id AND c.run_id=r.run_id) FROM runs r WHERE r.project_id=? AND r.work_item_id=? ORDER BY r.created_at_ns DESC, r.run_id DESC LIMIT 1`, query.ProjectID, query.WorkItemID).Scan(&material.Runs.LatestRunID, &material.Runs.LatestCreatedAtNS, &hasCandidate); err != nil {
+			return port.CompletionMaterial{}, normalizeError(err)
+		}
+		material.Runs.LatestHasCandidate = hasCandidate != 0
+	}
 
 	rows, err := tx.conn.QueryContext(ctx, `SELECT ac_id,revision_digest FROM work_item_ac_requirements WHERE project_id=? AND work_item_id=? ORDER BY ac_id,revision_digest LIMIT ?`, query.ProjectID, query.WorkItemID, completionRowLimit(query))
 	if err != nil {

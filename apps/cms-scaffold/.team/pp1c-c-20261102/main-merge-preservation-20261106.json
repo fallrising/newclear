@@ -1,0 +1,14 @@
+{
+  "initialMergeExit": 2,
+  "initialReason": "untracked historical source diff would be overwritten",
+  "files": [
+    {
+      "original": "apps/cms-scaffold/.team/pp1c-b-cli-20261102/local-bundle.mjs.diff",
+      "preserved": "apps/cms-scaffold/.team/pp1c-c-20261102/main-merge-preserved-20261106/apps/cms-scaffold/.team/pp1c-b-cli-20261102/local-bundle.mjs.diff",
+      "originalSha256": "ca247e4fc78f0451b6fda0a3b519227f17158b41f73717922f9f408fe7b5bd27",
+      "incomingSha256": "ca247e4fc78f0451b6fda0a3b519227f17158b41f73717922f9f408fe7b5bd27",
+      "bytesEqualToIncoming": true
+    }
+  ],
+  "noDataDiscarded": true
+}

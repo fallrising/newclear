@@ -1,0 +1,52 @@
+{
+  "network": {
+    "mechanism": "Linux libseccomp",
+    "denied_syscalls": [
+      "socket",
+      "socketpair",
+      "connect",
+      "sendto",
+      "sendmsg",
+      "sendmmsg"
+    ],
+    "probes": {
+      "ipv4": "EPERM",
+      "ipv6": "EPERM"
+    },
+    "installed_before_sdk_import": true,
+    "inherited_by_subprocesses": true
+  },
+  "patched_sdk": {
+    "patch": "explicit-vector-batch-v2-hnsw",
+    "sdk": "2.0.160",
+    "core": "2.0.140",
+    "archive_sha256": "8eab5aec9a30eb459f553ed091038b6916d02a2f33569b32a7aee1b556820243",
+    "patch_sha256": "9af1773d765ef51996a24de82069999a0bd81ecd10d9a942057a8218cbe26129",
+    "original_cargo_lock_sha256": "43cbd08f2ea7ee24b6dac987e14a8880fa6dec2fb20c772a27746e758dc4127d",
+    "cargo_lock_sha256": "80e7f63d82520603fb801565909612d86b58eb119c494980974f1ed3c17d306c",
+    "lock_patch_sha256": "44bc193e623a58d9cf32d5880d3501113432b606d4a298baaf800c704b9b0f2d",
+    "binding_sha256": "4fdc04d3e5dbb22665cd2db12692563e4bb28ebe687b975dd651cdc519a416b5",
+    "core_vec_sha256": "3c25d30284af02999e3c1debcc602ca2279f4d0f191034941dfdd055f7cd885b",
+    "library_sha256": "458cd24fc8faebb19a724ec98f90aa7697f483ab316d682096a5bc5084804a56",
+    "toolchain": "1.90.0",
+    "features": "pinned SDK default features",
+    "runtime": "explicit opt-in overlay"
+  },
+  "passed": false,
+  "stages": {
+    "initial_reopen": {
+      "expected": 1000,
+      "actual": 1000
+    },
+    "append_reopen": {
+      "expected": 1001,
+      "actual": 1001
+    },
+    "delete_reopen": {
+      "expected": 1000,
+      "actual": 1000
+    }
+  },
+  "corpus_sha256": "a91ec99c3329ddafdf856aa74a193dcfd5f62e32273ccd4c62d9154855c1f970",
+  "scope": "1000 repeated real-encoder payloads; storage retention control, not quality scores"
+}

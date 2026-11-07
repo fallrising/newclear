@@ -81,3 +81,9 @@ admission／delivery 狀態限定為 `accepted`、`dispatching`、`awaiting_resu
 | 429／503 | QUOTA_EXCEEDED／TEMPORARILY_UNAVAILABLE | 同 key 最多 3 次指數退避，受 deadline 約束 |
 
 暫時無回應先查原 key 的 admission；無法確認即維持 pending／unknown，不把 transport failure 宣告成 execution failure。M1 的 polling 與 outbox 足夠；未來 Queue／Workflow adapter 也不得改這些狀態及 authority 邊界。
+
+## M1 UR：operator未知結案擴充
+
+M0上方狀態基線保留；已實作的M1新增delivery `closed_unknown`。只有具體批准的可信operator離線計畫可以從reconciling、deadline已過、原owner journal=unknown且identity相符的單筆紀錄轉入，透過完整record/revision CAS保存resolution審計並釋放admission槽。owner outcome仍unknown、result保持null；不是成功、失敗、停止證據，也不抹除副作用未知性。不可由API caller／bot／timeout自動觸發。
+
+新狀態terminal，不再claim；任何晚到report拒絕RECONCILIATION_CLOSED。原idempotency key返回原結案，不重跑；後續新id才能取得新槽。保留原command／attempt／external_ref／journal與用量計數。詳見[UR契約](../docs/unknown-resolution.md)。舊Worker不相容，結案前須部署護欄並暫停runner／排空在途，不能結案後直接退回舊Worker。

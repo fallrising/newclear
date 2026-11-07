@@ -1,0 +1,120 @@
+{
+  "id": "puzzles-language-decoding",
+  "system": "puzzles",
+  "edition": 1,
+  "name": {
+    "zh": "语境推断陌生语言",
+    "en": "Decoding language from context"
+  },
+  "summary": {
+    "zh": "从行为、图像和重复词形推测一句话的含义。",
+    "en": "Infer meaning from behavior, pictures and repeated symbols."
+  },
+  "rules": {
+    "zh": "玩家将陌生文字与场景、行为和重复语句对照，提出词义假设。新上下文会支持或推翻判断；翻译使指示或历史变得可理解，再反过来指导下一次调查。",
+    "en": "Compare unknown writing with scenes, behavior and recurring phrases to propose meanings. New contexts support or overturn guesses; translations make directions and history usable for further investigation."
+  },
+  "loop": [
+    {
+      "zh": "收集带语境的文字",
+      "en": "Collect writing in context"
+    },
+    {
+      "zh": "比较重复符号",
+      "en": "Compare recurring symbols"
+    },
+    {
+      "zh": "填写或选择词义",
+      "en": "Enter or choose a meaning"
+    },
+    {
+      "zh": "用新语境检验",
+      "en": "Test against new context"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "符号是人名、动作还是类别，哪种解释更广？",
+      "en": "Is a symbol a name, action or category, and which explains more?"
+    },
+    {
+      "zh": "使用不确定译文推进，还是寻找第二条证据？",
+      "en": "Proceed with an uncertain translation or seek another clue?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "验证时机",
+        "en": "Validation timing"
+      },
+      "effect": {
+        "zh": "即时确认给进展感；延后确认保留考古式不确定性。",
+        "en": "Immediate confirmation shows progress; delay preserves archaeological uncertainty."
+      }
+    },
+    {
+      "name": {
+        "zh": "候选词提示",
+        "en": "Suggested meanings"
+      },
+      "effect": {
+        "zh": "候选词降低门槛；自由输入强调自主归纳。",
+        "en": "Suggestions reduce difficulty; free entry emphasizes inference."
+      }
+    }
+  ],
+  "tags": [
+    "information",
+    "discovery",
+    "narrative"
+  ],
+  "related": [
+    "puzzles-scene-deduction",
+    "puzzles-visual-rule-learning",
+    "commerce-interpret-orders",
+    "puzzles-box-pushing"
+  ],
+  "contrast": {
+    "zh": "巴别塔圣歌围绕当下人群交流；天堂之穹把翻译放进不确定的历史重建。",
+    "en": "Chants centers living communication; Heaven’s Vault embeds translation in uncertain historical reconstruction."
+  },
+  "combination": {
+    "zh": "组合提案：贸易初期凭图示谈价，学会地方语言后才能识别合同隐藏条件。",
+    "en": "Design proposal: trade using pictures first, then learn local language to detect hidden contract terms."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "一个陌生符号先出现在水井旁，又出现在递水的对话里。",
+      "en": "An unknown symbol appears beside a well and again in a conversation about handing over water."
+    },
+    "action": {
+      "zh": "你暂时把它记为“水”，带着这个猜测阅读下一块路牌。",
+      "en": "Tentatively record it as “water” and use that guess on the next sign."
+    },
+    "result": {
+      "zh": "新语境能解释得通，猜测更可靠；若矛盾就需要改译。",
+      "en": "The new context fits, strengthening the guess; a contradiction would require revision."
+    },
+    "next": {
+      "zh": "继续找重复出现的词，把新理解用于选择路线或回应人物。",
+      "en": "Find repeated words and use the growing translation to choose routes or respond to characters."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "设计六个符号、三处互相印证的场景和可修改的个人词典。",
+      "en": "Design six symbols, three corroborating scenes, and an editable personal dictionary."
+    },
+    "pitfall": {
+      "zh": "先别写庞大语言；同一个词需要足够上下文，才能支持推理而非记忆配对。",
+      "en": "Avoid a huge language first; each word needs enough context for inference rather than pair memorization."
+    },
+    "test": {
+      "zh": "给出未见过但使用已知词的句子，观察玩家能否解释并采取正确行动。",
+      "en": "Present a new sentence using learned words and see whether players interpret it and act accordingly."
+    }
+  }
+}

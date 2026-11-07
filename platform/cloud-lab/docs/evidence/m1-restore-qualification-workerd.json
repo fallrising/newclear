@@ -1,0 +1,78 @@
+{
+  "status": "passed",
+  "scope": "isolated local workerd logical D1 restore and real Python/SQLite journal; no remote export/import or live change",
+  "cases": [
+    {
+      "case": "started",
+      "status": "passed",
+      "source_collector_calls": 1,
+      "restore_collector_calls": 0,
+      "restored_delivery": "reconciling",
+      "restored_active": 1,
+      "journal_state": "started",
+      "source_unchanged": true
+    },
+    {
+      "case": "unknown",
+      "status": "passed",
+      "source_collector_calls": 1,
+      "restore_collector_calls": 0,
+      "restored_delivery": "reconciling",
+      "restored_active": 1,
+      "journal_state": "unknown",
+      "source_unchanged": true
+    },
+    {
+      "case": "completed",
+      "status": "passed",
+      "source_collector_calls": 1,
+      "restore_collector_calls": 0,
+      "restored_delivery": "result_recorded",
+      "restored_active": 0,
+      "journal_state": "completed",
+      "source_unchanged": true
+    },
+    {
+      "case": "missing-journal",
+      "status": "passed",
+      "source_collector_calls": 1,
+      "restore_collector_calls": 0,
+      "restored_delivery": "reconciling",
+      "restored_active": 1,
+      "journal_state": "unknown",
+      "source_unchanged": true
+    },
+    {
+      "case": "identity-mismatch",
+      "status": "passed",
+      "source_collector_calls": 1,
+      "restore_collector_calls": 0,
+      "restored_delivery": "reconciling",
+      "restored_active": 1,
+      "journal_state": "completed",
+      "source_unchanged": true
+    },
+    {
+      "case": "accepted-control",
+      "status": "passed",
+      "source_collector_calls": 1,
+      "restore_collector_calls": 0,
+      "restored_delivery": "accepted",
+      "restored_active": 1,
+      "journal_state": "completed",
+      "source_unchanged": true
+    }
+  ],
+  "miniflare": "5.20261019.2-beta",
+  "sources": {
+    "apps/control/worker/index.mjs": "8c561d04e6d1c8d53962ba96f0e180898d4f12986cb01fe6e435428f6edb2b69",
+    "apps/control/worker/auth.mjs": "2f1338e5f8db0bdc7b0e7a38818ef26d3b80825798ef795bc6692c67d548898a",
+    "apps/control/worker/protocol.mjs": "1328a818e0335a615635c3797b46dd9f1033a04a796592fc11a77dbf16f6abd0",
+    "apps/control/migrations/0001.sql": "67165ab7b0148900811abd596194e1701b9aa8d34a2130a362ff11776f743dbc",
+    "apps/control/migrations/0002.sql": "6fac19d185aad53fd634620f7b49974135f5f5c2d63134d19029fc85efea2578",
+    "adapters/node-health/runner.py": "5521d8c93b937374479da07f625a75ff6c82e0ab283c7cb6ed0aee870fb6d716",
+    "tests/fixtures/recovery_runner.py": "01cb9df47f35eedcb5ea59fbfadfa06bb963333b839ac9d30f910748e1b6183b",
+    "tests/fixtures/restore_journal.py": "cf89962ccfe2d8d2b5b1b522c5ac57a1a74e18bc83ae9778b7c98c7313fd6820",
+    "tools/qualify_restore.mjs": "7bc45739f8340aa07f0fc4c24fe6e36af5ad4ee9c3cd04117683f968f6588388"
+  }
+}

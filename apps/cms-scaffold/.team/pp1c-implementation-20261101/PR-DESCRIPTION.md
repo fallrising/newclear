@@ -1,0 +1,9 @@
+PP1c-A adds the strict bundle format and read-only inventory needed for local backup and restore. Node validates canonical JSON and declared manifest/receipt bindings. Java snapshots the approved 20 tables, catalogs, Flyway history and referenced, orphaned and deleted media. The offline `ops-inventory` route holds one read-only transaction through Ready/Permit, then writes a durable private inventory artifact.
+
+This implements the first 9 approved PP1c cards for T-0351, SUCCESS AC-05 / PP1-AC03 FM08/12. Existing maintenance routing and v1 formats are preserved. Capture, restore and the real isolated drill remain in B–D; this PR does not establish restore or RPO/RTO acceptance.
+
+Validation: 98 Node protocol tests, 564 Java unit tests, 211 PostgreSQL integration tests, packaging and four actual jar rejection smoke cases passed. Frontend tests, lint, typecheck, build, bundle checks, 117 v1 helper tests and 52 project contracts passed. Each card retains named Red/Green evidence and stays below 400 handwritten changed lines. T118 independently reviewed source and evidence; its filename encoding and directory membership findings were corrected and reverified.
+
+Historical failures remain visible: an unchanged frontend lookup timed out during concurrent Gradle work, then all 147 frontend tests passed alone with the original threshold. A prior Gradle tool session returned 143 while its bounded child continued and completed successfully. The final corrected-source Gradle run separately records exit 0 and fresh results.
+
+Evidence: `apps/cms-scaffold/.team/pp1c-implementation-20261101/EVIDENCE.md` and reports T-116/T-117/T-118. Receipt hash preimages await a C/D producer/verifier clarification; A checks specified shapes and bindings only. Required exact-head CI must pass before merge.

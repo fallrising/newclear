@@ -1,5 +1,8 @@
 # 驗收與里程碑
 
+> 本頁保留原始驗收設計與歷次追加。2026-11-01後的近期順序以[方向調整](direction-review.md)為準：既有CF工具目錄／重複判定不再等待M3；已驗子集與目前授權以[SUCCESS](../SUCCESS.md)為準。歷史pending不自動變成新門檻，手機／模型對話不是固定profile必要驗收。
+
+
 Cloud Lab 產品主線未完成。M0 文件檢查與未來執行驗收分列；不以文件、schema 或 mock 通過推導 live 成功。
 
 ## M0：本次文件里程碑
@@ -32,10 +35,10 @@ M0 不需要變更 runtime，因此沒有為文件增加產品行為測試或安
 | artifact 太大、digest 不符、輸出 schema 錯誤 | 不標 validated success；錯誤及上限可見 |
 | 事件重複、亂序、漏 seq | 去重，不倒退投影，缺漏觸發查權威狀態 |
 | runner／控制面恢復，schedule 重送 | 原 command 與 due-time 去重仍有效；不自動補跑無界 backlog |
-| 手機查看離線節點 | 顯示最後觀測時間與 stale／unknown，不顯示健康零值 |
+| 一般瀏覽器查看離線節點；實體手機選測 | 顯示最後觀測時間與 stale／unknown，不顯示健康零值 |
 | 隔離備份還原 | 對齊 schema／artifact digest，未完成命令先對帳 |
 
-驗證順序：domain 正反例 → fake 邊界整合 → local CF 實際 bindings → 經批准的真實 CF＋runner → 手機／bot 使用流程與恢復演練。每層獨立標記版本與結果；fake 不代替後兩層。部署前固定 retention、資源限額、觀測窗口及成本預算；不在此假設已核准帳號。
+驗證順序：domain 正反例 → fake 邊界整合 → local CF 實際 bindings → 經批准的真實 CF＋runner → 一般瀏覽器真人／bot 使用流程與恢復演練（實體手機依owner指示改為選測）。每層獨立標記版本與結果；fake 不代替後兩層。部署前固定 retention、資源限額、觀測窗口及成本預算；不在此假設已核准帳號。
 
 ## M2/M3：後續工作
 
@@ -65,3 +68,35 @@ git diff --check
 [FR-01～04隔離故障工具](recovery-qualification.md)及[實際結果](evidence/m1-recovery.md)補上程序中斷、回報送達前遺失與保存後ACK遺失。此層已跑真正local workerd／D1 binding，但遠端Cloudflare、撤權、主機重開機與手機流程仍需各自驗收。
 
 [UI-01～04看板瀏覽器驗收](dashboard-qualification.md)及[本機證據](evidence/m1-dashboard.md)區分真實Chromium／workerd／D1、合成JWT與手機尺寸模擬；不取代真正Access登入、實體手機及遠端新版部署。
+
+2026-10-28 owner取消實體手機必測門檻，見[範圍調整](dashboard-rollout.md#owner調整客戶端驗收範圍)。歷史文件的手機pending描述保留作當時狀態；目前只要求一般瀏覽器真人Access流程，裝置相容性另列選測，不阻擋其他功能開發。
+
+BP01–04依[政策契約](bot-policy.md)驗證離線初始化、配置綁定、期限／額度、並行FLOCK、ACK遺失同ID與MCP參數邊界；[本機證據](evidence/m1-bot-policy.md)與live／模型驗收分開。
+
+BR01–04依[續租契約](bot-policy-renewal.md)驗證preview、到期CAS／transaction rollback、歷史／payload保留、重試不補額度、實際MCP／HTTP跨期恢復；[證據](evidence/m1-bot-policy-renewal.md)區分本機與live。
+
+BA01–04以[準備證據](evidence/m1-bot-activation.md)核對候選hash、原資料／設定、管理metadata、self／resident及協議發現。tools/list不等於授權或提交成功；[方案](bot-activation.md)的實際續權／policy初始化／host切換另驗。
+
+BT01–04依[實際啟用證據](evidence/m1-bot-activation-live.md)驗fresh來源、單次窗口／bot-only更新、真實self、原state首次政策、native doctor和一筆MCP→resident→validated，以及最後保全；初始失敗與唯讀對帳保留。
+
+BI01–04依[唯讀查詢契約](bot-inspection.md)驗原state不變、FLOCK、sidecar／損壞拒絕、時間／額度投影及有界pendingIDs；[359tests與原state查詢](evidence/m1-bot-inspection.md)區分local snapshot與遠端授權未知。
+
+## 應用配額子集
+
+[QV01–04](quota-qualification.md)以Worker.handle／scheduled及本機SQLite補AC-08的總保留／滾動窗口、去重保全及Cron終局；[證據](evidence/m1-quota-qualification.md)保留fixture失敗及副本mutation。此層不證明provider耗盡、遠端競爭或帳單；其餘矩陣層級與缺口保持。
+
+## 應用用量觀測子集
+
+[UO01–04](usage-observation.md)補scope聚合、手動看板及過期／撤權競爭，[證據](evidence/m1-usage-observation.md)區分source/local與provider／live。觀測數值不是准入預留或帳單來源。
+
+[UL部分live證據](evidence/m1-usage-live.md)：已發布固定六檔，三modules／settings／歷史保全通過；UL03正向asset HTTP bytes／usage200 pending。runner403、expired bot401及匿名302是拒絕邊界，不能取代成功讀取。原unknown仍佔active槽，未恢復排程。
+
+Owner以Safari回報UL真人登入／手動用量成功，三counter與D1同窗口聚合一致；額外asset hash依owner要求取消，沒有假稱執行。UR新增離線CAS結案與晚到report／競爭／新Cron隔離驗證，原live unknown處置仍pending。
+
+## FQ逐列接續核對
+
+[十四列證據矩陣](failure-matrix.md)列出具名local／歷史workerd／remote證據及尚未實作的事件／稽核／完整性／restore缺口；[保留方案](retention.md)區分七天禁止下載與實際資料保留。本輪[FQ範圍](failure-retention-qualification.md)不新增live故障操作。前段UR原unknown pending已由後續[ULR](evidence/m1-unknown-resolution-live.md)完成單筆結案與新Cron驗證，結果仍unknown，沒有重跑。
+
+## M1 snapshot profile的具體對映
+
+[PS輪詢順序與恢復](snapshot-ordering.md)沿已授權ADR-03／08明列通知／Event提案與現行profile的差異：commit後ACK遺失靠持久command重讀，完整snapshot以command revision防倒退／衝突並可跳版。這不是Event source_seq或covered-through snapshot相容實作，原事件要求沒有被記成passed；採用事件協定時仍須獨立實作與驗證。

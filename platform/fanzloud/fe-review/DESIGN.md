@@ -1,7 +1,7 @@
 # FE Review — fanzloud / Codebox operator — DESIGN
 
-> 2026-10-23 owner 已確認本設計方向（[決策紀錄](../../../docs/fe-review/ROUND1-ACCEPTANCE.md#owner-confirmation-20261023)）：D1 採靜態資產＋有限假 API/WS，不新增 production fake-runner 或連真 Cloud。 第 2／3 輪仍未由本次文件回寫執行。
-> 狀態：**設計方向已確認**。實作與 runtime／browser 驗證仍須按本檔範圍另行執行；文件確認不代表產品可用。
+> 2026-10-23 owner 已確認本設計方向（[決策紀錄](../../../docs/fe-review/ROUND1-ACCEPTANCE.md#owner-confirmation-20261023)）：D1 採靜態資產＋有限假 API/WS，不新增 production fake-runner 或連真 Cloud。
+> 狀態：**第 2 輪 M1–M3 已交付**（[R2 報告](tasks/round2/report.md)）。這是合成 harness 範圍的結果，不代表真實後端、Cloud 或產品可用；第 3 輪未開始。
 
 ## 目標
 
@@ -19,7 +19,7 @@
 
 - 不啟動 production control-plane、Codex CLI、device login 或 Cloud task；不讀現有 CODEX_HOME、token、session、帳號、Cloud environment／branch 或私人狀態。
 - 不修改 Rust backend、runner、credential scope、HTTP／WS schema、Origin／cookie／CSP、安全驗證、mutation 重試／idempotency、durability 或 P1 actor；不新增 recovery 控制項、apply、push、多使用者、provider 選擇或 light theme。
-- 不以 mock 或既有驗收紀錄冒充本輪 browser／runtime／Cloud PASS；不修改 SUCCESS 的產品 AC。所有未來命令均是提案，新增 harness 目前不存在。
+- 不以 mock 或既有驗收紀錄冒充本輪 browser／runtime／Cloud PASS；不修改 SUCCESS 的產品 AC。
 
 ## 修改項目
 
@@ -30,7 +30,7 @@
 - 安全前置：瀏覽器、server 與 fixture 同一獨立 network namespace，只綁 loopback；runtime 阻外網。每次新建 task state、全新 browser profile/context，清除繼承的 CODEBOX／CODEX／provider 設定，不掛現有 HOME、憑證或 volume，不覆寫共用 HOME。產生本次 test CA／含 loopback SAN 的 certificate，僅信任於本次瀏覽器環境，不改全域 trust、不關閉產品 HTTPS 或使用 HTTP bypass。
 - Fixture：每個場景產生符合 schema 的合成 UUID、sequence、session／instance、短／長中文 prompt 與無秘密 diff；有界重播以 replay-begin／snapshot／replay-end／live 順序對齊，另有 gap、過期 instance、斷線、403、timeout 及 malformed frame 的負向場景。模擬 bootstrap/session cookie 只在本機、本次有效，形狀對齊契約；不是 production 認證驗收。device 畫面的固定官方 URL 只作文字（client validator:454），verification code 是合成值，不開外部連結、不進行登入。
 - 驗證：新增 harness 拒絕非 loopback、既有 state、未知場景及外部 fallback 的檢查；對照現有 controller 測試的 exact schema、bounds、explicit-action、sequence 與 idempotency 斷言。記錄有限 route/mutation 次數與無秘密狀態摘要，禁止存 token、header、cookie、prompt body 或原始 frame。真 backend 整合仍須另以受授權的假 executable／新私有目錄及真正瀏覽器驗證 HTTPS 接線；不能拿靜態 mock 代替那個 gate。
-- 風險與回滾：mock 容易與產品 contract 漂移，故來源 SHA／fixture schema 及負向斷言一起記錄。所有腳本目前未存在；前置或契約不足就記缺口並停止，不降低 parser／auth。回退 FE harness／targets 即可；清理只處理記錄並核對屬於本次的資源，不刪既有 state。
+- 風險與回滾：mock 容易與產品 contract 漂移，故來源 SHA／fixture schema 及負向斷言一起記錄。前置或契約不足就記缺口並停止，不降低 parser／auth。回退 FE harness／targets 即可；清理只處理記錄並核對屬於本次的資源，不刪既有 state。實作結果見 [R2 報告](tasks/round2/report.md)。
 
 ### M2 既有響應式與狀態可讀性（C2）
 
@@ -46,15 +46,15 @@
 - 驗證：只用合成 prompt／diff／device code，驗證看似 HTML 的 diff 仍是文字且不執行。新 context 及獨立場景不沿用現有 sessionStorage；同場景 refresh 則檢查 cursor／instance 契約。擷取前 bearer／prompt 已清空；停用 trace、video、HAR／body dump，cookie/storageState 僅放本次受保護 state、不得提交。共用 capture 不會 authenticate、seed、遮罩或走互動；正常 UI 的 200 不等於 HTTP/WS 成功。
 - 風險與回滾：攔截失效不能向真服務送出；先驗證 namespace／origin／fallback 拒絕。回退專用場景／測試，原本 controller 與安全邊界保持原意。
 
-## 啟動方式（第 2 輪要驗證的版本）
+## 啟動方式（第 2 輪已驗證的版本）
 
-**未執行，沒有就緒的 FE harness。** 原 `cargo run` targets 會進 production startup，已移除；不能靠留空 runner 設定或沿用本機 CODEBOX_* 啟動。M1 完成前不執行 capture／--start，也不把既有本機 listener 當 fixture。
+production `cargo run` 會進 production startup，不用於 review；不能靠留空 runner 設定或沿用本機 CODEBOX_* 啟動，也不把既有本機 listener 當 fixture。
 
-M1 的 wrapper 須先完成：新 task state、namespace／egress／loopback 確認、即時 CA／TLS、本次 browser trust、固定資產與契約 fixture、owned process／shutdown 收據。專用 server 的啟動命令與動態 port 尚待實作驗證，這裡不虛構可貼上的 seed／serve 指令。`targets.json` 僅保留候選 HTTPS URL，無 start；實際 port、CA 信任、fixture 場景、登入及私有 storageState 由本次 ephemeral targets／專用腳本配置，不寫回版控 token。
+M1 harness 由各專用 driver 啟動（`remaining-v7-baseline.mjs`、`conformance-browser.mjs`、`journeys-browser.mjs`、`shared-capture.mjs`），每次在固定映像 `fe-review-trust-terminal:20261024`、`--network none` 容器內：新 private state、即時 CA／loopback TLS 與本次 browser trust、固定資產與契約 fixture、owned process／shutdown 收據。review origin 是 `https://127.0.0.1:8443`。`targets.json` 只記這個 origin、無 start；私有 targets 由 `shared-capture.mjs` 逐 byte 複製到本次 state，不寫回 token。
 
-完成上述前置後，才從 repository root 使用本次產生的 ephemeral targets 跑 `node docs/fe-review/capture.mjs <本次-targets> --dry-run`，再擷取。共享腳本本身不設定 CA 信任、WSS mock 或登入。其餘互動由專用腳本完成；靜態初始 `/` 與 authenticated 狀態分開記錄，不能靠 URL 清單假裝覆蓋全部狀態。
+共用 `docs/fe-review/capture.mjs` 只由 `shared-capture.mjs` 呼叫，先 `--dry-run` 再擷取靜態初始 `/`（`capture-002`）。共享腳本本身不設定 CA 信任、WSS mock 或登入；authenticated 狀態由專用 driver 擷取，兩者分開記錄。
 
-第 2 輪必要前端檢查提案為 `node --test --test-isolation=none apps/control-plane/web/p0-client.test.mjs`，以及依元件規範選定的 Rust fmt／Clippy／test／build gates；均須經共用 launcher、符合已接受規格並保存實際結果。本輪沒有執行這些產品命令。fake CLI 的整合驗證必須另立明確範圍，不能換成真 Codex executable 或 Cloud runner。
+原生 gate 是 `node --test --test-isolation=none apps/control-plane/web/p0-client.test.mjs` 與 Rust fmt／Clippy／test／build（CI `fanzloud-ci.yml`），實際結果見 [R2 報告](tasks/round2/report.md)。fake CLI 的後端整合驗證必須另立明確範圍，不能換成真 Codex executable 或 Cloud runner。
 
 ## 第 3 輪驗收
 
@@ -66,5 +66,5 @@ M1 的 wrapper 須先完成：新 task state、namespace／egress／loopback 確
 ## 開放問題
 
 1. D1 已確認採靜態資產＋有限假 API/WS；production fake-runner mode 仍是範圍外後端變更。
-2. M1 的 HTTPS/WSS、fixture、trust、process/state ownership 與擷取 wrapper 尚未實作。若任何 security／atomicity／retry／recovery 契約無法從現有 T005/T006 規格確定，按 AGENTS 記 `[TD-GAP]` 並先補規範，不猜測。
+2. M1 的 HTTPS/WSS、fixture、trust、process/state ownership 與擷取 wrapper 已實作並實跑（見 R2 報告）。後續若任何 security／atomicity／retry／recovery 契約無法從現有 T005/T006 規格確定，按 AGENTS 記 `[TD-GAP]` 並先補規範，不猜測。
 - Owner 已明確確認本設計方向；原產品缺口與未執行驗證不因此通過。

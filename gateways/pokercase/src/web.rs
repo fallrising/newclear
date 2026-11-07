@@ -701,9 +701,9 @@ async fn usage_page(
         .store
         .recent_usage(50)
         .map_err(|e| AppError::Internal(e).into_response())?;
-    let daily = state
+    let measurements = state
         .store
-        .usage_by_day(14)
+        .usage_measurement_report(14)
         .map_err(|e| AppError::Internal(e).into_response())?;
     let cost_total = state
         .store
@@ -716,7 +716,8 @@ async fn usage_page(
             title => "Usage",
             active => "usage",
             events => events,
-            daily => daily,
+            daily => measurements.data,
+            measurement_summary => measurements.measurement_summary,
             cost_total => cost_total,
             admin_protected => state.cfg.admin_token.is_some(),
         },

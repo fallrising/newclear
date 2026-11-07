@@ -223,3 +223,106 @@ bindings under the previous policy cannot authorize new work, while committed re
 available. See [the policy contract](sdd/connected-local-runtime.md#usable-local-verification-policy-accepted-locally).
 Actual Chromium evidence is described in [traceability](traceability.md); it is not full UI or Done
 acceptance. Synthetic human fixture tests do not certify real-world task completion.
+
+## Human report API
+
+M1c implementation follows the [reviewed plan](plans/m1c-human-reports-20261031.md); consult
+[BOARD HM1C](tasks/BOARD.md#t-0339--m1c-sealed-human-reports) for its actual delivery status.
+This is an API path; the connected browser does not yet provide the completion/report form.
+
+1. Obtain the exact current completion-preparation snapshot for the candidate. Keep its WorkItem
+   version, subject digest, Run and fence values; evidence also needs the bound AC revision and
+   configured human recipe/environment. A successful Fake Run alone is insufficient.
+2. Submit `SubmitHumanReport` through the existing project command endpoint with the session cookie,
+   exact Origin, a new command ID/idempotency key and `report_` identifier. Send exact UTF-8 text
+   (1..65536 bytes, no NUL) as `text/plain` or `text/markdown`, and the matching `review` or `evidence`
+   intent defined in [OpenAPI](../api/openapi.yaml). The server owns actor, timestamp, digest and
+   stored availability. Review accepts Approved/ChangesRequested; Evidence explicitly asserts Passing
+   under the configured independent human policy. Submission does not move the phase or mark Done.
+3. If the response is lost, recover the command result with its original identity. Retrying the same
+   recorded intent replays its original bytes and does not republish material. Changed content or
+   intent requires a fresh command/key/report ID. Unrecorded storage failures permit a same-key retry;
+   they do not authorize a successful evidence assertion or an automatic retry of external work.
+4. Read `/api/v1/projects/{project_id}/human-reports/{report_id}` for immutable metadata, then follow
+   its scoped `artifact.href` to download verified bytes as an attachment. A metadata record or replayed
+   success does not guarantee the file is still available; missing/tampered files fail closed.
+
+Same bytes with different MIME conflict with existing immutable artifact metadata and are refused;
+use the original media type. Reports and their semantic records are immutable. Failed post-seal commits
+can leave unreferenced objects, which grant no read authority and are retained without automatic deletion.
+Keep the private data root intact; M6 owns complete backup/restore and any future safe offline GC.
+Do not delete shared digest files to retry a report. Existing completion verification still checks
+eligible Evidence bytes; a Review report is retained provenance, not a new Done condition.
+
+## Immutable per-project completion policies
+
+The owner-approved [contract](sdd/local-project-policy.md) and [evidence](evidence/project-policy-20261031.md)
+define this bounded M2 policy slice; consult BOARD HMPOL for actual implementation/delivery status.
+The runtime remains Fake-only and accepts environment configuration only.
+
+1. Create the project using the existing authenticated runtime/API, without accepting a specification
+   or dispatching a Run. Stop the runtime before installing the profile. Existing accepted or Run
+   history cannot be changed into a new custom policy through restart.
+2. Copy the [synthetic example](examples/project-policies.json) to an operator-controlled absolute
+   path. Replace its project ID and exact AC IDs with the intended existing project/specification.
+   Keep the file owned by the runtime user, regular, mode 0600, single-link and free of symlinks.
+   The example uses the established local recipe and deterministic Fake environment digests.
+3. Set HAI_TASKBOARD_COMPLETION_POLICIES_FILE to that absolute file path and start the runtime
+   with the other existing settings. The document contains every previously registered custom
+   project plus any new eligible project, at most 32 profiles and 256 rules per profile, 256 KiB total.
+4. Propose and explicitly accept the specification through the existing API. Initial preparation
+   returns the selected policy digest; do not invent a revision label or copy another project's
+   digest. Required ACs and node recipes must match the selected profile. Human report/evidence
+   submission, QA/approval and explicit completion retain all existing current-subject guards.
+
+V1 profiles accept only human verification with explicit independent=true. Every boolean, rule
+field and integration-base member is mandatory; absent base has explicit digest:null. Digests in
+the configuration are lowercase 64-hex without the API's sha256: prefix. Unknown fields, duplicates,
+wrong types, missing/null required values and unsafe/oversize files reject startup.
+
+The first successful registration is permanent for this slice, even before first acceptance.
+Reordering JSON keys/rules or changing formatting preserves the semantic policy. Changing a field,
+removing a registered project, or unsetting the selector after registration rejects startup. The
+file is read once: editing it during operation does not hot-reload policy. An eligible new project
+may be added while all old registrations remain identical. There is no delete/reset/activation
+operation; changing established policy requires a separately implemented reconciliation workflow.
+A registration committed before a later listener failure remains registered.
+
+Without custom registrations or the selector, the compiled local-policy-v2 behavior remains.
+Unconfigured projects retain that default even alongside configured projects; missing AC rules
+inside a configured project never fall back to local. Old local-policy-v1 history remains
+readable/replayable but cannot authorize new work. Loading policy never creates Passing evidence
+or treats a successful Fake Run as Done. This API/backend slice does not add a completion UI.
+
+
+## WorkItem material index
+
+Authenticated GET `/api/v1/projects/{project_id}/work-items/{work_item_id}/material-index` returns
+stored metadata, exact AC requirements, accepted specification references when present, and scoped
+Run/Candidate identities. Use the existing session cookie and a WorkItem ID from the project board.
+Send no query or request body; HEAD is explicitly rejected with405. All responses disable caching.
+
+Use a returned Run ID with its existing output read and a returned Candidate ID with the existing
+completion-preparation and verified-coverage reads. Those endpoints keep their own authorization,
+phase, policy, byte verification and current-subject checks. Inspect their exact results before an
+explicit command; this index neither selects a default Candidate nor grants completion authority.
+Legacy IDs are preserved byte-for-byte, including historically valid IDs that downstream URL syntax
+cannot address. Do not normalize, guess or silently replace them.
+
+One SQLite snapshot supplies all rows plus cursor and restore generation. Missing artifact bytes or
+current policy do not hide historical metadata. Each collection is limited to1024 rows and the wire
+response to4MiB; excess fails503 projection_unavailable with reason=material_index_capacity_exceeded,
+without truncation. There is no pagination in this version. Storage corruption fails503; missing or
+unauthorized scope is masked404. See the [approved contract](sdd/work-item-material-index.md).
+
+### WorkItem detail
+
+`GET /api/v1/projects/{project_id}/work-items/{work_item_id}` returns `work_item_detail/v1`: the board
+row as `summary`, the material index above as `material`, and stored blockers, reviews, evidence,
+approvals, completion records and audit. Only stored fields appear; `null` is a stored NULL such as an
+unresolved blocker or unconsumed approval. Reviews, evidence and approvals are attributed to the
+WorkItem through the immutable audit and command result chain; a row that cannot be attributed makes
+the read fail 503 `storage_corruption` rather than return an inexact list. Same precedence, limits
+(1024 per collection, 4 MiB, reason `work_item_detail_capacity_exceeded`) and no-write snapshot as the
+material index. It claims no coverage or Done validity. See the [contract](sdd/work-item-detail.md).
+The connected completion UI remains future work.

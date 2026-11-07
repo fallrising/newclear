@@ -41,3 +41,15 @@ Dispatch must begin before its dispatch deadline with at least the configured ti
 SQLite commits a `started` marker with the immutable command digest and external reference before collection, then commits result bytes before reporting. A lost report can be retried without collecting again. A restart encountering `started`, or a reconcile-only command without evidence, reports `unknown`. Reconcile-only never collects. Completed evidence survives subsequent attempts, including new fences. No automatic journal pruning occurs; retain the database and any SQLite journal/WAL files as durable state when backing up or restoring. Deleting the journal loses deduplication evidence and requires operator reconciliation before restarting.
 
 The importable API is `Config.from_dict(value, allow_loopback_http=False)`, `Journal(path)`, `HttpClient(config)`, and `Runner(config, journal, client=None, collector=None, clock=None).run_once()`. Collector/client injection is a test seam; CLI configuration cannot select them. CLI diagnostics omit secrets, request bodies and control-plane URLs. This implementation and its local tests do not establish Cloudflare/Access/D1 live acceptance.
+
+## 授權來源查詢
+
+`python3 runner.py --config /private/runner.json --authorization-status`只查自己的Worker HMAC／grant metadata，不建立journal或領取工作；不可與`--once`／`--stop-at`混用。新介面尚未部署，既有過期憑證仍拒絕，不自動續期。格式、來源限制與程序觀測規劃見[契約](../../docs/self-authorization.md)。
+
+## Resident即時觀測
+
+Resident可選`--observation-socket /private/resident.sock`；先備妥owner0700 parent。查詢使用`python3 runner.py --config /private/runner.json --observe-resident --observation-socket /private/resident.sock`，不取得journal鎖或領工作。不存在／殘留socket、設定漂移或缺少proc權限會拒絕。詳見[契約與限制](../../docs/resident-observation.md)。
+
+## 常態服務模式
+
+`--service-policy /private/service-policy.json` 使用 config-bound 私人政策與啟動 self 查詢，取 service／Access／HMAC／runner grant 的最早期限；與 once、stop-at、inspection 互斥。保留 journal，重啟不重做未知工作、不自動續權。使用與邊界見[服務契約](../../docs/service-runner.md)；新增 [unit模板](cloud-lab-runner-service.service.example) 尚未安裝到真實環境。

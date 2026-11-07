@@ -1,0 +1,39 @@
+{
+  "runId": "c190a53892af479ab1b2892d5157954b",
+  "helperId": "8fd04a5ca13291cc2b657b5eadee29db776167bb7cecf85d2d4879fc75936db1",
+  "state": {
+    "Status": "exited",
+    "Running": false,
+    "Paused": false,
+    "Restarting": false,
+    "OOMKilled": false,
+    "Dead": false,
+    "Pid": 0,
+    "ExitCode": 2,
+    "Error": "",
+    "StartedAt": "2026-11-02T13:37:40.507788314Z",
+    "FinishedAt": "2026-11-02T13:37:40.628461305Z"
+  },
+  "hostNetworkMode": "none",
+  "networks": {
+    "none": {
+      "IPAMConfig": null,
+      "Links": null,
+      "Aliases": null,
+      "DriverOpts": null,
+      "GwPriority": 0,
+      "NetworkID": "e4a7bd79d4e033c5eec5f83e87c2869722f8c0bd761581e70ae212e1ceb7041a",
+      "EndpointID": "",
+      "Gateway": "",
+      "IPAddress": "",
+      "MacAddress": "",
+      "IPPrefixLen": 0,
+      "IPv6Gateway": "",
+      "GlobalIPv6Address": "",
+      "GlobalIPv6PrefixLen": 0,
+      "DNSNames": null
+    }
+  },
+  "policyHash": "027ddf2b4adc50985f2022074e023032ec81a4a5f066ae41111a945bf6ee2c3b",
+  "scope": "sanitized actual no-network MEDIA_PACK state; no raw env/args/data"
+}

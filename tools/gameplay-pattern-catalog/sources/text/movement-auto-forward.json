@@ -1,0 +1,120 @@
+{
+  "id": "movement-auto-forward",
+  "system": "movement",
+  "edition": 3,
+  "name": {
+    "zh": "自动前进中选择动作时机",
+    "en": "Choose action timing while moving automatically"
+  },
+  "summary": {
+    "zh": "方向已经确定，你只负责在对的时间跳、滑或出手。",
+    "en": "Forward motion is given; you choose when to jump, slide or act."
+  },
+  "rules": {
+    "zh": "角色持续向前移动，玩家不能靠停在原地消除压力。前方障碍以可辨认的顺序出现，玩家根据距离和速度选择动作时机；成功通过后马上读取下一组障碍，失误则结束或退回一段。",
+    "en": "The character keeps moving forward, so stopping cannot remove the pressure. Recognizable obstacles approach in sequence. Choose action timing from their distance and speed, then read the next group immediately after passing the current one; mistakes end or reset a section."
+  },
+  "loop": [
+    {
+      "zh": "读取即将接近的障碍",
+      "en": "Read approaching obstacles"
+    },
+    {
+      "zh": "选择动作和触发时机",
+      "en": "Choose an action and timing"
+    },
+    {
+      "zh": "通过或碰撞",
+      "en": "Clear the obstacle or collide"
+    },
+    {
+      "zh": "继续读取下一组",
+      "en": "Read the next group"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "提前跳更稳，但会不会太早落进后面的空隙？",
+      "en": "An early jump seems safer, but will you land too soon in the following gap?"
+    },
+    {
+      "zh": "为奖励使用更冒险的动作时机，还是只保证通过主路线？",
+      "en": "Use a riskier timing for a reward or focus on clearing the main route?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "前方可见时间",
+        "en": "Look-ahead time"
+      },
+      "effect": {
+        "zh": "可见时间越长越能计划动作序列；太短则容易变成记忆障碍位置。",
+        "en": "Longer visibility supports sequence planning; too little turns play into memorizing obstacle positions."
+      }
+    },
+    {
+      "name": {
+        "zh": "动作种类",
+        "en": "Available actions"
+      },
+      "effect": {
+        "zh": "单一跳跃强调时机，多种动作加入识别与切换，但也增加输入负担。",
+        "en": "One jump action emphasizes timing; multiple actions add recognition and switching at an input cost."
+      }
+    }
+  ],
+  "tags": [
+    "timing",
+    "dexterity",
+    "precision"
+  ],
+  "related": [
+    "movement-variable-jump",
+    "exploration-grapple-swing",
+    "exploration-wall-jump",
+    "movement-low-slide"
+  ],
+  "contrast": {
+    "zh": "《Canabalt》把主要操作收束为跳跃，在变化的屋顶和跑速中判断时机；《BIT.TRIP RUNNER》用预设障碍序列要求切换跳、滑、踢等动作。",
+    "en": "Canabalt concentrates input on jumping across varying rooftops and speeds; BIT.TRIP RUNNER uses authored obstacle sequences that require switching among jumping, sliding and kicking."
+  },
+  "combination": {
+    "zh": "设计提案：自动前进的角色每经过一扇门就面对一个提前亮起的攻击提示，玩家选择跳过低扫或滑过高射线。",
+    "en": "Design proposal: an automatic runner encounters a telegraphed attack at each doorway; jump over a low sweep or slide beneath a high beam."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "教学示例：角色每秒前进 3 格，前方依次出现矮箱、低梁和深坑。",
+      "en": "Teaching example: the character moves three tiles per second toward a low box, a low beam and a pit."
+    },
+    "action": {
+      "zh": "你先跳箱，落地后滑过低梁，再等接近坑边才起跳。",
+      "en": "Jump over the box, slide under the beam after landing, then wait until near the pit edge to jump."
+    },
+    "result": {
+      "zh": "三个动作连续完成，角色没有停下，下一组障碍已经进入视野。",
+      "en": "The three actions succeed without stopping, and the next obstacle group comes into view."
+    },
+    "next": {
+      "zh": "下一组奖励更高，要决定是否改变起跳时机去拿。",
+      "en": "The next reward is higher, so decide whether to change jump timing to reach it."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "制作 20 秒固定速度路线，只放三种容易辨认的障碍；先用两个按键完成跳与滑。",
+      "en": "Build a twenty-second route at fixed speed with three recognizable obstacles; begin with two buttons for jumping and sliding."
+    },
+    "pitfall": {
+      "zh": "不要一开始同时随机速度、间距与障碍类型，否则失败原因难以读懂。",
+      "en": "Do not randomize speed, spacing and obstacle types together at first; failure would become hard to interpret."
+    },
+    "test": {
+      "zh": "观察连续失败是否集中在看不清下一障碍的位置；玩家应能说出自己按早了、按晚了还是选错动作。",
+      "en": "Check whether repeated failures occur where the next obstacle is unreadable; players should distinguish early inputs, late inputs and wrong actions."
+    }
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "exit": 0,
+  "stdout": "jdbcDebug=false\nprobeFinished\n",
+  "stderr": "",
+  "classpath": [
+    "/home/ckc/.gradle/caches/modules-2/files-2.1/ch.qos.logback/logback-classic/1.5.34/e598899bad5824511cd3019299254230468e1fa2/logback-classic-1.5.34.jar",
+    "/home/ckc/.gradle/caches/modules-2/files-2.1/ch.qos.logback/logback-core/1.5.34/378692f76c337b3325c15bffb89e013dc1f897b4/logback-core-1.5.34.jar",
+    "/home/ckc/.gradle/caches/modules-2/files-2.1/org.slf4j/slf4j-api/2.0.18/78a9e7a37cd6360e0b818e86341b24123d28d4df/slf4j-api-2.0.18.jar",
+    "/home/ckc/.gradle/caches/modules-2/files-2.1/org.springframework.boot/spring-boot/3.5.16/8e75e8d0d3cfbca088774df8d30b45bbd21e5d99/spring-boot-3.5.16.jar",
+    "/home/ckc/.gradle/caches/modules-2/files-2.1/org.springframework/spring-aop/6.2.19/86a538bb7b2be38a0afc4ef049784def10a86c62/spring-aop-6.2.19.jar",
+    "/home/ckc/.gradle/caches/modules-2/files-2.1/org.springframework/spring-beans/6.2.19/6d6b4774db3b036df46be6332d93b09d70e5c147/spring-beans-6.2.19.jar",
+    "/home/ckc/.gradle/caches/modules-2/files-2.1/org.springframework/spring-context/6.2.19/e218e4c4ecad1e821905628b2c4ce8561d937baa/spring-context-6.2.19.jar",
+    "/home/ckc/.gradle/caches/modules-2/files-2.1/org.springframework/spring-core/6.2.19/691459d4644894dae8e5c2d9550a4cfb8302f62f/spring-core-6.2.19.jar",
+    "/home/ckc/.gradle/caches/modules-2/files-2.1/org.springframework/spring-expression/6.2.19/c7202d23797fa778c5ed55e502ac1a9f0d34012a/spring-expression-6.2.19.jar",
+    "/home/ckc/.gradle/caches/modules-2/files-2.1/org.springframework/spring-jcl/6.2.19/39b9c7d631961f3649511b08ef167420b086184b/spring-jcl-6.2.19.jar",
+    "/home/ckc/.gradle/caches/modules-2/files-2.1/org.springframework/spring-jdbc/6.2.19/d7b6ea705a71dbbb4499437dd54b9217ce6c251a/spring-jdbc-6.2.19.jar",
+    "/home/ckc/.gradle/caches/modules-2/files-2.1/org.springframework/spring-test/6.2.19/e49cfc2dab98a634bdc3e24db8e021c5125d3ffd/spring-test-6.2.19.jar",
+    "/home/ckc/.gradle/caches/modules-2/files-2.1/org.springframework/spring-tx/6.2.19/aa1a170d935a3c39176d27a2353c34c2861b7dc/spring-tx-6.2.19.jar",
+    "/home/ckc/.gradle/caches/modules-2/files-2.1/org.springframework/spring-web/6.2.19/f1dc7b238611aeaf9e256a230aa089057cf0e5b3/spring-web-6.2.19.jar",
+    "/home/ckc/.gradle/caches/modules-2/files-2.1/org.springframework/spring-webmvc/6.2.19/836c68c8797106000e44153686b1cfa1a806a998/spring-webmvc-6.2.19.jar"
+  ]
+}

@@ -1,0 +1,8 @@
+{
+  "version": 1,
+  "original": "T144/faults/green.log",
+  "sha256": "c81b3a243b4b59855a3a8102f17a1294f92cd61836c1bd2a0a6f515623c13fa4",
+  "byteSize": "441",
+  "encoding": "utf-8",
+  "text": "✔ T144_identity_uses_fixed_operator_and_anonymous_permissions_before_media (10.632564ms)\n✔ T144_full_fixed_recipe_returns_actual_ids_hashes_and_last_memory_sessions (3.724643ms)\n✔ T144_png_order_is_fixed_independently_of_caller_object_order (1.754302ms)\n✔ T144_malformed_response_has_compact_fixed_failure (0.521197ms)\nℹ tests 4\nℹ suites 0\nℹ pass 4\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 74.619612\n"
+}

@@ -1,0 +1,120 @@
+{
+  "id": "stealth-disguise-access",
+  "system": "stealth",
+  "edition": 2,
+  "name": {
+    "zh": "伪装与身份权限",
+    "en": "Disguise permissions"
+  },
+  "summary": {
+    "zh": "换一身衣服，就换了一张能去不同地方的通行证。",
+    "en": "Changing clothes changes where you are allowed to go."
+  },
+  "rules": {
+    "zh": "区域按身份决定谁能进入、能携带什么。玩家先取得合适服装，再利用权限接近目标；特定识破者或越界行为仍会暴露身份，界面应及时解释原因。",
+    "en": "Areas decide access and permitted equipment by role. Acquire an outfit and use its permissions to approach a goal; recognizers and forbidden actions can still expose you, with clear feedback explaining why."
+  },
+  "loop": [
+    {
+      "zh": "辨认区域要求的身份",
+      "en": "Identify the required role"
+    },
+    {
+      "zh": "取得合适服装",
+      "en": "Acquire the right outfit"
+    },
+    {
+      "zh": "避开会识破的人",
+      "en": "Avoid people who recognize impostors"
+    },
+    {
+      "zh": "利用权限完成目标",
+      "en": "Use access to reach the goal"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "先绕路拿权限更大的服装，还是利用现有身份走一条更窄的路线？",
+      "en": "Detour for a more useful outfit, or use a narrower route with your current role?"
+    },
+    {
+      "zh": "一个身份能过门却不能带武器时，要放下工具还是另找入口？",
+      "en": "If a role grants access but forbids your weapon, leave it behind or find another entrance?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "身份覆盖范围",
+        "en": "Permission coverage"
+      },
+      "effect": {
+        "zh": "一种服装能进的区域越多，换装决策越少；权限交错会增加路线规划。",
+        "en": "Broader access reduces outfit changes; overlapping permissions create route choices."
+      }
+    },
+    {
+      "name": {
+        "zh": "识破者密度",
+        "en": "Recognizer density"
+      },
+      "effect": {
+        "zh": "少量固定识破者能让玩家读懂规则，过密会使伪装几乎失去作用。",
+        "en": "A few consistent recognizers clarify the rule; too many make disguises ineffective."
+      }
+    }
+  ],
+  "tags": [
+    "information",
+    "planning",
+    "risk"
+  ],
+  "related": [
+    "stealth-peeking",
+    "stealth-body-concealment",
+    "stealth-hiding-spots",
+    "stealth-knockout-window"
+  ],
+  "contrast": {
+    "zh": "《杀手》让同一角色收集多种权限；《影子战术》把伪装作为团队里一个人的专长。",
+    "en": "HITMAN lets one character collect permissions; Shadow Tactics makes disguise one squad member’s specialty."
+  },
+  "combination": {
+    "zh": "设计提案：制服也占装备槽，带两套制服就少带一件工具，让进入路线与工具选择一起决定。",
+    "en": "Design proposal: outfits use equipment slots, so carrying two uniforms means one fewer tool; access plans and loadouts become one decision."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "仓库只准搬运工进入，办公室只准文员进入。",
+      "en": "The warehouse admits porters; the office admits clerks."
+    },
+    "action": {
+      "zh": "你换上搬运服，从仓库拿到办公室钥匙，再回更衣室换装。",
+      "en": "Wear the porter outfit to retrieve an office key, then return to change."
+    },
+    "result": {
+      "zh": "你拿到了钥匙，但搬运服仍不能让你安全穿过办公室。",
+      "en": "You have the key, but the porter outfit still cannot safely cross the office."
+    },
+    "next": {
+      "zh": "下一步判断换文员服是否值得多走一趟。",
+      "en": "Decide whether another trip for the clerk outfit is worth it."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "做两间房、两套服装、一个门卫；用颜色说明当前身份能去哪里。",
+      "en": "Build two rooms, two outfits and one guard; color-code the areas your current role can enter."
+    },
+    "pitfall": {
+      "zh": "先别做复杂人物记忆；必须先让玩家分清“钥匙开门”和“身份获准进入”。",
+      "en": "Avoid complex NPC memory first; make unlocking a door distinct from being permitted inside."
+    },
+    "test": {
+      "zh": "让玩家解释为什么同一扇门换衣前后反应不同，并观察是否会主动规划换装顺序。",
+      "en": "Ask why the same doorway reacts differently after changing clothes, and watch whether players plan outfit order."
+    }
+  }
+}

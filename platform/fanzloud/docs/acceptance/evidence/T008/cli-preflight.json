@@ -1,0 +1,15 @@
+{
+  "date": "2026-10-30",
+  "sourceCommit": "268305cceceb750be6642e446d63300a46064916",
+  "pinnedVersion": "codex-cli 0.145.0",
+  "officialArchiveSha256": "bfaf13c9ba34f2ad764e4a916c49cf7177aeba329cf0f719e2227566fc8d662a",
+  "officialBinarySha256": "a2a05dafaa1acb002a45eaec0a462de5b13694fcfcd7bc43305f14781ce7be14",
+  "versionAndHelpExitZero": true,
+  "stderrEmpty": true,
+  "clearedEnvironmentVersionContract": "passed",
+  "liveStatus": "not run \u2014 credential/environment gate unavailable",
+  "startupVariablesConfigured": 0,
+  "requiredStartupVariables": 9,
+  "defaultCredentialScopeValid": false,
+  "reason": "default home mode 0775; no selected operator Cloud target/private HTTPS config"
+}

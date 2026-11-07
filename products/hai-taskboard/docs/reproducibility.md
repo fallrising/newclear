@@ -64,7 +64,9 @@ image pin above remains the reserved selection, not evidence of an existing job.
 ## Gate commands
 
 - `bash scripts/check-backend.sh`: assert Go; require a C compiler and CGO for race coverage; module
-  download/verify; gofmt check; vet; unit/contract/fault/integration tests; race tests; build.
+  download/verify; gofmt check; vet; unit/contract/fault/integration tests; race tests; build. Tests use an explicit
+  15-minute per-package timeout (Go's default is 10) because the `internal/application/service` race run takes
+  about 6–8 minutes on normal runners and exceeded 10 minutes on slow ones; the CI job's 20-minute cap still bounds it.
 - `bash scripts/check-web.sh`: assert Node/pnpm; frozen install with lifecycle scripts disabled;
   format; lint; Vitest/component a11y; existing build runs `tsc --noEmit` and Vite.
 - `bash scripts/check-ci-pins.sh`: compare the duplicated static pins without installing packages.

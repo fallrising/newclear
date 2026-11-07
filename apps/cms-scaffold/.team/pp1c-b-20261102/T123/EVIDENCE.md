@@ -1,0 +1,48 @@
+# T123 bounded integration evidence
+
+Source freeze: 2026-11-02T11:58:05.233504+00:00. Approved source: PR956 merge1bf6c506. Prior B fourteen-file overlay preserved in root; this worker used an isolated worktree and saved its nine initial writable files under baseline, plus baseline.json hashes. No Git mutation, network request, Docker command or nested agent was executed. Docker calls in tests are synthetic dependency adapters; real registry/store/token/target-inspector code and real private filesystem/streams run in the tests.
+
+## Final source and checkpoints
+
+final-source-hashes.json binds ten files, eight changed/new and two unchanged tests. H02b1=176, H02b2a=156, H02b2b=187, H02b2c=189 handwritten added+removed lines including tests, each below400. Each checkpoint stores complete source snapshots and counts/hashes. H02b2a/b/c were split by root before implementation, no scope or budget reset. The final compiled-profile adjustment and additional drain cases belong to H02b2c.
+
+Final command: `timeout 180 node --test scripts/local/maintenance-workflow.test.mjs scripts/local/maintenance-store.test.mjs scripts/local/maintenance-helper.test.mjs scripts/local/maintenance-helper-session.test.mjs scripts/local/maintenance-helper-integration.test.mjs scripts/local/maintenance-target.test.mjs scripts/local/maintenance-guard.test.mjs`.
+
+final-source-green.log: 200 tests,200 passed,0 failed/cancelled/skipped, Node test duration15774.37868ms. final-drain-and-profile.log additionally shows4/4 named current drain/profile checks. All ten final source paths checked for trailing whitespace, including ignored new files; `git diff --check` exit0. Root must still run staged whitespace when adding ignored files.
+
+## Red and correction history
+
+- H02b1-red.log: sandbox child-process test harness produced an opaque file-level failure; not accepted as behavior Red.
+- H02b1-red-no-isolation.log: initial JDBC fixture lacked inherited API labels; registration failed TARGET_NOT_OWNED, not the intended regression.
+- H02b1-red-corrected.log: corrected fixture reaches the genuine race. JDBC closed while running fails WRITER_NOT_QUIESCED; EXITED before Result fails CAPTURE_FAILED. H02b1-green.log proves both delayed Result/EOF positives, then negatives cover extra/replaced/reappearing backends, identity/policy/network changes, second helper and replay.
+- H02b1-focused-green.log initially failed the old exact callback-count assertion and later tests were cancelled in the in-process runner. H02b1-focused-native.log confirms161/162 with the same stale callback assertion. The assertion now requires the original readiness/permit ordering plus continued drain assertions; H02b1-final-green.log162/162 passes. No cancellation is counted as success.
+- H02b2a-red.log: import-safe profile scaffold rejects required successful observed profile, intended Red. Initial H02b2a-green.log failed because the synthetic ID generator produced128characters for decimal10; corrected to hex64. H02b2a-green-corrected.log4/4 passes.
+- H02b2b-red.log: import-safe wrapper scaffold rejects real-token source inventory, intended Red. H02b2b-green.log still failed because fake Docker create omitted inherited API labels. Corrected fixture gives H02b2b-green-fixture.log1/1 pass through registry/policy/Ready/Permit/EXITED/clear and private output binding.
+- H02b2c-red.log stayed empty when a raw FileHandle stream close hung; the identifiable test session was interrupted with exit130. This is incomplete evidence, not a passing or intended behavior Red. The raw output sink was replaced by backpressure-aware Writable with complete partial-write handling and explicit fsync/close.
+- H02b2c-red-stream-fixed.log then proves the intended missing transient-media-writer rejection. H02b2c-media-green.log passes after live token-bound media drain checks. H02b2c-owned-green.log5/5 passes source PG/media streams, private output/receipt faults and changed prior inventory. H02b2c-pg-drain-green.log proves actual fake-inspected PG container EXITED before output drain is accepted only after the pinned backend ended.
+- Original Java source-file probe was synthetic only. Root identified JRE compiler availability risk before any Docker run. Root approved the existing host JDK25 fixed-source compilation choice, preserving no new dependency/permissions. Current code checks observed javac25, compiles fixed source in private helper/profile/classes, records source/class hashes and owner UID/GID, and executes the read-only compiled class in the same API image. Actual host javac25 syntax compilation passed; java-profile/check.json binds source/class. This is not JRE/JDBC/ImageIO or actual image acceptance.
+- The final real-token reappearing test returns a backend from the independent observer after registry has already seen zero, then removes it before the next registry read. The consumer now receives an irreversible token-private helperBackendEnded signal and rejects this observation; this closes a cross-observer timing gap rather than relying only on later zero checks.
+
+## Profile and interface
+
+runOwnedHelper(token,{side,kind},deps) accepts only source INVENTORY,PG_DUMP,MEDIA_PACK. Paths/argv/images/network derive from token state. INVENTORY returns {kind,path,byteSize,sha256,inventory,inventorySha256,receipt,profile}; profile has exactly javaRuntimeVersion,pgDumpVersion,pgRestoreVersion,postgresServerVersion from current fixed same-image probes and independent server_version/server_version_num queries. Internal profile also observes API numeric media user. PG/MEDIA return {kind,path,byteSize,sha256}. MEDIA_PACK reads and rehashes the last verified inventory associated with the same live token. Source local-media script bytes are pinned and rechecked throughout helper assertions.
+
+Compiled profile uses existing JAVA_HOME/bin/javac or existing PATH javac, observes major25, installs nothing, and changes no global environment. No-network probe containers have exact full-ID/policy inspection, bounded attached execution and same-ID cleanup; unknown identity preserves private probe record. Main helpers keep durable registry lifecycle and fixed private0600 artifacts. PG diagnostics remain private; derived pgpass is removed only after verified helper removal, never original secret. Raw stdout has disk-capacity/backpressure bounds. Original failure takes priority over cleanup failure.
+
+## Remaining root gates and accounting
+
+Real Docker images and default adapter/profile, full B native gates/capture integration, independent review, CI, normal merge/readback and C/D remain root responsibilities. No backup/restore success follows from synthetic bytes or profile mocks. The host compiler syntax check does not establish runtime image compatibility. Target/revoke/browser helpers remain unsealed.
+
+Worker launches0, external provider routes0. Full outer/nested tool/provider/token/cost and aggregate active/wait counts unknown/null; no mechanical session export was available. This worker stayed within the assigned75minute budget; exact active time is unknown. Test duration above is measured by Node, not provider time or whole-session active time. All historical failures are retained.
+
+## H02b2d — actual Docker missing-object format
+
+Root requested bounded follow-up after real Docker returned lowercase `error: no such object: <fullID>`. Scope: exact code1/full-ID allowlist at both profile/main removal checks; named positive and wrong-ID/extra-text/code negatives. Estimate below100 changed lines including tests, within original75minute budget. Root retains original real-profile failure evidence.
+
+H02b2d native named Red:2expected failures(profile/main),3negative passes. Sandbox initial opaque failure retained separately. Green command `node --test scripts/local/maintenance-helper.test.mjs scripts/local/maintenance-helper-integration.test.mjs`:60/60pass,0fail/cancel/skip,205.237874ms in H02b2d-green-native.log. Exact lowercase string added to both code1/full-ID allowlists; no regex/substrings. H02b2d/checkpoint.json records 20 added+removed lines and before/after snapshots; final-source-hashes.json refreshed, prior manifest retained. Approximate elapsed42minutes since dispatch, no budget reset. Root real-profile failure retained by root; worker ran no actualDocker.
+
+## H02b2e — real-token removal diagnostic propagation
+
+Root identified missed clearOwnedHelper allowlist after lifecycle deletion. Scope: same exact full-ID/code1 lowercase format and owned wrapper regression proving real registry helper/reservation clearing permits next helper. Estimate below40 lines, original75minute budget unchanged. PG policy untouched pending decision.
+
+H02b2e named real-token wrapper Red: TARGET_NOT_OWNED on first inventory after lifecycle removal, H02b2e-red-native.log. Exact code1/full-ID lowercase allowlist correction in clearOwnedHelper. Whole workflow Green37/37, followed by added wrong-ID/extra-text/wrong-code preservation assertions Green40/40,0fail/cancel/skip,14355.401941ms (`node --test scripts/local/maintenance-workflow.test.mjs`, H02b2e-final-green-native.log). Positive completes two helpers sequentially through actual registry/token, proving lease helper and reservation cleared; negative failures preserve persisted helper. 22 added+removed lines includingtests; snapshots/checkpoint and final hashes refreshed. Approximate cumulative48minutes/original75, no reset. PG mount policy untouched: root real probe found image-declared PGDATA anonymous RW volume incompatible with current exact policy; root retains runtime evidence and owns decision.

@@ -1,4 +1,4 @@
-use axum::extract::{Path, State};
+use axum::extract::{Path, Query, State};
 use axum::http::{HeaderMap, StatusCode};
 use axum::response::{IntoResponse, Response};
 use axum::routing::{delete, get, post};
@@ -430,9 +430,49 @@ async fn usage(State(state): State<AppState>, headers: HeaderMap) -> AppResult<J
     Ok(Json(json!({ "data": state.store.recent_usage(100)? })))
 }
 
-async fn usage_daily(State(state): State<AppState>, headers: HeaderMap) -> AppResult<Json<Value>> {
+#[derive(Debug, Deserialize, Default)]
+struct UsageDailyQuery {
+    schema: Option<String>,
+}
+
+async fn usage_daily(
+    State(state): State<AppState>,
+    headers: HeaderMap,
+    Query(query): Query<UsageDailyQuery>,
+) -> AppResult<Json<Value>> {
     check_admin(&state, &headers)?;
-    Ok(Json(json!({ "data": state.store.usage_by_day(30)? })))
+    match query.schema.as_deref().unwrap_or("1") {
+        "1" => Ok(Json(json!({
+            "schema_revision": 1,
+            "data": state.store.usage_by_day(30)?,
+            "compatibility": {
+                "status": "legacy_numeric",
+                "message": "Legacy numeric token/latency fields do not distinguish missing values; use schema=2.",
+                "canonical_url": "/admin/api/usage/daily?schema=2"
+            }
+        }))),
+        "2" => {
+            let report = state.store.usage_measurement_report(30)?;
+            Ok(Json(json!({
+                "schema_revision": 2,
+                "data": report.data,
+                "measurement_summary": report.measurement_summary,
+                "scope": {
+                    "day_bucket_limit": 30,
+                    "selection": "latest_populated_date_prefix_buckets",
+                    "denominator": "stored_event_attempt_rows"
+                },
+                "basis": {
+                    "tokens": "stored_counters_not_subscription_consumption",
+                    "timing_mean": "known_saved_observations",
+                    "latency_ms": "mixed_legacy_and_headers_or_cli_ready_compatibility"
+                }
+            })))
+        }
+        _ => Err(AppError::BadRequest(
+            "unsupported usage schema; expected 1 or 2".into(),
+        )),
+    }
 }
 
 async fn usage_export_csv(

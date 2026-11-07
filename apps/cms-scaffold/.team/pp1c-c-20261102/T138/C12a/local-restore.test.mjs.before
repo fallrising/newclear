@@ -1,0 +1,53 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { validateRestorePreflight, deriveSmokeFixture, restoreLocal } from './local-restore.mjs';
+import { sha256, canonicalBytes, OpsError } from './recovery-protocol.mjs';
+const id=n=>`00000000-0000-4000-8000-${String(n).padStart(12,'0')}`,runId='a'.repeat(32),now=new Date('2026-11-02T16:00:00.000Z');
+function inputs() {
+  const request={operationId:id(1),purpose:'RESTORE_VERIFY_LOCAL',completionPolicy:'KEEP_STOPPED',targetRunId:'b'.repeat(32),incidentStartedAt:'2026-11-02T15:00:00.000Z'};
+  const smokeFixtureInput={version:1,sourceRunId:runId,adminPrincipalId:id(2),operatorPrincipalId:id(3),publishedEntryId:id(4),revisionNo:1,refEntryId:id(5),
+    media:Object.fromEntries(['publicImageId','publicPdfId','draftImageId','privateImageId','replacedImageId','deletedImageId'].map((k,i)=>[k,id(i+6)])),
+    expected:Object.fromEntries(['privateEntrySha256','operatorEntrySha256','publicEntrySha256','revisionListSha256','publicOriginalSha256','publicThumbnailSha256','publicWebSha256','publicPdfSha256','draftOriginalSha256','privateOriginalSha256','replacedOriginalSha256'].map(k=>[k,'c'.repeat(64)])),sessionAbsoluteSeconds:'43200',sessionMaxSeconds:'604800'};
+  const recoverySecrets=Object.fromEntries(['admin','operator'].map((role,i)=>[role,{principalId:id(i+2),username:`actor-${role}`,password:`private-${role}-password`,oldSessionToken:`secret-old-${role}`}])) ;
+  const rows={cms_principal:Object.values(recoverySecrets).map(a=>({id:a.principalId,username:a.username,status:'ACTIVE',failed_login_count:'0',locked_until:null,deleted_at:null})),
+    cms_session:Object.values(recoverySecrets).map((a,i)=>({id:id(i+20),principal_id:a.principalId,token_hash:'\\x'+sha256(Buffer.from(a.oldSessionToken)),created_at:'2026-11-02 15:00:00+00',expires_at:'2026-11-03 15:00:00+00',revoked_at:null})),
+    cms_entry:[{id:id(4)},{id:id(5)}],cms_entry_revision:[{entry_id:id(4),revision_no:'1'}],cms_media:Object.values(smokeFixtureInput.media).map(id=>({id}))};
+  return {inspection:{target:{runId}},request,recoverySecrets,smokeFixtureInput,inventory:{tables:Object.entries(rows).map(([tableName,rows])=>({tableName,rows}))}};
+}
+test('T138_C11_preflight_accepts_exact_memory_input_and_derives_only_safe_fixture',()=>{
+  const f=inputs();validateRestorePreflight(f.inspection,f.request,f,now);
+  const derived=deriveSmokeFixture(f.smokeFixtureInput,f.recoverySecrets,f.inventory,now);
+  assert.deepEqual(derived.oldSessionIds,{admin:id(20),operator:id(21)});
+  const bytes=canonicalBytes(derived).toString();for(const a of Object.values(f.recoverySecrets))for(const k of ['username','password','oldSessionToken'])assert.ok(!bytes.includes(a[k]));
+});
+for(const fault of ['no-secrets','extra-secret','principal-mismatch','short-password','equal-password','token-control','input-extra','missing-hash','bad-seconds','revision-two','duplicate-media','same-target','future-incident'])test(`T138_C11_preflight_rejects_${fault}`,()=>{
+  const f=inputs();
+  if(fault==='no-secrets')delete f.recoverySecrets;
+  if(fault==='extra-secret')f.recoverySecrets.admin.path='/secret';
+  if(fault==='principal-mismatch')f.recoverySecrets.admin.principalId=id(99);
+  if(fault==='short-password')f.recoverySecrets.admin.password='short';
+  if(fault==='equal-password')f.recoverySecrets.admin.username=f.recoverySecrets.admin.password.toUpperCase();
+  if(fault==='token-control')f.recoverySecrets.admin.oldSessionToken+='\n';
+  if(fault==='input-extra')f.smokeFixtureInput.oldSessionIds={admin:id(20),operator:id(21)};
+  if(fault==='missing-hash')delete f.smokeFixtureInput.expected.privateEntrySha256;
+  if(fault==='bad-seconds')f.smokeFixtureInput.sessionMaxSeconds=604800;
+  if(fault==='revision-two')f.smokeFixtureInput.revisionNo=2;
+  if(fault==='duplicate-media')f.smokeFixtureInput.media.publicPdfId=f.smokeFixtureInput.media.publicImageId;
+  if(fault==='same-target')f.request.targetRunId=runId;
+  if(fault==='future-incident')f.request.incidentStartedAt='2026-11-03T00:00:00.000Z';
+  assert.throws(()=>validateRestorePreflight(f.inspection,f.request,f,now),{code:'INPUT_INVALID'});
+});
+for(const fault of ['missing-session','duplicate-session','expired','revoked','wrong-hash','inactive-principal','missing-entry','missing-media','missing-revision','ambiguous-revision'])test(`T138_C11_derive_rejects_${fault}`,()=>{
+  const f=inputs(),table=name=>f.inventory.tables.find(t=>t.tableName===name).rows;
+  if(fault==='missing-session')table('cms_session').shift();
+  if(fault==='duplicate-session')table('cms_session').push({...table('cms_session')[0],id:id(99)});
+  if(fault==='expired')table('cms_session')[0].expires_at='2026-11-02 15:00:00+00';
+  if(fault==='revoked')table('cms_session')[0].revoked_at='2026-11-02 15:00:00+00';
+  if(fault==='wrong-hash')table('cms_session')[0].token_hash='\\x'+'0'.repeat(64);
+  if(fault==='inactive-principal')table('cms_principal')[0].status='DISABLED';
+  if(fault==='missing-entry')table('cms_entry').shift();
+  if(fault==='missing-media')table('cms_media').shift();
+  if(fault==='missing-revision')table('cms_entry_revision')[0].revision_no='2';
+  if(fault==='ambiguous-revision')table('cms_entry_revision').push({...table('cms_entry_revision')[0]});
+  assert.throws(()=>deriveSmokeFixture(f.smokeFixtureInput,f.recoverySecrets,f.inventory,now),{code:'INPUT_INVALID'});
+});

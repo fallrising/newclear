@@ -1,0 +1,105 @@
+{
+  "source": "1e70824e24161bafacfc1eca33bb31ba7045df5a",
+  "scope": "M0 baseline only; product incomplete",
+  "backend": {
+    "go": "1.27.1",
+    "native_gate_exit": 0,
+    "full_race_vet_build": true,
+    "image_id": "sha256:a3f100d3404f142bff2f2b4e0ca7765eb88926043e9a3ce9ddfed7fa9b68d407",
+    "initial_gate_exit": 1,
+    "initial_failure": "Docker tmpfs default noexec prevented executing go test binaries; corrected exec temp mount, no source change"
+  },
+  "web": {
+    "node": "24.20.0",
+    "pnpm": "11.25.0",
+    "native_gate_exit": 0,
+    "tests": 30,
+    "safety_tests": 8,
+    "image_id": "sha256:cdc858559b1a8fbd991580a95ca648bee977268387a099d4343fbf11b96f1c0c",
+    "initial_gate_exit": 137,
+    "initial_failure": "Offline shared store missing package metadata; task-owned container stopped; exact frozen lockfile dependencies prepared once, then original gate passed offline",
+    "warning": "jsdom canvas getContext is not implemented; existing component test warning retained"
+  },
+  "browser": {
+    "runId": "20261029T175717985Z",
+    "status": "passed",
+    "node": "v24.20.0",
+    "browser": "151.0.7922.34",
+    "driverSha256": "fcfc0cea0c49d4a9b51ba97bab312a8abdb7c143fdee7fd97304f4336a38679c",
+    "finalBoard": {
+      "phase": "Developing",
+      "runState": "Succeeded",
+      "cursor": {
+        "stream_epoch": 1,
+        "event_sequence": 10
+      },
+      "doneItems": 0
+    },
+    "recovery": {
+      "postCount": 1,
+      "automaticResultLookupCount": 1,
+      "totalSameIdentityResultGET": 2,
+      "commandID": "cmd_FG87Q0SDB53W8X2B1KYS"
+    },
+    "disconnect": {
+      "method": "owned runtime SIGTERM/wait then same-state restart",
+      "disconnected": "Disconnected · Last applied cursor: 1:10 · Project version 2",
+      "statusAfter": "Connected · Last applied cursor: 1:10 · Project version 2",
+      "commandsDisabledWhileDisconnected": true
+    },
+    "resetFault": {
+      "injection": "browser EventSource reset_required event",
+      "snapshot": "real backend read",
+      "authorityDisabledWhileHeld": true
+    },
+    "sessionLoss": "cookie removed in owned browser; no global secret rotation claimed",
+    "shutdown": [
+      {
+        "signal": "SIGTERM",
+        "exit": 0
+      },
+      {
+        "signal": "SIGTERM",
+        "exit": 0
+      },
+      {
+        "signal": "SIGTERM",
+        "exit": 0
+      }
+    ]
+  },
+  "browser_capture_count": 30,
+  "browser_step_count": 13,
+  "browser_axe_violations": 0,
+  "browser_document_overflow_count": 0,
+  "health_event_count": 26,
+  "health_note": "Expected unauthenticated/negative/recovery fault traffic retained; not a zero-error browser claim",
+  "retained_log_sha256": {
+    "backend-initial-noexec.log": "571a19ce2f546bb337f4544281db9fd54fe17eae0a7d33adbe17a68cdcd660e1",
+    "dependency-prepare.log": "adb9d58281fb894c89b68173b16ad74213f6614b2dc55e212f52150a0b01ca6f",
+    "backend.log": "f6f09c52457de27fa1d6c457e988a371072366a2240df3dd19df457f92328716",
+    "web.log": "0d7adc549d55697e68aad6db9404df0e30cf6075d3ee39960fd3f309127d3b56",
+    "web-initial-offline.log": "6a4feeb7c9a0d60ca31238e896bb2b1a27d009da7038d260b29da74ec9900c14",
+    "browser.log": "1b41e682db5de51b2ec053a7669d27c6ecbde66c965c4c48622b44d2a16a70ef",
+    "capture.json": "300f40b0aeca3733cab2555e2fe3df0c3b45ab320a861967eaa1e291cdf8d524"
+  },
+  "raw_evidence_bundle": "hai-m0-20261029 (owner private backup with README)",
+  "costs": {
+    "provider_requests": null,
+    "tokens": null,
+    "cost": null,
+    "aggregate_tool_calls": null,
+    "unknown_reason": "No complete hosted/root telemetry across earlier context; local commands are not provider counts"
+  },
+  "local_attempt_accounting": {
+    "coverage": "M0 test/audit launches after recorded17:47:11Z routing; excludes earlier preflight/Git/CI/tool calls",
+    "snapshot_utc": "2026-10-29T18:07:37Z",
+    "native_backend_gate_launches": 2,
+    "native_web_gate_launches": 2,
+    "frozen_dependency_preparation_launches": 1,
+    "real_browser_harness_launches": 1,
+    "native_auditor_launches": 2,
+    "native_independent_reviewer_launches": 1,
+    "provider_requests": null
+  }
+}

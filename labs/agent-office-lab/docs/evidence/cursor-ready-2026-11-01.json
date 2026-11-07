@@ -1,0 +1,58 @@
+{
+  "status": "completed",
+  "provider": "cursor",
+  "version": "2026.10.22-27dcf5f",
+  "model": "composer-2.5",
+  "startup_only": true,
+  "model_inference_verified": false,
+  "provider_request_cap": null,
+  "token_cap": null,
+  "money_cap": null,
+  "cleanup_errors": [],
+  "owned_processes_seen": 31,
+  "copied_credentials_removed": true,
+  "elapsed_s": 14.183709790930152,
+  "source_sha256": {
+    "run_cursor_work.py": "177fddace83a60ebee3d0506d914f72786572dfbb4a1b63ed63596f0b9940367",
+    "cursor_cli.py": "90fee7eab9f04b536a1ce0ebe75169509b200684c0e5e015c6ecae7fd1b229f2",
+    "cursor_task_hook.py": "d4b53c8a3e6046c6b6ccac8efb227d2219e99f3921ff2e7e2769ad5008457983",
+    "cursor_work_policy.mjs": "b9c65d411d61e2c4803c54811b4ea954192cff5e52686ba37564544c58e32a41",
+    "office_cursor_work.mjs": "14203023fd62e318852ba84ada2855b3cfb2e1943199f5225656fd2e00806d3c",
+    "cursor-task/cursor-agent": "897a385bcf752ab70a9d7e6f0a0a9fe27cdd3d764b41c26ab5431ae9cb33e692",
+    "remote_cli.py": "9a0ee26503ef76b003b9d8d387f6381acd1a043723374f62793a7f75bf97bb89",
+    "run_grok_startup.py": "8b5b556ae1c5bb6f1232738b9fc6549c8df5de77945a04e14ee7efa15c1d02c5",
+    "grok_startup.py": "af5188f82d05ebfb0830bbe7a7cb0e3c6838e37cd947424252b8ac7ea9b4af72"
+  },
+  "recorded_at": "2026-10-31T19:03:59Z",
+  "authentication_verified": true,
+  "selected_model_in_native_catalog": true,
+  "prompt_submitted": false,
+  "https_metadata_allowed": true,
+  "strict_network_isolation_verified": false,
+  "offline_tests": {
+    "node": 33,
+    "python": 30
+  },
+  "approval_status": "not_yet_authorized",
+  "office": {
+    "status": "completed",
+    "states": [
+      "idle"
+    ],
+    "task_completed": false,
+    "session_hook_verified": false,
+    "startup_verified": true,
+    "outcome": "ready_without_prompt",
+    "workspace_hooks_removed": true,
+    "cleanup_completed": true
+  },
+  "prior_attempts": [
+    {
+      "status": "failed",
+      "reason": "authenticated startup returned native internal error with all external network denied",
+      "model_inference_verified": false,
+      "cleanup_errors": [],
+      "copied_credentials_removed": true
+    }
+  ]
+}

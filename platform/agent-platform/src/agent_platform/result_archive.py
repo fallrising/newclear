@@ -66,6 +66,18 @@ def result_snapshot(run, result):
         )
     elif any(key in result for key in ("diff_bytes", "diff_sha256", "base_sha")):
         raise invalid()
+    if run.get("purpose") == "review":
+        from .review import result_review
+
+        review = result.get("review", {})
+        parsed = result_review(
+            run, {key: review.get(key) for key in ("candidate_sha256", "verdict", "reasons")}
+        )
+        if parsed != review:
+            raise invalid()
+        output["review"] = parsed
+    elif "review" in result:
+        raise invalid()
     return output
 
 
@@ -139,7 +151,8 @@ def persist_archive(conn, run, result):
 
 def require_run(conn, run_id):
     run = conn.execute(
-        "SELECT id,task_id,attempt_no,base_sha,profile_revision,goal FROM runs WHERE id=%s",
+        "SELECT id,task_id,attempt_no,base_sha,profile_revision,goal,purpose,review_context "
+        "FROM runs WHERE id=%s",
         (run_id,),
     ).fetchone()
     if run is None:
@@ -159,12 +172,16 @@ def list_archives(db, run_id):
 
 def read_archive(db, run_id, artifact_id):
     with db.transaction() as conn:
-        run = require_run(conn, run_id)
-        row = conn.execute(
-            f"SELECT {METADATA},substring(payload FROM 1 FOR %s) AS payload FROM result_archives "
-            "WHERE run_id=%s AND id=%s",
-            (ARCHIVE_LIMIT + 1, run_id, artifact_id),
-        ).fetchone()
+        return read_archive_conn(conn, run_id, artifact_id)
+
+
+def read_archive_conn(conn, run_id, artifact_id):
+    run = require_run(conn, run_id)
+    row = conn.execute(
+        f"SELECT {METADATA},substring(payload FROM 1 FOR %s) AS payload FROM result_archives "
+        "WHERE run_id=%s AND id=%s",
+        (ARCHIVE_LIMIT + 1, run_id, artifact_id),
+    ).fetchone()
     if row is None:
         raise Problem(404, "artifact_not_found")
     if row["pruned_at"] is not None:

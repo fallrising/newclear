@@ -1,0 +1,125 @@
+{
+  "date": "2026-11-01",
+  "provider": "cursor",
+  "model": "composer-2.5",
+  "version": "2026.10.22-27dcf5f",
+  "acceptance": "AC-13",
+  "status": "failed",
+  "baseline_commit": "4569ff7ed93a16f7728e28846e9230034de6a673",
+  "tested_source_sha256": {
+    "run_cursor_work.py": "6706437884ef482b2357c701b3d978094fc5649b31dafa979981b64b716d463e",
+    "cursor_cli.py": "90fee7eab9f04b536a1ce0ebe75169509b200684c0e5e015c6ecae7fd1b229f2",
+    "cursor_task_hook.py": "6e68400a42969113638270de204c6fc84dbecc8f3079568142a7eaf595b54ded",
+    "cursor_work_policy.mjs": "b9c65d411d61e2c4803c54811b4ea954192cff5e52686ba37564544c58e32a41",
+    "office_cursor_work.mjs": "c7cf93470923b8fee630d4f2f9c26e8353ca9b07ad971f1b539a2320dc5eb26b",
+    "cursor_hook_preflight.mjs": "3115fc57df97757a68ba35d0fee1ffb152a8808f3a8f946a72368a1b781022a9",
+    "cursor-task/cursor-agent": "4cda9627980c703a4e04efac8e8939c16000ba3ee866c3aed15a1d091a9ddf2a",
+    "remote_cli.py": "9a0ee26503ef76b003b9d8d387f6381acd1a043723374f62793a7f75bf97bb89",
+    "run_grok_startup.py": "8b5b556ae1c5bb6f1232738b9fc6549c8df5de77945a04e14ee7efa15c1d02c5",
+    "grok_startup.py": "af5188f82d05ebfb0830bbe7a7cb0e3c6838e37cd947424252b8ac7ea9b4af72"
+  },
+  "owner_authorization": {
+    "single_model_attempt": true,
+    "authorized_timeout_seconds": 240,
+    "authorized_tool_ceiling": 4,
+    "actual_tool_ceiling": 2,
+    "host_retries": 0,
+    "consumed": true
+  },
+  "model_activity_observed": true,
+  "model_inference_verified": false,
+  "elapsed_s": 34.045986832818016,
+  "native_hook_config_valid": true,
+  "same_session_model_verified": true,
+  "authenticated_events": [
+    "sessionStart",
+    "beforeSubmitPrompt",
+    "preToolUse",
+    "postToolUse",
+    "preToolUse"
+  ],
+  "boundary_events": [
+    {
+      "event": "sessionStart",
+      "model": "composer-2.5"
+    },
+    {
+      "event": "beforeSubmitPrompt",
+      "model": "composer-2.5",
+      "allowed": true
+    },
+    {
+      "event": "preToolUse",
+      "model": "composer-2.5",
+      "tool": "Read",
+      "allowed": true
+    },
+    {
+      "event": "beforeReadFile",
+      "model": "composer-2.5",
+      "allowed": true
+    },
+    {
+      "event": "postToolUse",
+      "model": "composer-2.5",
+      "tool": "Read"
+    },
+    {
+      "event": "preToolUse",
+      "model": "composer-2.5",
+      "tool": "Read",
+      "allowed": false
+    },
+    {
+      "event": "postToolUseFailure",
+      "model": "composer-2.5",
+      "failed": true
+    }
+  ],
+  "artifact_present": false,
+  "native_stop_verified": false,
+  "usage": {
+    "input_tokens": null,
+    "output_tokens": null,
+    "requests": null,
+    "cost": null
+  },
+  "cleanup": {
+    "owned_processes_seen": 51,
+    "errors": [],
+    "copied_credentials_removed": true,
+    "workspace_hooks_removed": true
+  },
+  "finding": "A second Read was denied after the first successful Read. The terminal showed Editing result.json. The target was not recorded; an implicit output inspection is a hypothesis, not a verified cause.",
+  "offline_preparation": {
+    "max_tool_calls": 4,
+    "allowed_sequence": "Read input once; optional result reads up to twice; Write result exactly once; all at most four calls, sequential completion and matching tool IDs",
+    "seed_output": "empty object",
+    "target_classification_recorded": true,
+    "node_tests": 33,
+    "python_tests": 32,
+    "source_sha256": {
+      "run_cursor_work.py": "26f170f3904c02f2aef8c52d370abbe8c8e174aa7cc94e3dc7a9bcb1fa35ae47",
+      "cursor_cli.py": "90fee7eab9f04b536a1ce0ebe75169509b200684c0e5e015c6ecae7fd1b229f2",
+      "cursor_task_hook.py": "55b59876b6040665e0352c94dfff2c6ffe9c19b59655a0f816e6142828d18684",
+      "cursor_work_policy.mjs": "b9c65d411d61e2c4803c54811b4ea954192cff5e52686ba37564544c58e32a41",
+      "office_cursor_work.mjs": "90cd72d854934d434998f42eaa854eaa0ded730925bfffca87f4f3acf66d059c",
+      "cursor_hook_preflight.mjs": "3115fc57df97757a68ba35d0fee1ffb152a8808f3a8f946a72368a1b781022a9",
+      "cursor-task/cursor-agent": "4cda9627980c703a4e04efac8e8939c16000ba3ee866c3aed15a1d091a9ddf2a",
+      "remote_cli.py": "9a0ee26503ef76b003b9d8d387f6381acd1a043723374f62793a7f75bf97bb89",
+      "run_grok_startup.py": "8b5b556ae1c5bb6f1232738b9fc6549c8df5de77945a04e14ee7efa15c1d02c5",
+      "grok_startup.py": "af5188f82d05ebfb0830bbe7a7cb0e3c6838e37cd947424252b8ac7ea9b4af72"
+    },
+    "native_startup_without_prompt": "completed",
+    "startup_elapsed_s": 12.559314749902114,
+    "startup_cleanup_errors": [],
+    "startup_copied_credentials_removed": true,
+    "live_verified": false
+  },
+  "limitations": [
+    "No second model attempt was launched under this approval.",
+    "Four-operation compatibility still needs native live acceptance.",
+    "Provider request, token and money caps are unknown; local stopping does not guarantee immediate remote billing termination.",
+    "No full file-read or egress audit."
+  ]
+}

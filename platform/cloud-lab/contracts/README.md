@@ -29,3 +29,15 @@ Queue receipt、Workflow progress、派送 ACK 與模型的成功文字都不是
 時間採 UTC RFC3339，durations 為整數秒；ID 是 1–128 UTF-8 bytes 的不透明字串，不含控制字元；digest 是 `sha256:` 加 64 個小寫十六進位字元。request、event、result 的 JSON body 上限均為 32 KiB（artifact bytes 另計）。其他描述字串每項最多 1024 UTF-8 bytes。使用者字串視為不可信資料，純文字呈現，不可插入 shell、HTML 或日誌指令。
 
 所有回應／稽核帶 `request_id`；錯誤語義見 commands-runs。實作前必須固定簽章 byte encoding、嚴格解析器與相容性 fixtures；本輪文件檢查不能代替 schema／驗簽或平台驗收。
+
+## 固定bot CLI介面
+
+[BC adapter](../docs/bot-bridge.md)提供獨立單次stdin／stdout契約：[request schema](bot-request.schema.json)與[response schema](bot-response.schema.json)。僅health.check／health.status，4KiB輸入，沒有任意命令；trusted host配置與server grant共同限制權限。不是新的HTTP route或已接通Grok的宣告。
+
+[MT MCP stdio介面](../docs/mcp-stdio.md)提供固定tools/list與tools/call；input僅UUID request_id，output沿用bot-response schema。MCP RPC ID與持久request_id分離，取消RPC不表示取消遠端命令，無新增HTTP route。
+
+[Bot私人政策v1](../docs/bot-policy.md)為本機CLI契約：固定期限／總額，綁config與原journal；不屬MCP模型參數或雲端授權grant。
+
+[Bot續租管理CLI](../docs/bot-policy-renewal.md)提供planned／renewed／already_applied回執；只管理本機政策，非模型工具或雲端grant API。
+
+[未知結果結案](../docs/unknown-resolution.md)新增可信operator離線計畫及closed_unknown控制面終局；owner結果仍unknown，沒有新增模型工具或授權capability。

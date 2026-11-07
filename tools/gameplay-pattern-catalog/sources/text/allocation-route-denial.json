@@ -1,0 +1,119 @@
+{
+  "id": "allocation-route-denial",
+  "system": "allocation",
+  "edition": 3,
+  "name": {
+    "zh": "抢占路段改变对手通路",
+    "en": "Claim routes to alter an opponent’s path"
+  },
+  "summary": {
+    "zh": "一段路既能帮自己连接，也能让别人被迫绕远。",
+    "en": "A route can connect your network and force an opponent to detour."
+  },
+  "rules": {
+    "zh": "地图上的路段或路口具有排他占用规则，玩家抢先建立连接或据点后，别人不能再用同一位置延伸。玩家在完成自己的路线与封住关键通路之间取舍；绕行距离、剩余入口和建设成本给出后果。",
+    "en": "Routes or junctions have exclusive occupancy. Claiming a connection or site prevents others from extending through the same position. Balance personal connectivity against denial, with detours, remaining entrances and building costs showing the consequences."
+  },
+  "loop": [
+    {
+      "zh": "寻找必要通路与替代路径",
+      "en": "Find critical links and alternatives"
+    },
+    {
+      "zh": "支付资源抢占路段或节点",
+      "en": "Pay to claim an edge or junction"
+    },
+    {
+      "zh": "更新双方可延伸范围",
+      "en": "Update reachable extensions"
+    },
+    {
+      "zh": "绕行或抢下一处缺口",
+      "en": "Detour or contest the next gap"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "先铺最短路线，还是先拿对手也需要的狭窄连接？",
+      "en": "Build the shortest path first or secure a bottleneck both sides need?"
+    },
+    {
+      "zh": "绕路成本已经很高，还要完成原目标吗？",
+      "en": "Is the original goal still worthwhile after an expensive detour?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "替代路线数量",
+        "en": "Alternative routes"
+      },
+      "effect": {
+        "zh": "只有一条通路会放大先手，多个绕行选择更利于补救。",
+        "en": "A single route magnifies first access; alternatives create recovery options."
+      }
+    },
+    {
+      "name": {
+        "zh": "占用持续时间",
+        "en": "Occupancy duration"
+      },
+      "effect": {
+        "zh": "永久占用强调提前判断，临时封锁更强调时机。",
+        "en": "Permanent claims reward anticipation; temporary blocks emphasize timing."
+      }
+    }
+  ],
+  "tags": [
+    "spatial",
+    "risk"
+  ],
+  "related": [
+    "allocation-area-majority",
+    "allocation-follow-phase",
+    "allocation-public-goal-race",
+    "allocation-public-pick"
+  ],
+  "contrast": {
+    "zh": "铁路环游主要排他占用边；卡坦岛还通过定居点封住路口，因此节点与路段的价值不同。",
+    "en": "Ticket to Ride primarily claims edges; Catan also blocks junctions with settlements, giving nodes and edges different strategic value."
+  },
+  "combination": {
+    "zh": "组合提案：自动贸易车队只能沿己方连接运行，对手抢占要道后必须重新编排路线，比较绕路运费与开辟新口岸。",
+    "en": "Design proposal: automated trade follows owned connections; a contested link forces rerouting and a comparison between longer transport and a new port."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "矿山与港口之间有一条两段捷径和一条四段绕路。",
+      "en": "A mine and port are linked by a two-edge shortcut and a four-edge detour."
+    },
+    "action": {
+      "zh": "花资源先占捷径中的唯一桥段。",
+      "en": "Spend resources to secure the shortcut’s bridge."
+    },
+    "result": {
+      "zh": "自己的短线被保住，对手必须走长线。",
+      "en": "Your short route is secured and the opponent must detour."
+    },
+    "next": {
+      "zh": "剩余资源变少，下一步决定继续连接还是储备资金。",
+      "en": "With fewer resources left, choose whether to finish the route or save."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "competitive",
+    "firstStep": {
+      "zh": "画六个节点、八条可独占边，两名玩家轮流花代币连线。",
+      "en": "Draw six nodes and eight exclusive edges; two local players spend tokens to connect them."
+    },
+    "pitfall": {
+      "zh": "别让一次开局抢路就永久失去参与机会。",
+      "en": "Avoid a single opening claim eliminating meaningful participation."
+    },
+    "test": {
+      "zh": "路被抢后，玩家是否能读出替代路线及额外代价？",
+      "en": "Can players identify a detour and its extra cost after a route is taken?"
+    }
+  }
+}

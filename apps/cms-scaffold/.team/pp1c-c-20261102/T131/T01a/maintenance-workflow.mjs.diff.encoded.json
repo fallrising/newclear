@@ -1,0 +1,8 @@
+{
+  "version": 1,
+  "original": "T131/T01a/maintenance-workflow.mjs.diff",
+  "sha256": "01041180281dde2ba6081d1b9fd87f11e454d4bad381ecc5208088c49ac86101",
+  "byteSize": "1129",
+  "encoding": "utf-8",
+  "text": "--- \n+++ \n@@ -142,6 +142,14 @@\n   await persistWorkflow(c.record,'BEGIN','TARGET_RESERVED',{target},deps);\n   await persistWorkflow(c.record,'END','TARGET_RESERVED',{},deps);return Object.freeze({root,target:structuredClone(target)});\n }\n+export async function restoreTargetContext(token,deps={}) {\n+  const c=await owned(token,deps);await assertWorkflow(token,{},deps);\n+  ensure(c.child&&c.record.lease.purpose==='RESTORE_VERIFY_LOCAL'&&c.record.lease.phase==='TARGET_RESERVED'\n+    &&c.record.lease.target.creationPhase==='RESERVED','TARGET_NOT_BLANK');\n+  return Object.freeze({root:c.child.root,target:structuredClone(c.record.lease.target),source:structuredClone(c.record.lease.source),\n+    sourceRoot:c.record.root,nodeBinary:c.details.nodeBinary,receipt:await read(join(c.record.root,'receipt.json')),\n+    artifacts:await read(join(c.record.root,'artifacts.json'))});\n+}\n export async function reserveHelper(token,{side,kind},deps={}) {\n   const c=await owned(token,deps);ensure(!c.helper&&!c.reservation&&c.record.lease.helper===null);\n   ensure(c.record.journal.records.at(-1)?.event==='BEGIN','JOURNAL_INCOMPLETE');\n"
+}

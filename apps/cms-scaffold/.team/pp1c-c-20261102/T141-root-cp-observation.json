@@ -1,0 +1,34 @@
+[
+  {
+    "path": "/app/app.jar",
+    "exitCode": 0,
+    "stderrBytes": 0,
+    "tarBytes": 41544192,
+    "rawHeaders": [
+      {
+        "name": "app.jar",
+        "type": "0",
+        "size": 41542634
+      }
+    ],
+    "jarSha256": "7948311615bf45f1c87ab68db08a8b28d0ef9ffe4b08915de10ccddb04555e15"
+  },
+  {
+    "path": "/run/secrets",
+    "exitCode": 0,
+    "stderrBytes": 0,
+    "tarBytes": 2560,
+    "rawHeaders": [
+      {
+        "name": "secrets",
+        "type": "5",
+        "size": 0
+      },
+      {
+        "name": "secrets/spring.datasource.password",
+        "type": "0",
+        "size": 43
+      }
+    ]
+  }
+]

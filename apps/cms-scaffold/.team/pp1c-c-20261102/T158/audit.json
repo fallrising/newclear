@@ -1,0 +1,157 @@
+{
+  "reviewedAt": "2026-11-06T15:45:29.988363+00:00",
+  "approvedSpecMerge": "646b11189ced91016e1dc57306460cf890d1dee3",
+  "approvedFixtureSha256": "f25157feb8a0c027f1b8930c4fad64fe7e0291e0745702d2e2a3b727533e856a",
+  "exactApprovedFixtureBytes": true,
+  "actualOwnedSourceSha256": {
+    "scripts/ops/local-recovery-verify.mjs": "6fc41628d4eafac391de214302553739fbf10c4b4ab630a918b977d24c34b70c",
+    "scripts/ops/local-recovery-verify.test.mjs": "3a6e02a43c5ab54d034a43fdd2575782206a3d690614dff1ed04491daee77e21",
+    "scripts/ops/local-recovery.fixture.mjs": "221f40105646a626f932ac0f53ca230bf9c4b1574d9a951699cbea5988fce96a"
+  },
+  "checkpointAddedRemoved": {
+    "A": {
+      "local-recovery-verify.mjs": 38,
+      "local-recovery-verify.test.mjs": 82,
+      "local-recovery.fixture.mjs": 3
+    },
+    "B": {
+      "local-recovery-verify.mjs": 0,
+      "local-recovery-verify.test.mjs": 157,
+      "local-recovery.fixture.mjs": 0
+    }
+  },
+  "rootBeforeEqualsBeforeA": true,
+  "rootCurrentEqualsAfterB": true,
+  "currentFreezeEntriesMatched": 246,
+  "priorFreezeDeltaOnlyThreeOwnedMjs": [
+    "scripts/ops/local-recovery-verify.mjs",
+    "scripts/ops/local-recovery-verify.test.mjs",
+    "scripts/ops/local-recovery.fixture.mjs"
+  ],
+  "unchangedJavaEntries": 208,
+  "rawComparatorCallSites": 2,
+  "strictPostRevokeBodyUnchanged": true,
+  "actualCatalogSchemasRehashed": 40,
+  "ninePairsMatchActualCatalog": true,
+  "sourceRawDbHash": "9f44cd306bf4e6d31febf784be10df94e189995e632772da7e828f7b7fee45f8",
+  "targetRawDbHash": "1a75c3d807ce7d86ba00a5270dd1c48ba2db8e9639c0dc4827767f73ea220961",
+  "pythonReadbackChangedLines": 53,
+  "pythonReadbackSha256": "685c46b982779f248cf8c0497847c89e15cb5e4ffc78651ff852bcb22dc1cc3a",
+  "pythonActualFunctionSha256": "04168ed44876c954f4b1a09ddd28b46ec5eb964580e341b5d03b4b9577ea4427",
+  "rootOfflinePythonCaseCounts": {
+    "positives": 20,
+    "negatives": 126
+  },
+  "offlineIsNotRuntime": true,
+  "visibleLogs": {
+    "T156/A-red.log": {
+      "sha256": "81d518b427bf904e04051e1d78dac43c9e9c6dabed4fd802fb3bd42046be2b2b",
+      "summary": [
+        "\u2139 tests 15",
+        "\u2139 suites 0",
+        "\u2139 pass 2",
+        "\u2139 fail 13",
+        "\u2139 cancelled 0",
+        "\u2139 skipped 0",
+        "\u2139 todo 0",
+        "\u2139 duration_ms 2957.728739"
+      ]
+    },
+    "T156/A-green.log": {
+      "sha256": "f52f49b2a646715d74847d3a1ca489a8a67214eeea5687dcd227dbf92cc68a2a",
+      "summary": [
+        "\u2139 tests 15",
+        "\u2139 suites 0",
+        "\u2139 pass 15",
+        "\u2139 fail 0",
+        "\u2139 cancelled 0",
+        "\u2139 skipped 0",
+        "\u2139 todo 0",
+        "\u2139 duration_ms 3261.67041"
+      ]
+    },
+    "T156/B-green-first.log": {
+      "sha256": "287ebfb76199a6cf6a9ba96e076c7f3566f93ac4e2900de4b70de907fba327b3",
+      "summary": [
+        "\u2139 tests 109",
+        "\u2139 suites 0",
+        "\u2139 pass 104",
+        "\u2139 fail 5",
+        "\u2139 cancelled 0",
+        "\u2139 skipped 0",
+        "\u2139 todo 0",
+        "\u2139 duration_ms 21671.852853"
+      ]
+    },
+    "T156/B-green.log": {
+      "sha256": "a7d16a19e3bfe227f8daeb470f893f8be1211c7991368d6c6947c5e967811199",
+      "summary": [
+        "\u2139 tests 109",
+        "\u2139 suites 0",
+        "\u2139 pass 109",
+        "\u2139 fail 0",
+        "\u2139 cancelled 0",
+        "\u2139 skipped 0",
+        "\u2139 todo 0",
+        "\u2139 duration_ms 23087.906993"
+      ]
+    },
+    "T156/final-focused-with-coherent-pins.log": {
+      "sha256": "6765761354c50a75db82284b221ca8fff25c8dbad6dfdfae6feac7329556aec7",
+      "summary": [
+        "\u2139 tests 234",
+        "\u2139 suites 0",
+        "\u2139 pass 234",
+        "\u2139 fail 0",
+        "\u2139 cancelled 0",
+        "\u2139 skipped 0",
+        "\u2139 todo 0",
+        "\u2139 duration_ms 32442.952316"
+      ]
+    },
+    "full-node-approved-policy-20261106.log": {
+      "sha256": "299ccecfaacc7254846e50909d08bd75a48580f7ff43948a7f059757f274822a",
+      "summary": [
+        "\u2139 tests 866",
+        "\u2139 suites 0",
+        "\u2139 pass 866",
+        "\u2139 fail 0",
+        "\u2139 cancelled 0",
+        "\u2139 skipped 0",
+        "\u2139 todo 0",
+        "\u2139 duration_ms 73529.111312"
+      ]
+    }
+  },
+  "fullNodeMetadata": {
+    "command": [
+      "/home/ckc/.local/node-v24.18.0/bin/node",
+      "--test",
+      "scripts/local/forward.test.mjs",
+      "scripts/local/ingress.test.mjs",
+      "scripts/local/maintenance-guard.test.mjs",
+      "scripts/local/maintenance-helper-integration.test.mjs",
+      "scripts/local/maintenance-helper-session.test.mjs",
+      "scripts/local/maintenance-helper.test.mjs",
+      "scripts/local/maintenance-store.test.mjs",
+      "scripts/local/maintenance-target.test.mjs",
+      "scripts/local/maintenance-workflow.test.mjs",
+      "scripts/local/maintenance.test.mjs",
+      "scripts/local/prepare.test.mjs",
+      "scripts/local/verify-accounts.test.mjs",
+      "scripts/local/verify.test.mjs",
+      "scripts/ops/local-bundle.test.mjs",
+      "scripts/ops/local-media.test.mjs",
+      "scripts/ops/local-recovery-verify.test.mjs",
+      "scripts/ops/local-restore.test.mjs",
+      "scripts/ops/recovery-protocol.test.mjs"
+    ],
+    "startedAt": "2026-11-06T15:42:49.720651+00:00",
+    "timeoutSeconds": 900,
+    "sourceFreeze": "source-freeze-approved-policy-20261106.json",
+    "exitCode": 0,
+    "elapsedSeconds": 73.59540696186014,
+    "endedAt": "2026-11-06T15:44:03.316061+00:00"
+  },
+  "noSuiteOrRuntimeRerun": true
+}

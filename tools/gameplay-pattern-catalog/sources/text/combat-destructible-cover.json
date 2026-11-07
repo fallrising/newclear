@@ -1,0 +1,120 @@
+{
+  "id": "combat-destructible-cover",
+  "system": "combat",
+  "edition": 2,
+  "name": {
+    "zh": "炸开掩体重画战场",
+    "en": "Destroying cover to reshape a fight"
+  },
+  "summary": {
+    "zh": "拆掉挡路或挡枪的东西，让原本安全的位置变危险。",
+    "en": "Remove protection or obstructions to change which positions are safe."
+  },
+  "rules": {
+    "zh": "墙和掩体不是永久边界，特定攻击能把它们破坏。玩家可以先花稀缺资源开洞或清除保护，再让其他单位利用新的视线和路线；同一次破坏也可能暴露自己的队员，因此要按改变后的地图继续行动。",
+    "en": "Walls and cover are not permanent boundaries: certain attacks destroy them. Spend a limited resource to open a route or remove protection, then exploit new sightlines. The same destruction may expose allies, requiring plans for the changed map."
+  },
+  "loop": [
+    {
+      "zh": "识别保护和阻挡",
+      "en": "Identify cover and obstruction"
+    },
+    {
+      "zh": "选择破坏目标",
+      "en": "Choose what to destroy"
+    },
+    {
+      "zh": "结算新视线与路线",
+      "en": "Update sightlines and routes"
+    },
+    {
+      "zh": "利用缺口重新部署",
+      "en": "Exploit the opening"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "现在用掉爆炸物消除掩体，还是留给后面的敌人？",
+      "en": "Spend an explosive to remove cover now or save it for later?"
+    },
+    {
+      "zh": "开出射线是否也会让自己的后排被敌人看见？",
+      "en": "Will the new sightline expose your rear units as well?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "可破坏范围",
+        "en": "Destructible scope"
+      },
+      "effect": {
+        "zh": "只破坏指定格子容易预测；复杂建筑坍塌会扩大制作和理解成本。",
+        "en": "Specific destructible tiles are predictable; complex collapse raises production and comprehension costs."
+      }
+    },
+    {
+      "name": {
+        "zh": "破坏资源稀缺度",
+        "en": "Destruction scarcity"
+      },
+      "effect": {
+        "zh": "次数越少，开哪一个口越重要；无限破坏可能让掩体失去价值。",
+        "en": "Limited uses make the chosen opening matter; unlimited destruction can invalidate cover."
+      }
+    }
+  ],
+  "tags": [
+    "spatial",
+    "planning",
+    "risk"
+  ],
+  "related": [
+    "combat-cover-flanking",
+    "combat-forced-movement",
+    "combat-friendly-fire",
+    "combat-overwatch"
+  ],
+  "contrast": {
+    "zh": "《幽浮2》常用破坏掩体为后续射击创造条件；《冰封触点》拆墙还直接改变之后同时执行指令的可走路线。",
+    "en": "XCOM 2 uses cover removal to prepare follow-up shots; Frozen Synapse wall destruction also changes routes for planned simultaneous orders."
+  },
+  "combination": {
+    "zh": "把战前建造接到可破坏掩体：玩家自己布置的防线，也可能在战斗中被打开缺口。",
+    "en": "Connect pre-battle construction to destructible cover so player-built defenses can develop breaches during combat."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "敌人躲在一段矮墙后，你有一枚炸弹和一名还没行动的射手。",
+      "en": "An enemy hides behind a low wall; you have one bomb and a shooter who has not acted."
+    },
+    "action": {
+      "zh": "先炸掉矮墙，再让射手对暴露的敌人开火。",
+      "en": "Destroy the wall, then fire at the exposed enemy."
+    },
+    "result": {
+      "zh": "射击条件改善，但这片区域之后也不能保护你的队员。",
+      "en": "The shot improves, but the area can no longer protect your own units."
+    },
+    "next": {
+      "zh": "你重新挑选下一回合的落脚点，避免站在刚炸开的空地。",
+      "en": "Choose the next turn’s position away from the newly exposed ground."
+    }
+  },
+  "prototype": {
+    "scope": "medium",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "用格子地图中可切换“完整／摧毁”的矮墙，重算通路和视线；不做真实碎裂模拟。",
+      "en": "Use tiled walls that switch between intact and destroyed, updating paths and sightlines without debris simulation."
+    },
+    "pitfall": {
+      "zh": "画面已经炸开但寻路仍然绕墙，或看似完整却不再挡枪，会破坏理解。",
+      "en": "Destroyed visuals with old pathing, or intact-looking walls that no longer block fire, undermine clarity."
+    },
+    "test": {
+      "zh": "破坏同一堵墙前后，让试玩者指出新增路线、暴露目标和自己失去的保护。",
+      "en": "Before and after breaking a wall, ask testers to identify new routes, exposed targets and lost protection."
+    }
+  }
+}

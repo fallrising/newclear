@@ -1,0 +1,120 @@
+{
+  "id": "exploration-climbing-rest-route",
+  "system": "movement",
+  "edition": 1,
+  "name": {
+    "zh": "攀爬体力与休息路线",
+    "en": "Climbing stamina and rest routes"
+  },
+  "summary": {
+    "zh": "把看似连续的墙面，拆成一段段可承受的攀登。",
+    "en": "Break a continuous wall into climbs the character can afford."
+  },
+  "rules": {
+    "zh": "攀爬消耗体力，玩家需要选择抓点、休息处和返回路线。到达平台恢复能力后继续上升；过长的路线会导致跌落或被保险绳接住，失败惩罚依作品而定。",
+    "en": "Climbing consumes stamina, requiring choices about holds, rest points and retreat. Restoring capacity at safe positions enables another segment; overlong routes can end in a fall or a safety-rope catch."
+  },
+  "loop": [
+    {
+      "zh": "观察下一处休息点",
+      "en": "Find the next rest point"
+    },
+    {
+      "zh": "估算体力与路线",
+      "en": "Estimate stamina and route"
+    },
+    {
+      "zh": "连续攀爬",
+      "en": "Climb the segment"
+    },
+    {
+      "zh": "休息或回撤调整",
+      "en": "Rest or retreat and revise"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "垂直直上更短，却可能找不到中途歇脚点。",
+      "en": "A direct ascent is shorter but may lack intermediate rest."
+    },
+    {
+      "zh": "绕路先拿体力升级，可以把难路线变成可行路线。",
+      "en": "A detour for a stamina upgrade can turn an impossible route into a feasible one."
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "静止是否耗体力",
+        "en": "Cost while stationary"
+      },
+      "effect": {
+        "zh": "停住不耗体力允许观察，持续消耗会增加即时压力。",
+        "en": "Free pauses allow observation; continuous drain adds urgency."
+      }
+    },
+    {
+      "name": {
+        "zh": "跌落保护",
+        "en": "Fall protection"
+      },
+      "effect": {
+        "zh": "保险绳降低重复爬升负担，可把挑战集中在路线判断。",
+        "en": "A safety rope reduces repeated climbing and emphasizes route judgment."
+      }
+    }
+  ],
+  "tags": [
+    "planning",
+    "risk",
+    "spatial"
+  ],
+  "related": [
+    "exploration-air-action-refill",
+    "exploration-gliding-descent",
+    "movement-carry-object",
+    "movement-downward-slam"
+  ],
+  "contrast": {
+    "zh": "《退潮》聚焦每一步的攀登操作与保护；《沙贝》把体力当作开放世界探索半径的限制。",
+    "en": "Jusant focuses on the act and safety of climbing; Sable uses stamina to limit the reach of open-world exploration."
+  },
+  "combination": {
+    "zh": "设计提案：登山采样时，样本重量降低攀爬续航；玩家要决定先卸货还是继续挑战高处稀有样本。",
+    "en": "Design proposal: geological samples reduce climbing endurance through weight, forcing a choice between unloading and pursuing a rare sample higher up."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "你有一条有限体力槽，直上很短，右侧绕路却有休息台。",
+      "en": "Your stamina is limited; the direct climb is short, but a detour has a resting ledge."
+    },
+    "action": {
+      "zh": "你先横移到休息台，恢复后再爬最后一段。",
+      "en": "Traverse to the ledge, recover, and climb the final stretch."
+    },
+    "result": {
+      "zh": "总路程更长，但每一段都没有耗尽体力。",
+      "en": "The total route is longer, but no segment exhausts your stamina."
+    },
+    "next": {
+      "zh": "从新的休息点判断下一处抓点和退路。",
+      "en": "From the new resting point, inspect the next holds and a retreat route."
+    }
+  },
+  "prototype": {
+    "scope": "medium",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "用二维墙面、固定体力消耗和三个休息台验证路线选择。",
+      "en": "Use a 2D wall, fixed stamina costs, and three ledges to test route decisions."
+    },
+    "pitfall": {
+      "zh": "自由攀爬动画、任意表面识别和保险绳物理会迅速扩大范围。",
+      "en": "Free-form climbing animation, arbitrary surfaces, and rope physics rapidly expand the scope."
+    },
+    "test": {
+      "zh": "让玩家在两条路线间选择，检查他们是否真的把休息点纳入计划。",
+      "en": "Offer two routes and check whether players plan around resting points."
+    }
+  }
+}

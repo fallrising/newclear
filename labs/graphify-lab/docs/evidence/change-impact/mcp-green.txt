@@ -1,0 +1,7 @@
+test_I04_impact_edit_refresh_and_source (test_change_impact_mcp.ChangeImpactMCP.test_I04_impact_edit_refresh_and_source) ... ok
+
+----------------------------------------------------------------------
+Ran 1 test in 2.232s
+
+OK
+{"journey": "I-04", "status": "passed", "requests": 15, "initialize_and_list_included": true, "provider_requests": null, "tokens": null, "cost": null}

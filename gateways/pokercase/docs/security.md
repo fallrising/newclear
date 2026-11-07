@@ -56,13 +56,11 @@ OAuth tokens are only sent to the provider's official hosts (https, default port
 | opencode | `opencode.ai` |
 | agy | `cloudcode-pa.googleapis.com` |
 
-The `claude` and `cursor` providers send no token at all (they run the host Claude Code CLI
-and containerized Cursor Agent CLI) and ignore their base URL. `cursor-agent` is a coding agent with
-built-in tools; it always runs in `--mode ask` with `--sandbox disabled` in a
-Docker tmpfs workspace (Docker supplies the boundary; the inner CLI sandbox is disabled for compatibility), never with `--force` or `--approve-mcps`. It can still use the Cursor account's plugins
-(e.g. Gmail), which the CLI cannot disable, so the provider stays off unless
-`--cursor-accept-account-plugins` and the required container image/profile settings are given.
-See [the container boundary](cursor-isolation.md): no host filesystem mounts, but bridge networking still allows host/LAN/external access and account plugins remain available. The admin UI/API rejects other base URLs for the providers above, and the proxy re-checks
+The `claude` and `cursor` providers delegate authentication to the official CLIs and ignore their base URL; thinrouter does not extract or send their tokens. `cursor` names Cursor Agent CLI (`cursor-agent`), not the IDE. The owner removed Docker as a product requirement on 2026-11-02; the existing adapter still uses the legacy container runner until migration, as recorded in the [current decision and historical boundary](cursor-isolation.md).
+
+That older implementation runs ask mode with its inner sandbox disabled only inside Docker, never with `--force` or `--approve-mcps`. These flags must not be copied to a future host runner as a claimed safety boundary. The previous selected-version probe found account plugins available, so the current opt-in remains. The old container restricted host files/processes but did not isolate account plugins or arbitrary networking. No Docker-free isolation or runtime acceptance is claimed by this documentation update.
+
+The admin UI/API rejects other base URLs for the providers above, and the proxy re-checks
 stored rows before every call. An operator can add a base with
 `--provider-base-override siwc=http://127.0.0.1:8080` (CLI/env only; used by tests and
 egress proxies). An imported OAuth connection of an unknown provider cannot change its

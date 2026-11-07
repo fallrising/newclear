@@ -1,0 +1,432 @@
+#!/usr/bin/env python3
+"""Read existing synthetic Office runs. Never launch a provider or load credentials."""
+import argparse
+import local_text_task
+import datetime
+import hashlib
+import json
+import math
+import os
+from pathlib import Path
+import re
+import stat
+import sys
+
+LAB = Path(__file__).resolve().parents[1]
+PROVIDERS = ('opencode', 'grok', 'pi', 'cursor')
+RUN_NAME = re.compile(r'(?:local-work|grok-work|pi-work|cursor-work)-[A-Za-z0-9_-]{1,100}\Z')
+TOKEN = re.compile(r'[A-Za-z0-9][A-Za-z0-9._/-]{0,127}\Z')
+MARKER = re.compile(r'[A-Za-z0-9_-]{1,128}\Z')
+SHA256 = re.compile(r'[a-f0-9]{64}\Z')
+AUTH_FINGERPRINT = re.compile(r'[a-f0-9]{12}\Z')
+MAX_RUNS = 1000
+
+
+class InvalidRun(ValueError):
+    pass
+
+
+def reject_duplicates(pairs):
+    result = {}
+    for key, value in pairs:
+        if key in result:
+            raise InvalidRun('duplicate_json_key')
+        result[key] = value
+    return result
+
+
+def read_json(directory_fd, parts, limit):
+    """Use descriptor-relative, no-follow opens for every component, including races."""
+    fd = os.dup(directory_fd)
+    try:
+        for part in parts[:-1]:
+            child = os.open(part, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW, dir_fd=fd)
+            os.close(fd)
+            fd = child
+        file_fd = os.open(parts[-1], os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK, dir_fd=fd)
+        with os.fdopen(file_fd, 'rb') as stream:
+            info = os.fstat(stream.fileno())
+            if not stat.S_ISREG(info.st_mode) or info.st_size > limit:
+                raise InvalidRun('unsafe_or_oversized_file')
+            raw = stream.read(limit + 1)
+        if len(raw) > limit:
+            raise InvalidRun('oversized_file')
+        value = json.loads(raw, object_pairs_hook=reject_duplicates,
+                           parse_constant=lambda _: (_ for _ in ()).throw(InvalidRun('nonfinite_json')))
+        if not isinstance(value, dict):
+            raise InvalidRun('expected_json_object')
+        return value, raw
+    finally:
+        os.close(fd)
+
+
+def safe_token(value):
+    return value if isinstance(value, str) and TOKEN.fullmatch(value) else None
+
+
+def artifact(run_fd, expected_hash):
+    """Only the two fixed synthetic fixture files are eligible for display."""
+    try:
+        fixture, _ = read_json(run_fd, ('workspace', 'input.json'), 4096)
+        result, raw = read_json(run_fd, ('workspace', 'result.json'), 4096)
+        marker, values = fixture.get('marker'), fixture.get('values')
+        if (set(fixture) != {'marker', 'values'} or not isinstance(marker, str)
+                or not MARKER.fullmatch(marker) or not isinstance(values, list)
+                or not 1 <= len(values) <= 100
+                or any(type(v) is not int or abs(v) > 10**9 for v in values)):
+            raise InvalidRun('invalid_fixture')
+        if (set(result) != {'marker', 'total'} or result['marker'] != marker
+                or type(result['total']) is not int or result['total'] != sum(values)):
+            raise InvalidRun('artifact_content_mismatch')
+        digest = hashlib.sha256(raw).hexdigest()
+        if not isinstance(expected_hash, str) or not SHA256.fullmatch(expected_hash):
+            return {'status': 'unverified', 'reason': 'recorded_hash_missing'}
+        if digest != expected_hash:
+            return {'status': 'unverified', 'reason': 'artifact_hash_mismatch'}
+        return {'status': 'verified', 'sha256': digest, 'content': result}
+    except FileNotFoundError:
+        return {'status': 'unavailable', 'reason': 'artifact_missing'}
+    except (OSError, ValueError, UnicodeError, RecursionError):
+        return {'status': 'unverified', 'reason': 'artifact_invalid'}
+
+
+def _normalize(run_fd, run_id):
+    row = {'id': run_id, 'provider': 'unknown', 'model': None, 'version': None,
+           'status': 'invalid', 'artifact': {'status': 'unavailable'}, 'cleanup_verified': False}
+    try:
+        report, _ = read_json(run_fd, ('result.json',), 2 * 1024 * 1024)
+    except FileNotFoundError:
+        return dict(row, status='incomplete', reason='report_missing')
+    except (OSError, ValueError, UnicodeError, RecursionError):
+        return dict(row, reason='report_invalid')
+    provider = report.get('provider')
+    if report.get('harness') == 'office-opencode' and provider in (None, 'opencode'):
+        provider = 'opencode'
+    if provider not in PROVIDERS:
+        return dict(row, reason='unsupported_provider')
+    row['provider'] = provider
+    office = report.get('office_result' if provider == 'opencode' else 'office', {})
+    if not isinstance(office, dict):
+        return dict(row, reason='invalid_native_report')
+    row['version'] = safe_token(report.get('version'))
+    authorization = report.get('authorization')
+    if (isinstance(authorization, dict) and set(authorization) == {'kind','fingerprint'}
+            and authorization.get('kind') == 'server_grant'
+            and isinstance(authorization.get('fingerprint'), str) and AUTH_FINGERPRINT.fullmatch(authorization['fingerprint'])):
+        row['authorization'] = {'kind':'server_grant','fingerprint':authorization['fingerprint']}
+    usage = report.get('remote_usage')
+    if (isinstance(usage, dict) and set(usage) == {'requests','output_tokens'}
+            and type(usage.get('requests')) is int and 0 <= usage['requests'] <= 4
+            and (usage.get('output_tokens') is None or (type(usage.get('output_tokens')) is int and 0 <= usage['output_tokens'] <= 4 * 512))):
+        row['remote_usage'] = {'requests':usage['requests'], 'output_tokens':usage['output_tokens']}
+    # Preserve model provenance from the saved native report, never infer it from a CLI default.
+    row['model'] = safe_token(office.get('model'))
+    requested = safe_token(report.get('model'))
+    prefix = {'opencode': 'strata/', 'pi': 'deepseek/'}.get(provider, '')
+    model_matches = bool(requested and row['model'] == prefix + requested)
+    row['cleanup_verified'] = (report.get('cleanup_errors') == []
+                               and office.get('cleanup_completed') is True
+                               and (provider not in ('grok', 'cursor')
+                                    or report.get('copied_credentials_removed') is True))
+    elapsed = report.get('elapsed_s')
+    if type(elapsed) in (int, float) and 0 <= elapsed < 10**7 and math.isfinite(elapsed):
+        row['elapsed_seconds'] = round(elapsed, 2)
+    row['artifact'] = artifact(run_fd, office.get('artifact_sha256'))
+    if report.get('result_kind') != 'native_question_check' and any(k in report for k in ('permission_kind','model_driven_permission','question_check_passed')):
+        return dict(row, status='invalid', reason='invalid_question_test_metadata', question_check_passed=False)
+    if report.get('result_kind') == 'native_question_check':
+        forbidden = ('host_restart_check','resume_check','cancellation_check','fault_injection','crash_injection',
+                     'authorization','retry_of','retry','task','text_output','text_task','revision')
+        if (provider != 'pi' or any(k in report for k in forbidden)
+                or any(k in office for k in ('fault_injection','authorization','retry'))
+                or report.get('permission_kind') != 'synthetic_ui_confirm'
+                or report.get('model_driven_permission') is not False
+                or report.get('startup_only', False) is not False
+                or office.get('provider') != 'pi'):
+            row.pop('authorization', None); row.pop('remote_usage', None)
+            return dict(row, status='invalid', reason='invalid_question_test_metadata', question_check_passed=False)
+        row['test_scenario'] = 'native_pi_question'
+        expected_responses = [{'index':0,'input':'deny','ui_result':False},
+                              {'index':1,'input':'allow','ui_result':True},
+                              {'index':2,'input':'timeout','ui_result':False}]
+        usage = report.get('remote_usage')
+        usage_ok = (isinstance(usage, dict) and set(usage) == {'requests','output_tokens'}
+                    and type(usage.get('requests')) is int and usage['requests'] == 0
+                    and type(usage.get('output_tokens')) is int and usage['output_tokens'] == 0)
+        responses = office.get('question_responses')
+        responses_ok = (isinstance(responses, list) and len(responses) == 3 and all(
+            isinstance(item, dict) and set(item) == {'index','input','ui_result'}
+            and type(item.get('index')) is int and item['index'] == expected_responses[i]['index']
+            and type(item.get('input')) is str and item['input'] == expected_responses[i]['input']
+            and type(item.get('ui_result')) is bool and item['ui_result'] is expected_responses[i]['ui_result']
+            for i, item in enumerate(responses)))
+        artifact_absent = False
+        try:
+            workspace_fd = os.open('workspace', os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW, dir_fd=run_fd)
+            try:
+                try: os.stat('result.json', dir_fd=workspace_fd, follow_symlinks=False)
+                except FileNotFoundError: artifact_absent = True
+            finally: os.close(workspace_fd)
+        except OSError: pass
+        question_ok = bool(report.get('question_check_passed') is True
+            and report.get('status') == 'stopped' and report.get('reason') == 'native_question_check'
+            and report.get('model_inference_verified') is False
+            and report.get('permission_kind') == 'synthetic_ui_confirm'
+            and report.get('model_driven_permission') is False
+            and isinstance(report.get('requests'), list) and report.get('requests') == []
+            and type(report.get('client_requests')) is int and report['client_requests'] == 0
+            and type(report.get('external_requests')) is int and report['external_requests'] == 0
+            and usage_ok
+            and type(report.get('remaining_owned_processes')) is int and report['remaining_owned_processes'] == 0
+            and report.get('cleanup_errors') == []
+            and office.get('status') == 'question_verified'
+            and office.get('provider') == 'pi' and office.get('model') == 'deepseek/deepseek-flash'
+            and model_matches and row['cleanup_verified']
+            and office.get('input_path') == 'office_ws_terminal_input'
+            and isinstance(office.get('marker_sha256'), str) and SHA256.fullmatch(office['marker_sha256'])
+            and responses_ok
+            and type(office.get('question_prompt_starts')) is int and office['question_prompt_starts'] == 3
+            and type(office.get('question_prompt_ends')) is int and office['question_prompt_ends'] == 3
+            and all(office.get(k) is True for k in ('marker_written_after_allow','native_question_verified',
+                'provider_request_detector_installed','same_session_verified','denial_preserved_workspace',
+                'replay_rejected','cleanup_completed'))
+            and office.get('model_inference_verified') is False
+            and artifact_absent and row['artifact']['status'] == 'unavailable')
+        row['question_check_passed'] = question_ok
+        return dict(row, status='stopped' if question_ok else 'failed' if report.get('status') == 'failed' else 'unverified',
+                    reason='native_question_check')
+    if report.get('result_kind') is not None:
+        row.pop('authorization', None); row.pop('remote_usage', None)
+        return dict(row, status='invalid', reason='invalid_result_kind')
+    if report.get('task') in ('local_text','local_revision'):
+        row['task_kind'] = report['task']
+        if provider != 'opencode': return dict(row,reason='invalid_text_provider')
+        try:
+            workspace_fd = os.open('workspace',os.O_RDONLY|os.O_DIRECTORY|os.O_NOFOLLOW,dir_fd=run_fd)
+            try: raw = local_text_task.read_regular(workspace_fd,'output.md',local_text_task.MAX_OUTPUT)
+            finally: os.close(workspace_fd)
+            digest = hashlib.sha256(raw).hexdigest()
+            recorded = report.get('text_output',{})
+            if (not raw.strip() or recorded != {'name':'output.md','sha256':digest,'bytes':len(raw)}
+                    or office.get('artifact_sha256') != digest): raise InvalidRun('text_hash_mismatch')
+            text_artifact = {'status':'verified','kind':'text','name':'output.md','sha256':digest,'text':raw.decode('utf8')}
+            if report['task']=='local_revision':
+                receipt,_=read_json(run_fd,('text-task.json',),512*1024)
+                change=local_text_task.revision(receipt,raw)
+                expected={k:change[k] for k in ('target','before_sha256','after_sha256','changed')}
+                if (not isinstance(report.get('text_task'),dict) or report.get('revision') != expected or report['text_task'].get('source_snapshot_sha256') != local_text_task.digest(local_text_task.encoded(receipt['files']))
+                        or local_text_task.read_source(run_fd,change['target']) != change['original'].encode()):
+                    raise InvalidRun('revision_source_mismatch')
+                text_artifact.update(kind='revision',name=Path(change['target']).name,target=change['target'],
+                                before_sha256=change['before_sha256'],original=change['original'],diff=change['diff'],changed=change['changed'])
+            row['artifact'] = text_artifact
+        except FileNotFoundError: pass
+        except (OSError,ValueError,UnicodeError): row['artifact'] = {'status':'unverified','reason':'text_output_invalid'}
+        verified = (report.get('status') == 'completed' and office.get('status') == 'completed'
+                    and report.get('model_inference_verified') is True and office.get('model_inference_verified') is True
+                    and office.get('text_task_completed') is True and report.get('source_snapshot_unchanged') is True
+                    and model_matches and row['cleanup_verified'] and row['artifact']['status'] == 'verified')
+        row['content_review_required'] = True
+        return dict(row,status='completed' if verified else report['status'] if report.get('status') in ('failed','cancelled') else 'unverified',reason=report['task']+'_task')
+    if 'host_restart_check' in report:
+        if (provider != 'pi' or report['host_restart_check'] != {'source':'loopback','http_status':429,'signal':'SIGKILL'}
+                or any(k in report for k in ('resume_check','cancellation_check','fault_injection','crash_injection'))):
+            return dict(row,status='invalid',reason='invalid_host_restart_metadata')
+        row['test_scenario'] = 'native_pi_host_restart'
+        observation = office.get('no_automatic_replay_observation_ms')
+        row['host_restart_check_passed'] = (report.get('host_restart_check_passed') is True
+            and report.get('status') == 'stopped' and office.get('status') == 'stopped'
+            and row['cleanup_verified'] and model_matches and report.get('model_inference_verified') is False
+            and report.get('host_target_verified') is True
+            and all(office.get(k) is True for k in ('crash_recovery_verified','repeated_restart_preserved','old_processes_exited',
+                'session_history_preserved','native_resume_verified','new_process_same_session','distinct_host_processes',
+                'browser_interrupted_visible','browser_refresh_without_replay'))
+            and type(office.get('host_generations')) is int and office['host_generations'] == 3
+            and type(observation) in (int,float) and 3000 <= observation < 10**7
+            and type(report.get('client_requests')) is int and report['client_requests'] == 1
+            and type(report.get('external_requests')) is int and report['external_requests'] == 0
+            and type(report.get('remaining_owned_processes')) is int and report['remaining_owned_processes'] == 0
+            and row['artifact']['status'] == 'unavailable')
+        return dict(row,status='stopped' if row['host_restart_check_passed'] else 'failed' if report.get('status') == 'failed' else 'unverified',reason='native_host_restart_check')
+    if 'resume_check' in report:
+        if (provider != 'pi' or report['resume_check'] != {'source':'loopback','http_status':429}
+                or any(k in report for k in ('cancellation_check','fault_injection','crash_injection'))):
+            return dict(row, status='invalid', reason='invalid_resume_test_metadata')
+        row['test_scenario'] = 'native_pi_resume'
+        row['resume_check_passed'] = (report.get('resume_check_passed') is True
+            and report.get('status') == 'stopped' and office.get('status') == 'stopped'
+            and row['cleanup_verified'] and model_matches and report.get('model_inference_verified') is False
+            and report.get('resume_target_verified') is True
+            and all(office.get(k) is True for k in ('native_resume_verified','session_history_preserved','native_token_rotated','new_process_same_session'))
+            and type(report.get('client_requests')) is int and report['client_requests'] == 1
+            and type(report.get('external_requests')) is int and report['external_requests'] == 0
+            and type(report.get('remaining_owned_processes')) is int and report['remaining_owned_processes'] == 0
+            and row['artifact']['status'] == 'unavailable')
+        return dict(row, status='stopped' if row['resume_check_passed'] else 'failed' if report.get('status') == 'failed' else 'unverified', reason='native_resume_check')
+    if 'cancellation_check' in report:
+        if (provider != 'pi' or report['cancellation_check'] != {'source':'held_loopback','method':'worker.kill'}
+                or 'fault_injection' in report or 'crash_injection' in report):
+            return dict(row, status='invalid', reason='invalid_cancel_test_metadata')
+        row['test_scenario'] = 'native_pi_cancel'
+        duration = office.get('cancel_processes_exit_duration_ms')
+        cleanup_duration = report.get('cancel_cleanup_duration_ms')
+        row['cancel_check_passed'] = (report.get('cancel_check_passed') is True
+            and report.get('status') == 'cancelled' and office.get('status') == 'cancelled'
+            and row['cleanup_verified'] and model_matches and report.get('model_inference_verified') is False
+            and office.get('native_cancel_verified') is True and office.get('cancelled_processes_exited') is True
+            and type(duration) in (int, float) and 0 <= duration <= 10000
+            and type(cleanup_duration) in (int, float) and 0 <= cleanup_duration <= 10000
+            and type(report.get('client_requests')) is int and report['client_requests'] == 1
+            and type(report.get('external_requests')) is int and report['external_requests'] == 0
+            and type(report.get('remaining_owned_processes')) is int and report['remaining_owned_processes'] == 0
+            and row['artifact']['status'] == 'unavailable')
+        return dict(row, status='cancelled' if row['cancel_check_passed'] else 'failed' if report.get('status') == 'failed' else 'unverified',
+                    reason='native_cancel_check')
+    if 'crash_injection' in report:
+        if (provider != 'pi' or report['crash_injection'] != {'source': 'owned_cli', 'signal': 'SIGKILL'}
+                or 'fault_injection' in report):
+            return dict(row, status='invalid', reason='invalid_crash_test_metadata')
+        row['test_scenario'] = 'injected_cli_crash'
+        row['failure_check_passed'] = (report.get('crash_check_passed') is True
+                                      and report.get('status') == 'failed' and row['cleanup_verified']
+                                      and office.get('status') == 'failed' and model_matches
+                                      and report.get('model_inference_verified') is False
+                                      and office.get('native_crash_verified') is True
+                                      and report.get('crash_target_verified') is True
+                                      and type(report.get('client_requests')) is int and report['client_requests'] == 1
+                                      and type(report.get('external_requests')) is int and report['external_requests'] == 0
+                                      and type(report.get('remaining_owned_processes')) is int and report['remaining_owned_processes'] == 0
+                                      and row['artifact']['status'] == 'unavailable')
+        return dict(row, status='failed' if report.get('status') == 'failed' else 'unverified',
+                    reason='injected_owned_cli_crash')
+    if 'fault_injection' in report:
+        fault = report['fault_injection']
+        if (provider != 'pi' or not isinstance(fault, dict) or fault.get('source') != 'loopback'
+                or type(fault.get('http_status')) is not int or fault.get('http_status') not in (401, 429)):
+            return dict(row, status='invalid', reason='invalid_fault_test_metadata')
+        row['test_scenario'] = 'injected_http_' + str(fault['http_status'])
+        row['failure_check_passed'] = (report.get('failure_check_passed') is True
+                                      and report.get('status') == 'failed' and row['cleanup_verified']
+                                      and report.get('model_inference_verified') is False
+                                      and office.get('native_error_verified') is True
+                                      and report.get('client_requests') == 1 and report.get('external_requests') == 0
+                                      and report.get('remaining_owned_processes') == 0
+                                      and row['artifact']['status'] == 'unavailable')
+        return dict(row, status='failed' if report.get('status') == 'failed' else 'unverified',
+                    reason='injected_loopback_failure')
+    native_fields = {
+        'opencode': ('office_native_status_verified', 'file_task_passed', 'model_inference_verified'),
+        'pi': ('agent_settled_verified', 'file_task_passed'),
+        'cursor': ('native_stop_verified', 'session_hook_verified', 'task_completed', 'file_task_passed'),
+        'grok': ('native_stop_verified', 'session_hook_verified', 'task_completed', 'native_model_selection_verified'),
+    }
+    native_ok = (office.get('provider') == provider and office.get('status') == 'completed'
+                 and all(office.get(key) is True for key in native_fields[provider]))
+    reported = report.get('status')
+    if reported == 'failed':
+        row.update(status='failed', reason='runner_reported_failure')
+    elif reported == 'cancelled':
+        row.update(status='cancelled', reason='runner_reported_user_cancellation')
+    elif reported in ('stopped', 'interrupted'):
+        row.update(status='stopped', reason='runner_reported_stop')
+    elif reported != 'completed':
+        row.update(status='incomplete', reason='no_final_report')
+    elif report.get('startup_only') is True:
+        row.update(status='startup_only', reason='no_task_requested')
+    elif (report.get('model_inference_verified') is True and model_matches and native_ok
+          and row['cleanup_verified'] and row['artifact']['status'] == 'verified'):
+        row['status'] = 'completed'
+    else:
+        row.update(status='unverified', reason='completion_evidence_incomplete')
+    return row
+
+
+def normalize(run_fd, run_id):
+    row = _normalize(run_fd, run_id)
+    try:
+        saved, _ = read_json(run_fd, ('attempt.json',), 4096)
+    except FileNotFoundError:
+        return row
+    except (OSError, ValueError, UnicodeError, RecursionError):
+        return dict(row, status='invalid', reason='invalid_retry_metadata', **({'question_check_passed':False} if 'question_check_passed' in row else {}))
+    try:
+        from pi_retry import receipt
+        saved = receipt(saved)
+        name = run_id.split(':')[-1]
+        if row.get('test_scenario') == 'native_pi_question' or row['provider'] != 'pi' or (saved['attempt'] == 0 and saved['root'] != name):
+            raise ValueError('invalid_retry_source')
+        row['retry'] = {k:saved[k] for k in ('root','parent','attempt')}
+    except (ValueError, TypeError, KeyError):
+        return dict(row, status='invalid', reason='invalid_retry_metadata', **({'question_check_passed':False} if 'question_check_passed' in row else {}))
+    return row
+
+
+def catalog(roots):
+    rows = []
+    for number, root in enumerate(roots, 1):
+        try:
+            root_fd = os.open(root, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW)
+        except OSError:
+            raise InvalidRun(f'runs_root_{number}_unavailable') from None
+        try:
+            names = sorted(name for name in os.listdir(root_fd) if RUN_NAME.fullmatch(name))
+            if len(names) + len(rows) > MAX_RUNS:
+                raise InvalidRun('too_many_runs')
+            for name in reversed(names):
+                run_id = f'{number}:{name}'
+                try:
+                    run_fd = os.open(name, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW, dir_fd=root_fd)
+                except OSError:
+                    rows.append({'id': run_id, 'provider': 'unknown', 'model': None, 'version': None,
+                                 'status': 'invalid', 'reason': 'unsafe_run_directory',
+                                 'cleanup_verified': False, 'artifact': {'status': 'unavailable'}})
+                    continue
+                try:
+                    rows.append(normalize(run_fd, run_id))
+                finally:
+                    os.close(run_fd)
+        finally:
+            os.close(root_fd)
+    return {'schema_version': 1, 'generated_at': datetime.datetime.now(datetime.timezone.utc).isoformat(),
+            'mode': 'read_only_snapshot', 'providers': list(PROVIDERS), 'runs': rows}
+
+
+def render_html(data):
+    # JSON is data, never HTML; additionally prevent closing the inert script element.
+    payload = json.dumps(data, ensure_ascii=True).replace('<', '\\u003c').replace('>', '\\u003e').replace('&', '\\u0026')
+    template = (Path(__file__).with_name('office_results.html')).read_text()
+    return template.replace('__OFFICE_RESULTS_JSON__', payload)
+
+
+def main(argv=None):
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--runs-root', action='append', type=Path, help='Explicit runs directory; repeat to combine histories')
+    parser.add_argument('--provider', choices=PROVIDERS)
+    parser.add_argument('--show', help='Run ID from the list, e.g. 1:grok-work-…')
+    parser.add_argument('--html', type=Path, help='Write a NEW private offline HTML snapshot (never overwrite)')
+    args = parser.parse_args(argv)
+    try:
+        data = catalog(args.runs_root or [LAB / 'runs'])
+        if args.provider:
+            data['runs'] = [r for r in data['runs'] if r['provider'] == args.provider]
+        if args.show:
+            data['runs'] = [r for r in data['runs'] if r['id'] == args.show]
+            if not data['runs']:
+                raise InvalidRun('run_not_found')
+        if args.html:
+            content = render_html(data)
+            fd = os.open(args.html, os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW, 0o600)
+            with os.fdopen(fd, 'w') as stream:
+                stream.write(content)
+            print(json.dumps({'status': 'snapshot_written', 'runs': len(data['runs'])}))
+        else:
+            print(json.dumps(data, indent=2, ensure_ascii=True))
+        return 0
+    except (OSError, InvalidRun):
+        print(json.dumps({'status': 'error', 'reason': 'unavailable_input_or_output',
+                          'hint': 'Check runs roots, run ID, file permissions and that HTML output does not exist.'}), file=sys.stderr)
+        return 1
+
+
+if __name__ == '__main__':
+    raise SystemExit(main())

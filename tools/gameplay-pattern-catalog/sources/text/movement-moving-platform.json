@@ -1,0 +1,120 @@
+{
+  "id": "movement-moving-platform",
+  "system": "movement",
+  "edition": 3,
+  "name": {
+    "zh": "等平台到位，再接续下一跳",
+    "en": "Time boarding and leaving a moving platform"
+  },
+  "summary": {
+    "zh": "落脚处会移动，什么时候上去和离开都要判断。",
+    "en": "The foothold moves, so both boarding and departure need a decision."
+  },
+  "rules": {
+    "zh": "平台按可观察的路线移动，或在玩家登上后启动。玩家需要先选上台时机，再利用平台接近目的地；跳出时平台与目标的相对位置决定能否落稳，等待也可能暴露于危险。",
+    "en": "A platform follows a visible route or starts moving when boarded. Choose when to get on, then ride toward the destination. Its position relative to the target shapes the departure jump, while waiting may expose you to hazards."
+  },
+  "loop": [
+    {
+      "zh": "观察平台路线",
+      "en": "Observe the platform route"
+    },
+    {
+      "zh": "抓住上台时机",
+      "en": "Choose a boarding moment"
+    },
+    {
+      "zh": "随平台接近落点",
+      "en": "Ride toward the destination"
+    },
+    {
+      "zh": "跳出并衔接下一段",
+      "en": "Leave and continue"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "现在勉强够得到平台，还是等它靠近再上去？",
+      "en": "Jump for the barely reachable platform now or wait until it is closer?"
+    },
+    {
+      "zh": "在平台到顶前提早跳走，还是等距离最短但危险更近的时候？",
+      "en": "Leave before the platform reaches its endpoint, or wait for a shorter jump with a closer hazard?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "移动周期与停留",
+        "en": "Travel cycle and pauses"
+      },
+      "effect": {
+        "zh": "停留时间越长越容易上台；不停移动更强调提前判断。",
+        "en": "Longer pauses ease boarding; continuous movement rewards anticipation."
+      }
+    },
+    {
+      "name": {
+        "zh": "平台与目标的间距",
+        "en": "Distance to the destination"
+      },
+      "effect": {
+        "zh": "最近距离决定基本可达性，沿途间距变化决定提前跳走是否值得。",
+        "en": "The closest distance determines basic reachability; changing distance makes early departure a meaningful option."
+      }
+    }
+  ],
+  "tags": [
+    "timing",
+    "spatial",
+    "planning"
+  ],
+  "related": [
+    "exploration-air-action-refill",
+    "exploration-climbing-rest-route",
+    "exploration-gliding-descent",
+    "exploration-grapple-swing"
+  ],
+  "contrast": {
+    "zh": "《蔚蓝》的拉索平台由登台动作直接触发，强调快速接续；《传送门2》的移动支架更常与测试室机关和通路安排一起使用。",
+    "en": "Celeste zip movers are directly triggered by boarding and emphasize quick transitions; Portal 2 scaffolds work within test-chamber switches and route planning."
+  },
+  "combination": {
+    "zh": "设计提案：用光束供能的平台只在光路接通时前进；玩家先调好光路，再决定在哪一站离开平台切换线路。",
+    "en": "Design proposal: a platform moves only while powered by a beam. Set the beam route, then decide where to leave the platform and redirect its power."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "教学示例：平台在两端之间往返，右侧高台只在它靠右时能跳到。",
+      "en": "Teaching example: a platform travels between two ends; the high ledge is reachable only when it is near the right."
+    },
+    "action": {
+      "zh": "你等平台回到左端再登上，接近右端时起跳。",
+      "en": "Board when it returns to the left, then jump as it approaches the right."
+    },
+    "result": {
+      "zh": "角色落上高台，平台继续返回，原来的退路暂时变远。",
+      "en": "You reach the ledge while the platform returns, temporarily moving the way back farther away."
+    },
+    "next": {
+      "zh": "前面奖励需要另一段移动平台，你得重新观察它的周期。",
+      "en": "A reward ahead requires a second moving platform, whose cycle must be read afresh."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "只做一块两点往返的平台、两个固定落点和一处危险，显示清楚的行进轨迹。",
+      "en": "Build one platform moving between two points, two fixed landings and one hazard; make its travel path clear."
+    },
+    "pitfall": {
+      "zh": "角色站在平台上抖动或被错误甩走会掩盖选择本身，先保证承载与离开规则稳定。",
+      "en": "Jitter or unexpected displacement obscures the decision; stabilize carrying and departure behavior first."
+    },
+    "test": {
+      "zh": "检查玩家能否在不试跳的情况下指出下一个上台窗口，以及哪一段最适合离开。",
+      "en": "Check whether players can identify the next boarding window and best departure section without trial jumps."
+    }
+  }
+}

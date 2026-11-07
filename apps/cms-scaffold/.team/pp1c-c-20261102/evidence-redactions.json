@@ -1,0 +1,19 @@
+{
+  "recordedAt": "2026-11-02T17:58:41.460419+00:00",
+  "files": [
+    {
+      "published": "T132/C14a/red-results.xml",
+      "publishedSha256": "5cf5a50e7db64adecb773075963b245845061ca0fd6e0ee01da0f4ea1c7c6d7b",
+      "privateOriginal": "local/pp1c-c-private-evidence/T132/C14a/red-results.xml",
+      "originalSha256": "18c63831503475bbe1030781b411f66b5969ea7d21e4e817c8082663157eede1",
+      "reason": "Generated Spring test-only security password removed from publishable XML; exact original preserved privately."
+    },
+    {
+      "published": "T132/C14a/TEST-com.fallrising.cms.CmsApiApplicationTests.xml",
+      "publishedSha256": "801ed74b66e58553ef285dd3519067107319eec98782763e8ccd784d6f17d934",
+      "privateOriginal": "local/pp1c-c-private-evidence/T132/C14a/TEST-com.fallrising.cms.CmsApiApplicationTests.xml",
+      "originalSha256": "880e830953fc085257d949232b79e181485571efd25257cea01694dcc4ccfd15",
+      "reason": "Generated Spring test-only security password removed from publishable XML; exact original preserved privately."
+    }
+  ]
+}

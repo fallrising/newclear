@@ -1,0 +1,5 @@
+C01 completed before C02: 15 product + 148 test = 163 added handwritten lines; 0 removed.
+Node v24.18.0; native node --test scripts/ops/recovery-protocol.test.mjs exited 1.
+Named behavior assertions: 76 tests, 2 passed, 74 failed, 0 skipped; no import/compile failure.
+Initial sandbox command returned a file-wrapper failure; retained separately, not accepted as Red evidence.
+In-process diagnostic also reproduced named assertion failures; native run is authoritative.

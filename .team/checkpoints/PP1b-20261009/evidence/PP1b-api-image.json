@@ -1,0 +1,12 @@
+{
+  "tag": "cms-pp1b-api-1d7eaabf10b14f54b7201ba155889a89:local",
+  "image": "sha256:fe48cc62f4f31748793c8d1f0b11845a645a7310c7fcb1b0ba77436fa5c3a986",
+  "baseImage": "sha256:3eec63f4d6e90362c264c2da6442e7a6b7ede79386ec086fbfead1452c55b32e",
+  "sourceCommit": "e3d0c3fbea02fa47cdd99a6b43914c1a8ad4fd1c",
+  "jarSha256": "b16d6737cdf9dee82ca390ae0d88afe4b022c6238d6ef85c66d4c1e67f02f5e3",
+  "jarBytes": 41494432,
+  "contextFiles": [
+    "Dockerfile",
+    "services/cms-api/build/libs/cms-api-0.1.0-SNAPSHOT.jar"
+  ]
+}

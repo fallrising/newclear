@@ -1,0 +1,13 @@
+{
+  "handwrittenChangedLines": 147,
+  "files": {
+    "maintenance-workflow.test.mjs": 66,
+    "maintenance-target.mjs": 17,
+    "maintenance-workflow.mjs": 64
+  },
+  "sha256": {
+    "scripts/local/maintenance-workflow.test.mjs": "7f2c9a13bb851d129616695322470d04fa54d614614f1326c9178d447379e7aa",
+    "scripts/local/maintenance-target.mjs": "54fe61cb5c57e0f10cbcfa7549b8b59e97bf00f7752d8e5a4bb3e121641cd4b5",
+    "scripts/local/maintenance-workflow.mjs": "a7fb32c714c34795f5d18ff464b05769e488ea7b5424c47f73498f911b328685"
+  }
+}

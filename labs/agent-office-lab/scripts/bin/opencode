@@ -1,0 +1,37 @@
+#!/usr/bin/env python3
+"""Office's native OpenCode adapter invokes this local-only launcher."""
+import json
+import os
+from pathlib import Path
+import sys
+import urllib.request
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from local_opencode import BINARY, LAB, prepare
+
+try:
+    run = Path(os.environ['LAB_OPENCODE_RUN']).resolve()
+    workspace = Path(os.environ['LAB_OPENCODE_WORKSPACE']).resolve()
+    if not run.is_relative_to(LAB / 'runs') or not workspace.is_relative_to(run):
+        raise ValueError('OpenCode lab launcher requires a synthetic run workspace')
+    if Path.cwd().resolve() != workspace:
+        raise ValueError('Unexpected worker directory')
+    for index, arg in enumerate(sys.argv[1:], 1):
+        if arg in ('--model', '-m') and sys.argv[index + 1] != 'strata/qwen3.8-flash-next-q2_0':
+            raise ValueError('This worker only accepts the local Strata model')
+        if arg.startswith(('--model=', '-m=')):
+            raise ValueError('Use the explicit local model argument')
+    opener = urllib.request.build_opener(urllib.request.ProxyHandler({}))
+    with opener.open('http://127.0.0.1:8080/health', timeout=3) as response:
+        health = json.load(response)
+    if (not health.get('loaded') or health.get('max_context') != 32768
+            or health.get('model') != 'qwen3.8-flash-next-q2_0'):
+        raise ValueError('Strata must be loaded at 32K; no cloud fallback')
+    state = run / 'opencode-worker'
+    state.mkdir(exist_ok=True)
+    command, env = prepare(state, workspace, office=True)
+    # Native TUI args, plugin session hooks, and session resume remain intact.
+    os.execve(command[0], command + sys.argv[1:], env)
+except Exception as error:
+    print(f'Local OpenCode unavailable: {error}', file=sys.stderr)
+    sys.exit(1)

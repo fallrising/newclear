@@ -1,0 +1,18 @@
+{
+  "prepare.mjs": {
+    "changedLines": 4,
+    "sha256": "29cc7dbf1bc0bbd326dd2b7dcb448fbae7c598eaa5cd4a4f0e9949eaa392cbb8"
+  },
+  "prepare.test.mjs": {
+    "changedLines": 68,
+    "sha256": "4a2b94b1253678916f7746726786c78e13c8d3e7b6cd6d495154e23c57d74ef7"
+  },
+  "restore-target.mjs": {
+    "changedLines": 0,
+    "sha256": "d3afe4d7bab1a6c1a9936cbc7b2c87a5f90379ee73fbb5baeb9ab2e91733e79b"
+  },
+  "maintenance-workflow.test.mjs": {
+    "changedLines": 1,
+    "sha256": "5a89d3e54b974b91359d090d42c0e38000ec0b897cfba4be1de33513e24d784c"
+  }
+}

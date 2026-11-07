@@ -1,0 +1,120 @@
+{
+  "id": "progression-research-prerequisites",
+  "system": "progression",
+  "edition": 2,
+  "name": {
+    "zh": "先研究前置，再解锁新技术",
+    "en": "Research prerequisite chains"
+  },
+  "summary": {
+    "zh": "研究不是单独等进度条，而是安排一条解锁路线。",
+    "en": "Research is a route through prerequisites, not just a timer."
+  },
+  "rules": {
+    "zh": "新技术要求先完成指定研究，再投入研究资源或人员时间。玩家从多个目标中选当前最值得解锁的一项，研究完成后用新能力改善生产或生活，再支持下一轮研究。",
+    "en": "A technology requires specific earlier research plus resources or researcher time. Choose the next worthwhile unlock among competing goals, then use it to improve the economy or settlement and support further research."
+  },
+  "loop": [
+    {
+      "zh": "从目标倒查前置条件",
+      "en": "Trace a target’s prerequisites"
+    },
+    {
+      "zh": "分配研究资源与人手",
+      "en": "Allocate resources and labor"
+    },
+    {
+      "zh": "完成研究获得新做法",
+      "en": "Unlock a new option"
+    },
+    {
+      "zh": "利用新能力支持后续研究",
+      "en": "Use it to support later research"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "先做立刻缓解问题的技术，还是先完成通向远期目标的前置？",
+      "en": "Solve today’s problem or work on prerequisites for a long-term goal?"
+    },
+    {
+      "zh": "把材料和人手给研究，还是维持眼前生产？",
+      "en": "Allocate materials and labor to research or keep current production running?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "前置链长度",
+        "en": "Prerequisite depth"
+      },
+      "effect": {
+        "zh": "链条越长，长期规划越重要，但目标收益必须足够清楚。",
+        "en": "Deeper chains reward planning but need a clearly understood payoff."
+      }
+    },
+    {
+      "name": {
+        "zh": "研究与生产的资源重叠",
+        "en": "Shared research costs"
+      },
+      "effect": {
+        "zh": "两者争用同一种材料时，研发速度会变成可见的生产取舍。",
+        "en": "When research and production share inputs, research speed becomes an explicit economic tradeoff."
+      }
+    }
+  ],
+  "tags": [
+    "planning",
+    "progression",
+    "economy"
+  ],
+  "related": [
+    "progression-respec-investment",
+    "progression-challenge-tiers",
+    "progression-death-loses-training",
+    "progression-evolution-recipes"
+  ],
+  "contrast": {
+    "zh": "《异星工厂》突出连续供应研究材料；《环世界》突出安排有限人员工作。两者都需要先完成前置，再取得关键解锁。",
+    "en": "Factorio emphasizes a continuing material supply; RimWorld emphasizes allocating limited workers. Both gate important unlocks behind earlier research."
+  },
+  "combination": {
+    "zh": "设计提案：工坊接到三天后的订单，要先研究染料再研究印花；玩家可接近单赚钱，也可把时间投入这条解锁路线。",
+    "en": "Design proposal: an order due in three days requires dyes before printing; choose immediate paid jobs or invest in the research chain."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "你想做冷藏箱，但先要学会金属加工；研究员每天只能完成一个项目。",
+      "en": "You want a cooler, but metalworking is required first; the researcher completes one project daily."
+    },
+    "action": {
+      "zh": "今天先研究金属加工，把冷藏箱排到明天。",
+      "en": "Research metalworking today and schedule the cooler for tomorrow."
+    },
+    "result": {
+      "zh": "新金属配方今天就能用，但食物保鲜仍要再等一天。",
+      "en": "Metal recipes become available now, but food storage still waits a day."
+    },
+    "next": {
+      "zh": "判断是否继续冷藏箱，还是临时插入紧急的防御研究。",
+      "en": "Continue toward the cooler or interrupt the plan for urgent defense research?"
+    }
+  },
+  "prototype": {
+    "scope": "medium",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "做六个研究节点、两种资源和一名研究员；完成节点后立刻开放可操作的新生产按钮。",
+      "en": "Build six research nodes, two resources and one researcher; each completion opens a usable production action."
+    },
+    "pitfall": {
+      "zh": "别先画上百节点；需要先验证前置、资源消耗和新产出的关系确实互相影响。",
+      "en": "Avoid hundreds of nodes before prerequisites, spending and new output form meaningful interactions."
+    },
+    "test": {
+      "zh": "玩家能否从目标技术说出下一步缺什么，并因生产压力改变研究顺序？",
+      "en": "Can players explain the next missing prerequisite and alter research order because of production pressure?"
+    }
+  }
+}

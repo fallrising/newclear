@@ -1,0 +1,49 @@
+{
+  "tables": 20,
+  "allRowsEqual": true,
+  "schemaUnequalTables": [
+    "cms_content_type",
+    "cms_entry",
+    "cms_entry_index",
+    "cms_entry_ref",
+    "cms_field",
+    "cms_navigation_menu",
+    "cms_principal"
+  ],
+  "files": {
+    "changedCount": "0",
+    "equal": true,
+    "extraCount": "0",
+    "missingCount": "0",
+    "sourceBytes": "14089",
+    "sourceCount": "17",
+    "sourceHeaderSha256": "c6e5d818c81bae0b0ace2748b1f3a7ecbae20174ef8e41fa924628ab5181cc3f",
+    "targetBytes": "14089",
+    "targetCount": "17",
+    "targetHeaderSha256": "c6e5d818c81bae0b0ace2748b1f3a7ecbae20174ef8e41fa924628ab5181cc3f"
+  },
+  "assetsEqual": true,
+  "variantsEqual": true,
+  "flywayEqual": true,
+  "coreSuccess": false,
+  "coreCode": "RAW_MISMATCH",
+  "stoppedContainerCount": 6,
+  "lastRecord": {
+    "phase": "RAW_VERIFIED",
+    "event": "FAIL",
+    "failureCode": "RAW_MISMATCH"
+  },
+  "hasRevokeOrComplete": false,
+  "ledger": {
+    "desk": {
+      "originalPrefixPreserved": true,
+      "addedLines": 7,
+      "sha256": "880091cbaf212a0004a33e5acdad27d248c165e9d8a2a0c0d8fa2f9bfba4529b"
+    },
+    "journal": {
+      "originalPrefixPreserved": true,
+      "addedLines": 11,
+      "sha256": "481f750b9b9953f924f6620708946a4f45796ef7cb8d902b58001e59c6698e22"
+    }
+  }
+}

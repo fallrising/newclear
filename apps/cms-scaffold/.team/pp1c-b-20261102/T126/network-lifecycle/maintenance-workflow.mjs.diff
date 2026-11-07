@@ -1,0 +1,10 @@
+--- maintenance-workflow.mjs.before
++++ scripts/local/maintenance-workflow.mjs
+@@ -173,6 +173,7 @@
+   const labels={...(image.Config.Labels??{}),'org.cms.pp1c.operation':l.operationId,'org.cms.pp1c.seq':String(c.sequence),
+     'org.cms.pp1c.kind':r.kind,'org.cms.pp1c.policy':helper.policySha256};
+   ensure(expected.name===`cms-pp1c-${l.operationId}-${c.sequence}`&&same(expected.labels,labels));
++  if(policy.networkId)ensure(expected.dataNetworkName===`${l.source.project}_data`);
+   for(const mount of policy.mounts.filter(m=>m.type==='volume')) {
+     const volumes=JSON.parse(await docker(deps,['volume','inspect',mount.source]));
+     ensure(volumes.length===1&&volumes[0].Name===mount.source&&expected.volumeMountpoints[mount.source]===volumes[0].Mountpoint);

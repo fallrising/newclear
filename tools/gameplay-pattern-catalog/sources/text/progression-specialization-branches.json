@@ -1,0 +1,120 @@
+{
+  "id": "progression-specialization-branches",
+  "system": "progression",
+  "edition": 2,
+  "name": {
+    "zh": "成长方向二选一",
+    "en": "Exclusive specialization branches"
+  },
+  "summary": {
+    "zh": "成长到关键节点，只能选一条更擅长的路线。",
+    "en": "At a milestone, commit to one branch of expertise."
+  },
+  "rules": {
+    "zh": "角色成长到指定阶段后，玩家从互斥的方向中选择一个，例如提高单件售价或增加产量。选择会改变之后哪些行动更划算；没选的路线暂时关闭，避免所有能力最终都一样。",
+    "en": "At a milestone, choose between mutually exclusive paths, such as a higher sale price or more output. The choice changes which later actions pay off; the alternative remains unavailable under the current choice."
+  },
+  "loop": [
+    {
+      "zh": "达到分支节点",
+      "en": "Reach a branch"
+    },
+    {
+      "zh": "比较两种收益",
+      "en": "Compare benefits"
+    },
+    {
+      "zh": "确定专长",
+      "en": "Commit to a specialty"
+    },
+    {
+      "zh": "围绕专长安排下一轮",
+      "en": "Plan around it"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "选眼下立刻有用的方向，还是为以后准备？未来收益可能要先投入配套资源。",
+      "en": "Take an immediate benefit or prepare for a later plan that needs supporting resources?"
+    },
+    {
+      "zh": "继续加强已有长处，还是选能补短板的第二方向？",
+      "en": "Deepen an existing strength or use a second specialty to cover a weakness?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "分支互斥程度",
+        "en": "Branch exclusivity"
+      },
+      "effect": {
+        "zh": "可同时学习的方向越少，选择越有代价，也越需要提前说明效果。",
+        "en": "Fewer simultaneous paths make choices more consequential and demand clearer previews."
+      }
+    },
+    {
+      "name": {
+        "zh": "分支出现时机",
+        "en": "Milestone timing"
+      },
+      "effect": {
+        "zh": "太早选择时玩家不了解差异；太晚则很久体验不到角色区别。",
+        "en": "Early choices may be uninformed; late choices delay a distinct identity."
+      }
+    }
+  ],
+  "tags": [
+    "planning",
+    "progression",
+    "optimization"
+  ],
+  "related": [
+    "progression-challenge-tiers",
+    "progression-death-loses-training",
+    "progression-evolution-recipes",
+    "progression-practice-based-growth"
+  ],
+  "contrast": {
+    "zh": "《星露谷物语》在同一工作技能内选收益方向；《恐怖黎明》选择两套可组合的战斗技能树，改变可用手段。",
+    "en": "Stardew Valley branches the rewards within a work skill; Grim Dawn combines two combat skill trees to change available tools."
+  },
+  "combination": {
+    "zh": "设计提案：小店升级时二选一，做高价少量商品或低价大量商品，再通过顾客反应测试这次专精是否合适。",
+    "en": "Design proposal: specialize a shop in premium small batches or cheap volume, then use customer reactions to judge the choice."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "你的小店升到 3 级，可选每件多卖 2 元，或每天多做 3 件。",
+      "en": "Your shop reaches level 3: gain 2 coins per item or make 3 extra items daily."
+    },
+    "action": {
+      "zh": "你每天只有 4 位顾客，于是选择提高单件收益。",
+      "en": "With only 4 daily customers, choose the higher margin."
+    },
+    "result": {
+      "zh": "卖完 4 件后多得 8 元，但产量仍与以前一样。",
+      "en": "Selling 4 items earns 8 extra coins; capacity is unchanged."
+    },
+    "next": {
+      "zh": "接下来决定先改善商品，还是引流，让这个专长发挥更大作用。",
+      "en": "Next choose between better products and more customers to exploit the specialty."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "做两个互斥加成、一个固定客流的售卖回合，选择前显示一轮预估收益。",
+      "en": "Build two exclusive bonuses and one fixed-demand selling round, with a one-round benefit preview."
+    },
+    "pitfall": {
+      "zh": "先别铺整棵技能树；两条路线若只是不同名称的加钱，就没有真正取舍。",
+      "en": "Avoid a full skill tree while both branches merely grant equivalent money."
+    },
+    "test": {
+      "zh": "改变客流后，观察玩家是否会改变选择，并能解释原因。",
+      "en": "Change customer demand and see whether players change their choice for a clear reason."
+    }
+  }
+}

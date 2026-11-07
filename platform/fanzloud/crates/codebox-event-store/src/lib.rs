@@ -5,6 +5,7 @@ mod error;
 mod path;
 mod snapshot;
 mod sqlite;
+mod submission;
 
 pub use error::{
     CorruptStoreStage, DatabasePathErrorKind, EventStoreError, InvalidEventHistoryReason,
@@ -17,3 +18,5 @@ pub use sqlite::{
 };
 
 pub use snapshot::{MAX_SNAPSHOT_BYTES, MAX_SNAPSHOT_PREFIX_EVENTS, SessionSnapshot};
+
+pub use submission::{BeginSubmission, SubmissionStore, SubmissionStoreError};

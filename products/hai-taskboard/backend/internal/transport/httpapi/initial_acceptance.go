@@ -6,8 +6,6 @@ import (
 	"encoding/json/jsontext"
 	json "encoding/json/v2"
 	"net/http"
-	"unicode"
-	"unicode/utf8"
 
 	"github.com/fallrising/newclear/products/hai-taskboard/backend/internal/application/command"
 	"github.com/fallrising/newclear/products/hai-taskboard/backend/internal/application/port"
@@ -164,13 +162,5 @@ func validInitialDescription(data []byte, proposal domain.Digest) bool {
 
 // Proposal AC identity permits UTF-8 identifiers up to 120 bytes.
 func validInitialACID(value string) bool {
-	if len(value) == 0 || len(value) > 120 || !utf8.ValidString(value) {
-		return false
-	}
-	for _, r := range value {
-		if unicode.IsControl(r) || unicode.IsSpace(r) || r == '/' || r == '\\' {
-			return false
-		}
-	}
-	return true
+	return domain.ValidACID(value)
 }

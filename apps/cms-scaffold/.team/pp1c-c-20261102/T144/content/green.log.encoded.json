@@ -1,0 +1,8 @@
+{
+  "version": 1,
+  "original": "T144/content/green.log",
+  "sha256": "93dceceb63ea8d06b419931f333fc65fffc5a392c90eeecf199bcaa2544003ce",
+  "byteSize": "295",
+  "encoding": "utf-8",
+  "text": "✔ T144_identity_uses_fixed_operator_and_anonymous_permissions_before_media (9.647328ms)\n✔ T144_full_fixed_recipe_returns_actual_ids_hashes_and_last_memory_sessions (4.670489ms)\nℹ tests 2\nℹ suites 0\nℹ pass 2\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 75.414218\n"
+}

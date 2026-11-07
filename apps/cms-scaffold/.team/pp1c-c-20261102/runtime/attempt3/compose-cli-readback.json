@@ -1,0 +1,26 @@
+{
+  "recordedAt": "2026-11-02T17:56:43.897343+00:00",
+  "binarySha256": "47737f4236e6d3ccea7291995203f8f018058783b4c3a9469119811a0b5db8c0",
+  "results": [
+    {
+      "command": [
+        "/home/ckc/.cache/devbox/toolchains/docker-compose-v5.6.1/docker-compose",
+        "create",
+        "--help"
+      ],
+      "exit": 0,
+      "artifact": "help.txt"
+    },
+    {
+      "command": [
+        "/home/ckc/.cache/devbox/toolchains/docker-compose-v5.6.1/docker-compose",
+        "create",
+        "--no-deps",
+        "--dry-run",
+        "postgres"
+      ],
+      "exit": 1,
+      "artifact": "unsupported-flag-readonly.txt"
+    }
+  ]
+}

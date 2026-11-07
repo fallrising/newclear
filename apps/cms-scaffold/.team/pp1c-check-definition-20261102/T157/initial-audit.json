@@ -1,0 +1,20 @@
+{
+  "desk": {
+    "path": "tasks/T-0351-cms-scaffold/task.md",
+    "baseSha": "082f37dc6527bb4aff4d2894b3c4cda2c56aa356",
+    "originalSha256": "880091cbaf212a0004a33e5acdad27d248c165e9d8a2a0c0d8fa2f9bfba4529b",
+    "reviewedSha256": "af65bcaa2cfed43533ee7a1cc909ab7e9537790e3a9b3f612f06d5ebc951f696",
+    "onlyExpectedPathChanged": true,
+    "appendOnly": true,
+    "frontmatterUnchanged": true
+  },
+  "journal": {
+    "path": "runs/newclear/cms-scaffold/2026/11/20261102T111245Z-1a0926f4-6632-4381-9963-7c6121c0d20b/run.md",
+    "baseSha": "2bd475e8dea8ba77b17662a2fd3d4b09e8a03564",
+    "originalSha256": "481f750b9b9953f924f6620708946a4f45796ef7cb8d902b58001e59c6698e22",
+    "reviewedSha256": "24c8c012cf58d0eb53e38272c31100544fb9ddf23c775bafbc589145ea405404",
+    "onlyExpectedPathChanged": true,
+    "appendOnly": true,
+    "frontmatterUnchanged": true
+  }
+}

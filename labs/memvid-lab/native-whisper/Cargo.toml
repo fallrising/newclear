@@ -1,0 +1,16 @@
+[package]
+name = "memvid-lab-whisper"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.90"
+publish = false
+
+[dependencies]
+memvid-core = { version = "=2.0.140", path = "work/memvid-core", default-features = false, features = ["whisper"] }
+serde_json = "=1.0.145"
+
+[profile.dev]
+debug = 0
+
+[profile.release]
+debug = 0

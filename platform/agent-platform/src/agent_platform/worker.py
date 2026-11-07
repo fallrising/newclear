@@ -14,16 +14,18 @@ from uuid import uuid4
 from psycopg.types.json import Jsonb
 
 from .adapters import FakeAgentBackend, FakeSandboxProvider
-from .domain import TERMINAL, Problem
+from .domain import RUNTIME_BACKENDS, SUBSCRIPTION_BACKENDS, TERMINAL, Problem
 from .result_archive import persist_archive
 from .store import event
 
 
 class Worker:
-    def __init__(self, db, connector=None):
+    def __init__(self, db, connector=None, subscription=None, codex_subscription=None):
         self.db = db
         self.owner = uuid4()
         self.connector = connector
+        self.subscription = subscription
+        self.codex_subscription = codex_subscription
         self.tool_config = os.environ.get("TOOL_BROKER_MOCK_CONFIG")
         self.model_proxy = None
         if connector is not None and os.environ.get("MODEL_PROXY_CONFIG"):
@@ -34,6 +36,13 @@ class Worker:
             connector.model_transport = True
         self.agent = FakeAgentBackend()
         self.sandbox = FakeSandboxProvider()
+
+    def subscription_for(self, backend):
+        if backend == "claude-subscription":
+            return self.subscription
+        if backend == "codex-subscription":
+            return self.codex_subscription
+        return None
 
     def state(self, conn, run, state, reason=None):
         row = conn.execute(
@@ -114,7 +123,16 @@ class Worker:
             recovery = claim_recovery(self)
             if recovery:
                 return recovery
-        for node, backend in [("fake-local", "fake"), ("cocoon-local", "openhands")]:
+        for node, backend in [
+            ("fake-local", "fake"),
+            ("cocoon-local", "openhands"),
+            ("cocoon-local", "claude-subscription"),
+            ("cocoon-local", "codex-subscription"),
+        ]:
+            if backend in SUBSCRIPTION_BACKENDS and (
+                self.connector is None or self.subscription_for(backend) is None
+            ):
+                continue
             if backend == "openhands" and self.connector is None:
                 continue
             claim = self.claim_node(node, backend)
@@ -228,7 +246,7 @@ class Worker:
     def execute(self, claim):
         if claim.get("expired"):
             return
-        if claim.get("backend") == "openhands":
+        if claim.get("backend") in RUNTIME_BACKENDS:
             from .runtime_worker import execute_real
 
             return execute_real(self, claim)

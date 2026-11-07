@@ -1,0 +1,258 @@
+{
+  "schema": 1,
+  "milestone": "T-0024",
+  "date": "2026-11-07",
+  "baseline": "646b11189ced91016e1dc57306460cf890d1dee3",
+  "scope": "Persistent one-shot grants for fixed fresh Pi console tasks; offline and loopback acceptance only. Product paid end-to-end remains pending.",
+  "delegation": {
+    "advisor": {
+      "provider": "firstParty",
+      "model": "claude-opus-5-5",
+      "cli_version": "2.1.316",
+      "turns": 1,
+      "tools": 0,
+      "public_source_files": 7,
+      "reported_list_cost_usd": 0.8233818
+    },
+    "parallel_pi_workers": {
+      "backend": {
+        "provider": "openai",
+        "model": "gpt-5.5",
+        "requests": 24,
+        "tool_calls": 37,
+        "reported_cost_usd": 1.689313,
+        "completion": {
+          "worker": "backend",
+          "exit_code": 77,
+          "elapsed_s": 273.71
+        },
+        "delivered_files": 10
+      },
+      "ui": {
+        "provider": "openai",
+        "model": "gpt-5.5",
+        "requests": 20,
+        "tool_calls": 20,
+        "reported_cost_usd": 1.025835,
+        "completion": {
+          "worker": "ui",
+          "exit_code": 0,
+          "elapsed_s": 201.4
+        },
+        "delivered_files": 4
+      }
+    },
+    "cost_is_reported_estimate_not_invoice": true,
+    "integrator_review_and_repairs": true
+  },
+  "offline_tests": {
+    "python": 176,
+    "node": 42,
+    "total": 218,
+    "passed": true
+  },
+  "stub_browser": {
+    "ok": true,
+    "scenarios": {
+      "no_optin": {
+        "ok": true
+      },
+      "no_grant": {
+        "ok": true
+      },
+      "grant": {
+        "ok": true,
+        "spawn_count": 1,
+        "consumed_count": 1
+      },
+      "revoke_after_plan": {
+        "ok": true
+      },
+      "restart": {
+        "ok": true,
+        "pending_survives": true,
+        "consumed_survives": true
+      }
+    },
+    "external_requests": [],
+    "failures": []
+  },
+  "stub_outer_cleanup": {
+    "exit_code": 0,
+    "owned_processes_seen": 94,
+    "remaining_owned_processes": 0,
+    "owned_background_sigterm": 0,
+    "elapsed_seconds": 10.41
+  },
+  "native": {
+    "429": {
+      "browser": {
+        "status": "passed",
+        "remote_model_calls": 0,
+        "local_model_inference": false,
+        "external_browser_requests": 0,
+        "browser_errors": 0,
+        "four_provider_detect": true,
+        "remote_execution_blocked": true,
+        "refresh_without_rerun": true,
+        "duplicate_execute_blocked": true,
+        "runs": 64
+      },
+      "outer_cleanup": {
+        "console_exit_code": 0,
+        "browser_exit_code": 0,
+        "owned_processes_seen": 46,
+        "remaining_owned_processes": 0,
+        "owned_background_sigterm": 0,
+        "active_journal_present": false,
+        "elapsed_seconds": 36.32
+      },
+      "runner": {
+        "status": "failed",
+        "model_inference_verified": false,
+        "failure_check_passed": true,
+        "cancel_check_passed": null,
+        "client_requests": 1,
+        "external_requests": 0,
+        "remote_usage": {
+          "requests": 0,
+          "output_tokens": 0
+        },
+        "remaining_owned_processes": 0,
+        "cleanup_errors": [],
+        "elapsed_s": 30.80447291699238
+      }
+    },
+    "cancel": {
+      "browser": {
+        "status": "passed",
+        "model_inference": false,
+        "remote_model_calls": 0,
+        "duplicate_execute_blocked": true,
+        "refresh_without_rerun": true,
+        "retry_rejected": true,
+        "native_cancel_duration_ms": 102,
+        "native_process_exit_ms": 102,
+        "cancel_cleanup_duration_ms": 3521,
+        "runner_elapsed_seconds": 14.323118249885738,
+        "cleanup_verified": true,
+        "external_browser_requests": 0,
+        "browser_errors": 0,
+        "result_detail_verified": true,
+        "runs": 65
+      },
+      "outer_cleanup": {
+        "console_exit_code": 0,
+        "browser_exit_code": 0,
+        "owned_processes_seen": 29,
+        "remaining_owned_processes": 0,
+        "owned_background_sigterm": 0,
+        "active_journal_present": false,
+        "elapsed_seconds": 17.58
+      },
+      "runner": {
+        "status": "cancelled",
+        "model_inference_verified": false,
+        "failure_check_passed": null,
+        "cancel_check_passed": true,
+        "client_requests": 1,
+        "external_requests": 0,
+        "remote_usage": {
+          "requests": 0,
+          "output_tokens": 0
+        },
+        "remaining_owned_processes": 0,
+        "cleanup_errors": [],
+        "elapsed_s": 14.323118249885738
+      }
+    }
+  },
+  "results_browser": {
+    "status": "passed",
+    "providers_checked": [
+      "opencode",
+      "grok",
+      "pi",
+      "cursor"
+    ],
+    "runs": 65,
+    "detail_content_and_hash": true,
+    "filters": true,
+    "refresh": true,
+    "external_requests": 0,
+    "browser_errors": 0
+  },
+  "product_remote_model_calls": 0,
+  "product_local_model_inference": false,
+  "production_paid_grant_created": false,
+  "strict_network_isolation_verified": false,
+  "prior_attempts": [
+    {
+      "stage": "development_backend_auth",
+      "status": "failed",
+      "reason": "expired_secret_key",
+      "model_usage": 0
+    },
+    {
+      "stage": "development_ui_initial",
+      "status": "not_started",
+      "reason": "automatic_review_requested_explicit_cost_threshold_approval",
+      "resolved_by_owner": true
+    },
+    {
+      "stage": "offline_sandbox",
+      "status": "blocked",
+      "reason": "loopback_bind_permission",
+      "resolved_by_authorized_native_execution": true
+    },
+    {
+      "stage": "stub_browser_first",
+      "status": "failed",
+      "reason": "test_expected_used_plan_error_before_active_job_busy_error",
+      "spawn_count": 1,
+      "paid_calls": 0,
+      "fixed_and_retested": true
+    },
+    {
+      "stage": "stub_browser_second",
+      "status": "passed",
+      "paid_calls": 0
+    }
+  ],
+  "review_repairs": [
+    "Fresh-task grants cannot authorize retry plans",
+    "Strict finite schema, filename identity, no hardlinks/symlinks and private directory modes",
+    "Bind dispatcher, grant and console code as well as runner sources",
+    "Atomic consumption survives missing audit receipt and refuses restored pending copies",
+    "Bounded nonblocking grant lock and reads",
+    "Unknown consumption remains unknown; invalid grants do not hide stop controls",
+    "UI uses actual request/token limit field names",
+    "Actual external request counts; unknown interrupted-stream token usage is not zero",
+    "Browser checks exact rejection status, stop completion, persistent consumed state, request bodies and owned cleanup"
+  ],
+  "limitations": [
+    "No paid Pi console end-to-end task or remote-stream stop verified",
+    "No remote retry or Grok/Cursor UI authorization",
+    "No remote terminal, arbitrary prompt or private-project execution",
+    "Full cross-provider lifecycle and security acceptance remain pending",
+    "No usable tag, release or deployment"
+  ],
+  "source_sha256": {
+    "scripts/office_console.css": "7cd43966cabe8d013e4696701c434a6b9cc25d89dcf9fed7e39e0e3a61e1a40f",
+    "scripts/office_console.html": "327ae44fce225b7bac4b7c8593a8c6c8b919bc01e465bb22738702a401bfaa6e",
+    "scripts/office_console.js": "543497f08001f2f8866582929eefd97d2ae4e1258d6fa2e57b8f0308709ad48f",
+    "scripts/office_console.py": "1982de01442711caac8c342c5104e1eebbd1de78da3e78a3c3efa6246cc48b2b",
+    "scripts/office_dispatch.py": "46eb27940d5dea75fc7392c9aa30fb093017b512e79c40e6c7abfa7fd9750dc6",
+    "scripts/office_results.py": "89fbfa939bb2782a1e6a7cd8a8954ad7f8c298b34772b8067aa25c1793e8df7e",
+    "scripts/run_pi_work.py": "2b94d2608af6bc1a25dc8467d2ed35b7c4c2dfc9e8e7872d9479141742017a91",
+    "scripts/test_office_console.py": "458bd4a634f1d765ec3886357288c095418e9e40aa834b2fae71f9e288f08ba0",
+    "scripts/test_office_dispatch.py": "c360acc144e1698242c74213927a4dafcc3e27bd131320df868f00668fa23bd7",
+    "scripts/test_office_results.py": "f63d72c7bb047fe2a4015cddec48ad4f5a4fe0f096a0f479881c8faaf86f9a5b",
+    "scripts/check_console_remote_grant_browser.mjs": "b704749a306d9bb096b7a38d13515321863c14ef545cfb47a167775651570f74",
+    "scripts/console_grant_harness.py": "a7218369296d0c7cab0a905adfbc63a837f957cda4f480935e70f7ac7f1b7706",
+    "scripts/remote_grant.py": "0640776e5e73c686eeb5cf169f7ca05c4f442111c93f2068dfb44b058ee17bab",
+    "scripts/test_remote_grant.py": "e311adf85ed62e0487894012f293c27861c4c6160205a70fad893d58951bfb9e",
+    "scripts/test_remote_grant_integrity.py": "1c874044eb150ec5abb1f598638d3678e2e6610a05a3534be535456b6897ebf6"
+  },
+  "integration_parent": "cf0aaef6cf584c03a72a00f5d4f53a0c832ec895"
+}

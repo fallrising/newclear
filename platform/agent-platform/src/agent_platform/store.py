@@ -8,7 +8,15 @@ from uuid import uuid4
 from psycopg.types.json import Jsonb
 
 from .auth import audit
-from .domain import TERMINAL, Problem, capabilities
+from .domain import (
+    RUNTIME_BACKENDS,
+    SUBSCRIPTION_BACKENDS,
+    SUBSCRIPTION_MODELS,
+    TERMINAL,
+    Problem,
+    capabilities,
+    execution_mode,
+)
 from .task_query import decode_cursor, encode_cursor, literal_pattern, scope_key
 
 
@@ -57,9 +65,9 @@ def event(conn, run_id, kind, payload, *, source="platform", source_id=None):
 
 def run_view(row):
     return {
-        **row,
+        **{k: v for k, v in row.items() if k not in {"review_candidate", "review_output"}},
         "capabilities": capabilities(row["backend"]),
-        "execution_mode": "cocoon-fixture" if row["backend"] == "openhands" else "fake",
+        "execution_mode": execution_mode(row["backend"]),
     }
 
 
@@ -127,6 +135,10 @@ class Store:
             raise Problem(409, "unsupported_capability:mock_tools")
         if data.require_approval and data.backend != "openhands":
             raise Problem(409, "unsupported_capability:approval")
+        if data.backend in SUBSCRIPTION_BACKENDS and (
+            data.deadline_seconds > 600 or data.verification.mode != "commands"
+        ):
+            raise Problem(422, "subscription_requires_bounded_verified_run")
         profile = data.profile_id or uuid4()
         revision = 1
         if data.profile_id:
@@ -143,7 +155,7 @@ class Store:
             revision = old["revision"] + 1
         template = "fixture:m1"
         egress_policy = None
-        if data.backend == "openhands":
+        if data.backend in RUNTIME_BACKENDS:
             catalog = conn.execute(
                 "SELECT * FROM runtime_catalog WHERE node_id='cocoon-local'"
             ).fetchone()
@@ -165,13 +177,15 @@ class Store:
                 revision,
                 data.name,
                 data.backend,
-                "openai-compatible:chat-completions"
+                SUBSCRIPTION_MODELS[data.backend]
+                if data.backend in SUBSCRIPTION_BACKENDS
+                else "openai-compatible:chat-completions"
                 if data.backend == "openhands"
                 else "fixture:m1",
                 template,
                 Jsonb(
                     {
-                        "exec": data.backend == "openhands",
+                        "exec": data.backend in RUNTIME_BACKENDS,
                         "network": data.backend == "openhands",
                         "egress_policy_sha256": egress_policy,
                         "require_approval": data.require_approval,
@@ -198,7 +212,7 @@ class Store:
             "profile_not_found",
         )
         egress_policy = profile["tool_policy"].get("egress_policy_sha256")
-        if profile["backend"] == "openhands":
+        if profile["backend"] in RUNTIME_BACKENDS:
             catalog = conn.execute(
                 "SELECT * FROM runtime_catalog WHERE node_id='cocoon-local'"
             ).fetchone()
@@ -254,7 +268,7 @@ class Store:
             {
                 "state": "queued",
                 "state_version": 1,
-                "execution_mode": "cocoon-fixture" if profile["backend"] == "openhands" else "fake",
+                "execution_mode": execution_mode(profile["backend"]),
             },
         )
         event(
@@ -289,6 +303,14 @@ class Store:
         latest = conn.execute(
             "SELECT * FROM runs WHERE task_id=%s ORDER BY attempt_no DESC LIMIT 1", (task_id,)
         ).fetchone()
+        linked = conn.execute(
+            "SELECT 1 FROM review_lineages l JOIN runs r ON r.id IN "
+            "(l.root_writer_run_id,l.first_review_run_id,l.rework_run_id,l.second_review_run_id) "
+            "WHERE r.task_id=%s LIMIT 1",
+            (task_id,),
+        ).fetchone()
+        if linked:
+            raise Problem(409, "review_lineage_retry_forbidden")
         if latest["state_version"] != data.expected_state_version:
             raise Problem(409, "state_conflict")
         if latest["state"] not in TERMINAL:

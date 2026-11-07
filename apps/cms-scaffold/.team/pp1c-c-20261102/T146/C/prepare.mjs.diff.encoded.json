@@ -1,0 +1,8 @@
+{
+  "version": 1,
+  "original": "T146/C/prepare.mjs.diff",
+  "sha256": "db86905bca00c28dbe19687a0e6dbf401d4e4b99189d3373243ea26d6c2487bf",
+  "byteSize": "1412",
+  "encoding": "utf-8",
+  "text": "--- \n\n+++ \n\n@@ -262,11 +262,13 @@\n\n         if(['host','null'].includes(network.Driver)){\n           networkEnsure(network.Name===(network.Driver==='host'?'host':'none')&&!(network.IPAM?.Config?.length));continue;\n         }\n-        networkEnsure(network.Driver==='bridge'&&Array.isArray(network.IPAM?.Config)&&network.IPAM.Config.length>0);\n+        networkEnsure(network.Driver==='bridge'&&network.EnableIPv6!==true&&network.IPAM?.Driver==='default'&&(!network.IPAM.Options||Object.keys(network.IPAM.Options).length===0)&&Array.isArray(network.IPAM.Config)&&network.IPAM.Config.length>0);\n         for(const config of network.IPAM.Config){\n           const range=networkRange(config.Subnet);ranges.push(range);\n           if(config.Gateway)networkEnsure(ipv4Number(config.Gateway)>=range[0]&&ipv4Number(config.Gateway)<=range[1]);\n           if(config.IPRange){const r=networkRange(config.IPRange);networkEnsure(r[0]>=range[0]&&r[1]<=range[1]);}\n+          if(config.AuxiliaryAddresses){networkEnsure(typeof config.AuxiliaryAddresses==='object'&&!Array.isArray(config.AuxiliaryAddresses));\n+            for(const value of Object.values(config.AuxiliaryAddresses))networkEnsure(ipv4Number(value)>=range[0]&&ipv4Number(value)<=range[1]);}\n         }\n       }\n       for(const prefix of [['ps','-a'],['volume','ls']])for(const filter of [`label=com.docker.compose.project=${cap.project}`,`name=${cap.project}`])\n"
+}

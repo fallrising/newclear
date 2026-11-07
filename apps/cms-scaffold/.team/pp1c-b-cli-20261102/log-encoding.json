@@ -1,0 +1,27 @@
+[
+  {
+    "rawPath": "combined-node.log",
+    "publishedPath": "combined-node.log.encoded.json",
+    "sha256": "79c7debac5c4eb0fbfd4470ab54b57a67bc15695973ade7c8d245d5c57bff7b4"
+  },
+  {
+    "rawPath": "green-corrected.log",
+    "publishedPath": "green-corrected.log.encoded.json",
+    "sha256": "2b91612a9e19b2c6e49162a7d2ae495791efe00aaa27eefd405be1246f61ed03"
+  },
+  {
+    "rawPath": "green-native.log",
+    "publishedPath": "green-native.log.encoded.json",
+    "sha256": "44a0ca38f528dcaa97fb83f894c3338d381cdd1db008bfb9bd93bc216fd29d72"
+  },
+  {
+    "rawPath": "red-native-unrestricted.log",
+    "publishedPath": "red-native-unrestricted.log.encoded.json",
+    "sha256": "ff2eaa0de3308faf67761a6dc476995297f387a9b066107663e2b56b16c42135"
+  },
+  {
+    "rawPath": "red-native.log",
+    "publishedPath": "red-native.log.encoded.json",
+    "sha256": "2145c57d3492f57787825d90c6441cdd1ac9b51b1e3c5b406580dc3ba43757ea"
+  }
+]

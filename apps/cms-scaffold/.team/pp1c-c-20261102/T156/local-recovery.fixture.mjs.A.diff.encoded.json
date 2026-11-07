@@ -1,0 +1,8 @@
+{
+  "version": 1,
+  "original": "T156/local-recovery.fixture.mjs.A.diff",
+  "sha256": "4b36379f7632134937fb861e17631e615efd2f20692bada624e9f52649d57072",
+  "byteSize": "928",
+  "encoding": "utf-8",
+  "text": "--- local-recovery.fixture.mjs.before\n+++ local-recovery.fixture.mjs.after\n@@ -119,10 +119,11 @@\n   value.dbSnapshotSha256=digest(value.tables.map(({tableName,schemaSha256,rowsSha256,rowCount})=>({tableName,schemaSha256,rowsSha256,rowCount})));\n   value.mediaHeaderSha256=digest({version:1,files:value.files});return value;\n }\n-export async function rawFixture(t,{mutateTarget,mutateSource,files=false,baseInventory}={}) {\n+export async function rawFixture(t,{mutateTarget,mutateSource,files=false,baseInventory,configure}={}) {\n   const f=await fixture(t);f.ctx.lease.purpose='RESTORE_VERIFY_LOCAL';\n   f.state.rawPermission=true;f.state.rawOrphan=files;\n   f.state.inventoryTemplate=baseInventory;\n+  await configure?.(f);\n   const captured=await captureSource(f.token,f.deps);\n   const verified=await verifyCapturedBundle(f.token,captured.backupId,f.deps);\n   const copy=await protectCapturedBundle(f.token,verified,f.deps);\n"
+}

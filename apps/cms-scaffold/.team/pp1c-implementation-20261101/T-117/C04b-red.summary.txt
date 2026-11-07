@@ -1,0 +1,29 @@
+Original local log SHA256: 49208dbad3a7dc1d2a28e94dc6e28b5ed1639d81064f230aa25d3b7abdca121e
+
+RecoveryInventoryTests > PP1c_checksumMismatchRejected() FAILED
+    org.opentest4j.AssertionFailedError at RecoveryInventoryTests.java:248
+RecoveryInventoryTests > PP1c_decodedImageNeedsAllVariants() FAILED
+    org.opentest4j.AssertionFailedError at RecoveryInventoryTests.java:248
+RecoveryInventoryTests > PP1c_declaredWebFileMissingEvenWhenOriginalExists() FAILED
+    org.opentest4j.AssertionFailedError at RecoveryInventoryTests.java:248
+RecoveryInventoryTests > PP1c_pdfAndDecodeNullCannotClaimDimensionsOrExtraVariants() FAILED
+    org.opentest4j.AssertionFailedError at RecoveryInventoryTests.java:248
+RecoveryInventoryTests > PP1c_pdfDeletedAndOrphanRemainUnchanged() FAILED
+    org.opentest4j.AssertionFailedError at RecoveryInventoryTests.java:73
+RecoveryInventoryTests > PP1c_completeImageHasExactFittedJpegVariants() FAILED
+    org.opentest4j.AssertionFailedError at RecoveryInventoryTests.java:153
+RecoveryInventoryTests > PP1c_duplicateVariantObjectKeyAndUnknownMetadataRejected() FAILED
+    org.opentest4j.AssertionFailedError at RecoveryInventoryTests.java:248
+RecoveryInventoryTests > PP1c_nonJpegThumbnailAndWrongDimensionsRejected() FAILED
+    org.opentest4j.AssertionFailedError at RecoveryInventoryTests.java:248
+RecoveryInventoryTests > PP1c_missingOriginalRejected() FAILED
+    org.opentest4j.AssertionFailedError at RecoveryInventoryTests.java:248
+RecoveryInventoryTests > PP1c_decodeNullImageHasOnlyOriginal() FAILED
+    org.opentest4j.AssertionFailedError at RecoveryInventoryTests.java:82
+RecoveryInventoryTests > PP1c_unsafeDatabaseObjectKeysRejected() FAILED
+    org.opentest4j.AssertionFailedError at RecoveryInventoryTests.java:248
+RecoveryInventoryTests > PP1c_sizeAndStoredBytesMismatchRejected() FAILED
+    org.opentest4j.AssertionFailedError at RecoveryInventoryTests.java:248
+23 tests completed, 12 failed
+> Task :services:cms-api:test FAILED
+BUILD FAILED in 11s

@@ -1,0 +1,20 @@
+{
+  "desk": {
+    "pr": 410,
+    "head": "4513d423cadb404a3f70039fe8dd6e174f7f9e29",
+    "ci": 41480882189,
+    "merge": "0eed4084689c5fd5169d1df8f780c4545d624641",
+    "mergedAt": "2026-11-02T16:25:03Z",
+    "exactTaskRemoteDiff": "empty"
+  },
+  "journal": {
+    "pr": 247,
+    "head": "967e839b15b33873566cb5b38455b46985a7791d",
+    "ci": 41481135641,
+    "merge": "6f469ecd39efc222b1aa4dc891de71e236b3739b",
+    "mergedAt": "2026-11-02T16:26:26Z",
+    "exactRunRemoteDiff": "empty"
+  },
+  "T142": "DONE",
+  "scope": "B CLI delivery and partial C progress only; claim/status unchanged"
+}

@@ -1,0 +1,15 @@
+{
+  "rows": [
+    {
+      "file": "local-restore.mjs",
+      "changedLines": 60,
+      "sha256": "b0fcced8846e6eb2b27e8c3cd66c2a40723f62381ef1a9b326295070e8d53949"
+    },
+    {
+      "file": "local-restore.test.mjs",
+      "changedLines": 53,
+      "sha256": "6e8ca197d271e5d63af92c0e199073f6968e9ad3a297752c21f597329cc78ce4"
+    }
+  ],
+  "total": 113
+}

@@ -53,6 +53,7 @@ GET /
 GET /assets/p0-app.js
 GET /assets/p0-client.js
 GET /assets/p0.css
+GET /favicon.ico
 ```
 
 No wildcard file route, directory listing, path parameter, filesystem read, template input, or
@@ -68,6 +69,9 @@ The exact successful response media types are:
 | `/assets/p0-app.js` | `text/javascript; charset=utf-8` |
 | `/assets/p0-client.js` | `text/javascript; charset=utf-8` |
 | `/assets/p0.css` | `text/css; charset=utf-8` |
+| `/favicon.ico` | `image/x-icon` |
+
+The embedded favicon and focused browser follow-up are specified by [T006F](SPEC-T006F-browser-followup.md), clause F01. The existing same-origin image CSP is unchanged.
 
 HTML imports `/assets/p0-app.js` as an external module. `p0-app.js` owns only DOM bindings and
 constructs the controller from browser-native `fetch`, `WebSocket`, `crypto.randomUUID`,
@@ -131,6 +135,18 @@ shown with a fixed instruction to use the trusted operator recovery procedure an
 | P-006-08 | Stored cursor record has exact version/UUID/nonnegative-safe-integer schema | Delete it and adopt the authenticated snapshot high-water before subscribe |
 | P-006-09 | Fetch remains on one fixed route with redirect mode `error` | Redirect/network failure; no follow or retry |
 | P-006-10 | Response status, media type, decoded byte count, UTF-8, JSON, and exact schema validate | Cancel body stream; fixed safe error; no untrusted display |
+
+Response bodies are read in one of two ways, decided by framing. A declared `Content-Length` must be a canonical
+decimal no larger than the operation's bound before any byte is read. That body is then drained whole with
+`arrayBuffer()`, never through a stream reader, and its byte count is checked again against the bound. This
+applies only without `Content-Encoding`, where the declared length equals the decoded length. A body without a
+declared length (chunked) or with a content coding is read incrementally with a stream reader; the reader is
+cancelled as soon as the running decoded byte count exceeds the bound. The whole-body drain exists because Chromium 153 can report a
+complete no-store body consumed through a stream reader as `net::ERR_ABORTED`
+([layer ablation](../../../../docs/fe-review/fanzloud-completion-regression/LAYER-ABLATION.md)). The product
+transport builds every response through `CachedResponse::into_response` as one uncompressed full body, which
+hyper frames with an exact `Content-Length`, so production responses take the whole-body path. The T007 loopback
+e2e samples this framing on `GET /session` (401 and 200).
 
 The UTF-8-to-`ByteString` conversion rejects encoded ASCII controls and any length outside the
 accepted byte bound before constructing `Headers`. The bootstrap input is copied only long enough
@@ -261,6 +277,14 @@ unknown-field, binary, oversized, malformed, wrong-session, or impossible frame 
 connection without reflecting input. Replay duplicates at or below the requested cursor are
 ignored; only a validated next version-1 envelope updates the cursor. The UI shows only fixed
 allowlisted lifecycle/event summaries, never raw prompt/diff/code/provider output.
+
+P-006-11 — client close code. When the controller closes a connection after it detects a stream
+failure itself, it calls `close(1000, "")`. The T005C codes 1008, 1012 and 1013 are server close
+codes; a browser page may send only 1000 or 3000–4999 and throws `InvalidAccessError` for any
+other code, so a `close(1008)` from the page never closes the socket. The failure policy (terminal
+or refresh) is held by the controller, not encoded in the close code, so the reconnect and refresh
+policy is unchanged; it now takes effect in browsers because the close event arrives. T-0433 `journeys-001` J04 observed the socket staying open after a
+self-detected protocol error until a manual Refresh; the `close(1008)` cause is a source inference.
 
 # Cancellation and Timeout
 
@@ -417,9 +441,14 @@ use Node's built-in `node:test`, fake browser primitives, and the actual product
 network, browser binary, package manager, or third-party module.
 Test 6 partitions valid retained cursors, duplicates, gaps, current-session mismatch, reconnect
 delays, snapshot-high-water adoption, restart authentication loss, and storage failure. Test 7
-covers peer close, disposal, ambiguous cancellation response, and explicit cancel separately.
+covers peer close, disposal, ambiguous cancellation response, and explicit cancel separately. Its fake
+WebSocket rejects `close` codes other than 1000 and 3000–4999 with `InvalidAccessError`, as browsers
+do, and after each self-detected stream failure the socket is closed with an allowed code and the
+failure policy holds (P-006-11).
 Test 8 includes HTML/script/diff-size, invalid UTF-8, chunk, content-length, EOF, and media-type
-partitions. Across tests 3–10, every HTTP success status/schema is accepted exactly and rejected at
+partitions, and proves that a declared-length body within its bound (diff and JSON) is drained whole with
+no stream reader, rejected after an over-length drain or invalid UTF-8, and fails safely when the drain
+rejects, while a content-coded declared-length body keeps the stream reader. Across tests 3–10, every HTTP success status/schema is accepted exactly and rejected at
 the wrong status. JSON, diff, and WebSocket bounds cover limit/limit-plus-one, one/many chunks,
 UTF-8 byte length versus JavaScript length, and reader cancellation on overflow. Stream tests cover
 every legal phase plus out-of-order, binary, oversized, malformed, unknown-field, and impossible

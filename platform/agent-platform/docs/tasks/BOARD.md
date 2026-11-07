@@ -218,3 +218,48 @@ This post-merge record supersedes pre-merge wording in the dated local snapshot.
 | --- | --- | --- | --- | --- | --- |
 | T-0112.1 | Present actual failed and unverified Worker outcomes without false verification success | RTF-01 | in_progress | 2026-10-26T08:15:28Z | | 2026-10-26T08:31:12Z |
 | T-0112.2 | Preserve interrupted/resultless archive-failure UI and held capacity | RTF-02 | in_progress | 2026-10-26T08:15:28Z | | 2026-10-26T08:31:12Z |
+
+## T-0447 — Fanzloud M1 isolated executor dependency
+
+[Contract](../EXTERNAL-WORKSPACE.md); parent T-0442.
+
+| ID | Task | AC | Status | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| T-0447.1 | Run-scoped external workspace API | EX-01 | done | 2026-10-31T18:37:19Z | 2026-10-31T19:40:53Z | 2026-10-31T19:40:53Z |
+| T-0447.2 | Actual VM isolation and cleanup | EX-02 | done | 2026-10-31T18:37:19Z | 2026-10-31T19:40:53Z | 2026-10-31T19:40:53Z |
+| T-0447.3 | Subscription CLI coding qualification | EX-03 | done | 2026-10-31T18:37:19Z | 2026-10-31T19:40:53Z | 2026-10-31T19:40:53Z |
+
+
+## T-0442 — Fanzloud M2 bounded second subscription route
+
+[Scope and acceptance](../../../fanzloud/docs/specs/SPEC-M2-two-vendors.md).
+Existing T-0447 executor authority is reused; this does not open another AP milestone.
+
+| ID | Task | AC | Status | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| M2-route | Exact Codex admission/driver, trusted tool boundary and native backup compatibility; PR895 merged | M2-01/02 | done | 2026-11-01T04:15Z | 2026-11-01T05:30:52Z | 2026-11-01T05:30:52Z |
+
+Code review corrections and native backup31 tests passed; actual Codex Web execution
+and concurrent workspace proof remain pending. Host ceiling remains one4CPU/4GiB VM.
+
+2026-11-01 M2 pair: exact approved2VM window passed real dual-vendor overlap, boundaries,
+cancelA/completeB and cleanup; max1 restored. Fresh independent ACCEPT_M2_LIVE and
+all three final-head workflows passed; PR906 merged2026-11-01T11:39:17Z as
+`d55db6a9ad4606cd7df30b2bc9411b559d04f75a`, with remote product bytes read back equal.
+No AP production code changes or M3. Earlier pending-resource snapshot superseded.
+
+## T-0449 approved readonly review dependency
+
+| ID | Task | AC | Status | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| FN05-R | AP readonly admission/tools/result and same-Web explicit handoff | R01–05 / CU-M3-R01–04 | done | 2026-11-01T16:44:02Z | 2026-11-01T17:25:32.944657+00:00 | 2026-11-01T17:25:32.944657+00:00 |
+
+PR952 merged as `a69ff34ec173ee36284aceebcb417e560438569c` after finalhead967727b2 passed AP41330719757/Fanz41330719768/contracts41330719829; remote Fanzloud/AP bytes read back equal. Bounded FN05-R done; completeM3/FN07 remains open.
+
+## T-0442 approved reconciliation dependency
+
+| ID | Task | AC | Status | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| FN04-U | Exact authenticated read-only command evidence; owner approved deskPR395 | CU-M3-U01/U01–03 | done | 2026-11-02T12:15:04Z | 2026-11-02T13:18:13Z | 2026-11-02T13:18:13Z |
+
+FN04-U native/current original-installation evidence accepted on86350871; PR983 merged2026-11-02T13:18:13Z as `d0dfb3622bd4cf59793b79448c7b4be55c3b3e7d`; finalheadfcf5c3fe all5requiredCI passed and remote Fanzloud/AP bytes match. No lifecycle/lease/schema change; full platform remains incomplete.

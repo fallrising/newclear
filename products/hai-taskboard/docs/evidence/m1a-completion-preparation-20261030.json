@@ -1,0 +1,63 @@
+{
+  "snapshot_utc": "2026-10-30T04:22:14.877509+00:00",
+  "baseline": "6b7bf17c010f6a354f7abf3676f994f7ae2d19ec",
+  "documentation_first_commit": "c651b83f59cab40cfa8f7f6cdfcd92265800d7ab",
+  "contracts": [
+    "C01",
+    "C02",
+    "C06"
+  ],
+  "backend_sha256": {
+    "products/hai-taskboard/backend/internal/application/command/result.go": "e7050003cc8d71f956a30c2cf1ad12835416ebbb5bb38509b90321e46119bf54",
+    "products/hai-taskboard/backend/internal/application/service/completion_description.go": "c98950b9ee82817746a82b939b90fe769be108f260754ec27008cd244dc58e1b",
+    "products/hai-taskboard/backend/internal/application/service/completion_preparation.go": "5f3e567642d34712129f47a64f8e1f6be453baecd99dbac2beee6fc6ccba8bc1",
+    "products/hai-taskboard/backend/internal/application/service/completion_preparation_test.go": "327296b5e836d21ffc2307877021962e800950648ea5ede09c62a347f61cfbe0",
+    "products/hai-taskboard/backend/internal/transport/httpapi/server.go": "70a91bc0ecf1453adcaf0442be4ec00d65f41309ff8738d5056053546e24818c",
+    "products/hai-taskboard/backend/internal/transport/httpapi/completion_preparation.go": "74e3aef043c4bd32f9ae4701deb049c967717bef53227fdca05dca4e396e6c3b",
+    "products/hai-taskboard/backend/internal/transport/httpapi/completion_preparation_test.go": "47122055c55e5fd65d6979e0de7c517aa8a07c90a37fec904987909563b4f5ce"
+  },
+  "checks": {
+    "backend_native_full_race_vet_build": {
+      "exit_code": 0,
+      "source_inputs": 185
+    },
+    "web_native_gate": {
+      "exit_code": 0,
+      "tests": 30
+    },
+    "openapi_pinned_lint": {
+      "exit_code": 0,
+      "warnings": 0
+    },
+    "independent_contract_review": "ACCEPT",
+    "independent_implementation_review": "ACCEPT"
+  },
+  "retained_logs_sha256": {
+    "backend-final.log": "5c6c21599f471f40ea324ba2216a945bd64fca5ad6ffc5ae52ff1bd9283d88b5",
+    "backend-superseded-dot-fix.log": "35440a5ec9f65bc0d809d239b4a5b06803fea369dd448e84dcb1a7d5b2b3a21a",
+    "web.log": "7a1a36d8f3d327cba977cf25ddfecd76e9fc90bf089ef7d790b07e2068f3ea80",
+    "web-initial-offline.log": "96b86f97a31dbb616544a28d2d6d3c40c431dd8c46591e43b9e0b71bc159890b",
+    "dependency-prepare.log": "022416e7f6c395178c73daa591b2d584179731a8493011312166a8cdbf3f5516",
+    "api-lint.log": "c1e38b61e5dd5636d5442523f2cfc820c9687d419ba2077289dc11152bd8fda2",
+    "worker/red.log": "d0527b91b88a4736c47893d33c0242b10f32454ed6cacf1081bc07594358dfc5",
+    "worker/red-compiled.log": "a62aad567eff44e14ee9447ba65beb3e779d3303471a090e185458ae6c2506fc",
+    "worker/green-final.log": "116b0c3d10910c07d5ac88ba03eb380997e22e0945248c69084d79d8a204a49e",
+    "worker/green-dot-final.log": "ef775fa8ccf61e5c7ae1d259116af854073cc02b3ccb5fcc0d0694e6e3b0c222"
+  },
+  "accounting": {
+    "native_agent_starts": 3,
+    "external_worker_launches": 0,
+    "outer_calls": null,
+    "nested_calls": null,
+    "provider_requests": null,
+    "tokens": null,
+    "cost": null,
+    "period": "M1a intake through snapshot; native launches observed, other totals uninstrumented"
+  },
+  "limits": {
+    "browser_run": false,
+    "full_product_acceptance": false,
+    "release_or_deploy": false,
+    "pr_delivery": "pending"
+  }
+}

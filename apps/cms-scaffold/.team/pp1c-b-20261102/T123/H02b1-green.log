@@ -1,0 +1,10 @@
+✔ PP1C_H02b1_real_token_JDBC_closed_running_before_result_and_EOF (1210.605764ms)
+✔ PP1C_H02b1_real_token_JDBC_closed_EXITED_before_result_and_EOF (1314.917873ms)
+ℹ tests 2
+ℹ suites 0
+ℹ pass 2
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 2571.259375

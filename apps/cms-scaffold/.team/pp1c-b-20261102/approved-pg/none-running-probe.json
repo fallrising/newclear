@@ -1,0 +1,27 @@
+{
+  "scope": "synthetic network-none Docker metadata probe only",
+  "image": "sha256:6a8ca4b22705adf7134d2220ab8aadff634a6b76c816dba55e0409f8e5c180dc",
+  "name": "pp1c-none-probe-9b10209a03a5457c8d5306f93f499e46",
+  "id": "ecc821d0418dd19e1bdf6afb894b82234376347eb80a4eb1ef9b9a1f8399d62e",
+  "hostNetworkMode": "none",
+  "networks": {
+    "none": {
+      "IPAMConfig": null,
+      "Links": null,
+      "Aliases": null,
+      "DriverOpts": null,
+      "GwPriority": 0,
+      "NetworkID": "e4a7bd79d4e033c5eec5f83e87c2869722f8c0bd761581e70ae212e1ceb7041a",
+      "EndpointID": "e74a1eea12a0425f55b991d909df96ad3857556c4779d01af292dd9355675623",
+      "Gateway": "",
+      "IPAddress": "",
+      "MacAddress": "",
+      "IPPrefixLen": 0,
+      "IPv6Gateway": "",
+      "GlobalIPv6Address": "",
+      "GlobalIPv6PrefixLen": 0,
+      "DNSNames": null
+    }
+  },
+  "exited": true
+}

@@ -1,0 +1,11 @@
+{
+  "card": "C05",
+  "result": "expected assertion RED:20 tests,9failed,compilepassed",
+  "handwrittenChangedLines": 214,
+  "sourceSha256": {
+    "services/cms-api/src/main/java/com/fallrising/cms/CmsApiApplication.java": "80783b10734baba6a00cb32a807b1de7d40d17719f5c929fe1c77cfeda16d48f",
+    "services/cms-api/src/test/java/com/fallrising/cms/CmsApiApplicationTests.java": "7d585f0272df986127aaff19ddd2d74d57b04c4a3d87f99e8668b91b3786c943",
+    "services/cms-api/src/main/java/com/fallrising/cms/ops/RecoveryInventoryMain.java": "0e33bb7346297c71a85f9299d42b76da49bef01af6921276a7c7a74cb64f94aa",
+    "services/cms-api/src/test/java/com/fallrising/cms/ops/RecoveryInventoryMainTests.java": "71d8962caa1b170b776a2ac02fb3298b81c5c7ead6bba2bd5896bba65e366fd1"
+  }
+}

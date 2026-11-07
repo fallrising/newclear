@@ -1,0 +1,120 @@
+{
+  "id": "cooking-ingredient-substitution",
+  "system": "cooking",
+  "edition": 1,
+  "name": {
+    "zh": "同类食材替换",
+    "en": "Ingredient substitution"
+  },
+  "summary": {
+    "zh": "满足配方条件即可换料，把稀缺材料留给更重要的用途。",
+    "en": "Swap ingredients that satisfy a recipe and save scarce items for other uses."
+  },
+  "rules": {
+    "zh": "配方可以要求具体物品，也可以要求食材类别或属性。玩家在满足条件的前提下选择便宜、过剩或快坏的材料；结果取决于规则，而不只是背下一组固定名称。",
+    "en": "Recipes may require exact items, categories or properties. Players choose cheap, abundant or aging ingredients while satisfying those rules; outcomes depend on constraints rather than memorizing one fixed list."
+  },
+  "loop": [
+    {
+      "zh": "查看必须条件",
+      "en": "Read required constraints"
+    },
+    {
+      "zh": "选择可替代材料",
+      "en": "Choose valid substitutes"
+    },
+    {
+      "zh": "检查冲突与成本",
+      "en": "Check conflicts and cost"
+    },
+    {
+      "zh": "制作并保留贵重食材",
+      "en": "Cook while saving valuable ingredients"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "用高价鱼做普通菜，还是换成便宜鱼？",
+      "en": "Use an expensive fish or substitute a cheap one?"
+    },
+    {
+      "zh": "替换后仍满足所有条件吗，是否触发另一配方？",
+      "en": "Does the substitution still meet every condition, or trigger another recipe?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "替代范围",
+        "en": "Substitution breadth"
+      },
+      "effect": {
+        "zh": "范围越宽越能救活杂乱库存；太宽会抹平食材身份。",
+        "en": "Broad substitutions rescue mixed stocks; excessive freedom erases ingredient identity."
+      }
+    },
+    {
+      "name": {
+        "zh": "冲突规则透明度",
+        "en": "Conflict visibility"
+      },
+      "effect": {
+        "zh": "提前预览结果鼓励优化；隐藏优先级会把首次尝试变成试错。",
+        "en": "Outcome previews support optimization; hidden priorities turn early attempts into experiments."
+      }
+    }
+  ],
+  "tags": [
+    "economy",
+    "planning",
+    "optimization"
+  ],
+  "related": [
+    "commerce-trade-route-programming",
+    "cooking-food-preservation",
+    "cooking-meal-loadout",
+    "cooking-preparation-chain"
+  ],
+  "contrast": {
+    "zh": "饥荒的替换会影响配方判定；星露谷的同类替换主要改变机会成本。",
+    "en": "Substitution in DST can change recipe selection; in Stardew it primarily changes opportunity cost."
+  },
+  "combination": {
+    "zh": "组合创意：餐厅菜单允许同类替换，但每种替代食材带来不同过敏原与顾客偏好，需要按订单配料。",
+    "en": "Design proposal: substitutions preserve a recipe but change allergens and preferences, requiring order-specific choices."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "这道菜需要一份鱼，你手里有便宜小鱼和高价稀有鱼。",
+      "en": "The recipe needs one fish; you have a cheap small fish and a valuable rare fish."
+    },
+    "action": {
+      "zh": "你选便宜鱼，并确认它仍满足配方的其他条件。",
+      "en": "Use the cheap fish and check that it meets every remaining recipe condition."
+    },
+    "result": {
+      "zh": "做出合格菜品，同时留下可单独高价出售的稀有鱼。",
+      "en": "You produce the required dish while preserving the rare fish for a better use."
+    },
+    "next": {
+      "zh": "下次库存变化时重新选料，不必固定用同一物品。",
+      "en": "Choose ingredients again when your inventory changes instead of always using the same item."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "做“任意鱼＋蔬菜”与一个更严格配方，让玩家看到材料类别和预期结果。",
+      "en": "Use a fish-plus-vegetable recipe and a stricter alternative, displaying ingredient categories and expected results."
+    },
+    "pitfall": {
+      "zh": "隐藏配方优先级会使替换结果难解释，先明确哪条规则决定最后出锅的菜。",
+      "en": "Hidden recipe priority makes substitutions confusing; make the rule choosing the final dish explicit."
+    },
+    "test": {
+      "zh": "当某种材料涨价或快过期时，玩家是否能主动替换并保留贵重材料？",
+      "en": "When an ingredient becomes valuable or nearly spoils, can players substitute deliberately?"
+    }
+  }
+}

@@ -1,0 +1,42 @@
+/** Exact recovery bootstrap GET observer; all body/identity data stay in RAM. */
+import {bounded} from './lifecycle.mjs';
+import {readVerdict} from './disconnected-observer.mjs';
+import {observeBodyRead} from './disconnected-timeline.mjs';
+const events=new Set(['REQUEST','RESPONSE','BODY_START','BODY_END','REQUEST_FINISHED','REQUEST_FAILED','SERVER_FINISH','SERVER_CLOSE','SERVER_ERROR']);
+const outcomes=new Set(['FULFILLED','RESPONSE_REJECTED','OBSERVER_DEADLINE','OTHER_FAILURE']);
+const errors=new Set(['ERROR','ABORT_ERROR','TIMEOUT_ERROR','TARGET_CLOSED_ERROR','OTHER']);
+export function createRecoveryTimeline({clock=()=>performance.now(),limit=64}={}){
+ if(!Number.isInteger(limit)||limit<1||limit>128)throw Error('REVIEW_TIMELINE_LIMIT');
+ const origin=clock(),rows=[];let overflow=false,invalid=false,last=0;
+ const now=()=>clock()-origin;
+ return Object.freeze({now,record(event,data={}){
+  if(rows.length>=limit){overflow=true;return;}
+  const timeMs=now();if(!events.has(event)||!Number.isFinite(timeMs)||timeMs<last){invalid=true;return;}
+  const row={sequence:rows.length+1,timeMs,event};last=timeMs;
+  if(data.category!==undefined){if(!['session','login'].includes(data.category)||!Number.isInteger(data.ordinal)||data.ordinal<1||data.ordinal>8){invalid=true;return;}row.category=data.category;row.ordinal=data.ordinal;}
+  if(data.outcome!==undefined){if(!outcomes.has(data.outcome)){invalid=true;return;}row.outcome=data.outcome;}
+  if(data.errorClass!==undefined){if(!errors.has(data.errorClass)){invalid=true;return;}row.errorClass=data.errorClass;}
+  if(data.elapsedMs!==undefined){if(!Number.isFinite(data.elapsedMs)||data.elapsedMs<0){invalid=true;return;}row.elapsedMs=data.elapsedMs;}
+  if(data.requestFailedSeen!==undefined)row.requestFailedSeen=data.requestFailedSeen===true;
+  rows.push(row);
+ },snapshot:()=>({clock:'performance.now',limit,overflow,invalid,events:rows.map(row=>({...row}))})});
+}
+const exact=(v,keys)=>!!v&&typeof v==='object'&&!Array.isArray(v)&&Object.keys(v).sort().join(',')===[...keys].sort().join(',');
+const uuid=v=>typeof v==='string'&&/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(v)&&v!=='00000000-0000-0000-0000-000000000000';
+export function validRecoveryBody(category,body){if(!Buffer.isBuffer(body)||body.length>65536)return false;try{const v=JSON.parse(new TextDecoder('utf-8',{fatal:true}).decode(body));if(category==='login')return exact(v,['state'])&&v.state==='logged_in';if(category!=='session'||!exact(v,['identity','state','current_turn','high_water_seq'])||v.state!=='recovery_required'||v.high_water_seq!==0||!exact(v.identity,['session_id','instance_id'])||!uuid(v.identity.session_id)||!uuid(v.identity.instance_id))return false;const t=v.current_turn,q=t?.projection,l=q?.lifecycle;return exact(t,['turn_id','projection'])&&uuid(t.turn_id)&&exact(q,['phase','lifecycle','cancel_requested'])&&q.phase==='cloud'&&q.cancel_requested===false&&exact(l,['state','operation_id'])&&l.state==='outcome_unknown'&&uuid(l.operation_id);}catch{return false;}}
+export function recoveryReadVerdict(d){return d?.authenticationMutations===1?readVerdict(d):'FAIL';}
+const paths={session:'/api/p0/v1/session',login:'/api/p0/v1/login'};
+export function createRecoveryReadObserver(origin,timeline){
+ let armed=false,overflow=false,unmatched=false,extraMutations=0,authenticationMutations=0;const requests={session:[],login:[]},servers={session:[],login:[]},pending=[],rows=[];const category=url=>Object.keys(paths).find(k=>url===origin+paths[k]);
+ return {
+  arm(){if(armed)throw Error('REVIEW_OBSERVER_ALREADY_ARMED');armed=true;},
+  request(req){if(!armed)return;if(!['GET','HEAD'].includes(req.method())){if(req.method()==='POST'&&req.url()===origin+'/api/p0/v1/operator/session')authenticationMutations++;else extraMutations++;}const c=category(req.url());if(req.method()!=='GET'||!c)return;if(rows.length>=8){overflow=true;return;}const row={request:req,category:c,ordinal:requests[c].length+1,response:null,terminalCount:0,requestFinished:false,requestFailed:false,failureCode:null,bodyOutcome:'NOT_ATTEMPTED',headers:null};requests[c].push(row);rows.push(row);timeline.record('REQUEST',{category:c,ordinal:row.ordinal});},
+  server({method,path,output,res}){if(!armed||method!=='GET')return;const c=Object.keys(paths).find(k=>path===paths[k]);if(!c)return;if(servers.session.length+servers.login.length>=8){overflow=true;return;}const entry={body:Buffer.from(output.body),status:output.status,finished:false,closed:false,closeBeforeFinish:false,error:'NONE'};servers[c].push(entry);res.once('finish',()=>{entry.finished=true;timeline.record('SERVER_FINISH',{category:c,ordinal:servers[c].indexOf(entry)+1});});res.once('close',()=>{entry.closed=true;entry.closeBeforeFinish=!entry.finished;timeline.record('SERVER_CLOSE',{category:c,ordinal:servers[c].indexOf(entry)+1});});res.once('error',e=>{entry.error=['EPIPE','ECONNRESET'].includes(e?.code)?e.code:'OTHER';timeline.record('SERVER_ERROR',{category:c,ordinal:servers[c].indexOf(entry)+1});});},
+  response(response){if(!armed)return;const request=response.request(),c=category(request.url());if(request.method()!=='GET'||!c)return;const row=rows.find(r=>r.request===request);if(!row||row.response){unmatched=true;return;}row.response=response;row.status=response.status();timeline.record('RESPONSE',{category:c,ordinal:row.ordinal});const entry=servers[c][row.ordinal-1];if(!entry){unmatched=true;return;}
+   pending.push((async()=>{try{const h=await bounded(()=>response.allHeaders(),1000,'get-headers');row.headers={json:h['content-type']==='application/json',noStore:h['cache-control']==='no-store',nosniff:h['x-content-type-options']==='nosniff',contentEncodingAbsent:!Object.hasOwn(h,'content-encoding'),contentLengthPresent:Object.hasOwn(h,'content-length'),contentLengthMatchesExpected:Object.hasOwn(h,'content-length')?h['content-length']===String(entry.body.length):null,transferChunked:h['transfer-encoding']==='chunked'};}catch{}try{const body=await observeBodyRead(()=>response.body(),{timeline,category:c,ordinal:row.ordinal,requestFailed:()=>row.requestFailed});row.bodyOutcome=body.length>65536?'BODY_TOO_LARGE':!validRecoveryBody(c,body)||!validRecoveryBody(c,entry.body)?'INVALID_BODY':body.equals(entry.body)?'EXACT_SCHEMA_AND_FIXTURE_MATCH':'BODY_MISMATCH';}catch{row.bodyOutcome='READ_FAILED';}finally{row.bodyReadOutcome=timeline.snapshot().events.filter(e=>e.event==='BODY_END'&&e.category===c&&e.ordinal===row.ordinal).at(-1)?.outcome??'NOT_RECORDED';}})());
+  },
+  terminal(request,error){if(!armed)return;const row=rows.find(r=>r.request===request);if(!row)return;row.terminalCount++;if(error){row.requestFailed=true;row.failureCode=['ERR_ABORTED','ERR_FAILED','ERR_CONNECTION_CLOSED'].includes(error)?error:'UNKNOWN';}else row.requestFinished=true;timeline.record(error?'REQUEST_FAILED':'REQUEST_FINISHED',{category:row.category,ordinal:row.ordinal});},
+  async finish(){let observerSettled=true;try{await bounded(()=>Promise.all(pending),3500,'get-observer-drain');}catch{observerSettled=false;}return {armed,overflow,unmatched,extraMutations,authenticationMutations,observerSettled,rows:rows.map(row=>{const e=servers[row.category][row.ordinal-1];return {category:row.category,ordinal:row.ordinal,browserCount:requests[row.category].length,serverCount:servers[row.category].length,sameRequest:!!row.response&&row.response.request()===row.request,correlation:e&&row.response?'UNIQUE_METHOD_PATH_ORDINAL':'UNPROVEN',status:row.status??null,bodyOutcome:row.bodyOutcome,bodyReadOutcome:row.bodyReadOutcome??'NOT_ATTEMPTED',headers:row.headers,requestFinished:row.requestFinished,requestFailed:row.requestFailed,terminalCount:row.terminalCount,failureCode:row.failureCode,server:e?{status:e.status,finished:e.finished,closed:e.closed,closeBeforeFinish:e.closeBeforeFinish,error:e.error}:null};})};}
+ };
+}
+export function recoveryDiagnosticComplete(d,t){return !!d&&d.armed===true&&d.observerSettled===true&&!d.overflow&&!d.unmatched&&!!t&&!t.invalid&&!t.overflow&&Array.isArray(d.rows)&&d.rows.length===2&&['session','login'].every(c=>d.rows.filter(r=>r.category===c).length===1)&&d.rows.every(r=>r.browserCount===1&&r.serverCount===1&&r.ordinal===1&&r.sameRequest===true&&r.correlation==='UNIQUE_METHOD_PATH_ORDINAL'&&r.terminalCount===1&&!!r.server&&(r.server.finished===true||r.server.closed===true||['EPIPE','ECONNRESET','OTHER'].includes(r.server.error))&&['FULFILLED','RESPONSE_REJECTED','OBSERVER_DEADLINE','OTHER_FAILURE'].includes(r.bodyReadOutcome));}

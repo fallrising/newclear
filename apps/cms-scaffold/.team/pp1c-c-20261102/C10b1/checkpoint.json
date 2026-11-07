@@ -1,0 +1,17 @@
+{
+  "frozenAt": "2026-11-02T15:57:11.116803+00:00",
+  "handwrittenChangedLines": 210,
+  "files": {
+    "scripts/ops/local-recovery-verify.mjs": 91,
+    "scripts/ops/local-recovery-verify.test.mjs": 33,
+    "scripts/ops/local-recovery.fixture.mjs": 70,
+    "scripts/local/maintenance-helper.mjs": 16
+  },
+  "sha256": {
+    "scripts/ops/local-recovery-verify.mjs": "3be0ecdac65639b743d26516d71b13bb5af6df3a9807cfabc73574603dd60d3f",
+    "scripts/ops/local-recovery-verify.test.mjs": "d227e29621224aaabebeb04e97c4782828b8f8fbaef5a892b5896b906354c5bb",
+    "scripts/ops/local-recovery.fixture.mjs": "a050ad2d41713826c8ee2a234f85aee91a1937c18316f87f55c40bed10b4227e",
+    "scripts/local/maintenance-helper.mjs": "2062ba86baa0a75330832fbae57ff352909b7ea8b58d11fea0febd361cd8c765"
+  },
+  "checks": "24/24 focused; 572/572 combined Node, zero failure/skip; synthetic raw comparison, no actual restore claim"
+}

@@ -1,0 +1,6 @@
+{
+  "container": "9d06d3650b675cab2194507b531437d8ef1bece7e1cb0d157acfb3223d2e2b30",
+  "sql": "SELECT '172.31.0.9'::inet::text, host('172.31.0.9'::inet);",
+  "result": "172.31.0.9/32|172.31.0.9",
+  "priorAttempt": "readiness not awaited; connection refused; no mutation"
+}

@@ -1,0 +1,264 @@
+{
+  "round": 3,
+  "base": "1bd5a86056b1604247a4afff32872613fbf435d9",
+  "excluded": [
+    "automation-belt-routing",
+    "rhythm-hidden-beats"
+  ],
+  "manual_edits": {
+    "removed_snapshot_line": [
+      "cooking-recipe-learning",
+      "allocation-shop-reservation",
+      "inventory-adjacency",
+      "inventory-shape-packing",
+      "building-structural-support"
+    ],
+    "allocation-area-majority": "驗收例改為無平局的配置，刪除來源未提供的平局歸屬規則",
+    "allocation-follow-phase": "刪除 pi 加入的相關模式前置說明句"
+  },
+  "runs": [
+    {
+      "generated_at": "2026-11-03T10:56:25Z",
+      "applied": true,
+      "counts": {
+        "fixed": 15,
+        "failed": 1,
+        "cannot-fix": 0
+      },
+      "notes": [
+        {
+          "id": "allocation-follow-phase",
+          "result": "fixed",
+          "provider": "default",
+          "summary_changed": false,
+          "chars_before": 2522,
+          "chars_after": 2478,
+          "attempts": [
+            {
+              "provider": "default",
+              "error": "no body markers"
+            }
+          ]
+        },
+        {
+          "id": "allocation-route-denial",
+          "result": "fixed",
+          "provider": "default",
+          "summary_changed": false,
+          "chars_before": 2745,
+          "chars_after": 2868,
+          "attempts": []
+        },
+        {
+          "id": "automation-fluid-routing",
+          "result": "fixed",
+          "provider": "default",
+          "summary_changed": false,
+          "chars_before": 2447,
+          "chars_after": 2476,
+          "attempts": []
+        },
+        {
+          "id": "combat-combat-deck-cycle",
+          "result": "fixed",
+          "provider": "default",
+          "summary_changed": false,
+          "chars_before": 2462,
+          "chars_after": 2452,
+          "attempts": []
+        },
+        {
+          "id": "commerce-interpret-orders",
+          "result": "fixed",
+          "provider": "default",
+          "summary_changed": false,
+          "chars_before": 2246,
+          "chars_after": 2318,
+          "attempts": []
+        },
+        {
+          "id": "cooperation-split-information",
+          "result": "fixed",
+          "provider": "default",
+          "summary_changed": false,
+          "chars_before": 2549,
+          "chars_after": 2699,
+          "attempts": []
+        },
+        {
+          "id": "deckbuilding-card-upgrade",
+          "result": "fixed",
+          "provider": "default",
+          "summary_changed": false,
+          "chars_before": 3032,
+          "chars_after": 3035,
+          "attempts": []
+        },
+        {
+          "id": "deckbuilding-trigger-order",
+          "result": "fixed",
+          "provider": "default",
+          "summary_changed": false,
+          "chars_before": 2573,
+          "chars_after": 2620,
+          "attempts": []
+        },
+        {
+          "id": "fishing-pond-production",
+          "result": "fixed",
+          "provider": "default",
+          "summary_changed": false,
+          "chars_before": 2456,
+          "chars_after": 2585,
+          "attempts": []
+        },
+        {
+          "id": "gathering-supply-mining",
+          "result": "fixed",
+          "provider": "default",
+          "summary_changed": true,
+          "chars_before": 2743,
+          "chars_after": 2743,
+          "attempts": []
+        },
+        {
+          "id": "matching-gravity-cascade",
+          "result": "fixed",
+          "provider": "default",
+          "summary_changed": false,
+          "chars_before": 3026,
+          "chars_after": 3105,
+          "attempts": [
+            {
+              "provider": "default",
+              "error": "no body markers"
+            }
+          ]
+        },
+        {
+          "id": "movement-carry-object",
+          "result": "failed",
+          "attempts": [
+            {
+              "provider": "default",
+              "error": "no body markers"
+            },
+            {
+              "provider": "default",
+              "error": "reference footer changed"
+            },
+            {
+              "provider": "default",
+              "error": "reference footer changed"
+            }
+          ]
+        },
+        {
+          "id": "puzzles-linked-portals",
+          "result": "fixed",
+          "provider": "default",
+          "summary_changed": false,
+          "chars_before": 2506,
+          "chars_after": 2631,
+          "attempts": []
+        },
+        {
+          "id": "stealth-light-shadow",
+          "result": "fixed",
+          "provider": "default",
+          "summary_changed": false,
+          "chars_before": 2510,
+          "chars_after": 2634,
+          "attempts": []
+        },
+        {
+          "id": "stealth-sound-lures",
+          "result": "fixed",
+          "provider": "default",
+          "summary_changed": false,
+          "chars_before": 3171,
+          "chars_after": 3261,
+          "attempts": []
+        },
+        {
+          "id": "stealth-synchronized-actions",
+          "result": "fixed",
+          "provider": "default",
+          "summary_changed": false,
+          "chars_before": 2449,
+          "chars_after": 2584,
+          "attempts": []
+        }
+      ],
+      "run": "fix-16"
+    },
+    {
+      "generated_at": "2026-11-03T11:00:38Z",
+      "applied": true,
+      "counts": {
+        "fixed": 1,
+        "failed": 0,
+        "cannot-fix": 0
+      },
+      "notes": [
+        {
+          "id": "allocation-follow-phase",
+          "result": "fixed",
+          "attempts": []
+        }
+      ],
+      "run": "related-allocation-follow-phase"
+    },
+    {
+      "generated_at": "2026-11-03T11:02:57Z",
+      "applied": true,
+      "counts": {
+        "fixed": 0,
+        "failed": 1,
+        "cannot-fix": 0
+      },
+      "notes": [
+        {
+          "id": "movement-carry-object",
+          "result": "failed",
+          "attempts": [
+            {
+              "provider": "default",
+              "error": "reference footer changed"
+            },
+            {
+              "provider": "default",
+              "error": "reference footer changed"
+            },
+            {
+              "provider": "default",
+              "error": "no body markers"
+            },
+            {
+              "provider": "default",
+              "error": "reference footer changed"
+            }
+          ]
+        }
+      ],
+      "run": "retry-movement-carry-object"
+    },
+    {
+      "generated_at": "2026-11-03T11:18:32Z",
+      "applied": true,
+      "counts": {
+        "fixed": 1,
+        "failed": 0,
+        "cannot-fix": 0
+      },
+      "notes": [
+        {
+          "id": "deckbuilding-card-upgrade",
+          "result": "fixed",
+          "attempts": []
+        }
+      ],
+      "run": "related-deckbuilding-card-upgrade"
+    }
+  ]
+}

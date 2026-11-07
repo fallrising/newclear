@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "snapshot_id": "atlas-public-2026-11-02",
+  "seed": "atlas-public-2026-11-02",
+  "count": 15,
+  "ids": [
+    "commerce-haggling",
+    "inventory-deck-thinning",
+    "deckbuilding-poker-hand-requirements",
+    "cooking-station-handoff",
+    "gathering-salvage-dismantling",
+    "gathering-hidden-deposit-clues",
+    "cooperation-split-information",
+    "combat-destructible-cover",
+    "deckbuilding-rule-changing-passives",
+    "commerce-trade-route-programming",
+    "inventory-equipment-budget",
+    "progression-challenge-tiers",
+    "commerce-auction-bidding",
+    "progression-practice-based-growth",
+    "building-water-engineering"
+  ]
+}

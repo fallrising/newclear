@@ -1,0 +1,42 @@
+✔ PP1FM04_lockAndReservationAreExclusive (82.846779ms)
+✔ PP1FM04_recoverRequiresVerifiedRollbackBeforeStop (12.308979ms)
+✔ PP1FM04_acquireBackendPinIsExact (115.063377ms)
+✔ PP1FM04_writerRestartAndIdleBackendReject (169.337774ms)
+✔ PP1FM04_unknownFailureNeverRestartsOrReleases (56.499628ms)
+✔ PP1FM04_concurrentReservationNeverStopsSecondOperation (52.481634ms)
+✔ metadata live and backend primitive core (115.208765ms)
+✔ metadata private input and live destination are immutable (76.501585ms)
+✔ helper CLI has fixed readonly inspect and rejects unknown inputs (189.435732ms)
+✔ PP1FM04_existingRegistryNeverReplaysOrStops (17.154779ms)
+✔ PP1FM04_privateLeaseMetadataFailsClosed (336.631585ms)
+✔ PP1FM04_pgTargetAndEpochDriftNeverRebind (73.258828ms)
+✔ probe exact inherited image labels and ownership reject before start (366.653481ms)
+✔ probe bounded failures clean only verified ID and preserve API lock (217.934164ms)
+✔ probe signals abort own wait cleanup and restore listener counts (153.073591ms)
+✔ commit receipt plus zero alone restarts same API and readonly COMPLETE survives release (140.118163ms)
+✔ commit nonzero invalid receipt and health failures never release or replay (343.280009ms)
+✔ missing registry and corrupt journal never repair or unlock (20.739554ms)
+✔ probe execution deadline aborts before extra command and cleanup remains bounded (39.486227ms)
+✔ health shared deadline rejects delayed start or healthy inspect without extra command (144.626675ms)
+✔ PP1C_L05_fixed_entrypoint_dispatch_preserves_v1_assert (58.073352ms)
+✔ PP1C_L05_fixed_entrypoint_rejects_unknown_version_or_wrong_run (53.64808ms)
+✖ PP1C_L05_v1_acquire_accepts_only_released_complete_v2_prior (114.000721ms)
+ℹ tests 23
+ℹ suites 0
+ℹ pass 22
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 3024.651038
+
+✖ failing tests:
+
+test at scripts/local/maintenance-guard.test.mjs:362:1
+✖ PP1C_L05_v1_acquire_accepts_only_released_complete_v2_prior (114.000721ms)
+  Error: QUIESCENCE_NOT_PROVEN
+      at code (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-registry-20261101/apps/cms-scaffold/scripts/local/maintenance-guard.mjs:9:61)
+      at acquire (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-registry-20261101/apps/cms-scaffold/scripts/local/maintenance-guard.mjs:138:121)
+      at async TestContext.<anonymous> (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-registry-20261101/apps/cms-scaffold/scripts/local/maintenance-guard.test.mjs:370:15)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7)

@@ -159,6 +159,11 @@ def inspect(service, run_id, generation):
         if "prepare" not in operations:
             return response
         service.isolation(row, terminal="prompt" in operations)
+        if row["input"].get("external_workspace"):
+            response.update(phase="prepared", prepared=operations["prepare"]["result"])
+            if "result" in operations:
+                response.update(phase="result", result=operations["result"]["result"])
+            return response
         with service.relay(row) as http:
             info = http.expect("GET", "/server_info")
             conversation = service.conversation(row, http)

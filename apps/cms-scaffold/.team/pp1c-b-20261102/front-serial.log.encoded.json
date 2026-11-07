@@ -1,0 +1,7 @@
+{
+  "encoding": "utf-8",
+  "originalPath": ".team/pp1c-b-20261102/front-serial.log",
+  "byteSize": 651,
+  "sha256": "cd59dc0e366a9ad2b92c43ea511279bdc982ee84e3a5a473a98d7cb8dd197d73",
+  "text": "\n> test\n> vitest run --maxWorkers=1\n\n\n RUN  v5.0.0 /home/ckc/test/codex/wt/newclear/cms-pp1c-b-20261101/apps/cms-scaffold/apps/web-front\n\nNot implemented: navigation to another Document\n\n Test Files  16 passed (16)\n      Tests  147 passed (147)\n   Start at  11:43:39\n   Duration  56.87s (import 53%, tests 27%, environment 13%, setup 5%, transform 2%)\n\n     Import  134 modules were evaluated 1063 times · 29.22s total, 53% of tracked time\n             ~25.53s faster with isolate: false — shared modules are evaluated once per worker instead of once per file\n             learn more: https://vitest.dev/guide/improving-performance#test-isolation\n\n"
+}

@@ -1,0 +1,63 @@
+name: Graphify lab CI
+
+on:
+  pull_request:
+    paths:
+      - labs/graphify-lab/**
+      - tools/codex-usage/**
+      - .github/workflows/graphify-lab-ci.yml
+  push:
+    branches: [main]
+    paths:
+      - labs/graphify-lab/**
+      - tools/codex-usage/**
+      - .github/workflows/graphify-lab-ci.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: graphify-lab-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  real-scenarios:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.12.14'
+      - name: Install locked dependencies and exact-search baseline
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y ripgrep
+          make -C labs/graphify-lab setup
+      - name: Cache, CLI and live MCP regressions
+        run: make -C labs/graphify-lab check
+      - name: Fetch pinned public source
+        run: make -C labs/graphify-lab prepare
+      - name: Real CLI, references and stdio MCP scenarios
+        run: make -C labs/graphify-lab full RUN_DIR=work/ci-run
+      - name: Real development task replay
+        run: |
+          git fetch --no-tags --depth=1 origin c31f0de93ddfdd5113f8db2e0a5e16fc206b2ca7
+          cd labs/graphify-lab
+          .venv/bin/python -m graphify_lab.pilot --baseline c31f0de93ddfdd5113f8db2e0a5e16fc206b2ca7 --out work/ci-pilot
+      - name: Local workspace and larger component trial
+        run: make -C labs/graphify-lab workspace-trial RUN_DIR=work/ci-workspace
+      - name: Preserve compact evidence
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: graphify-lab-report
+          path: |
+            labs/graphify-lab/work/ci-run/report.json
+            labs/graphify-lab/work/ci-pilot/report.json
+            labs/graphify-lab/work/ci-workspace/report.json
+          if-no-files-found: ignore
+          retention-days: 7

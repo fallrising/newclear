@@ -1,0 +1,17 @@
+{
+  "runId": "4422008970804730bed698cc679d4eac",
+  "operationId": "2ee46e63-bc74-4214-af2c-644efb7b2d46",
+  "startedAt": "2026-11-02T12:37:43.973Z",
+  "scope": "real B source capture only; no restore acceptance",
+  "calls": [],
+  "initialInspection": true,
+  "lastNonzero": {
+    "file": "docker",
+    "action": "inspect",
+    "code": 1
+  },
+  "success": false,
+  "code": "ADAPTER_UNSEALED",
+  "stopped": true,
+  "endedAt": "2026-11-02T12:38:29.969Z"
+}

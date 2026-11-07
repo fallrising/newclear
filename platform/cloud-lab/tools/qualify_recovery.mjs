@@ -27,7 +27,7 @@ const secrets={bot:'ab'.repeat(32),runner:'cd'.repeat(32)};
 const keys=Object.fromEntries(Object.entries(secrets).map(([id,key])=>[id,{principal_id:id,grant_id:id,generation:1,secret_hex:key,expires_at:iso(now+3600000)}]));
 const mf=new Miniflare(convertV4MiniflareOptions({host:'127.0.0.1',cf:false,telemetry:{enabled:false},
  resourcePersistencePath:join(directory,'d1-state'),resourceTmpPath:join(build,'recovery-tmp'),workers:[{
- name:'recovery',modulesRoot:join(root,'apps/control/worker'),modules:['index.mjs','auth.mjs','protocol.mjs'].map(name=>({type:'ESModule',path:join(root,'apps/control/worker',name)})),
+ name:'recovery',modulesRoot:join(root,'apps/control'),modules:['worker/index.mjs','worker/auth.mjs','worker/protocol.mjs','worker/inventory.mjs','public/inventory.mjs'].map(name=>({type:'ESModule',path:join(root,'apps/control',name)})),
  compatibilityDate:'2026-10-26',d1Databases:{DB:'recovery'},outboundService:()=>new Response(null,{status:503}),
  bindings:{PUBLIC_ORIGIN:origin,AUDIENCE:audience,MACHINE_KEYS:JSON.stringify(keys),ACCESS_CONFIG:'{}'}}]}));
 const children=new Set(),checks=[],assignments=[],reports=[];
@@ -75,7 +75,7 @@ async function waitFor(predicate,timeout=5000){const deadline=Date.now()+timeout
 async function expireLease(assignment){const wait=Math.max(0,Date.parse(assignment.attempt.lease_expires_at)-Date.now()+1100);assert.ok(wait<=17000);await sleep(wait);}
 try {
  const db=await mf.getD1Database('DB');
- const sql=readFileSync(join(root,'apps/control/migrations/0001.sql'),'utf8').replace(/^--.*$/gm,'');
+ const sql=['0001.sql','0002.sql'].map(name=>readFileSync(join(root,'apps/control/migrations',name),'utf8')).join('\n').replace(/^--.*$/gm,'');
  await db.batch(sql.split(';').filter(x=>x.trim()).map(x=>db.prepare(x)));
  for(const [id,capabilities] of [['bot',['commands:read','commands:submit','node:health:read','artifact:read']],['runner',['dispatch:claim','runs:report','runs:reconcile']]]) {
   const policy={principal_id:id,workspace_id:'recovery',resource_ref:{resource_id:'synthetic-node',generation:1},recipe_ref:ref,capabilities,not_before:iso(now-10000),expires_at:iso(now+3600000),max_timeout_seconds:30,max_output_bytes:16384};
@@ -139,7 +139,7 @@ try {
   checks.push({case:mode,status:'passed',collector_calls:1,delivery:remoteAfter.record.delivery});console.log('passed',mode);
  }
  const counts=await db.prepare('SELECT count(*) n,sum(active) active FROM commands').first();assert.deepEqual(counts,{n:3,active:1});
- const summary={status:'passed',scope:'isolated local workerd/D1 binding + real Python CLI/SQLite/HTTP; no remote Cloudflare or systemd changes',checks,counts,miniflare:require('miniflare/package.json').version,sources:Object.fromEntries(['adapters/node-health/runner.py','apps/control/worker/index.mjs','apps/control/worker/auth.mjs','apps/control/worker/protocol.mjs','apps/control/migrations/0001.sql','tests/fixtures/recovery_runner.py','tools/qualify_recovery.mjs'].map(path=>[path,hash(readFileSync(join(root,path)))]))};
+ const summary={status:'passed',scope:'isolated local workerd/D1 binding + real Python CLI/SQLite/HTTP; no remote Cloudflare or systemd changes',checks,counts,miniflare:require('miniflare/package.json').version,sources:Object.fromEntries(['adapters/node-health/runner.py','apps/control/worker/index.mjs','apps/control/worker/auth.mjs','apps/control/worker/protocol.mjs','apps/control/migrations/0001.sql','apps/control/migrations/0002.sql','tests/fixtures/recovery_runner.py','tools/qualify_recovery.mjs'].map(path=>[path,hash(readFileSync(join(root,path)))]))};
  save('summary',summary);console.log(JSON.stringify(summary));
 } catch(error) {save('failure',{name:error.name,message:error.message,stack:error.stack});throw error;}
 finally {

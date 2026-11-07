@@ -227,19 +227,18 @@ async fn cc1_cc2_cost_coverage_agrees_across_admin_surfaces() {
                 .collect();
             assert_eq!(day["requests"], matching.len());
             assert_eq!(
-                day["ok"],
+                day["headers_200"],
                 matching
                     .iter()
                     .filter(|(_, _, status)| *status == 200)
                     .count()
             );
-            assert_eq!(
-                day["errors"],
-                matching
-                    .iter()
-                    .filter(|(_, _, status)| *status != 200)
-                    .count()
-            );
+            // These seeded legacy rows have no terminal provenance. Preserve the
+            // HTTP count above; do not infer success/failure from that status.
+            assert_eq!(day["ok"], 0);
+            assert_eq!(day["errors"], 0);
+            assert_eq!(day["unknown"], matching.len());
+            assert_eq!(day["pending"], 0);
             let rendered = html
                 .split("<tr>")
                 .find(|r| r.contains(&format!(">{day_name}</td>")))

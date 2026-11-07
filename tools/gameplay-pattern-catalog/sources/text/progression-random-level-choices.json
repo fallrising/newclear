@@ -1,0 +1,120 @@
+{
+  "id": "progression-random-level-choices",
+  "system": "progression",
+  "edition": 2,
+  "name": {
+    "zh": "升级时从随机选项中挑一个",
+    "en": "Random choices at level-up"
+  },
+  "summary": {
+    "zh": "每次升级给几项候选，玩家边打边决定成长方向。",
+    "en": "Each level offers a small random set that shapes the current build."
+  },
+  "rules": {
+    "zh": "积累经验达到门槛后，系统给出少量随机升级，玩家只能取一个。候选可能加强已有能力，也可能加入新能力；不能保证想要的选项马上出现，所以要在立即解决问题和等待组合之间取舍。",
+    "en": "At an experience threshold, choose one upgrade from a small random set. Offers can strengthen an existing ability or add a new one. The desired option is not guaranteed, creating a tradeoff between immediate relief and a future combination."
+  },
+  "loop": [
+    {
+      "zh": "收集经验",
+      "en": "Collect experience"
+    },
+    {
+      "zh": "达到升级门槛",
+      "en": "Reach a level"
+    },
+    {
+      "zh": "比较少量随机候选",
+      "en": "Compare random offers"
+    },
+    {
+      "zh": "选择后用新能力继续",
+      "en": "Use the chosen improvement"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "现在拿防御保命，还是选以后能配成组合的攻击？",
+      "en": "Take defense to survive now or an attack that could complete a later combination?"
+    },
+    {
+      "zh": "强化已经稳定的能力，还是占一个位置引入新能力？",
+      "en": "Strengthen a reliable ability or use a slot for something new?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "候选数量",
+        "en": "Number of offers"
+      },
+      "effect": {
+        "zh": "候选多时更容易按计划成长，少时更需要临时应变。",
+        "en": "More offers support planned growth; fewer require adaptation."
+      }
+    },
+    {
+      "name": {
+        "zh": "重抽代价",
+        "en": "Reroll cost"
+      },
+      "effect": {
+        "zh": "有限重抽给玩家补救机会，也让“现在花还是以后用”成为资源选择。",
+        "en": "Limited rerolls offer recovery while creating a save-or-spend decision."
+      }
+    }
+  ],
+  "tags": [
+    "randomness",
+    "progression",
+    "planning"
+  ],
+  "related": [
+    "progression-successor-selection",
+    "progression-challenge-tiers",
+    "progression-death-loses-training",
+    "progression-evolution-recipes"
+  ],
+  "contrast": {
+    "zh": "《吸血鬼幸存者》在升级瞬间打断战斗做选择；《土豆兄弟》把属性选择放到波次间，让一段战斗保持连续。",
+    "en": "Vampire Survivors interrupts combat at level-up; Brotato resolves stat choices between waves, preserving each wave’s continuity."
+  },
+  "combination": {
+    "zh": "设计提案：随机升级同时提供新工具和旧工具强化，但工具总共只能装三件，促使玩家考虑已有位置。",
+    "en": "Design proposal: offer new tools and upgrades together while allowing only three equipped tools, making existing slots part of the decision."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "你有两把武器，剩一个空位；升级提供护盾、新弓或现有短剑伤害加 2。",
+      "en": "You have two weapons and one open slot; choose a shield, a new bow or +2 damage to the current sword."
+    },
+    "action": {
+      "zh": "下一波有远处敌人，你占用最后空位拿弓。",
+      "en": "Take the bow to handle distant enemies in the next wave."
+    },
+    "result": {
+      "zh": "现在能隔远攻击，但下次出现新工具时已无空位。",
+      "en": "You gain range, but no slot remains for the next new tool."
+    },
+    "next": {
+      "zh": "之后优先强化已有武器，或寻找允许替换工具的机会。",
+      "en": "Now favor existing upgrades or seek a way to replace a tool."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "做六张升级卡、每次随机三选一，以及一个能显示升级效果的短波次。",
+      "en": "Build six upgrade cards, random three-option offers and a short wave that makes effects visible."
+    },
+    "pitfall": {
+      "zh": "别先做上百升级；先保证随机抽出的三项不会全都无用。",
+      "en": "Avoid hundreds of upgrades before random sets consistently include useful choices."
+    },
+    "test": {
+      "zh": "玩家能否根据下一波或当前缺口改变选择，而非永远只看最高数字？",
+      "en": "Do players choose for the next wave or current weakness rather than always taking the largest number?"
+    }
+  }
+}

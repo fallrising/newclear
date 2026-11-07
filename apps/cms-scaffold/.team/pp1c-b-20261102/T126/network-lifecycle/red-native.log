@@ -1,0 +1,32 @@
+✖ T126_network_real_registry_CREATED_blank_then_RUNNING_then_EXITED_blank (200.269447ms)
+✔ T126_network_real_registry_CREATED_rejects_wrong-name (167.497694ms)
+✔ T126_network_real_registry_CREATED_rejects_forged-name (157.977031ms)
+✔ T126_network_real_registry_CREATED_rejects_host-network (157.324343ms)
+✔ T126_network_real_registry_CREATED_rejects_network-ID (146.606085ms)
+✔ T126_network_real_registry_CREATED_rejects_IP (152.241692ms)
+✔ T126_network_real_registry_CREATED_rejects_endpoint (145.655108ms)
+✔ T126_network_real_registry_CREATED_rejects_extra-network (146.345506ms)
+ℹ tests 8
+ℹ suites 0
+ℹ pass 7
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1349.020344
+
+✖ failing tests:
+
+test at scripts/local/maintenance-workflow.test.mjs:511:1
+✖ T126_network_real_registry_CREATED_blank_then_RUNNING_then_EXITED_blank (200.269447ms)
+  Error: ADAPTER_UNSEALED
+      at assertHelperPolicy (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-integration-20261102/apps/cms-scaffold/scripts/local/maintenance-helper.mjs:131:19)
+      at helperSnapshot (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-integration-20261102/apps/cms-scaffold/scripts/local/maintenance-workflow.mjs:160:10)
+      at async Module.registerOwnedHelper (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-integration-20261102/apps/cms-scaffold/scripts/local/maintenance-workflow.mjs:180:3)
+      at async TestContext.<anonymous> (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-integration-20261102/apps/cms-scaffold/scripts/local/maintenance-workflow.test.mjs:515:3)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:385:3) {
+    code: 'ADAPTER_UNSEALED',
+    phase: null,
+    operationId: null
+  }

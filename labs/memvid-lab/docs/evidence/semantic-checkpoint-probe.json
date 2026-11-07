@@ -1,0 +1,324 @@
+{
+  "put_many_ids": [
+    "1",
+    "2",
+    "3",
+    "4",
+    "5",
+    "6",
+    "7",
+    "8",
+    "9",
+    "10",
+    "11",
+    "12",
+    "13",
+    "14",
+    "15",
+    "16",
+    "17",
+    "18",
+    "20",
+    "21",
+    "22",
+    "23",
+    "24",
+    "25"
+  ],
+  "before_seal": {
+    "frames": {
+      "mv2://notes/n01": 0,
+      "mv2://notes/n02": 1,
+      "mv2://notes/n03": 2,
+      "mv2://notes/n04": 3,
+      "mv2://notes/n05": 4,
+      "mv2://notes/n06": 5,
+      "mv2://notes/n07": 6,
+      "mv2://notes/n08": 7,
+      "mv2://notes/n09": 8,
+      "mv2://notes/n10": 9,
+      "mv2://notes/n11": 10,
+      "mv2://notes/n12": 11,
+      "mv2://notes/n13": 12,
+      "mv2://notes/n14": 13,
+      "mv2://notes/n15": 14,
+      "mv2://notes/n16": 15,
+      "mv2://notes/n17": 16,
+      "mv2://notes/n18": 17,
+      "mv2://notes/n19": 18,
+      "mv2://notes/n20": 19,
+      "mv2://notes/n21": 20,
+      "mv2://notes/n22": 21,
+      "mv2://notes/n23": 22,
+      "mv2://notes/n24": 23
+    },
+    "hits": [
+      {
+        "frame_id": 0,
+        "uri": "mv2://notes/n01",
+        "score": 0.6367264986038208
+      },
+      {
+        "frame_id": 7,
+        "uri": "mv2://notes/n08",
+        "score": 0.4788588881492615
+      },
+      {
+        "frame_id": 4,
+        "uri": "mv2://notes/n05",
+        "score": 0.46834439039230347
+      },
+      {
+        "frame_id": 15,
+        "uri": "mv2://notes/n16",
+        "score": 0.4624180793762207
+      },
+      {
+        "frame_id": 5,
+        "uri": "mv2://notes/n06",
+        "score": 0.4580346941947937
+      },
+      {
+        "frame_id": 11,
+        "uri": "mv2://notes/n12",
+        "score": 0.4479793310165405
+      },
+      {
+        "frame_id": 14,
+        "uri": "mv2://notes/n15",
+        "score": 0.4417712688446045
+      },
+      {
+        "frame_id": 1,
+        "uri": "mv2://notes/n02",
+        "score": 0.4322826862335205
+      },
+      {
+        "frame_id": 10,
+        "uri": "mv2://notes/n11",
+        "score": 0.42831873893737793
+      },
+      {
+        "frame_id": 8,
+        "uri": "mv2://notes/n09",
+        "score": 0.4278048872947693
+      },
+      {
+        "frame_id": 2,
+        "uri": "mv2://notes/n03",
+        "score": 0.42674916982650757
+      },
+      {
+        "frame_id": 17,
+        "uri": "mv2://notes/n18",
+        "score": 0.4258221983909607
+      },
+      {
+        "frame_id": 3,
+        "uri": "mv2://notes/n04",
+        "score": 0.42189180850982666
+      },
+      {
+        "frame_id": 6,
+        "uri": "mv2://notes/n07",
+        "score": 0.41759830713272095
+      },
+      {
+        "frame_id": 9,
+        "uri": "mv2://notes/n10",
+        "score": 0.4153871536254883
+      },
+      {
+        "frame_id": 16,
+        "uri": "mv2://notes/n17",
+        "score": 0.4036244750022888
+      },
+      {
+        "frame_id": 13,
+        "uri": "mv2://notes/n14",
+        "score": 0.38268667459487915
+      },
+      {
+        "frame_id": 12,
+        "uri": "mv2://notes/n13",
+        "score": 0.3724132776260376
+      }
+    ]
+  },
+  "after_reopen": {
+    "frames": {
+      "mv2://notes/n01": 0,
+      "mv2://notes/n02": 1,
+      "mv2://notes/n03": 2,
+      "mv2://notes/n04": 3,
+      "mv2://notes/n05": 4,
+      "mv2://notes/n06": 5,
+      "mv2://notes/n07": 6,
+      "mv2://notes/n08": 7,
+      "mv2://notes/n09": 8,
+      "mv2://notes/n10": 9,
+      "mv2://notes/n11": 10,
+      "mv2://notes/n12": 11,
+      "mv2://notes/n13": 12,
+      "mv2://notes/n14": 13,
+      "mv2://notes/n15": 14,
+      "mv2://notes/n16": 15,
+      "mv2://notes/n17": 16,
+      "mv2://notes/n18": 17,
+      "mv2://notes/n19": 18,
+      "mv2://notes/n20": 19,
+      "mv2://notes/n21": 20,
+      "mv2://notes/n22": 21,
+      "mv2://notes/n23": 22,
+      "mv2://notes/n24": 23
+    },
+    "hits": [
+      {
+        "frame_id": 23,
+        "uri": "mv2://notes/n24",
+        "score": 0.45213985443115234
+      },
+      {
+        "frame_id": 19,
+        "uri": "mv2://notes/n20",
+        "score": 0.4390268921852112
+      },
+      {
+        "frame_id": 18,
+        "uri": "mv2://notes/n19",
+        "score": 0.4209214448928833
+      },
+      {
+        "frame_id": 20,
+        "uri": "mv2://notes/n21",
+        "score": 0.4134564995765686
+      },
+      {
+        "frame_id": 21,
+        "uri": "mv2://notes/n22",
+        "score": 0.3912610411643982
+      },
+      {
+        "frame_id": 22,
+        "uri": "mv2://notes/n23",
+        "score": 0.39037877321243286
+      }
+    ]
+  },
+  "independent_cosines": [
+    {
+      "uri": "mv2://notes/n01",
+      "cosine": 0.736064742462939
+    },
+    {
+      "uri": "mv2://notes/n08",
+      "cosine": 0.4568239113446668
+    },
+    {
+      "uri": "mv2://notes/n05",
+      "cosine": 0.4346845794468232
+    },
+    {
+      "uri": "mv2://notes/n16",
+      "cosine": 0.42201133424481496
+    },
+    {
+      "uri": "mv2://notes/n06",
+      "cosine": 0.4125472533914247
+    },
+    {
+      "uri": "mv2://notes/n24",
+      "cosine": 0.39969852037879433
+    },
+    {
+      "uri": "mv2://notes/n12",
+      "cosine": 0.3905463573310298
+    },
+    {
+      "uri": "mv2://notes/n15",
+      "cosine": 0.3767613846822732
+    },
+    {
+      "uri": "mv2://notes/n20",
+      "cosine": 0.37061825971613793
+    },
+    {
+      "uri": "mv2://notes/n02",
+      "cosine": 0.35539405230376636
+    },
+    {
+      "uri": "mv2://notes/n11",
+      "cosine": 0.34636107506592145
+    },
+    {
+      "uri": "mv2://notes/n09",
+      "cosine": 0.34518542813029296
+    },
+    {
+      "uri": "mv2://notes/n03",
+      "cosine": 0.34276701559348904
+    },
+    {
+      "uri": "mv2://notes/n18",
+      "cosine": 0.3406397399509296
+    },
+    {
+      "uri": "mv2://notes/n04",
+      "cosine": 0.3315819113116988
+    },
+    {
+      "uri": "mv2://notes/n19",
+      "cosine": 0.3293360382972759
+    },
+    {
+      "uri": "mv2://notes/n07",
+      "cosine": 0.3216164758580242
+    },
+    {
+      "uri": "mv2://notes/n10",
+      "cosine": 0.3164556522065197
+    },
+    {
+      "uri": "mv2://notes/n21",
+      "cosine": 0.3119334225651571
+    },
+    {
+      "uri": "mv2://notes/n17",
+      "cosine": 0.28867234990231205
+    },
+    {
+      "uri": "mv2://notes/n22",
+      "cosine": 0.2588737361651474
+    },
+    {
+      "uri": "mv2://notes/n23",
+      "cosine": 0.25672399741595453
+    },
+    {
+      "uri": "mv2://notes/n14",
+      "cosine": 0.23784839174520728
+    },
+    {
+      "uri": "mv2://notes/n13",
+      "cosine": 0.2122698057829786
+    }
+  ],
+  "opts_disable_auto_checkpoint": true,
+  "network": {
+    "mechanism": "Linux libseccomp",
+    "denied_syscalls": [
+      "socket",
+      "socketpair",
+      "connect",
+      "sendto",
+      "sendmsg",
+      "sendmmsg"
+    ],
+    "probes": {
+      "ipv4": "EPERM",
+      "ipv6": "EPERM"
+    },
+    "installed_before_sdk_import": true,
+    "inherited_by_subprocesses": true
+  }
+}

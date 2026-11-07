@@ -1,0 +1,146 @@
+{
+  "run": "local-work-20261031T124602885727Z",
+  "source_sha256": "b44deb3015305b354eabe0488510a6e709c0fc524b93cba9c045a63e510ffd2f",
+  "status": "completed",
+  "elapsed_s": 91.22213079198264,
+  "cloud_fallback": false,
+  "strict_network_isolation_verified": false,
+  "cleanup_errors": [],
+  "office": {
+    "status": "completed",
+    "interrupted_at_permission": true,
+    "crash_recovery_verified": true,
+    "old_processes_exited": true,
+    "repeated_restart_preserved": true,
+    "browser_interrupted_visible": true,
+    "manual_resume_verified": true,
+    "permission_roundtrips": [
+      {
+        "kind": "edit",
+        "replied": true,
+        "continued": true
+      }
+    ],
+    "file_task_passed": true,
+    "model_inference_verified": true,
+    "artifact_sha256": "d83aebcd70fcd45b51504fc3a792dfaf05851d820bff837d4f3d2ed508194855",
+    "completed_not_replayed": true,
+    "distinct_host_processes": true,
+    "host_generations": 4,
+    "cleanup_completed": true
+  },
+  "resources": {
+    "samples": 18,
+    "pressure_levels": [
+      1,
+      2
+    ],
+    "max_swap_delta_mib": 0.0
+  },
+  "runtime_sources_sha256": {
+    "scripts/run_local_work.py": "c98c272e0948b900cecb8a776d500d95b8acf5cbdbacbc9f956dfcb819785545",
+    "scripts/bin/opencode": "8b1315eb0cbbf062233e7542b44c5b5232958490a7b2b0152f7cba40179174a7",
+    "scripts/local_opencode.py": "f06c9914743d0bfb079ad2cc5afa2ea124ce49661f272f5618887c345273fd46",
+    "scripts/office_opencode.mjs": "652fd9e27b936ecc6923c29593943f6c1b691e8ae4bfaf3699c0f86a0e85a598",
+    "scripts/local_office_policy.mjs": "0a3648cbec6e39c1f7f01c5f6d60d8388987c7b39f4bc04342f5d9d3f29dcf20",
+    "scripts/permission_probe.mjs": "b05e5e388a03e9f77600e1abcaf9e886bf440fe3867a0bd41cd0e97856bdd9b1",
+    "scripts/manual_recovery.mjs": "713a9c1725d818c0203981dbd86517ffdf4340589ae41957972eeb015472b8f5",
+    "scripts/office_runtime.mjs": "1de087c7d80de99e01a518fbe7a6ecf6e5372e21979fc5c75c4009131e16c949",
+    "scripts/office_host.mjs": "87a38bdf350ae481d1b9e3e4353829b8eeb5484abfe375d0f75f9fdf85be9ff9",
+    "scripts/office_restart.mjs": "db6fb66fe8a4229b0f402a47ffb30ce1beeff9a5bfba48c404ae498cca448c2b"
+  },
+  "date": "2026-10-31",
+  "kind": "allowlisted_live_acceptance_summary",
+  "node_tests_passed": 23,
+  "python_tests_passed": 3,
+  "earlier_attempts": [
+    {
+      "run": "local-work-20261031T123843924591Z",
+      "source_sha256": "3cd45f81df760dcaba2c38c4912392c904c5abf43f07720f28ba1ad14385e49f",
+      "status": "failed",
+      "cleanup_errors": [],
+      "reason": "Harness incorrectly counted offline owner rows as running processes; corrected to count actual PIDs"
+    },
+    {
+      "run": "local-work-20261031T123948855850Z",
+      "source_sha256": "f7dbe7cc25ed31b06445b72cc71ca72f926d87e0a7be0e543b92c96efec5aae6",
+      "status": "failed",
+      "cleanup_errors": [],
+      "reason": "Unchanged resource guard stopped on swap growth above 1 GiB"
+    },
+    {
+      "run": "local-work-20261031T124105100897Z",
+      "source_sha256": "624faac70b2e86ac891957ef0adba60b4fbfe487e51ef9cd116f6e89b605f225",
+      "status": "failed",
+      "cleanup_errors": [],
+      "reason": "Crash and repeated restart parked correctly; stopped after identifying that OpenCode --prompt is not submitted on an existing session"
+    },
+    {
+      "run": "local-work-20261031T124744556610Z",
+      "source_sha256": "dffd96888268a12433c4e6f0dc7831657f6b98f5ddb95d6f8aea907d68df59f1",
+      "status": "failed",
+      "cleanup_errors": [],
+      "reason": "Lifecycle regression stopped by unchanged resource guard on swap growth above 1 GiB"
+    }
+  ],
+  "lifecycle_regression": {
+    "run": "local-work-20261031T124929419450Z",
+    "source_sha256": "28dbc437611fc70ff2398588642e961cd7120037d53f88089f97ca0f95274bce",
+    "status": "completed",
+    "elapsed_s": 62.95978270797059,
+    "cloud_fallback": false,
+    "strict_network_isolation_verified": false,
+    "cleanup_errors": [],
+    "office": {
+      "status": "completed",
+      "permission_roundtrips": [
+        {
+          "kind": "edit",
+          "replied": true,
+          "continued": true
+        },
+        {
+          "kind": "edit",
+          "replied": true,
+          "continued": true
+        }
+      ],
+      "file_task_passed": true,
+      "model_inference_verified": true,
+      "artifact_sha256": "df2288a218d3f44ff4370bf38991cd91c5329f4505c8788226c5f3e8035b2cc4",
+      "cleanup_completed": true,
+      "refresh_without_rerun": true,
+      "resume_verified": true,
+      "resume": {
+        "same_session": true,
+        "new_process": true,
+        "old_processes_exited": true,
+        "native_usage_hydrated": true,
+        "original_artifact_unchanged": true,
+        "output_before": 243,
+        "output_after": 415,
+        "artifact_sha256": "df2288a218d3f44ff4370bf38991cd91c5329f4505c8788226c5f3e8035b2cc4"
+      },
+      "permission_wait_verified": true
+    },
+    "resources": {
+      "samples": 13,
+      "pressure_levels": [
+        1
+      ],
+      "max_swap_delta_mib": 0.0
+    },
+    "runtime_sources_sha256": {
+      "scripts/run_local_work.py": "c98c272e0948b900cecb8a776d500d95b8acf5cbdbacbc9f956dfcb819785545",
+      "scripts/bin/opencode": "8b1315eb0cbbf062233e7542b44c5b5232958490a7b2b0152f7cba40179174a7",
+      "scripts/local_opencode.py": "f06c9914743d0bfb079ad2cc5afa2ea124ce49661f272f5618887c345273fd46",
+      "scripts/office_opencode.mjs": "652fd9e27b936ecc6923c29593943f6c1b691e8ae4bfaf3699c0f86a0e85a598",
+      "scripts/local_office_policy.mjs": "0a3648cbec6e39c1f7f01c5f6d60d8388987c7b39f4bc04342f5d9d3f29dcf20",
+      "scripts/permission_probe.mjs": "b05e5e388a03e9f77600e1abcaf9e886bf440fe3867a0bd41cd0e97856bdd9b1",
+      "scripts/manual_recovery.mjs": "713a9c1725d818c0203981dbd86517ffdf4340589ae41957972eeb015472b8f5",
+      "scripts/office_runtime.mjs": "1de087c7d80de99e01a518fbe7a6ecf6e5372e21979fc5c75c4009131e16c949",
+      "scripts/office_host.mjs": "87a38bdf350ae481d1b9e3e4353829b8eeb5484abfe375d0f75f9fdf85be9ff9",
+      "scripts/office_restart.mjs": "db6fb66fe8a4229b0f402a47ffb30ce1beeff9a5bfba48c404ae498cca448c2b"
+    }
+  }
+}

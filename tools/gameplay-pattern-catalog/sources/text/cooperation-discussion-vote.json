@@ -1,0 +1,120 @@
+{
+  "id": "cooperation-discussion-vote",
+  "system": "cooperation",
+  "edition": 2,
+  "name": {
+    "zh": "讨论、举证与集体投票",
+    "en": "Discussion, evidence and voting"
+  },
+  "summary": {
+    "zh": "把每个人只看到的一小段事实，变成一次全体承担后果的决定。",
+    "en": "Turn partial individual observations into a decision whose consequences affect the group."
+  },
+  "rules": {
+    "zh": "事件触发讨论阶段，玩家依次陈述见闻、质疑矛盾，再投票决定怀疑对象或暂不行动。投票结果改变参与者或局势，余下玩家据此重新判断旧证词。",
+    "en": "An event opens discussion: players share observations, challenge inconsistencies and vote on a suspect or defer action. The outcome changes the group and gives remaining players a reason to reassess earlier claims."
+  },
+  "loop": [
+    {
+      "zh": "出现需要解释的事件",
+      "en": "An incident needs explaining"
+    },
+    {
+      "zh": "交换见闻并追问矛盾",
+      "en": "Compare accounts and question conflicts"
+    },
+    {
+      "zh": "投票承担选择后果",
+      "en": "Vote and face the consequence"
+    },
+    {
+      "zh": "回看证词再进入行动",
+      "en": "Reassess accounts and resume play"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "证据不足时跟随多数，还是保留意见并解释原因？",
+      "en": "Follow the majority with weak evidence or explain why you disagree?"
+    },
+    {
+      "zh": "先说最可疑的人，还是先报能被别人核对的时间地点？",
+      "en": "Name a suspect first or give a checkable time and place?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "讨论时长",
+        "en": "Discussion duration"
+      },
+      "effect": {
+        "zh": "太短只能抢话，太长容易重复；应容纳一轮陈述和追问。",
+        "en": "Too short rewards interruption; too long invites repetition. Allow an account and a follow-up."
+      }
+    },
+    {
+      "name": {
+        "zh": "结果公开程度",
+        "en": "Outcome disclosure"
+      },
+      "effect": {
+        "zh": "公开身份让推理快速校正，隐藏身份让后续判断更不确定。",
+        "en": "Revealed roles provide quick correction; concealed roles preserve uncertainty."
+      }
+    }
+  ],
+  "tags": [
+    "information",
+    "cooperation",
+    "narrative"
+  ],
+  "related": [
+    "cooperation-hidden-role",
+    "cooperation-split-information",
+    "cooperation-complementary-abilities",
+    "cooperation-downed-revival"
+  ],
+  "contrast": {
+    "zh": "共同点是把私人见闻汇成集体决定；角色种类越多，讨论越需要区分“看到了什么”和“推测是什么”。",
+    "en": "Both convert private observations into group action; larger role sets make separating observation from interpretation especially useful."
+  },
+  "combination": {
+    "zh": "设计提案：每人拿到案发现场的一角，先讨论再表决打开哪个证据箱，错误决定会消耗一次调查机会。",
+    "en": "Design proposal: give each player a fragment of a crime scene and vote on which evidence box to open, spending an investigation chance on mistakes."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "编辑示例：四人中一人弄坏机器，A看到B离开机房，C看到D拿着工具。",
+      "en": "Editorial example: one of four people broke a machine. A saw B leave the room; C saw D carrying tools."
+    },
+    "action": {
+      "zh": "大家先确认先后顺序，发现D拿工具是在警报之后，于是把票投给B。",
+      "en": "They establish the order of events: D fetched tools after the alarm, so they vote for B."
+    },
+    "result": {
+      "zh": "B的身份揭晓，大家知道哪些推断可靠、哪些证词可能误导。",
+      "en": "B’s role is revealed, showing which inferences held and which accounts may mislead."
+    },
+    "next": {
+      "zh": "下一轮保留已确认的事实，再讨论新事件。",
+      "en": "Carry verified facts into the next incident rather than restarting the argument."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "competitive",
+    "firstStep": {
+      "zh": "用四份不同证词、一个限时讨论和纸面投票，做三轮短案情。",
+      "en": "Run three short cases with four different accounts, timed discussion and paper ballots."
+    },
+    "pitfall": {
+      "zh": "先让证据能改变投票；复杂发言权限、实时语音与房间匹配会掩盖基础讨论是否成立。",
+      "en": "First ensure evidence changes votes; elaborate speaking rules, voice chat and matchmaking can hide a weak discussion loop."
+    },
+    "test": {
+      "zh": "至少有一名试玩者因新证据改变原投票，并能说明是哪条信息改变了判断。",
+      "en": "At least one tester changes a vote because of new evidence and can name the evidence."
+    }
+  }
+}

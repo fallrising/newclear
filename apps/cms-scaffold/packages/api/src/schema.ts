@@ -63,3 +63,5 @@ export type AuditEventSummary = S["AuditEventSummary"];
 export type AuditEventDetail = S["AuditEventDetail"];
 export type AuditEventPage = S["AuditEventPage"];
 export type AuditSettings = S["AuditSettings"];
+
+export type PurgeEntryRequest = S["PurgeEntryRequest"];

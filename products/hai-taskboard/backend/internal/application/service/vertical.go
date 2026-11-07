@@ -5,7 +5,6 @@ import (
 	"context"
 	json "encoding/json/v2"
 	"errors"
-	"io"
 	"mime"
 	"slices"
 	"time"
@@ -436,6 +435,13 @@ func (service *Service) SubmitCandidate(ctx context.Context, principal domain.Ac
 			if item.Version() != value.ExpectedVersion {
 				return mutation{}, domain.Rejection{Code: domain.CodeVersionConflict}
 			}
+			latest, err := tx.LoadCompletionMaterial(ctx, port.CompletionMaterialQuery{ProjectID: value.ProjectID, WorkItemID: value.WorkItemID, RunID: value.RunID})
+			if err != nil {
+				return mutation{}, err
+			}
+			if latest.Runs.LatestRunID != value.RunID || latest.Runs.LatestHasCandidate {
+				return mutation{}, command.NewError(command.CodeLifecycleRejected, "only the latest Run without a Candidate can submit one", false, nil, nil)
+			}
 			if item.Phase() != domain.PhaseDeveloping || run.Run.WorkItemID != value.WorkItemID || run.Run.ObservedState != "Succeeded" ||
 				run.Run.ReconciliationState != "None" || run.Run.SideEffectOutcome != "Confirmed" || value.Candidate.InputSubjectDigest != run.Run.InputDigest {
 				return mutation{}, port.ErrRunLifecycle
@@ -574,9 +580,10 @@ func (service *Service) PublishFixtureEvidence(ctx context.Context, principal do
 			if identity != snapshotIdentity || !sameCompletionMaterial(snapshot, material) {
 				return mutation{}, staleCurrentInput(nil)
 			}
-			rule, required := service.config.Completion.Checks[value.Evidence.ACID]
+			policy := service.completionFor(material.WorkItem.ProjectID())
+			rule, required := policy.Checks[value.Evidence.ACID]
 			if !required || value.Evidence.VerifierID != principal || principal == run.Lease.Fence.Holder || value.Evidence.VerifierClass == "producer" ||
-				value.Evidence.VerifierClass != rule.VerifierClass || value.Evidence.RecipeDigest != service.config.Completion.RecipeDigest ||
+				value.Evidence.VerifierClass != rule.VerifierClass || value.Evidence.RecipeDigest != policy.RecipeDigest ||
 				(!rule.EnvironmentDigest.IsZero() && value.Evidence.EnvironmentDigest != rule.EnvironmentDigest) {
 				return mutation{}, command.NewError(command.CodePermissionDenied, "evidence verifier or recipe is not authorized", false, nil, nil)
 			}
@@ -643,7 +650,7 @@ func (service *Service) ApproveSubject(ctx context.Context, principal domain.Act
 			if completionMaterial.WorkItem.Phase() != domain.PhaseReview && completionMaterial.WorkItem.Phase() != domain.PhaseQA {
 				return mutation{}, port.ErrRunLifecycle
 			}
-			current, err := preparationSubject(completionMaterial, service.config.Completion)
+			current, err := preparationSubject(completionMaterial, service.completionFor(completionMaterial.WorkItem.ProjectID()))
 			if err != nil || current.Digest() != value.SubjectDigest {
 				return mutation{}, command.NewError(command.CodeStaleSubject, "completion subject is not current", false, []domain.RejectionCode{domain.CodeSubjectStale}, err)
 			}
@@ -691,7 +698,7 @@ func (service *Service) RequestQA(ctx context.Context, principal domain.ActorID,
 			if err != nil {
 				return mutation{}, err
 			}
-			subject, err := preparationSubject(material, service.config.Completion)
+			subject, err := preparationSubject(material, service.completionFor(material.WorkItem.ProjectID()))
 			if err != nil || subject.Digest() != value.SubjectDigest {
 				return mutation{}, command.NewError(command.CodeStaleSubject, "completion subject is not current", false, []domain.RejectionCode{domain.CodeSubjectStale}, err)
 			}
@@ -713,6 +720,91 @@ func (service *Service) RequestQA(ctx context.Context, principal domain.ActorID,
 			}
 			result := command.Result{Type: "QARequested", ProjectID: value.ProjectID, WorkItemID: value.WorkItemID, Version: next.Version(), Phase: next.Phase()}
 			return changeMutation(value.ProjectID, "work_item", string(value.WorkItemID), next.Version(), result, subject.Digest()), nil
+		})
+}
+
+// RequestRework returns the current Candidate's Review/QA work to Developing.
+// It changes only the WorkItem; earlier material stays as history and becomes
+// inapplicable because later subjects carry a new version or Candidate.
+func (service *Service) RequestRework(ctx context.Context, principal domain.ActorID, value command.RequestRework) (command.Outcome, error) {
+	request, digest, err := command.CanonicalRequestRework(value)
+	if err != nil {
+		return failureOutcome(value.Metadata, invalidRequest(err))
+	}
+	return service.execute(ctx, principal, value.Metadata, command.RequestReworkOperation, value.ProjectID, request, digest,
+		func(ctx context.Context, tx port.Transaction, _ time.Time) (mutation, error) {
+			item, err := tx.LoadWorkItem(ctx, value.ProjectID, value.WorkItemID)
+			if err != nil {
+				return mutation{}, err
+			}
+			if item.Version() != value.ExpectedVersion {
+				return mutation{}, domain.Rejection{Code: domain.CodeVersionConflict}
+			}
+			if item.Phase() != domain.PhaseReview && item.Phase() != domain.PhaseQA {
+				return mutation{}, domain.Rejection{Code: domain.CodeInvalidTransition}
+			}
+			history, err := tx.LoadCompletionMaterial(ctx, port.CompletionMaterialQuery{ProjectID: value.ProjectID, WorkItemID: value.WorkItemID})
+			if err != nil {
+				return mutation{}, err
+			}
+			stale := command.NewError(command.CodeStaleSubject, "completion subject is not current", false, []domain.RejectionCode{domain.CodeSubjectStale}, nil)
+			if !history.Runs.LatestHasCandidate {
+				return mutation{}, stale
+			}
+			material, _, err := service.currentCompletionMaterial(ctx, tx, port.CompletionMaterialQuery{ProjectID: value.ProjectID, WorkItemID: value.WorkItemID, RunID: history.Runs.LatestRunID, SubjectDigest: value.SubjectDigest})
+			if err != nil {
+				return mutation{}, err
+			}
+			subject, err := preparationSubject(material, service.completionFor(value.ProjectID))
+			if err != nil || subject.Digest() != value.SubjectDigest {
+				return mutation{}, stale
+			}
+			next, err := item.Transition(domain.PhaseDeveloping, domain.TransitionGuards{ExpectedVersion: value.ExpectedVersion, ReworkReason: value.Reason})
+			if err != nil {
+				return mutation{}, err
+			}
+			if err := tx.UpdateWorkItem(ctx, next, value.ExpectedVersion); err != nil {
+				return mutation{}, rollbackMutationError{err}
+			}
+			result := command.Result{Type: "ReworkRequested", ProjectID: value.ProjectID, WorkItemID: value.WorkItemID, Version: next.Version(), Phase: next.Phase(), Reason: value.Reason, SubjectDigest: value.SubjectDigest}
+			return changeMutation(value.ProjectID, "work_item", string(value.WorkItemID), next.Version(), result, value.SubjectDigest), nil
+		})
+}
+
+// ReopenWorkItem returns a Done WorkItem to Draft or Ready. Only the WorkItem
+// changes; the CompletionRecord and all material stay as history.
+func (service *Service) ReopenWorkItem(ctx context.Context, principal domain.ActorID, value command.ReopenWorkItem) (command.Outcome, error) {
+	request, digest, err := command.CanonicalReopenWorkItem(value)
+	if err != nil {
+		return failureOutcome(value.Metadata, invalidRequest(err))
+	}
+	return service.execute(ctx, principal, value.Metadata, command.ReopenWorkItemOperation, value.ProjectID, request, digest,
+		func(ctx context.Context, tx port.Transaction, _ time.Time) (mutation, error) {
+			item, err := tx.LoadWorkItem(ctx, value.ProjectID, value.WorkItemID)
+			if err != nil {
+				return mutation{}, err
+			}
+			if item.Version() != value.ExpectedVersion {
+				return mutation{}, domain.Rejection{Code: domain.CodeVersionConflict}
+			}
+			if item.Phase() != domain.PhaseDone {
+				return mutation{}, domain.Rejection{Code: domain.CodeInvalidTransition}
+			}
+			// Ready means dispatchable: the current inputs must resolve as for MarkReady.
+			if value.TargetPhase == domain.PhaseReady {
+				if _, err := service.currentRunInput(ctx, tx, item, service.executorDeclaration.Scenarios[0]); err != nil {
+					return mutation{}, err
+				}
+			}
+			next, err := item.Transition(value.TargetPhase, domain.TransitionGuards{ExpectedVersion: value.ExpectedVersion, ReopenReason: value.Reason})
+			if err != nil {
+				return mutation{}, err
+			}
+			if err := tx.UpdateWorkItem(ctx, next, value.ExpectedVersion); err != nil {
+				return mutation{}, rollbackMutationError{err}
+			}
+			result := command.Result{Type: "WorkItemReopened", ProjectID: value.ProjectID, WorkItemID: value.WorkItemID, Version: next.Version(), Phase: next.Phase(), Reason: value.Reason}
+			return changeMutation(value.ProjectID, "work_item", string(value.WorkItemID), next.Version(), result, digest), nil
 		})
 }
 
@@ -905,7 +997,7 @@ func (service *Service) preparationForRun(ctx context.Context, tx port.Authority
 	if err != nil {
 		return port.RunAuthority{}, port.CompletionMaterial{}, domain.CompletionSubject{}, err
 	}
-	subject, err := preparationSubject(material, service.config.Completion)
+	subject, err := preparationSubject(material, service.completionFor(material.WorkItem.ProjectID()))
 	if err != nil || subject.Digest() != requested {
 		return port.RunAuthority{}, port.CompletionMaterial{}, domain.CompletionSubject{}, command.NewError(command.CodeStaleSubject, "completion subject is not current", false, []domain.RejectionCode{domain.CodeSubjectStale}, err)
 	}
@@ -937,22 +1029,18 @@ func preparationSubject(material port.CompletionMaterial, policy CompletionPolic
 }
 
 func (service *Service) verifyArtifact(ctx context.Context, locator command.ArtifactLocator) error {
-	if locator.Availability != "Present" {
-		return command.NewError(command.CodeLifecycleRejected, "artifact is unavailable", false, nil, nil)
+	err := service.readArtifact(ctx, locator)
+	if failure, ok := errors.AsType[artifactReadFailure](err); ok {
+		switch failure.stage {
+		case "availability":
+			return command.NewError(command.CodeLifecycleRejected, "artifact is unavailable", false, nil, nil)
+		case "open":
+			return command.NewError(command.CodeLifecycleRejected, "artifact bytes are unavailable", false, nil, failure.cause)
+		case "mismatch":
+			return command.NewError(command.CodeLifecycleRejected, "artifact bytes do not match their immutable locator", false, nil, nil)
+		}
 	}
-	reader, err := service.artifacts.Open(ctx, locator.Digest)
-	if err != nil {
-		return command.NewError(command.CodeLifecycleRejected, "artifact bytes are unavailable", false, nil, err)
-	}
-	defer reader.Close()
-	content, err := io.ReadAll(io.LimitReader(reader, int64(locator.ByteLength)+1))
-	if err != nil {
-		return err
-	}
-	if uint64(len(content)) != locator.ByteLength || domain.HashBytes(content) != locator.Digest {
-		return command.NewError(command.CodeLifecycleRejected, "artifact bytes do not match their immutable locator", false, nil, nil)
-	}
-	return nil
+	return err
 }
 
 func artifactStorageKey(digest domain.Digest) string { return "sha256:" + digest.String() }

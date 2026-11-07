@@ -24,7 +24,7 @@ export async function authenticate(request,env,bytes,now,fetcher=fetch){
   const message=`CLOUDLAB-M1\n${env.AUDIENCE}\n${keyId}\n${key.generation}\n${request.method}\n${url.pathname}\n${time}\n${nonce}\n${await digest(bytes)}`;
   requireThat(await crypto.subtle.verify('HMAC',verifier,unhex(signature),enc.encode(message)),401,'UNAUTHENTICATED');
   try{await env.DB.batch([env.DB.prepare('DELETE FROM nonces WHERE expires_at < ?').bind(now),env.DB.prepare('INSERT INTO nonces(credential_id,nonce,expires_at) VALUES(?,?,?)').bind(keyId,nonce,now+600000)]);}catch(e){if(String(e).includes('UNIQUE'))throw new Fault(401,'REPLAY_REJECTED');throw e;}
-  identity={principal:key.principal_id,grant_id:key.grant_id,human:false};
+  identity={principal:key.principal_id,grant_id:key.grant_id,human:false,credential:{id:keyId,generation:key.generation,principal_id:key.principal_id,grant_id:key.grant_id,revoked:false,expires_at:key.expires_at}};
  }else identity=await access(request,env,now,fetcher);
  if(identity.human&&request.method!=='GET'){requireThat(request.headers.get('Origin')===env.PUBLIC_ORIGIN&&request.headers.get('X-Cloud-Lab')==='1',403,'ORIGIN_DENIED');}
  return {...identity,grant:await getGrant(env.DB,identity.grant_id,identity.principal,now)};

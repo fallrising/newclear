@@ -1,0 +1,120 @@
+{
+  "id": "combat-overwatch",
+  "system": "combat",
+  "edition": 2,
+  "name": {
+    "zh": "留守警戒与反应射击",
+    "en": "Overwatch and reaction fire"
+  },
+  "summary": {
+    "zh": "把当前机会留到敌人行动时，用一片危险区域限制它。",
+    "en": "Reserve an opportunity for enemy movement and threaten an area."
+  },
+  "rules": {
+    "zh": "角色放弃立即攻击，进入警戒状态。敌人满足移动、进入射程等触发条件时自动遭到反应攻击；没有敌人触发就可能白等一轮。玩家要选择守哪里、留多少资源，以及是否值得诱使敌人进入。",
+    "en": "A unit forgoes immediate attack to enter overwatch. Enemy movement or entry into range triggers a reaction; if nothing triggers it, the opportunity may be wasted. Choose a position, resource commitment and possible lure."
+  },
+  "loop": [
+    {
+      "zh": "预测敌人路线",
+      "en": "Predict the enemy route"
+    },
+    {
+      "zh": "设置警戒区域",
+      "en": "Set the watched area"
+    },
+    {
+      "zh": "等待条件触发",
+      "en": "Wait for the trigger"
+    },
+    {
+      "zh": "射击后重新部署",
+      "en": "React and reposition"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "现在有一次低命中攻击，要不要换成守住必经路线？",
+      "en": "Take a low-probability shot now or guard a likely route?"
+    },
+    {
+      "zh": "守窄入口提高效果，还是扩大范围覆盖更多可能？",
+      "en": "Focus on a narrow entrance or cover more possible routes?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "触发条件",
+        "en": "Trigger conditions"
+      },
+      "effect": {
+        "zh": "按移动、入区或开火触发，会鼓励完全不同的诱敌方式。",
+        "en": "Movement, entry or firing triggers encourage different ways to bait enemies."
+      }
+    },
+    {
+      "name": {
+        "zh": "警戒次数与精度",
+        "en": "Reaction count and accuracy"
+      },
+      "effect": {
+        "zh": "次数和精度决定封锁力度；过强会让主动进攻总是吃亏。",
+        "en": "Reaction count and accuracy determine denial strength; excessive power punishes all aggression."
+      }
+    }
+  ],
+  "tags": [
+    "planning",
+    "spatial",
+    "risk"
+  ],
+  "related": [
+    "combat-cover-flanking",
+    "combat-destructible-cover",
+    "combat-forced-movement",
+    "combat-friendly-fire"
+  ],
+  "contrast": {
+    "zh": "《幽浮2》侧重视线和移动触发；《战争机器：战术小队》让玩家直接调整锥形区域和投入的行动。",
+    "en": "XCOM 2 focuses on line of sight and movement; Gears Tactics adds explicit cone placement and action investment."
+  },
+  "combination": {
+    "zh": "让探索中的高低差或短路通道成为绕过警戒的方法，路线发现就会改变战斗。",
+    "en": "Make elevation or shortcuts bypass overwatch, so route discovery changes the fight."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "敌人躲在墙后，下回合可能从左侧门口冲出来。",
+      "en": "An enemy hides behind a wall and may leave through the left doorway."
+    },
+    "action": {
+      "zh": "你不射击墙边目标，改为把警戒区对准门口。",
+      "en": "Skip an immediate shot and watch the doorway."
+    },
+    "result": {
+      "zh": "敌人穿门触发反应射击；如果它原地不动，你就失去这次进攻机会。",
+      "en": "Crossing the door triggers a shot; staying put instead wastes your attack opportunity."
+    },
+    "next": {
+      "zh": "根据敌人这次选择，下一轮改守另一个入口或主动推进。",
+      "en": "Use its choice to decide whether to guard another exit or advance next turn."
+    }
+  },
+  "prototype": {
+    "scope": "medium",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "用小网格实现一条入口和一次移动触发射击，再加入第二名单位。",
+      "en": "Prototype one doorway and a single movement-triggered shot, then add a second unit."
+    },
+    "pitfall": {
+      "zh": "多个警戒同时触发时，射击顺序和目标死亡后的处理容易混乱。",
+      "en": "Multiple simultaneous reactions need a clear order and rules for targets that die early."
+    },
+    "test": {
+      "zh": "观察进攻方是否能看懂危险区域并找到至少一种绕行或诱发办法。",
+      "en": "Check that attackers understand the danger and find a bypass or bait."
+    }
+  }
+}

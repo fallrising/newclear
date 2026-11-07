@@ -1,0 +1,120 @@
+{
+  "id": "automation-fluid-routing",
+  "system": "automation",
+  "edition": 1,
+  "name": {
+    "zh": "管道与液体输送",
+    "en": "Fluid routing"
+  },
+  "summary": {
+    "zh": "通过管线、泵与分支把液体送到正确设备。",
+    "en": "Use pipes, pumps and junctions to deliver fluids to machines."
+  },
+  "rules": {
+    "zh": "玩家连接液体来源与消耗端，并处理距离、高度或分支造成的限制。缺液会停产，错误连接可能混入不需要的液体；检查流量和设备状态后改管。",
+    "en": "Players connect fluid sources to consumers under distance, elevation or junction constraints. Starvation halts production and wrong connections can introduce unwanted fluids; flow readings guide revisions."
+  },
+  "loop": [
+    {
+      "zh": "标出供液端",
+      "en": "Locate the source"
+    },
+    {
+      "zh": "规划管道与泵",
+      "en": "Plan pipes and pumps"
+    },
+    {
+      "zh": "接入生产设备",
+      "en": "Connect consumers"
+    },
+    {
+      "zh": "检查流动并修正",
+      "en": "Inspect flow and revise"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "共用管网节省建造，但故障影响范围更大。",
+      "en": "A shared network saves construction but spreads failures."
+    },
+    {
+      "zh": "增加泵或独立支路提高可控性，同时提高用电与维护成本。",
+      "en": "Extra pumps and separate branches improve control at a power and maintenance cost."
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "高度限制",
+        "en": "Elevation limit"
+      },
+      "effect": {
+        "zh": "需要克服高度时，厂区选址也成为物流决策。",
+        "en": "When elevation matters, factory siting becomes part of logistics."
+      }
+    },
+    {
+      "name": {
+        "zh": "流量可视化",
+        "en": "Flow visibility"
+      },
+      "effect": {
+        "zh": "直接显示方向和瓶颈能把试错变成可推理的诊断。",
+        "en": "Visible direction and bottlenecks turn guessing into diagnosis."
+      }
+    }
+  ],
+  "tags": [
+    "spatial",
+    "optimization",
+    "information"
+  ],
+  "related": [
+    "automation-aerial-logistics",
+    "automation-belt-routing",
+    "automation-conditional-control",
+    "automation-flow-splitting"
+  ],
+  "contrast": {
+    "zh": "前者强调管网分段与方向；后者把高度直接纳入输液设计。",
+    "en": "Factorio emphasizes network segmentation and direction; Satisfactory makes elevation explicit."
+  },
+  "combination": {
+    "zh": "在山地温室中建水肥网络：上层作物利润高，却需要额外扬水设施和备用水箱。",
+    "en": "Build irrigation for hillside greenhouses: valuable uphill crops require additional lift and backup tanks."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "水源在低处，两台高处设备同时缺水，现有管线没有足够输送能力。",
+      "en": "The source is low, two machines are higher, and the current pipes cannot deliver enough water."
+    },
+    "action": {
+      "zh": "你在合适位置加泵，并把拥挤支路改为独立供水。",
+      "en": "Add a pump at an appropriate point and separate the overloaded branch."
+    },
+    "result": {
+      "zh": "设备开始得到液体，流量指示能看出哪一段仍受限。",
+      "en": "Liquid reaches the machines, and flow indicators reveal any remaining restriction."
+    },
+    "next": {
+      "zh": "扩建前先核对供水余量，再接入新负载。",
+      "en": "Check spare supply capacity before connecting another consumer."
+    }
+  },
+  "prototype": {
+    "scope": "medium",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "先做节点式管网、储液量和一条明确的高度限制，不必模拟真实流体表面。",
+      "en": "Use a node-based network, stored volume and one explicit height restriction; no free-surface fluid simulation is needed."
+    },
+    "pitfall": {
+      "zh": "物理精度、循环管网和多液体混合会大幅增加状态问题，应分阶段加入。",
+      "en": "Physical accuracy, loops and mixed liquids create many more state problems; add them in stages."
+    },
+    "test": {
+      "zh": "出现缺液时，玩家能否区分“源头不够”“输送太慢”和“高度不达标”？",
+      "en": "Can players distinguish insufficient supply, limited throughput and an invalid height lift?"
+    }
+  }
+}

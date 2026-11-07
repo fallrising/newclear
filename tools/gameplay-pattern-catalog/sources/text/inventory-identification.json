@@ -1,0 +1,120 @@
+{
+  "id": "inventory-identification",
+  "system": "inventory",
+  "edition": 1,
+  "name": {
+    "zh": "未知道具鉴定",
+    "en": "Unknown-item identification"
+  },
+  "summary": {
+    "zh": "先承担试用风险，还是花资源换取确定性？",
+    "en": "Risk a trial or spend resources for certainty?"
+  },
+  "rules": {
+    "zh": "拾取的道具先隐藏名称或效果，玩家通过鉴定、观察或使用来确认。尝试可能消耗道具或触发负面效果，而已获得的知识让以后同类物品更容易判断。",
+    "en": "Found items hide names or effects until examined, identified or used. Testing may consume the item or cause harm, but knowledge improves later decisions about the same kind."
+  },
+  "loop": [
+    {
+      "zh": "拾取未知物品",
+      "en": "Find an unknown item"
+    },
+    {
+      "zh": "选择安全鉴定或试用",
+      "en": "Choose identification or trial"
+    },
+    {
+      "zh": "观察结果并记录",
+      "en": "Observe and record the result"
+    },
+    {
+      "zh": "据此决定保留用途",
+      "en": "Decide its role in the loadout"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "紧急时喝未知药水可能获救，也可能雪上加霜。",
+      "en": "An unknown potion may save an emergency or make it worse."
+    },
+    {
+      "zh": "有限鉴定资源优先给高价值装备，还是先排除危险消耗品？",
+      "en": "Spend scarce identification on valuable gear or on dangerous consumables?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "知识保留范围",
+        "en": "Knowledge persistence"
+      },
+      "effect": {
+        "zh": "单局保留促使每轮重新学习；跨局保留形成长期图鉴。",
+        "en": "Run-local knowledge renews uncertainty; persistent knowledge builds a long-term catalog."
+      }
+    },
+    {
+      "name": {
+        "zh": "试错代价",
+        "en": "Trial cost"
+      },
+      "effect": {
+        "zh": "低代价鼓励实验；高代价使线索和鉴定工具更重要。",
+        "en": "Cheap trials encourage experiments; costly trials increase the value of clues and identification tools."
+      }
+    }
+  ],
+  "tags": [
+    "information",
+    "risk",
+    "discovery"
+  ],
+  "related": [
+    "commerce-auction-bidding",
+    "commerce-price-discovery",
+    "cooking-recipe-learning",
+    "inventory-death-retrieval"
+  ],
+  "contrast": {
+    "zh": "前者主要重新洗牌物品外观与效果的对应；后者强调角色面对陌生技术时的理解能力。",
+    "en": "The former reshuffles appearance-to-effect mappings; the latter emphasizes a character’s ability to understand unfamiliar technology."
+  },
+  "combination": {
+    "zh": "组合提案：炼金经营中可付费鉴定原料，也可小剂量试药，结果写入本轮药性记录。",
+    "en": "Design proposal: an alchemy shop can pay to identify ingredients or run small-dose trials, recording results for the current expedition."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "你血量很低，包里有一瓶未知药水和仅剩一次鉴定机会。",
+      "en": "Your health is low; you have an unknown potion and one identification charge."
+    },
+    "action": {
+      "zh": "你把鉴定用在药水上，确认它的效果后再饮用。",
+      "en": "Identify the potion, then drink it after learning its effect."
+    },
+    "result": {
+      "zh": "这次避免了盲喝风险，但下件未知装备就没有免费答案了。",
+      "en": "You avoid a blind-drinking risk, but the next unknown item has no easy answer."
+    },
+    "next": {
+      "zh": "记住这种药水的外观，之后同类物品可以直接判断。",
+      "en": "Remember its appearance so future potions of that type are recognizable."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "做四种随机外观药水、一项鉴定资源，以及本局共享的已知效果记录。",
+      "en": "Build four potions with randomized appearances, an identification resource, and knowledge shared within the run."
+    },
+    "pitfall": {
+      "zh": "先限制负面效果强度；没有线索的即死结果很难产生可学习的判断。",
+      "en": "Limit harmful effects first; clue-free instant death offers little learnable judgment."
+    },
+    "test": {
+      "zh": "观察玩家在安全与危急状态下是否采用不同鉴定顺序。",
+      "en": "See whether players change identification priorities between safe and urgent situations."
+    }
+  }
+}

@@ -1,4 +1,4 @@
-//! Claude subscription through the real Claude Code CLI (`claude -p`).
+//! Claude subscription through the real Claude Code CLI (interactive TUI or print).
 //!
 //! thinrouter never sends a Claude subscription token itself. Every request is answered
 //! by the local `claude` binary, signed in with the user's own account, so requests to
@@ -37,14 +37,23 @@ use tokio::sync::{mpsc, oneshot, OwnedSemaphorePermit, Semaphore};
 use tokio_util::sync::CancellationToken;
 use tracing::{debug, warn};
 
+use crate::claude_usage::{Attempt, RequestContext};
 use crate::error::AppError;
 use crate::proxy::UpstreamAttemptError;
+
+/// The server selects TUI by default; print remains an explicit compatibility mode.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, clap::ValueEnum)]
+pub enum Mode {
+    Tui,
+    Print,
+}
 
 /// Process settings and live runs shared by every request.
 #[derive(Clone)]
 pub struct ClaudeCode {
     /// `claude` executable (PATH lookup when bare).
     pub bin: String,
+    pub mode: Mode,
     /// Empty folder runs start in, so no project CLAUDE.md or settings are picked up.
     pub work_dir: PathBuf,
     /// Bounds concurrent Claude Code processes (waiting runs hold a slot).
@@ -115,6 +124,8 @@ struct LiveRun {
     token: String,
     /// Where the current request's records go; None between requests.
     sink: Mutex<Option<mpsc::Sender<Item>>>,
+    /// Accounting is bound to the same channel as the current reply, never the process.
+    accounting: Mutex<Option<(mpsc::WeakSender<Item>, Attempt)>>,
     /// Wake the reader when an idle run gets a new request receiver.
     sink_changed: tokio::sync::Notify,
     /// tool_use blocks streamed and not yet matched to an MCP call: (id, bridged name, input).
@@ -149,6 +160,18 @@ struct LiveRun {
 /// Retire the selected run when input or first-reply ownership is interrupted.
 struct ResumeInputGuard(Option<Arc<LiveRun>>);
 
+/// Covers the interval before the reader owns the initial reply. Dropping a
+/// startup future must settle its reservation even when no LiveRun exists yet.
+struct StartupAccounting(Option<Attempt>);
+
+impl Drop for StartupAccounting {
+    fn drop(&mut self) {
+        if let Some(attempt) = &self.0 {
+            attempt.stop("cancelled", "stream_cancelled");
+        }
+    }
+}
+
 impl Drop for ResumeInputGuard {
     fn drop(&mut self) {
         if let Some(run) = &self.0 {
@@ -179,23 +202,44 @@ fn norm(m: &Value) -> Value {
                 .count()
         })
         .unwrap_or(0);
-    json!({
+    let mut normalized = json!({
         "role": m.get("role").cloned().unwrap_or(json!("user")),
         "text": content_text(m.get("content").unwrap_or(&Value::Null)).trim(),
         "calls": calls,
         "call_id": m.get("tool_call_id").cloned().unwrap_or(Value::Null),
         "images": images,
-    })
+    });
+    // Keep old ordinary/shelf hashes byte-compatible; provenance is additional
+    // only for adapter-reconstructed inline instructions.
+    if is_inline_instruction(m) {
+        normalized["inline_instruction"] = json!(true);
+    }
+    normalized
+}
+
+fn is_inline_instruction(m: &Value) -> bool {
+    matches!(
+        m.get("role").and_then(Value::as_str),
+        Some("system" | "developer")
+    ) && m.get(crate::claude::INLINE_INSTRUCTION) == Some(&Value::Bool(true))
+}
+
+fn user_turn(msgs: &[Value]) -> bool {
+    msgs.iter()
+        .any(|m| m.get("role").and_then(Value::as_str) == Some("user"))
+        && msgs.iter().all(|m| {
+            m.get("role").and_then(Value::as_str) == Some("user") || is_inline_instruction(m)
+        })
 }
 
 fn is_system(m: &Value) -> bool {
     matches!(
         m.get("role").and_then(|r| r.as_str()),
         Some("system" | "developer")
-    )
+    ) && !is_inline_instruction(m)
 }
 
-/// The conversation part of a chat request (system/developer messages excluded).
+/// Conversation including adapter-proven inline instructions, excluding stable instructions.
 fn convo(chat: &Value) -> Vec<Value> {
     chat.get("messages")
         .and_then(|m| m.as_array())
@@ -230,6 +274,9 @@ fn signature(model: &str, chat: &Value) -> String {
 impl ClaudeCode {
     pub fn new(bin: Option<String>, data_dir: &std::path::Path, max_runs: usize) -> Self {
         Self {
+            // Keep this internal constructor compatible with direct print fixtures.
+            // AppConfig/server owns the operator-facing default and always sets it.
+            mode: Mode::Print,
             bin: bin
                 .filter(|b| !b.trim().is_empty())
                 .unwrap_or_else(|| "claude".into()),
@@ -249,6 +296,11 @@ impl ClaudeCode {
 
     pub fn with_store(mut self, store: crate::store::Store) -> Self {
         self.store = Some(store);
+        self
+    }
+
+    pub fn with_mode(mut self, mode: Mode) -> Self {
+        self.mode = mode;
         self
     }
 
@@ -317,14 +369,20 @@ impl ClaudeCode {
     fn unshelve(&self, model: &str, chat: &Value) -> Option<(String, usize)> {
         let store = self.store.as_ref()?;
         let msgs = convo(chat);
+        // shelf_take consumes the row. An instruction-only suffix must not take
+        // a healthy saved session away from a later actual user turn.
+        let after_assistant = msgs
+            .iter()
+            .rposition(|m| m.get("role").and_then(Value::as_str) == Some("assistant"))
+            .map_or(0, |i| i + 1);
+        if !user_turn(&msgs[after_assistant..]) {
+            return None;
+        }
         let hashes: Vec<String> = msgs.iter().map(|m| sha(&norm(m).to_string())).collect();
         let (sid, n) = store
             .shelf_take(&sha(&signature(model, chat)), &hashes)
             .ok()??;
-        let only_user = msgs[n..]
-            .iter()
-            .all(|m| m.get("role").and_then(|r| r.as_str()) == Some("user"));
-        if !only_user || !self.session_saved(&sid) {
+        if !user_turn(&msgs[n..]) || !self.session_saved(&sid) {
             self.remove_session(&sid);
             return None;
         }
@@ -384,7 +442,8 @@ impl ClaudeCode {
         for r in &runs {
             r.stop.cancel();
         }
-        let deadline = Instant::now() + Duration::from_secs(6);
+        let deadline =
+            Instant::now() + Duration::from_secs(if self.mode == Mode::Tui { 7 } else { 6 });
         while self.alive.load(std::sync::atomic::Ordering::SeqCst) > 0 && Instant::now() < deadline
         {
             tokio::time::sleep(Duration::from_millis(50)).await;
@@ -413,6 +472,7 @@ impl ClaudeCode {
         model: &str,
         chat: &Value,
         cancel: &CancellationToken,
+        context: Option<&RequestContext>,
     ) -> Result<Option<(Arc<LiveRun>, ReplyReceiver)>, UpstreamAttemptError> {
         let sig = signature(model, chat);
         let msgs = convo(chat);
@@ -428,19 +488,18 @@ impl ClaudeCode {
                     && r.signature == sig
                     && known.len() < normed.len()
                     && normed[..known.len()] == known[..]
-                    && msgs[known.len()..]
-                        .iter()
-                        .all(|m| m.get("role").and_then(|r| r.as_str()) == Some("user"))
+                    && user_turn(&msgs[known.len()..])
             }) else {
                 return Ok(None);
             };
+            let accounting = context.map(RequestContext::begin).transpose()?;
             let run = live.idle.remove(pos);
             live.order.retain(|r| !Arc::ptr_eq(r, &run));
             let start = run.known.lock().unwrap().len();
             run.idle_now
                 .store(false, std::sync::atomic::Ordering::SeqCst);
-            let (tx, rx) = reply_channel();
-            *run.sink.lock().unwrap() = Some(tx);
+            let (tx, rx) = reply_channel_observed(accounting);
+            install_reply(&run, tx, rx.accounting.clone());
             *run.waiting_since.lock().unwrap() = None;
             *run.known.lock().unwrap() = normed;
             run.sink_changed.notify_one();
@@ -448,6 +507,7 @@ impl ClaudeCode {
             (run, start, rx)
         };
         let mut guard = ResumeInputGuard(Some(run.clone()));
+        let accounting = rx.accounting.clone();
         let line = json!({"type": "user", "message": {"role": "user", "content": render_turn(&msgs[start..])}});
         let input = format!("{line}\n");
         let written = tokio::select! {
@@ -462,6 +522,9 @@ impl ClaudeCode {
         };
         match written {
             None => {
+                if let Some(attempt) = &accounting {
+                    attempt.stop("cancelled", "stream_cancelled");
+                }
                 // The select's write future (and mutex guard) is gone before cleanup.
                 drop(guard);
                 drop(rx);
@@ -473,7 +536,10 @@ impl ClaudeCode {
                 })
             }
             Some(false) => {
-                *run.sink.lock().unwrap() = None;
+                if let Some(attempt) = &accounting {
+                    attempt.stop("failed", "upstream_attempt_failed");
+                }
+                clear_reply(&run);
                 Ok(None)
             }
             Some(true) => {
@@ -581,34 +647,79 @@ impl ClaudeCode {
 
     /// If `chat` ends with exactly the results a waiting run asked for, hand them over
     /// and return a new sink's receiver for that run's next message.
+    #[cfg(test)]
     fn continue_run(&self, chat: &Value) -> Option<(Arc<LiveRun>, ReplyReceiver)> {
-        let results = trailing_tool_results(chat)?;
-        let known = convo(chat).iter().map(norm).collect();
+        self.continue_run_observed("sonnet", chat, None).unwrap()
+    }
+
+    fn continue_run_observed(
+        &self,
+        model: &str,
+        chat: &Value,
+        context: Option<&RequestContext>,
+    ) -> Result<Option<(Arc<LiveRun>, ReplyReceiver)>, UpstreamAttemptError> {
+        let Some(results) = trailing_tool_results(chat) else {
+            return Ok(None);
+        };
+        let conversation = convo(chat);
+        let known: Vec<Value> = conversation.iter().map(norm).collect();
         let mut live = self.live.lock().unwrap();
-        let run = live.waiting.get(&results[0].0)?.clone();
+        let Some(run) = live.waiting.get(&results[0].0).cloned() else {
+            return Ok(None);
+        };
         if run.stop.is_cancelled()
             || run
                 .interrupted_input
                 .load(std::sync::atomic::Ordering::SeqCst)
         {
-            return None;
+            return Ok(None);
         }
         let pending = run.pending.lock().unwrap().clone();
         let mut want: Vec<&String> = pending.iter().collect();
         let mut got: Vec<&String> = results.iter().map(|(id, _)| id).collect();
         want.sort();
         got.sort();
-        if want != got {
-            return None;
+        if want != got || want.windows(2).any(|ids| ids[0] == ids[1]) {
+            return Ok(None);
         }
+        // IDs locate a candidate; they do not authorize delivery into its old
+        // context. Check before reserving usage or consuming any waiting state.
+        if run.signature != signature(model, chat) {
+            return Ok(None);
+        }
+        let previous = run.known.lock().unwrap();
+        if known.len() != previous.len() + 1 + results.len() || !known.starts_with(&previous) {
+            return Ok(None);
+        }
+        let assistant = &conversation[previous.len()];
+        let mut announced: Vec<&String> = known[previous.len()]["calls"]
+            .as_array()
+            .into_iter()
+            .flatten()
+            .filter_map(Value::as_str)
+            .filter_map(|id| pending.iter().find(|pending_id| pending_id.as_str() == id))
+            .collect();
+        announced.sort();
+        if assistant.get("role").and_then(Value::as_str) != Some("assistant")
+            || assistant
+                .get("tool_calls")
+                .and_then(Value::as_array)
+                .map(Vec::len)
+                != Some(want.len())
+            || announced != want
+        {
+            return Ok(None);
+        }
+        drop(previous);
+        let accounting = context.map(RequestContext::begin).transpose()?;
         for id in &pending {
             live.waiting.remove(id);
         }
         live.order.retain(|r| !Arc::ptr_eq(r, &run));
         // Completion and new-sink installation share the live lock. A completed
         // phase cannot publish stale waiting entries or overwrite this receiver.
-        let (tx, rx) = reply_channel();
-        *run.sink.lock().unwrap() = Some(tx);
+        let (tx, rx) = reply_channel_observed(accounting);
+        install_reply(&run, tx, rx.accounting.clone());
         *run.waiting_since.lock().unwrap() = None;
         *run.known.lock().unwrap() = known;
         run.pending.lock().unwrap().clear();
@@ -626,7 +737,7 @@ impl ClaudeCode {
                 }
             }
         }
-        Some((run, rx))
+        Ok(Some((run, rx)))
     }
 
     /// Detach this message's sender before making the run reusable. Retire a
@@ -637,7 +748,7 @@ impl ClaudeCode {
         filter: &mut EventFilter,
     ) -> Option<mpsc::Sender<Item>> {
         let mut live = self.live.lock().unwrap();
-        let tx = run.sink.lock().unwrap().take();
+        let tx = clear_reply(run);
         if run
             .interrupted_input
             .load(std::sync::atomic::Ordering::SeqCst)
@@ -830,12 +941,7 @@ pub fn render_prompt(chat: &Value) -> Vec<Value> {
         .and_then(|m| m.as_array())
         .cloned()
         .unwrap_or_default();
-    let (system, convo): (Vec<&Value>, Vec<&Value>) = messages.iter().partition(|m| {
-        matches!(
-            m.get("role").and_then(|r| r.as_str()),
-            Some("system" | "developer")
-        )
-    });
+    let (system, convo): (Vec<&Value>, Vec<&Value>) = messages.iter().partition(|m| is_system(m));
     let mut blocks: Vec<Value> = Vec::new();
     let mut text = String::new();
 
@@ -885,11 +991,15 @@ pub fn render_prompt(chat: &Value) -> Vec<Value> {
             text.push_str(HISTORY_CLOSE);
         }
         let role = m.get("role").and_then(|r| r.as_str()).unwrap_or("user");
-        text.push_str(if role == "assistant" {
-            "Assistant: "
+        if is_inline_instruction(m) {
+            text.push_str(inline_instruction_open(role));
         } else {
-            "Human: "
-        });
+            text.push_str(if role == "assistant" {
+                "Assistant: "
+            } else {
+                "Human: "
+            });
+        }
         if role == "tool" {
             text.push_str(&format!(
                 "\n[tool result id={}]\n",
@@ -937,6 +1047,9 @@ pub fn render_prompt(chat: &Value) -> Vec<Value> {
                     .unwrap_or("{}"),
             ));
         }
+        if is_inline_instruction(m) {
+            text.push_str("\n</external_system_instructions>");
+        }
         text.push_str("\n\n");
         if split > 0 && i < split && (i + 1) % HISTORY_CHUNK == 0 {
             flush(&mut blocks, &mut text);
@@ -958,14 +1071,24 @@ pub fn render_prompt(chat: &Value) -> Vec<Value> {
     blocks
 }
 
-/// New user messages for a run that already has the conversation: their own text and
-/// images, as Claude Code would be told them directly.
+fn inline_instruction_open(role: &str) -> &'static str {
+    if role == "developer" {
+        "<external_system_instructions>\nDeveloper: "
+    } else {
+        "<external_system_instructions>\nSystem: "
+    }
+}
+
+/// New user messages and ordered inline instructions for a known conversation.
 pub fn render_turn(msgs: &[Value]) -> Vec<Value> {
     let mut blocks: Vec<Value> = Vec::new();
     let mut text = String::new();
     for (i, m) in msgs.iter().enumerate() {
         if i > 0 {
             text.push_str("\n\n");
+        }
+        if is_inline_instruction(m) {
+            text.push_str(inline_instruction_open(m["role"].as_str().unwrap()));
         }
         match m.get("content") {
             Some(Value::Array(parts)) => {
@@ -982,6 +1105,9 @@ pub fn render_turn(msgs: &[Value]) -> Vec<Value> {
             }
             Some(other) => text.push_str(&content_text(other)),
             None => {}
+        }
+        if is_inline_instruction(m) {
+            text.push_str("\n</external_system_instructions>");
         }
     }
     flush(&mut blocks, &mut text);
@@ -1021,12 +1147,55 @@ pub(crate) enum Item {
 struct ReplyReceiver {
     rx: mpsc::Receiver<Item>,
     sink: mpsc::WeakSender<Item>,
+    accounting: Option<Attempt>,
 }
 
+#[cfg(test)]
 fn reply_channel() -> (mpsc::Sender<Item>, ReplyReceiver) {
+    reply_channel_observed(None)
+}
+
+fn reply_channel_observed(accounting: Option<Attempt>) -> (mpsc::Sender<Item>, ReplyReceiver) {
     let (tx, rx) = mpsc::channel(64);
     let sink = tx.downgrade();
-    (tx, ReplyReceiver { rx, sink })
+    (
+        tx,
+        ReplyReceiver {
+            rx,
+            sink,
+            accounting,
+        },
+    )
+}
+
+fn install_reply(run: &LiveRun, tx: mpsc::Sender<Item>, accounting: Option<Attempt>) {
+    let mut sink = run.sink.lock().unwrap();
+    *run.accounting.lock().unwrap() = accounting.map(|attempt| (tx.downgrade(), attempt));
+    *sink = Some(tx);
+}
+
+fn clear_reply(run: &LiveRun) -> Option<mpsc::Sender<Item>> {
+    let mut sink = run.sink.lock().unwrap();
+    let tx = sink.take();
+    run.accounting.lock().unwrap().take();
+    tx
+}
+
+/// Snapshot both identities under the sink lock. A detached terminal retains its
+/// own clone and never consults a newer reply's accounting after publishing reuse.
+fn active_reply(run: &LiveRun) -> (Option<mpsc::Sender<Item>>, Option<Attempt>) {
+    let sink = run.sink.lock().unwrap();
+    let accounting = run.accounting.lock().unwrap();
+    let attempt = accounting.as_ref().and_then(|(owner, attempt)| {
+        owner
+            .upgrade()
+            .filter(|owner| {
+                sink.as_ref()
+                    .is_some_and(|current| current.same_channel(owner))
+            })
+            .map(|_| attempt.clone())
+    });
+    (sink.clone(), attempt)
 }
 
 /// Cancellation belongs to one request sink, not to the reusable process. A weak
@@ -1065,9 +1234,14 @@ pub struct ClaudeRun {
     first: Option<String>,
     rx: mpsc::Receiver<Item>,
     output: Option<OutputCancellation>,
+    accounting: Option<Attempt>,
 }
 
 impl ClaudeRun {
+    pub fn accounting(&self) -> Option<Attempt> {
+        self.accounting.clone()
+    }
+
     /// Observe cancellation while the response is being consumed, including a
     /// pending receive. Merely retaining an unpolled response is not a watcher.
     async fn next(&mut self) -> Option<Item> {
@@ -1084,6 +1258,9 @@ impl ClaudeRun {
             }
             let output = self.output.take().unwrap();
             if output.stop_if_active() {
+                if let Some(attempt) = &self.accounting {
+                    attempt.stop("cancelled", "stream_cancelled");
+                }
                 self.first = None;
                 // Closing before awaiting cleanup also wakes a producer blocked
                 // on a full channel; no cancellation waits behind backpressure.
@@ -1124,7 +1301,17 @@ impl ClaudeRun {
         let mut records = crate::collection::Records::default();
         while let Some(item) = self.next().await {
             match item {
-                Item::Record(r) => records.push(r)?,
+                Item::Record(r) => {
+                    if let Err(error) = records.push(r) {
+                        // Settle before dropping the receiver: otherwise the
+                        // producer can mistake this collection failure for a
+                        // caller cancellation and win the once-only finalizer.
+                        if let Some(accounting) = &self.accounting {
+                            accounting.converted_terminal(true);
+                        }
+                        return Err(error);
+                    }
+                }
                 Item::Failed { status, message } => {
                     return Err(AppError::Upstream {
                         status,
@@ -1157,7 +1344,7 @@ pub(crate) fn status_for(message: &str) -> u16 {
 
 /// Ask Claude Code to stop with SIGTERM (it then removes its OAuth refresh lock), and
 /// kill it only after a grace period.
-pub(crate) async fn stop(mut child: Child) {
+async fn stop(mut child: Child, mode: Mode) {
     #[cfg(unix)]
     if let Some(pid) = child.id() {
         // SAFETY: plain kill(2) on our own child's pid.
@@ -1165,9 +1352,12 @@ pub(crate) async fn stop(mut child: Child) {
             libc::kill(pid as i32, libc::SIGTERM);
         }
     }
-    if tokio::time::timeout(Duration::from_secs(5), child.wait())
-        .await
-        .is_err()
+    if tokio::time::timeout(
+        Duration::from_secs(if mode == Mode::Tui { 6 } else { 5 }),
+        child.wait(),
+    )
+    .await
+    .is_err()
     {
         let _ = child.kill().await;
     }
@@ -1182,6 +1372,7 @@ pub(crate) async fn first_record(
             first: Some(first),
             rx,
             output: None,
+            accounting: None,
         }),
         Some(Item::Failed { status, message }) => Err(UpstreamAttemptError {
             status,
@@ -1203,7 +1394,11 @@ async fn first_reply(
     reply: ReplyReceiver,
     cancel: &CancellationToken,
 ) -> Result<ClaudeRun, UpstreamAttemptError> {
-    let ReplyReceiver { rx, sink } = reply;
+    let ReplyReceiver {
+        rx,
+        sink,
+        accounting,
+    } = reply;
     let mut guard = ResumeInputGuard(Some(run.clone()));
     let output = Some(OutputCancellation {
         run: run.clone(),
@@ -1217,6 +1412,9 @@ async fn first_reply(
     };
     match result {
         None => {
+            if let Some(attempt) = &accounting {
+                attempt.stop("cancelled", "stream_cancelled");
+            }
             // The receiver has been dropped before waiting for latched cleanup.
             drop(guard);
             run.cleaned.cancelled().await;
@@ -1229,10 +1427,19 @@ async fn first_reply(
         Some(result) => {
             // Preserve ordinary errors and their existing cleanup/fallback timing.
             guard.0 = None;
-            result.map(|mut response| {
-                response.output = output;
-                response
-            })
+            match result {
+                Ok(mut response) => {
+                    response.output = output;
+                    response.accounting = accounting;
+                    Ok(response)
+                }
+                Err(error) => {
+                    if let Some(attempt) = &accounting {
+                        attempt.stop("failed", "upstream_attempt_failed");
+                    }
+                    Err(error)
+                }
+            }
         }
     }
 }
@@ -1252,11 +1459,22 @@ fn write_private(path: &Path, bytes: &[u8]) -> std::io::Result<()> {
 /// Answer a request with Claude Code: hand tool results to the run waiting for them, or
 /// start `claude -p`. Waits for the first reply event, so failures before any output can
 /// still fall back to another target.
+#[cfg(test)]
 pub async fn start(
     cc: &ClaudeCode,
     model: &str,
     chat: &Value,
     cancel: &CancellationToken,
+) -> Result<ClaudeRun, UpstreamAttemptError> {
+    start_observed(cc, model, chat, cancel, None).await
+}
+
+pub async fn start_observed(
+    cc: &ClaudeCode,
+    model: &str,
+    chat: &Value,
+    cancel: &CancellationToken,
+    context: Option<&RequestContext>,
 ) -> Result<ClaudeRun, UpstreamAttemptError> {
     // Reject before consuming a pending tool result or taking an idle process.
     if cancel.is_cancelled() {
@@ -1266,30 +1484,35 @@ pub async fn start(
             retryable: false,
         });
     }
-    if let Some((run, rx)) = cc.continue_run(chat) {
+    if let Some((run, rx)) = cc.continue_run_observed(model, chat, context)? {
         debug!("tool results go on in the waiting Claude Code run");
         return first_reply(run, rx, cancel).await;
     }
-    if let Some((run, rx)) = cc.resume_run(model, chat, cancel).await? {
+    if let Some((run, rx)) = cc.resume_run(model, chat, cancel, context).await? {
         debug!("the next turn goes on in the idle Claude Code run");
         return first_reply(run, rx, cancel).await;
     }
+    // A new process is now selected. Reserve before shelf_take removes a saved
+    // session entry, so a storage refusal cannot orphan that reusable session.
+    let accounting = context.map(RequestContext::begin).transpose()?;
     if let Some(saved) = cc.unshelve(model, chat) {
-        match spawn_run(cc, model, chat, cancel, Some(saved)).await {
+        return match spawn_run(cc, model, chat, cancel, Some(saved), accounting).await {
             Ok(run) => {
                 debug!("the next turn goes on from a saved Claude Code session");
-                return Ok(run);
+                Ok(run)
             }
-            Err(e) if !cancel.is_cancelled() => {
+            Err(e) if !cancel.is_cancelled() && e.body != "usage reservation failed" => {
                 debug!(
                     status = e.status,
                     "saved session not resumable; a new run is told the conversation"
                 );
+                let accounting = context.map(RequestContext::begin).transpose()?;
+                spawn_run(cc, model, chat, cancel, None, accounting).await
             }
-            Err(e) => return Err(e),
-        }
+            Err(e) => Err(e),
+        };
     }
-    spawn_run(cc, model, chat, cancel, None).await
+    spawn_run(cc, model, chat, cancel, None, accounting).await
 }
 
 /// Own only a directory created by this run, including during startup errors or
@@ -1352,11 +1575,24 @@ async fn spawn_run(
     chat: &Value,
     cancel: &CancellationToken,
     resume: Option<(String, usize)>,
+    accounting: Option<Attempt>,
 ) -> Result<ClaudeRun, UpstreamAttemptError> {
-    let fail = |status: u16, body: String, retryable: bool| UpstreamAttemptError {
-        status,
-        body,
-        retryable,
+    // Own the reservation before acquiring capacity (which may evict a waiting
+    // process), creating tool files, spawning a child, or writing any input.
+    let mut startup_accounting = StartupAccounting(accounting.clone());
+    let fail = |status: u16, body: String, retryable: bool| {
+        if let Some(attempt) = &accounting {
+            if status == 499 {
+                attempt.stop("cancelled", "stream_cancelled");
+            } else {
+                attempt.stop("failed", "upstream_attempt_failed");
+            }
+        }
+        UpstreamAttemptError {
+            status,
+            body,
+            retryable,
+        }
     };
     let permit = cc
         .slot(cancel)
@@ -1416,7 +1652,26 @@ async fn spawn_run(
     }
     let allowed: Vec<String> = names.keys().cloned().collect();
 
-    let mut cmd = Command::new(&cc.bin);
+    let mut cmd = match cc.mode {
+        Mode::Print => Command::new(&cc.bin),
+        Mode::Tui => {
+            let executable = std::env::current_exe()
+                .map_err(|_| fail(503, "cannot locate Claude TUI helper".into(), false))?;
+            let mut command = Command::new(executable);
+            command.arg("claude-tui-helper").arg("--").arg(&cc.bin);
+            // Only the helper's owned tap may instrument the interactive child.
+            // Remove loaders before launching the helper, not only inside it.
+            for key in [
+                "BUN_OPTIONS",
+                "NODE_OPTIONS",
+                "LD_PRELOAD",
+                "DYLD_INSERT_LIBRARIES",
+            ] {
+                command.env_remove(key);
+            }
+            command
+        }
+    };
     cmd.args(cli_args(
         model,
         mcp_config.as_deref(),
@@ -1461,25 +1716,30 @@ async fn spawn_run(
             debug!(target: "thinrouter::claude_lifecycle", stage = "startup_input_cancelled");
             // A partial write cannot be replayed safely. Retire this new child
             // with the existing grace period before returning a non-retryable error.
-            stop(child.take()).await;
+            stop(child.take(), cc.mode).await;
             diagnostics.stop().await;
             return Err(fail(499, "client disconnected".into(), false));
         },
         result = stdin.write_all(input.as_bytes()) => result,
     };
     if let Err(e) = written {
-        stop(child.take()).await;
+        stop(child.take(), cc.mode).await;
         diagnostics.stop().await;
         return Err(fail(502, format!("Claude Code input: {e}"), true));
     }
 
     let child = child.take();
-    let (tx, rx) = reply_channel();
+    let (tx, rx) = reply_channel_observed(accounting);
     static NEXT_TRACE_ID: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(1);
     let run = Arc::new(LiveRun {
         trace_id: NEXT_TRACE_ID.fetch_add(1, std::sync::atomic::Ordering::Relaxed),
         token: token.clone(),
         sink: Mutex::new(Some(tx)),
+        accounting: Mutex::new(
+            rx.accounting
+                .clone()
+                .map(|attempt| (rx.sink.clone(), attempt)),
+        ),
         sink_changed: tokio::sync::Notify::new(),
         announced: Mutex::new(VecDeque::new()),
         announcement_changed: tokio::sync::Notify::new(),
@@ -1506,6 +1766,7 @@ async fn spawn_run(
         let _permit = permit;
         let mut lines = crate::cli_lines::Lines::new(BufReader::new(stdout));
         let mut limit_failure = None;
+        let mut cancelled = false;
         let mut sent = false;
         let mut filter = EventFilter {
             names,
@@ -1515,7 +1776,7 @@ async fn spawn_run(
         'read: loop {
             // An active receiver can disappear while stdout stays silent. Between
             // completed turns there is no sink; retain the reusable process then.
-            let active_sink = sink(&run);
+            let (active_sink, _) = active_reply(&run);
             let disconnected = async {
                 match active_sink.as_ref() {
                     Some(tx) => tx.closed().await,
@@ -1524,8 +1785,8 @@ async fn spawn_run(
             };
             let next = tokio::select! {
                 _ = run.sink_changed.notified() => continue,
-                _ = disconnected => break,
-                _ = run.stop.cancelled() => break,
+                _ = disconnected => { cancelled = true; break; },
+                _ = run.stop.cancelled() => { cancelled = true; break; },
                 l = lines.next_line() => l,
             };
             let l = match next {
@@ -1542,11 +1803,24 @@ async fn spawn_run(
             let Ok(env) = serde_json::from_str::<Value>(&l) else {
                 continue;
             };
+            let (_, active_accounting) = active_reply(&run);
             match env.get("type").and_then(|t| t.as_str()) {
                 Some("stream_event") => {
                     let Some(ev) = env.get("event") else { continue };
                     let records = filter.on_event(ev);
+                    if let Some(attempt) = &active_accounting {
+                        // Decide readiness using accepted records, then observe the
+                        // untouched source event before delivery or conversion. In
+                        // particular ready must precede an already-queued terminal.
+                        if !records.is_empty() {
+                            attempt.ready();
+                        }
+                        attempt.observe_filtered_event(ev, !records.is_empty());
+                    }
                     if filter.failed {
+                        if let Some(attempt) = &active_accounting {
+                            attempt.converted_terminal(true);
+                        }
                         limit_failure = Some(EVENT_STATE_LIMIT_MESSAGE);
                         run.idle_now
                             .store(false, std::sync::atomic::Ordering::SeqCst);
@@ -1579,6 +1853,7 @@ async fn spawn_run(
                                 // A completed turn detached before publishing reuse.
                                 // Dropping its queued terminal cannot own a later turn.
                                 if !filter.done {
+                                    cancelled = true;
                                     break 'read;
                                 }
                                 break;
@@ -1599,6 +1874,9 @@ async fn spawn_run(
                     // A successful turn ends with a result; the run lives on.
                     if !failed {
                         continue;
+                    }
+                    if let Some(attempt) = &active_accounting {
+                        attempt.stop("failed", "stream_error");
                     }
                     {
                         let msg = env
@@ -1632,6 +1910,18 @@ async fn spawn_run(
         }
         drop(lines);
         drop(filter);
+        // A process-wide `sent` bit does not describe a reused reply. Settle the
+        // current channel on every exit, even if an earlier request had output.
+        let (_, unfinished_accounting) = active_reply(&run);
+        if let Some(attempt) = &unfinished_accounting {
+            if limit_failure.is_some() {
+                attempt.stop("failed", "stream_observer_invalid");
+            } else if cancelled || run.stop.is_cancelled() {
+                attempt.stop("cancelled", "stream_cancelled");
+            } else {
+                attempt.eof();
+            }
+        }
         // Hold the active sender across cleanup so the client cannot observe EOF
         // as success, and deliver limit failures only after the process/slot are freed.
         let failure_sink = limit_failure.and_then(|message| sink(&run).map(|tx| (tx, message)));
@@ -1662,8 +1952,8 @@ async fn spawn_run(
         debug!(target: "thinrouter::claude_lifecycle", run_id = run.trace_id, stage = "reader_cleanup");
         cc.forget(&run);
         run.stop.cancel();
-        *run.sink.lock().unwrap() = None;
-        stop(child).await;
+        clear_reply(&run);
+        stop(child, cc.mode).await;
         diagnostics.stop().await;
         // An idle run's session is kept for its next turn; any other run's is removed.
         let idle = run.idle_now.load(std::sync::atomic::Ordering::SeqCst);
@@ -1692,6 +1982,7 @@ async fn spawn_run(
         debug!("claude code run finished");
     });
 
+    startup_accounting.0 = None;
     first_reply(first_run, rx, cancel).await
 }
 
@@ -1890,6 +2181,423 @@ impl EventFilter {
 
 #[cfg(test)]
 mod tests {
+    fn usage_context(store: &crate::store::Store, request: &str) -> super::RequestContext {
+        let connection = serde_json::from_value(serde_json::json!({
+            "id":"synthetic","name":"synthetic","base_url":"http://127.0.0.1:1/v1",
+            "api_key":"synthetic","default_model":null,"priority":0,"enabled":true,
+            "input_price_per_m":null,"output_price_per_m":null,"auth_type":"api_key","oauth":null,
+            "created_at":"synthetic","updated_at":"synthetic"
+        }))
+        .unwrap();
+        super::RequestContext::new(
+            store,
+            request,
+            "public",
+            &crate::store::ResolvedTarget {
+                connection,
+                upstream_model: "sonnet".into(),
+            },
+        )
+    }
+
+    fn refuse_usage_reservations(path: &std::path::Path) {
+        rusqlite::Connection::open(path)
+            .unwrap()
+            .execute_batch(
+                "CREATE TRIGGER refuse_usage BEFORE INSERT ON usage_events
+             BEGIN SELECT RAISE(FAIL, 'synthetic reservation refusal'); END;",
+            )
+            .unwrap();
+    }
+
+    #[test]
+    fn dc1_inline_instruction_stays_in_conversation_order() {
+        let chat = json!({"messages":[
+            {"role":"user", "content":"first-before"},
+            {"role":"system", "content":"notice-after", "_thinrouter_inline_instruction":true},
+            {"role":"user", "content":"last-after"}
+        ]});
+        let text = render_prompt(&chat)
+            .iter()
+            .filter_map(|b| b["text"].as_str())
+            .collect::<Vec<_>>()
+            .join("\n");
+        assert!(
+            text.find("first-before").unwrap() < text.find("notice-after").unwrap(),
+            "inline instruction was hoisted before its preceding user message"
+        );
+        assert!(text.find("notice-after").unwrap() < text.find("last-after").unwrap());
+        assert!(
+            text.contains("System:"),
+            "inline instruction role must remain explicit"
+        );
+        assert_eq!(convo(&chat).len(), 3);
+    }
+
+    fn dc_chat(body: Value) -> Value {
+        crate::claude::prepare_claude_code_chat(Value::Null, Some(&Bytes::from(body.to_string())))
+            .unwrap()
+    }
+
+    #[test]
+    fn dc2_inline_identity_and_user_suffix_keep_strict_past_and_stable_settings() {
+        let base = json!({"model":"m", "system":"stable", "messages":[
+            {"role":"system","content":"initial context"},
+            {"role":"user","content":"first"}, {"role":"assistant","content":"reply"}
+        ]});
+        let original = dc_chat(base.clone());
+        let known: Vec<Value> = convo(&original).iter().map(norm).collect();
+        let mut next = base.clone();
+        next["messages"].as_array_mut().unwrap().extend([
+            json!({"role":"developer","content":[{"type":"text","text":"new context"}]}),
+            json!({"role":"user","content":"next question"}),
+        ]);
+        let chat = dc_chat(next.clone());
+        let msgs = convo(&chat);
+        assert_eq!(signature("m", &original), signature("m", &chat));
+        assert!(msgs
+            .iter()
+            .map(norm)
+            .collect::<Vec<_>>()
+            .starts_with(&known));
+        assert!(user_turn(&msgs[known.len()..]));
+        assert!(
+            !user_turn(&msgs[known.len()..known.len() + 1]),
+            "context alone is not a turn"
+        );
+        let text = render_turn(&msgs[known.len()..])
+            .iter()
+            .filter_map(|b| b["text"].as_str())
+            .collect::<Vec<_>>()
+            .join("\n");
+        assert!(text.contains("Developer: new context\n</external_system_instructions>"));
+        assert!(text.find("new context").unwrap() < text.find("next question").unwrap());
+        assert!(!text.contains("initial context") && !text.contains("first"));
+        next["messages"][3]["content"] = json!("new context");
+        assert_eq!(
+            chat,
+            dc_chat(next.clone()),
+            "text representations are equivalent"
+        );
+        next["messages"][0]["content"] = json!("rewritten context");
+        assert!(!convo(&dc_chat(next.clone()))
+            .iter()
+            .map(norm)
+            .collect::<Vec<_>>()
+            .starts_with(&known));
+        next["messages"][0]["content"] = json!("initial context");
+        next["messages"][0]["role"] = json!("developer");
+        assert!(!convo(&dc_chat(next))
+            .iter()
+            .map(norm)
+            .collect::<Vec<_>>()
+            .starts_with(&known));
+        let mut stable_changed = base.clone();
+        stable_changed["system"] = json!("different stable");
+        assert_ne!(
+            signature("m", &original),
+            signature("m", &dc_chat(stable_changed))
+        );
+        assert_ne!(signature("m", &original), signature("other", &original));
+        let mut tools_changed = original.clone();
+        tools_changed["tools"] = json!([{"function":{"name":"new"}}]);
+        assert_ne!(signature("m", &original), signature("m", &tools_changed));
+        assert_eq!(
+            norm(&json!({"role":"user","content":"ordinary"})),
+            json!({"role":"user","text":"ordinary","calls":[],"call_id":null,"images":0})
+        );
+    }
+
+    #[tokio::test]
+    async fn dc3_tool_results_retain_inline_history_but_reject_new_context() {
+        let (_dir, cc, run) = continuation_fixture();
+        let prefix = dc_chat(json!({"model":"m", "messages":[
+            {"role":"system","content":"heard context"}, {"role":"user","content":"question"}
+        ]}));
+        let mut valid = synthetic_tool_result();
+        let mut messages = convo(&prefix);
+        *run.known.lock().unwrap() = messages.iter().map(norm).collect();
+        messages.extend(valid["messages"].as_array().unwrap().clone());
+        valid["messages"] = json!(messages);
+        run.pending.lock().unwrap().push("tool_1".into());
+        cc.live
+            .lock()
+            .unwrap()
+            .waiting
+            .insert("tool_1".into(), run.clone());
+        let before = run.known.lock().unwrap().clone();
+        for index in [2, 3, 4] {
+            let mut changed = valid.clone();
+            changed["messages"].as_array_mut().unwrap().insert(index,json!({"role":"system","content":"new tool notice", "_thinrouter_inline_instruction":true}));
+            assert!(
+                cc.continue_run(&changed).is_none(),
+                "new context at {index}"
+            );
+            assert_eq!(*run.known.lock().unwrap(), before);
+            assert_eq!(*run.pending.lock().unwrap(), ["tool_1"]);
+            assert!(run.results.lock().unwrap().is_empty());
+            let prompt = render_prompt(&changed)
+                .iter()
+                .filter_map(|b| b["text"].as_str())
+                .collect::<Vec<_>>()
+                .join("\n");
+            assert!(prompt.contains("new tool notice") && prompt.contains("synthetic-result"));
+        }
+        let (continued, _reply) = cc.continue_run(&valid).unwrap();
+        assert!(Arc::ptr_eq(&run, &continued));
+        assert_eq!(
+            run.results.lock().unwrap()["tool_1"].text,
+            "synthetic-result"
+        );
+    }
+
+    #[test]
+    fn dc2_instruction_only_suffix_preserves_saved_session_for_valid_user() {
+        let dir = tempfile::tempdir().unwrap();
+        let mut cc = ClaudeCode::new(Some("unused-fake".into()), dir.path(), 1)
+            .with_store(crate::store::Store::open(&dir.path().join("shelf.db"), None).unwrap());
+        cc.config_dir = dir.path().join("synthetic-config");
+        let folder = cc.session_dirs().remove(0);
+        std::fs::create_dir_all(&folder).unwrap();
+        std::fs::write(folder.join("dc-saved.jsonl"), b"synthetic").unwrap();
+        let mut body = json!({"model":"m","messages":[
+            {"role":"system","content":"heard"}, {"role":"user","content":"first"}, {"role":"assistant","content":"reply"}
+        ]});
+        let original = dc_chat(body.clone());
+        let hashes: Vec<String> = convo(&original)
+            .iter()
+            .map(|m| sha(&norm(m).to_string()))
+            .collect();
+        let store = cc.store.as_ref().unwrap();
+        store
+            .shelf_put(
+                "dc-saved",
+                &sha(&signature("m", &original)),
+                &hashes,
+                SHELF_MOST,
+            )
+            .unwrap();
+        body["messages"]
+            .as_array_mut()
+            .unwrap()
+            .push(json!({"role":"system","content":"new context"}));
+        assert!(cc.unshelve("m", &dc_chat(body.clone())).is_none());
+        assert_eq!(store.shelf_ids().unwrap(), ["dc-saved"]);
+        assert!(folder.join("dc-saved.jsonl").is_file());
+        body["messages"]
+            .as_array_mut()
+            .unwrap()
+            .push(json!({"role":"user","content":"next"}));
+        assert_eq!(
+            cc.unshelve("m", &dc_chat(body)),
+            Some(("dc-saved".into(), 3))
+        );
+    }
+
+    #[test]
+    fn nr2_instruction_representation_preserves_reuse_identity() {
+        let convert = |instruction: Value| -> Value {
+            let body = Bytes::from(
+                json!({"model":"m", "messages":[
+                    {"role":"user", "content":"first"},
+                    {"role":"system", "content":instruction}
+                ]})
+                .to_string(),
+            );
+            serde_json::from_slice(&crate::claude::anthropic_to_openai(&body).unwrap()).unwrap()
+        };
+        let blocks = convert(json!([{"type":"text", "text":"instruction"}]));
+        let mut text = convert(json!("instruction"));
+        assert_eq!(signature("m", &blocks), signature("m", &text));
+        assert_eq!(
+            convo(&blocks).iter().map(norm).collect::<Vec<_>>(),
+            convo(&text).iter().map(norm).collect::<Vec<_>>()
+        );
+        assert_eq!(convo(&blocks).len(), 1, "instructions are not user turns");
+        assert_ne!(
+            signature("m", &text),
+            signature("m", &convert(json!("changed instruction")))
+        );
+        let original = signature("m", &text);
+        text["messages"]
+            .as_array_mut()
+            .unwrap()
+            .push(json!({"role":"system", "content":"new instruction"}));
+        assert_ne!(
+            original,
+            signature("m", &text),
+            "new instructions remain ineligible for reuse"
+        );
+    }
+
+    #[tokio::test]
+    async fn cs1_reservation_failure_preserves_tool_results_and_capacity() {
+        let (dir, cc, run) = continuation_fixture();
+        let path = dir.path().join("usage.db");
+        let store = crate::store::Store::open(&path, None).unwrap();
+        let context = usage_context(&store, "request");
+        refuse_usage_reservations(&path);
+        run.pending.lock().unwrap().push("tool_1".into());
+        cc.live
+            .lock()
+            .unwrap()
+            .waiting
+            .insert("tool_1".into(), run.clone());
+        cc.live.lock().unwrap().order.push_back(run.clone());
+        let permit = cc.runs.clone().acquire_owned().await.unwrap();
+        for chat in [
+            synthetic_tool_result(),
+            json!({"messages":[{"role":"user","content":"fresh"}]}),
+        ] {
+            let error = match start_observed(
+                &cc,
+                "sonnet",
+                &chat,
+                &CancellationToken::new(),
+                Some(&context),
+            )
+            .await
+            {
+                Err(error) => error,
+                Ok(_) => panic!("reservation refusal admitted a request"),
+            };
+            assert_eq!(
+                (error.status, error.body.as_str(), error.retryable),
+                (503, "usage reservation failed", false)
+            );
+            assert_eq!(*run.pending.lock().unwrap(), ["tool_1"]);
+            assert!(cc.live.lock().unwrap().waiting.contains_key("tool_1"));
+            assert_eq!(cc.live.lock().unwrap().order.len(), 1);
+            assert!(run.sink.lock().unwrap().is_none());
+            assert!(run.results.lock().unwrap().is_empty());
+            assert!(
+                !run.stop.is_cancelled(),
+                "reservation failure must not evict the waiting run"
+            );
+            assert!(!cc.work_dir.exists());
+        }
+        assert!(store.recent_usage(10).unwrap().is_empty());
+        drop(permit);
+    }
+
+    #[tokio::test]
+    async fn cs3_detached_reply_accounting_does_not_adopt_next_sink() {
+        let (dir, cc, run) = continuation_fixture();
+        let store = crate::store::Store::open(&dir.path().join("usage.db"), None).unwrap();
+        let old = usage_context(&store, "old-request").begin().unwrap();
+        let (tx, old_reply) = reply_channel_observed(Some(old.clone()));
+        install_reply(&run, tx, Some(old.clone()));
+        old.ready();
+        old.observe_event(&json!({"type":"message_start","message":{"usage":{"input_tokens":12,"cache_read_input_tokens":0,"cache_creation_input_tokens":0}}}));
+        old.observe_event(&json!({"type":"message_delta","delta":{"stop_reason":"tool_use"},"usage":{"output_tokens":5}}));
+        old.observe_event(&json!({"type":"message_stop"}));
+        let mut filter = EventFilter {
+            done: true,
+            stop_reason: Some("tool_use".into()),
+            tool_ids: vec!["tool_1".into()],
+            ..Default::default()
+        };
+        let retiring = cc.finish_turn(&run, &mut filter).unwrap();
+        let next_context = usage_context(&store, "next-request");
+        let (_, next_reply) = cc
+            .continue_run_observed("sonnet", &synthetic_tool_result(), Some(&next_context))
+            .unwrap()
+            .unwrap();
+        retiring
+            .send(Item::Record(
+                "event: message_stop\ndata: {\"type\":\"message_stop\"}".into(),
+            ))
+            .await
+            .unwrap();
+        drop(retiring);
+        let old_response = first_reply(run.clone(), old_reply, &CancellationToken::new())
+            .await
+            .unwrap();
+        old_response
+            .accounting()
+            .unwrap()
+            .stop("cancelled", "stream_cancelled");
+        let rows = store.recent_usage(10).unwrap();
+        assert_eq!(rows.len(), 2);
+        let old_row = rows
+            .iter()
+            .find(|row| row.request_id.as_deref() == Some("old-request"))
+            .unwrap();
+        assert_eq!(old_row.outcome, "succeeded");
+        assert_eq!(old_row.completion_tokens, Some(5));
+        let next_row = rows
+            .iter()
+            .find(|row| row.request_id.as_deref() == Some("next-request"))
+            .unwrap();
+        assert!(next_row.finalized_at.is_none());
+        assert!(!run.stop.is_cancelled());
+        next_reply
+            .accounting
+            .as_ref()
+            .unwrap()
+            .stop("cancelled", "stream_cancelled");
+        clear_reply(&run);
+    }
+
+    #[cfg(target_os = "linux")]
+    #[tokio::test]
+    async fn cs1_saved_resume_and_existing_fallback_have_distinct_attempts() {
+        let (_dir, cc, chat, token) = first_reply_fixture("saved_error", false).await;
+        let store = cc.store.as_ref().unwrap();
+        let context = usage_context(store, "saved-request");
+        let response = tokio::time::timeout(
+            Duration::from_secs(3),
+            start_observed(&cc, "sonnet", &chat, &token, Some(&context)),
+        )
+        .await;
+        if response.is_err() {
+            cc.shutdown().await;
+        }
+        let response = response.unwrap().unwrap();
+        let accounting = response.accounting().unwrap();
+        response.collect("sonnet").await.unwrap();
+        accounting.eof();
+        cc.shutdown().await;
+        let rows = store.recent_usage(10).unwrap();
+        assert_eq!(rows.len(), 2);
+        assert!(rows
+            .iter()
+            .all(|row| row.request_id.as_deref() == Some("saved-request")));
+        assert_ne!(rows[0].attempt_id, rows[1].attempt_id);
+        assert_eq!(rows.iter().filter(|row| row.outcome == "failed").count(), 1);
+        assert_eq!(
+            rows.iter().filter(|row| row.outcome == "succeeded").count(),
+            1
+        );
+        assert_eq!(
+            std::fs::read_to_string(cc.work_dir.join("starts")).unwrap(),
+            "resume\nfresh\n"
+        );
+    }
+
+    #[cfg(target_os = "linux")]
+    #[tokio::test]
+    async fn cs1_reservation_failure_does_not_consume_saved_session() {
+        let (dir, cc, chat, token) = first_reply_fixture("saved_error", false).await;
+        let store = cc.store.as_ref().unwrap();
+        let before = store.shelf_ids().unwrap();
+        assert_eq!(before.len(), 1);
+        let context = usage_context(store, "saved-refused");
+        refuse_usage_reservations(&dir.path().join("shelf.db"));
+        let error = match start_observed(&cc, "sonnet", &chat, &token, Some(&context)).await {
+            Err(error) => error,
+            Ok(_) => panic!("reservation refusal dispatched a saved session"),
+        };
+        assert_eq!(
+            (error.status, error.body.as_str(), error.retryable),
+            (503, "usage reservation failed", false)
+        );
+        assert_eq!(store.shelf_ids().unwrap(), before);
+        assert!(!cc.work_dir.join("starts").exists());
+        assert_eq!(cc.runs.available_permits(), 1);
+        cc.shutdown().await;
+    }
+
     fn continuation_fixture() -> (
         tempfile::TempDir,
         super::ClaudeCode,
@@ -1903,6 +2611,7 @@ mod tests {
             trace_id: 0,
             token: "synthetic".into(),
             sink: Mutex::new(None),
+            accounting: Mutex::new(None),
             sink_changed: tokio::sync::Notify::new(),
             announced: Mutex::new(VecDeque::new()),
             announcement_changed: tokio::sync::Notify::new(),
@@ -1914,7 +2623,7 @@ mod tests {
             interrupted_input: std::sync::atomic::AtomicBool::new(false),
             waiting_since: Mutex::new(None),
             stdin: tokio::sync::Mutex::new(None),
-            signature: String::new(),
+            signature: signature("sonnet", &synthetic_tool_result()),
             known: Mutex::new(Vec::new()),
             session_id: Mutex::new(None),
             idle_now: std::sync::atomic::AtomicBool::new(false),
@@ -1932,6 +2641,99 @@ mod tests {
             {"role":"assistant","tool_calls":[{"id":"tool_1","type":"function","function":{"name":"probe","arguments":"{}"}}]},
             {"role":"tool","tool_call_id":"tool_1","content":"synthetic-result"}
         ]})
+    }
+
+    #[tokio::test]
+    async fn nc2_tool_continuation_rejects_changed_context_without_consuming_wait() {
+        use super::*;
+        let (dir, cc, run) = continuation_fixture();
+        let store = crate::store::Store::open(&dir.path().join("usage.db"), None).unwrap();
+        let context = usage_context(&store, "rejected-continuation");
+        let prefix = json!({"role":"user", "content":"original question"});
+        run.known.lock().unwrap().push(norm(&prefix));
+        run.pending.lock().unwrap().push("tool_1".into());
+        cc.live
+            .lock()
+            .unwrap()
+            .waiting
+            .insert("tool_1".into(), run.clone());
+        cc.live.lock().unwrap().order.push_back(run.clone());
+        let (callback, mut result) = tokio::sync::oneshot::channel();
+        run.calls.lock().unwrap().insert("tool_1".into(), callback);
+        let mut valid = synthetic_tool_result();
+        valid["messages"].as_array_mut().unwrap().insert(0, prefix);
+        let before = run.known.lock().unwrap().clone();
+        let mut cases = Vec::new();
+        let mut changed = valid.clone();
+        changed["messages"][0]["content"] = json!("rewritten question");
+        cases.push(("history", changed));
+        let mut changed = valid.clone();
+        changed["messages"]
+            .as_array_mut()
+            .unwrap()
+            .insert(0, json!({"role":"system","content":"new instruction"}));
+        cases.push(("instruction", changed));
+        let mut changed = valid.clone();
+        changed["tools"] = json!([{"type":"function","function":{"name":"another_tool"}}]);
+        cases.push(("tools", changed));
+        let mut changed = valid.clone();
+        changed["messages"][1]["tool_calls"][0]["id"] = json!("different");
+        cases.push(("assistant ID", changed));
+        let mut changed = valid.clone();
+        let call = changed["messages"][1]["tool_calls"][0].clone();
+        changed["messages"][1]["tool_calls"]
+            .as_array_mut()
+            .unwrap()
+            .push(call);
+        cases.push(("duplicate assistant ID", changed));
+        let mut changed = valid.clone();
+        changed["messages"].as_array_mut().unwrap().remove(1);
+        cases.push(("missing assistant", changed));
+        let mut changed = valid.clone();
+        changed["messages"]
+            .as_array_mut()
+            .unwrap()
+            .insert(1, json!({"role":"user","content":"extra turn"}));
+        cases.push(("extra turn", changed));
+        let mut changed = valid.clone();
+        let duplicate = changed["messages"][2].clone();
+        changed["messages"].as_array_mut().unwrap().push(duplicate);
+        cases.push(("duplicate result", changed));
+        let mut changed = valid.clone();
+        changed["messages"][2]["tool_call_id"] = json!("different");
+        cases.push(("result ID", changed));
+        // Resolved model is supplied by routing, not taken from the JSON alias.
+        assert!(cc
+            .continue_run_observed("opus", &valid, Some(&context))
+            .unwrap()
+            .is_none());
+        for (label, chat) in cases {
+            assert!(
+                cc.continue_run_observed("sonnet", &chat, Some(&context))
+                    .unwrap()
+                    .is_none(),
+                "accepted {label}"
+            );
+            assert_eq!(*run.known.lock().unwrap(), before, "{label}");
+            assert_eq!(*run.pending.lock().unwrap(), ["tool_1"], "{label}");
+            assert!(cc.live.lock().unwrap().waiting.contains_key("tool_1"));
+            assert_eq!(cc.live.lock().unwrap().order.len(), 1);
+            assert!(run.sink.lock().unwrap().is_none());
+            assert!(run.accounting.lock().unwrap().is_none());
+            assert!(run.results.lock().unwrap().is_empty());
+            assert_eq!(run.calls.lock().unwrap().len(), 1);
+            assert!(matches!(
+                result.try_recv(),
+                Err(tokio::sync::oneshot::error::TryRecvError::Empty)
+            ));
+            assert!(store.recent_usage(10).unwrap().is_empty());
+            assert!(!run.stop.is_cancelled());
+        }
+        let (continued, _reply) = cc.continue_run(&valid).unwrap();
+        assert!(Arc::ptr_eq(&run, &continued));
+        assert_eq!(result.await.unwrap().text, "synthetic-result");
+        assert!(run.pending.lock().unwrap().is_empty());
+        assert!(cc.live.lock().unwrap().waiting.is_empty());
     }
 
     #[tokio::test]
@@ -3732,6 +4534,7 @@ while True: time.sleep(60)
             let (tx, rx) = mpsc::channel(1);
             let rx = ReplyReceiver {
                 sink: tx.downgrade(),
+                accounting: None,
                 rx,
             };
             tx.send(item).await.unwrap();
@@ -3753,6 +4556,7 @@ while True: time.sleep(60)
             let (tx, rx) = mpsc::channel(1);
             let rx = ReplyReceiver {
                 sink: tx.downgrade(),
+                accounting: None,
                 rx,
             };
             if failure {
@@ -4286,6 +5090,7 @@ while True:
                     first,
                     rx,
                     output: None,
+                    accounting: None,
                 }
                 .collect("m"),
             )
@@ -4312,10 +5117,61 @@ while True:
             .await
             .unwrap();
             assert!(
-                matches!(ClaudeRun{first:Some(String::new()),rx,output:None}.collect("m").await,Err(AppError::Upstream{status:s,body}) if s == status && body == "explicit CLI failure")
+                matches!(ClaudeRun{first:Some(String::new()),rx,output:None,accounting:None}.collect("m").await,Err(AppError::Upstream{status:s,body}) if s == status && body == "explicit CLI failure")
             );
             assert!(tx.is_closed());
         }
+    }
+
+    #[tokio::test]
+    async fn cb3_collection_failure_settles_before_receiver_close() {
+        let dir = tempfile::tempdir().unwrap();
+        let store = crate::store::Store::open(&dir.path().join("usage.db"), None).unwrap();
+        let accounting = usage_context(&store, "collection-failure").begin().unwrap();
+        accounting.observe_event(&json!({"type":"message_start","message":{"usage":{
+            "input_tokens":12,"cache_read_input_tokens":3,"cache_creation_input_tokens":2,
+            "output_tokens":0
+        }}}));
+        let producer_accounting = accounting.clone();
+        let (tx, rx) = tokio::sync::mpsc::channel(1);
+        let producer = tokio::spawn(async move {
+            tx.closed().await;
+            // The real producer treats a closed consumer as cancellation.
+            producer_accounting.stop("cancelled", "stream_cancelled");
+        });
+        let result = tokio::time::timeout(
+            Duration::from_secs(3),
+            ClaudeRun {
+                first: Some("x".repeat(crate::collection::MAX_BYTES - 1)),
+                rx,
+                output: None,
+                accounting: Some(accounting.clone()),
+            }
+            .collect("m"),
+        )
+        .await
+        .unwrap();
+        assert!(
+            matches!(result, Err(AppError::Upstream { status: 502, body })
+            if body == crate::collection::LIMIT_MESSAGE)
+        );
+        // Force the producer to observe closure before the outer proxy handles
+        // collect's error, so scheduler timing cannot hide the settlement race.
+        tokio::time::timeout(Duration::from_secs(3), producer)
+            .await
+            .unwrap()
+            .unwrap();
+        accounting.converted_terminal(true);
+        let rows = store.recent_usage(10).unwrap();
+        assert_eq!(rows.len(), 1);
+        let row = &rows[0];
+        assert_eq!(row.outcome, "failed");
+        assert_eq!(row.error.as_deref(), Some("stream_conversion_failed"));
+        assert_eq!(row.prompt_tokens, Some(17));
+        assert_eq!(row.completion_tokens, Some(0));
+        assert_eq!(row.usage_status, "partial");
+        assert!(row.status.is_none());
+        assert!(row.finalized_at.is_some());
     }
 
     #[tokio::test]
@@ -4325,6 +5181,7 @@ while True:
             first: Some("x".repeat(16 * 1024 * 1024 - 1)),
             rx,
             output: None,
+            accounting: None,
         };
         let result = tokio::time::timeout(std::time::Duration::from_secs(1), run.collect("m"))
             .await

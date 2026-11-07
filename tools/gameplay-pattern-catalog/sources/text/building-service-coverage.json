@@ -1,0 +1,120 @@
+{
+  "id": "building-service-coverage",
+  "system": "building",
+  "edition": 1,
+  "name": {
+    "zh": "设施覆盖选址",
+    "en": "Service coverage placement"
+  },
+  "summary": {
+    "zh": "让关键设施覆盖更多需求，同时减少无效重叠。",
+    "en": "Reach more demand with facilities while reducing wasted overlap."
+  },
+  "rules": {
+    "zh": "玩家查看设施作用范围，把需要服务的对象安排在有效区域。边界、路径和容量限制收益；覆盖提示与未服务对象引导下一轮选址。",
+    "en": "Players place facilities and users within effective reach. Boundaries, access and capacity constrain benefits; overlays and unserved users guide new sites."
+  },
+  "loop": [
+    {
+      "zh": "找出缺口",
+      "en": "Locate gaps"
+    },
+    {
+      "zh": "预览覆盖",
+      "en": "Preview reach"
+    },
+    {
+      "zh": "放置设施",
+      "en": "Place a facility"
+    },
+    {
+      "zh": "检查边缘与扩张",
+      "en": "Check edges and growth"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "中心位置覆盖广，却占据宝贵地块。",
+      "en": "Central sites cover broadly but use valuable land."
+    },
+    {
+      "zh": "边缘站点减少盲区，却增加重复建设。",
+      "en": "Peripheral sites fill gaps at the cost of duplication."
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "范围形状",
+        "en": "Coverage shape"
+      },
+      "effect": {
+        "zh": "圆形易理解，沿路传播强调路网配合。",
+        "en": "A radius is readable; road-based reach rewards network planning."
+      }
+    },
+    {
+      "name": {
+        "zh": "服务容量",
+        "en": "Capacity"
+      },
+      "effect": {
+        "zh": "容量有限时，已覆盖区域也可能需要新设施。",
+        "en": "Limited capacity can require more facilities within covered areas."
+      }
+    }
+  ],
+  "tags": [
+    "spatial",
+    "planning",
+    "optimization"
+  ],
+  "related": [
+    "building-access-network",
+    "building-construction-sequencing",
+    "building-room-requirements",
+    "building-structural-support"
+  ],
+  "contrast": {
+    "zh": "工作台提供局部建造支持；城市服务还要应对通行与容量限制。",
+    "en": "Workbenches provide local construction support; city services add access and capacity limits."
+  },
+  "combination": {
+    "zh": "设计每天只驻扎一个位置的流动兽医营地，覆盖不同农场并处理有限诊疗量。",
+    "en": "Design a mobile vet camp choosing one daily site with limited treatment capacity."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "四间房需要服务，一个设施放中心能覆盖三间，放边缘只能覆盖两间。",
+      "en": "Four houses need a service; a central facility reaches three while an edge location reaches two."
+    },
+    "action": {
+      "zh": "你先放中心，再用剩余预算考虑最远那间房。",
+      "en": "Place the central facility first, then consider the farthest house with the remaining budget."
+    },
+    "result": {
+      "zh": "覆盖预览与未服务标记显示选址效果，重叠区没有自动多一份收益。",
+      "en": "Coverage and unserved markers show the outcome; overlapping coverage need not add value."
+    },
+    "next": {
+      "zh": "住宅扩展后重新看缺口，再决定新增或迁移设施。",
+      "en": "Review new gaps after housing expansion before adding or relocating facilities."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "做有限地图、几个需求点和一个可移动覆盖圆，显示覆盖数量与建造成本。",
+      "en": "Use a bounded map, demand points and a movable coverage circle, showing coverage count and cost."
+    },
+    "pitfall": {
+      "zh": "覆盖范围、服务容量和道路可达是三种限制，首版先清楚区分再逐项加入。",
+      "en": "Range, capacity and route access are different limits; distinguish them clearly and add them one at a time."
+    },
+    "test": {
+      "zh": "在新增需求点后，玩家是否会重新评估旧设施位置，而不只是继续堆数量？",
+      "en": "After new demand appears, do players reassess existing locations instead of simply adding more facilities?"
+    }
+  }
+}

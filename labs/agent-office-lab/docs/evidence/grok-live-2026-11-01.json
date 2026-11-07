@@ -1,0 +1,120 @@
+{
+  "date": "2026-11-01",
+  "status": "failed",
+  "acceptance": "AC-03",
+  "tested_commit": "f71ca7564157cbcff7734bcd6411d4cfe3c7ee0b",
+  "provider": "grok",
+  "model": "grok-4.6",
+  "version": "1.0.70",
+  "source_sha256": {
+    "run_grok_work.py": "04a991a24ab25f492d9d9b215d9f02fd9e5785782443cb342eaad04ff0d060e4",
+    "grok_task_hook.py": "da1addd60fc90cc4e76667dfdb54826c03119c299c9e7bc07cf2dc8bc223a792",
+    "grok_work_policy.mjs": "123326e29da8351e483f1ef4439c358223cb3468bc20bb19060aa55d75b4ad80",
+    "office_grok_work.mjs": "a8d8e551b37ba0419d34a2e090db720c531a4fb20176b7d7529d2c560b93d4c6",
+    "grok-work/grok": "b2e9750e43488c136e8b73b3cc83789148ab9b0056cf34e856e6db0b80bb7485",
+    "remote_cli.py": "9a0ee26503ef76b003b9d8d387f6381acd1a043723374f62793a7f75bf97bb89",
+    "run_grok_startup.py": "8b5b556ae1c5bb6f1232738b9fc6549c8df5de77945a04e14ee7efa15c1d02c5",
+    "grok_startup.py": "af5188f82d05ebfb0830bbe7a7cb0e3c6838e37cd947424252b8ac7ea9b4af72",
+    "cursor_task_hook.py": "55b59876b6040665e0352c94dfff2c6ffe9c19b59655a0f816e6142828d18684",
+    "grok_native_evidence.py": "d56ae4c5eb032b30baba05475b1e0e523442c21969a581b26c00a49c7093cf66"
+  },
+  "model_activity_observed": true,
+  "model_inference_verified": false,
+  "elapsed_s": 12.549463707953691,
+  "authorization": {
+    "single_attempt": true,
+    "consumed": true,
+    "hook_tool_gate": 4,
+    "native_max_turns": 6,
+    "timeout_seconds": 240,
+    "host_retries": 0
+  },
+  "events": [
+    {
+      "event": "SessionStart",
+      "model_field_present": false,
+      "allowed": true
+    },
+    {
+      "event": "UserPromptSubmit",
+      "model": "grok-4.6",
+      "allowed": true
+    },
+    {
+      "event": "PreToolUse",
+      "tool": "read_file",
+      "target": "other",
+      "model": "grok-4.6",
+      "allowed": false
+    },
+    {
+      "event": "PreToolUse",
+      "tool": "read_file",
+      "target": "other",
+      "model": "grok-4.6",
+      "allowed": false
+    },
+    {
+      "event": "Stop",
+      "cleanup_event": true
+    }
+  ],
+  "authenticated_events": [
+    "SessionStart",
+    "UserPromptSubmit",
+    "PreToolUse"
+  ],
+  "same_session_verified": true,
+  "original_seed_output_unchanged": true,
+  "artifact_verified": false,
+  "tools_successful": 0,
+  "model_tool_requests_observed": 2,
+  "observed_tool_arguments": [
+    {
+      "tool": "read_file",
+      "target_file": "input.json"
+    },
+    {
+      "tool": "read_file",
+      "target_file": "result.json"
+    }
+  ],
+  "finding": "The model supplied target_file; the lab only recognized file_path. Both read requests were denied before any edit.",
+  "cleanup": {
+    "completed": true,
+    "owned_processes_seen": 22,
+    "copied_credentials_removed": true,
+    "errors": []
+  },
+  "usage": {
+    "requests": null,
+    "input_tokens": null,
+    "output_tokens": null,
+    "cost": null
+  },
+  "offline_fix": {
+    "unambiguous_path_aliases": [
+      "target_file",
+      "file_path",
+      "path"
+    ],
+    "bounded_parallel_reads": true,
+    "edit_requires_both_reads_completed": true,
+    "duplicate_tool_id_rejected": true,
+    "completion_order_independent": true,
+    "node_tests": 35,
+    "python_tests": 45,
+    "live_retested": false,
+    "changed_sources_sha256": {
+      "grok_task_hook.py": "9c269111e7bb3806b64a95c17600659f016536145d41ea494b3dd87ee70d5b6c",
+      "office_grok_work.mjs": "23f8e4b77230c6cc508597929ac0ba1c40c2cc74fbf3279cede19dbbf16b3fc9",
+      "test_grok_task.py": "986cd9b25ba4657dacbfa228d97be4cdb0f79eadb013533b3cc5c943b8207923"
+    }
+  },
+  "limitations": [
+    "No additional paid attempt was made.",
+    "Native successful tool-result shapes, edit and normal end_turn Stop still need live verification.",
+    "Hook failure remains fail-open; four tools are not a provider-enforced hard cap.",
+    "Request/token/money caps and usage/cost remain unknown."
+  ]
+}

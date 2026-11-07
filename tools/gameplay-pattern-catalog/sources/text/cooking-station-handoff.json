@@ -1,0 +1,120 @@
+{
+  "id": "cooking-station-handoff",
+  "system": "cooking",
+  "edition": 1,
+  "name": {
+    "zh": "厨房岗位交接",
+    "en": "Kitchen station handoffs"
+  },
+  "summary": {
+    "zh": "把半成品交到对的人手里，比每个人各做一道菜更有效。",
+    "en": "Handing off components can outperform every chef doing a whole dish."
+  },
+  "rules": {
+    "zh": "厨师共享空间和工作站，角色可按备料、加热、送餐分工。半成品需要明确交接；阻塞的台面、错放的材料和同时抢设备会制造拥堵。",
+    "en": "Chefs share space and stations and can specialize in preparation, cooking or service. Components need clear handoffs; blocked counters, misplaced items and contested equipment create congestion."
+  },
+  "loop": [
+    {
+      "zh": "分配岗位",
+      "en": "Assign stations"
+    },
+    {
+      "zh": "准备交接物",
+      "en": "Prepare a handoff item"
+    },
+    {
+      "zh": "传递或放到缓冲位",
+      "en": "Pass it or use a buffer"
+    },
+    {
+      "zh": "确认接收并补位",
+      "en": "Confirm receipt and cover gaps"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "固定岗位减少沟通，还是随瓶颈临时换班？",
+      "en": "Use fixed roles or rotate to the current bottleneck?"
+    },
+    {
+      "zh": "用最短路线抢道，还是绕路保持其他人的流量？",
+      "en": "Take the shortest path or leave a lane open for teammates?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "通道宽度",
+        "en": "Lane width"
+      },
+      "effect": {
+        "zh": "窄路强化协调，也容易把错误放大为互相阻挡。",
+        "en": "Narrow lanes intensify coordination but magnify blocking."
+      }
+    },
+    {
+      "name": {
+        "zh": "交接距离",
+        "en": "Handoff range"
+      },
+      "effect": {
+        "zh": "可投掷能跨越障碍；只能贴身传递更依赖布局。",
+        "en": "Throwing bridges obstacles; short-range handoffs depend more on layout."
+      }
+    }
+  ],
+  "tags": [
+    "cooperation",
+    "spatial",
+    "optimization"
+  ],
+  "related": [
+    "cooking-preparation-chain",
+    "automation-aerial-logistics",
+    "automation-belt-routing",
+    "automation-flow-splitting"
+  ],
+  "contrast": {
+    "zh": "胡闹厨房让团队适应设计好的障碍；PlateUp 允许团队先改空间，再执行分工。",
+    "en": "Overcooked asks teams to adapt to authored obstacles; PlateUp lets them reshape space before dividing work."
+  },
+  "combination": {
+    "zh": "组合创意：飞艇厨房在颠簸时改变传送带方向，队友需要切换既定交接协议，而不只是提高移动速度。",
+    "en": "Design proposal: turbulence reverses airship-kitchen belts, requiring teams to switch handoff protocols."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "两位厨师共用一个切菜台，煎锅另一侧的人一直等不到原料。",
+      "en": "Two cooks share one chopping station; the cook by the pan keeps waiting for ingredients."
+    },
+    "action": {
+      "zh": "你们约定一人切菜、一人烹调，并把中间台作为交接点。",
+      "en": "Assign one cook to chopping and the other to cooking, using a central counter for handoffs."
+    },
+    "result": {
+      "zh": "原料流动更稳定，但中间台满了就必须停下调整。",
+      "en": "Ingredients flow more reliably, but a full handoff counter forces an adjustment."
+    },
+    "next": {
+      "zh": "新订单改变瓶颈时临时补位，再恢复分工。",
+      "en": "Help the bottleneck when a new order changes demand, then resume roles."
+    }
+  },
+  "prototype": {
+    "scope": "medium",
+    "interaction": "cooperative",
+    "firstStep": {
+      "zh": "先做同屏双人、两个岗位和一个交接格；只验证传递与堵塞，不加入联网。",
+      "en": "Begin with two local players, two stations and one handoff slot; test passing and blockage without networking."
+    },
+    "pitfall": {
+      "zh": "联网同步、自由物理碰撞和大量菜谱会同时扩大范围，应与岗位协作分开验证。",
+      "en": "Networking, free physics and a large menu multiply scope; test role coordination separately."
+    },
+    "test": {
+      "zh": "观察两人是否主动约定交接位置，并在某岗位积压时调整分工。",
+      "en": "Watch whether players establish a handoff location and redistribute work when one station backs up."
+    }
+  }
+}

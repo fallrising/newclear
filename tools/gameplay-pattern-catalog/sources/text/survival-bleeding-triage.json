@@ -1,0 +1,119 @@
+{
+  "id": "survival-bleeding-triage",
+  "system": "survival",
+  "edition": 2,
+  "name": {
+    "zh": "持续失血与紧急包扎",
+    "en": "Bleeding and urgent bandaging"
+  },
+  "summary": {
+    "zh": "先阻止伤势继续扩大，再考虑把生命补满。",
+    "en": "Stop ongoing damage before trying to refill health."
+  },
+  "rules": {
+    "zh": "受伤后除了立即损失生命，还可能持续失血。玩家在移动、战斗和包扎之间选择时机；处理伤口可以止住持续损失，却不会立即恢复全部伤势。",
+    "en": "An injury may cause both immediate damage and ongoing blood loss. Choose when to move, fight or bandage. Treatment stops further loss without instantly healing the original wound."
+  },
+  "loop": [
+    {
+      "zh": "发现出血与剩余时间",
+      "en": "Notice bleeding and urgency"
+    },
+    {
+      "zh": "找短暂安全窗口",
+      "en": "Find a brief safe window"
+    },
+    {
+      "zh": "消耗材料处理伤口",
+      "en": "Spend supplies to dress wounds"
+    },
+    {
+      "zh": "脱险后恢复其他伤势",
+      "en": "Recover remaining injuries after escape"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "原地包扎有被打断风险，先跑又会继续失血。",
+      "en": "Bandaging now risks interruption; running first costs more blood."
+    },
+    {
+      "zh": "材料有限时，应先处理流血最快的伤口。",
+      "en": "With limited supplies, prioritize the fastest bleeding wound."
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "失血速度",
+        "en": "Bleed rate"
+      },
+      "effect": {
+        "zh": "快失血强调即时避险；慢失血允许艰难返程。",
+        "en": "Fast bleeding demands immediate shelter; slow bleeding permits difficult retreats."
+      }
+    },
+    {
+      "name": {
+        "zh": "治疗打断规则",
+        "en": "Treatment interruption"
+      },
+      "effect": {
+        "zh": "允许保留部分进度会鼓励分段治疗；重置进度更需要完整安全窗口。",
+        "en": "Partial progress permits staged treatment; resets demand a full safe window."
+      }
+    }
+  ],
+  "tags": [
+    "planning",
+    "risk"
+  ],
+  "related": [
+    "survival-competing-needs",
+    "survival-fatigue-rest",
+    "survival-limb-impairment",
+    "survival-safe-water"
+  ],
+  "contrast": {
+    "zh": "僵尸毁灭工程要求玩家亲自给身体部位包扎；环世界把救治交给可调度的医生与病床。",
+    "en": "Project Zomboid asks for direct body-part treatment; RimWorld turns care into doctor and bed scheduling."
+  },
+  "combination": {
+    "zh": "设计提案：绷带也占背包重量，出发时要在多带急救物资和多带战利品之间取舍；撤退时减轻负重可以缩短带伤暴露的时间。",
+    "en": "Design proposal: bandages consume carrying capacity, so extra aid supplies compete with loot space; dropping weight on retreat reduces the time spent exposed while injured."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "演示设定：生命剩六格，每轮流血一格，出口还有四轮。",
+      "en": "Example: six health, one lost per turn, four turns to the exit."
+    },
+    "action": {
+      "zh": "花一轮躲进房间包扎。",
+      "en": "Spend a turn bandaging in a room."
+    },
+    "result": {
+      "zh": "生命降到五格，但之后不再持续下降。",
+      "en": "Health drops to five, then stops draining."
+    },
+    "next": {
+      "zh": "带着伤势撤离，之后再恢复生命。",
+      "en": "Escape injured and heal afterward."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "一个出血状态、一个可中断包扎动作和一条撤退路线就能验证。",
+      "en": "Test one bleeding state, an interruptible bandage action and a retreat route."
+    },
+    "pitfall": {
+      "zh": "大量伤口类型会分散核心判断；先只做轻重两级出血。",
+      "en": "Many wound types obscure the decision; begin with two bleed severities."
+    },
+    "test": {
+      "zh": "记录玩家能否解释为什么先包扎或先移动。",
+      "en": "Check whether players can explain treating first versus moving first."
+    }
+  }
+}

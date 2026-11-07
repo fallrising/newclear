@@ -49,7 +49,8 @@ func (service *Service) AcceptInitialSpecification(ctx context.Context, principa
 		if e = service.initialAuthority(v.ProjectID, p); e != nil {
 			return mutation{}, e
 		}
-		if v.PolicyRevisionDigest != service.config.Completion.RevisionDigest {
+		policy := service.completionFor(v.ProjectID)
+		if v.PolicyRevisionDigest != policy.RevisionDigest {
 			return mutation{}, command.NewError(command.CodeStaleSubject, "policy revision changed", false, nil, nil)
 		}
 		subject := port.NewInitialAcceptanceSubject(v.ProjectID, v.ExpectedVersion, p, v.PolicyRevisionDigest, v.WorkItems)
@@ -67,7 +68,7 @@ func (service *Service) AcceptInitialSpecification(ctx context.Context, principa
 		material := record.Material()
 		for _, binding := range material.Bindings {
 			for _, n := range binding.Nodes {
-				if n.Recipe != service.config.Completion.RecipeDigest.String() {
+				if n.Recipe != policy.RecipeDigest.String() {
 					return mutation{}, invalidRequest(errors.New("unsupported recipe"))
 				}
 			}
@@ -81,7 +82,7 @@ func (service *Service) AcceptInitialSpecification(ctx context.Context, principa
 		}
 		revisions := make([]port.ACRevision, 0, len(material.ACs))
 		for _, a := range material.ACs {
-			rule, exists := service.config.Completion.Checks[a.ACID]
+			rule, exists := policy.Checks[a.ACID]
 			if !exists || rule.VerifierClass == "" {
 				return mutation{}, invalidRequest(errors.New("AC verification policy missing"))
 			}

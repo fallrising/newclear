@@ -1,0 +1,8 @@
+{
+  "version": 1,
+  "original": "nov6-before-policy-runtime/core-run-attempt2.log",
+  "sha256": "97317853fb7e0aa8043079d5171dd29b10f01e61f53f265aaa3b3c2d247b7c23",
+  "byteSize": "41",
+  "encoding": "utf-8",
+  "text": "{\"success\":false,\"code\":\"INPUT_INVALID\"}\n"
+}

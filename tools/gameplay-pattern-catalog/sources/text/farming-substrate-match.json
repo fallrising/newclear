@@ -1,0 +1,120 @@
+{
+  "id": "farming-substrate-match",
+  "system": "farming",
+  "edition": 1,
+  "name": {
+    "zh": "土壤与作物匹配",
+    "en": "Crop–substrate matching"
+  },
+  "summary": {
+    "zh": "种子能否生长，取决于脚下是什么地面。",
+    "en": "A seed's viability depends on the ground beneath it."
+  },
+  "rules": {
+    "zh": "玩家识别种子的地面要求，寻找或搬运兼容基质，再种植目标作物。不合适的地块无法形成有效种植点；正确的环境配置把探索所得转成稳定生产。",
+    "en": "Identify a seed's substrate requirements, then find or transport suitable ground. Incompatible tiles cannot support planting; the right setup turns exploration discoveries into repeatable production."
+  },
+  "loop": [
+    {
+      "zh": "发现新种子",
+      "en": "Discover a seed"
+    },
+    {
+      "zh": "确认基质要求",
+      "en": "Identify its substrate"
+    },
+    {
+      "zh": "寻找或铺设地面",
+      "en": "Find or place suitable ground"
+    },
+    {
+      "zh": "种植并扩建专用田",
+      "en": "Plant and expand a specialized plot"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "就地建立分基地，还是把稀有土壤搬回家，取决于运输成本。",
+      "en": "Build a remote farm or transport rare soil home depending on hauling cost."
+    },
+    {
+      "zh": "专用田提升可靠性，但让种植空间更难临时改用途。",
+      "en": "Specialized plots improve reliability but are less flexible to repurpose."
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "基质稀缺度",
+        "en": "Substrate rarity"
+      },
+      "effect": {
+        "zh": "稀缺基质让作物成为探索奖励，而非商店里的一种皮肤。",
+        "en": "Rare substrates turn crops into exploration rewards rather than interchangeable shop goods."
+      }
+    },
+    {
+      "name": {
+        "zh": "搬运成本",
+        "en": "Transport cost"
+      },
+      "effect": {
+        "zh": "低成本鼓励集中基地，高成本鼓励地区分工。",
+        "en": "Cheap transport favors a central base; expensive hauling favors regional specialization."
+      }
+    }
+  ],
+  "tags": [
+    "spatial",
+    "discovery",
+    "planning"
+  ],
+  "related": [
+    "farming-crop-protection",
+    "farming-irrigation-layout",
+    "building-access-network",
+    "building-room-requirements"
+  ],
+  "contrast": {
+    "zh": "护核纪元强调搬运不同地面；泰拉瑞亚也提供通用容器来降低后期管理负担。",
+    "en": "Core Keeper emphasizes transporting terrain; Terraria also offers general-purpose containers to reduce later management overhead."
+  },
+  "combination": {
+    "zh": "设计提案：不同矿层的土壤培育不同药材，把矿井废料变成地下温室的关键材料。",
+    "en": "Design proposal: soils from different mine layers grow different medicinal plants, making excavation waste essential greenhouse material."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "新找到的种子只适合沙土，你家目前全是普通土。",
+      "en": "A newly discovered seed needs sand, but your home plots have ordinary soil."
+    },
+    "action": {
+      "zh": "你带回两块沙土，铺成一小块专用田。",
+      "en": "Bring home two sand tiles and create a dedicated plot."
+    },
+    "result": {
+      "zh": "相同种子在普通地面不可种，在沙地上出现有效预览。",
+      "en": "The same seed is invalid on ordinary ground and valid on sand."
+    },
+    "next": {
+      "zh": "确认能生长后，再选择扩大专用田或保留原土地。",
+      "en": "After confirming growth, decide whether to expand or preserve space for other crops."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "用两类地面和两类种子做兼容表，放置预览直接说明不兼容原因。",
+      "en": "Use two soil types and two seed types, with placement previews explaining incompatibility."
+    },
+    "pitfall": {
+      "zh": "若每个种子都有独立土壤，记忆负担会迅速增加；先用少量可归类的需求。",
+      "en": "A unique soil requirement for every seed creates a large memorisation burden; begin with shared categories."
+    },
+    "test": {
+      "zh": "第一次失败后，玩家能否根据提示自行换地面，而无需查看外部说明？",
+      "en": "After one failed attempt, can players choose the correct soil without outside instructions?"
+    }
+  }
+}

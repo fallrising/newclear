@@ -1,0 +1,4 @@
+{
+  "optionalReviewerArtifacts": "No T148 evidence directory created: reviewer produced report only; initial unconditional copy raised FileNotFoundError after report was copied, corrected to conditional optional copy. Required report present and validator passed.",
+  "rawFilesDeleted": 0
+}

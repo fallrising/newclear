@@ -1,0 +1,8 @@
+{
+  "version": 1,
+  "original": "T144/identity/green2.log",
+  "sha256": "d19a0f34240bba9998c0d0d3dc01250bae9d1a80ecd5c956562f3f31ae71db3a",
+  "byteSize": "204",
+  "encoding": "utf-8",
+  "text": "✔ T144_identity_uses_fixed_operator_and_anonymous_permissions_before_media (9.590317ms)\nℹ tests 1\nℹ suites 0\nℹ pass 1\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 66.790712\n"
+}

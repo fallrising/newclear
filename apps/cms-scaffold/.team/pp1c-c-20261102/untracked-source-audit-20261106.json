@@ -1,0 +1,45 @@
+{
+  "sourceFiles": [
+    {
+      "path": "scripts/local/restore-target.mjs",
+      "ignored": true
+    },
+    {
+      "path": "scripts/ops/local-restore.test.mjs",
+      "ignored": false
+    },
+    {
+      "path": "scripts/ops/local-recovery-verify.mjs",
+      "ignored": false
+    },
+    {
+      "path": "scripts/ops/local-restore.mjs",
+      "ignored": false
+    },
+    {
+      "path": "scripts/ops/local-recovery-verify.test.mjs",
+      "ignored": false
+    },
+    {
+      "path": "scripts/ops/local-recovery.fixture.mjs",
+      "ignored": false
+    },
+    {
+      "path": "services/cms-api/src/test/java/com/fallrising/cms/ops/RestoreSessionRevokerTests.java",
+      "ignored": false
+    },
+    {
+      "path": "services/cms-api/src/main/java/com/fallrising/cms/ops/RestoreSessionRevoker.java",
+      "ignored": false
+    },
+    {
+      "path": "services/cms-api/src/integrationTest/java/com/fallrising/cms/contract/RestoreSessionRevokerIntegrationTests.java",
+      "ignored": false
+    },
+    {
+      "path": "services/cms-api/src/integrationTest/java/com/fallrising/cms/ops/RestoreSessionRevokerMainIntegrationTests.java",
+      "ignored": false
+    }
+  ],
+  "note": "git ls-files queried from component returns component-relative paths; initial diagnostic incorrectly prefixed repository path, corrected without mutation"
+}

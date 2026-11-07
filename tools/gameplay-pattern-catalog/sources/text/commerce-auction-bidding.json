@@ -1,0 +1,120 @@
+{
+  "id": "commerce-auction-bidding",
+  "system": "commerce",
+  "edition": 1,
+  "name": {
+    "zh": "竞拍与止损报价",
+    "en": "Auction bidding limits"
+  },
+  "summary": {
+    "zh": "在对手不断抬价时，守住自己对标的的真实估值。",
+    "en": "Maintain a valuation while rivals raise the price."
+  },
+  "rules": {
+    "zh": "玩家观察拍品与当前报价，选择加价或退出。获胜不等于盈利：支付成本必须与转售价值或战略用途比较；别人退出后才真正结算。",
+    "en": "Inspect a lot and current bid, then raise or withdraw. Winning is not automatically profitable: compare cost with resale or strategic value before the auction settles."
+  },
+  "loop": [
+    {
+      "zh": "估计拍品价值",
+      "en": "Value the lot"
+    },
+    {
+      "zh": "设定最高出价",
+      "en": "Set a ceiling"
+    },
+    {
+      "zh": "跟价或退出",
+      "en": "Bid or withdraw"
+    },
+    {
+      "zh": "兑现用途或转售",
+      "en": "Use or resell"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "拍品对自己价值普通，但能否阻止对手形成优势？",
+      "en": "Does denying a rival justify paying above personal value?"
+    },
+    {
+      "zh": "已经投入的竞价时间，是否正在诱导自己越过止损线？",
+      "en": "Is time spent bidding tempting you to exceed your limit?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "价值不确定性",
+        "en": "Valuation uncertainty"
+      },
+      "effect": {
+        "zh": "信息不全会放大捡漏与买贵的风险。",
+        "en": "Incomplete information increases both bargains and overpayment."
+      }
+    },
+    {
+      "name": {
+        "zh": "加价步长",
+        "en": "Bid increments"
+      },
+      "effect": {
+        "zh": "大步长缩短竞拍，但减少细致试探空间。",
+        "en": "Large increments shorten auctions but reduce fine probing."
+      }
+    }
+  ],
+  "tags": [
+    "economy",
+    "information",
+    "risk"
+  ],
+  "related": [
+    "commerce-price-discovery",
+    "commerce-debt-pressure",
+    "commerce-dynamic-market",
+    "commerce-haggling"
+  ],
+  "contrast": {
+    "zh": "外星贸易公司的竞拍直接改变比赛优势；当铺人生2更关注买入商品后的经营回报。",
+    "en": "Offworld auctions change competitive leverage; Dealer’s Life 2 emphasizes later commercial returns."
+  },
+  "combination": {
+    "zh": "组合创意：遗迹地图采用拍卖获取，地图价值取决于自己拥有的探险技能，让同一拍品对不同角色值不同价。",
+    "en": "Design proposal: auction ruin maps whose value depends on each explorer’s skills, giving the same lot different values to different buyers."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "拍品估值 120，当前报价 90，每次加价 10。",
+      "en": "You value the item at 120; the bid is 90 and increments are 10."
+    },
+    "action": {
+      "zh": "你出价 100，对手跟到 110，下一次轮到你决定是否出 120。",
+      "en": "Bid 100; the opponent offers 110, leaving you to consider 120."
+    },
+    "result": {
+      "zh": "出 120 即使赢得拍品，也已没有预期转售利润。",
+      "en": "At 120, winning leaves no expected resale profit."
+    },
+    "next": {
+      "zh": "你选择退出，保留资金等待下一件更有余量的拍品。",
+      "en": "Withdraw and keep funds for an item with more margin."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "做三个有参考估值的拍品和两个不同出价上限的电脑对手。",
+      "en": "Create three items with estimated values and two computer bidders with different limits."
+    },
+    "pitfall": {
+      "zh": "先区分估值线索与真实价值；对手全知会让玩家觉得竞争不公平。",
+      "en": "Distinguish valuation clues from actual value; omniscient opponents can feel unfair."
+    },
+    "test": {
+      "zh": "观察玩家是否会放弃已经追价多轮的拍品，而非把获胜本身当作盈利。",
+      "en": "See whether players abandon a long bidding contest instead of treating victory as profit."
+    }
+  }
+}

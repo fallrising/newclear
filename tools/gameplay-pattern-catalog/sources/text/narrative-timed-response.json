@@ -1,0 +1,120 @@
+{
+  "id": "narrative-timed-response",
+  "system": "narrative",
+  "edition": 3,
+  "name": {
+    "zh": "在回答窗口关闭前表态",
+    "en": "Answer before the response window closes"
+  },
+  "summary": {
+    "zh": "还没想好也会继续，犹豫本身消耗说话机会。",
+    "en": "The conversation continues even when you hesitate, so thinking uses up the chance to speak."
+  },
+  "rules": {
+    "zh": "对话出现可选回应，同时给出有限的作答窗口。玩家必须在窗口关闭前选定态度；超时后系统按预先写好的默认回应继续，而不是一直等候。本条关注选择截止时间，默认回应可以是沉默，但不等同于所有沉默玩法。",
+    "en": "A conversation offers responses for a limited window. Choose a stance before it closes; otherwise a written default advances the scene instead of waiting forever. This mechanic concerns the deadline. Silence is one possible default, not a requirement."
+  },
+  "loop": [
+    {
+      "zh": "听清眼前的问题",
+      "en": "Hear the immediate question"
+    },
+    {
+      "zh": "在有限时间内比较回应",
+      "en": "Weigh the responses within the window"
+    },
+    {
+      "zh": "选择一句话或接受超时结果",
+      "en": "Choose a line or accept the timeout"
+    },
+    {
+      "zh": "面对对方的新反应",
+      "en": "Face the resulting reaction"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "先选稳妥答复，还是冒着错过窗口的风险多想一下？",
+      "en": "Answer safely now or risk losing the opportunity while thinking?"
+    },
+    {
+      "zh": "当前信息不够时，要不要先表态承担承诺？",
+      "en": "With incomplete information, should you still take a position and accept its commitment?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "作答窗口长度",
+        "en": "Response-window length"
+      },
+      "effect": {
+        "zh": "更短会增加临场压力；至少应让玩家读完选项，并允许调整阅读时间。",
+        "en": "Shorter windows add pressure; allow enough reading time and a timing adjustment."
+      }
+    },
+    {
+      "name": {
+        "zh": "超时结果",
+        "en": "Timeout outcome"
+      },
+      "effect": {
+        "zh": "明确的默认回应让犹豫成为可理解的后果；隐蔽的随机结果容易显得不公平。",
+        "en": "A clear default makes hesitation legible; a hidden random outcome can feel arbitrary."
+      }
+    }
+  ],
+  "tags": [
+    "timing",
+    "narrative",
+    "risk"
+  ],
+  "related": [
+    "narrative-conversation-intervention",
+    "narrative-deliberate-silence",
+    "commerce-haggling",
+    "narrative-background-dialogue-access"
+  ],
+  "contrast": {
+    "zh": "行尸走肉用明显的倒计时强调决断；Oxenfree 把机会放进持续进行的谈话里。",
+    "en": "The Walking Dead emphasizes the decision with a visible countdown; Oxenfree places the opportunity inside a continuing conversation."
+  },
+  "combination": {
+    "zh": "组合提案：商人只短暂保留一份委托报价；玩家要在回应窗口内核对库存并决定是否承诺交付。",
+    "en": "Design proposal: a merchant holds a contract offer briefly, requiring a stock check and a delivery commitment before the response window closes."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "渡口管理员问是否替一位旅客担保，只给六秒回应。",
+      "en": "A ferryman gives six seconds to decide whether to vouch for a traveler."
+    },
+    "action": {
+      "zh": "玩家没查完介绍，先选择“我担保”。",
+      "en": "Before finishing the background note, the player chooses to vouch."
+    },
+    "result": {
+      "zh": "旅客获准上船，担保责任也记在玩家身上。",
+      "en": "The traveler boards, and responsibility is recorded against the player."
+    },
+    "next": {
+      "zh": "下一段问话出现时，玩家要决定是否继续维护此前说法。",
+      "en": "At the next question, the player must decide whether to maintain that position."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "做一个问题、三句回应、一个可调整时长的倒计时和一条超时分支。",
+      "en": "Build one question, three responses, an adjustable timer and one timeout branch."
+    },
+    "pitfall": {
+      "zh": "同时出现长字幕和短倒计时，会把阅读速度误当成决策能力。",
+      "en": "Long text with a short deadline tests reading speed more than decision-making."
+    },
+    "test": {
+      "zh": "玩家能否说明是主动选了立场，还是根本没来得及读懂？",
+      "en": "Can players distinguish choosing a stance from simply failing to read in time?"
+    }
+  }
+}

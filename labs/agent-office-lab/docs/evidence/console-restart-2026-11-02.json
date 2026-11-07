@@ -1,0 +1,52 @@
+{
+  "schema": 1,
+  "milestone": "T-0019",
+  "date": "2026-11-02",
+  "baseline": "ef238c7ea95eb3d6d20ad0fc66f56513a185ec4d",
+  "scope": "Read-only shared execution state across launchers and console restarts. Recheck before spawning; retain dispatcher locking.",
+  "offline_tests": {
+    "python": 136,
+    "node": 35,
+    "total": 171,
+    "passed": true
+  },
+  "browser": {
+    "status": "passed",
+    "provider_launches": 0,
+    "model_inference": false,
+    "external_lock_blocks_stale_plan": true,
+    "process_crash_preserves_journal": true,
+    "restart_and_refresh_do_not_unlock_or_rerun": true,
+    "explicit_ack_preserves_archive_and_does_not_launch": true,
+    "unreadable_state_blocks_without_exposure": true,
+    "browser_errors": 0,
+    "external_requests": 0,
+    "remaining_owned_processes": 0
+  },
+  "runtime_kind": "Real OS helper processes, HTTP servers and Chrome on a private synthetic lab. No native provider acceptance claimed.",
+  "checks": [
+    "Inspection does not create state directories or modify journal bytes/mtime/inode.",
+    "Busy lock is detected even before its owner writes a journal.",
+    "Actual helper SIGKILL leaves a running journal classified cleanup_unconfirmed.",
+    "Two separate console server processes preserve the same journal; refresh does not replay a job.",
+    "Stale execute requests are rejected before runner spawn; unknown jobs cannot be stopped.",
+    "Explicit acknowledgement only after fixture worker exit preserves original bytes in archive.",
+    "Malformed JSON, symlinks, non-private lock/directory and FIFO fail closed without exposing contents.",
+    "Shared slot snapshot is advisory; actual dispatcher exclusive locking remains authoritative."
+  ],
+  "source_sha256": {
+    "scripts/execution_slot.py": "63e33470175c4be38257a633d000dc472f5d15d674a62d40d1fc6c6dc083d0c2",
+    "scripts/office_dispatch.py": "5a13de67cd3c47eaf6fb02e1dbf7cc3e28279fa937a424bf85a6541581247479",
+    "scripts/office_console.py": "6293de8d9cff49dd30d24d07cddc373967f7f860a6f63f8d77baace77826673b",
+    "scripts/office_console.js": "7e9af4c4b67089598d176ab206b0ce28c7e9f96f71e3615fb2fa3f1f72cc8bad",
+    "scripts/office_console.html": "e718688ebd1c8f007b4ef8e58731d9d96dd48fb79016d90022bfcbb7338354b9",
+    "scripts/office_console.css": "742a6809eab08a197d914ebb96d32642caba2f1dfac944cc884c41f79bcf5e43",
+    "scripts/check_console_restart_browser.mjs": "b28915f00664085c944a65fc1f76bb77a36e1a5d45442a6fc48b447c26285105"
+  },
+  "limitations": [
+    "Native provider host restart, session resume, remote integration and full AC-08/11 remain pending.",
+    "No process adoption, persistent console job scheduler or automatic recovery.",
+    "Read-only checks may become stale immediately; they do not reserve execution.",
+    "No model inference, paid API calls, release, deployment or usable tag."
+  ]
+}

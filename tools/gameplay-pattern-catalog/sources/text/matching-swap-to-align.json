@@ -1,0 +1,120 @@
+{
+  "id": "matching-swap-to-align",
+  "system": "matching",
+  "edition": 3,
+  "name": {
+    "zh": "交换相邻物件凑成一排",
+    "en": "Swap neighbors to complete a match"
+  },
+  "summary": {
+    "zh": "只换两个位置，却要同时考虑眼前消除和换完后的棋盘。",
+    "en": "Swap two positions while considering both the immediate clear and the board left behind."
+  },
+  "rules": {
+    "zh": "玩家交换两个相邻物件，让同类物件在横向或纵向连成足够长的一排。匹配的物件消失，上方物件补位；不成组的交换通常退回。玩家在新的排列里继续寻找能推进目标的一步。",
+    "en": "Swap adjacent pieces to align enough matching pieces horizontally or vertically. Matched pieces disappear and pieces above fill the gaps; a swap that makes no match usually reverses. Search the new arrangement for the next useful move."
+  },
+  "loop": [
+    {
+      "zh": "寻找差一个位置的组合",
+      "en": "Find a group missing one position"
+    },
+    {
+      "zh": "交换相邻两格",
+      "en": "Swap two neighboring cells"
+    },
+    {
+      "zh": "消除并补入物件",
+      "en": "Clear and refill"
+    },
+    {
+      "zh": "重新判断下一步",
+      "en": "Reassess the next move"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "先消除最容易的一组，还是保留它给更大的组合腾位置？",
+      "en": "Take the easiest match or preserve it while setting up something larger?"
+    },
+    {
+      "zh": "多消几块能得分，但是否真的清到了关卡要求的位置？",
+      "en": "A larger clear scores well, but does it affect the cells the goal requires?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "同类数量门槛",
+        "en": "Match threshold"
+      },
+      "effect": {
+        "zh": "门槛越高，准备步骤越多，也越需要保证棋盘存在可行解。",
+        "en": "Higher thresholds require more preparation and stronger guarantees that useful moves exist."
+      }
+    },
+    {
+      "name": {
+        "zh": "颜色种类",
+        "en": "Number of colors"
+      },
+      "effect": {
+        "zh": "颜色少更容易连续消除；颜色多会增加寻找机会的时间。",
+        "en": "Fewer colors create frequent matches; more colors increase the time spent looking for an opening."
+      }
+    }
+  ],
+  "tags": [
+    "planning",
+    "spatial",
+    "optimization"
+  ],
+  "related": [
+    "matching-complete-lines",
+    "matching-merge-three-upgrade",
+    "matching-pattern-creates-power",
+    "matching-tap-connected-group"
+  ],
+  "contrast": {
+    "zh": "糖果传奇用关卡目标和步数决定哪次交换更有价值；宝石迷阵3的经典模式更强调在棋盘持续变化中延续得分。",
+    "en": "Candy Crush values swaps against a level objective and move budget; Bejeweled 3 Classic emphasizes continuing to score as the board changes."
+  },
+  "combination": {
+    "zh": "组合提案：消除和移动角色共用行动点。玩家要决定先换出治疗资源，还是先让角色躲开危险。",
+    "en": "Design proposal: make board swaps and character movement spend the same action points, forcing a choice between earning healing resources and escaping danger."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "一行是红、红、蓝，蓝块下方有一块红色，剩余四步。",
+      "en": "A row reads red, red, blue, with a red piece below the blue. Four moves remain."
+    },
+    "action": {
+      "zh": "把蓝块和下方红块交换。",
+      "en": "Swap the blue piece with the red below it."
+    },
+    "result": {
+      "zh": "三个红块消失，目标计数减少三，剩余三步。",
+      "en": "Three reds clear, the target count drops by three, and three moves remain."
+    },
+    "next": {
+      "zh": "补入的新块形成另一个缺口，需要重新找交换位置。",
+      "en": "New pieces create another incomplete group, so the next swap must be reconsidered."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "做一个六乘六棋盘、四种颜色，只保留交换、匹配、补位和一个收集目标。",
+      "en": "Build a six-by-six board with four colors, swapping, matching, refill and one collection goal."
+    },
+    "pitfall": {
+      "zh": "随机补位可能产生无可行交换的局面，先明确重排或失败规则。",
+      "en": "Random refill can leave no legal swaps; specify reshuffle or failure behavior first."
+    },
+    "test": {
+      "zh": "玩家能否解释为什么某个交换比另一个更接近目标？",
+      "en": "Can players explain why one swap advances the goal more than another?"
+    }
+  }
+}

@@ -1,0 +1,241 @@
+{
+  "schema_version": 1,
+  "sdk": "2.0.160",
+  "core": "2.0.140",
+  "model": "bge_zh",
+  "model_revision": "75c43b069aac4d136ba6bc1122f995fedcfd2781",
+  "corpus_sha256": "a91ec99c3329ddafdf856aa74a193dcfd5f62e32273ccd4c62d9154855c1f970",
+  "expected_source_count": 24,
+  "put_many_ids": [
+    "1",
+    "2",
+    "3",
+    "4",
+    "5",
+    "6",
+    "7",
+    "8",
+    "9",
+    "10",
+    "11",
+    "12",
+    "13",
+    "14",
+    "15",
+    "16",
+    "17",
+    "18",
+    "20",
+    "21",
+    "22",
+    "23",
+    "24",
+    "25"
+  ],
+  "before_seal": {
+    "frames": {
+      "mv2://notes/n01": 0,
+      "mv2://notes/n02": 1,
+      "mv2://notes/n03": 2,
+      "mv2://notes/n04": 3,
+      "mv2://notes/n05": 4,
+      "mv2://notes/n06": 5,
+      "mv2://notes/n07": 6,
+      "mv2://notes/n08": 7,
+      "mv2://notes/n09": 8,
+      "mv2://notes/n10": 9,
+      "mv2://notes/n11": 10,
+      "mv2://notes/n12": 11,
+      "mv2://notes/n13": 12,
+      "mv2://notes/n14": 13,
+      "mv2://notes/n15": 14,
+      "mv2://notes/n16": 15,
+      "mv2://notes/n17": 16,
+      "mv2://notes/n18": 17,
+      "mv2://notes/n19": 18,
+      "mv2://notes/n20": 19,
+      "mv2://notes/n21": 20,
+      "mv2://notes/n22": 21,
+      "mv2://notes/n23": 22,
+      "mv2://notes/n24": 23
+    },
+    "hits": [
+      {
+        "frame_id": 0,
+        "uri": "mv2://notes/n01",
+        "score": 0.6367264986038208
+      },
+      {
+        "frame_id": 7,
+        "uri": "mv2://notes/n08",
+        "score": 0.4788588881492615
+      },
+      {
+        "frame_id": 4,
+        "uri": "mv2://notes/n05",
+        "score": 0.46834439039230347
+      },
+      {
+        "frame_id": 15,
+        "uri": "mv2://notes/n16",
+        "score": 0.4624180793762207
+      },
+      {
+        "frame_id": 5,
+        "uri": "mv2://notes/n06",
+        "score": 0.4580346941947937
+      },
+      {
+        "frame_id": 11,
+        "uri": "mv2://notes/n12",
+        "score": 0.4479793310165405
+      },
+      {
+        "frame_id": 14,
+        "uri": "mv2://notes/n15",
+        "score": 0.4417712688446045
+      },
+      {
+        "frame_id": 1,
+        "uri": "mv2://notes/n02",
+        "score": 0.4322826862335205
+      },
+      {
+        "frame_id": 10,
+        "uri": "mv2://notes/n11",
+        "score": 0.42831873893737793
+      },
+      {
+        "frame_id": 8,
+        "uri": "mv2://notes/n09",
+        "score": 0.4278048872947693
+      },
+      {
+        "frame_id": 2,
+        "uri": "mv2://notes/n03",
+        "score": 0.42674916982650757
+      },
+      {
+        "frame_id": 17,
+        "uri": "mv2://notes/n18",
+        "score": 0.4258221983909607
+      },
+      {
+        "frame_id": 3,
+        "uri": "mv2://notes/n04",
+        "score": 0.42189180850982666
+      },
+      {
+        "frame_id": 6,
+        "uri": "mv2://notes/n07",
+        "score": 0.41759830713272095
+      },
+      {
+        "frame_id": 9,
+        "uri": "mv2://notes/n10",
+        "score": 0.4153871536254883
+      },
+      {
+        "frame_id": 16,
+        "uri": "mv2://notes/n17",
+        "score": 0.4036244750022888
+      },
+      {
+        "frame_id": 13,
+        "uri": "mv2://notes/n14",
+        "score": 0.38268667459487915
+      },
+      {
+        "frame_id": 12,
+        "uri": "mv2://notes/n13",
+        "score": 0.3724132776260376
+      }
+    ]
+  },
+  "after_reopen": {
+    "frames": {
+      "mv2://notes/n01": 0,
+      "mv2://notes/n02": 1,
+      "mv2://notes/n03": 2,
+      "mv2://notes/n04": 3,
+      "mv2://notes/n05": 4,
+      "mv2://notes/n06": 5,
+      "mv2://notes/n07": 6,
+      "mv2://notes/n08": 7,
+      "mv2://notes/n09": 8,
+      "mv2://notes/n10": 9,
+      "mv2://notes/n11": 10,
+      "mv2://notes/n12": 11,
+      "mv2://notes/n13": 12,
+      "mv2://notes/n14": 13,
+      "mv2://notes/n15": 14,
+      "mv2://notes/n16": 15,
+      "mv2://notes/n17": 16,
+      "mv2://notes/n18": 17,
+      "mv2://notes/n19": 18,
+      "mv2://notes/n20": 19,
+      "mv2://notes/n21": 20,
+      "mv2://notes/n22": 21,
+      "mv2://notes/n23": 22,
+      "mv2://notes/n24": 23
+    },
+    "hits": [
+      {
+        "frame_id": 23,
+        "uri": "mv2://notes/n24",
+        "score": 0.45213985443115234
+      },
+      {
+        "frame_id": 19,
+        "uri": "mv2://notes/n20",
+        "score": 0.4390268921852112
+      },
+      {
+        "frame_id": 18,
+        "uri": "mv2://notes/n19",
+        "score": 0.4209214448928833
+      },
+      {
+        "frame_id": 20,
+        "uri": "mv2://notes/n21",
+        "score": 0.4134564995765686
+      },
+      {
+        "frame_id": 21,
+        "uri": "mv2://notes/n22",
+        "score": 0.3912610411643982
+      },
+      {
+        "frame_id": 22,
+        "uri": "mv2://notes/n23",
+        "score": 0.39037877321243286
+      }
+    ]
+  },
+  "returned_ids_match_persisted_frames": false,
+  "all_sources_searchable_after_reopen": false,
+  "native_persistence_passed": false,
+  "network": {
+    "mechanism": "Linux libseccomp",
+    "denied_syscalls": [
+      "socket",
+      "socketpair",
+      "connect",
+      "sendto",
+      "sendmsg",
+      "sendmmsg"
+    ],
+    "probes": {
+      "ipv4": "EPERM",
+      "ipv6": "EPERM"
+    },
+    "installed_before_sdk_import": true,
+    "inherited_by_subprocesses": true
+  },
+  "sources": {
+    "diagnose_vectors.py": "21262c407fa31301838855dbb5c9952040f276ab8e5f5fd1d35aeb7b5aa5ee7f",
+    "semantic_models.py": "64e9d99fea7bc928fa080f195c096154b638c5c83c9cb1786cba8c7d002188ce",
+    "requirements.lock": "46982859187a17fdc10c405074e49b14b27fddcefb411ba597f9186b4091dbcd",
+    "requirements-models.lock": "c02e6ef0ac4b75d03b45217cdd6328a958d5d16479c5cedf909b5a75e01ee7a1"
+  }
+}

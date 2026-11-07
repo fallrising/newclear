@@ -1,0 +1,120 @@
+{
+  "id": "driving-drift-boost",
+  "system": "driving",
+  "edition": 3,
+  "name": {
+    "zh": "漂移蓄力后释放加速",
+    "en": "Drift to charge a release boost"
+  },
+  "summary": {
+    "zh": "弯道里多维持一会儿漂移，换取出弯时更长的加速。",
+    "en": "Hold a drift through a corner to earn a longer burst on the exit."
+  },
+  "rules": {
+    "zh": "入弯后维持侧滑，积累加速奖励，并用方向输入调整行驶路线。松开漂移键会把已积累的奖励转成短暂加速。玩家要判断还能安全蓄多久，以及出弯后有没有足够空间使用加速；漂移本身不等于越久越好。",
+    "en": "Maintain a drift through a corner while steering and building a boost. Releasing the drift converts the stored reward into a short burst. Judge how much longer the line is safe and whether the exit has enough room to use the speed."
+  },
+  "loop": [
+    {
+      "zh": "观察弯道和出口",
+      "en": "Read the turn and exit"
+    },
+    {
+      "zh": "入弯并维持漂移",
+      "en": "Enter and hold a drift"
+    },
+    {
+      "zh": "修正路线与观察蓄力",
+      "en": "Adjust the line and watch charge"
+    },
+    {
+      "zh": "松开漂移，利用加速",
+      "en": "Release and use the boost"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "继续蓄力还是现在放开，避免冲到路外？",
+      "en": "Keep charging or release now to stay on the road?"
+    },
+    {
+      "zh": "下一弯很近，值得把这次加速蓄满吗？",
+      "en": "Is a full boost useful with another corner so close?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "蓄力分档",
+        "en": "Charge thresholds"
+      },
+      "effect": {
+        "zh": "档位之间的距离决定玩家会不会冒险再撑一小段。",
+        "en": "The spacing between thresholds shapes the temptation to hold a little longer."
+      }
+    },
+    {
+      "name": {
+        "zh": "漂移可修正幅度",
+        "en": "Steering during a drift"
+      },
+      "effect": {
+        "zh": "修正余地越小，入弯位置越重要；余地太大会削弱路线取舍。",
+        "en": "Limited correction makes entry position matter; too much can remove the line choice."
+      }
+    }
+  ],
+  "tags": [
+    "timing",
+    "precision",
+    "risk"
+  ],
+  "related": [
+    "driving-air-balance",
+    "driving-air-stunt",
+    "driving-slipstream",
+    "driving-start-charge"
+  ],
+  "contrast": {
+    "zh": "马力欧卡丁车用火花颜色明确分档；索尼克的手册强调持续漂移与有限方向修正。两者都把弯中路线与出弯速度连在一起。",
+    "en": "Mario Kart communicates tiers through spark colors; the Sonic manual emphasizes sustaining a drift with limited correction. Both connect the cornering line to exit speed."
+  },
+  "combination": {
+    "zh": "组合提案：配送任务有截止时间，但急弯后紧接卸货点，玩家要判断加速节省的时间是否值得增加停车难度。",
+    "en": "Design proposal: give deliveries a deadline, with unloading just after a tight bend. A boost saves time but makes stopping harder."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "教学原型中，一个长弯后接直道；当前漂移已达到第一档。",
+      "en": "In the teaching prototype, a long bend leads to a straight. The drift has reached its first tier."
+    },
+    "action": {
+      "zh": "玩家多保持半秒，向弯内轻微修正。",
+      "en": "Hold for another half-second and steer slightly inward."
+    },
+    "result": {
+      "zh": "第二档亮起，松开后得到更长加速，但车已靠近路边。",
+      "en": "Tier two lights up. Releasing gives a longer boost, but the vehicle is now near the road edge."
+    },
+    "next": {
+      "zh": "玩家先回到安全路线，再决定下一弯要不要更早入弯。",
+      "en": "Return to a safe line, then decide whether to enter the next turn earlier."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "用俯视方块小车、一个弯和两档蓄力条，先验证松开时机。",
+      "en": "Use a top-down rectangle vehicle, one bend and two charge tiers to test release timing."
+    },
+    "pitfall": {
+      "zh": "先做稳定可预测的转向；漂移反馈不清时，增加车型和赛道只会放大问题。",
+      "en": "Establish predictable steering first; more vehicles and tracks amplify unclear drift feedback."
+    },
+    "test": {
+      "zh": "玩家能否说清楚为什么这一弯提前松开，下一弯继续蓄力？",
+      "en": "Can players explain why they released early in one corner and held longer in another?"
+    }
+  }
+}

@@ -56,7 +56,8 @@ func (service *Service) verifyCompletionMaterial(ctx context.Context, value comm
 	if !material.CandidatePresent || !material.RunPresent || !material.CandidateAvailable {
 		return nil
 	}
-	current, err := currentSubject(material, service.config.Completion)
+	policy := service.completionFor(material.WorkItem.ProjectID())
+	current, err := currentSubject(material, policy)
 	if err != nil || current.Digest() != value.Subject.Digest() || material.WorkItem.Version() != value.ExpectedVersion {
 		return nil // Preserve the existing current-subject/version gate classification.
 	}
@@ -108,13 +109,13 @@ func (service *Service) verifyCompletionMaterial(ctx context.Context, value comm
 		artifacts[artifact.Digest] = artifact
 	}
 	for _, evidence := range material.Evidence {
-		rule, required := service.config.Completion.Checks[evidence.ACID]
+		rule, required := policy.Checks[evidence.ACID]
 		bound := slices.ContainsFunc(material.RequiredACRevisions, func(ac port.ACRequirement) bool {
 			return ac.ACID == evidence.ACID && ac.RevisionDigest == evidence.ACRevisionDigest
 		})
 		if !required || !bound || evidence.SubjectDigest != current.Digest() || evidence.VerifierClass != rule.VerifierClass || evidence.Verdict != "Passed" ||
 			evidence.Applicability != "Current" || evidence.Availability != "Present" ||
-			evidence.RecipeDigest != service.config.Completion.RecipeDigest ||
+			evidence.RecipeDigest != policy.RecipeDigest ||
 			(!rule.EnvironmentDigest.IsZero() && evidence.EnvironmentDigest != rule.EnvironmentDigest) {
 			continue // The existing Done predicate rejects missing/nonpassing/stale coverage.
 		}

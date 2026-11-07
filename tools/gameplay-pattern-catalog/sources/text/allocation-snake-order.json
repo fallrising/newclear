@@ -1,0 +1,119 @@
+{
+  "id": "allocation-snake-order",
+  "system": "allocation",
+  "edition": 3,
+  "name": {
+    "zh": "第二轮倒着选补偿后手",
+    "en": "Reverse the next pass to compensate late picks"
+  },
+  "summary": {
+    "zh": "前面先挑，后面则有机会连着挑两次。",
+    "en": "Early players pick first; late players may pair consecutive picks."
+  },
+  "rules": {
+    "zh": "每人需要选择多次时，第一遍按顺序进行，第二遍反向返回，减少同一人总是先选的优势。玩家不仅看单件价值，也要考虑距离下次选择还有几个人；转折位置可连续选择，适合拿互相配合的两件。",
+    "en": "For repeated picks, proceed in order and then reverse the next pass. This reduces repeated first access while making the gap until the next pick important. Players at the turn-around can take consecutive picks and secure a pair."
+  },
+  "loop": [
+    {
+      "zh": "查看完整选择顺序",
+      "en": "Read the full pick order"
+    },
+    {
+      "zh": "拿最怕被抢走的选项",
+      "en": "Take the most contested option"
+    },
+    {
+      "zh": "顺序反转后再次选择",
+      "en": "Pick again after the order reverses"
+    },
+    {
+      "zh": "根据两次所得形成方案",
+      "en": "Build a plan from the pair"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "先手拿单件最强，还是拿必须配另一件才有用的部分？",
+      "en": "Take the strongest standalone item first or start a combination that needs another piece?"
+    },
+    {
+      "zh": "最后一位能连选两次，要凑组合还是抢两个通用强项？",
+      "en": "Use consecutive picks for a pair or two broadly strong options?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "往返次数",
+        "en": "Number of passes"
+      },
+      "effect": {
+        "zh": "一次往返便于理解，多轮反转需要持续提示顺序。",
+        "en": "One out-and-back pass is easy to read; repeated reversals need persistent order cues."
+      }
+    },
+    {
+      "name": {
+        "zh": "组合强度",
+        "en": "Pair strength"
+      },
+      "effect": {
+        "zh": "成对收益越大，连续两次选择就越有价值。",
+        "en": "Stronger pair rewards make consecutive picks more valuable."
+      }
+    }
+  ],
+  "tags": [
+    "planning",
+    "optimization"
+  ],
+  "related": [
+    "allocation-area-majority",
+    "allocation-follow-phase",
+    "allocation-public-goal-race",
+    "allocation-public-pick"
+  ],
+  "contrast": {
+    "zh": "璀璨玻璃每轮重复往返选骰；卡坦岛将往返主要用于开局选址，之后回到通常的回合顺序。",
+    "en": "Sagrada repeats the pattern for each dice draft; Catan primarily uses it for initial placement before normal turn order resumes."
+  },
+  "combination": {
+    "zh": "组合提案：玩家蛇形轮选双用途卡，先手优先保住通用牌，末位则可连续拿到互相支持的生产与行动两张牌。",
+    "en": "Design proposal: snake-draft dual-use cards, letting early players secure versatile cards while the last player takes a production-and-action pair together."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "三人选六件工具，顺序为甲、乙、丙、丙、乙、甲。",
+      "en": "Three players draft six tools in the order A, B, C, C, B, A."
+    },
+    "action": {
+      "zh": "丙连续拿走锯子和木工夹。",
+      "en": "C takes a saw and clamp consecutively."
+    },
+    "result": {
+      "zh": "丙凑齐组合，甲最先拿的强工具却没有配件。",
+      "en": "C completes a pair while A’s strong first pick lacks support."
+    },
+    "next": {
+      "zh": "甲最后一次选择要改拿通用工具，或保留未来再补配件的计划。",
+      "en": "A must take a general tool last or plan to find support later."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "competitive",
+    "firstStep": {
+      "zh": "三名本地玩家、六张工具牌和两种成对奖励，把六次顺序一直显示在屏幕上。",
+      "en": "Use three local players, six tool cards and two pair bonuses with the full order visible."
+    },
+    "pitfall": {
+      "zh": "蛇形顺序只能补偿部分先手差异，不能保证任意奖励结构都公平。",
+      "en": "Snake order offsets some first-pick advantage but cannot balance every reward structure."
+    },
+    "test": {
+      "zh": "先手与末位是否形成不同的拿牌策略，且都能说清原因？",
+      "en": "Do early and late pickers use different strategies and explain why?"
+    }
+  }
+}

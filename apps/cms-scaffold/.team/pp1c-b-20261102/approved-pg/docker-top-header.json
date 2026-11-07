@@ -1,0 +1,6 @@
+{
+  "scope": "actual Docker top header only, no arguments retained",
+  "header": "PID                 COMMAND",
+  "trimMatchesCurrentParser": false,
+  "runId": "3253eeb3bae442f9b660b1e5c80ec033"
+}

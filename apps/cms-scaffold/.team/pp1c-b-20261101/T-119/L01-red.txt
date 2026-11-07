@@ -1,0 +1,55 @@
+✖ PP1C_L01_v1_insertion_order_bytes_and_atomic_update (3.614787ms)
+✖ PP1C_L01_duplicate_reservation_preserves_existing_bytes (2.217923ms)
+✖ PP1C_L01_symlink_hardlink_and_mode_rejected (1.299165ms)
+ℹ tests 3
+ℹ suites 0
+ℹ pass 0
+ℹ fail 3
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 17.538444
+
+✖ failing tests:
+
+test at scripts/local/maintenance-store.test.mjs:12:1
+✖ PP1C_L01_v1_insertion_order_bytes_and_atomic_update (3.614787ms)
+  Error: ENOENT: no such file or directory, open '/tmp/pp1-store-6gkYAg/lease.json'
+      at async open (node:internal/fs/promises:640:25)
+      at async readFile (node:internal/fs/promises:1290:14)
+      at async TestContext.<anonymous> (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-registry-20261101/apps/cms-scaffold/scripts/local/maintenance-store.test.mjs:16:16)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:385:3) {
+    errno: -2,
+    code: 'ENOENT',
+    syscall: 'open',
+    path: '/tmp/pp1-store-6gkYAg/lease.json'
+  }
+
+test at scripts/local/maintenance-store.test.mjs:21:1
+✖ PP1C_L01_duplicate_reservation_preserves_existing_bytes (2.217923ms)
+  AssertionError [ERR_ASSERTION]: Missing expected rejection.
+      at async TestContext.<anonymous> (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-registry-20261101/apps/cms-scaffold/scripts/local/maintenance-store.test.mjs:24:3)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: [Object],
+    operator: 'rejects',
+    diff: 'simple'
+  }
+
+test at scripts/local/maintenance-store.test.mjs:27:1
+✖ PP1C_L01_symlink_hardlink_and_mode_rejected (1.299165ms)
+  AssertionError [ERR_ASSERTION]: Missing expected rejection.
+      at async TestContext.<anonymous> (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-registry-20261101/apps/cms-scaffold/scripts/local/maintenance-store.test.mjs:31:3)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: /QUIESCENCE_NOT_PROVEN/,
+    operator: 'rejects',
+    diff: 'simple'
+  }

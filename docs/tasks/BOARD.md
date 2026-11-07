@@ -28,10 +28,10 @@
 
 ## T-0380
 
-> 2026-10-28 owner決定：依已交付18項結案，Fanzloud暫緩且未完成（8/27、007FAIL/consumed、PR604Draft）。停止延伸Chromium調查；下方舊「下一步」僅為歷史提案，不是待執行工作。唯一恢復入口：[issue706](https://github.com/fallrising/newclear/issues/706)；[結案範圍](https://github.com/fallrising/newclear/blob/main/docs/fe-review/ROUND2-CLOSEOUT.md)。沒有新runtime/build/model授權。
+> 2026-10-29 desk T-0433 ([issue706](https://github.com/fallrising/newclear/issues/706)) delivered the Fanzloud unit: every R2-AC-14 condition holds with linked evidence ([R2 report](../../platform/fanzloud/fe-review/tasks/round2/report.md)), so FE2-14 and FE2-E are done and Round2 is 19/19 (13 newclear, 5 kernel, Fanzloud). This is synthetic-harness scope, not real backend/Cloud or product mainline acceptance.
 
 
-依據：[第2輪 SDD 提案](../fe-review/ROUND2-SDD.md)。原Owner批准SDD（PR577）及順序保留；目前依上方結案決定停止推進Fanzloud。
+依據：[第2輪 SDD 提案](../fe-review/ROUND2-SDD.md)。原Owner批准SDD（PR577）及順序保留；Fanzloud由desk T-0433續做並已交付，見[結案紀錄](../fe-review/ROUND2-CLOSEOUT.md)。
 
 | ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -48,8 +48,33 @@
 | FE2-11 | Paired synthetic Web R2 delivered in PR598 | R2-AC-11 | done | 2026-10-24T11:22:03Z | 2026-10-24T17:33:41Z | 2026-10-24T17:34:24Z |
 | FE2-12 | gateways/pokercase 第2輪實作 | R2-AC-12 | done | 2026-10-24T12:21:48Z | 2026-10-24T14:18:11Z | 2026-10-24T14:18:11Z |
 | FE2-13 | systems/clarkq 第2輪實作 | R2-AC-13 | done | 2026-10-24T11:45:41Z | 2026-10-24T12:55:49Z | 2026-10-24T12:55:49Z |
-| FE2-14 | platform/fanzloud 暫緩、未完成（[issue706](https://github.com/fallrising/newclear/issues/706)；PR604 Draft；owner停止持續調查） | R2-AC-14 | in_progress | 2026-10-24T12:23:53Z | — | 2026-10-28T10:21:52.298548+00:00 |
-| FE2-E | 原全14項整合未完成；13項證據見結案表，Fanzloud部分留issue706 | R2-AC-E | todo | — | — | 2026-10-28T10:21:52.298548+00:00 |
+| FE2-14 | platform/fanzloud 第2輪實作（desk T-0433；[R2 報告](../../platform/fanzloud/fe-review/tasks/round2/report.md)；targets verified） | R2-AC-14 | done | 2026-10-24T12:23:53Z | 2026-10-29T16:42:19Z | 2026-10-29T16:42:19Z |
+| FE2-E | 全14項證據、交付與狀態一致：13項見[結案表](../fe-review/ROUND2-CLOSEOUT.md)，Fanzloud見R2報告 | R2-AC-E | done | 2026-10-29T06:04:00Z | 2026-10-29T16:42:19Z | 2026-10-29T16:42:19Z |
+
+
+## T-0433
+
+Desk [T-0433](https://github.com/fallrising/desk/blob/main/tasks/T-0433-fanzloud-fe2-completion/task.md) resumes the FE2-14 Fanzloud unit; the T-0380 closure scope is unchanged. Spec: [SPEC-T006](../../platform/fanzloud/docs/specs/SPEC-T006-private-operator-web.md) P-006-10 and [SPEC-T006R](../../platform/fanzloud/docs/specs/SPEC-T006R-fe-review.md) R03.
+
+| ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| T0433-1 | p0-client bounded read and fixture framing fix for ERR_ABORTED | R2-AC-14 | done | 2026-10-28T14:50:49Z | 2026-10-28T17:26:18Z | 2026-10-28T17:26:18Z |
+| T0433-2a | v4 recovery-only runner and one approved desktop recovery run (008: PASS, actual review ACCEPT; canonical 1/27 on new source) | R2-AC-14 | done | 2026-10-28T15:13:39Z | 2026-10-28T17:26:18Z | 2026-10-28T17:26:18Z |
+| T0433-2b | v5 desktop-remaining runner and one approved run of the other eight desktop cells (001: PASS, actual review ACCEPT; desktop 9/9, canonical 9/27) | R2-AC-14 | done | 2026-10-28T15:41:57Z | 2026-10-28T17:26:18Z | 2026-10-28T17:26:18Z |
+| T0433-2c | v6 tablet/mobile runner, tablet-001 and mobile-001 (both PASS, actual review ACCEPT; baseline 27/27) | R2-AC-14 | done | 2026-10-28T16:57:37Z | 2026-10-28T17:26:18Z | 2026-10-28T17:26:18Z |
+| T0433-2 | M2 actual UI repairs (mobile overflow, focusable diff/event regions, contrast evidence) and finite HTTP/WSS conformance | R2-AC-14 | done | 2026-10-28T17:32:56Z | 2026-10-29T05:44:04Z | 2026-10-29T05:44:04Z |
+| T0433-2d | v7 runner and recapture of all 27 dark cells on the M2-repaired source (desktop, tablet, mobile once each; all CANONICAL_ACCEPT; 27/27) | R2-AC-14 | done | 2026-10-28T17:58:58Z | 2026-10-28T18:18:08Z | 2026-10-28T18:18:08Z |
+| T0433-2e | Finite HTTP/WSS conformance C1: 15 offline oracles, findings F1–F4 (merged PR735) | R2-AC-14 | done | 2026-10-29T03:18:35Z | 2026-10-29T03:41:54Z | 2026-10-29T03:41:54Z |
+| T0433-2f | Harness repair F1–F4 and C2 browser driver (PR739); C2 conformance-001 PASS, actual review ACCEPT | R2-AC-14 | done | 2026-10-29T04:59:16Z | 2026-10-29T05:44:04Z | 2026-10-29T05:44:04Z |
+| T0433-3 | Final integration (R2-AC-E): focused journeys `journeys-001` PASS (PR752/754), shared capture `capture-001` FAIL kept and `capture-002` PASS (PR761/764/765); [R2 report](../../platform/fanzloud/fe-review/tasks/round2/report.md), R2-AC-14 conditions shown, targets `verified:true` | R2-AC-E | done | 2026-10-29T06:04:00Z | 2026-10-29T16:42:19Z | 2026-10-29T16:42:19Z |
+
+## T-0438
+
+Desk [T-0438](https://github.com/fallrising/desk/blob/main/tasks/T-0438-fanzloud-client-fixes/task.md): Fanzloud operator client fixes from the T-0433 product findings. Spec: [SPEC-T006](../../platform/fanzloud/docs/specs/SPEC-T006-private-operator-web.md) P-006-11.
+
+| ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| T0438-1 | Socket close code after a self-detected stream failure (P-006-11) and Authenticate spacing; RED then GREEN T006 test | P-006-11 | done | 2026-10-29T17:05:00Z | 2026-10-29T17:18:52Z | 2026-10-29T17:18:52Z |
 
 Pokercase original Round2 M1–M4 delivered in [PR603](https://github.com/fallrising/newclear/pull/603), merge `05aeed43a3a49cc1b4a98f760e52fa2881c61064` at 2026-10-24T14:18:11Z. R31 ACCEPT, both current CI checks SUCCESS and fetched scoped equality passed. This is scoped delivery; full Round3 and gateway mainline/owner acceptance remain separate.
 
@@ -66,3 +91,14 @@ Overall delivery is18of19. Fanz PR604 remains incomplete: bootstrap001-only PASS
 2026-10-28 Fanzloud checkpoint: approved next unit produced a test-only upstream patch with nine gtests, static applicability/reversal and helper/oracle mapping. Compilation/execution remain NOT_RUN; R9/R10 real context/V8 coverage remains GAP. [Artifact and single reassessment](../fe-review/fanzloud-completion-regression/README.md). No engine/product/dependency change or browser attempt;007FAIL/consumed,18/19,8/27 and DraftPR604 remain.
 
 2026-10-28 environment checkpoint: bounded read-only inventory identified no compatible existing Blink source/build/test route in the inspected scope; explicit exclusions/errors prevent a global absence claim. [Result and single next recommendation](../fe-review/fanzloud-completion-regression/ENVIRONMENT-FEASIBILITY.md). No engine/browser/model execution; patchNOT_RUN,R9/R10GAP,007FAIL/consumed,18/19,8/27 and DraftPR604 remain.
+
+## T-0440 — Favicon and browser follow-up
+
+[Desk T-0440](https://github.com/fallrising/desk/tree/main/archive/T-0440-fanzloud-browser-followup) · [SPEC-T006F](../../platform/fanzloud/docs/specs/SPEC-T006F-browser-followup.md)
+
+| ID | Task | AC | Status | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| T0440-1 | Embedded favicon route and native regression | AC-F01 | done | 2026-10-29T17:41:52.916453+00:00 | 2026-10-29T18:00:49Z | 2026-10-29T18:00:49Z |
+| T0440-2 | Focused Chromium evidence and acceptance | AC-F02–F04 | done | 2026-10-29T17:53:43.505657+00:00 | 2026-10-29T18:00:49Z | 2026-10-29T18:00:49Z |
+
+T-0440 completed: [PR790](https://github.com/fallrising/newclear/pull/790), merge `fe761aa529d23c49a8d42f2b753d6bc9c91230bb`; [ACCEPT-T006F](../../platform/fanzloud/docs/acceptance/T006F.acceptance.md) and [source-bound browser report](../../platform/fanzloud/fe-review/tasks/followup/report.md). All required checks and independent acceptance passed; remote component tree matched the reviewed head.

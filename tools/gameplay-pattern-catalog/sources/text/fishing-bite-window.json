@@ -1,0 +1,120 @@
+{
+  "id": "fishing-bite-window",
+  "system": "fishing",
+  "edition": 1,
+  "name": {
+    "zh": "咬钩时机判断",
+    "en": "Bite timing"
+  },
+  "summary": {
+    "zh": "从试探动作中识别真咬钩，在短窗口内提竿。",
+    "en": "Recognize a real bite and strike within a short window."
+  },
+  "rules": {
+    "zh": "玩家抛出鱼钩后等待信号，在真正咬钩时按键提竿。等待时间并不固定，过早或过晚行动可能空竿；浮标、音效或提示符把不可见的水下状态转成可判断的信息。",
+    "en": "After casting, wait for a signal and strike when a real bite occurs. Variable waiting prevents rote timing; early or late action may miss. Bobber motion, sound or an icon makes underwater state readable."
+  },
+  "loop": [
+    {
+      "zh": "把鱼钩投入水中",
+      "en": "Cast into water"
+    },
+    {
+      "zh": "等待并辨认信号",
+      "en": "Wait and identify the signal"
+    },
+    {
+      "zh": "在窗口内提竿",
+      "en": "Strike within the window"
+    },
+    {
+      "zh": "进入收线或重新抛竿",
+      "en": "Reel in or cast again"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "浮标只是轻晃，还是已经真正下沉？现在提竿能抢到机会，也可能太早空竿。",
+      "en": "Is the float merely twitching or truly sinking? Striking now may catch the moment or waste the cast."
+    },
+    {
+      "zh": "已经出现咬钩信号，要立即提竿，还是再等一瞬确认并承担错过窗口的风险？",
+      "en": "After a bite signal, strike immediately or wait for confirmation and risk missing the window?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "有效窗口",
+        "en": "Response window"
+      },
+      "effect": {
+        "zh": "窄窗口强调反应，宽窗口更适合休闲与辅助操作。",
+        "en": "Narrow windows emphasize reflexes; wider ones improve accessibility."
+      }
+    },
+    {
+      "name": {
+        "zh": "信号差异",
+        "en": "Signal contrast"
+      },
+      "effect": {
+        "zh": "真假信号越接近越需要注意力，也越容易令人疲劳。",
+        "en": "Subtle cue differences demand attention but can become tiring."
+      }
+    }
+  ],
+  "tags": [
+    "timing",
+    "information",
+    "precision"
+  ],
+  "related": [
+    "fishing-line-tension",
+    "fishing-target-tracking",
+    "exploration-stealth-awareness",
+    "fishing-cast-placement"
+  ],
+  "contrast": {
+    "zh": "星露谷使用明确提示引导反应；Dinkum把辨认浮标动作纳入准备阶段。",
+    "en": "Stardew emphasizes an explicit prompt; Dinkum makes reading bobber behavior part of preparation."
+  },
+  "combination": {
+    "zh": "设计提案：水面视线被雾遮挡时加强音效，让玩家选择更安静但距离更远的钓位。",
+    "en": "Design proposal: fog obscures the surface, making audio clearer at quiet but more distant fishing spots."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "浮标轻晃两次，鱼还没有真正吞钩。",
+      "en": "The float twitches twice, but the fish has not committed to the hook."
+    },
+    "action": {
+      "zh": "你继续等，直到浮标明显下沉才按提竿。",
+      "en": "Wait until the float clearly sinks, then strike."
+    },
+    "result": {
+      "zh": "按在有效窗口内进入收线；抢先按会空竿。",
+      "en": "A strike inside the valid window starts reeling; an early strike catches nothing."
+    },
+    "next": {
+      "zh": "失手后重新抛竿，利用刚才的反馈辨认下一次信号。",
+      "en": "After missing, cast again and use the feedback to read the next signal."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "做“等待／试探／真咬钩／逃走”四态和一个按键，让真假信号有可学习差异。",
+      "en": "Use waiting, nibbling, biting and escaped states with one button and learnably different signals."
+    },
+    "pitfall": {
+      "zh": "先别增加鱼种与装备；如果失败原因不清楚，更多内容只会放大猜测感。",
+      "en": "Postpone species and gear; unclear failure feedback makes extra content feel like more guessing."
+    },
+    "test": {
+      "zh": "试玩几轮后，玩家能否说出自己是按早了还是按晚了，并提高成功率？",
+      "en": "After several attempts, can players identify early versus late strikes and improve?"
+    }
+  }
+}

@@ -1,0 +1,148 @@
+{
+  "schema": 1,
+  "milestone": "T-0018",
+  "date": "2026-11-02",
+  "baseline": "973f2e2a6e4b9730a6a84eec087dad4651f82b79",
+  "scope": "Native Office cancellation of a working real Pi CLI held at a loopback request; CLI/console entry and result classification. No model inference.",
+  "offline_tests": {
+    "python": 128,
+    "node": 35,
+    "total": 163,
+    "passed": true
+  },
+  "browser": {
+    "status": "passed",
+    "model_inference": false,
+    "remote_model_calls": 0,
+    "duplicate_execute_blocked": true,
+    "refresh_without_rerun": true,
+    "run": "pi-work-20261102T122527656028Z",
+    "retry_rejected": true,
+    "native_cancel_duration_ms": 102,
+    "native_process_exit_ms": 102,
+    "cancel_cleanup_duration_ms": 3521,
+    "runner_elapsed_seconds": 14.335758292116225,
+    "cleanup_verified": true,
+    "external_browser_requests": 0,
+    "browser_errors": 0,
+    "result_detail_verified": true,
+    "runs": 55
+  },
+  "outer_cleanup": {
+    "exit_code": 0,
+    "owned_processes_seen": 29,
+    "remaining_owned_processes": 0,
+    "active_journal_present": false,
+    "elapsed_seconds": 41.9
+  },
+  "offline_results_browser": {
+    "status": "passed",
+    "providers_checked": [
+      "opencode",
+      "grok",
+      "pi",
+      "cursor"
+    ],
+    "runs": 55,
+    "detail_content_and_hash": true,
+    "filters": true,
+    "refresh": true,
+    "external_requests": 0,
+    "browser_errors": 0
+  },
+  "attempts": [
+    {
+      "attempt": "initial",
+      "run": "pi-work-20261102T121903887739Z",
+      "status": "cancelled",
+      "native_cancel_verified": true,
+      "native_worker_exit_ms": 102,
+      "cancel_cleanup_duration_ms": null,
+      "model_inference_verified": false,
+      "client_requests": 1,
+      "external_requests": 0,
+      "runner_owned_processes_seen": 16,
+      "remaining_owned_processes": 0,
+      "cleanup_errors": [],
+      "outer_cleanup": {
+        "exit_code": 0,
+        "owned_processes_seen": 41,
+        "remaining_owned_processes": 0,
+        "active_journal_present": false,
+        "elapsed_seconds": 71.95
+      },
+      "note": "Native worker exited in 102 ms, but complete runner report arrived about 20.09 s after cancellation. Initial browser checks passed without enforcing total cleanup time; milestone acceptance was incomplete.",
+      "report_file_mtime_minus_cancel_started_ms": 20089
+    },
+    {
+      "attempt": "shutdown_incomplete",
+      "run": "pi-work-20261102T122218384445Z",
+      "status": "failed",
+      "native_cancel_verified": true,
+      "native_worker_exit_ms": 102,
+      "cancel_cleanup_duration_ms": null,
+      "model_inference_verified": false,
+      "client_requests": 1,
+      "external_requests": 0,
+      "runner_owned_processes_seen": 5,
+      "remaining_owned_processes": 1,
+      "cleanup_errors": [
+        "owned_pi_process_survived"
+      ],
+      "outer_cleanup": {
+        "exit_code": 0,
+        "owned_processes_seen": 26,
+        "remaining_owned_processes": 1,
+        "active_journal_present": true,
+        "elapsed_seconds": 41.81
+      },
+      "note": "Explicit host exit exposed one surviving owned background child. Runner failed, cleanup journal stayed blocking. All recorded identities were later rechecked gone before explicit acknowledgement; original failure retained.",
+      "later_identity_recheck": {
+        "remaining_owned_processes": 0,
+        "verified_after_initial_cleanup_failure": true
+      }
+    },
+    {
+      "attempt": "final",
+      "run": "pi-work-20261102T122527656028Z",
+      "status": "cancelled",
+      "native_cancel_verified": true,
+      "native_worker_exit_ms": 102,
+      "cancel_cleanup_duration_ms": 3521,
+      "model_inference_verified": false,
+      "client_requests": 1,
+      "external_requests": 0,
+      "runner_owned_processes_seen": 12,
+      "remaining_owned_processes": 0,
+      "cleanup_errors": [],
+      "outer_cleanup": {
+        "exit_code": 0,
+        "owned_processes_seen": 29,
+        "remaining_owned_processes": 0,
+        "active_journal_present": false,
+        "elapsed_seconds": 41.9
+      },
+      "note": "Native shutdown followed by identity-checked SIGTERM to the remaining owned background child. Entire cleanup met the ten-second gate."
+    }
+  ],
+  "source_sha256": {
+    "scripts/office_dispatch.py": "535371ff18ec8c9d687392e4e115be5db6fc3f869ed68f6f8ba3cf24508626e4",
+    "scripts/run_pi_work.py": "2e5cc4b92f616ffe097ead0b9276ee73e1600e1045d12ec2db60f271cf3753c5",
+    "scripts/office_pi.mjs": "d122371c368872471deda938ef487814023eff9a4a929f8eae408b36913b12d4",
+    "scripts/process_ownership.py": "98b3ac4087f578549387f659efe883bb181f089b226215c984cb4825301579e8",
+    "scripts/office_results.py": "1c7b8de222ca21b6a0e2a33d844a610b08590e6f506f95c6f6757f15e32ebc01",
+    "scripts/office_results.html": "0ef4f588a85d4ccb112b7911b3ab661ff2ec2559d43fa3228c94bc0a3b8d71fa",
+    "scripts/office_console.py": "e6f7ce61c9aa4a5c2d4cab2ea3ffc98ac46e4363da47fbc803c7ee16ddba1669",
+    "scripts/office_console.js": "50948db6e555642830b21c7071e11c8bb226d015f9114b643f6bb99640aa6710",
+    "scripts/check_pi_cancel_browser.mjs": "6268c40418beb008f332f6454d48565045c87e2240bdae619025ff2b2adb1b51",
+    "scripts/check_office_results_browser.mjs": "246f64105ef99aadaf0a05914df182ac0572c0f1fadcb5be136e859534f77cbe"
+  },
+  "limitations": [
+    "AC-06/08/09/11 remain pending across all providers.",
+    "Cancellation uses native worker.kill and closes its PTY; this is not resuming the same session.",
+    "No real provider API or billing cancellation was tested.",
+    "Upstream usage-probe background process cleanup is scoped by observed PID/start identity; no process-name-wide kill.",
+    "Whole host network/file boundary audit remains pending.",
+    "Raw runs, process identities, screenshots and credentials stay private."
+  ]
+}

@@ -3,6 +3,7 @@
 from __future__ import annotations
 import argparse
 import datetime as dt
+import importlib.util
 import json
 import re
 from pathlib import Path
@@ -162,6 +163,24 @@ def index_text(data, records):
         lines.append(f"| [{p}]({p}/SUCCESS.md) | {p.rsplit('/', 1)[0]} | {purpose} | {labels[m['mainline']]} | {version} | {date} |")
     return "\n".join(lines) + "\n"
 
+def catalog_generated_status_errors(root: Path):
+    """Recompute the gameplay catalog status and compare SUCCESS, inventory, and the snippet.
+
+    The checker implementation lives with the catalog. This hook keeps that
+    comparison inside the project-success contract instead of a second inventory.
+    """
+    catalog = root / "tools/gameplay-pattern-catalog"
+    module_path = Path(__file__).resolve().parents[1] / "tools/gameplay-pattern-catalog/status.py"
+    if not module_path.is_file():
+        return ["tools/gameplay-pattern-catalog: status.py missing"]
+    if not catalog.is_dir():
+        return ["tools/gameplay-pattern-catalog: catalog directory missing"]
+    spec = importlib.util.spec_from_file_location("gameplay_catalog_status", module_path)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return ["tools/gameplay-pattern-catalog: " + item for item in module.check(catalog)]
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--root", type=Path, default=Path(__file__).resolve().parents[1])
@@ -201,6 +220,9 @@ def main(argv=None):
         meta, problems = check_contract(root, p, not args.contracts_only)
         records[p] = meta
         errors.extend(p + ": " + e for e in problems)
+    selected = set(args.projects or projects)
+    if "tools/gameplay-pattern-catalog" in selected and "tools/gameplay-pattern-catalog" in set(projects):
+        errors.extend(catalog_generated_status_errors(root))
     if not errors and not args.projects and not args.contracts_only:
         expected = index_text(data, records)
         index = root / "PROJECTS.md"

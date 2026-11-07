@@ -1,7 +1,7 @@
 # HAI Taskboard Software Design Document
 
 Status: **Accepted at G0 for P0-A implementation**
-Last updated: 2026-09-05
+Last updated: 2026-10-30 (owner-approved C01/C02; original G0 acceptance retained)
 Baseline: `newclear/main@3ad5533d8148a84ab19145fbee92306d1b69941b`
 
 ## 1. Decision summary
@@ -78,7 +78,7 @@ React Web UI --- REST commands / SSE projections
 | Dispatch work | SQLite outbox | Claimed after command commit; external calls never occur in it |
 | Large artifacts | Filesystem | Immutable digest-addressed objects; metadata and bindings in SQLite |
 | Board/SSE/attention | Rebuildable projection | Never an independent authority |
-| Bootstrap execution status | `.team/PLAN.md` | One-time switch to SQLite; never bidirectional synchronization |
+| Bootstrap execution status | `docs/tasks/BOARD.md` | Current repository bootstrap work status; any future migration to SQLite requires an explicit authority decision; never bidirectional synchronization |
 
 - **HAI-AUTH-001** — A command that changes authoritative state MUST commit the aggregate mutation,
   command-result/idempotency record, audit record and any outbox intent in one SQLite transaction.
@@ -145,7 +145,13 @@ whose current accepted inputs differ from its CompletionRecord; its stored histo
 - **HAI-STATE-004** — Review → QA requires all policy-required Reviews to approve the current subject;
   QA → Done is permitted only through `CompleteWorkItem` and the Done predicate.
 - **HAI-STATE-005** — Review/QA → Developing records a reason, preserves all historical evidence and marks
-  non-current evidence inapplicable rather than deleting it.
+  non-current evidence inapplicable rather than deleting it. Inapplicability is computed (subject mismatch or a
+  non-current Candidate), never stored.
+- **HAI-STATE-007** — Developing → Developing (redispatch) starts a new Run only by explicit operator command when
+  the WorkItem already has Runs and every Run is settled; it never retries automatically ([rework loop](sdd/rework-loop.md)).
+- **HAI-STATE-008** — Done → Draft or Ready happens only through the human `ReopenWorkItem` command with a recorded
+  reason; it increments the version and retains the CompletionRecord and all history. A later dispatch from Ready
+  with existing Runs obeys the HAI-STATE-007 settled and strict-order guards ([reopen](sdd/reopen-work-item.md)).
 - **HAI-STATE-006** — Drag, keyboard movement and button transitions MUST call the same server
   command and guards; the client MUST NOT optimistically persist an illegal phase.
 
@@ -154,7 +160,8 @@ whose current accepted inputs differ from its CompletionRecord; its stored histo
 For requested subject `S`, `CompleteWorkItem(S)` succeeds only when all terms below are true:
 
 1. the WorkItem is in `QA`, unblocked, and its expected version matches;
-2. `S` identifies the current Candidate digest, Run input digest, complete required AC revision set,
+2. `S` identifies the current Candidate (the Candidate of the WorkItem's latest Run, see
+   [rework loop](sdd/rework-loop.md)) digest, Run input digest, complete required AC revision set,
    accepted dependency graph revision, policy version and completion recipe version;
 3. all required checks have terminal `Passed` Evidence for exactly `S` and required verifier class;
 4. no required check is `Failed`, `Skipped`, `NotRun`, `Unknown` or superseded;
@@ -254,7 +261,8 @@ P0-A provides four connected surfaces:
 1. **Project/Board** — Draft, Ready, Developing, Review, QA and Done phase columns, plus a
    deterministic Blocked condition projection; work cards expose current execution/evidence state.
 2. **WorkItem detail** — ACs and bindings, dependency impact, Runs, Candidate, Review, Evidence,
-   approvals and audit history.
+   approvals and audit history. The read contract is [work-item-detail](sdd/work-item-detail.md); dependency
+   impact belongs to the Impact Preview surface.
 3. **Attention** — actionable conflicts, blockers, unknown outcomes, stale plans/evidence and
    disconnected/reset-required states; no vanity activity feed.
 4. **Impact Preview** — old/new revision, directly changed and transitively affected items, reasons,
@@ -326,8 +334,10 @@ store. Deployment packaging is local/container development only until restore ev
   diff and verification output before updating the execution plan.
 - **HAI-DELIVERY-003** — Required failed, skipped, flaky or NotRun checks remain visible and prevent
   an unqualified completion claim.
-- **HAI-DELIVERY-004** — Product task contracts in `docs/tasks` are immutable inputs. Mutable bootstrap
-  execution status exists only in `.team/PLAN.md` until the explicit SQLite authority migration.
+- **HAI-DELIVERY-004** — Product task contracts `docs/tasks/HTB-P0A-*.md` are immutable inputs.
+  Current bootstrap execution status is recorded only in `docs/tasks/BOARD.md`. Root `.team/PLAN.md`
+  records routing, review and acceptance rationale; the archived product ledger remains immutable.
+  A future migration of execution-status authority to SQLite requires an explicit decision.
 
 ## 13. Technology baseline
 
@@ -362,9 +372,19 @@ The G0 re-review was accepted by T-011 and the design adoption by T-010, as reco
 
 ## 15. References
 
+- [Kanzo-inspired usability follow-up](sdd/kanzo-inspired-usability.md) — proposed later
+  capture/search/notes/export and agent-facing workflow contracts. It does not expand P0-A,
+  enable MCP or a real executor, or supply missing G1/G2 acceptance evidence.
 - `hai-taskboard-brief.md`, SHA-256
   `74596865dcf073626d52548160b709e4506d155fa4e90cc07b6a6535d2c7d7c6`
 - `hai-taskboard-design-review-v0.2.md`, SHA-256
   `f7cadae975c9300478f2a4d1bd24c2c1efbf3a3bd7bba0daa20fd4ee2db6a01c`
 - `hai-taskboard-sdd-review-v0.2-augmented.md`, SHA-256
   `e03910bb3cd1cdc763201552e671f34d351a3db9cfc4c234261f507069249dbc`
+
+## 2026-10-30 accepted amendments
+
+Owner approved M0 C01/C02/C06: current repository bootstrap authority is BOARD (HAI-DELIVERY-004),
+artifact preflight wording is aligned in the Fake vertical contract, and the narrow
+[completion preparation API](sdd/completion-preparation.md) refines HAI-API-001 without granting Done.
+Original G0 acceptance, all full-product obligations and historical failures remain unchanged.

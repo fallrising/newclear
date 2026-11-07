@@ -1,0 +1,29 @@
+{
+  "name": "spring-pool-web",
+  "main": "src/index.tsx",
+  "compatibility_date": "2026-09-30",
+  "workers_dev": false,
+  "preview_urls": false,
+  "vars": {
+    "ENVIRONMENT": "local",
+    "AUTH_MODE": "local",
+    "BUILD_REVISION": "dev",
+  },
+  "services": [{ "binding": "API", "service": "spring-pool-api" }],
+  "env": {
+    "staging": {
+      "name": "spring-pool-web-staging",
+      "workers_dev": true,
+      "preview_urls": false,
+      "vars": {
+        "ENVIRONMENT": "staging",
+        "AUTH_MODE": "access",
+        "BUILD_REVISION": "dev",
+        "ACCESS_TEAM_DOMAIN": "",
+        "ACCESS_AUD": "",
+        "OWNER_EMAIL": "",
+      },
+      "services": [{ "binding": "API", "service": "spring-pool-api-staging" }],
+    },
+  },
+}

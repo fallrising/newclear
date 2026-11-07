@@ -1,0 +1,43 @@
+# Read by scripts/run_local_work.py; does not replace the user's global config.
+model = "qwen3.8-flash-next-q2_0"
+model_provider = "strata_local"
+model_context_window = 32768
+model_auto_compact_token_limit = 15000
+model_reasoning_effort = "none"
+web_search = "disabled"
+check_for_update_on_startup = false
+
+# This synthetic file task only needs local shell/file tools.
+[features]
+apps = false
+plugins = false
+plugin_discovery_prefetch = false
+remote_plugin = false
+multi_agent = false
+browser_use = false
+computer_use = false
+image_generation = false
+api_key_model_discovery = false
+skip_host_skill_discovery = true
+
+[analytics]
+enabled = false
+[feedback]
+enabled = false
+[otel]
+exporter = "none"
+metrics_exporter = "none"
+trace_exporter = "none"
+
+[sandbox_workspace_write]
+network_access = false
+
+[model_providers.strata_local]
+name = "Strata localhost only"
+base_url = "http://127.0.0.1:8080/v1"
+wire_api = "responses"
+requires_openai_auth = false
+supports_websockets = false
+request_max_retries = 0
+stream_max_retries = 0
+stream_idle_timeout_ms = 600000

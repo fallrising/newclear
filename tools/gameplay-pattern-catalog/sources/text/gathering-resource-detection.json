@@ -1,0 +1,120 @@
+{
+  "id": "gathering-resource-detection",
+  "system": "gathering",
+  "edition": 1,
+  "name": {
+    "zh": "资源探测高亮",
+    "en": "Resource detection overlays"
+  },
+  "summary": {
+    "zh": "花费道具或基础设施，把寻找资源从盲搜变成定位。",
+    "en": "Spend items or infrastructure to turn blind searching into localization."
+  },
+  "rules": {
+    "zh": "玩家启动探测效果，使范围内某类资源被标记。标记减少搜索时间，却不自动解决路程、地形或危险；玩家仍要规划到达路线并采集。",
+    "en": "Detection marks nearby resources of a selected type. It reduces search time without removing travel, terrain or danger; players still plan a route and extract the target."
+  },
+  "loop": [
+    {
+      "zh": "确定缺少的资源",
+      "en": "Choose a needed resource"
+    },
+    {
+      "zh": "启动探测",
+      "en": "Activate detection"
+    },
+    {
+      "zh": "规划到标记的路线",
+      "en": "Route to a marker"
+    },
+    {
+      "zh": "采集并寻找下一点",
+      "en": "Harvest and move on"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "先投入探测设施，还是凭地形经验直接找？",
+      "en": "Invest in detection or search using terrain knowledge?"
+    },
+    {
+      "zh": "近处低产点和远处富集点，哪个更值得？",
+      "en": "Choose a nearby poor deposit or a distant rich one?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "覆盖范围",
+        "en": "Detection range"
+      },
+      "effect": {
+        "zh": "范围大节省盲搜，但过大时容易抹掉发现地形的乐趣。",
+        "en": "Large ranges reduce blind searching but can erase terrain discovery."
+      }
+    },
+    {
+      "name": {
+        "zh": "使用成本",
+        "en": "Activation cost"
+      },
+      "effect": {
+        "zh": "消耗品鼓励关键时刻使用；常驻设施促使建立采集据点。",
+        "en": "Consumables encourage selective use; permanent facilities encourage gathering outposts."
+      }
+    }
+  ],
+  "tags": [
+    "information",
+    "discovery",
+    "optimization"
+  ],
+  "related": [
+    "gathering-hidden-deposit-clues",
+    "exploration-ability-gates",
+    "exploration-earned-map",
+    "gathering-depth-targeting"
+  ],
+  "contrast": {
+    "zh": "泰拉瑞亚让检测能力随角色短时移动；深海迷航让探测依附在基地与服务范围上。",
+    "en": "Terraria makes detection a temporary mobile buff; Subnautica anchors it to infrastructure and coverage."
+  },
+  "combination": {
+    "zh": "组合创意：探测器每次只显示矿脉方向，玩家在两个地点测量后交叉定位，再决定钻探路线。",
+    "en": "Design proposal: scanners report only a bearing; two readings triangulate a vein before drilling."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "你缺铜矿，只剩一次探测机会；最近的山洞已经搜过。",
+      "en": "You need copper and have one scan left; the nearest cave is already searched."
+    },
+    "action": {
+      "zh": "你到未知区域启动探测，查看亮起的矿点与通路。",
+      "en": "Scan an unexplored area and inspect the highlighted deposits and routes."
+    },
+    "result": {
+      "zh": "位置变明确了，但远处矿点仍可能被危险地形挡住。",
+      "en": "Locations become known, but hazardous terrain may still block a distant deposit."
+    },
+    "next": {
+      "zh": "先选可达且划算的点，采完后再决定是否补充探测资源。",
+      "en": "Choose a worthwhile reachable deposit, then consider replenishing scans afterward."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "用遮蔽网格、固定探测半径和少量障碍，比较探测前后的路径选择。",
+      "en": "Use a hidden grid, fixed scan radius and a few obstacles to compare route choices before and after scanning."
+    },
+    "pitfall": {
+      "zh": "探测若同时自动寻路和自动采集，会抹去定位之后的判断空间。",
+      "en": "Automatic navigation and collection attached to scanning remove decisions after discovery."
+    },
+    "test": {
+      "zh": "探测给出多个点时，玩家是否比较路线成本，而非永远选画面上最近的一点？",
+      "en": "When scanning reveals several deposits, do players compare route costs rather than visual distance alone?"
+    }
+  }
+}

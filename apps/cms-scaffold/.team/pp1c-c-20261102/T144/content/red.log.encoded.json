@@ -1,0 +1,8 @@
+{
+  "version": 1,
+  "original": "T144/content/red.log",
+  "sha256": "c3560bd299683cd3c258a839d9d98ca8d0dcc18602d63511d3e02d58c7ae8746",
+  "byteSize": "941",
+  "encoding": "utf-8",
+  "text": "✖ T144_full_fixed_recipe_returns_actual_ids_hashes_and_last_memory_sessions (9.289728ms)\nℹ tests 1\nℹ suites 0\nℹ pass 0\nℹ fail 1\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 69.123753\n\n✖ failing tests:\n\ntest at .team/pp1c-c-20261102/T144/fixture-client.test.mjs:47:1\n✖ T144_full_fixed_recipe_returns_actual_ids_hashes_and_last_memory_sessions (9.289728ms)\n  Error: FIXTURE_UNSEALED\n      at prepareSmokeFixture (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-c-target-20261102/apps/cms-scaffold/.team/pp1c-c-20261102/T144/fixture-client.mjs:66:23)\n      at async TestContext.<anonymous> (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-c-target-20261102/apps/cms-scaffold/.team/pp1c-c-20261102/T144/fixture-client.test.mjs:48:32)\n      at async Test.run (node:internal/test_runner/test:1332:7)\n      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:385:3) {\n    code: 'FIXTURE_UNSEALED'\n  }\n"
+}

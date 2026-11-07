@@ -1,0 +1,8 @@
+{
+  "version": 1,
+  "original": "C14n2-post-green.log",
+  "sha256": "b86d8cb8cecc64e13e179fb4afd8ef1537d5b8d82b4abd27caabc976f3878fa3",
+  "byteSize": "206",
+  "encoding": "utf-8",
+  "text": "✔ PP1c_C14n2_token_bound_commit_and_post_inventory_prove_exact_revocation (389.943764ms)\nℹ tests 1\nℹ suites 0\nℹ pass 1\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 482.340168\n"
+}

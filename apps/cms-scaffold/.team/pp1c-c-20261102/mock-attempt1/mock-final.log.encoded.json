@@ -1,0 +1,8 @@
+{
+  "version": 1,
+  "original": "mock-attempt1/mock-final.log",
+  "sha256": "cdadac85a2228b9c22275540f8f5a91ade449044fe2e5fd7e3a1d80d7dcc54f3",
+  "byteSize": "572",
+  "encoding": "utf-8",
+  "text": "docker: Error response from daemon: failed to create task for container: failed to create shim task: OCI runtime create failed: runc create failed: unable to start container process: error during container init: error mounting \"tmpfs\" to rootfs at \"/work/node_modules/.vite\": create mountpoint for /work/node_modules/.vite mount: make mountpoint \"/work/node_modules/.vite\": mkdirat /var/lib/docker/overlay2/c3c4360c68ee59e4186bf140cb3c383a6bdb56db7eea686a85e9466a5de62215/merged/work/node_modules/.vite: read-only file system\n\nRun 'docker run --help' for more information\n"
+}

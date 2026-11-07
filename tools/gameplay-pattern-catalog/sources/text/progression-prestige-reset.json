@@ -1,0 +1,121 @@
+{
+  "id": "progression-prestige-reset",
+  "system": "progression",
+  "edition": 2,
+  "name": {
+    "zh": "主动重置换永久加速",
+    "en": "Reset progress for lasting acceleration"
+  },
+  "summary": {
+    "zh": "主动放弃这一轮积累，换下一轮更快起步。",
+    "en": "Trade this cycle’s progress for a faster next cycle."
+  },
+  "rules": {
+    "zh": "当本轮增长变慢，玩家可主动重置普通资源和设施，按已达进度领取长期奖励。下一轮从较低阶段重开，却有更强的效率；关键选择是现在重开，还是再推进一点以换取更多奖励。",
+    "en": "When growth slows, voluntarily reset ordinary resources and facilities in exchange for a lasting reward based on progress. The next cycle starts earlier but grows faster. Decide whether to reset now or push further for a better return."
+  },
+  "loop": [
+    {
+      "zh": "积累产能",
+      "en": "Build production"
+    },
+    {
+      "zh": "比较继续推进与重置收益",
+      "en": "Compare pushing and resetting"
+    },
+    {
+      "zh": "确认保留与清空的内容",
+      "en": "Review retained and lost progress"
+    },
+    {
+      "zh": "带加成重走早期阶段",
+      "en": "Replay early stages with a bonus"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "现在重置能很快回本，还是多等一会就能跨过更高奖励门槛？",
+      "en": "Reset for a quick payback or wait to reach a larger reward threshold?"
+    },
+    {
+      "zh": "长期奖励用来普遍提速，还是投资一条特定生产路线？",
+      "en": "Spend the lasting reward on broad speed or a specialized production route?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "重置奖励曲线",
+        "en": "Reset reward curve"
+      },
+      "effect": {
+        "zh": "门槛间隔越大，玩家越需要判断继续等待值不值。",
+        "en": "Wider reward thresholds make the decision to wait more consequential."
+      }
+    },
+    {
+      "name": {
+        "zh": "重走早期的时间",
+        "en": "Replay time"
+      },
+      "effect": {
+        "zh": "回到旧进度太慢会显得惩罚；太快则早期升级很快失去意义。",
+        "en": "Slow recovery feels punitive; instant recovery makes early purchases irrelevant."
+      }
+    }
+  ],
+  "tags": [
+    "progression",
+    "economy",
+    "time",
+    "optimization"
+  ],
+  "related": [
+    "progression-permanent-run-currency",
+    "progression-practice-based-growth",
+    "progression-research-prerequisites",
+    "progression-respec-investment"
+  ],
+  "contrast": {
+    "zh": "《饼干点点乐》重走生产设施的增长曲线；《点击英雄》重走英雄升级与战斗关卡。共同点是用主动清空换长期提速。",
+    "en": "Cookie Clicker repeats a production curve; Clicker Heroes repeats hero upgrades and combat stages. Both exchange a voluntary reset for lasting acceleration."
+  },
+  "combination": {
+    "zh": "设计提案：店铺完成一季后可重新布置并清空普通货架，换永久展示加成；让下一季尝试不同陈列策略。",
+    "en": "Design proposal: reset ordinary shop shelves after a season for a lasting display bonus, encouraging a different layout next season."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "你的工坊每分钟赚 10 元；现在重置可得 1 枚徽记，再赚 100 元可得 2 枚。",
+      "en": "The workshop earns 10 coins per minute; resetting grants 1 emblem, or 2 after another 100 coins."
+    },
+    "action": {
+      "zh": "你选择现在重置，用 1 枚徽记购买永久产出加成。",
+      "en": "Reset now and spend 1 emblem on a permanent production bonus."
+    },
+    "result": {
+      "zh": "机器清空，但重新买到第一台后，每分钟产出从 1 提高到 2。",
+      "en": "Machines are cleared, but the first repurchased machine now makes 2 per minute instead of 1."
+    },
+    "next": {
+      "zh": "用更快的起步冲到新门槛，再决定下一次何时重置。",
+      "en": "Reach a new threshold faster, then decide when to reset again."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "做三档生产设施、一个清楚显示清空和保留内容的重置按钮，以及一个永久倍率。",
+      "en": "Build three production tiers, one permanent multiplier and a reset preview listing what is lost and retained."
+    },
+    "pitfall": {
+      "zh": "别先堆超大数字；先验证重置后的几分钟仍有选择，而不是机械补买。",
+      "en": "Avoid enormous numbers before the first minutes after reset offer choices beyond repurchasing."
+    },
+    "test": {
+      "zh": "让玩家说明为什么此刻重置，并观察第二轮是否主动改变购买顺序。",
+      "en": "Ask why the player resets now and watch whether the second cycle changes their purchase order."
+    }
+  }
+}

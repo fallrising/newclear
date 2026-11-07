@@ -1,0 +1,66 @@
+--- maintenance-workflow.test.mjs.before
++++ scripts/local/maintenance-workflow.test.mjs
+@@ -194,7 +194,7 @@
+   const policy=buildHelperPolicy({...context,image,kind,side:'source'}),policySha256=sha256(canonicalBytes(policy));
+   const expected={fullContainerId:'f'.repeat(64),name:`cms-pp1c-${operationId}-1`,labels:{...image.Config.Labels,'org.cms.pp1c.operation':operationId,
+     'org.cms.pp1c.seq':'1','org.cms.pp1c.kind':kind,'org.cms.pp1c.policy':policySha256},
+-    volumeMountpoints:Object.fromEntries(f.state.volumes.map(v=>[v.Name,v.Mountpoint])),state:'created'};
++    volumeMountpoints:Object.fromEntries(f.state.volumes.map(v=>[v.Name,v.Mountpoint])),state:'created',dataNetworkName:`${project}_data`};
+   const helper={kind,side:'source',fullContainerId:expected.fullContainerId,policySha256,state:'CREATED',endpoint:null,backend:null,startedAt:new Date().toISOString()};
+   const container=helperContainer(policy,expected,expected.volumeMountpoints);
+   if(policy.networkId) container.NetworkSettings.Networks[`${project}_data`]={NetworkID:policy.networkId,IPAddress:''};
+@@ -361,7 +361,7 @@
+     c.State={Status:state,Running:state==='running',ExitCode:0};
+     if(c.HostConfig.NetworkMode!=='none') {
+       const network=f.state.networks.find(n=>n.Id===c.HostConfig.NetworkMode);
+-      c.NetworkSettings.Networks[network.Name]={NetworkID:network.Id,IPAddress:state==='running'?'172.31.0.9':''};
++      c.NetworkSettings.Networks[network.Name]={NetworkID:state==='running'?network.Id:'',IPAddress:state==='running'?'172.31.0.9':'',EndpointID:''};
+       if(state==='running')network.Containers[c.Id]={IPv4Address:'172.31.0.9/16'};else delete network.Containers[c.Id];
+     }
+   };
+@@ -504,3 +504,45 @@
+   await assert.rejects(workflow.clearOwnedHelper(f.token,f.deps));
+   assert.equal(JSON.parse(await readFile(join(f.root,'maintenance/lease.json'))).helper.fullContainerId,f.helper.fullContainerId);
+ });
++
++function inactiveEndpoint() {
++  return {NetworkID:'',EndpointID:'',IPAddress:'',Gateway:'',MacAddress:'',IPv6Gateway:'',GlobalIPv6Address:'',IPPrefixLen:0,GlobalIPv6PrefixLen:0};
++}
++test('T126_network_real_registry_CREATED_blank_then_RUNNING_then_EXITED_blank',async t=>{
++  const f=await helperFixture(t,'INVENTORY');
++  f.expected.dataNetworkName=`${project}_data`;
++  f.container.NetworkSettings.Networks={[`${project}_data`]:inactiveEndpoint()};
++  await workflow.registerOwnedHelper(f.token,f.helper,f.policy,f.expected,f.deps);
++  setHelperRunning(f,true);
++  f.container.NetworkSettings.Networks[`${project}_data`].NetworkID=f.policy.networkId;
++  f.helper={...f.helper,state:'RUNNING',endpoint:{networkId:f.policy.networkId,address:'172.31.0.9'}};
++  await workflow.updateOwnedHelper(f.token,f.helper,f.deps);
++  setHelperRunning(f,false);f.container.NetworkSettings.Networks={[`${project}_data`]:inactiveEndpoint()};
++  f.helper={...f.helper,state:'EXITED'};await workflow.updateOwnedHelper(f.token,f.helper,f.deps);
++  const state=await workflow.assertWorkflow(f.token,{},f.deps);assert.deepEqual(state.lease.helper.endpoint,f.helper.endpoint);
++});
++for(const fault of ['wrong-name','forged-name','host-network','network-ID','IP','endpoint','extra-network']) {
++  test(`T126_network_real_registry_CREATED_rejects_${fault}`,async t=>{
++    const f=await helperFixture(t,'INVENTORY');f.expected.dataNetworkName=`${project}_data`;
++    const endpoint=inactiveEndpoint();f.container.NetworkSettings.Networks={[`${project}_data`]:endpoint};
++    if(fault==='wrong-name'||fault==='forged-name')f.container.NetworkSettings.Networks={unknown:endpoint};
++    if(fault==='forged-name')f.expected.dataNetworkName='unknown';
++    if(fault==='host-network')f.container.HostConfig.NetworkMode='0'.repeat(64);
++    if(fault==='network-ID')endpoint.NetworkID='0'.repeat(64);
++    if(fault==='IP')endpoint.IPAddress='172.31.0.9';
++    if(fault==='endpoint')endpoint.EndpointID='f'.repeat(64);
++    if(fault==='extra-network')f.container.NetworkSettings.Networks.extra=inactiveEndpoint();
++    await assert.rejects(workflow.registerOwnedHelper(f.token,f.helper,f.policy,f.expected,f.deps));
++  });
++}
++
++for(const field of ['NetworkID','IPAddress','EndpointID','Gateway','MacAddress','IPv6Gateway','GlobalIPv6Address','IPPrefixLen','GlobalIPv6PrefixLen']) {
++  test(`T126_network_real_registry_EXITED_rejects_${field}`,async t=>{
++    const f=await helperFixture(t,'INVENTORY');
++    await workflow.registerOwnedHelper(f.token,f.helper,f.policy,f.expected,f.deps);
++    f.container.State={Status:'exited',Running:false,ExitCode:0};
++    const endpoint=inactiveEndpoint();endpoint[field]=field.endsWith('PrefixLen')?24:'unexpected';
++    f.container.NetworkSettings.Networks={[`${project}_data`]:endpoint};
++    await assert.rejects(workflow.updateOwnedHelper(f.token,{...f.helper,state:'EXITED'},f.deps));
++  });
++}

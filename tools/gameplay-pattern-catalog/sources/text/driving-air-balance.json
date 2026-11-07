@@ -1,0 +1,120 @@
+{
+  "id": "driving-air-balance",
+  "system": "driving",
+  "edition": 3,
+  "name": {
+    "zh": "空中调整车身，准备落地",
+    "en": "Adjust vehicle pitch before landing"
+  },
+  "summary": {
+    "zh": "腾空后仍能改变姿态，让车轮以合适角度接触下一段地面。",
+    "en": "Change pitch while airborne so the wheels meet the next surface at a useful angle."
+  },
+  "rules": {
+    "zh": "载具离地后，玩家用前后倾或油门刹车等输入影响旋转。观察落地点的坡度，逐步把车身调到可接受的角度，再接地继续行驶。修正过头会造成新的倾斜，因而既要决定何时施力，也要决定何时停止。",
+    "en": "After leaving the ground, lean or throttle/brake inputs affect vehicle rotation. Read the landing slope, adjust toward a viable angle and touch down to continue. Overcorrection creates a new tilt, making when to stop input as important as when to begin."
+  },
+  "loop": [
+    {
+      "zh": "起跳并观察落地坡度",
+      "en": "Take off and read the landing slope"
+    },
+    {
+      "zh": "比较车身与地面角度",
+      "en": "Compare vehicle and surface angles"
+    },
+    {
+      "zh": "输入修正并及时停手",
+      "en": "Correct the pitch and stop in time"
+    },
+    {
+      "zh": "落地后准备下一次起伏",
+      "en": "Land and prepare for the next rise"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "现在强力修正，还是等落点更清楚后轻微调整？",
+      "en": "Correct strongly now or wait until the landing is clearer?"
+    },
+    {
+      "zh": "车身已接近目标角度，还应继续按住吗？",
+      "en": "With the pitch near its target, should the input continue?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "姿态响应与惯性",
+        "en": "Pitch response and inertia"
+      },
+      "effect": {
+        "zh": "响应快容易及时修正；惯性大需要提前停止输入。",
+        "en": "Fast response enables late correction; greater inertia requires releasing earlier."
+      }
+    },
+    {
+      "name": {
+        "zh": "落地容错范围",
+        "en": "Landing tolerance"
+      },
+      "effect": {
+        "zh": "宽容范围帮助学习，窄范围使坡度判断和细小修正更重要。",
+        "en": "A wide tolerance supports learning; a narrow one makes slope reading and small corrections matter."
+      }
+    }
+  ],
+  "tags": [
+    "precision",
+    "dexterity",
+    "risk"
+  ],
+  "related": [
+    "driving-air-stunt",
+    "driving-drift-boost",
+    "driving-start-charge",
+    "driving-slipstream"
+  ],
+  "contrast": {
+    "zh": "特技摩托强调骑手倾身与车身平衡，双人模式还加入协调；登山赛车把空中旋转映射到已有的油门和刹车。",
+    "en": "Trials emphasizes rider lean and bike balance, with coordination added in tandem mode; Hill Climb Racing maps airborne rotation to the existing throttle and brake controls."
+  },
+  "combination": {
+    "zh": "组合提案：送货重量改变空中旋转速度，玩家在出发前选择多装货，或保留容易控制的车身；先只设轻、重两档。",
+    "en": "Design proposal: cargo weight changes pitch response. Before leaving, choose more cargo or easier handling, starting with just light and heavy settings."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "教学原型中，车头抬起，前方落地面却向下倾斜。",
+      "en": "In the teaching prototype, the nose is raised while the landing surface slopes downward."
+    },
+    "action": {
+      "zh": "玩家短按前倾输入，使车头转向坡面。",
+      "en": "Briefly apply forward pitch to rotate the nose toward the slope."
+    },
+    "result": {
+      "zh": "车身接近坡面角度，停止输入后仍有少量旋转。",
+      "en": "The vehicle approaches the slope angle, with a little rotation remaining after release."
+    },
+    "next": {
+      "zh": "玩家提前停手并顺利落地，下一跳会更早考虑惯性。",
+      "en": "Releasing early allows a safe landing and informs the next jump’s correction."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "做一个可旋转的矩形、固定抛物线和两种坡面，先测试输入与落地角度的关系。",
+      "en": "Use a rotating rectangle, a fixed jump arc and two landing slopes to test input against landing angle."
+    },
+    "pitfall": {
+      "zh": "不要一开始同时加入复杂悬挂、损伤与多轮接触，先让姿态变化可预测。",
+      "en": "Avoid complex suspension, damage and multiple wheel contacts until pitch changes are predictable."
+    },
+    "test": {
+      "zh": "失败后，玩家能否指出是修正太晚还是按得太久，并在下一次改善？",
+      "en": "After failing, can players identify late input versus holding too long and improve the next attempt?"
+    }
+  }
+}

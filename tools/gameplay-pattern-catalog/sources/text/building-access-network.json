@@ -1,0 +1,120 @@
+{
+  "id": "building-access-network",
+  "system": "building",
+  "edition": 1,
+  "name": {
+    "zh": "道路与入口连通",
+    "en": "Road and entrance connectivity"
+  },
+  "summary": {
+    "zh": "建筑摆下去不等于能工作，还要让人和货到达入口。",
+    "en": "A placed building needs reachable access for people and goods."
+  },
+  "rules": {
+    "zh": "玩家把建筑入口接入道路或步行网络。断路、朝向和绕行距离影响使用；观察不可达提示与移动路线后重新布局。",
+    "en": "Players connect entrances to roads or paths. Disconnections, orientation and detours affect use; access warnings and travel routes guide redesign."
+  },
+  "loop": [
+    {
+      "zh": "确认入口",
+      "en": "Check entrances"
+    },
+    {
+      "zh": "接入主路径",
+      "en": "Connect main paths"
+    },
+    {
+      "zh": "检查可达性",
+      "en": "Verify access"
+    },
+    {
+      "zh": "缩短高频行程",
+      "en": "Shorten frequent trips"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "密集地块能多放建筑，却容易绕行。",
+      "en": "Dense plots fit more buildings but create detours."
+    },
+    {
+      "zh": "多开道路增加连通性，也挤占生产空间。",
+      "en": "Extra routes improve connectivity but consume productive space."
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "路径成本",
+        "en": "Travel cost"
+      },
+      "effect": {
+        "zh": "移动越耗时，近邻选址越重要。",
+        "en": "Longer travel times make adjacency more valuable."
+      }
+    },
+    {
+      "name": {
+        "zh": "入口数量",
+        "en": "Entrance count"
+      },
+      "effect": {
+        "zh": "多入口减少死角，单入口强调朝向。",
+        "en": "Multiple entrances reduce dead zones; one entrance emphasizes orientation."
+      }
+    }
+  ],
+  "tags": [
+    "spatial",
+    "planning",
+    "optimization"
+  ],
+  "related": [
+    "building-service-coverage",
+    "automation-aerial-logistics",
+    "automation-belt-routing",
+    "automation-flow-splitting"
+  ],
+  "contrast": {
+    "zh": "Timberborn强调步行与高差；城市天际线还把路网用于车辆交通。",
+    "en": "Timberborn emphasizes walking and elevation; Cities: Skylines also carries vehicle traffic."
+  },
+  "combination": {
+    "zh": "港口仓库必须同时连接码头与市场，玩家权衡短路和高容量通道的效率。",
+    "en": "Require warehouses to reach docks and markets, balancing route length against capacity."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "仓库离工坊很近，但门朝向错误，工人需要绕一大圈。",
+      "en": "A warehouse is close to a workshop, but its entrance faces away and forces a long detour."
+    },
+    "action": {
+      "zh": "你调整入口方向并补一段道路，连接高频往返路线。",
+      "en": "Reorient the entrance and add a short road for the frequent trip."
+    },
+    "result": {
+      "zh": "可达提示恢复，实际步行距离缩短，运输等待减少。",
+      "en": "Access becomes valid, walking distance falls and delivery waits shrink."
+    },
+    "next": {
+      "zh": "扩建时继续检查入口，避免新建筑把旧通路堵掉。",
+      "en": "During expansion, keep checking entrances so new buildings do not block old routes."
+    }
+  },
+  "prototype": {
+    "scope": "medium",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "做小网格寻路、两个带入口的建筑和一名搬运者，同时显示路径长度。",
+      "en": "Use small-grid pathfinding, two buildings with entrances and one carrier, displaying route length."
+    },
+    "pitfall": {
+      "zh": "大量单位避让与复杂交通可以另做；先验证入口和道路断开时的反馈。",
+      "en": "Large-scale avoidance and traffic can wait; first validate feedback for entrances and broken roads."
+    },
+    "test": {
+      "zh": "玩家能否区分直线距离与真实路线，并通过改入口减少搬运时间？",
+      "en": "Can players distinguish straight-line distance from the actual route and improve delivery through entrance placement?"
+    }
+  }
+}

@@ -1,0 +1,120 @@
+{
+  "id": "ecology-plant-crossbreeding",
+  "system": "ecology",
+  "edition": 2,
+  "name": {
+    "zh": "安排邻株培育新品种",
+    "en": "Arrange neighbors to breed plants"
+  },
+  "summary": {
+    "zh": "想得到新植物，先决定哪些植物一起生长、哪些必须隔开。",
+    "en": "To obtain new plants, decide which should grow together and which must stay apart."
+  },
+  "rules": {
+    "zh": "种植布局会影响交配或授粉的结果。玩家选定亲本或相邻品种，等待一次生长或授粉，再检查结果并保留有用样本；产量地块与实验地块因此可能需要分开。",
+    "en": "Plant layout affects crossing or pollination. Select parents or neighboring varieties, wait for growth or pollination, then inspect and retain useful results; production plots and experimental plots may need separation."
+  },
+  "loop": [
+    {
+      "zh": "选择想获得的品种或性状",
+      "en": "Choose a target variety or trait"
+    },
+    {
+      "zh": "安排能相互影响的植株",
+      "en": "Arrange plants that influence one another"
+    },
+    {
+      "zh": "等待生长或授粉结果",
+      "en": "Wait for growth or pollination"
+    },
+    {
+      "zh": "保留结果并调整下一组",
+      "en": "Keep the result and revise the next group"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "用有限地块稳定收成，还是留一块试验未知组合？",
+      "en": "Use limited plots for reliable harvests or reserve one for an experiment?"
+    },
+    {
+      "zh": "保留已经不错的植株，还是继续杂交争取更合适的性状？",
+      "en": "Keep a useful plant or cross it again for a better trait mix?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "相互影响范围",
+        "en": "Interaction range"
+      },
+      "effect": {
+        "zh": "按邻格、半径或蜂箱活动范围判断，会产生不同的隔离布局。",
+        "en": "Adjacency, radius or hive range creates different separation layouts."
+      }
+    },
+    {
+      "name": {
+        "zh": "结果可预测程度",
+        "en": "Result predictability"
+      },
+      "effect": {
+        "zh": "能看到亲本和候选结果时，玩法偏规划；隐藏结果则需提供可保存的实验记录。",
+        "en": "Visible parents and outcomes favor planning; hidden outcomes need persistent experiment records."
+      }
+    }
+  ],
+  "tags": [
+    "planning",
+    "discovery",
+    "spatial"
+  ],
+  "related": [
+    "ecology-breeding-conditions",
+    "ecology-habitat-capacity",
+    "ecology-species-compatibility",
+    "farming-substrate-match"
+  ],
+  "contrast": {
+    "zh": "Rust让玩家优化同类植物的基因组合并克隆；APICO通过蜂群访问花朵的组合发现花种，空间安排就是实验条件。",
+    "en": "Rust optimizes and clones plant gene combinations; APICO discovers flower species through bee visits, making layout the experiment condition."
+  },
+  "combination": {
+    "zh": "设计提案：每次实验都必须留下足够种子维持下一轮生产，育种进度与当季收入共用地块。",
+    "en": "Design proposal: reserve enough seed for another production cycle so breeding experiments compete with current income for space."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "演示设定：有三格苗圃，两株红花和一株黄花，目标是发现橙花。",
+      "en": "Example: a three-slot nursery holds two red flowers and one yellow; the target is orange."
+    },
+    "action": {
+      "zh": "把红黄花放进同一蜂箱的访问范围，另一株红花移到外面留种。",
+      "en": "Place red and yellow within one hive’s range and move the spare red outside as reserve stock."
+    },
+    "result": {
+      "zh": "一轮授粉后得到候选新种，同时保住原种。",
+      "en": "One pollination round yields a candidate variety while preserving the originals."
+    },
+    "next": {
+      "zh": "记录这组配置，再决定扩种新品种或试另一组。",
+      "en": "Record the arrangement, then expand the new variety or test another pair."
+    }
+  },
+  "prototype": {
+    "scope": "medium",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "用四种花、三格苗圃和一张固定组合表，不先做真实遗传模拟。",
+      "en": "Use four flowers, three nursery slots and a fixed crossing table instead of a full genetics simulation."
+    },
+    "pitfall": {
+      "zh": "如果所有相邻植物都随机混合且无法隔离，玩家会失去实验控制感。",
+      "en": "If every neighbor mixes randomly with no way to isolate plants, experiments lose controllability."
+    },
+    "test": {
+      "zh": "给一块生产地和一块实验地，观察玩家能否保留亲本并重复成功组合。",
+      "en": "Provide production and experiment plots; see whether players preserve parents and repeat a successful cross."
+    }
+  }
+}

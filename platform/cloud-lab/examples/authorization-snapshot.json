@@ -1,0 +1,36 @@
+{
+  "schema_version": "cloudlab.authorization.v1",
+  "observed_at": "2030-01-01T00:00:00Z",
+  "target": {
+    "worker_name": "cloud-lab-qualification",
+    "database_id": "12345678-1234-4234-8234-123456789abc"
+  },
+  "active_commands": 0,
+  "schedules_enabled": false,
+  "subjects": [
+    {
+      "role": "runner",
+      "grant": {
+        "id": "grant-runner",
+        "revision": 1,
+        "revoked": 0,
+        "policy": "{\"principal_id\": \"runner-principal\", \"workspace_id\": \"workspace\", \"resource_ref\": {\"resource_id\": \"node\", \"generation\": 1}, \"recipe_ref\": {\"recipe_id\": \"node-health\", \"version\": \"1.0.0\", \"digest\": \"sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\"}, \"capabilities\": [\"dispatch:claim\", \"runs:report\", \"runs:reconcile\"], \"not_before\": \"2029-12-31T23:00:00Z\", \"expires_at\": \"2030-01-01T01:00:00Z\", \"max_timeout_seconds\": 10, \"max_output_bytes\": 16384}"
+      },
+      "credential": {
+        "id": "key-runner",
+        "principal_id": "runner-principal",
+        "grant_id": "grant-runner",
+        "generation": 1,
+        "revoked": false,
+        "expires_at": "2030-01-01T02:00:00Z"
+      },
+      "access_required": true,
+      "access_service": {
+        "id": "access-token",
+        "revoked": false,
+        "expires_at": "2030-01-01T00:30:00Z"
+      },
+      "runner_stop_at": "2030-01-01T00:45:00Z"
+    }
+  ]
+}

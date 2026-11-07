@@ -1,4 +1,6 @@
 # Codebox
+
+> **2026-10-31 accepted delivery rebaseline:** owner approved [SDD](../SDD.md) / [ADR-0008](adr/ADR-0008-provider-neutral-mainline.md). External-agent-first M1 is active, with secret/private-operator boundaries retained. [Qualification status](acceptance/M1-qualification.md) is partial; this approval is not runtime evidence.
 ## Unified Technical Design, Specification Contract, and LLM Delivery Protocol
 
 > **Status:** Implementation Ready  

@@ -27,7 +27,7 @@ Bot／runner 經 Access service-token policy 時，在 [runner private config](.
 
 ## 排程、保留與復原
 
-沒有 schedule row／Cron trigger 時完全停用。M1 只支援固定 UTC 每分鐘 health-minute，可信 provisioning 新增 schedules row（id、revision、enabled、grant_id、last_due）；先 enabled=0。啟用需部署 gate，設定 Cron `* * * * *` 並將該 row 啟用。同 due time＋revision 原子去重；當前分鐘以外 skipped_misfire；已有 active／unknown skipped_overlap；停用後 dispatch 再驗 enabled／revision。
+目前source以[HS有界低頻政策](health-schedule.md)取代固定每分鐘行為。保留health-minute row ID與既有schema；缺少HEALTH_SCHEDULE、無效／不匹配revision、期限外均不提交。可信operator先保持row disabled，設定四欄policy（15／60／1440分鐘，以UTC整分鐘not_before為錨，最多7日），變更policy須同時增加row revision。Cron須匹配起始分鐘；建議起點對齊UTC四分之一小時，用`*/15 * * * *`。Policy期限不得晚於runner服務期限；命令仍需scheduler grant覆蓋execution_deadline。同due＋revision去重、當前分鐘以外skip、active／unknown占位、dispatch重驗policy／row／grant。未配置Cron不會自動觸發；讀取API的next_due_at不是Cron已部署證明。本次source開發沒有更新live Worker或啟用排程。
 
 命令最多 10000 筆、24 小時最多 1440 次准入，全域一個 active。大於配額回429，未知工作保留 slot。成果7天後 API 不再提供 bytes；**此版沒有自動刪除或資料庫清理**。容量／保留運維尚須 live gate，不可把到期讀取拒絕宣稱為實體刪除。
 
@@ -51,3 +51,7 @@ runner journal 是唯一執行證據：先保存 started，再採樣，完成先
 ## 無桌面授權
 
 連線補權與 callback 回貼流程見 [OAuth 操作紀錄](headless-oauth.md)。本輪 owner 確認 Workers Free／零新增付費；不開付費訂閱，也不將未知計費查詢寫成已驗證零帳單。
+
+## 已批准排程的接續
+
+[HL部分執行與保留證據](evidence/m1-health-schedule-live.md)記錄assets-upload-session的兩次500、bounded retry及最終保留核對。原runtime／scheduler／Cron未更新；恢復時重採fresh前態並固定新起點，不重用失敗嘗試的時間或假稱已驗真實Cron。原批准在原截止內持續有效。

@@ -1,0 +1,277 @@
+{
+  "schema": 1,
+  "recorded_at": "2026-11-01T16:52:27Z",
+  "source_commit": "053e2bcd63cedb36e463c9b8f640fd2831101f23",
+  "provider": "pi",
+  "version": "1.4.0",
+  "scenario": "explicit_two_retry_chain_with_local_429",
+  "owner_api_key_loaded": false,
+  "remote_model_calls": 0,
+  "local_model_inference": false,
+  "strata_started": false,
+  "cases": [
+    {
+      "mode": "root",
+      "exit_code": 0,
+      "owned_processes_seen": 41,
+      "remaining_owned_processes": 0,
+      "active_journal_present": false,
+      "run_count": 1,
+      "elapsed_seconds": 31.474,
+      "duplicate_attempt": {
+        "exit_code": 1,
+        "blocked_busy": true,
+        "blocked_stale": false
+      },
+      "run_id": "pi-work-20261101T164825736559Z",
+      "attempt": {
+        "schema": 1,
+        "root": "pi-work-20261101T164825736559Z",
+        "parent": null,
+        "attempt": 0,
+        "mode": "http_429",
+        "source_sha256": "620299c263e4d3906c8ad6924cae6506cbdb43458058750a9d16742320221f15",
+        "fixture_sha256": "f576619513bba8870983a515d83b4cf95e578de9fad315ff7a3d3e0b9d382385"
+      },
+      "report": {
+        "status": "failed",
+        "failure_check_passed": true,
+        "model_inference_verified": false,
+        "client_requests": 1,
+        "external_requests": 0,
+        "cleanup_errors": [],
+        "elapsed_s": 30.792752374894917,
+        "owned_processes_seen": 8,
+        "remaining_owned_processes": 0
+      },
+      "office": {
+        "status": "failed",
+        "native_error_verified": true,
+        "cleanup_completed": true,
+        "states": [
+          "starting",
+          "idle",
+          "working",
+          "needs_input"
+        ]
+      },
+      "preserved_files_sha256": {
+        "result.json": "fb5f0926c5b66966998787486af2629c8a52404fe0794299619256816729968e",
+        "office-result.json": "b240912301eb1b053d3c898205d211226fd3aea4cb701e6274e9f89e0e0b6602",
+        "pi-events.jsonl": "8b23a483fe35dbbf97462bc0e4190e00458f403c828e7120b892e3c9bd43f95f",
+        "workspace/input.json": "6e3bf56a14f77b256931908b30b1648c7a521d3f6267981897e361f585d0d763",
+        "attempt.json": "cc34d4a1c7e15119fd41ff18e397a1b703b3a41b8b489fb7dc6e2bb495d02c4d"
+      },
+      "runtime_source_sha256": {
+        "pi_retry.py": "ea40859ef99a032ef2ce4cb8bc6264d33ed6445b59fe0ffc96152ea39c71dd25",
+        "execution_slot.py": "c88b9dc8f74e8d841814762523e873e1ab463832a1e17426deaacecf601bf104",
+        "run_pi_work.py": "25af658e0ad026be3c79615f7f74625dd86d810a776384c123eb31e73032fca8",
+        "office_pi.mjs": "168dda19b1c8ce7b583db462527e16bfbcc702936fcdcc092c5184ac9fc4855e",
+        "deepseek_relay.py": "2818c617139b50c58aff74fce808ad8120a329969d057faf02b93c4ef3b8cd62"
+      }
+    },
+    {
+      "mode": "first",
+      "exit_code": 0,
+      "owned_processes_seen": 35,
+      "remaining_owned_processes": 0,
+      "active_journal_present": false,
+      "run_count": 1,
+      "elapsed_seconds": 31.49,
+      "duplicate_attempt": {
+        "exit_code": 1,
+        "blocked_busy": false,
+        "blocked_stale": true
+      },
+      "run_id": "pi-work-20261101T164934357544Z",
+      "attempt": {
+        "schema": 1,
+        "root": "pi-work-20261101T164825736559Z",
+        "parent": "pi-work-20261101T164825736559Z",
+        "attempt": 1,
+        "mode": "http_429",
+        "source_sha256": "620299c263e4d3906c8ad6924cae6506cbdb43458058750a9d16742320221f15",
+        "fixture_sha256": "f576619513bba8870983a515d83b4cf95e578de9fad315ff7a3d3e0b9d382385"
+      },
+      "report": {
+        "status": "failed",
+        "failure_check_passed": true,
+        "model_inference_verified": false,
+        "client_requests": 1,
+        "external_requests": 0,
+        "cleanup_errors": [],
+        "elapsed_s": 30.79960291692987,
+        "owned_processes_seen": 7,
+        "remaining_owned_processes": 0
+      },
+      "office": {
+        "status": "failed",
+        "native_error_verified": true,
+        "cleanup_completed": true,
+        "states": [
+          "starting",
+          "idle",
+          "working",
+          "needs_input"
+        ]
+      },
+      "preserved_files_sha256": {
+        "result.json": "972abb22932eb1936e5b83ccf93e9d97d561758cb622ad07b3619b97299a972a",
+        "office-result.json": "9215d13b4e072b26463169a21f4ff5324550a185c11c5704194cef26109b8601",
+        "pi-events.jsonl": "2025e5b1a79132cb4c9b0b96f75ad204ece8b2fc559b20d94001cca040fbd956",
+        "workspace/input.json": "6e3bf56a14f77b256931908b30b1648c7a521d3f6267981897e361f585d0d763",
+        "attempt.json": "962194dcd193f813965ab45e9e478e79dad9007cba55972bc65c39067db80a00"
+      },
+      "runtime_source_sha256": {
+        "pi_retry.py": "ea40859ef99a032ef2ce4cb8bc6264d33ed6445b59fe0ffc96152ea39c71dd25",
+        "execution_slot.py": "c88b9dc8f74e8d841814762523e873e1ab463832a1e17426deaacecf601bf104",
+        "run_pi_work.py": "25af658e0ad026be3c79615f7f74625dd86d810a776384c123eb31e73032fca8",
+        "office_pi.mjs": "168dda19b1c8ce7b583db462527e16bfbcc702936fcdcc092c5184ac9fc4855e",
+        "deepseek_relay.py": "2818c617139b50c58aff74fce808ad8120a329969d057faf02b93c4ef3b8cd62"
+      }
+    },
+    {
+      "mode": "second",
+      "exit_code": 0,
+      "owned_processes_seen": 46,
+      "remaining_owned_processes": 0,
+      "active_journal_present": false,
+      "run_count": 1,
+      "elapsed_seconds": 31.528,
+      "duplicate_attempt": {
+        "exit_code": 1,
+        "blocked_busy": false,
+        "blocked_stale": true
+      },
+      "run_id": "pi-work-20261101T165036257213Z",
+      "attempt": {
+        "schema": 1,
+        "root": "pi-work-20261101T164825736559Z",
+        "parent": "pi-work-20261101T164934357544Z",
+        "attempt": 2,
+        "mode": "http_429",
+        "source_sha256": "620299c263e4d3906c8ad6924cae6506cbdb43458058750a9d16742320221f15",
+        "fixture_sha256": "f576619513bba8870983a515d83b4cf95e578de9fad315ff7a3d3e0b9d382385"
+      },
+      "report": {
+        "status": "failed",
+        "failure_check_passed": true,
+        "model_inference_verified": false,
+        "client_requests": 1,
+        "external_requests": 0,
+        "cleanup_errors": [],
+        "elapsed_s": 30.781644166912884,
+        "owned_processes_seen": 4,
+        "remaining_owned_processes": 0
+      },
+      "office": {
+        "status": "failed",
+        "native_error_verified": true,
+        "cleanup_completed": true,
+        "states": [
+          "starting",
+          "idle",
+          "working",
+          "needs_input"
+        ]
+      },
+      "preserved_files_sha256": {
+        "result.json": "e81f91aec88d2c5f4c824475150185f5badfe06492313893d544fbd8d6b7264b",
+        "office-result.json": "d1dea56d8c91018abd23e1e3a4de3c433c9fd5a91564e73ad290d417befd84fb",
+        "pi-events.jsonl": "a93140590cd3b56f8e3949af7bc48c236cbe76f33d69804c662260657e3682d4",
+        "workspace/input.json": "6e3bf56a14f77b256931908b30b1648c7a521d3f6267981897e361f585d0d763",
+        "attempt.json": "011a93a818d1c7d0f340241c315028ab5e6dcb3122c787129adbea3b23d876d7"
+      },
+      "runtime_source_sha256": {
+        "pi_retry.py": "ea40859ef99a032ef2ce4cb8bc6264d33ed6445b59fe0ffc96152ea39c71dd25",
+        "execution_slot.py": "c88b9dc8f74e8d841814762523e873e1ab463832a1e17426deaacecf601bf104",
+        "run_pi_work.py": "25af658e0ad026be3c79615f7f74625dd86d810a776384c123eb31e73032fca8",
+        "office_pi.mjs": "168dda19b1c8ce7b583db462527e16bfbcc702936fcdcc092c5184ac9fc4855e",
+        "deepseek_relay.py": "2818c617139b50c58aff74fce808ad8120a329969d057faf02b93c4ef3b8cd62"
+      }
+    }
+  ],
+  "verification": {
+    "blocked_attempts": [
+      {
+        "attempt": 2,
+        "execute": false,
+        "reason": "retry_limit_reached",
+        "exit_code": 1
+      },
+      {
+        "attempt": 2,
+        "execute": true,
+        "reason": "retry_limit_reached",
+        "exit_code": 1
+      },
+      {
+        "attempt": 0,
+        "execute": false,
+        "reason": "retry_requires_latest_attempt",
+        "exit_code": 1
+      },
+      {
+        "attempt": 0,
+        "execute": true,
+        "reason": "retry_requires_latest_attempt",
+        "exit_code": 1
+      },
+      {
+        "attempt": 1,
+        "execute": false,
+        "reason": "retry_requires_latest_attempt",
+        "exit_code": 1
+      },
+      {
+        "attempt": 1,
+        "execute": true,
+        "reason": "retry_requires_latest_attempt",
+        "exit_code": 1
+      }
+    ],
+    "new_runs_created_by_rejections": 0,
+    "original_files_unchanged": true,
+    "distinct_sessions": 3,
+    "identical_fixture_bytes": true,
+    "ledger_attempts": [
+      0,
+      1,
+      2
+    ],
+    "active_journal_present": false
+  },
+  "tests": {
+    "python": 117,
+    "node": 35,
+    "total": 152
+  },
+  "browser": {
+    "runs": 46,
+    "four_provider_artifact_details": true,
+    "retry_lineage_and_attempt_labels": true,
+    "fault_tasks_remain_failed": true,
+    "filters": true,
+    "refresh": true,
+    "external_requests": 0,
+    "javascript_errors": 0
+  },
+  "source_sha256": {
+    "pi_retry.py": "ea40859ef99a032ef2ce4cb8bc6264d33ed6445b59fe0ffc96152ea39c71dd25",
+    "execution_slot.py": "c88b9dc8f74e8d841814762523e873e1ab463832a1e17426deaacecf601bf104",
+    "office_dispatch.py": "abe50deac4b715693ac84bf19847fadfd3bcbe28cb5e94311bf8cc324de8ed1b",
+    "run_pi_work.py": "25af658e0ad026be3c79615f7f74625dd86d810a776384c123eb31e73032fca8",
+    "office_results.py": "bc6f09632ba6062a58213fc27c2ad0ccb4f4ba07f79a64d54ccafaf21f63edf2",
+    "office_results.html": "ad9f2a39458feba47c09e68339d65a5419b11d5bfbff1012e3c8f3e5eb026d03",
+    "check_office_results_browser.mjs": "4204b631616fc5c1c67491c52c9ba17fab8c7f4a7688067757987d331f66110c",
+    "test_pi_retry.py": "32decf528d2873d1c4d0d4b6645795de75c665936a91bf5521c46d1e52967d86"
+  },
+  "limitations": [
+    "Native retry acceptance used Pi with locally injected HTTP 429, not actual provider inference or recovery from a real outage",
+    "Pi task, HTTP 401 and CLI crash retry selection covered offline; native retry chain exercised HTTP 429 only",
+    "Retries use fresh sessions and workspaces; this is not same-session resume",
+    "Other providers do not yet support retry lineage; full AC-07 and MVP remain pending",
+    "The limit applies to one recorded task in one cooperating checkout, not independent tasks, manual CLI launches, hostile file edits or global spending",
+    "Interrupted or inconsistent reservations remain blocked; no ledger repair or automatic reset is provided"
+  ]
+}

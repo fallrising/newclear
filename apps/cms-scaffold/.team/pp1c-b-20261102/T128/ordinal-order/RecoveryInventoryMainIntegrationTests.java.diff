@@ -1,0 +1,17 @@
+--- RecoveryInventoryMainIntegrationTests.java.before
++++ services/cms-api/src/integrationTest/java/com/fallrising/cms/ops/RecoveryInventoryMainIntegrationTests.java
+@@ -142,6 +142,14 @@
+             assertEquals(RecoveryInventory.sha256(artifact), result.path("inventorySha256").textValue());
+             assertEquals(JSON.readTree(artifact).path("dbSnapshotSha256"), result.path("dbSnapshotSha256"));
+             assertEquals(20, JSON.readTree(artifact).path("tables").size());
++            for (JsonNode table : JSON.readTree(artifact).path("tables")) {
++                int prior = 0;
++                for (JsonNode column : table.path("schema").path("columns")) {
++                    int ordinal = Integer.parseInt(column.path("ordinalPosition").textValue());
++                    assertTrue(ordinal > prior, "numeric column order: " + table.path("tableName").textValue());
++                    prior = ordinal;
++                }
++            }
+             assertEquals(PosixFilePermissions.fromString("rw-------"), Files.getPosixFilePermissions(output));
+             assertTrue(new String(artifact, StandardCharsets.UTF_8).contains(RAW_ROW));
+             for (String line : new String[]{readyLine, resultLine}) {

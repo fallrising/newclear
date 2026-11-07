@@ -13,6 +13,7 @@ from unittest import mock
 from uuid import uuid4
 
 import psycopg
+import test_runtime
 from backup_fixture import NativeClient
 from fastapi.testclient import TestClient
 from psycopg import sql
@@ -21,6 +22,7 @@ from test_control_plane import URL, PlatformFixture
 
 from agent_platform import archive_retention, audit_retention, backup, event_retention
 from agent_platform.api import create_app
+from agent_platform.connector_recovery import STOP_KEYS
 from agent_platform.db import Database
 from agent_platform.domain import Problem
 from agent_platform.result_archive import read_archive
@@ -72,6 +74,166 @@ class BackupTests(PlatformFixture):
         return backup.restore_backup(
             self.target_url, self.bundle, offline=True, confirm_database=self.target_name
         )
+
+    def subscription_histories(self, *, confirmed=False):
+        test_runtime.RuntimeTests.clear_catalog(self)
+        self.addCleanup(test_runtime.RuntimeTests.clear_catalog, self)
+        test_runtime.RuntimeTests.real_profile(self)
+        expected = []
+        for backend, model in (
+            ("claude-subscription", "claude-subscription:claude-opus-5-5"),
+            ("codex-subscription", "codex-subscription:gpt-6.1-sol"),
+        ):
+            response = self.post(
+                "/agent-profiles",
+                {
+                    "name": backend,
+                    "backend": backend,
+                    "deadline_seconds": 600,
+                    "verification": {
+                        "mode": "commands",
+                        "revision": "backup-v1",
+                        "checks": [{"id": "test", "argv": ["true"], "timeout_seconds": 1}],
+                    },
+                },
+            )
+            self.assertEqual(response.status_code, 201, response.text)
+            profile = response.json()
+            self.assertEqual(profile["model_ref"], model)
+            self.payload["profile_revision"] = profile["id"]
+            run = self.create()["run"]
+            if confirmed:
+                # Only runtime/provider effects are mocked. Worker state, leases,
+                # result archive, cleanup and native dump/restore use the real DB.
+                connector = mock.Mock()
+                connector.allocate.return_value = {
+                    "handle": "fixture-owned-" + run["id"],
+                    "lease_deadline": "2099-01-01T00:00:00Z",
+                    "vm_id": "fixture-vm-" + run["id"],
+                }
+                operations = {
+                    "prepare": {"ref": run["id"], "model_transport": False},
+                    "result": {
+                        "execution_mode": "cocoon-external",
+                        "summary": "Synthetic runtime result for native backup coverage",
+                        "verification": {"status": "passed", "reason": "mock runtime only"},
+                    },
+                    "release": {
+                        "observed_state": "stopped",
+                        "proof": {key: True for key in STOP_KEYS},
+                    },
+                }
+                connector.operation.side_effect = lambda _, action, results=operations: results[
+                    action
+                ]
+                driver = mock.Mock()
+                argument = (
+                    "subscription" if backend == "claude-subscription" else "codex_subscription"
+                )
+                worker = Worker(self.db, connector, **{argument: driver})
+                self.assertTrue(worker.run_once())
+                driver.execute.assert_called_once()
+                connector.allocate.assert_called_once()
+                self.assertEqual(
+                    [call.args[1] for call in connector.operation.call_args_list],
+                    ["prepare", "result", "release"],
+                )
+            else:
+                cancelled = self.post(
+                    f"/runs/{run['id']}/actions",
+                    {"action": "cancel", "expected_state_version": run["state_version"]},
+                )
+                self.assertEqual(cancelled.status_code, 202, cancelled.text)
+            expected.append(Store(self.db).run(run["id"]))
+        with self.db.transaction() as conn:
+            conn.execute("UPDATE runtime_capacity SET draining=true")
+        return expected
+
+    def subscription_roundtrip(self, *, confirmed=False):
+        expected = self.subscription_histories(confirmed=confirmed)
+        before = self.snapshot(URL)
+        self.make_backup()
+        self.restore()
+        target = Database(self.target_url)
+        target.open()
+        self.addCleanup(target.close)
+        self.assertEqual(self.snapshot(self.target_url), before)
+        for run in expected:
+            self.assertEqual(Store(target).run(run["id"]), run)
+            self.assertEqual(run["execution_mode"], "cocoon-external")
+            self.assertEqual(run["state"], "succeeded" if confirmed else "cancelled")
+            self.assertEqual(run["cleanup_state"], "confirmed" if confirmed else "not_allocated")
+
+    def test_real_native_roundtrip_preserves_subscription_profiles_and_cancelled_runs(self):
+        self.subscription_roundtrip()
+
+    def test_real_native_roundtrip_preserves_confirmed_subscription_histories(self):
+        self.subscription_roundtrip(confirmed=True)
+
+    def test_queued_subscription_cancellation_requires_exact_never_admitted_proof(self):
+        histories = self.subscription_histories()
+        for run in histories:
+            for statement in (
+                "UPDATE runs SET generation=2 WHERE id=%s",
+                "UPDATE runs SET cancel_command_id=NULL WHERE id=%s",
+                "UPDATE runs SET cancel_requested_at=NULL WHERE id=%s",
+                "UPDATE runs SET cancel_completed_at=NULL WHERE id=%s",
+                "UPDATE runs SET cancel_completed_at=cancel_requested_at-interval '1 second' "
+                "WHERE id=%s",
+                "UPDATE runs SET reason=NULL WHERE id=%s",
+                "UPDATE runs SET state='failed' WHERE id=%s",
+                "UPDATE runs SET backend_ref='unknown' WHERE id=%s",
+                "UPDATE runs SET backend_cursor='unknown' WHERE id=%s",
+                "UPDATE runs SET cleanup_state='unknown' WHERE id=%s",
+                "UPDATE jobs SET generation=0 WHERE run_id=%s",
+                "UPDATE jobs SET attempts=1 WHERE run_id=%s",
+                "UPDATE jobs SET lease_owner=gen_random_uuid() WHERE run_id=%s",
+                "UPDATE jobs SET lease_until=now() WHERE run_id=%s",
+                "DELETE FROM jobs WHERE run_id=%s",
+                "UPDATE commands SET route='unrelated' "
+                "WHERE id=(SELECT cancel_command_id FROM runs WHERE id=%s)",
+                "UPDATE commands SET expected_version=NULL "
+                "WHERE id=(SELECT cancel_command_id FROM runs WHERE id=%s)",
+                "UPDATE commands SET result=NULL "
+                "WHERE id=(SELECT cancel_command_id FROM runs WHERE id=%s)",
+                "UPDATE commands SET result=jsonb_set(result,'{body,status}','\"pending\"') "
+                "WHERE id=(SELECT cancel_command_id FROM runs WHERE id=%s)",
+                "UPDATE commands SET run_id=NULL "
+                "WHERE id=(SELECT cancel_command_id FROM runs WHERE id=%s)",
+                "INSERT INTO adapter_operations(operation_id,run_id,kind,result) "
+                "VALUES ('uncertain',%s,'allocate','{}'::jsonb)",
+            ):
+                with self.subTest(backend=run["backend"], statement=statement):
+                    with psycopg.connect(URL) as conn:
+                        backup._quiescent(conn)
+                        conn.execute(statement, (run["id"],))
+                        with self.assertRaisesRegex(ValueError, "backup_source_active"):
+                            backup._quiescent(conn)
+                        conn.rollback()
+
+    def test_confirmed_subscription_history_requires_matching_cleanup_proof(self):
+        histories = self.subscription_histories(confirmed=True)
+        for run in histories:
+            for statement in (
+                "UPDATE runs SET generation=generation+1 WHERE id=%s",
+                "UPDATE runs SET cleanup_state='unknown' WHERE id=%s",
+                "UPDATE sandbox_bindings SET cleanup_state='unknown' WHERE run_id=%s",
+                "UPDATE sandbox_bindings SET desired_state='running' WHERE run_id=%s",
+                "UPDATE sandbox_bindings SET observed_state='unknown' WHERE run_id=%s",
+                "UPDATE sandbox_bindings SET provider_handle='pending:unknown' WHERE run_id=%s",
+                "UPDATE sandbox_bindings SET node_id='fake-local' WHERE run_id=%s",
+                "UPDATE resource_reservations SET released_at=NULL "
+                "WHERE sandbox_id=(SELECT sandbox_id FROM runs WHERE id=%s)",
+                "DELETE FROM resource_reservations "
+                "WHERE sandbox_id=(SELECT sandbox_id FROM runs WHERE id=%s)",
+            ):
+                with self.subTest(backend=run["backend"], statement=statement):
+                    with psycopg.connect(URL) as conn:
+                        backup._quiescent(conn)
+                        conn.execute(statement, (run["id"],))
+                        with self.assertRaisesRegex(ValueError, "backup_source_active"):
+                            backup._quiescent(conn)
+                        conn.rollback()
 
     def test_real_native_roundtrip_preserves_pruned_event_replay_identity(self):
         original = self.completed()

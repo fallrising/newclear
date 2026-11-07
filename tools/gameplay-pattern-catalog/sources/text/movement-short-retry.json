@@ -1,0 +1,124 @@
+{
+  "id": "movement-short-retry",
+  "system": "movement",
+  "edition": 3,
+  "name": {
+    "zh": "失败后立刻重试同一小段",
+    "en": "Retry the same short segment immediately"
+  },
+  "summary": {
+    "zh": "把失败变成一次有用的练习，下一次只改一个动作。",
+    "en": "Make failure useful practice: change one action on the next attempt."
+  },
+  "rules": {
+    "zh": "挑战被切成较短的动作段，失败后迅速回到这一段的起点，已经通过的前段不必重做。玩家利用刚看到的失败位置调整起跳或移动时机；当连续动作终于接上，就进入下一段新挑战。",
+    "en": "Divide a challenge into short action segments. Failure quickly restores the current segment without replaying completed sections. Use the freshly observed failure to adjust a jump or movement timing; completing the sequence advances to the next challenge."
+  },
+  "loop": [
+    {
+      "zh": "尝试短动作段",
+      "en": "Attempt a short sequence"
+    },
+    {
+      "zh": "看到失败位置",
+      "en": "See where it failed"
+    },
+    {
+      "zh": "迅速回到段落起点",
+      "en": "Return quickly to the segment start"
+    },
+    {
+      "zh": "修改一个动作再试",
+      "en": "Change one action and retry"
+    },
+    {
+      "zh": "通过后进入新段",
+      "en": "Clear it and advance"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "刚才撞上顶棚，这次提前松手，还是改变起跳位置？",
+      "en": "After hitting the ceiling, release jump earlier or change where you take off?"
+    },
+    {
+      "zh": "继续使用接近成功的路线，还是换一条更稳但更慢的走法？",
+      "en": "Refine the nearly successful route or try a slower, safer one?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "重试段长度",
+        "en": "Retry segment length"
+      },
+      "effect": {
+        "zh": "短段方便把失败归因到一个动作，长段更强调动作的连续稳定性。",
+        "en": "Short segments isolate a failure to one action; longer ones test consistency across a sequence."
+      }
+    },
+    {
+      "name": {
+        "zh": "失败到可操作的等待",
+        "en": "Delay before control returns"
+      },
+      "effect": {
+        "zh": "等待越短越容易保留刚才的动作记忆；过短而缺乏失败提示也可能让原因不清楚。",
+        "en": "A short delay preserves fresh action memory, but removing failure feedback can obscure the cause."
+      }
+    }
+  ],
+  "tags": [
+    "precision",
+    "timing",
+    "information"
+  ],
+  "related": [
+    "movement-auto-forward",
+    "movement-run-walk-control",
+    "movement-target-bounce",
+    "movement-variable-jump"
+  ],
+  "contrast": {
+    "zh": "《蔚蓝》把重试放在连续旅途中的小房间里；《超级食肉男孩》更常把一次重试对应到独立短关卡。两者都让学习留在玩家身上，而非依靠每次失败加属性。",
+    "en": "Celeste places retries in small rooms within a continuous journey; Super Meat Boy more often maps a retry to a separate short level. Both preserve learning in the player rather than requiring stat gains after failure."
+  },
+  "combination": {
+    "zh": "设计提案：每个短房间只加入一种新障碍规则，失败后保留上一次碰撞位置的短暂标记，帮助玩家提出并验证下一种走法。",
+    "en": "Design proposal: introduce one new obstacle rule per short room and briefly mark the previous collision point after failure, helping players propose and test a revised route."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "教学示例：一段 8 秒路线包含两次跳跃，第二次起跳太晚会撞锯片。",
+      "en": "Teaching example: an eight-second section has two jumps; a late second takeoff hits a saw."
+    },
+    "action": {
+      "zh": "第一次失败后，你在段落起点立刻重试，只把第二次起跳提前。",
+      "en": "After failing once, retry from the segment start and change only the second takeoff to occur earlier."
+    },
+    "result": {
+      "zh": "这次通过锯片，失败位置成为可用的信息。",
+      "en": "You clear the saw; the previous failure has supplied useful information."
+    },
+    "next": {
+      "zh": "下一间房移动了落点，你需要形成新的动作顺序。",
+      "en": "The next room relocates the landing, requiring a new sequence."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "做三间各 5—10 秒可通过的房间，失败后约半秒恢复操作，并保留清晰的碰撞反馈。",
+      "en": "Build three rooms that each take five to ten seconds to clear; restore control about half a second after failure while preserving clear collision feedback."
+    },
+    "pitfall": {
+      "zh": "重试太快不等于可读性好；隐藏陷阱或不稳定的重置位置仍会让玩家无法学习。",
+      "en": "Fast retries do not guarantee readability; hidden hazards or inconsistent reset positions still prevent learning."
+    },
+    "test": {
+      "zh": "连续记录五次尝试，检查玩家是否改变失败附近的动作，而不是每次从头盲按。",
+      "en": "Record five consecutive attempts; check whether players revise actions near the failure rather than repeating blind inputs from the start."
+    }
+  }
+}

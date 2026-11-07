@@ -1,0 +1,12 @@
+Original local log SHA256: 96cc567f113f4f2f97c9801ea39a9393ed7fd9138ab87797b2b1a7b76f92d18c
+
+RecoveryInventoryIntegrationTests > PP1c_completeFlywayChecksumNullAndSuccessDrift() FAILED
+    org.opentest4j.AssertionFailedError at RecoveryInventoryIntegrationTests.java:153
+RecoveryInventoryIntegrationTests > PP1c_catalogContainsOriginalTypesNullsConstraintsAndIndexes() FAILED
+RecoveryInventoryIntegrationTests > PP1c_unsupportedConstraintRejected() FAILED
+    org.opentest4j.AssertionFailedError at RecoveryInventoryIntegrationTests.java:164
+RecoveryInventoryIntegrationTests > PP1c_constraintAndIndexDriftChangeOnlySchemaHashes() FAILED
+    org.opentest4j.AssertionFailedError at RecoveryInventoryIntegrationTests.java:131
+4 tests completed, 4 failed
+> Task :services:cms-api:integrationTest FAILED
+BUILD FAILED in 18s

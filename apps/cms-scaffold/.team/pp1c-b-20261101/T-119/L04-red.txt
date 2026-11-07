@@ -1,0 +1,94 @@
+✔ PP1C_L01_v1_insertion_order_bytes_and_atomic_update (9.656647ms)
+✔ PP1C_L01_duplicate_reservation_preserves_existing_bytes (1.611015ms)
+✔ PP1C_L01_symlink_hardlink_and_mode_rejected (2.309931ms)
+✔ PP1C_L02_version (0.875976ms)
+✔ PP1C_L02_unknown (0.338428ms)
+✔ PP1C_L02_missing (0.378509ms)
+✔ PP1C_L02_source_identity (0.969217ms)
+✔ PP1C_L02_source_unknown (0.469409ms)
+✔ PP1C_L02_source_connection (0.988647ms)
+✔ PP1C_L02_operation (0.344449ms)
+✔ PP1C_L02_phase (0.230799ms)
+✔ PP1C_L02_source_release (0.369429ms)
+✔ PP1C_L02_policy (0.909897ms)
+✔ PP1C_L02_time (0.224439ms)
+✔ PP1C_L02_target_for_backup (0.36963ms)
+✔ PP1C_L02_proof_for_backup (0.265378ms)
+✔ PP1C_L02_account_for_backup (0.18543ms)
+✔ PP1C_L02_helper_empty (0.271369ms)
+✔ PP1C_L02_restore_missing_target (0.161469ms)
+✔ PP1C_L02_recover_running (0.14311ms)
+✔ PP1C_L02_valid_backup_phases_and_nested_required (5.663751ms)
+✔ PP1C_L02_restore_reserved_created_blank_and_no_second_source (4.677213ms)
+✔ PP1C_L02_helper_handshake_state_network_and_backend_bindings (3.097559ms)
+✔ PP1C_L02_recover_proof_self_hash_and_account_phase (1.282105ms)
+✖ PP1C_L04_BEGIN_without_END_is_incomplete_and_lock_retained (2.195022ms)
+✖ PP1C_L04_partial_bytes_and_unknown_sequence_fail_closed (1.137556ms)
+✖ PP1C_L04_rename_or_sync_failure_never_releases_lock (1.173587ms)
+✖ PP1C_L04_FAIL_retains_original_phase_and_primary_failure (1.320165ms)
+ℹ tests 28
+ℹ suites 0
+ℹ pass 24
+ℹ fail 4
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 61.066496
+
+✖ failing tests:
+
+test at scripts/local/maintenance-store.test.mjs:145:1
+✖ PP1C_L04_BEGIN_without_END_is_incomplete_and_lock_retained (2.195022ms)
+  AssertionError [ERR_ASSERTION]: Missing expected rejection.
+      at async TestContext.<anonymous> (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-registry-20261101/apps/cms-scaffold/scripts/local/maintenance-store.test.mjs:148:3)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: /JOURNAL_INCOMPLETE/,
+    operator: 'rejects',
+    diff: 'simple'
+  }
+
+test at scripts/local/maintenance-store.test.mjs:153:1
+✖ PP1C_L04_partial_bytes_and_unknown_sequence_fail_closed (1.137556ms)
+  Error: ENOENT: no such file or directory, open '/tmp/pp1-store-NuGshH/local/pp1/bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb/maintenance/operations/11111111-1111-4111-8111-111111111111.json'
+      at async open (node:internal/fs/promises:640:25)
+      at async readFile (node:internal/fs/promises:1290:14)
+      at async TestContext.<anonymous> (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-registry-20261101/apps/cms-scaffold/scripts/local/maintenance-store.test.mjs:156:69)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    errno: -2,
+    code: 'ENOENT',
+    syscall: 'open',
+    path: '/tmp/pp1-store-NuGshH/local/pp1/bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb/maintenance/operations/11111111-1111-4111-8111-111111111111.json'
+  }
+
+test at scripts/local/maintenance-store.test.mjs:162:1
+✖ PP1C_L04_rename_or_sync_failure_never_releases_lock (1.173587ms)
+  AssertionError [ERR_ASSERTION]: Missing expected rejection.
+      at async TestContext.<anonymous> (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-registry-20261101/apps/cms-scaffold/scripts/local/maintenance-store.test.mjs:165:5)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: undefined,
+    operator: 'rejects',
+    diff: 'simple'
+  }
+
+test at scripts/local/maintenance-store.test.mjs:170:1
+✖ PP1C_L04_FAIL_retains_original_phase_and_primary_failure (1.320165ms)
+  Error: ENOENT: no such file or directory, open '/tmp/pp1-store-0daTCK/local/pp1/bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb/maintenance/operations/11111111-1111-4111-8111-111111111111.json'
+      at async open (node:internal/fs/promises:640:25)
+      at async readFile (node:internal/fs/promises:1290:14)
+      at async TestContext.<anonymous> (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-b-registry-20261101/apps/cms-scaffold/scripts/local/maintenance-store.test.mjs:174:22)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    errno: -2,
+    code: 'ENOENT',
+    syscall: 'open',
+    path: '/tmp/pp1-store-0daTCK/local/pp1/bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb/maintenance/operations/11111111-1111-4111-8111-111111111111.json'
+  }

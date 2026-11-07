@@ -1,0 +1,19 @@
+{
+  "handwrittenChangedLines": 165,
+  "files": {
+    "scripts/local/maintenance-helper.mjs": 29,
+    "scripts/local/maintenance-workflow.test.mjs": 30,
+    "scripts/ops/local-recovery-verify.mjs": 42,
+    "scripts/ops/local-recovery-verify.test.mjs": 21,
+    "scripts/ops/local-recovery.fixture.mjs": 43
+  },
+  "sha256": {
+    "scripts/local/maintenance-helper.mjs": "421f4e954c5d2498a1aa7c414fed59d4b478319b4fdf15155826e9cc12b15c11",
+    "scripts/local/maintenance-workflow.test.mjs": "39e26d56e59cca4cd0533370b9c54c170e39909cfbf252064d230f0f37d1aff9",
+    "scripts/ops/local-recovery-verify.mjs": "05a6f0638095d3682b071872ade5642d4830fa1746f777e7af0e52e66d322daa",
+    "scripts/ops/local-recovery-verify.test.mjs": "56c29728bfdf7dcd86c268053af376e5c30a806e83405289a5048f6a4e7ef28a",
+    "scripts/ops/local-recovery.fixture.mjs": "b368657dfe397cd5f59a7ca42ca89dec64da1c0e835e2070ba27a312b4acc050"
+  },
+  "checks": "302/302 affected registry/helper/verifier/restore pass; named wrapper/post Red retained; no actualCclaim",
+  "frozenAt": "2026-11-02T16:27:48.362385+00:00"
+}

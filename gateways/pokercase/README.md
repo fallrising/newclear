@@ -26,30 +26,80 @@ A **thin** OpenAI-compatible LLM API proxy in Rust, inspired by [9router](https:
 **In scope:** `/v1/chat/completions`, `/v1/messages`, `/v1/responses`, routes + fallback/RR, **OAuth/session token import** (personal subscriptions), optional token-saver, web admin, TUI, SQLite.
 
 **Architecture:** Layer A = this gateway; Layer B = your multi-agent “team” apps calling only Layer A. See [docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md).  
-**Providers:** siwc (OpenAI models) · claude · cursor · grok · opencode · agy — [docs/PROVIDERS.md](./docs/PROVIDERS.md)  
+**Providers:** siwc (OpenAI models) · claude · cursor-agent CLI (`cursor` ID) · grok · opencode · agy — [docs/PROVIDERS.md](./docs/PROVIDERS.md)
 **Claude 订阅原理：** [docs/CLAUDE_SUBSCRIPTION.md](./docs/CLAUDE_SUBSCRIPTION.md)
+
+Messages requests routed to Claude retain top-level instructions as stable settings and inline system/developer text as ordered conversation context. New inline instructions can accompany a new user turn in the same or saved session; changed stable settings or edited earlier context still require a fresh run. Direct Chat/Responses keep their existing strict instruction policy. See [ordered dynamic-context continuation and limits](docs/tasks/T-0426-dynamic-context.md).
 
 **Out of scope (for now):** MITM, cloud sync, 9router.db compatibility, media APIs.
 
 > [!WARNING]
-> **`claude` provider** answers through your local, signed-in Claude Code CLI (`claude -p`);
+> **`claude` provider** answers through your local, signed-in Claude Code CLI (interactive TUI by default; explicit print compatibility);
 > thinrouter never holds or sends a Claude token, and your system prompt never replaces
 > Claude Code's. Automated use of a subscription is still subject to Anthropic's terms —
 > see [docs/CLAUDE_SUBSCRIPTION.md](./docs/CLAUDE_SUBSCRIPTION.md).
 
-> [!WARNING]
-> **`cursor` provider is off by default.** `cursor-agent` can use your Cursor account's
-> plugins (for example Gmail) even in ask mode, and the CLI cannot turn them off,
-> so any client holding a gateway key could make it read that data. Enable it only with
-> `--cursor-accept-account-plugins` after disconnecting plugins you do not want exposed.
-> A pinned local container image and dedicated profile volume are also required; see
-> [Cursor isolation and setup](docs/cursor-isolation.md). Ask mode is not a security boundary.
+**Cursor Agent CLI (`cursor-agent`), not the IDE.** The owner removed Docker as a product requirement on 2026-11-02. The `cursor` provider ID remains for existing configurations. The current adapter still uses its older container runner; Docker-free CLI execution is pending, so it is not yet a usable no-Docker route. See the [current decision and historical isolation evidence](docs/cursor-isolation.md). The existing account-plugin opt-in remains; the prior selected-version probe found plugins callable in ask mode.
+
+Claude tool-result continuation checks the resolved model, instructions, tool definitions and known normalized history before delivering results to a waiting process. Changed context takes the existing fresh-run path; see [correlation correction and remaining client limits](docs/tasks/T-0426-claude-client.md).
+
+## Process interruption and recovery evidence
+
+The existing ledger now has a reproducible [M-10 crash-recovery check](docs/tasks/T-0432-crash-recovery.md): nine storage-process boundaries and three actual isolated buffered HTTP/fakeCLI gateway cases. Pending attempts recover once as interrupted/unknown usage; finalized history stays intact and restart sends no new request. The current runtime already passed, so this delivery adds tests and evidence without changing runtime policy. The retained private `local-demo.py` defaults to check and verifies source/binary pins; the task documents source-checkout commands and read-only report verification. This is offline evidence, not live client/provider acceptance.
 
 ## Cost aggregate compatibility
 
 Admin stats and daily JSON expose `cost_summary` with `known_sum`, known/unknown/total row counts, nullable `coverage`, `status`, and `basis: "stored_estimate_usd"`. The legacy `estimated_cost_usd` aggregate is now null for empty, unknown or partial scopes; only a nonempty complete scope returns a number. A known zero remains zero. Web, TUI and `doctor` distinguish partial subtotals from complete estimates. Stats and the usage header are all-time; daily rows retain their existing bucket limits. Coverage measures non-null stored estimates, not billing accuracy. Event CSV values and stored rows are unchanged. See the [fixed acceptance and limits](docs/tasks/T-0429-cost-coverage.md).
 
 ## Quick start
+
+Generic API-key Chat HTTP upstream streams reserve an attempt before dispatch and settle observed tail usage once for Chat, Messages and Responses clients. Converted streams account for original upstream usage, including tools, and settle before final output. Admin events expose `request_id`, `attempt_id`, `outcome`, `usage_status`, `usage_source`, `headers_ms`, `first_output_ms`, `total_observed_ms` and `finalized_at`; CSV appends these fields after the original columns. Daily `ok` means observed terminal success; use `headers_200` for the previous HTTP200 count. Historical rows and paths without a source observer retain unknown terminal provenance. A missing token remains unknown and cost is estimated only with complete observed counters and prices. Server startup recovers pending attempts as interrupted, without replay, and rejects a concurrent server sharing its data directory. See [three-client scope and acceptance](docs/tasks/T-0432-protocol-settlement.md) and the original [timing and compatibility](docs/tasks/T-0432-stream-settlement.md); #698 remains open for the other paths.
+
+Existing SIWC and Grok Responses upstreams and OpenCode Chat upstreams now use durable streaming attempts for all three client protocols, including their supported tool exchanges. Each actual inference send has a separate attempt; fallback and the existing legal401 retry retain one request identity. OAuth refresh and model discovery do not create inference rows. Raw `openai_responses_v1` / `openai_chat_v1` observations preserve missing versus zero usage, HTTP status versus terminal outcome, and each attempt’s own timing. Named subscription/OAuth cost remains unknown, even with arbitrary configured rates. Borrowed Grok credentials remain read-only and are retried only when the existing reread detects a changed token. See [scope, isolation and acceptance](docs/tasks/T-0432-named-http-settlement.md).
+
+Buffered clients now also reserve and settle each generic API-key, SIWC, Grok and OpenCode HTTP dispatch. Failed collection/conversion, cancellation and legal retries retain their own attempts and original usage; missing fields remain unknown. Direct JSON has no measured first-output timestamp. Native Responses bytes and accepted background responses remain unchanged. Existing buffered configured-rate estimates require complete counters and prices; they are not verified subscription bills. See [BH-1–BH-5 and evidence boundaries](docs/tasks/T-0432-buffered-http-settlement.md).
+
+Claude Code and Cursor buffered Chat/Messages/Responses requests now use their existing raw CLI observers too. Each selected attempt is reserved before dispatch and settled once, including fallback, saved-session retry, collection failure and caller cancellation. Claude tools and live/saved session reuse retain their existing behavior; Cursor remains text-only. The ledger retains original source counters and clocks, independently of converted client usage. Cursor input/cache overlap is still unknown, so its normalized prompt and cost remain null. No buffered first-output or stall timeout is added. See [CB-1–CB-5 and the isolated fake-CLI check](docs/tasks/T-0432-buffered-cli-settlement.md).
+
+For the buffered HTTP check, preserve the native test executable reported by `cargo +1.99.0 test --locked --bin thinrouter --no-run --message-format=json`, verify its source and test inventory, and record its SHA256 before running:
+
+```sh
+python3 scripts/buffered_http_check.py --test-binary /path/to/preserved-native-test --expected-test-sha256 <verified-sha256> --output-dir /path/to/buffered-http-evidence
+```
+
+This defaults to check mode, verifies confinement before HTTP and writes a report for 53 cases across nine stages, including SQL/JSON/CSV/Web reconciliation. It uses the real gateway router, controlled fake upstreams and test-only refresh transport. Reopening exercises production recovery under an owned store lock; it is not a full process-crash matrix or real client/provider acceptance.
+
+For the headless named HTTP walkthrough after a locked build:
+
+```sh
+python3 scripts/named_http_walkthrough.py --check --binary "$CARGO_TARGET_DIR/debug/thinrouter" --expected-binary-sha256 <verified-sha256> --output-dir /path/to/named-http-evidence
+```
+
+The default check runs synthetic authentication, discovery, three-client streams and two-turn tools, fallback/borrowed401, failures/cancel/stall, consistent usage views and restart/reuse. `--serve` retains a disposable local admin demo until stopped. Every network destination is a controlled fake endpoint behind a non-forwarding proxy; refresh tests separately inject a test-only fake transport into the existing refresh logic. No real login, provider, client version or subscription billing is verified. Antigravity uses the separate isolation and accounting entries below; other buffered clients and Cursor tools/images are outside this named-HTTP continuation.
+
+Antigravity has a separate [offline HTTP and settlement entry](docs/ANTIGRAVITY-OFFLINE.md). It uses a preserved native **test executable**, proves confinement before running the real gateway router, and writes a JSON report. Inference, project discovery and Google refresh all use a test-only non-forwarding loopback proxy; a production base override alone is insufficient. No login, desktop or real provider is involved. The [AS-1–AS-5 continuation](docs/tasks/T-0432-antigravity-settlement.md) adds durable inference accounting, buffered raw usage and explicit terminal evidence, failures/cancel/timeout and restart. Existing stream bytes remain opaque: EOF is unknown, with no native Gemini stream conversion or measured stream usage. The original [AI-1–AI-5](docs/tasks/T-0434-antigravity-isolation.md) evidence remains a historical isolation baseline.
+
+Claude Code provider streams also reserve per dispatch across Chat, Messages and Responses, including live tool/user continuations and saved-session retries. Each attempt retains raw `reported_usage` input/output/cache counters; normalized `prompt_tokens` is known only when all disjoint input buckets are explicitly reported. Cumulative output replaces earlier counts. Missing fields stay unknown and CLI cost stays null. `cli_ready_ms` records the first accepted CLI event, separately from HTTP status and `headers_ms` (both null for CLI). First output excludes filtered thinking/tools/text. Successful CLI result/session totals are not attributed to a later request; an existing failing result still aborts the process and fails its active request without importing result counters. JSON/HTML/CSV expose the same stored observations; CSV appends five CLI columns after the existing fields. See [Claude scope, provenance and acceptance](docs/tasks/T-0432-claude-settlement.md). Actual CLI version/cache schema and real account/client behavior remain unverified.
+
+For a terminal-only, isolated Claude walkthrough after a locked build:
+
+```sh
+python3 scripts/claude_walkthrough.py --check --binary "$CARGO_TARGET_DIR/debug/thinrouter" --output-dir /path/to/claude-evidence
+```
+
+This retained walkthrough explicitly tests print compatibility. The new synthetic `claude_tui_e2e` suite exercises the actual PTY/helper with a fake interactive child. Neither establishes real CLI compatibility or quota savings. The script defaults to check mode and accepts `--serve` for a disposable local demo. It runs a Python fake Claude plus the real gateway/MCP helper, verifies all three client streams/tools, fallback/failure/cancel/stall, usage and process/session reuse after restart, and preserves sanitized diagnostics plus source/binary hashes. It never invokes an installed Claude CLI or real provider. `--expected-binary-sha256` rejects a changed binary before launch; the delivered local helper also pins preserved script hashes. All reported tokens are synthetic fixture observations; all CLI costs remain unknown. The original generic HTTP walkthrough remains available.
+
+
+Cursor text-only streams also retain per-dispatch raw `result.usage` counters with source `cursor_cli_result_v1`. `reported_usage` preserves input/output/cache values independently; absent fields stay unknown. Cursor's cache relationship is unverified, so normalized `prompt_tokens` and cost remain null, while observed output counts are retained. JSON/HTML/CSV use the same durable attempt, outcome and CLI timing. Existing opt-in and tools/images refusal remain; these observations use the legacy container adapter described in the [migration status](docs/cursor-isolation.md). Actual CLI version/account behavior is not established by the fake-runtime evidence. See [Cursor scope and acceptance](docs/tasks/T-0432-cursor-settlement.md).
+
+For the isolated terminal walkthrough after a locked build:
+
+```sh
+python3 scripts/cursor_walkthrough.py --check --binary "$CARGO_TARGET_DIR/debug/thinrouter" --output-dir /path/to/cursor-evidence
+```
+
+This entry uses an absolute fake runtime and fake Cursor with the real gateway; it never invokes Docker or an installed Cursor CLI. It checks three-client text streaming, refusals/fallback, failure/cancel/post-output stall, usage and independent requests after restart. CLI costs remain unknown. `--serve` retains a disposable local demo until cleanup; `--expected-binary-sha256` rejects a changed executable. Before first output, a silent process can still wait until the caller cancels; this slice adds no startup timeout.
+
 
 ```bash
 cargo run -- serve
@@ -115,6 +165,7 @@ thinrouter login-siwc [--name siwc] [--model <slug>]
 | `THINROUTER_SECRETS_KEY` / `--secrets-key` | Passphrase (Argon2id) for at-rest encryption; default: random `<data_dir>/secrets.key` |
 | `THINROUTER_PROVIDER_BASE_OVERRIDES` / `--provider-base-override` | Operator-only `provider=url` upstream base (mocks, egress proxies) |
 | `THINROUTER_CLAUDE_BIN` / `--claude-bin` | Claude Code CLI for the `claude` provider (default `claude` on PATH) |
+| `THINROUTER_CLAUDE_MODE` / `--claude-mode` | `tui` (default): genuine Unix PTY + incremental response observation; `print`: explicit legacy compatibility. No automatic print fallback. |
 | `THINROUTER_CLAUDE_MAX_RUNS` / `--claude-max-runs` | Concurrent Claude Code processes (default 2) |
 | `THINROUTER_CLAUDE_IDLE_SECS` / `--claude-idle-secs` | How long a completed Claude Code turn waits for client tool results or the next user turn (default 600) |
 | `THINROUTER_CURSOR_BIN` / `--cursor-bin` | Cursor command inside the pinned image (default `cursor-agent`) |
@@ -138,6 +189,8 @@ Same operations as the UI under `/admin/api/*` (`x-admin-token`, or a login sess
 - `GET/POST /admin/api/routes` · `GET/PUT/DELETE .../{id}`
 - `GET/POST /admin/api/keys` · `DELETE .../{id}`
 - `GET /admin/api/usage` · `.../daily` · `.../export.csv` · `GET /admin/api/stats`
+
+Daily measurement coverage is available at `GET /admin/api/usage/daily?schema=2`. It distinguishes no events, unknown, partial, explicit zero and complete saved fields; token subtotals are not subscription consumption. HTTP headers, CLI ready, first output, total observed and legacy/compatibility latency have separate known-only means and coverage. The Web usage page uses the same canonical report for its latest14 populated dates; the API selects30. Default/schema1 retains legacy numeric scalars and a compatibility notice. CSV preserves missing fields as empty cells; TUI labels missing legacy latency as unknown. See the [bounded coverage contract and checks](docs/tasks/T-0435-measurement-coverage.md).
 
 Multi-target route:
 
@@ -194,4 +247,6 @@ Set `THINROUTER_ADMIN_TOKEN` through your environment or secret configuration be
 
 MIT. Inspired by upstream MIT projects; not affiliated with 9Router.
 
-Cursor container settings: `--cursor-image` / `THINROUTER_CURSOR_IMAGE` (pinned local digest), `--cursor-profile-volume` / `THINROUTER_CURSOR_PROFILE_VOLUME` (dedicated `thinrouter-cursor-*` named volume), and `--cursor-runtime-bin` / `THINROUTER_CURSOR_RUNTIME_BIN` (Docker executable, default `docker`). Missing settings return 503; there is no host CLI fallback.
+Legacy Cursor Agent CLI runtime settings (migration pending; not the current product requirement): `--cursor-image` / `THINROUTER_CURSOR_IMAGE` (pinned local digest), `--cursor-profile-volume` / `THINROUTER_CURSOR_PROFILE_VOLUME` (dedicated `thinrouter-cursor-*` named volume), and `--cursor-runtime-bin` / `THINROUTER_CURSOR_RUNTIME_BIN` (Docker executable, default `docker`). Missing settings return 503; there is no host CLI fallback.
+
+Bounded fixture reliability checks: [fixture startup ownership and safe diagnostics](docs/tasks/T-0445-fixture-startup.md). Historical startup/auth causes remain unknown; test-only ownership evidence does not establish real-provider acceptance.

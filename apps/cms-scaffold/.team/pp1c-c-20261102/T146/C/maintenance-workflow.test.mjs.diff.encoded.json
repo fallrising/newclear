@@ -1,0 +1,8 @@
+{
+  "version": 1,
+  "original": "T146/C/maintenance-workflow.test.mjs.diff",
+  "sha256": "bf4ecf293811f45405c5c1c7f79d7eaf25dbcaeb389b7b7c2596e9c52b98a2e5",
+  "byteSize": "699",
+  "encoding": "utf-8",
+  "text": "--- \n\n+++ \n\n@@ -655,6 +655,7 @@\n\n     }\n   });\n   const original=f.deps.command;f.childState={containers,networks,volumes,relations:'0',empty:true,backends:[],visible:new Set(prepared?services:[])};\n+  if(!prepared)for(const network of f.state.networks)network.IPAM.Driver='default';\n   f.childState.networkCreated=new Set(prepared?['web','data']:[]);f.deps.readRoutes=async()=> 'Iface Destination Gateway Flags RefCnt Use Metric Mask MTU Window IRTT\\n';\n   f.targetCalls=[];await writeFile(join(f.cwd,'compose.pp1-local.yaml'),await readFile(new URL('../../compose.pp1-local.yaml',import.meta.url)));\n   if(!prepared){containers[0].State={Status:'created',Running:false,Health:{Status:'healthy'}};\n"
+}

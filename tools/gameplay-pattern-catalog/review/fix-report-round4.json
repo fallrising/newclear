@@ -1,0 +1,86 @@
+{
+  "round": 4,
+  "base": "a92c29187a3d02612a95f037cbdc1423cf50be6f",
+  "excluded": [
+    "automation-belt-routing",
+    "rhythm-hidden-beats"
+  ],
+  "manual_edits": {
+    "allocation-area-majority": "邊界驗收改用來源列出的「平局無人控制」規則；可調參數的平局規則改列來源三種做法，移除平局歸現任持有者的假設",
+    "movement-carry-object": "pi 三次驗證失敗後手改：驗收例改為只有拋投能讓箱子過 A；邊界驗收改為開關橋延時 5 秒的可行配置；參考來源移除「直接對照公開頁面及其內嵌條目，不是搜尋索引摘錄」",
+    "gathering-supply-mining": "pi 修後主驗收例仍被 flag，手改為同一基準比較（不繞路 8 礦 vs 繞路 6 礦），邊界例改寫結論"
+  },
+  "runs": [
+    {
+      "generated_at": "2026-11-03T11:55:26Z",
+      "applied": true,
+      "counts": {
+        "fixed": 4,
+        "failed": 1,
+        "cannot-fix": 0
+      },
+      "notes": [
+        {
+          "id": "allocation-route-denial",
+          "result": "fixed",
+          "provider": "default",
+          "summary_changed": false,
+          "chars_before": 2868,
+          "chars_after": 2879,
+          "attempts": []
+        },
+        {
+          "id": "deckbuilding-card-upgrade",
+          "result": "fixed",
+          "provider": "default",
+          "summary_changed": false,
+          "chars_before": 3121,
+          "chars_after": 3312,
+          "attempts": []
+        },
+        {
+          "id": "gathering-supply-mining",
+          "result": "fixed",
+          "provider": "default",
+          "summary_changed": false,
+          "chars_before": 2743,
+          "chars_after": 2824,
+          "attempts": [
+            {
+              "provider": "default",
+              "error": "no body markers"
+            }
+          ]
+        },
+        {
+          "id": "movement-carry-object",
+          "result": "failed",
+          "attempts": [
+            {
+              "provider": "default",
+              "error": "reference footer changed"
+            },
+            {
+              "provider": "default",
+              "error": "no body markers"
+            },
+            {
+              "provider": "default",
+              "error": "no body markers"
+            }
+          ]
+        },
+        {
+          "id": "stealth-synchronized-actions",
+          "result": "fixed",
+          "provider": "default",
+          "summary_changed": false,
+          "chars_before": 2584,
+          "chars_after": 2651,
+          "attempts": []
+        }
+      ],
+      "run": "fix-5"
+    }
+  ]
+}

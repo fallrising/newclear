@@ -1,0 +1,120 @@
+{
+  "id": "inventory-light-reserve",
+  "system": "inventory",
+  "edition": 1,
+  "name": {
+    "zh": "可耗尽的照明储备",
+    "en": "Consumable light reserves"
+  },
+  "summary": {
+    "zh": "光既提供安全，也占用有限补给。",
+    "en": "Light provides safety at a supply cost."
+  },
+  "rules": {
+    "zh": "玩家消耗火把或燃料维持照明，越深入越接近耗尽。黑暗带来危险或规则变化，因此补光、冒险前进和返程之间形成选择；亮度或燃烧条持续显示余量。",
+    "en": "Spend torches or fuel to sustain light while progressing toward depletion. Darkness changes danger or rules, creating a choice between relighting, pushing onward and returning; a light meter exposes remaining reserve."
+  },
+  "loop": [
+    {
+      "zh": "准备照明用品",
+      "en": "Prepare lighting supplies"
+    },
+    {
+      "zh": "前进并消耗光源",
+      "en": "Advance while light drains"
+    },
+    {
+      "zh": "评估黑暗风险",
+      "en": "Assess darkness risk"
+    },
+    {
+      "zh": "补光或安全撤回",
+      "en": "Relight or retreat"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "把最后一支火把用于深入，还是留给返程？",
+      "en": "Spend the final torch going deeper, or save it for the return?"
+    },
+    {
+      "zh": "照明不足时，去熟悉的短路线，还是冒险探索可能有补给的岔路？",
+      "en": "With little light, take a familiar short route or explore a branch that may hold supplies?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "消耗触发",
+        "en": "Drain trigger"
+      },
+      "effect": {
+        "zh": "随真实时间消耗造成操作压力；按步数消耗更偏计划。",
+        "en": "Real-time drain creates execution pressure; movement-based drain favors planning."
+      }
+    },
+    {
+      "name": {
+        "zh": "黑暗收益",
+        "en": "Darkness rewards"
+      },
+      "effect": {
+        "zh": "有额外收益会鼓励冒险；只有惩罚则强调准备。",
+        "en": "Extra rewards encourage risk; penalties alone emphasize preparation."
+      }
+    }
+  ],
+  "tags": [
+    "risk",
+    "time",
+    "planning"
+  ],
+  "related": [
+    "inventory-durability",
+    "inventory-death-retrieval",
+    "inventory-weight-budget",
+    "stealth-knockout-window"
+  ],
+  "contrast": {
+    "zh": "前者用光照调节风险收益档位；后者把光源作为夜间生存的即时底线。",
+    "en": "The former uses light as a risk-reward setting; the latter makes it an immediate nighttime survival requirement."
+  },
+  "combination": {
+    "zh": "组合提案：洞穴摄影需要暂时熄灯拍摄发光生物，玩家必须预留重新点亮的燃料。",
+    "en": "Design proposal: photographing bioluminescent creatures requires darkness, but enough fuel must remain to relight safely."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "火把还能亮一分钟，前面的岔路通向奖励，出口在身后。",
+      "en": "Your torch lasts another minute; a reward lies ahead and the exit is behind you."
+    },
+    "action": {
+      "zh": "你估算来回路程，决定只探索最近的房间。",
+      "en": "Estimate the round trip and explore only the nearest room."
+    },
+    "result": {
+      "zh": "得到一份奖励后照明已经明显变弱，继续前进会增加摸黑风险。",
+      "en": "After one reward the light is visibly weaker, making further progress riskier."
+    },
+    "next": {
+      "zh": "回到补给处补光，或接受黑暗的代价再走一段。",
+      "en": "Return to replenish light or accept the cost of darkness for one more stretch."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "做一条有岔路的走廊、会消耗的光源和一种清楚的黑暗惩罚。",
+      "en": "Build a branching corridor, a consumable light source, and one clear darkness penalty."
+    },
+    "pitfall": {
+      "zh": "纯粹看不清可能只令人烦躁；黑暗改变什么规则必须让玩家知道。",
+      "en": "Poor visibility alone may only frustrate; explain which rules darkness changes."
+    },
+    "test": {
+      "zh": "观察玩家是否在燃料耗尽前主动决定返程，而非被动等到一片漆黑。",
+      "en": "See whether players choose to return before fuel runs out instead of waiting passively for darkness."
+    }
+  }
+}

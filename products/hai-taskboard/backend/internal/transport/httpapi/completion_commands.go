@@ -28,6 +28,12 @@ type SubjectApprovalService interface {
 type QARequestService interface {
 	RequestQA(context.Context, domain.ActorID, command.RequestQA) (command.Outcome, error)
 }
+type ReworkRequestService interface {
+	RequestRework(context.Context, domain.ActorID, command.RequestRework) (command.Outcome, error)
+}
+type ReopenService interface {
+	ReopenWorkItem(context.Context, domain.ActorID, command.ReopenWorkItem) (command.Outcome, error)
+}
 type CancellationRequestService interface {
 	RequestCancellation(context.Context, domain.ActorID, command.RequestCancellation) (command.Outcome, error)
 }
@@ -108,6 +114,18 @@ type requestQAWire struct {
 	WorkItemID    string `json:"work_item_id"`
 	CandidateID   string `json:"candidate_id"`
 	SubjectDigest string `json:"completion_subject_digest"`
+}
+
+type requestReworkWire struct {
+	WorkItemID    string `json:"work_item_id"`
+	SubjectDigest string `json:"subject_digest"`
+	Reason        string `json:"reason"`
+}
+
+type reopenWorkItemWire struct {
+	WorkItemID  string `json:"work_item_id"`
+	TargetPhase string `json:"target_phase"`
+	Reason      string `json:"reason"`
 }
 
 type requestCancelWire struct {
@@ -309,6 +327,36 @@ func (server *Server) completionCommand(response http.ResponseWriter, request *h
 			return unavailable()
 		}
 		out, err := capability.RequestQA(request.Context(), session.Principal, v)
+		return out, err, true
+	case command.RequestReworkOperation:
+		var w requestReworkWire
+		if !decodeCompletionPayload(response, payload, &w) {
+			return command.Outcome{}, nil, false
+		}
+		v := command.RequestRework{Metadata: metadata, ProjectID: project, WorkItemID: domain.WorkItemID(w.WorkItemID), SubjectDigest: completionDigest(w.SubjectDigest), Reason: w.Reason}
+		if _, _, err := command.CanonicalRequestRework(v); err != nil {
+			return bad()
+		}
+		capability, ok := server.commands.(ReworkRequestService)
+		if !ok {
+			return unavailable()
+		}
+		out, err := capability.RequestRework(request.Context(), session.Principal, v)
+		return out, err, true
+	case command.ReopenWorkItemOperation:
+		var w reopenWorkItemWire
+		if !decodeCompletionPayload(response, payload, &w) {
+			return command.Outcome{}, nil, false
+		}
+		v := command.ReopenWorkItem{Metadata: metadata, ProjectID: project, WorkItemID: domain.WorkItemID(w.WorkItemID), TargetPhase: domain.Phase(w.TargetPhase), Reason: w.Reason}
+		if _, _, err := command.CanonicalReopenWorkItem(v); err != nil {
+			return bad()
+		}
+		capability, ok := server.commands.(ReopenService)
+		if !ok {
+			return unavailable()
+		}
+		out, err := capability.ReopenWorkItem(request.Context(), session.Principal, v)
 		return out, err, true
 	case command.RequestCancelOperation:
 		var w requestCancelWire

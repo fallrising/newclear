@@ -275,6 +275,7 @@ struct Translate {
     streamed: bool,
     done: bool,
     failed: bool,
+    visible_text: bool,
 }
 
 impl Translate {
@@ -291,8 +292,9 @@ impl Translate {
             "content_block": {"type": "text", "text": ""}})));
     }
 
-    fn text(out: &mut Vec<String>, t: &str) {
+    fn text(&mut self, out: &mut Vec<String>, t: &str) {
         if !t.is_empty() {
+            self.visible_text = true;
             out.push(record(&json!({"type": "content_block_delta", "index": 0,
                 "delta": {"type": "text_delta", "text": t}})));
         }
@@ -300,6 +302,7 @@ impl Translate {
 
     fn on_line(&mut self, v: &Value, model: &str) -> Vec<String> {
         let mut out = Vec::new();
+        self.visible_text = false;
         if self.done || self.failed {
             return out;
         }
@@ -321,7 +324,7 @@ impl Translate {
                 {
                     if let Some(t) = c.get("text").and_then(|t| t.as_str()) {
                         self.streamed |= !t.is_empty();
-                        Self::text(&mut out, t);
+                        self.text(&mut out, t);
                     }
                 }
             }
@@ -339,7 +342,7 @@ impl Translate {
                 if !self.streamed {
                     // No deltas seen: the result holds all assistant text.
                     let t = v.get("result").and_then(|r| r.as_str()).unwrap_or("");
-                    Self::text(&mut out, t);
+                    self.text(&mut out, t);
                 }
                 out.push(record(&json!({"type": "content_block_stop", "index": 0})));
                 // cursor-agent reports usage on the result (camelCase, not in its docs).
@@ -367,12 +370,14 @@ impl Translate {
 
 /// Answer one request with `cursor-agent -p`; waits for the first reply event so
 /// failures before any output can fall back to another target.
-pub async fn start(
+/// Accounting is per actual dispatch, never attached to synthesized usage records.
+pub async fn start_observed(
     cc: &CursorCli,
     model: &str,
     chat: &Value,
     cancel: &CancellationToken,
-) -> Result<ClaudeRun, UpstreamAttemptError> {
+    usage: Option<&crate::cursor_usage::RequestContext>,
+) -> Result<(ClaudeRun, Option<crate::cursor_usage::Attempt>), UpstreamAttemptError> {
     let fail = |status: u16, body: String, retryable: bool| UpstreamAttemptError {
         status,
         body,
@@ -404,9 +409,16 @@ pub async fn start(
         .stdin(Stdio::null())
         .stdout(Stdio::piped())
         .stderr(Stdio::piped());
+    let accounting = usage
+        .map(crate::cursor_usage::RequestContext::begin)
+        .transpose()?;
+    let mut startup = StartupAccounting(accounting.clone());
     let mut child = match cmd.spawn() {
         Ok(child) => child,
         Err(_) => {
+            if let Some(a) = &accounting {
+                a.stop("failed", "upstream_attempt_failed");
+            }
             reconcile_container(&runtime, &name).await;
             return Err(fail(
                 503,
@@ -427,6 +439,7 @@ pub async fn start(
     let (tx, rx) = mpsc::channel::<Item>(64);
     let cancel = cancel.clone();
     let model = model.to_string();
+    let producer_accounting = accounting.clone();
     tokio::spawn(async move {
         let _permit = permit;
         let mut lines = crate::cli_lines::Lines::new(BufReader::new(stdout));
@@ -449,7 +462,14 @@ pub async fn start(
             let Ok(v) = serde_json::from_str::<Value>(&l) else {
                 continue;
             };
-            for rec in tr.on_line(&v, &model) {
+            let records = tr.on_line(&v, &model);
+            if let Some(a) = &producer_accounting {
+                if !records.is_empty() {
+                    a.ready();
+                }
+                a.observe_line(&v, tr.visible_text, tr.done);
+            }
+            for rec in records {
                 tokio::select! {
                     _ = cancel.cancelled() => break 'read,
                     result = tx.send(Item::Record(rec)) => if result.is_err() { break 'read; },
@@ -461,6 +481,22 @@ pub async fn start(
         }
         drop(lines);
         let failed = !tr.done && !cancel.is_cancelled() && !tx.is_closed();
+        if let Some(a) = &producer_accounting {
+            if failed {
+                a.stop(
+                    "failed",
+                    if line_overflow {
+                        "stream_observer_limit"
+                    } else {
+                        "stream_incomplete"
+                    },
+                );
+            } else if cancel.is_cancelled() {
+                a.stop("cancelled", "stream_cancelled");
+            }
+            // Receiver closure is owned by the consumer lease (possibly timeout).
+            // Do not race it with a less-specific producer cancellation outcome.
+        }
         let mut status = 502;
         let mut sandbox_unavailable = false;
         if failed && !line_overflow {
@@ -505,12 +541,82 @@ pub async fn start(
             }
         }
     });
-    first_record(rx).await
+    match first_record(rx).await {
+        Ok(run) => {
+            startup.0 = None;
+            Ok((run, accounting))
+        }
+        Err(error) => {
+            if let Some(a) = &accounting {
+                a.stop("failed", "upstream_attempt_failed");
+            }
+            Err(error)
+        }
+    }
+}
+
+/// A dropped startup future still owns its already-reserved dispatch. The producer
+/// reacts to the closed receiver/cancellation and performs existing runtime cleanup.
+struct StartupAccounting(Option<crate::cursor_usage::Attempt>);
+impl Drop for StartupAccounting {
+    fn drop(&mut self) {
+        if let Some(a) = &self.0 {
+            a.stop("cancelled", "stream_cancelled");
+        }
+    }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn cu3_only_accepted_nonempty_text_marks_visible_output() {
+        let mut tr = Translate::default();
+        for event in [
+            json!({"type":"thinking","text":"private"}),
+            json!({"type":"tool_call","text":"private"}),
+            json!({"type":"assistant","timestamp_ms":1,"model_call_id":"flush",
+                "message":{"content":[{"text":"duplicate"}]}}),
+            json!({"type":"assistant","message":{"content":[{"text":"duplicate"}]}}),
+            json!({"type":"assistant","timestamp_ms":1,"message":{"content":[{"text":""}]}}),
+        ] {
+            tr.on_line(&event, "m");
+            assert!(!tr.visible_text);
+        }
+        tr.on_line(
+            &json!({"type":"assistant","timestamp_ms":2,
+            "message":{"content":[{"type":"text","text":"visible"}]}}),
+            "m",
+        );
+        assert!(tr.visible_text);
+        tr.on_line(
+            &json!({"type":"result","subtype":"success","is_error":false,
+            "result":"visible"}),
+            "m",
+        );
+        assert!(
+            tr.done && !tr.visible_text,
+            "result must not count the repeated text"
+        );
+
+        let mut only = Translate::default();
+        only.on_line(
+            &json!({"type":"result","subtype":"success","is_error":false,
+            "result":"result-only text"}),
+            "m",
+        );
+        assert!(only.done && only.visible_text);
+        let mut failed = Translate::default();
+        assert!(failed
+            .on_line(
+                &json!({"type":"result","subtype":"error","is_error":true,
+            "result":"private error"}),
+                "m"
+            )
+            .is_empty());
+        assert!(failed.failed && !failed.visible_text);
+    }
 
     #[cfg(unix)]
     #[tokio::test]

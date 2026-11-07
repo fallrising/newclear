@@ -1,0 +1,119 @@
+{
+  "id": "deckbuilding-temporary-generation",
+  "system": "deckbuilding",
+  "edition": 2,
+  "name": {
+    "zh": "战斗中临时生出新牌",
+    "en": "Generating cards during combat"
+  },
+  "summary": {
+    "zh": "用一张牌或一个单位，在这一战里制造额外的行动材料。",
+    "en": "Use a card or unit to create extra action cards within the current fight."
+  },
+  "rules": {
+    "zh": "部分效果把原牌库没有的牌加入手牌或弃牌区，只影响当前战斗。玩家要安排生成时机、手牌空间和后续出牌费用；生成牌可能马上消耗，也可能继续参与本战循环。",
+    "en": "Some effects add cards absent from the starting deck to the hand or discard pile for this fight. Timing, hand space and play costs matter; created cards may be one-use or remain in the combat cycle."
+  },
+  "loop": [
+    {
+      "zh": "启动造牌效果",
+      "en": "Activate a card generator"
+    },
+    {
+      "zh": "检查手牌和费用",
+      "en": "Check hand space and costs"
+    },
+    {
+      "zh": "使用新生成的牌",
+      "en": "Play the created cards"
+    },
+    {
+      "zh": "让造牌节奏配合战况",
+      "en": "Match generation to the encounter"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "先开增益再造小攻击，还是先造牌确保本回合能清场？",
+      "en": "Set up a bonus first, or generate attacks immediately to clear the threat?"
+    },
+    {
+      "zh": "持续造牌的单位占了战场位置，产出的牌是否值得这个位置？",
+      "en": "Does a generator’s output justify the battlefield space it occupies?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "每次产牌数",
+        "en": "Cards per trigger"
+      },
+      "effect": {
+        "zh": "数量越多越能触发连击，也越容易挤满手牌。",
+        "en": "More output supports repeated triggers but can clog the hand."
+      }
+    },
+    {
+      "name": {
+        "zh": "生成牌去向",
+        "en": "Destination"
+      },
+      "effect": {
+        "zh": "直接入手立即见效；进弃牌区则要等待下一轮洗牌。",
+        "en": "Hand insertion gives immediate access; discard insertion delays it."
+      }
+    }
+  ],
+  "tags": [
+    "planning",
+    "optimization"
+  ],
+  "related": [
+    "deckbuilding-dice-allocation",
+    "deckbuilding-duplicate-investment",
+    "deckbuilding-opening-hand-control",
+    "deckbuilding-reward-choice"
+  ],
+  "contrast": {
+    "zh": "小刀强调短时间内连续出牌；Vinemother 把持续产牌能力绑定在要保护的单位身上。",
+    "en": "Shivs emphasize immediate repeated plays; Vinemother ties ongoing supply to a unit that must survive."
+  },
+  "combination": {
+    "zh": "设计提案：让一座临时工坊每回合生成一张支撑卡，工坊垮塌后停止供给，形成保设施还是抢建造的取舍。",
+    "en": "Design proposal: Have a temporary workshop generate support cards until it collapses, making protection compete with building."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "编辑示例：手中一张备料牌能生成两张零费木板卡。",
+      "en": "Editorial example: Prepare Materials creates two free plank cards."
+    },
+    "action": {
+      "zh": "玩家先用备料，再把两张木板分别补到断桥的两个缺口。",
+      "en": "Play it, then use one plank on each of two bridge gaps."
+    },
+    "result": {
+      "zh": "这一回合多完成两次修补，但木板用完就消耗。",
+      "en": "Two repairs finish this turn, and the plank cards are spent."
+    },
+    "next": {
+      "zh": "下一回合需要再次抽到备料或改用其他建材。",
+      "en": "Next turn requires another generator draw or a different material."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "先做一种生成牌、一个产牌效果和明确的手牌上限。",
+      "en": "Start with one created card, one generator and a visible hand limit."
+    },
+    "pitfall": {
+      "zh": "生成牌再生成自身会造成无限链；首版禁止递归造牌。",
+      "en": "Self-generating cards can create infinite chains; forbid them initially."
+    },
+    "test": {
+      "zh": "玩家会为了产牌提前清出手牌空间，并理解战后这些牌不会留下。",
+      "en": "Players clear hand space before generating and understand that created cards do not persist after battle."
+    }
+  }
+}

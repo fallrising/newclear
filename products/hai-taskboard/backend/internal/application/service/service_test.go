@@ -1056,6 +1056,10 @@ func (tx *memoryTransaction) LoadCompletionMaterial(_ context.Context, query por
 	}
 	material = cloneMaterial(material)
 	material.WorkItem = item
+	if material.RunPresent && material.Runs.Count == 0 {
+		// The memory fixture models one Run per WorkItem.
+		material.Runs = port.RunHistory{Count: 1, LatestRunID: material.Run.ID, LatestCreatedAtNS: material.Run.CreatedAtNS, LatestHasCandidate: material.CandidatePresent}
+	}
 	return material, nil
 }
 

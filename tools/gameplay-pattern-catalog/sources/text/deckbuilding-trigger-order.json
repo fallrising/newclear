@@ -1,0 +1,119 @@
+{
+  "id": "deckbuilding-trigger-order",
+  "system": "deckbuilding",
+  "edition": 2,
+  "name": {
+    "zh": "同样的效果，换顺序结果不同",
+    "en": "Ordering effects to change the result"
+  },
+  "summary": {
+    "zh": "先加再乘，或先挂弱点再攻击，把顺序本身变成决策。",
+    "en": "Add before multiplying or expose a weakness before attacking: sequence becomes a decision."
+  },
+  "rules": {
+    "zh": "让效果按可理解的顺序逐个结算，而不是同时生效。玩家调整卡牌顺序或出牌先后，使前一步为后一步创造条件；界面应展示每次触发和当前结果，方便核对。",
+    "en": "Resolve effects in a readable sequence rather than simultaneously. Players reorder modifiers or actions so earlier steps prepare later ones, with visible intermediate results."
+  },
+  "loop": [
+    {
+      "zh": "查看各效果的条件",
+      "en": "Read each effect’s condition"
+    },
+    {
+      "zh": "安排先后顺序",
+      "en": "Arrange their order"
+    },
+    {
+      "zh": "逐步观察结算",
+      "en": "Watch each resolution"
+    },
+    {
+      "zh": "比较并修正顺序",
+      "en": "Compare and revise"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "先加固定数值再翻倍，还是先翻倍再加？要看它们在哪个结算阶段生效。",
+      "en": "Add before multiplying or afterward? Their resolution stage matters."
+    },
+    {
+      "zh": "把能量先花在弱点上，剩下的攻击是否足以收回这笔准备成本？",
+      "en": "Will the remaining attacks repay the cost of applying a vulnerability first?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "顺序可编辑范围",
+        "en": "Editable order"
+      },
+      "effect": {
+        "zh": "只让玩家排同一阶段的效果，较容易预测和解释。",
+        "en": "Restricting rearrangement to one stage keeps results easier to predict."
+      }
+    },
+    {
+      "name": {
+        "zh": "中间结果可见度",
+        "en": "Intermediate feedback"
+      },
+      "effect": {
+        "zh": "逐步显示计算能把试错变成理解，减少只查攻略的情况。",
+        "en": "Showing intermediate values turns trial and error into understanding."
+      }
+    }
+  ],
+  "tags": [
+    "planning",
+    "optimization"
+  ],
+  "related": [
+    "deckbuilding-dice-allocation",
+    "deckbuilding-duplicate-investment",
+    "deckbuilding-opening-hand-control",
+    "deckbuilding-reward-choice"
+  ],
+  "contrast": {
+    "zh": "《小丑牌》让玩家整理持续效果的位置；《杀戮尖塔》主要通过手动出牌先后控制状态与伤害。",
+    "en": "Balatro exposes positional ordering of persistent effects; Slay the Spire uses the order of played actions."
+  },
+  "combination": {
+    "zh": "设计提案：把分数处理做成流水线：先清洗材料加价值，再用精加工倍率放大，玩家拖动工序比较收益。",
+    "en": "Design proposal: Build a scoring production line where cleaning adds value before a finishing multiplier."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "编辑示例：基础倍率为三，有一个加二效果和一个乘二效果。",
+      "en": "Editorial example: base multiplier is three, with add-two and multiply-by-two effects."
+    },
+    "action": {
+      "zh": "玩家把加二放在乘二之前。",
+      "en": "Place add-two before multiply-by-two."
+    },
+    "result": {
+      "zh": "倍率先变五，再变十；反过来只有八。",
+      "en": "The value becomes five, then ten; the reverse order gives eight."
+    },
+    "next": {
+      "zh": "下一次拿到新效果时，再检查它应该插入哪一步。",
+      "en": "When a new modifier arrives, decide where it belongs."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "做三种效果和一条可拖动结算队列，每一步显示前后数值。",
+      "en": "Use three modifier types and a draggable queue showing each intermediate value."
+    },
+    "pitfall": {
+      "zh": "不要一开始就混合多套隐藏优先级；无法解释的例外会破坏学习。",
+      "en": "Avoid hidden priority layers whose exceptions undermine learning."
+    },
+    "test": {
+      "zh": "玩家能在点击结算前预测两种排列的差别，并用动画验证。",
+      "en": "Players predict the difference between two orders before resolving them."
+    }
+  }
+}

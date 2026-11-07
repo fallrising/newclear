@@ -23,6 +23,10 @@ public class PasswordHasher {
         return encoder.encode(raw);
     }
 
+    public String hash(char[] raw) {
+        return encoder.encode(java.nio.CharBuffer.wrap(raw));
+    }
+
     public boolean matches(String raw, String encoded) {
         if (raw == null || encoded == null) {
             return false;

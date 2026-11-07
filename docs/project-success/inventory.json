@@ -29,9 +29,19 @@
       "source_commit": "65d41ca3fbe59d324fe2369cf0816a50cac0e647"
     },
     {
+      "path": "gateways/edge-relay",
+      "last_source_update": "2026-11-02T09:08:59Z",
+      "source_commit": "244c7f7b416508aedd8f5f8d4a082ae2bb17d022"
+    },
+    {
       "path": "gateways/pokercase",
       "last_source_update": "2026-10-11T15:26:36+08:00",
       "source_commit": "9d23bd72850af83d32dcd1081b44d09bc4fc7b8d"
+    },
+    {
+      "path": "labs/agent-office-lab",
+      "last_source_update": "2026-11-07T04:20:45Z",
+      "source_commit": "0529e812171c0fb2dbce9b25edcce21d92e984a4"
     },
     {
       "path": "labs/aweshore",
@@ -54,6 +64,11 @@
       "source_commit": "86d86258fd636ee47165a52c3b148bd9500e5287"
     },
     {
+      "path": "labs/graphify-lab",
+      "last_source_update": "2026-10-29T14:03:53Z",
+      "source_commit": "011fa8cac6137735b576e14b5695ea26544e91db"
+    },
+    {
       "path": "labs/handwired-learning",
       "last_source_update": "2026-10-22T01:17:24+08:00",
       "source_commit": "222c1a8a736dbb3ac89f34345a7bc73fa887aba8"
@@ -67,6 +82,11 @@
       "path": "labs/m4-seat",
       "last_source_update": "2026-10-17T18:53:31+08:00",
       "source_commit": "8526b6411bd11967b98b91a7c2cacadeafe5ef71"
+    },
+    {
+      "path": "labs/memvid-lab",
+      "last_source_update": "2026-10-28T11:50:42Z",
+      "source_commit": "7d0c0bf5f9c6bbc0c4058cb4d53ac001be7d39c2"
     },
     {
       "path": "labs/mithril-research",
@@ -94,9 +114,24 @@
       "source_commit": "267b12d78b3304d12bb589639650628b22987e95"
     },
     {
+      "path": "labs/pixelorama-class-showcase",
+      "last_source_update": "2026-10-30T16:34:17Z",
+      "source_commit": "427f557b94ce56a97a0daa9427d894dae64fc8fe"
+    },
+    {
       "path": "labs/retro-economy",
       "last_source_update": "2026-10-22T01:17:24+08:00",
       "source_commit": "222c1a8a736dbb3ac89f34345a7bc73fa887aba8"
+    },
+    {
+      "path": "labs/token-economizer-lab",
+      "last_source_update": "2026-11-01T06:20:23Z",
+      "source_commit": "f122e4f41b392d590de486ddfd2f22fa9f0c3fd7"
+    },
+    {
+      "path": "labs/virtual-office-lab",
+      "last_source_update": "2026-10-30T17:00:00Z",
+      "source_commit": "8bf48551f524086d81fa66d946c984f8052152ff"
     },
     {
       "path": "labs/zircon-godot",
@@ -154,6 +189,11 @@
       "source_commit": "90f74b0e0f9a6c50d40f1d56fbd89b8a0ae99ae9"
     },
     {
+      "path": "platform/spring-pool",
+      "last_source_update": "2026-09-30T18:09:19Z",
+      "source_commit": "2eb29676863869a67f90dc68b8332ff1db87078e"
+    },
+    {
       "path": "products/goku",
       "last_source_update": "2026-10-10T14:36:19+00:00",
       "source_commit": "79109d62d5d8f47cfe3e673d7467e901e41467eb"
@@ -182,6 +222,11 @@
       "path": "specs/fleet",
       "last_source_update": "2026-09-29T01:37:01+08:00",
       "source_commit": "ff6459a8fbc9db69d43ba41b9ac5e7d41df3465b"
+    },
+    {
+      "path": "systems/agent-secrets",
+      "last_source_update": "2026-11-02T09:52:31Z",
+      "source_commit": "244c7f7b416508aedd8f5f8d4a082ae2bb17d022"
     },
     {
       "path": "systems/clarkq",
@@ -217,6 +262,11 @@
       "path": "tools/codex-usage",
       "last_source_update": "2026-10-18T16:12:15+08:00",
       "source_commit": "63e2f3b3a47776e35865fcb28d368e8f4d32be22"
+    },
+    {
+      "path": "tools/gameplay-pattern-catalog",
+      "last_source_update": "2026-11-03T01:44:52Z",
+      "source_commit": "1cef7d4d657067f133da55c41092c37df80a220f"
     },
     {
       "path": "tools/motion-prompt",

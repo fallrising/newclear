@@ -1,0 +1,21 @@
+Original local log SHA256: 4faa287e75a9ab32e6a26edc3ea0c5575236c2170d156f498544c0bf0769697a
+
+RecoveryInventoryTests > PP1c_directoryMembershipDriftRejected() FAILED
+    org.opentest4j.AssertionFailedError at RecoveryInventoryTests.java:154
+RecoveryInventoryTests > PP1c_sameBytesReplacementDetectedByFileIdentity() FAILED
+    org.opentest4j.AssertionFailedError at RecoveryInventoryTests.java:154
+RecoveryInventoryTests > PP1c_symlinkRejectedWithoutFollowing() FAILED
+    org.opentest4j.AssertionFailedError at RecoveryInventoryTests.java:154
+RecoveryInventoryTests > PP1c_hardlinkRejected() FAILED
+    org.opentest4j.AssertionFailedError at RecoveryInventoryTests.java:154
+RecoveryInventoryTests > PP1c_stableFilesSortedAndHashedWithoutMutation() FAILED
+    org.opentest4j.AssertionFailedError at RecoveryInventoryTests.java:134
+RecoveryInventoryTests > PP1c_rootSymlinkAndNestedDirectoryLinkRejected() FAILED
+    org.opentest4j.AssertionFailedError at RecoveryInventoryTests.java:154
+RecoveryInventoryTests > PP1c_sourceChangedDuringInventoryRejected() FAILED
+    org.opentest4j.AssertionFailedError at RecoveryInventoryTests.java:154
+RecoveryInventoryTests > PP1c_unsafePathRejectedWithoutChangingSource() FAILED
+    org.opentest4j.AssertionFailedError at RecoveryInventoryTests.java:154
+8 tests completed, 8 failed
+> Task :services:cms-api:test FAILED
+BUILD FAILED in 26s

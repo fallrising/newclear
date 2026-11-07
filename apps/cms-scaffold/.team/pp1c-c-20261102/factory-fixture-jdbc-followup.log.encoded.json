@@ -1,0 +1,8 @@
+{
+  "version": 1,
+  "original": "factory-fixture-jdbc-followup.log",
+  "sha256": "ab31ff3994b7898ab3f0bf91674df98084b38bd9773684d69d097028a5274acb",
+  "byteSize": "218",
+  "encoding": "utf-8",
+  "text": "✔ T146 factory preserves both privately created network IDs through unchanged Compose (678.369292ms)\nℹ tests 1\nℹ suites 0\nℹ pass 1\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 752.194256\n"
+}

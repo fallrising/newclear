@@ -1,0 +1,120 @@
+{
+  "id": "incremental-quantity-milestones",
+  "system": "incremental",
+  "edition": 3,
+  "name": {
+    "zh": "凑到数量门槛，产出突然跃升",
+    "en": "Reach a quantity threshold for a production jump"
+  },
+  "summary": {
+    "zh": "临近门槛的最后几次投入，可能比平时更有价值。",
+    "en": "The final investments before a threshold may matter more than ordinary ones."
+  },
+  "rules": {
+    "zh": "购买或升级会增加数量，达到公开门槛时额外解锁速度或产量奖励。门槛之间的增幅较平缓，跨过门槛会出现一次跃升。玩家因此会比较离门槛的距离，而不只是比较当前单次购买回报。",
+    "en": "Purchases or levels increase a count. Reaching a visible threshold grants an extra speed or output bonus. Ordinary gains between thresholds are smoother, while crossing one creates a jump. Compare distance to the next threshold as well as immediate return."
+  },
+  "loop": [
+    {
+      "zh": "查看每项距离下一门槛多远",
+      "en": "Check distance to each threshold"
+    },
+    {
+      "zh": "计算凑齐还需投入多少",
+      "en": "Estimate the cost to reach it"
+    },
+    {
+      "zh": "集中补齐或分散投资",
+      "en": "Complete one set or spread investment"
+    },
+    {
+      "zh": "获得跃升后重排优先级",
+      "en": "Reprioritize after the jump"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "把钱投给当前效率最高的一项，还是补齐差一点就翻倍的另一项？",
+      "en": "Buy the best current return or complete another item that is close to a multiplier?"
+    },
+    {
+      "zh": "为了全体达标奖励，是否值得补齐最弱的一项？",
+      "en": "Is improving the weakest item worthwhile to earn an all-items threshold reward?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "门槛间距",
+        "en": "Threshold spacing"
+      },
+      "effect": {
+        "zh": "间隔短形成频繁小目标；间隔长需要更明显的进度和下一次收益预告。",
+        "en": "Short intervals create frequent goals; long intervals need clear progress and reward previews."
+      }
+    },
+    {
+      "name": {
+        "zh": "局部与全局奖励",
+        "en": "Local versus global reward"
+      },
+      "effect": {
+        "zh": "只奖励该项鼓励集中；全体达标奖励会拉动落后的项目。",
+        "en": "Local rewards encourage focus; all-items rewards give a reason to improve lagging projects."
+      }
+    }
+  ],
+  "tags": [
+    "progression",
+    "economy",
+    "planning"
+  ],
+  "related": [
+    "incremental-escalating-copy-price",
+    "incremental-farm-or-push",
+    "incremental-manual-to-passive",
+    "incremental-offline-window"
+  ],
+  "contrast": {
+    "zh": "点击英雄的节点主要改变特定英雄的伤害；冒险资本家的数量节点还能跨企业形成共同目标。",
+    "en": "Clicker Heroes mainly changes a particular hero’s damage at thresholds; AdVenture Capitalist also uses counts to create goals across businesses."
+  },
+  "combination": {
+    "zh": "组合提案：三条产线都达到每轮5件时解锁整体速度奖励，玩家需要把原料从强线分给落后线。",
+    "en": "Design proposal: unlock a global speed reward when all three lines reach five items per round, encouraging material redistribution to lagging lines."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "A生产器已有9台，凑10台会翻倍；B目前每台回报略高。",
+      "en": "Producer A has nine units and doubles at ten; B currently offers a slightly better per-unit return."
+    },
+    "action": {
+      "zh": "玩家先买第10台A。",
+      "en": "Buy the tenth A first."
+    },
+    "result": {
+      "zh": "A整组产出翻倍，超过刚才购买B的短期收益。",
+      "en": "The whole A group doubles, outperforming the immediate B purchase."
+    },
+    "next": {
+      "zh": "A的下一门槛较远，重新比较是否改买B。",
+      "en": "A’s next threshold is distant, so reconsider buying B."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "做两类生产器，每类一个数量门槛，购买按钮显示距奖励还差几次。",
+      "en": "Build two producer types with one count threshold each; show purchases remaining to the reward."
+    },
+    "pitfall": {
+      "zh": "阈值奖励不能藏在长列表里，否则只剩盲目点购买。",
+      "en": "Do not bury threshold rewards in long lists or purchases become blind clicking."
+    },
+    "test": {
+      "zh": "接近不同门槛时，玩家是否改变购买对象？",
+      "en": "Do players switch their purchase target as different thresholds approach?"
+    }
+  }
+}

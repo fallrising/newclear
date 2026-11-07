@@ -1,0 +1,157 @@
+{
+  "snapshot_utc": "2026-10-30T10:42:40.814549+00:00",
+  "task": "T-0339",
+  "milestone": "M1b",
+  "status": "locally_accepted_delivery_pending",
+  "source_base": "e00866434e856d164a59516bc9c7de2f4770020b",
+  "documentation_first_commit": "6acb8931",
+  "desk_continuation_pr": 326,
+  "desk_continuation_merge": "7c86a4b913e7fdcb15c56fc54cc6f714698fed9e",
+  "scope": "historical Run outputs and project-bound verified artifact reads",
+  "whole_product_complete": false,
+  "browser_run": false,
+  "later_slice_started": false,
+  "claude_harness_version": "2.1.312",
+  "review_calls": [
+    {
+      "phase": "plan",
+      "requested_model": "claude-opus-5-5",
+      "observed_model": "claude-opus-5-5",
+      "requested_effort": "high",
+      "exit_code": 0,
+      "timeout": false,
+      "elapsed_seconds": 119.568,
+      "reported_turns": 1,
+      "permission_denials": 0,
+      "spawned_subagents": 0,
+      "prompt_sha256": "947fc6b045c7332e5298385fc356eead1ba7ee68dee10ca153afafc4a9a65900",
+      "reported_input_tokens": 2,
+      "reported_output_tokens": 11613,
+      "reported_cache_read_tokens": 649,
+      "reported_cache_creation_tokens": 18143,
+      "reported_list_cost_usd": 0.37754180000000004,
+      "cost_basis": "list",
+      "actual_billed_cost_usd": null
+    },
+    {
+      "phase": "plan-followup",
+      "requested_model": "claude-opus-5-5",
+      "observed_model": "claude-opus-5-5",
+      "requested_effort": "high",
+      "exit_code": 0,
+      "timeout": false,
+      "elapsed_seconds": 85.85,
+      "reported_turns": 1,
+      "permission_denials": 0,
+      "spawned_subagents": 0,
+      "prompt_sha256": "89ff7f50ec4c766c4d3d1c28d1253711e228e5d348dcae26219747469e7e6797",
+      "reported_input_tokens": 2,
+      "reported_output_tokens": 8614,
+      "reported_cache_read_tokens": 1545,
+      "reported_cache_creation_tokens": 15658,
+      "reported_list_cost_usd": 0.297861,
+      "cost_basis": "list",
+      "actual_billed_cost_usd": null
+    },
+    {
+      "phase": "code",
+      "requested_model": "claude-opus-5-5",
+      "observed_model": "claude-opus-5-5",
+      "requested_effort": "high",
+      "exit_code": 0,
+      "timeout": false,
+      "elapsed_seconds": 202.719,
+      "reported_turns": 1,
+      "permission_denials": 0,
+      "spawned_subagents": 0,
+      "prompt_sha256": "6aea98ed3eb9904aff6f13808c7fb648737382231ac4f45f915bb33fa34048af",
+      "reported_input_tokens": 2,
+      "reported_output_tokens": 21204,
+      "reported_cache_read_tokens": 1545,
+      "reported_cache_creation_tokens": 55616,
+      "reported_list_cost_usd": 0.869325,
+      "cost_basis": "list",
+      "actual_billed_cost_usd": null
+    },
+    {
+      "phase": "code-followup",
+      "requested_model": "claude-opus-5-5",
+      "observed_model": "claude-opus-5-5",
+      "requested_effort": "high",
+      "exit_code": 0,
+      "timeout": false,
+      "elapsed_seconds": 35.239,
+      "reported_turns": 1,
+      "permission_denials": 0,
+      "spawned_subagents": 0,
+      "prompt_sha256": "d655d0108d8362399352c897a67bea45aabcb45c6fea5c0413873d004fd8d63f",
+      "reported_input_tokens": 2,
+      "reported_output_tokens": 3525,
+      "reported_cache_read_tokens": 1545,
+      "reported_cache_creation_tokens": 22953,
+      "reported_list_cost_usd": 0.25444100000000003,
+      "cost_basis": "list",
+      "actual_billed_cost_usd": null
+    }
+  ],
+  "local_native_leaf_launches": 1,
+  "external_cli_launches": 4,
+  "provider_request_count": null,
+  "root_tool_total": null,
+  "root_tokens": null,
+  "actual_billed_cost_usd": null,
+  "root_active_seconds": null,
+  "root_wait_seconds": null,
+  "full_backend_gate": {
+    "exit_code": 0,
+    "input_count": 191,
+    "manifest_sha256": "4f2e65a2a9b28eb8bcc4f5d0711b809cd95c4afd91efa4428873b800c7b4a70e",
+    "final_production_identical": true,
+    "subsequent_changes": [
+      "products/hai-taskboard/backend/cmd/taskboard/output_access_test.go",
+      "products/hai-taskboard/backend/internal/application/service/output_access_test.go",
+      "products/hai-taskboard/backend/internal/transport/httpapi/output_access_test.go"
+    ]
+  },
+  "assertion_delta_race": {
+    "exit_code": 0,
+    "packages": [
+      "service",
+      "httpapi",
+      "cmd/taskboard"
+    ],
+    "scope": "TestOutputAccess* only; three assertion-only test files"
+  },
+  "web_gate": {
+    "exit_code": 0,
+    "tests": 30
+  },
+  "openapi_lint": {
+    "exit_code": 0,
+    "warnings": 0
+  },
+  "final_input_count": 191,
+  "final_input_manifest_sha256": "7b4e5ad6818c624ba6928477c317853f3588dc91d497b7cecc36330aadca5851",
+  "go_files": {
+    "products/hai-taskboard/backend/internal/application/port/run_output.go": "f6a640a1ed343ff9070329dcb12fa1ca389351e74beeda3adc16a3e786742073",
+    "products/hai-taskboard/backend/internal/domain/sqlite/run_output.go": "cbc54f0a89e56ec45ef75e369619ada9fed91be35219b60f7ab456bfdb9d0be5",
+    "products/hai-taskboard/backend/internal/domain/sqlite/output_access_test.go": "bbbf681d3ddd70a70c4f358a575477b09d4ca72cba01435f779b63e84058149f",
+    "products/hai-taskboard/backend/internal/application/service/output_access.go": "1dc1b8bef6eb9c1b00f7e34a5d06a62bf7eda04e44f7da7cc8ab72ab8b3bc1cc",
+    "products/hai-taskboard/backend/internal/application/service/output_access_test.go": "ce5371f1908cb8623108e231e3380d5fe633e18d07ebb80bf4852dcdea70f641",
+    "products/hai-taskboard/backend/internal/transport/httpapi/server.go": "a393ef205062e91e698bae655d126f566cb35f37603a40856429d79d7b333aa3",
+    "products/hai-taskboard/backend/internal/transport/httpapi/output_access.go": "f4f9e684966d83a72afca8ac952f729ea18cf7efbfee367faa2e041528d2c3d2",
+    "products/hai-taskboard/backend/internal/transport/httpapi/output_access_test.go": "4b9c3a58e6343beae32efa904981a7565227380d97053e1fc4c8fb1de963394a",
+    "products/hai-taskboard/backend/cmd/taskboard/output_access_test.go": "f161523c9f207bbde948d0d1fabb39306b27762e1f54699e85e63fabc65a6088"
+  },
+  "reviews": {
+    "plan": "REWORK then ACCEPT",
+    "code": "REWORK (two assertion gaps, no production defect) then ACCEPT"
+  },
+  "limits": [
+    "full product AC02/03/04 pending",
+    "no new browser evidence",
+    "runtime empty-object refusal remains; zero-byte HTTP refusal established piecewise",
+    "metadata reads retain BEGIN IMMEDIATE",
+    "no M1c, UI, real provider adapter, release or deploy"
+  ]
+}

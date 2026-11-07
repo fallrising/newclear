@@ -36,3 +36,7 @@ artifact ACL 與 command 閱讀分開，ReadArtifact 必須有 `artifact:read` �
 健康檢查 command `cmd_demo_1` 使用 `attempt_demo_1`、fence 1、external_ref `{owner: "node-check-owner", adapter_id: "adapter_demo", external_id: "check_demo_1"}`。`evt_demo_1`／seq 1 為 external.bound；`evt_demo_2`／seq 2 為 run.observed running；`evt_demo_3`／seq 3 為 run.result。
 
 最後一筆 owner_outcome=succeeded，started_at=`2026-10-26T00:00:03Z`、finished_at=`2026-10-26T00:00:05Z`；health-json 內容是 `{ "status": "healthy", "sample_age_seconds": 2, "checks": { "collector": "ok" } }`。output digest 由這份實際 bytes 計算；文件不捏造其 hash。validation 的三項必需 checks 為 schema、freshness、scope，全為 passed，validator 為 `node-health-validator@1.0.0`。所有 body 均受 32 KiB 上限、output 受 16384 bytes 上限，範例不是已保存的 artifact。
+
+## M1 snapshot profile的具體對映
+
+[PS輪詢順序與恢復](../docs/snapshot-ordering.md)沿已授權ADR-03／08明列通知／Event提案與現行profile的差異：commit後ACK遺失靠持久command重讀，完整snapshot以command revision防倒退／衝突並可跳版。這不是Event source_seq或covered-through snapshot相容實作，原事件要求沒有被記成passed；採用事件協定時仍須獨立實作與驗證。

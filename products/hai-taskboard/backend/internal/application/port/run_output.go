@@ -31,3 +31,12 @@ type RunOutput struct {
 	RestoreGeneration uint64
 	Artifact          Artifact
 }
+
+// RunOutputReadTransaction exposes scoped immutable history without requiring
+// publication authority, current leases, or current specification heads.
+type RunOutputReadTransaction interface {
+	Transaction
+	LoadRunOutputs(context.Context, domain.ProjectID, domain.RunID) ([]RunOutput, error)
+	LoadScopedRunOutputs(context.Context, domain.ProjectID, domain.WorkItemID, domain.RunID) ([]RunOutput, error)
+	LoadProjectRunOutput(context.Context, domain.ProjectID, domain.Digest) (RunOutput, error)
+}

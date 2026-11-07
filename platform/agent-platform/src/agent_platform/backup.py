@@ -18,9 +18,9 @@ from . import backup_files
 
 VERSION = "agent-platform-backup-v1"
 POSTGRES_MAJOR = 18
-# Independently measured on pristine PostgreSQL18 after migrations001..018 (T091-schema1).
+# Independently measured on pristine PostgreSQL18 after migrations001..021 (T0449-readonly-schema1).
 # Schema/catalog changes require deliberate fixture re-derivation and review, never self-trust.
-SCHEMA_SHA256 = "456bad6ac3e99751dd9df8c1aa77afa6fdc30f7e164598e1b1151e41f4a55f9e"
+SCHEMA_SHA256 = "c2f7f977bb02cbdec40ee2f27ae9f76e753887a6f47be025f869175ae88d5707"
 EPHEMERAL = ("sessions", "login_limits", "model_proxy_tokens", "tool_broker_tokens")
 EXCLUDED = (*EPHEMERAL, "maintenance_identity")
 NATIVE_TIMEOUT = 300
@@ -321,6 +321,9 @@ def _lock_tables(conn):
 
 
 def _quiescent(conn):
+    # Queued cancellation is never admitted but advances generation to1. Accept
+    # only its committed command/result and zero-attempt job proof; a bare higher
+    # generation or a terminal label cannot attest absence of runtime effects.
     unsafe = conn.execute("""SELECT
         EXISTS(SELECT 1 FROM runtime_capacity WHERE NOT draining)
         OR EXISTS(SELECT 1 FROM runs WHERE state NOT IN ('succeeded','failed','cancelled')
@@ -331,11 +334,34 @@ def _quiescent(conn):
             WHERE b.id IS DISTINCT FROM r.sandbox_id)
         OR EXISTS(SELECT 1 FROM runs r WHERE NOT (
             (r.cleanup_state='not_allocated' AND r.sandbox_id IS NULL
-             AND r.generation=0 AND r.backend_ref IS NULL
+             AND r.backend_ref IS NULL
+             AND (r.generation=0 OR (r.generation=1 AND EXISTS(
+                 SELECT 1 FROM commands c JOIN jobs j ON j.run_id=r.id
+                 WHERE c.id=r.cancel_command_id AND c.run_id=r.id
+                   AND c.route='runs/' || r.id::text || '/actions'
+                   AND c.status='completed' AND c.expected_version=r.state_version-1
+                   AND c.result->>'status'='202'
+                   AND c.result->'body'->>'command_id'=c.id::text
+                   AND c.result->'body'->>'status'='completed'
+                   AND c.result->'body'->'run'->>'id'=r.id::text
+                   AND c.result->'body'->'run'->>'state'='cancelled'
+                   AND c.result->'body'->'run'->>'generation'='1'
+                   AND c.result->'body'->'run'->>'cleanup_state'='not_allocated'
+                   AND c.result->'body'->'run'->>'reason'='operator_cancelled'
+                   AND c.result->'body'->'run'->>'cancel_command_id'=c.id::text
+                   AND c.result->'body'->'run'->>'state_version'=r.state_version::text
+                   AND j.status='done' AND j.generation=r.generation
+                   AND r.backend IN ('openhands','claude-subscription','codex-subscription')
+                   AND r.state='cancelled' AND r.reason='operator_cancelled'
+                   AND r.cancel_requested_at IS NOT NULL
+                   AND r.cancel_completed_at>=r.cancel_requested_at
+                   AND c.created_at<=r.cancel_requested_at
+                   AND r.backend_cursor IS NULL AND r.result IS NULL
+                   AND r.control_action IS NULL AND r.interrupted_from IS NULL)))
              AND NOT EXISTS(SELECT 1 FROM sandbox_bindings b WHERE b.run_id=r.id)
              AND NOT EXISTS(SELECT 1 FROM adapter_operations op WHERE op.run_id=r.id)
              AND NOT EXISTS(SELECT 1 FROM jobs j WHERE j.run_id=r.id AND
-                 (j.generation<>0 OR j.attempts<>0 OR j.lease_owner IS NOT NULL
+                 (j.generation<>r.generation OR j.attempts<>0 OR j.lease_owner IS NOT NULL
                   OR j.lease_until IS NOT NULL)))
             OR (r.cleanup_state='confirmed' AND EXISTS(
                 SELECT 1 FROM sandbox_bindings b
@@ -343,7 +369,8 @@ def _quiescent(conn):
                 WHERE b.id=r.sandbox_id AND b.run_id=r.id AND b.generation=r.generation
                   AND b.cleanup_state='confirmed' AND b.desired_state='stopped'
                   AND b.observed_state='stopped' AND rr.released_at IS NOT NULL
-                  AND ((r.backend='openhands' AND b.node_id='cocoon-local'
+                  AND ((r.backend IN ('openhands','claude-subscription','codex-subscription')
+                        AND b.node_id='cocoon-local'
                         AND b.provider_handle<>'' AND b.provider_handle NOT LIKE 'pending:%')
                        OR (r.backend='fake' AND b.node_id='fake-local'
                            AND ((b.provider_handle<>''

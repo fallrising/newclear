@@ -1,0 +1,31 @@
+✔ PP1FM04_lockAndReservationAreExclusive (85.914066ms)
+✔ PP1FM04_recoverRequiresVerifiedRollbackBeforeStop (9.25496ms)
+✔ PP1FM04_acquireBackendPinIsExact (121.004893ms)
+✔ PP1FM04_writerRestartAndIdleBackendReject (167.760477ms)
+✔ PP1FM04_unknownFailureNeverRestartsOrReleases (58.107649ms)
+✔ PP1FM04_concurrentReservationNeverStopsSecondOperation (50.463354ms)
+✔ metadata live and backend primitive core (117.081836ms)
+✔ metadata private input and live destination are immutable (77.595205ms)
+✔ helper CLI has fixed readonly inspect and rejects unknown inputs (186.823264ms)
+✔ PP1FM04_existingRegistryNeverReplaysOrStops (17.918571ms)
+✔ PP1FM04_privateLeaseMetadataFailsClosed (331.27272ms)
+✔ PP1FM04_pgTargetAndEpochDriftNeverRebind (66.595761ms)
+✔ probe exact inherited image labels and ownership reject before start (352.59903ms)
+✔ probe bounded failures clean only verified ID and preserve API lock (221.77256ms)
+✔ probe signals abort own wait cleanup and restore listener counts (156.217836ms)
+✔ commit receipt plus zero alone restarts same API and readonly COMPLETE survives release (132.347524ms)
+✔ commit nonzero invalid receipt and health failures never release or replay (332.001996ms)
+✔ missing registry and corrupt journal never repair or unlock (22.747456ms)
+✔ probe execution deadline aborts before extra command and cleanup remains bounded (33.528519ms)
+✔ health shared deadline rejects delayed start or healthy inspect without extra command (143.148729ms)
+✔ PP1C_L01_v1_insertion_order_bytes_and_atomic_update (14.489003ms)
+✔ PP1C_L01_duplicate_reservation_preserves_existing_bytes (2.621673ms)
+✔ PP1C_L01_symlink_hardlink_and_mode_rejected (3.45297ms)
+ℹ tests 23
+ℹ suites 0
+ℹ pass 23
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 2755.877441

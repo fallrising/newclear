@@ -1,0 +1,120 @@
+{
+  "id": "gathering-salvage-dismantling",
+  "system": "gathering",
+  "edition": 1,
+  "name": {
+    "zh": "拆解环境回收",
+    "en": "Dismantling for salvage"
+  },
+  "summary": {
+    "zh": "把已经有用途的物件拆成材料，获得资源也失去设施。",
+    "en": "Turn useful objects into materials, gaining resources while losing infrastructure."
+  },
+  "rules": {
+    "zh": "玩家拆解家具、建筑或废弃设备，获得其中一部分材料。拆解耗时并移除原物件；要比较眼前材料需求与对象未来用途，而不能把所有东西视为免费矿点。",
+    "en": "Players dismantle furniture, structures or abandoned equipment for partial materials. Dismantling takes time and removes the object, requiring a comparison of immediate needs and future utility."
+  },
+  "loop": [
+    {
+      "zh": "检查可拆对象",
+      "en": "Inspect a salvage target"
+    },
+    {
+      "zh": "比较材料与原用途",
+      "en": "Compare materials with its current use"
+    },
+    {
+      "zh": "选择工具并拆解",
+      "en": "Choose tools and dismantle"
+    },
+    {
+      "zh": "把材料投入新用途",
+      "en": "Reuse the materials"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "拆掉庇护所的家具换燃料，是否破坏了以后返回的价值？",
+      "en": "Strip shelter furniture for fuel at the cost of future utility?"
+    },
+    {
+      "zh": "保留设施等待使用，还是立即回收解燃眉之急？",
+      "en": "Keep a facility for later or salvage it to meet an urgent need?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "材料返还比例",
+        "en": "Recovery fraction"
+      },
+      "effect": {
+        "zh": "高返还鼓励迁移和重建；低返还让拆除更有重量。",
+        "en": "High recovery encourages relocation; low recovery makes demolition consequential."
+      }
+    },
+    {
+      "name": {
+        "zh": "拆解耗时",
+        "en": "Dismantling duration"
+      },
+      "effect": {
+        "zh": "长耗时把天气与敌人风险带进决策；瞬间拆解更偏建设便利。",
+        "en": "Long tasks expose players to weather and enemies; instant salvage favors building convenience."
+      }
+    }
+  ],
+  "tags": [
+    "economy",
+    "risk",
+    "planning"
+  ],
+  "related": [
+    "gathering-depth-targeting",
+    "gathering-gathering-quota",
+    "gathering-oxygen-gathering",
+    "gathering-supply-mining"
+  ],
+  "contrast": {
+    "zh": "漫漫长夜侧重有限环境存量与应急物资；饥荒把回收放进玩家自己建造和搬迁的循环。",
+    "en": "The Long Dark emphasizes finite environmental stocks and emergencies; DST integrates recovery with player construction and relocation."
+  },
+  "combination": {
+    "zh": "组合创意：废船的门能拆成钢板，但拆门会打通怪物路线；每次回收同时重写关卡安全性。",
+    "en": "Design proposal: shipwreck doors yield steel, but removing one opens a monster route and changes level safety."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "避难屋里有一张可睡觉的床，你急需木材修好门。",
+      "en": "A shelter has a usable bed, but you urgently need wood to repair the door."
+    },
+    "action": {
+      "zh": "你先检查其他可拆物，只在材料仍不足时考虑拆床。",
+      "en": "Check other salvage first, considering the bed only if materials remain insufficient."
+    },
+    "result": {
+      "zh": "拆下的材料能修门，但原物件的功能随之失去。",
+      "en": "Salvaged material repairs the door, while the dismantled object’s function disappears."
+    },
+    "next": {
+      "zh": "危机解除后，重新安排失去的休息或储物功能。",
+      "en": "After the emergency, restore the lost sleeping or storage function."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "做3件用途不同的设施、固定拆解收益和一个急迫材料需求，先不用破碎物理。",
+      "en": "Use three functional objects, fixed salvage yields and one urgent material demand; skip debris physics."
+    },
+    "pitfall": {
+      "zh": "如果所有可拆物都是无用垃圾，取舍会退化为清场收集；保留一部分真实用途。",
+      "en": "If every salvage object is useless rubbish, the choice becomes a cleanup chore; retain some meaningful functions."
+    },
+    "test": {
+      "zh": "材料不足时，玩家是否比较被拆物未来用途，而不只按产出最高排序？",
+      "en": "When short of material, do players weigh future utility instead of choosing only the highest yield?"
+    }
+  }
+}

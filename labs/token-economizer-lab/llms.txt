@@ -1,0 +1,23 @@
+# TokenEconomizer lab
+
+> Real pinned Microsoft TokenEconomizer execution on synthetic traces, without provider calls.
+
+Tier: ungraded
+Status: partial
+Interfaces: cli
+Entrypoint: make -C labs/token-economizer-lab prepare; make -C labs/token-economizer-lab run
+Auth: none
+Spec: none (bounded experiment; JSON report and acceptance contract documented below)
+
+Runs envfacts, live tool-pruning evidence/apply/restore, paused-judge loop-guard backstop and cache-aware accounting. Not an installation, live model evaluation, savings benchmark or production service.
+
+## Interface reference
+
+- [README](https://github.com/fallrising/newclear/blob/main/labs/token-economizer-lab/README.md): commands, isolation and limits.
+- [SUCCESS](https://github.com/fallrising/newclear/blob/main/labs/token-economizer-lab/SUCCESS.md): dated acceptance and remaining gaps.
+- [Report](https://github.com/fallrising/newclear/blob/main/labs/token-economizer-lab/docs/evidence/report.json): real runtime outputs, explicitly synthetic inputs.
+
+## Optional
+
+- [Design](https://github.com/fallrising/newclear/blob/main/labs/token-economizer-lab/SDD.md): bounded questions and ACs.
+- [Upstream lock](https://github.com/fallrising/newclear/blob/main/labs/token-economizer-lab/upstream.lock.json): commit and package SHA-256 hashes.

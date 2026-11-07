@@ -8,6 +8,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   Button,
+  Checkbox,
   fill,
   Input,
   Label,
@@ -21,19 +22,29 @@ export interface ConfirmDialogProps {
   confirmLabel: string;
   /** C-19 (surface-admin §8, 01 A-S4): the confirm button stays disabled until the input equals this text exactly. */
   phrase?: string;
+  confirmationWord?: "DELETE";
+  acknowledgementLabel?: string;
   destructive?: boolean;
   pending: boolean;
-  onConfirm: () => void;
+  onConfirm: (typed: string, word?: string) => void;
   onCancel: () => void;
 }
 
-/** Every governance write asks first. The dialog stays open while the request runs and after it fails. */
-export function ConfirmDialog({ open, title, description, confirmLabel, phrase, destructive, pending, onConfirm, onCancel }: ConfirmDialogProps) {
+/** Every governance write asks first. The parent closes the dialog on completion; retry requires reopening it. */
+export function ConfirmDialog({ open, title, description, confirmLabel, phrase, confirmationWord, acknowledgementLabel, destructive, pending, onConfirm, onCancel }: ConfirmDialogProps) {
   const [typed, setTyped] = useState("");
+  const [word, setWord] = useState("");
+  const [acknowledged, setAcknowledged] = useState(false);
   useEffect(() => {
-    if (!open) setTyped("");
+    if (!open) {
+      setTyped("");
+      setWord("");
+      setAcknowledged(false);
+    }
   }, [open]);
-  const ready = phrase === undefined || typed.trim() === phrase;
+  const ready = confirmationWord === undefined
+    ? phrase === undefined || typed.trim() === phrase
+    : typed === phrase && word === confirmationWord && acknowledgementLabel !== undefined && acknowledged;
   return (
     <AlertDialog open={open} onOpenChange={(next) => (next || pending ? undefined : onCancel())}>
       <AlertDialogContent data-testid="confirm-dialog">
@@ -44,14 +55,38 @@ export function ConfirmDialog({ open, title, description, confirmLabel, phrase, 
         {phrase !== undefined ? (
           <div className="flex flex-col gap-2">
             <Label htmlFor="confirm-phrase">{fill(copy["confirm.phraseLabel"], { phrase })}</Label>
-            <Input id="confirm-phrase" autoComplete="off" value={typed} onChange={(event) => setTyped(event.target.value)} data-testid="confirm-input" />
+            <Input id="confirm-phrase" autoComplete="off" disabled={pending} value={typed} onChange={(event) => setTyped(event.target.value)} data-testid="confirm-input" />
           </div>
+        ) : null}
+        {confirmationWord !== undefined ? (
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="confirm-word">{copy["confirm.deletionWordLabel"]}</Label>
+            <Input id="confirm-word" autoComplete="off" disabled={pending} value={word} onChange={(event) => setWord(event.target.value)} data-testid="confirm-word" />
+          </div>
+        ) : null}
+        {acknowledgementLabel !== undefined ? (
+          <Label htmlFor="confirm-acknowledgement" className="flex items-center gap-2">
+            <Checkbox
+              id="confirm-acknowledgement"
+              checked={acknowledged}
+              disabled={pending}
+              onCheckedChange={(checked) => setAcknowledged(checked === true)}
+              data-testid="confirm-acknowledgement"
+            />
+            {acknowledgementLabel}
+          </Label>
         ) : null}
         <AlertDialogFooter>
           <AlertDialogCancel disabled={pending} data-testid="confirm-cancel">
             {copy["common.cancel"]}
           </AlertDialogCancel>
-          <Button type="button" variant={destructive ? "destructive" : "default"} disabled={!ready || pending} onClick={onConfirm} data-testid="confirm-submit">
+          <Button
+            type="button"
+            variant={destructive ? "destructive" : "default"}
+            disabled={!ready || pending}
+            onClick={() => onConfirm(confirmationWord === undefined ? typed.trim() : typed, word)}
+            data-testid="confirm-submit"
+          >
             {pending ? copy["common.working"] : confirmLabel}
           </Button>
         </AlertDialogFooter>

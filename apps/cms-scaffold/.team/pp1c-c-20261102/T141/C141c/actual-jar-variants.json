@@ -1,0 +1,8 @@
+{
+  "sourceSha256": "c77db33818be74674006328f990531543584983cb2ffe13351b605eb60ecfc15",
+  "variants": {
+    "config-content": "52464fef4fc0a2b3522e194521daf24bd14bc93246160f24b16cea829964b4d9",
+    "extra-config": "98a3f1426eb97b12c711f97f70a3006bea745a5af82dd445f59db1cbf74a60ee",
+    "missing-class": "97455bc322475fecc36bf8fa9360e0d41a1f8950ab29bc4b7e2e2c633f9ff2bd"
+  }
+}

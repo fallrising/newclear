@@ -1,0 +1,119 @@
+{
+  "id": "ecology-animal-taming",
+  "system": "ecology",
+  "edition": 2,
+  "name": {
+    "zh": "让野生动物逐步接受靠近",
+    "en": "Gradually tame wild animals"
+  },
+  "summary": {
+    "zh": "想把野生动物变成长期伙伴，先要提供食物并处理它的戒备。",
+    "en": "To gain a lasting animal companion, provide food and manage its wariness."
+  },
+  "rules": {
+    "zh": "驯化需要反复接近、喂食或维持安全环境。动物的野性、警戒和处理者能力会影响进度或成功率；玩家要投入资源，并决定何时靠近、何时退开。",
+    "en": "Taming requires repeated approaches, feeding or safe conditions. Wildness, alarm and handler skill affect progress or success; players invest resources and choose when to approach or back away."
+  },
+  "loop": [
+    {
+      "zh": "挑选目标并准备食物与空间",
+      "en": "Choose a target and prepare food and space"
+    },
+    {
+      "zh": "创造可接近的条件",
+      "en": "Create safe approach conditions"
+    },
+    {
+      "zh": "尝试驯化并观察反应",
+      "en": "Attempt taming and read the response"
+    },
+    {
+      "zh": "继续投入或换目标",
+      "en": "Continue investing or choose another target"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "先驯化容易成功但帮助有限的动物，还是冒险处理更有价值的目标？",
+      "en": "Tame an easy, modestly useful animal or risk a more valuable target?"
+    },
+    {
+      "zh": "继续接近争取进度，还是退开让它恢复平静？",
+      "en": "Approach again for progress or withdraw so it can settle?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "驯化可预测程度",
+        "en": "Predictability"
+      },
+      "effect": {
+        "zh": "积累进度便于规划，概率尝试强调资源预算；失败反馈都必须清楚。",
+        "en": "Accumulating progress supports planning; chance-based attempts emphasize budgeting, with clear failure feedback."
+      }
+    },
+    {
+      "name": {
+        "zh": "中断条件",
+        "en": "Interruption conditions"
+      },
+      "effect": {
+        "zh": "饥饿、惊吓或处理者能力分别要求不同的准备动作。",
+        "en": "Hunger, alarm and handler skill require different preparation."
+      }
+    }
+  ],
+  "tags": [
+    "timing",
+    "planning"
+  ],
+  "related": [
+    "ecology-breeding-conditions",
+    "ecology-genetic-diversity",
+    "ecology-habitat-capacity",
+    "ecology-parent-trait-selection"
+  ],
+  "contrast": {
+    "zh": "环世界强调处理者技能与单次尝试机会；英灵神殿强调布置环境后维持动物平静。",
+    "en": "RimWorld emphasizes handler skill and attempts; Valheim emphasizes preparation and sustained calm."
+  },
+  "combination": {
+    "zh": "设计提案：围栏留一条可安全投食的通道，让接近路线参与驯化准备。",
+    "en": "Design proposal: include a safe feeding route in enclosure design so access supports taming."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "演示设定：野兽已进围栏，但玩家靠近就受惊，地上没有食物。",
+      "en": "Example: a creature is enclosed but alarms when approached, with no food on the ground."
+    },
+    "action": {
+      "zh": "从外侧投放食物，随后离开视线。",
+      "en": "Place food from outside and move out of sight."
+    },
+    "result": {
+      "zh": "动物平静后进食，驯化条开始增长。",
+      "en": "It settles, eats and begins gaining taming progress."
+    },
+    "next": {
+      "zh": "下一次补食选择它走到远端时，避免再次惊扰。",
+      "en": "Refill food when it moves to the far side to avoid another disturbance."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "做一个动物、平静与受惊两种状态、一种食物和可见进度条。",
+      "en": "Use one animal, calm and alarmed states, one food and a visible progress bar."
+    },
+    "pitfall": {
+      "zh": "不要先做复杂动物AI；先保证玩家能看懂什么行为打断进度。",
+      "en": "Skip elaborate animal AI initially; make interruptions understandable first."
+    },
+    "test": {
+      "zh": "不弹操作答案，观察玩家能否从动物反应学会退开并等待。",
+      "en": "Without explicit action prompts, see whether players learn to withdraw and wait from the animal’s response."
+    }
+  }
+}

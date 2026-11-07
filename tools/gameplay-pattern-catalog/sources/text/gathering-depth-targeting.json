@@ -1,0 +1,120 @@
+{
+  "id": "gathering-depth-targeting",
+  "system": "gathering",
+  "edition": 1,
+  "name": {
+    "zh": "按矿层选择深度",
+    "en": "Depth-targeted mining"
+  },
+  "summary": {
+    "zh": "去更深不一定更好，先确定你缺哪一种矿。",
+    "en": "Deeper is not always better; first decide which material you need."
+  },
+  "rules": {
+    "zh": "不同深度或地层有不同资源分布与危险组合。玩家根据配方缺口选目标层，再在时间、补给与撤退距离约束下开采；层级信息把单纯深入变成有目的的路线选择。",
+    "en": "Depths and strata differ in resource distribution and hazards. Players choose a target layer based on material needs, then mine within time, supply and return constraints; geological knowledge makes depth a choice rather than automatic progress."
+  },
+  "loop": [
+    {
+      "zh": "确定所需矿物",
+      "en": "Choose the required mineral"
+    },
+    {
+      "zh": "选择对应地层",
+      "en": "Choose the matching layer"
+    },
+    {
+      "zh": "抵达并开采",
+      "en": "Reach it and mine"
+    },
+    {
+      "zh": "按剩余补给返回",
+      "en": "Return based on supplies"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "为稀有矿深入，还是留在浅层完成当前升级？",
+      "en": "Go deep for rare ore or finish a current upgrade in shallower layers?"
+    },
+    {
+      "zh": "寻找通往下一层的入口，会不会错过当前最需要的矿？",
+      "en": "Will searching for the next level distract from needed materials here?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "分布重叠度",
+        "en": "Distribution overlap"
+      },
+      "effect": {
+        "zh": "重叠少使地层知识更重要；重叠多允许随意探索也有收获。",
+        "en": "Low overlap rewards geological knowledge; broad overlap supports opportunistic exploration."
+      }
+    },
+    {
+      "name": {
+        "zh": "返程便利度",
+        "en": "Return convenience"
+      },
+      "effect": {
+        "zh": "快捷返回降低深入风险；长距离回撤要求提前留余量。",
+        "en": "Fast return reduces deep-mining risk; long exits require larger reserves."
+      }
+    }
+  ],
+  "tags": [
+    "planning",
+    "risk",
+    "discovery"
+  ],
+  "related": [
+    "gathering-gathering-quota",
+    "gathering-oxygen-gathering",
+    "gathering-renewable-forage-route",
+    "gathering-salvage-dismantling"
+  ],
+  "contrast": {
+    "zh": "星露谷用编号楼层与电梯降低重复抵达成本；泰拉瑞亚让玩家在连续地形里自己建立通道和深度认知。",
+    "en": "Stardew uses numbered floors and elevators; Terraria asks players to learn depth and build routes through continuous terrain."
+  },
+  "combination": {
+    "zh": "组合创意：电梯只能设三个停靠层，玩家依据近期制造计划选择固定物流站，换站又需要时间成本。",
+    "en": "Design proposal: a mine elevator supports only three stops, selected around current crafting plans and costly to relocate."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "你缺铜做当前升级，铜在浅层；深层虽更贵，却主要产铁。",
+      "en": "You need copper for an upgrade; shallow layers contain copper while deeper, pricier deposits are mostly iron."
+    },
+    "action": {
+      "zh": "你留在浅层采够铜，暂时放弃继续向下找入口。",
+      "en": "Stay shallow to gather copper, postponing the search for a deeper entrance."
+    },
+    "result": {
+      "zh": "这一趟满足了配方缺口，还节省了深层返程补给。",
+      "en": "The trip fills the recipe gap and saves the supplies needed to return from deeper layers."
+    },
+    "next": {
+      "zh": "升级完成后，按下一份材料需求重新选层。",
+      "en": "After upgrading, choose a layer based on the next material requirement."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "做三层矿区选择页，列出主要资源、危险与返程成本，用目标配方驱动选择。",
+      "en": "Use a three-layer selection screen showing resources, danger and return cost, driven by a target recipe."
+    },
+    "pitfall": {
+      "zh": "若深层对所有目标都更优，选层会失去意义；不同材料需要保留各自目的地。",
+      "en": "If deeper layers are superior for every goal, layer choice disappears; preserve distinct resource destinations."
+    },
+    "test": {
+      "zh": "把目标配方从铜改成铁，玩家是否能据此换层，而非一直追求最深处？",
+      "en": "When the recipe changes from copper to iron, do players change layers rather than always seeking maximum depth?"
+    }
+  }
+}

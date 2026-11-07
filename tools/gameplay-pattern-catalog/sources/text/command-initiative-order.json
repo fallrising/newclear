@@ -1,0 +1,119 @@
+{
+  "id": "command-initiative-order",
+  "system": "command",
+  "edition": 3,
+  "name": {
+    "zh": "调整速度安排出手先后",
+    "en": "Tune speed to arrange turn order"
+  },
+  "summary": {
+    "zh": "让先手留给铺垫者，再让收割者接上。",
+    "en": "Let a setup unit act before the finisher."
+  },
+  "rules": {
+    "zh": "玩家通过配装、属性或状态改变单位的出手先后，让减防、治疗与攻击按需要衔接。速度不一定增加行动次数；还要看敌我是否交替、每轮是否重排。行动队列或实际出手结果给出反馈。",
+    "en": "Change initiative through equipment, stats or effects so debuffs, healing and attacks arrive in a useful order. Speed need not grant more actions: alternation and per-round rerolls also matter. A timeline or the resolved order gives feedback."
+  },
+  "loop": [
+    {
+      "zh": "观察当前出手顺序",
+      "en": "Inspect the current order"
+    },
+    {
+      "zh": "调整关键单位速度",
+      "en": "Adjust a key unit’s speed"
+    },
+    {
+      "zh": "执行铺垫与后续行动",
+      "en": "Resolve setup and follow-up actions"
+    },
+    {
+      "zh": "根据敌方先手重新安排",
+      "en": "Revise the order around enemy turns"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "让治疗者抢先保命，还是让控制者先压住危险敌人？",
+      "en": "Should the healer act first to save someone, or should control suppress the threat?"
+    },
+    {
+      "zh": "为抢先手牺牲伤害，能否换来少挨一次攻击？",
+      "en": "Does sacrificing damage for initiative prevent an enemy action?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "速度随机幅度",
+        "en": "Initiative randomness"
+      },
+      "effect": {
+        "zh": "随机越大，精确连招越不稳定，更需要备用计划。",
+        "en": "More randomness weakens exact sequencing and makes backup plans matter."
+      }
+    },
+    {
+      "name": {
+        "zh": "重排时点",
+        "en": "Reordering time"
+      },
+      "effect": {
+        "zh": "每轮重排方便局间调整；实时重排会让加速效果更难预测。",
+        "en": "Round boundaries make changes easier to anticipate; immediate reordering is harder to read."
+      }
+    }
+  ],
+  "tags": [
+    "planning",
+    "timing"
+  ],
+  "related": [
+    "combat-stamina-budget",
+    "command-focus-fire",
+    "command-frontline-shielding",
+    "command-interrupt-action"
+  ],
+  "contrast": {
+    "zh": "暗黑地牢加入每轮随机性；神界原罪2还用敌我交替限制连续先手。",
+    "en": "Darkest Dungeon adds round-by-round uncertainty; Original Sin 2 additionally constrains initiative through alternating sides."
+  },
+  "combination": {
+    "zh": "组合提案：将敌人意图与队列放在一起，玩家发现敌人下一次将放大招后，再给打断者换上加速装备。",
+    "en": "Design proposal: show enemy intent beside the queue, letting players equip a speed boost on the interrupter before a major attack."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "敌人将在第三位释放大范围攻击，我方治疗者第二位、控制者第四位。",
+      "en": "The enemy’s area attack is third; the healer is second and the controller fourth."
+    },
+    "action": {
+      "zh": "把加速饰品从治疗者换给控制者。",
+      "en": "Move a speed trinket from the healer to the controller."
+    },
+    "result": {
+      "zh": "控制者提前行动，先压住敌人。",
+      "en": "The controller acts sooner and suppresses the enemy."
+    },
+    "next": {
+      "zh": "面对持续失血的下一战，再考虑恢复治疗者先手。",
+      "en": "Against bleeding in the next fight, reconsider giving the healer priority."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "做四个单位和一条排序队列，只提供一件改变速度的装备。",
+      "en": "Build four units and a turn queue with one speed-changing item."
+    },
+    "pitfall": {
+      "zh": "别把速度、行动点与行动次数混成一个难读数值。",
+      "en": "Keep initiative, action points and action count distinct."
+    },
+    "test": {
+      "zh": "玩家能否在开战前说出调整后谁会先动，以及这样做的目的？",
+      "en": "Can players predict the changed order and explain why they want it?"
+    }
+  }
+}

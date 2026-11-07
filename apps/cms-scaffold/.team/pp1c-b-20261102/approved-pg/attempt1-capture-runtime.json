@@ -1,0 +1,15 @@
+{
+  "runId": "4422008970804730bed698cc679d4eac",
+  "root": "/home/ckc/test/codex/wt/newclear/cms-pp1c-b-20261101/apps/cms-scaffold/local/pp1/4422008970804730bed698cc679d4eac",
+  "project": "cms-pp1-local-4422008970804730bed698cc679d4eac",
+  "apiImage": "sha256:dc6e6b5d9f323e8f771fd1066d7becc98bf819739f67c880739b4d481f451255",
+  "scope": "B source capture fresh isolated runtime only",
+  "prepared": true,
+  "healthy": true,
+  "stoppedContainers": [
+    "6b507f8aef5875353c04d09597bf0e531fcf48850a9915f12a9043f7ea130cc8",
+    "e4890ddb4415e3476f1625bb4afb9481a0a8ef4b2cbc25fecc76c5e5e0060e60",
+    "d0a337106b472c447f66214ace8c46e5b6687e31817ff430bf4b9788e4909dd2"
+  ],
+  "stoppedFor": "pending new PG helper mount specification decision; no source capture attempted"
+}

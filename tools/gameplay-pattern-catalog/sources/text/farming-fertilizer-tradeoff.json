@@ -1,0 +1,119 @@
+{
+  "id": "farming-fertilizer-tradeoff",
+  "system": "farming",
+  "edition": 1,
+  "name": {
+    "zh": "肥料投入取舍",
+    "en": "Fertilizer investment"
+  },
+  "summary": {
+    "zh": "先投入稀缺材料，换取更快或更优的收成。",
+    "en": "Invest scarce materials before harvesting for faster or better returns."
+  },
+  "rules": {
+    "zh": "玩家在播种前后按规则给地块施肥，用材料成本换取成长或品质收益。不同肥效不一定可叠加，土地闲置和换季也可能影响保留，反馈来自实际收获时间与产物。",
+    "en": "Apply fertilizer under the planting rules, exchanging material cost for growth or quality. Effects may be mutually exclusive, and idle land or season changes can affect persistence; harvest timing and output reveal the benefit."
+  },
+  "loop": [
+    {
+      "zh": "选择收成目标",
+      "en": "Choose a harvest objective"
+    },
+    {
+      "zh": "制作或购买肥料",
+      "en": "Craft or buy fertilizer"
+    },
+    {
+      "zh": "施肥并种植",
+      "en": "Apply and plant"
+    },
+    {
+      "zh": "核对增益是否抵过成本",
+      "en": "Compare the benefit with its cost"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "追求高品质售价，还是提前收获再种一轮，取决于剩余时间。",
+      "en": "Higher-quality sales or an earlier extra harvest depends on the time remaining."
+    },
+    {
+      "zh": "贵作物更容易覆盖肥料成本，但也把更多价值押在一块田上。",
+      "en": "Valuable crops justify fertilizer more easily but concentrate investment in one plot."
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "增益方向",
+        "en": "Benefit type"
+      },
+      "effect": {
+        "zh": "提速改变日程，提质改变出售或加工选择。",
+        "en": "Speed changes scheduling; quality changes sale and processing choices."
+      }
+    },
+    {
+      "name": {
+        "zh": "保留规则",
+        "en": "Persistence"
+      },
+      "effect": {
+        "zh": "长期保留鼓励固定田块，易失效则要求持续投入。",
+        "en": "Persistent fertilizer favors permanent plots; expiring effects require ongoing investment."
+      }
+    }
+  ],
+  "tags": [
+    "economy",
+    "optimization"
+  ],
+  "related": [
+    "commerce-dynamic-market",
+    "commerce-trade-route-programming",
+    "farming-irrigation-layout",
+    "farming-livestock-care"
+  ],
+  "contrast": {
+    "zh": "前者提供多种目标的横向选择；后者让投入价值随首次成熟与再生阶段而变化。",
+    "en": "The former offers alternative goals; the latter changes the value of investment between initial growth and regrowth."
+  },
+  "combination": {
+    "zh": "设计提案：肥料来自不同区域的采集物，每种改变作物一个属性，形成供应链选择。",
+    "en": "Design proposal: fertilizers use materials from different regions, each changing one crop trait and creating sourcing choices."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "你只够买一种肥料：提早2天成熟，或提高收获品质。",
+      "en": "You can buy one fertiliser: mature two days earlier, or improve crop quality."
+    },
+    "action": {
+      "zh": "季末将近，你选提速肥料，争取再收一轮。",
+      "en": "With the season ending, choose faster growth to fit one more harvest."
+    },
+    "result": {
+      "zh": "单次售价没提高，但多出的收获可能补回肥料钱。",
+      "en": "The sale price stays the same, but the extra harvest may repay the fertiliser cost."
+    },
+    "next": {
+      "zh": "换到季初后重新算账，未必仍选同一种肥料。",
+      "en": "Recalculate at the start of the next season; the best choice may change."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "先做一种作物、两种互斥肥料，结算时列出投入、收获次数和净收益。",
+      "en": "Use one crop and two mutually exclusive fertilisers. Show spending, harvest count and net return."
+    },
+    "pitfall": {
+      "zh": "避免把所有肥效都做成可叠加的增产百分比，否则只剩有钱就买的选择。",
+      "en": "Stackable percentage bonuses can reduce the decision to buying every affordable upgrade."
+    },
+    "test": {
+      "zh": "用季初和季末两个场景，检查玩家选择是否改变，并能解释原因。",
+      "en": "Test early- and late-season scenarios; see whether choices change for understandable reasons."
+    }
+  }
+}

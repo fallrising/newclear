@@ -1,5 +1,22 @@
 # HAI Taskboard Handoff
 
+Current continuation: M1c and M2 accepted-workflow identity repair are delivered. Owner approved
+the immutable local project-policy direction; [concrete contract](sdd/local-project-policy.md)
+passed Claude plan review before implementation; local backend/web/API/docs and final code review
+now pass. [Evidence](evidence/project-policy-20261031.md) and BOARD HMPOL track final CI/delivery. Verified coverage remains unimplemented; full M2/product are incomplete.
+
+Planning checkpoint (2026-10-29): the owner requested documentation-first sequencing of remaining
+P0-A and proposed designs with Claude review. See [the plan](plans/remaining-work-20261029.md) and
+[its review record](evidence/remaining-work-plan-20261029.md). That planning checkpoint did not resume runtime
+implementation or accept any new normative clause; the historical implementation checkpoint below
+retains its date and scope. Current task state remains in [BOARD](tasks/BOARD.md).
+
+2026-10-31 continuation: M1a/M1b have been delivered; owner continued M1c human reports. The newer
+Session/control-room and provider-path documents remain Proposed and preserve Fake-only/M1c.
+[Reviewed M1c plan](plans/m1c-human-reports-20261031.md) fixes REPORT-AC-01..05 and actor/subject/
+idempotency/capacity/retention boundaries. Implementation, final local gates and Claude plan/code
+review now pass, including human-record completion joins and failure cases. Evidence and actual delivery stay in [the M1c report](evidence/m1c-human-reports-20261031.md) and BOARD HM1C.
+
 > 補救註記（2026-09-28）：本文件引用的部分 `.team` 紀錄或 evidence 的 SHA-256 是主機資訊遮蔽前的值；新舊對照見 [../../../docs/remediation/2026-09-host-info.md](../../../docs/remediation/2026-09-host-info.md)。
 
 Updated: 2026-10-23 (resumption); historical checkpoints below retain their original dates.
@@ -282,5 +299,37 @@ UI and providers require later assignments. No runtime or API exposes this found
 ## Restore invariant
 
 A resumed agent MUST verify the branch/baseline and actual diff before trusting this handoff. If the
-files disagree, the archived ledger at journal `archive/team-ledgers/newclear/products/hai-taskboard/.team/PLAN.md` plus Git/SQLite authority rules win; record the discrepancy rather
-than silently repairing history.
+files disagree, current bootstrap work status comes from `docs/tasks/BOARD.md`, alongside accepted
+Git/SQLite authority rules. The archived product PLAN preserves historical acceptance evidence only;
+root `.team/PLAN.md` records routing/review rationale. Record discrepancies without repairing history.
+Owner-approved C01 (2026-10-30) aligns this precedence; no SQLite migration is claimed.
+
+
+2026-10-29 M0 接手依據：[baseline report](evidence/m0-baseline-20261029.md)。新一輪 pinned backend/web 與真實 ConnectedApp foundation 已跑；完整產品仍未完成，M1a 新契約仍待接受。
+
+2026-10-30 M1a: owner approved C01/C02/C06 and requested current designs. Remote HAI documents
+were unchanged since M0 closeout; the current [completion preparation contract](sdd/completion-preparation.md)
+and [evidence](evidence/m1a-completion-preparation-20261030.md) now define the bounded slice.
+Read BOARD for live delivery status; the preceding2026-10-29 waiting note is historical.
+
+## M1b continuation — 2026-10-30
+
+Owner continued M1b and authorized Claude Code plan/code review. The
+[reviewed plan](plans/m1b-output-access-20261030.md) fixes ACCESS-AC-01..04 before code.
+Scope: scoped historical Run outputs and project-bound verified artifact download; no writes,
+no current-head/lease requirement for historical output and no global-hash authority.
+Claude plan/code REWORK was revised and accepted; implementation and root gates pass within
+the [documented evidence boundaries](evidence/m1b-output-access-20261030.md). Full product remains incomplete.
+The next planned slice after M1b is M1c human report persistence/submission; it is not started.
+
+
+M2 continuation: [identity plan](plans/m2-ac-identity-20261031.md) and [evidence](evidence/m2-ac-identity-20261031.md) track accepted-workflow AC alignment. Legacy nonempty Draft stays compatible; general policy and verified coverage remain pending. Current state is BOARD HM2ID; full P0-A is incomplete.
+
+
+## Verified coverage entry — 2026-11-01
+
+Identity and immutable local project policy are delivered (#854/#855/#868/#880); desk #346
+records the prior closeout. The sole active continuation is BOARD HM2C and its
+[concrete coverage proposal](plans/m2-verified-coverage-20261101.md). The preceding policy-pending
+note is historical. Coverage implementation requires acceptance of that new contract, following
+Claude plan review; UI and full M2 remain incomplete. No policy redesign or Git authorization is needed.

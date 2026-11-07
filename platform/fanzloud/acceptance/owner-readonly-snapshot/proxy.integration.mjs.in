@@ -1,0 +1,28 @@
+// Local transport fixture only: no product, AP, DB, worker, old intent or owner journey.
+import assert from 'node:assert/strict';
+import {createServer} from 'node:http';
+import {request} from 'node:https';
+import {readFileSync,mkdtempSync,writeFileSync,rmSync} from 'node:fs';
+import {tmpdir} from 'node:os';
+import {spawn} from 'node:child_process';
+import {once} from 'node:events';
+const root=mkdtempSync(tmpdir()+'/fanz-owner-proxy-fixture-');
+const ca=readFileSync('@PRIVATE_WORKSPACE@/.local/fanz-executor-20261031/tls.crt');
+const calls=[];let child;
+const backend=createServer((req,res)=>{calls.push(req.method+' '+req.url);req.resume();req.on('end',()=>{res.writeHead(200,{'content-type':'application/json'});res.end('{"fixture":true}');});});
+const ask=(method,path)=>new Promise((yes,no)=>{const q=request({hostname:'127.0.0.1',servername:'localhost',port:18447,method,path,ca,timeout:500},r=>{r.resume();r.on('end',()=>yes(r.statusCode));});q.on('error',no);q.on('timeout',()=>q.destroy());q.end();});
+const wait=ms=>new Promise(r=>setTimeout(r,ms));
+try{
+ await new Promise((yes,no)=>{backend.once('error',no);backend.listen(18449,'127.0.0.1',yes);});
+ writeFileSync(root+'/state.json',JSON.stringify({cleanup_wall_ms:Date.now()+2200}),{mode:0o600});
+ child=spawn(process.execPath,[new URL('./proxy.mjs',import.meta.url).pathname,root],{stdio:'ignore'});
+ let ready=false;for(let i=0;i<40;i++){try{if(await ask('GET','/api/v1/session')===200){ready=true;break;}}catch{}await wait(25);}
+ assert.ok(ready,'fixture proxy startup');
+ assert.equal(await ask('POST','/api/v1/session'),200);
+ const before=calls.length;
+ for(const path of ['/api/v1/tasks','/api/v1/runs/9c20ec74-f940-46fd-81e6-064b9dee93eb/reviews','/api/v1/runs/9c20ec74-f940-46fd-81e6-064b9dee93eb/rework','/api/v1/runs/9c20ec74-f940-46fd-81e6-064b9dee93eb/actions','/api/v1/submissions/2268a87e-3b2b-4ad1-95b0-58eaeed97b04/reconcile'])assert.equal(await ask('POST',path),403);
+ assert.equal(calls.length,before,'blocked operations never reach even the fake backend');
+ const exited=await Promise.race([once(child,'exit'),wait(4000).then(()=>{throw new Error('deadline did not close proxy');})]);assert.equal(exited[0],0);
+ await assert.rejects(ask('GET','/api/v1/session'));
+ console.log('PASS: trusted TLS fixture, login pass-through, five execution mutations denied before upstream, independent proxy cutoff');
+}finally{if(child&&child.exitCode===null){child.kill('SIGKILL');await once(child,'exit');}backend.closeAllConnections();await new Promise(r=>backend.close(r));rmSync(root,{recursive:true,force:true});}

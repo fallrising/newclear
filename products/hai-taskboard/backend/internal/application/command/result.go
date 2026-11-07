@@ -22,6 +22,7 @@ const (
 	CodeIdempotencyConflict   = "idempotency_conflict"
 	CodeIdempotencyExpired    = "idempotency_expired"
 	CodeStaleSubject          = "stale_subject"
+	CodePolicyRejected        = "policy_rejected"
 	CodeImpactPlanStale       = "impact_plan_stale"
 	CodeLifecycleRejected     = "lifecycle_rejected"
 	CodeDoneGateUnsatisfied   = "done_gate_unsatisfied"
@@ -66,6 +67,8 @@ type successCommand struct {
 }
 
 type successResult struct {
+	ReportID                string            `json:"report_id,omitempty"`
+	ReportKind              string            `json:"report_kind,omitempty"`
 	AcceptedRevisionDigest  string            `json:"accepted_revision_digest,omitempty"`
 	AcceptanceSubjectDigest string            `json:"acceptance_subject_digest,omitempty"`
 	ProposalDigest          string            `json:"proposal_digest,omitempty"`
@@ -78,6 +81,8 @@ type successResult struct {
 	RunID                   domain.RunID      `json:"run_id,omitempty"`
 	Version                 uint64            `json:"version,omitzero"`
 	Phase                   domain.Phase      `json:"phase,omitempty"`
+	Reason                  string            `json:"reason,omitempty"`
+	SubjectDigest           string            `json:"subject_digest,omitempty"`
 }
 
 type successAudit struct {
@@ -110,20 +115,25 @@ type failureDetails struct {
 
 func CanonicalSuccess(metadata Metadata, operation Operation, result Result, auditSequence uint64, cursor port.Cursor) ([]byte, error) {
 	if !commandIDPattern.MatchString(metadata.CommandID) || !validText(metadata.CorrelationID, 80) ||
-		!validSuccessResult(operation, successResult{
-			AcceptedRevisionDigest: result.AcceptedRevisionDigest, AcceptanceSubjectDigest: result.AcceptanceSubjectDigest, Type: result.Type, ProjectID: result.ProjectID, WorkItemID: result.WorkItemID,
-			RunID: result.RunID, Version: result.Version, Phase: result.Phase, ProposalDigest: result.ProposalDigest, GraphDigest: result.GraphDigest, ObjectFormat: result.ObjectFormat, CommitOID: result.CommitOID,
-		}) || auditSequence == 0 || cursor.Epoch == 0 || cursor.Sequence == 0 {
+		!validSuccessResult(operation, wireResult(result)) || auditSequence == 0 || cursor.Epoch == 0 || cursor.Sequence == 0 {
 		return nil, ErrInvalidCommand
 	}
 	return json.Marshal(successEnvelope{
 		APIVersion: "v1", OK: true,
 		Command:          successCommand{CommandID: metadata.CommandID, Operation: operation, Status: "recorded", Replayed: false},
-		Result:           successResult{AcceptedRevisionDigest: result.AcceptedRevisionDigest, AcceptanceSubjectDigest: result.AcceptanceSubjectDigest, Type: result.Type, ProjectID: result.ProjectID, WorkItemID: result.WorkItemID, RunID: result.RunID, Version: result.Version, Phase: result.Phase, ProposalDigest: result.ProposalDigest, GraphDigest: result.GraphDigest, ObjectFormat: result.ObjectFormat, CommitOID: result.CommitOID},
+		Result:           wireResult(result),
 		Audit:            successAudit{Sequence: auditSequence},
 		ProjectionCursor: successCursor{StreamEpoch: cursor.Epoch, EventSequence: cursor.Sequence},
 		CorrelationID:    metadata.CorrelationID,
 	})
+}
+
+func wireResult(result Result) successResult {
+	wire := successResult{ReportID: result.ReportID, ReportKind: result.ReportKind, AcceptedRevisionDigest: result.AcceptedRevisionDigest, AcceptanceSubjectDigest: result.AcceptanceSubjectDigest, Type: result.Type, ProjectID: result.ProjectID, WorkItemID: result.WorkItemID, RunID: result.RunID, Version: result.Version, Phase: result.Phase, ProposalDigest: result.ProposalDigest, GraphDigest: result.GraphDigest, ObjectFormat: result.ObjectFormat, CommitOID: result.CommitOID, Reason: result.Reason}
+	if !result.SubjectDigest.IsZero() {
+		wire.SubjectDigest = canonicalSHA256(result.SubjectDigest)
+	}
+	return wire
 }
 
 func CanonicalFailure(metadata Metadata, failure *Error) ([]byte, error) {
@@ -183,6 +193,29 @@ func DecodeCanonicalResult(payload []byte, commandID string, operation Operation
 	return NewError(failure.Error.Code, failure.Error.Message, failure.Error.Retryable, reasons, nil), nil
 }
 
+// DecodeResultOwner is the read-side counterpart of DecodeCanonicalResult for
+// audit attribution: the same canonical checks, but the operation is taken
+// from the stored result because runtime audit labels are not operations.
+// Only successes carry audit groups, so a stored failure is corruption here.
+func DecodeResultOwner(payload []byte, commandID string) (port.ResultOwner, error) {
+	var success successEnvelope
+	if err := json.Unmarshal(payload, &success, json.RejectUnknownMembers(true)); err != nil || !success.OK || !validOperation(success.Command.Operation) {
+		return port.ResultOwner{}, errors.New("invalid canonical command success")
+	}
+	if failure, err := DecodeCanonicalResult(payload, commandID, success.Command.Operation); err != nil || failure != nil {
+		return port.ResultOwner{}, errors.New("invalid canonical command success")
+	}
+	owner := port.ResultOwner{Operation: string(success.Command.Operation), WorkItemID: success.Result.WorkItemID, RunID: success.Result.RunID}
+	if success.Result.AcceptedRevisionDigest != "" {
+		digest, err := domain.ParseDigest(strings.TrimPrefix(success.Result.AcceptedRevisionDigest, "sha256:"))
+		if err != nil {
+			return port.ResultOwner{}, errors.New("invalid canonical command success")
+		}
+		owner.AcceptedRevisionDigest = digest
+	}
+	return owner, nil
+}
+
 func canonicalBytes(payload []byte, value any) bool {
 	encoded, err := json.Marshal(value)
 	return err == nil && bytes.Equal(payload, encoded)
@@ -190,9 +223,9 @@ func canonicalBytes(payload []byte, value any) bool {
 
 func validOperation(operation Operation) bool {
 	switch operation {
-	case AcceptInitialSpecificationOperation, ProposeSpecificationOperation, CreateProjectOperation, CreateWorkItemOperation, MarkReadyOperation, DispatchRunOperation,
+	case SubmitHumanReportOperation, AcceptInitialSpecificationOperation, ProposeSpecificationOperation, CreateProjectOperation, CreateWorkItemOperation, MarkReadyOperation, DispatchRunOperation,
 		SubmitCandidateOperation, PublishReviewOperation, PublishEvidenceOperation, ApproveSubjectOperation,
-		RequestQAOperation, RequestCancelOperation, CompleteWorkItemOperation:
+		RequestQAOperation, RequestCancelOperation, RequestReworkOperation, CompleteWorkItemOperation, ReopenWorkItemOperation:
 		return true
 	default:
 		return false
@@ -200,15 +233,24 @@ func validOperation(operation Operation) bool {
 }
 
 func validSuccessResult(operation Operation, result successResult) bool {
+	if operation != SubmitHumanReportOperation && (result.ReportID != "" || result.ReportKind != "") {
+		return false
+	}
 	if operation != AcceptInitialSpecificationOperation && (result.AcceptedRevisionDigest != "" || result.AcceptanceSubjectDigest != "") {
 		return false
 	}
 	if operation != ProposeSpecificationOperation && operation != AcceptInitialSpecificationOperation && (result.ProposalDigest != "" || result.GraphDigest != "" || result.ObjectFormat != "" || result.CommitOID != "") {
 		return false
 	}
+	reasonAllowed := operation == RequestReworkOperation || operation == ReopenWorkItemOperation
+	if (operation != RequestReworkOperation && result.SubjectDigest != "") || (!reasonAllowed && result.Reason != "") {
+		return false
+	}
 	projectValid := projectIDPattern.MatchString(string(result.ProjectID))
 	workItemValid := workItemIDPattern.MatchString(string(result.WorkItemID))
 	switch operation {
+	case SubmitHumanReportOperation:
+		return result.Type == "HumanReportSubmitted" && projectValid && workItemValid && runIDPattern.MatchString(string(result.RunID)) && result.Version > 0 && port.ValidHumanReportID(result.ReportID) && (result.ReportKind == "review" && result.Phase == domain.PhaseReview || result.ReportKind == "evidence" && (result.Phase == domain.PhaseReview || result.Phase == domain.PhaseQA))
 	case AcceptInitialSpecificationOperation:
 		validDigest := func(s string) bool {
 			d, e := domain.ParseDigest(strings.TrimPrefix(s, "sha256:"))
@@ -250,6 +292,13 @@ func validSuccessResult(operation Operation, result successResult) bool {
 	case RequestCancelOperation:
 		return result.Type == "CancellationRequested" && projectValid && workItemValid &&
 			runIDPattern.MatchString(string(result.RunID)) && result.Version > 0 && (result.Phase == domain.PhaseDeveloping || result.Phase == domain.PhaseReview || result.Phase == domain.PhaseQA)
+	case RequestReworkOperation:
+		subject, err := domain.ParseDigest(strings.TrimPrefix(result.SubjectDigest, "sha256:"))
+		return result.Type == "ReworkRequested" && projectValid && workItemValid && result.RunID == "" && result.Version > 0 &&
+			result.Phase == domain.PhaseDeveloping && ValidReworkReason(result.Reason) && err == nil && !subject.IsZero() && canonicalSHA256(subject) == result.SubjectDigest
+	case ReopenWorkItemOperation:
+		return result.Type == "WorkItemReopened" && projectValid && workItemValid && result.RunID == "" && result.Version > 0 &&
+			(result.Phase == domain.PhaseDraft || result.Phase == domain.PhaseReady) && ValidReworkReason(result.Reason)
 	case CompleteWorkItemOperation:
 		return result.Type == "WorkItemCompleted" && projectValid && workItemValid && result.RunID == "" &&
 			result.Version > 0 && result.Phase == domain.PhaseDone

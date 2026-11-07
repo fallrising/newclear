@@ -10,6 +10,70 @@ source_commit: 95fdf5f8ef4e548e6854f8838385913dff4877b2
 
 # pokercase 成功契約
 
+## T-0426 — Renewed dynamic Claude trial
+
+Owner approved [RD-1–RD-3](docs/tasks/T-0426-dynamic-renewed.md), a fresh3/300/60/no-retry repeat after probablecapacityreport. Samepinnedruntime/CLI/runner; old429/unusedslotsclosed. Actual3/3HTTP200 in7.673s passed distinctinline markers, sameprocess andmatchingSIDnative restart,3durableusage rows/history andownedcleanup. All3admissionsconsumed/closed,no retries; limitedterminalMessages tuple, no overallproduct/cache/account guarantee.
+
+## T-0426 — Approved dynamic Claude live acceptance
+
+Owner approved [LD-1–LD-3](docs/tasks/T-0426-dynamic-live.md): new3gatewayrequests/300seconds/60seconds each, no retries, using the reviewed dynamic-context runtime and retained officialTUI. First response, appended inline instruction continuation, restart/native reuse and usage readback; no broader client/cache/account or whole-product claim. Actual attempt stopped at firstHTTP429:1/3admissions,total2.811s,no retry; dynamic continuation and restart cases notrun. Ownedcleanup passed; this allowance and prior budgets are closed.
+
+## T-0426 — Ordered dynamic instruction continuation
+
+Owner approved [DC-1–DC-4](docs/tasks/T-0426-dynamic-context.md) after the tool-context correction. Preserve Messages top-level versus inline instruction provenance/order, add bounded idle/saved user continuation, and retain strict fresh fallback for new context alongside tool results. No instruction stripping, other-protocol contract relaxation, real trial or whole-product acceptance. Claim397 merged; original17AC remain unchanged.
+
+## T-0426 — Cursor Agent CLI decision and Claude client continuation
+
+Owner 2026-11-02 selected Cursor Agent CLI (`cursor-agent`), not the IDE, and removed the Docker product requirement. [Current decision](docs/cursor-isolation.md) supersedes the old AC-17 execution choice while preserving its historical text and evidence; the existing runtime migration remains pending. Claude is the selected development priority. [NC-1–NC-3](docs/tasks/T-0426-claude-client.md) pin Magpie comparison, faithful offline continuation work and bounded delivery. No fresh live allowance or whole-product acceptance is implied. The selected missing tool-result signature/history gate is corrected with a genuine pre-fix RED,53focused unit/11TUI/436full Rust tests,199Python fixtures and both offline walkthroughs passing; independent source review accepted. Delivery gates are recorded separately.
+
+## T-0426 — Renewed TUI tool trial after owner quota report
+
+Owner explicitly approved [TR-1–TR-3](docs/tasks/T-0426-tui-tools-renewed.md): a fresh2/300/60 TUI tool call/result attempt, no retries, unchangedCLI/runtime/model/profile. Prior429 andalloldbudgetsclosed; restoredcapacity remainsowner tentative untilnewresult. Actual2/2passed in4.631s: expectedtool/result, samePID/nativeMCPcallback, exactmodel/marker, durableusage/history andownedcleanup. This isonlyfixedsingletoolHTTPMessages tuple; original17AC/mainlineincomplete remain.
+
+## T-0426 — Approved real TUI tool continuation
+
+Owner approved [TC-1–TC-3](docs/tasks/T-0426-tui-tools.md): fresh2gatewayrequests/300seconds/60seconds each, one synthetic MCP tool call/result with same-process continuation, no retries. RetainedCLI2.1.312 and acceptedruntime; priorbudgetsclosed. Independentpreflight/isolateddry passed; actualfirstrequest stoppedHTTP429,1of2admissions, no retry, toolresult/sameprocess case notrun. Cleanup passed. Original17AC/mainlineincomplete remain.
+
+## T-0426 — Fresh TUI trial in owner-trusted directory
+
+Owner confirmed directory trust and explicitly approved [TT-1–TT-3](docs/tasks/T-0426-tui-trusted.md): a new3request/600second/60second fixed-input text/native-reuse trial. Earlier budgets remain closed. Exact trustedcwd with separate gateway data, pinned reviewedCLI/runtime, stopfirstfailure/no retry; actual result:3/3passed, sameprocess and matching-session restart verified on retainedCLI2.1.312; usagehistory and ownedcleanup passed. Original17AC and mainline incomplete remain.
+
+## T-0426 — Approved three-request real TUI pilot
+
+Owner approved [TP-1–TP-3](docs/tasks/T-0426-tui-pilot.md): new3gatewayrequests/10minutes/60seconds each, fixed-input firsttext/sameprocess/restartresume. Stopfirstfailure; prior6admissions remain exhausted. This is a bounded acceptance attempt, with no new runtime change or whole-product completion claim. Result: first real admission stopped at an owner-interaction prompt (HTTP401); later two cases unexecuted, no retry. Official Pro login preflight passed; native live reuse remains unaccepted.
+
+## T-0426 — Inline instruction role preservation
+
+[NR-1–NR-3](docs/tasks/T-0426-instruction-roles.md) correct the observed system text-block/string role mismatch while preserving strict reuse criteria. This bounded offline correction does not accept live native reuse or reopen the exhausted pilot budget. Original17AC remains unchanged.
+
+## T-0426 — Approved interactive Claude transport
+
+Owner selected A: genuine interactive CLI plus response tap. [TA-1–TA-5 design and acceptance](docs/tasks/T-0426-claude-tui.md) govern the core update after claim351. This explicitly resolves the earlier pending choice. Preserve original17AC history while extending the transport; no live quota/compatibility or native-reuse acceptance is implied. The implementation has passed432Rusttests/25groups,199Python tests, formatter/Clippy and independent code review. RemoteCI/delivery and finalbackup/cleanup remain separate gates; the linked task records actual outcomes.
+
+## T-0426 — CLI transport/cache decision
+
+Owner requested a Claude TUI core update and other-CLI comparison. [CT-1–CT-3 evidence and concrete choices](docs/tasks/T-0426-cli-cache-review.md) distinguish prompt caching, native reuse and subscription weighting. Claim PR348 merged. Magpie's incremental TUI streaming uses a runtime preload tap; transcript-only output changes streaming behavior. At that historical checkpoint the material choice awaited owner decision; the approved A extension above now supersedes that pending state. Review publication does not complete the requested core update; original17AC and the exhausted live-call budget remain unchanged.
+
+## T-0426 — Bounded official Claude client pilot
+
+Owner approved Claude tools / Cursor text-only and a subscription-only, single-model Claude pilot. [LP-1–LP-3 scope, gates and results](docs/tasks/T-0426-claude-pilot.md) govern this continuation; renewed claim PR344 merged before implementation. Existing core AC wording and historical evidence remain intact. A failed safety, model, admission or cleanup preflight stops before inference. Six gateway requests are not six internal model calls or a monetary cap; this pilot cannot close the full mainline.
+
+## T-0432 — Process interruption and durable recovery
+
+Claim PR336 merged before product work. [Fixed CR-1–CR-5 and design](docs/tasks/T-0432-crash-recovery.md) implement the existing T-1102 M-10 recovery evidence requirement. Separate storage-subprocess boundaries from actual isolated HTTP/fakeCLI dispatch, retain identities and finalized history through SIGKILL/restart, and prove no replay or duplicate amounts. Existing behavior may already pass; no runtime defect or RED is claimed from a missing test. Current runtime passed unchanged:9storage-process cuts and3actual buffered gateway cases,407Rust/199Python/20repository tests,49contracts/8indexes,fmt/Clippy/locked builds and8prior isolated regressions. Independent source/runtime review passed; publication and final ledger/backup/cleanup remain delivery gates. Original17AC/T1102/Cargo and mainline incomplete/usable_tag none remain; AC04/17 and live acceptance are separate unresolved gates.
+
+## T-0445 — Fixture startup ownership and safe diagnostics
+
+[FS-1–FS-5](docs/tasks/T-0445-fixture-startup.md) cover the bounded #701 continuation. The two implicated integration fixtures now require their owned post-bind address, health and admin identity before configuration; stderr drainage and failure diagnostics are bounded. Actual listening-log RED→GREEN and a separate mocked runner-cleanup RED→GREEN are retained. The fixed headless entry passed 10 scenarios, with 406 Rust tests/23 groups, 149 Python, 20 repository tests, original-target serial checks, fmt/Clippy/locked builds and eight previous isolated regressions. The first full-suite failure in an unchanged third Claude fixture and later passing controls remain explicit, with unknown cause. Independent review, normal PR/required CI, remote readback and final ledger/backup/cleanup are delivery gates. Original17AC/T1102/Cargo, mainline incomplete/usable_tag none and unresolved AC04/17 remain; no broader #701 or live-provider acceptance.
+
+## T-0432 — Existing buffered CLI settlement continuation
+
+Owner approved the bounded Claude Code/Cursor non-stream accounting continuation. Claim PR318 merged; [fixed CB-1–CB-5, scope and design](docs/tasks/T-0432-buffered-cli-settlement.md) precede implementation. Connect existing raw observers and per-dispatch reservation through collection/conversion; preserve Claude tools/session reuse, Cursor text-only and all previous delivery contracts. Actual gateway/fakeCLI baseline RED→GREEN and a separate native collection-race RED→GREEN are retained. The new45-case/9-stage real gateway/fakeCLI matrix passed with50selected attempts and exact-scope SQLite/JSON/CSV/Web reconciliation;396Rust/129Python/20repository tests, fmt/Clippy/locked builds and seven prior regressions passed. Independent source/runtime and prepublication ledger reviews passed. Publication and required CI remain delivery gates. No new timeout policy, schema/API, real CLI/provider acceptance or whole-product completion. Original17AC/T1102/Cargo and mainline incomplete/usable_tag none remain unchanged.
+
+## T-0432 — Existing buffered HTTP settlement continuation
+
+Owner instructed continued development after T-0435 delivery. Claim PR309 merged; [fixed BH-1–BH-5, scope, design and validation](docs/tasks/T-0432-buffered-http-settlement.md) cover existing generic/SIWC/Grok/OpenCode buffered HTTP across three clients. Reserve each actual dispatch, retain raw usage/terminal/clocks through failures, preserve native Responses bytes and existing retry behavior. Documentation and claim preceded RED and implementation. Actual isolated RED→GREEN,53case/9stage buffered matrix,395Rusttests/22groups,111Python,20repository validator tests,47contracts/indexes,fmt/Clippy/lockedbuild, four prior nine-stage journeys, coverage and Antigravity regressions passed locally. Independent source/runtime and prepublication ledger reviews passed. Normal PR/required CI/remote readback and final delivery facts are recorded by the task board and handoff. Prior streaming, Antigravity, coverage, original17AC and T-1102 remain unchanged. Mainline incomplete, usable_tag none; #698–702 remain open.
+
 ## 主線與範圍
 
 目錄名為 pokercase，binary／資料目錄為 thinrouter；不是兩個不同產品。
@@ -43,6 +107,18 @@ MITM、cloud sync、9router.db 相容與媒體 API 排除在外。
 | AC-15 | Given chat 格式上游或 Claude Code，When 客戶端以 `/v1/responses` 串流且回覆含文字與工具呼叫，Then 收到完整的 Responses 事件序列（`response.created`、message 與 `function_call` 的 `output_item.added`／delta／`.done`、帶 output 與 usage 的 `response.completed`，`sequence_number` 遞增，不送 `[DONE]`）；`length` 結束為 `response.incomplete`，錯誤為 `response.failed`。 | passed | `responses::tests::chat_stream_to_responses_*`、`tests/chat_upstream_responses_e2e.rs`、`claude_live_e2e::responses_stream_from_claude_code_carries_the_tool_call`；2026-10-23 本機全綠。 |
 | AC-16 | Given `import-local` 匯入的 grok 連線（借用 `~/.grok/auth.json`；xAI refresh token 會輪換），When 呼叫上游、檔案被 Grok CLI 更新或 token 過期，Then 每次重讀檔案、從不自行 refresh 或寫檔，401 時重讀一次後回明確提示；舊資料的 grok refresh token 在開庫時清除。agy（Google，不輪換）照常 refresh。 | passed | `tests/responses_e2e.rs::borrowed_grok_login_is_reread_and_never_refreshed`、`borrowed` 單元測試；2026-10-23 本機全綠。 |
 | AC-17 | Given `cursor` provider，When 三個端點送純文字（串流與非串流），Then 僅在 operator 加 `--cursor-accept-account-plugins` 時（否則 503，不啟動 CLI）且提供固定 Docker image／專用 profile volume，由容器內官方 `cursor-agent -p --output-format stream-json --stream-partial-output` 回答，傳入 `--mode ask`、`--sandbox disabled`、臨時工作目錄（這些 CLI 旗標本身不是安全邊界），不加 `--force`／`--approve-mcps`；只採用串流 delta（略過重複 flush），呼叫方 system 放在 `<external_system_instructions>`；thinrouter 不持有 Cursor token、不再使用私有協定；帶 tools 或圖片回 501，未登入回 401。 | passed | `tests/cursor_cli_e2e.rs`（Python 假 `cursor-agent` 照官方 output-format 文件輸出）、`cursor_cli` 單元測試；2026-10-23 本機全綠。2026-10-23 owner 以真實 `cursor-agent` 2026.10.16 跑 `-p --output-format stream-json --stream-partial-output --mode ask --sandbox enabled --trust --workspace /tmp "say hi"`：參數均被接受、delta／flush 判斷與實作一致，另有文件未載的 `thinking` 事件（忽略）與 result 上的 usage（已對應）；假程式依此輸出更新。同日探測：ask 模式下 agent 仍可用帳號的 Cursor plugin（Gmail 等）且 CLI 無法停用，故改為 opt-in；workspace MCP 需 `--approve-mcps` 才載入。後於2026-10-24 corrected-runner 單次非串流 Chat 端到端 HTTP200／5.897s，owned container 清理成功（下方歷史紀錄）；不擴為全部 API／stream／tools/images 驗收。 |
+
+## T-0432 — 本輪一般 Chat 串流結算
+
+目標、設計與固定 SS-1–SS-6 見 [任務](docs/tasks/T-0432-stream-settlement.md)。本輪僅 generic API-key HTTP Chat 串流，先 fake upstream RED，再完成送出前登記、一次結算、終態／usage／時間及管理面一致性；其他協定、CLI、OAuth 與完整 [#698](https://github.com/fallrising/newclear/issues/698) 留待後續。本機279Rusttests/22groups、fmt/Clippy、20Python回歸、九階段離線旅程及repository validators已通過；獨立審查及PR712必要CI／正常合併／遠端回讀已通過；管理帳本與備份清理見本輪handoff；不改原17項 AC、mainline incomplete 或 usable_tag none。
+
+## T-0432 — Three-client generic HTTP settlement continuation
+
+Owner approved the bounded continuation after current-state review. [Fixed PC-1–PC-5, design and evidence](docs/tasks/T-0432-protocol-settlement.md) extend the delivered generic Chat-upstream observer to Messages/Responses clients and verify all three protocols through the headless journey. Preserve original17AC, prior SS-1–SS-6 and T-1102; CLI/provider-profile/OAuth and native non-Chat upstreams remain outside this slice. Mainline incomplete, usable_tag none; full#698 and#699–702 remain open. Documentation-first actual RED→GREEN, full locked Rust/fmt/Clippy, Python and the strict nine-stage journey passed. Independent review findings were reproduced and corrected; PR720 required CI/normal merge/remote readback passed; final ledger/backup/cleanup are recorded by this round’s handoff.
+
+## T-0432 — Claude Code provider settlement continuation
+
+Owner approved the existing Claude Code provider accounting continuation. [Fixed CS-1–CS-5 and design](docs/tasks/T-0432-claude-settlement.md) cover per-dispatch reservation, raw source usage, terminal/time, tool/user/session reuse, three client protocols and a headless fake-CLI journey. Local implementation, full313Rust/22groups, fmt/Clippy/build,35Python,20validator tests/45contracts7indexes and nine-stage Claude+genericHTTP journeys passed. Independent review found two actual REDs (filtered first-output timing and rawerror persistence); both corrected with GREEN evidence. PR729 requiredCI/normalmerge/remote source readback passed; subsequent ledger/backup/cleanup are recorded by finalhandoff; no real CLI/provider validation or mainline completion claim. Original17AC, T1102, prior SS/PC deliveries and remaining#698–702 scope are preserved.
 
 ## 本次里程碑：T-0377 Cursor 外部隔離
 
@@ -506,3 +582,85 @@ Goal: an operator can run the full gateway workflow with synthetic loopback upst
 Mainline incomplete; usable_tag none. Existing live acceptance and T-1102 remain open in issues#698–702. No real provider or account is exercised.
 
 Local evidence (2026-10-28): unchanged Rust baseline completed all nine journey stages. Final walkthrough creates17usage rows,11with exact5/3token counts and synthetic $2 estimates,6unknown; cost coverage stays partial. Twenty Python regressions include actual --serve/admin access/SIGTERM cleanup and negative terminal/cleanup/deadline cases. Full254Rusttests/21groups,fmt,Clippy,20validator tests and44contracts/7indexes passed. No Rust/Cargo changes or runtime bug claimed. Independent review found launcher cleanup exit0, failed-stream acceptance and missing total request deadline; preserved failing regressions now pass. Sandbox sccache/socket EPERM failures remain environment observations; approved execution passed without permission/configuration changes. Required CI/merge/readback and management delivery remain separate gates.
+
+## T-0432 Cursor streaming settlement continuation
+
+Owner approved the bounded text-only Cursor accounting continuation. [CU-1–CU-5 scope, design and validation](docs/tasks/T-0432-cursor-settlement.md) extend the existing forwarding path with durable raw usage/outcome/time and headless fake-runtime evidence. Local implementation and three-client fake-runtime validation passed; independent source/runtime evidence review passed; PR741 product CI/merge/readback passed; subsequent administrative closure is recorded by final handoff. Original17AC/T1102, prior slices and mainline incomplete/usable_tag none remain. No Docker or real CLI/provider/account use; actual version/cache relationships and AC04-tool/AC17-text scope remain unverified or undecided.
+
+Local source/runtime evidence: corrected actual baseline RED showed legacy status200 rows without attempt IDs or rawusage; integrated CU checks and final329Rusttests/22groups,fmt/Clippy/lockedbuild,57Python regressions,20validators/46contracts/7indexes passed. Corrected Cursor headless journey passed nine stages with17durableattempts,all17costunknown; prior Claude and genericHTTP journeys passed on finalbinary `db2c45c4351710733e3afb6a7b380ef835467464349560550862aa458efbd36a`. Cursor restart demonstrates preserved history and independent new processes, not Claude-style session reuse; pending recovery/storefaults are verified by dedicated integration/unit cases.
+
+Original failures remain: harness admin-envelope accessor (not productRED), corrected actualmissingattempt RED, worker sccache sandboxdenial followed byapprovedsamecommandPASS, initialCursorfixture reused a connection cooledby501 refusal and fallback omittedit; independentreview R1 led to isolated refusalconnections with regressionRED→GREEN andactualjourneyPASS. Diagnosticloopbackdenial and binarydigestrefusal dispatchednothing; oldHTTPscript rejected unsupported digestflag beforelaunch, corrected command passed with externaldigestcheck. No runtime cooldownpolicy/statusassertion or oldhelper protection was relaxed.
+
+Independent source/runtime/final-evidence review passed; PR741 product CI/merge/readback passed; ledger CI/merges/readbacks, backup and cleanup are recorded in finalhandoff. RealCursor version/cache relationships/account/plugins, full#698 and#699–702 remain unverified/open; no whole-product completion claim.
+
+Actual guarded helper `--serve` also passed the full journey, authenticated admin usage HTTP200, SIGTERM exit0, owned gateway reaping and removal of disposable data. First serve-checker attempt hit a text-buffer/readiness bug; corrected checker passed with no product change and original failure retained. PR741 required CI/merge/readback passed; later administrative gates are recorded in final handoff.
+
+## Cursor product delivery readback
+
+產品 [PR741](https://github.com/fallrising/newclear/pull/741) source `5779858af53658716d0008352157c521b47206ae`、merge `51d034f9e7a87265b282105cdc5582390b302c15` at 2026-10-29T05:33:30Z；329 Rust tests/22 groups、fmt/Clippy/locked build、57 Python、20 validator tests、46 contracts/7 indexes、Cursor及既有Claude/genericHTTP九階段旅程、獨立來源/執行審查通過。必要check/validate CI、正常合併與遠端內容/祖先/Desk-Task trailer回讀通過。
+
+保留實際baseline missing-attempt RED及其先行admin envelope測試錯誤、sccache/socket sandbox拒絕與核准重跑、binary digest拒絕、舊HTTP入口不支援digest旗標的argparse失敗。獨立review R1指出拒絕fixture冷卻共用連線，已以獨立拒絕連線修正，regression RED→GREEN；R2指出本機serve checker文字緩衝/readiness問題，改reader thread後實測通過，產品不變。worker報告格式錯誤均保留。另有一次shell缺少fail-stop，報告格式驗證失敗後仍繼續首次commit/push；立即暫停PR發布，修正報告、通過驗證，再以正常followup commit發布。沒有改寫歷史、弱化產品檢查或繞過CI；見commit-gate-incident.json。先前fixture401/啟動重試通過仍不代表#701已查明或修好。
+
+本份是產品merge時點快照。後續帳本發布、完整備份`t0432-cursor-settlement-20261029`（完整位置留在私人交接）與本輪工作樹清理由`.local/t0432-cursor-settlement/handoff.json`核實，不預先宣稱完成。新`local-demo.py`預設check、驗證source/binary digest；舊入口與舊digest不變。本輪完成即停止，不開新里程碑。
+
+## T-0432 existing named HTTP settlement continuation
+
+Owner approved existing SIWC/Grok Responses and OpenCode Chat streaming accounting across all three clients, existing tools and legal auth retries. [NH-1–NH-5, matrix, design and isolation](docs/tasks/T-0432-named-http-settlement.md) are fixed before implementation. Prior SS/PC/CS/CU delivery, original17AC, T1102 and whole-product incomplete/usable_tag none remain. Actual nine-path RED was corrected; named and all three prior offline journeys passed, including actual guarded serve/admin/cleanup. Independent source/runtime review and required CI passed; PR748 merged and remote content/ancestor/trailer readback passed. Ledger/backup/cleanup are recorded separately by final handoff. No real provider or credential use.
+
+## Named HTTP product-merge evidence
+
+產品 [PR748](https://github.com/fallrising/newclear/pull/748) source `667248f46d0a90a3d3d8849196f8f0df614d3e4e`、merge `af2321d68aca9c26e043c249f3bda16395ece016` at 2026-10-29T08:08:28Z；353 Rust tests/22 groups、fmt/Clippy/locked build、67 Python、20 validator tests、46 contracts/7 indexes、獨立來源/執行審查通過。必要 Pokercase CI、Project success contracts、Workflow static validation 全通過；正常 merge 後18檔內容、source/merge祖先與雙方Desk-Task trailer回讀一致。
+
+既有SIWC/Grok Responses與OpenCode Chat的三種客戶端串流現在每次實際推論前登記attempt；fallback/既有合法401重試保留相同request_id與不同attempt，refresh/discovery不列推論。原始Chat/Responses usage、終態與各attempt獨立時間入帳，缺值unknown、明確零保留；OAuth/訂閱費用不推算為已知帳單。借用Grok檔保持read-only，未變更token的401不重試；正式allowlist與retry限制不變。
+
+named HTTP九階段隔離旅程通過：41筆attempt（34 succeeded、5 failed、1 cancelled、1 timeout）、3次獨立fake discovery、0個非預期目的地，41筆cost全部null。涵蓋三provider×三client文字/既有工具兩輪、fallback/借用401、失敗/截斷/缺值/零/取消/stall、API/HTML/CSV及重啟保留歷史設定後新請求。真正refresh由test-only transport透過原有鎖/重讀/rotation/persistence測試，不冒充binary旅程曾呼叫refresh。named preheaders取消/timeout、body drop、conversion failure、儲存故障與pending一次恢復另有focused/unit/integration證據。既有genericHTTP/Claude/Cursor各九階段旅程回歸通過；generic fixture估價不是provider帳單或開發費用。
+
+新保留入口預設check，固定六個來源及獨立binary digest；實際--serve也完成旅程、authenticated admin200、SIGTERM exit0、owned child與臨時資料清理。Binary SHA256 `b03228008e0cc4668bb0aea499bdbb74ad7ccf81892fdffb0521406f836ab4fb`。舊Cursor入口與digest原文保留。這是agent離線實測，沒有宣稱owner親自跑過。
+
+保留九組baseline missing-attempt RED、converted CR-only提前觀察RED、converter failure回饋缺漏RED，以及獨立review R1的BOM消費邊界RED；各以最小修正取得GREEN，BOM另驗兩種實際轉換模式。初次socket/fetch/index sandbox拒絕由平台核准精確操作解決，沒有chmod或放寬正式限制。claim validator曾用錯cwd，fail-stop在提交前停止；讀取錯路徑不冒充產品失敗。本機未找到既有actionlint工具，未宣稱本機通過，必要remote workflow static validation已通過。所有提交/發布gate使用fail-stop；未用重試通過宣稱#701根因已知。
+
+完整#698仍需剩餘路徑完整覆蓋，Antigravity保留#702隔離工作；buffered clients維持前輪範圍。#699完整token覆蓋/價格來源精度/歷史語義、#700具名真client/version/provider與AC01/04/08、SIWC namespace工具實際相容性，以及AC04工具對AC17 Cursor text-only範圍決策仍未完成。#701既有啟動/auth間歇問題根因未知；本輪不處理CLI首次輸出前deadline或其他hardening。mainline incomplete、usable_tag none、desk in_progress；不自動關閉#698–702，不把測試數量當整體完成。
+
+只使用fake HTTP/CLI/runtime、合成憑證/借用檔與臨時DB；沒有真provider/登入/credential/私人DB/Docker、新依賴、擴權、release/deploy。原17AC、T1102、Cargo、已交付SS/PC/CS/CU及不相關tracked plans保留。全輪未完整量測工具/provider/token/費用/active-wait均unknown/null，局部command時間和fixture41次推論不代表開發模型/provider總用量。
+
+本份為產品merge時點快照。NH-5全流程的後續帳本發布、完整備份`t0432-named-http-settlement-20261029`逐檔核對及本輪工作樹清理，以私人`t0432-named-http-settlement/handoff.json`最終事實核實，不預先宣稱完成；完整操作位置留在私人交接。完成此有界切片即停止，不啟動下一里程碑。
+
+最終artifact核對另從乾淨已提交source做locked build，仍得到同一b032binary，四條旅程及serve再次通過。共享target曾呈現另一digest；兩條追加旅程因root傳入該digest而在fixture啟動前被guard拒絕，改用實測locked-build digest後通過，原失敗保留、保護不變；不把這當#701根因證據。
+
+
+## T-0434 — Antigravity offline HTTP isolation
+
+Owner authorized #702 as an independent isolation slice. [Fixed AI-1–AI-5, source matrix and design](docs/tasks/T-0434-antigravity-isolation.md) establish test-only controlled inference/refresh/discovery before actual HTTP acceptance. Documentation was frozen before implementation. Independent source gate and six transport proofs passed before seven-stage real gateway HTTP acceptance:37inference/3discovery/7refresh/0unexpected destinations,36legacy usage rows, all owned-resource cleanup passed. Full360Rust/22groups,74Python,20validator tests,46contracts/7indexes, fmt/Clippy/locked build and all four prior nine-stage journeys passed locally. Independent product review and required CI passed; PR757 merged and remote content/ancestor/trailer readback passed. Ledger/backup/cleanup are recorded separately by final handoff.
+
+Existing stream passthrough still has no native conversion or durable usage observer; malformedHTTP200→400 with no usage row remains a measured gap. Legacy buffered configured-rate estimates are not subscription bills. No provider capability or live validation is added. Original17AC/T1102/Cargo/prior deliveries remain; mainline incomplete, usable_tag none, desk in_progress. [Headless offline entry](docs/ANTIGRAVITY-OFFLINE.md) uses an independently preserved test executable; it does not add a production login/demo option or relax the OAuth allowlist.
+
+Append-only owner evidence: after the previous handoff/backup, owner personally reran the namedHTTP entry; nine stages and cleanup passed with41inference/3discovery/0unexpected destinations and original b032binary digest. ReportSHA256 `3a3ef04c6bb391fa2d7acafb8488a2bdaac5f42d949494c132d8574c9c66673d`. Earlier owner-not-run statements describe their original snapshot; the old backup did not contain this later report. This establishes owner offline rerun only, not whole-product/live-provider acceptance. Historical T-0428 official-endpoint synthetic401 is retained and not retried.
+
+## Antigravity HTTP product-merge evidence
+
+產品 [PR757](https://github.com/fallrising/newclear/pull/757) source `7d7382bc79854dfbd8786a22c1b7a67c9fbfc2d9`、normal merge `3d2b125afe250b35f1ff4ff1bc0a7bd47eac5255` at 2026-10-29T12:46:39Z；三項必要CI、獨立來源/執行/文件審查通過，17檔遠端內容、source/merge祖先及雙方Desk-Task trailer回讀一致。
+
+本輪只建立既有Antigravity HTTP離線隔離與驗收基礎。測試編譯專用closed transport攔截固定inference/discovery/Google refresh URL，使用不轉送loopback proxy；六項proof通過後才執行實際gateway HTTP。Production OAuth allowlist、URL、權限、登入及依賴不變。Proof的10次fake請求（7允許/3拒絕）、四種redirect不跟隨、0sentinel連線及清理通過。
+
+七階段實際HTTP觀測37inference/3discovery/7refresh/0非預期目的地，另計37client inference與169local admin請求；36legacy usage rows。15個buffered案例涵蓋三client轉換及wrapped/unwrapped/缺值/部分/零/無效/overflow/缺價，SQLite/adminJSON/CSV一致。Discovery快取、主動refresh與一次401重試、失敗/fallback、三client opaque bytes、取消/stall及重啟重用通過。5個stream owner釋放、0active，兩server join、listener rebind、temporary data移除。
+
+360Rust tests/22groups、74Python、20validator tests、46contracts/7indexes、fmt/Clippy/locked build全通過；genericHTTP/Claude/Cursor/namedHTTP各九階段與cleanup回歸通過。乾淨已提交source的Cargo artifact回讀及40source hashes一致，保留test binary SHA256 `61645fcfdcaa361ca9bf959c7584b0218c7e2b083713b134fcf9dfad4d3f7458`、normal binary `af057a4c1337dfe8da486d731db2ad5fcaefe3bb739b33838736d1ac8115a88a`。新入口固定保留script/test binary後先proof再HTTP，不依賴可變共享target。
+
+T-0428合成請求意外到官方端點得到401的歷史保留：未讀真credential/私人DB、未觀察成功推論，但不是零外連，也未重試真provider。新增owner證據為前輪namedHTTP入口親自重跑九階段/cleanup成功、41inference/3discovery/0非預期與原b032digest；report SHA256 `3a3ef04c6bb391fa2d7acafb8488a2bdaac5f42d949494c132d8574c9c66673d`。它晚於舊handoff/backup；舊未親跑快照不覆寫，舊備份不假稱含此報告，亦不宣稱owner已跑新Antigravity入口。
+
+Antigravity仍是generateContent的opaque串流，無原生stream轉換/tools/images/observer/durable terminal attempt；malformedHTTP200→400實測沒有usage row，保留為#698剩餘記帳缺口。本輪legacy11/7合成rate估價0.000043不是訂閱帳單。完整#698其他未覆蓋路徑、#699token/價格/歷史語義、#700真client/version/provider與AC01/04/08及SIWC namespace工具、AC04工具對AC17 Cursor text-only決策仍未完成。#701啟動/auth間歇根因未知，不以green重跑推論已修。#702依完整隔離證據判斷，#698–702不自動關閉。mainline incomplete、usable_tag none、desk in_progress保持。
+
+只用合成credential/fixture與隔離臨時DB，沒有真provider/登入/credential/私人DB/Docker、新依賴、擴權、release/deploy。排除admin refresh/refresh-all/probe/host import；這是列舉應用路徑的隔離，不是全機零egress。原17AC/T1102/Cargo/既有交付及不相關tracked plan保留。全輪工具/agent/provider/model/retry/token/費用/execution-active-wait均unknown/null；局部command時間與fixture次數不替代整輪量測。
+
+此段是產品merge時點快照；AI-5後續帳本發布、完整備份`t0434-antigravity-isolation-20261029`逐檔核對與本輪工作樹清理，依私人`t0434-antigravity-isolation/handoff.json`最終回讀事實核實，不預先宣稱完成。完整操作位置留私人交接。完成本輪即停止，不啟動下一里程碑。
+
+## T-0432 — Antigravity existing HTTP settlement
+
+Owner authorized the bounded continuation after T0434 isolation. [Fixed AS-1–AS-5 and design](docs/tasks/T-0432-antigravity-settlement.md) cover per-dispatch durable accounting, buffered raw usage and explicit terminal evidence, opaque unknown streaming, failure/cancel/timeout/restart and management consistency. ClaimPR290 merged before implementation. Native stream conversion/tools/images and other remaining work stay outside. Original17AC/T1102 and previous deliveries unchanged; mainline incomplete, usable_tag none. Local370Rust/81Python/20validator tests,47contracts/8indexes,fmt/Clippy/locked build and all four prior nine-stage journeys passed. Seven-stage actualHTTP evidence:45inference/2discovery/4refresh/0unexpected,45durableattempts, SQLite/adminJSON/CSV一致及完整清理。Malformed200→400漏記帳有實際RED→GREEN；opaque EOF仍unknown、無原生串流轉換。完整證據、歷史失敗、較晚owner隔離重跑及剩餘路徑見本切片文件；獨立審查與發布/帳本/備份清理另按交付門檻核實。
+
+
+## T-0435 — Existing token and timing coverage
+
+Owner authorized this bounded #699 slice; claimPR292 merged before implementation. [MT-1–MT-5, source matrix, API contract and reproduction](docs/tasks/T-0435-measurement-coverage.md) distinguish no data, unknown, partial, explicit zero and complete saved fields, independently from whole usage status. Owner approved opt-in `schema=2`; defaultv1 retains numeric compatibility with an explicit notice. Web uses canonical subtotals/coverage and separate known-only timing means; TUI missing legacy latency is unknown. Existing raw eventJSON/CSV and cost-only doctor/footer semantics remain.
+
+Actual native and adminHTTP RED preceded corrections. Local378Rust/22groups,96Python,20repository-validator tests,47contracts/8indexes,fmt/Clippy/lockedbuild passed; seven-scenario adminHTTP/SQLite/HTML/CSV/doctor reconciliation and unchanged-history reopen passed, with0inference/refresh/discovery. Four prior9stage journeys and Antigravity6proof+7HTTP settlement regression passed. Independent review and requiredCI/normalmerge/readback/ledger/backup/cleanup remain delivery gates. T0428/T0429, original17AC, T1102 and previous deliveries remain unchanged; mainline incomplete, usable_tag none. This does not close #699 or #698–702, resolve AC04/AC17, or establish realclient/version/provider acceptance.

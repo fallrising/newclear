@@ -1,17 +1,26 @@
 # Codebox
 
+> **2026-11-01 固定審查候選**：同一 Web 可核對並下載既有 writer 的不可變成果包，包含原任務、diff、檢查與固定 hash；兩個真瀏覽器回讀一致。[實測與限制](docs/acceptance/M3-fixed-candidate.md)。實際跨廠商 reviewer 尚待 T-0449 後端契約批准，FN05 尚未完成。
+
+> **2026-11-01 AC05 最小持久化**：提交意圖與唯一 AP run／成果引用已持久保存；真 Rust／AP 重啟及新瀏覽器回讀、unknown 零自動重送通過獨立驗收。[證據與限制](docs/acceptance/M3-durable-intents.md)。unknown 現有明示唯讀對帳入口；[原安裝已恢復並通過自動 journey](docs/acceptance/M3-reconciliation.md)。服務已停止，本人操作確認待辦，完整 M3／FN07 尚未完成。
+
+> **2026-11-01 M2**：同一 Web 的兩家正式 agent 已有真實修復／diff 證據；兩個同時工作區的邊界、取消互不影響與清理已實跑通過，獨立驗收已接受，PR906／914 已合併並完成遠端回讀。[證據與限制](docs/acceptance/M2-two-vendors.md)。驗收服務已停止，目前沒有常駐操作網址。
+
+> **2026-10-31 M1**：真 Chromium → Rust → Agent Platform → 隔離 VM → 官方 Claude Code 已完成一次修復，頁面顯示進度、檢查通過並下載精確 diff。[實測證據與限制](docs/acceptance/M1-isolated.md)、[私人操作入口](docs/isolated-operator.md)。目前僅單一已登錄專案／agent，尚非完整廠商中立 MVP。
+
 > 主線、驗收條件、剩餘缺口與可用版本：[SUCCESS.md](SUCCESS.md)。
 
 
-> **Portfolio doc tier: C (dormant)** — Preserved; not an active investment. **Dormant since:** 2026-09-04. Restore only with an explicit owner decision in [PORTFOLIO.md](../../PORTFOLIO.md). Policy: [docs/portfolio-doc-tiers.md](../../docs/portfolio-doc-tiers.md).
+> **Portfolio doc tier: A (active, bounded P0)** — Owner resumed the private single-operator browser-to-Cloud flow on 2026-10-30. [Quickstart and current gates](docs/quickstart.md); [PORTFOLIO](../../PORTFOLIO.md). Persistence and host runtimes remain separate milestones.
 
 
 [![Fanzloud CI](https://github.com/fallrising/newclear/actions/workflows/fanzloud-ci.yml/badge.svg)](https://github.com/fallrising/newclear/actions/workflows/fanzloud-ci.yml)
 
-Codebox is a private Codex Cloud task control plane written in Rust. Its longer-term design
-adds provider-neutral agents and isolated per-session sandboxes; those runtimes are not implemented.
+Fanzloud is a private Rust Web entry for isolated coding tasks. Explicit `isolated` mode
+uses Agent Platform as its sole execution authority. The original Codex Cloud P0 mode
+remains a separately versioned historical route; its live Cloud gate is unverified.
 
-The currently implemented milestone is the accepted **P0 personal BYOS** slice: a private,
+The earlier accepted **P0 personal BYOS** slice is: a private,
 single-operator web control layer for the operator's own ChatGPT/Codex subscription. Codebox uses a
 pinned official Codex CLI to submit work to an administrator-configured Codex Cloud environment,
 stream normalized task state, and display the resulting diff. Repository-controlled work stays in
@@ -25,9 +34,9 @@ the provider-managed environment and never runs beside the local credential dire
 ## Current status
 
 The T001–T007 personal-BYOS path and T010/T020 domain foundations have historical acceptance.
-The deterministic Linux end-to-end test covers the browser, HTTP and WebSocket APIs, session
-runtime, trusted Codex runner, and a fake provider process. The credential-gated live operator
-smoke has not been run.
+The deterministic Linux end-to-end test covers a wire-equivalent browser flow, HTTP and WebSocket APIs, session
+runtime, trusted Codex runner, and a fake provider process; it is not a real-browser run. [T008](docs/acceptance/T008.acceptance.md) now proves actual Chromium → production Rust →
+T007 fake executable → page final diff. The credential-gated live operator smoke has not been run.
 
 T030A atomic SQLite append and T030B bounded ordered replay have been recovered locally from
 archived Fanzloud commit `0a47dcd`. Their upstream acceptance reports are retained as historical
@@ -212,3 +221,5 @@ affected task stops until the design is repaired.
 P0 does not provide public or multi-user SaaS, arbitrary repository selection, local repository
 execution, interactive tool approval, automatic patch application or Git push, private Git
 credential management, provider-task cancellation, or crash-durable browser/session replay.
+
+T-0449 已批准跨廠商唯讀審查與一次明示返工；[契約](docs/specs/SPEC-M3-readonly-review.md)／[驗收狀態](docs/acceptance/M3-readonly-review.md)。實際審查驗收仍待本輪證據，未宣稱完整M3。

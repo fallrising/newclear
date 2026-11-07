@@ -1,0 +1,120 @@
+{
+  "id": "combat-stamina-budget",
+  "system": "combat",
+  "edition": 1,
+  "name": {
+    "zh": "攻防共用耐力",
+    "en": "Shared attack–defense stamina"
+  },
+  "summary": {
+    "zh": "每多打一刀，都在花掉下一次闪避的余量。",
+    "en": "Every extra attack spends part of your escape budget."
+  },
+  "rules": {
+    "zh": "攻击、翻滚和受击格挡消耗同一资源；停止消耗后恢复。玩家既要打出伤害，也要为敌人的下一轮反击留下行动额度，耐力条直接暴露透支风险。",
+    "en": "Attacks, rolls and blocked hits draw from one regenerating pool. Deal damage while reserving enough for the next enemy response; the stamina bar makes overcommitment visible."
+  },
+  "loop": [
+    {
+      "zh": "观察敌人收招",
+      "en": "Read the recovery window"
+    },
+    {
+      "zh": "分配攻击与防守余量",
+      "en": "Budget offense and escape"
+    },
+    {
+      "zh": "出手后撤或格挡",
+      "en": "Attack, then disengage or guard"
+    },
+    {
+      "zh": "恢复后再进场",
+      "en": "Recover and re-engage"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "追击残血还是保留翻滚？击杀收益与被反打风险直接冲突。",
+      "en": "Finish a weakened enemy or save a roll? A quick kill competes with surviving the reply."
+    },
+    {
+      "zh": "举盾安全但恢复较慢时，何时放下盾成为主动决策。",
+      "en": "When raised guarding slows recovery, lowering the shield becomes an active choice."
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "恢复延迟",
+        "en": "Recovery delay"
+      },
+      "effect": {
+        "zh": "延迟越长，连续贪刀后的空窗越危险。",
+        "en": "Longer delays create a more vulnerable pause after overattacking."
+      }
+    },
+    {
+      "name": {
+        "zh": "动作成本差",
+        "en": "Cost differences"
+      },
+      "effect": {
+        "zh": "重击成本高，玩家更重视命中把握和敌人的硬直。",
+        "en": "Expensive heavy attacks make certainty and enemy recovery more valuable."
+      }
+    }
+  ],
+  "tags": [
+    "timing",
+    "risk",
+    "planning"
+  ],
+  "related": [
+    "combat-cover-flanking",
+    "combat-destructible-cover",
+    "combat-forced-movement",
+    "combat-friendly-fire"
+  ],
+  "contrast": {
+    "zh": "两者都限制连续进攻；《艾尔登法环》明确放宽非战斗移动成本，降低赶路负担。",
+    "en": "Both constrain sustained aggression; Elden Ring explicitly relaxes the cost outside combat to reduce travel friction."
+  },
+  "combination": {
+    "zh": "设计提案：把重型采矿工具也接入耐力预算，遭遇敌人时可选择放弃挖掘以保留防御余量。",
+    "en": "Design proposal: let heavy mining tools spend combat stamina, making a surprise encounter a choice between one last extraction and a safe defense."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "你有 60 点耐力，攻击花 20，翻滚花 25。",
+      "en": "You have 60 stamina; an attack costs 20 and a roll costs 25."
+    },
+    "action": {
+      "zh": "敌人刚收招，你砍一刀后停手，留下 40 点。",
+      "en": "After the enemy finishes a swing, attack once and keep 40 stamina."
+    },
+    "result": {
+      "zh": "敌人反击时，你仍能翻滚；如果砍两刀就只剩 20。",
+      "en": "You can roll away from its reply; two attacks would have left only 20."
+    },
+    "next": {
+      "zh": "退开恢复，再判断下次空当能安全打几刀。",
+      "en": "Back off to recover, then judge how many hits the next opening allows."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "做一个固定节奏敌人、攻击和翻滚两个按钮，以及会恢复的耐力条。",
+      "en": "Build one enemy with a fixed rhythm, attack and roll buttons, and a regenerating stamina bar."
+    },
+    "pitfall": {
+      "zh": "先别加武器库；动作成本与敌人节奏没配好，更多武器只会放大问题。",
+      "en": "Avoid a weapon catalogue until action costs work with the enemy rhythm."
+    },
+    "test": {
+      "zh": "观察玩家是否会在耐力没空时主动停手，并能说出保留耐力的原因。",
+      "en": "Watch whether players stop before exhaustion and can explain what they are saving stamina for."
+    }
+  }
+}

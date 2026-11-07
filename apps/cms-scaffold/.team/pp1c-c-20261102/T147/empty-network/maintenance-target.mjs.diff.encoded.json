@@ -1,0 +1,8 @@
+{
+  "version": 1,
+  "original": "T147/empty-network/maintenance-target.mjs.diff",
+  "sha256": "8853dd9a206c21abfcc07a44d7519fa6f5e6610320a086c9c4c970fec443c884",
+  "byteSize": "1153",
+  "encoding": "utf-8",
+  "text": "--- maintenance-target.mjs.before\n+++ maintenance-target.mjs.after\n@@ -113,7 +113,7 @@\n     for (const c of all.filter(c => !allowed.includes(c))) ensure(!Object.entries(c.NetworkSettings.Networks).some(([n, e]) => networkNames.includes(n) || networksOwnedId(e.NetworkID)) && !c.Mounts.some(m => volumeNames.includes(m.Name)));\n     const networks = await list(['network', 'inspect', ...networkNames]); ensure(networks.length === 2 && new Set(networks.map(n => n.Name)).size === 2 && new Set(networks.map(n => n.Id)).size === 2);\n     const networkMap = new Map();\n-    function networksOwnedId(id) { return owned.some(c => Object.values(c.NetworkSettings.Networks).some(e => e.NetworkID === id)); }\n+    function networksOwnedId(id) { return hex(id, 64) && owned.some(c => Object.values(c.NetworkSettings.Networks).some(e => e.NetworkID === id)); }\n     for (const n of networks) {\n       const name = ['web', 'data'].find(k => n.Name === `${project}_${k}`);\n       ensure(name && hex(n.Id, 64) && n.Internal === true && n.Driver === 'bridge' && n.Labels?.['com.docker.compose.project'] === project && n.Labels['com.docker.compose.network'] === name);\n"
+}

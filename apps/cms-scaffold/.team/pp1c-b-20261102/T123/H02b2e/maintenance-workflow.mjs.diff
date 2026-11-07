@@ -1,0 +1,11 @@
+--- maintenance-workflow.mjs.before
++++ maintenance-workflow.mjs
+@@ -207,7 +207,7 @@
+   for(const k of ['DOCKER_HOST','DOCKER_CONTEXT','DOCKER_TLS_VERIFY','DOCKER_CERT_PATH'])delete env[k];
+   let result;try{result=await(deps.command??execute)('docker',['--host','unix:///var/run/docker.sock','inspect',h.fullContainerId],
+     {env,shell:false,timeout:30000,maxBuffer:1048576});}catch(error){result=error;}
+-  ensure(result.code===1&&[`Error: No such object: ${h.fullContainerId}`,`Error response from daemon: No such container: ${h.fullContainerId}`].includes(String(result.stderr??'').trim()));
++  ensure(result.code===1&&[`Error: No such object: ${h.fullContainerId}`,`error: no such object: ${h.fullContainerId}`,`Error response from daemon: No such container: ${h.fullContainerId}`].includes(String(result.stderr??'').trim()));
+   await updatePendingWorkflow(c.record,{helper:null},deps);c.helper=null;c.reservation=null;
+   await assertWorkflow(token,{},deps);
+ }

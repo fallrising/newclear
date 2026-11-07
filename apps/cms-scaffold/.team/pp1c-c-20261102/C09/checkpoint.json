@@ -1,0 +1,10 @@
+{
+  "handwrittenChangedLines": 132,
+  "files": {
+    "scripts/ops/local-recovery.fixture.mjs": "f1a04eccea5a348bdd3841abf3d01f5b4ea771e23c6ab7b245f1aeb48814a914",
+    "scripts/ops/local-recovery-verify.mjs": "4f34b0957e31ecd89f2292d11ee62843283231a4549aeb63a795e2390f9c639d",
+    "scripts/ops/local-recovery-verify.test.mjs": "fae8b240787b5e34234cdad5d5c8760b13600c5f8601dbc5d60e50f6fc4a6d8d"
+  },
+  "observedAt": "2026-11-02T14:31:27.039876+00:00",
+  "status": "named behavior Red; initial sandbox and fixture setup failures retained separately"
+}

@@ -1,0 +1,192 @@
+{
+  "repair": {
+    "findings": [],
+    "metrics": {
+      "actions_completed": 5,
+      "actions_skipped": 0,
+      "phase_durations": [
+        {
+          "duration_ms": 39,
+          "phase": "index_rebuild"
+        },
+        {
+          "duration_ms": 2,
+          "phase": "finalize"
+        },
+        {
+          "duration_ms": 3,
+          "phase": "verify"
+        }
+      ],
+      "total_duration_ms": 45
+    },
+    "phases": [
+      {
+        "actions": [
+          {
+            "action": "rebuild_vec_index",
+            "detail": "scheduled vector index rebuild",
+            "status": "executed"
+          },
+          {
+            "action": "recompute_toc",
+            "detail": "indexes rebuilt",
+            "status": "executed"
+          }
+        ],
+        "duration_ms": 39,
+        "phase": "index_rebuild",
+        "status": "executed"
+      },
+      {
+        "actions": [
+          {
+            "action": "recompute_toc",
+            "detail": "toc + commit footer rewritten",
+            "status": "executed"
+          },
+          {
+            "action": "update_header",
+            "detail": "header rewritten",
+            "status": "executed"
+          }
+        ],
+        "duration_ms": 2,
+        "phase": "finalize",
+        "status": "executed"
+      },
+      {
+        "actions": [
+          {
+            "action": "deep_verify",
+            "detail": "deep verification passed",
+            "status": "executed"
+          }
+        ],
+        "duration_ms": 3,
+        "phase": "verify",
+        "status": "executed"
+      }
+    ],
+    "plan": {
+      "file_path": "work/frame-repair-001/probe.mv2",
+      "findings": [],
+      "options": {
+        "dry_run": false,
+        "quiet": true,
+        "rebuild_lex_index": false,
+        "rebuild_time_index": false,
+        "rebuild_vec_index": true,
+        "vacuum": false
+      },
+      "phases": [
+        {
+          "actions": [
+            {
+              "action": "rebuild_vec_index",
+              "detail": {
+                "dimension": 512,
+                "expected_vectors": 6,
+                "type": "vec_index"
+              },
+              "note": "rebuild vec index",
+              "reasons": [
+                "vec_index_missing"
+              ],
+              "required": true
+            }
+          ],
+          "phase": "index_rebuild"
+        },
+        {
+          "actions": [
+            {
+              "action": "recompute_toc",
+              "detail": null,
+              "note": "persist rebuilt manifests",
+              "reasons": [],
+              "required": true
+            },
+            {
+              "action": "update_header",
+              "detail": null,
+              "note": "update header pointer",
+              "reasons": [],
+              "required": true
+            }
+          ],
+          "phase": "finalize"
+        },
+        {
+          "actions": [
+            {
+              "action": "deep_verify",
+              "detail": null,
+              "note": "run deep verify",
+              "reasons": [],
+              "required": true
+            }
+          ],
+          "phase": "verify"
+        }
+      ],
+      "version": 1
+    },
+    "status": "healed",
+    "verification": {
+      "checks": [
+        {
+          "details": null,
+          "name": "TimeIndexEntryCount",
+          "status": "passed"
+        },
+        {
+          "details": null,
+          "name": "TimeIndexSortOrder",
+          "status": "passed"
+        },
+        {
+          "details": null,
+          "name": "LexIndexDecode",
+          "status": "passed"
+        },
+        {
+          "details": null,
+          "name": "VecIndexDecode",
+          "status": "passed"
+        },
+        {
+          "details": null,
+          "name": "WalPendingRecords",
+          "status": "passed"
+        },
+        {
+          "details": null,
+          "name": "FrameCountConsistency",
+          "status": "passed"
+        }
+      ],
+      "file_path": "work/frame-repair-001/probe.mv2",
+      "overall_status": "passed"
+    }
+  },
+  "hit_count": 0,
+  "hits": [],
+  "network": {
+    "mechanism": "Linux libseccomp",
+    "denied_syscalls": [
+      "socket",
+      "socketpair",
+      "connect",
+      "sendto",
+      "sendmsg",
+      "sendmmsg"
+    ],
+    "probes": {
+      "ipv4": "EPERM",
+      "ipv6": "EPERM"
+    },
+    "installed_before_sdk_import": true,
+    "inherited_by_subprocesses": true
+  }
+}

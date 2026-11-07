@@ -475,11 +475,16 @@ pub struct ResponsesToChatStream {
     args_streamed: HashSet<String>,
     next_tool: usize,
     finished: bool,
+    failed: bool,
 }
 
 impl ResponsesToChatStream {
     pub(crate) fn is_done(&self) -> bool {
         self.finished
+    }
+
+    pub(crate) fn is_failed(&self) -> bool {
+        self.failed
     }
 
     pub fn new(model: impl Into<String>) -> Self {
@@ -494,6 +499,7 @@ impl ResponsesToChatStream {
             args_streamed: HashSet::new(),
             next_tool: 0,
             finished: false,
+            failed: false,
         }
     }
 
@@ -653,6 +659,7 @@ impl ResponsesToChatStream {
                 out.extend(self.finish(ev.get("response")));
             }
             "response.failed" | "error" => {
+                self.failed = true;
                 let err = ev
                     .pointer("/response/error")
                     .or_else(|| ev.get("error"))
@@ -943,6 +950,7 @@ pub struct ChatToResponsesStream {
     seq: u64,
     started: bool,
     done: bool,
+    failed: bool,
     /// Output items in order (finished ones complete).
     output: Vec<Value>,
     /// Index into `output` of the open text item, and its text so far.
@@ -954,6 +962,9 @@ pub struct ChatToResponsesStream {
 }
 
 impl ChatToResponsesStream {
+    pub(crate) fn is_failed(&self) -> bool {
+        self.failed
+    }
     pub(crate) fn is_done(&self) -> bool {
         self.done
     }
@@ -967,6 +978,7 @@ impl ChatToResponsesStream {
             seq: 0,
             started: false,
             done: false,
+            failed: false,
             output: Vec::new(),
             text: None,
             tools: HashMap::new(),
@@ -1085,6 +1097,7 @@ impl ChatToResponsesStream {
             r["error"] = err.clone();
             out.push(self.ev("response.failed", json!({"response": r})));
             self.done = true;
+            self.failed = true;
             return out;
         }
         if !self.started {

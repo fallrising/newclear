@@ -1,0 +1,120 @@
+{
+  "id": "exploration-grapple-swing",
+  "system": "movement",
+  "edition": 1,
+  "name": {
+    "zh": "钩索摆荡与放手时机",
+    "en": "Grapple swings and release timing"
+  },
+  "summary": {
+    "zh": "选锚点、积累速度、适时放手，把空间变成运动路线。",
+    "en": "Choose an anchor, build speed and release into a new route."
+  },
+  "rules": {
+    "zh": "向可连接表面发射钩索，利用绳长和重力摆荡，再在合适时机脱离。目标不是只到达锚点，而是借由锚点获得位置和速度；落点与下个连接点共同决定最佳放手时机。",
+    "en": "Attach to an eligible surface, swing under rope constraints and gravity, then release. The goal is useful position and speed rather than merely reaching the anchor; landing and the next anchor determine release timing."
+  },
+  "loop": [
+    {
+      "zh": "选取锚点",
+      "en": "Choose an anchor"
+    },
+    {
+      "zh": "连接并形成摆弧",
+      "en": "Attach and enter the arc"
+    },
+    {
+      "zh": "调整方向与速度",
+      "en": "Steer and build speed"
+    },
+    {
+      "zh": "放手衔接下一动作",
+      "en": "Release into the next action"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "近处锚点可靠，远处锚点可能带来更高速度。",
+      "en": "A nearby anchor is reliable; a distant one may generate more speed."
+    },
+    {
+      "zh": "晚放手能获得高度，早放手可能保留更好的前进方向。",
+      "en": "A later release may gain height; an earlier one may preserve a better forward trajectory."
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "可挂接范围",
+        "en": "Anchor eligibility"
+      },
+      "effect": {
+        "zh": "任意表面更自由，指定挂点更容易控制关卡节奏。",
+        "en": "Broad eligibility grants freedom; authored anchors tightly control pacing."
+      }
+    },
+    {
+      "name": {
+        "zh": "动量保留",
+        "en": "Momentum retention"
+      },
+      "effect": {
+        "zh": "保留更多速度鼓励高手连续摆荡，强制减速则方便落点控制。",
+        "en": "Preserved momentum rewards chaining; forced slowdown simplifies landing."
+      }
+    }
+  ],
+  "tags": [
+    "dexterity",
+    "spatial",
+    "timing"
+  ],
+  "related": [
+    "exploration-wall-jump",
+    "movement-low-slide",
+    "combat-invulnerable-dodge",
+    "exploration-air-action-refill"
+  ],
+  "contrast": {
+    "zh": "《泰坦陨落2》把钩索放进高速竞技移动；《消逝的光芒2》将其连接到开放城市中的持续跑酷路线。",
+    "en": "Titanfall 2 places grappling inside fast competitive movement; Dying Light 2 connects it to extended parkour routes through an open city."
+  },
+  "combination": {
+    "zh": "设计提案：玩家先搭建少量永久锚点，再进行限时运输；前期选址直接决定后期摆荡路线。",
+    "en": "Design proposal: players install a few permanent anchors before timed deliveries, making early construction determine later swing routes."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "峡谷对面有平台，中间上方有一个可连接的锚点。",
+      "en": "A platform lies across a ravine, with an anchor above the gap."
+    },
+    "action": {
+      "zh": "你挂上锚点摆向前方，在速度方向指向平台时松开。",
+      "en": "Attach to the anchor, swing forward, and release when your velocity points toward the platform."
+    },
+    "result": {
+      "zh": "角色带着速度飞出；松手过早或过晚都会改变落点。",
+      "en": "Your character carries momentum into flight; releasing early or late changes the landing."
+    },
+    "next": {
+      "zh": "落稳后寻找下一个锚点，再决定需要的高度和速度。",
+      "en": "After landing, find the next anchor and decide the height and speed needed."
+    }
+  },
+  "prototype": {
+    "scope": "large",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "先做二维单绳、固定锚点和一个落点目标，屏幕显示预测轨迹辅助调试。",
+      "en": "Start with a 2D rope, fixed anchor, and landing target, with a predicted arc for tuning."
+    },
+    "pitfall": {
+      "zh": "绳长、碰撞、镜头与速度互相影响；动态锚点和绳索绕障会额外增加难度。",
+      "en": "Rope length, collisions, camera, and speed interact; moving anchors and rope wrapping add further complexity."
+    },
+    "test": {
+      "zh": "观察玩家能否通过调整松手时机稳定落地，并能判断失误方向。",
+      "en": "Check whether release timing produces repeatable landings and understandable misses."
+    }
+  }
+}

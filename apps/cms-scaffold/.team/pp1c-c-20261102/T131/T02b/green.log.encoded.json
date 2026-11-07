@@ -1,0 +1,8 @@
+{
+  "version": 1,
+  "original": "T131/T02b/green.log",
+  "sha256": "6929133832c5a51704c5955de525009face28aaa06558109a2ae31fbcbd0dfb6",
+  "byteSize": "1338",
+  "encoding": "utf-8",
+  "text": "✖ T131_T02_factory_creates_PG_first_and_only_after_blank_creates_stopped_services (301.172589ms)\nℹ tests 1\nℹ suites 0\nℹ pass 0\nℹ fail 1\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 372.362126\n\n✖ failing tests:\n\ntest at scripts/local/maintenance-workflow.test.mjs:699:1\n✖ T131_T02_factory_creates_PG_first_and_only_after_blank_creates_stopped_services (301.172589ms)\n  Error: PP1_LOCAL_TARGET_EXISTS\n      at fail (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-c-target-20261102/apps/cms-scaffold/scripts/local/prepare.mjs:10:30)\n      at prepareInternal (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-c-target-20261102/apps/cms-scaffold/scripts/local/prepare.mjs:105:54)\n      at async prepareRestore (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-c-target-20261102/apps/cms-scaffold/scripts/local/prepare.mjs:176:17)\n      at async createRestoreTarget (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-c-target-20261102/apps/cms-scaffold/scripts/local/restore-target.mjs:34:5)\n      at async TestContext.<anonymous> (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-c-target-20261102/apps/cms-scaffold/scripts/local/maintenance-workflow.test.mjs:701:17)\n      at async Test.run (node:internal/test_runner/test:1332:7)\n      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:385:3)\n"
+}

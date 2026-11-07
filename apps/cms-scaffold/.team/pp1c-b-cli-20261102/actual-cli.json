@@ -1,0 +1,44 @@
+{
+  "startedAt": "2026-11-02T15:56:32.571047+00:00",
+  "runId": "bfe98fc8cd8d474880c9f92f1ce6367c",
+  "operationId": "612c5a44-a718-41c8-9a23-23fe60e501c0",
+  "scope": "actual fixed B CLI; original API stopped",
+  "priorOperationId": "7e301694-fa4e-46ef-a6db-3bd0e90f40b6",
+  "initialOwnedStopped": true,
+  "command": "JAVA_HOME=/home/ckc/.cache/devbox/toolchains/jdk-25.0.5+8 timeout 900 /home/ckc/.local/bin/node scripts/ops/local-bundle.mjs --run-id bfe98fc8cd8d474880c9f92f1ce6367c --operation-id 612c5a44-a718-41c8-9a23-23fe60e501c0",
+  "exitCode": 0,
+  "stdoutSha256": "7e16ed339202952ca00e5f6105a68e4076a3b6f472f30445fb89abbbd71abe0b",
+  "stderrBytes": 0,
+  "receipt": {
+    "backupId": "pp1-20261102T155637442Z-5b98327f0fc6062f31dc78303bea080d",
+    "code": null,
+    "exitCode": 0,
+    "operationId": "612c5a44-a718-41c8-9a23-23fe60e501c0",
+    "phase": "COMPLETE"
+  },
+  "success": true,
+  "manifestSha256": "0c57ae52dfeb9b0f102a53b746f50d1b0554ab12f03468b006efefea4fc6f029",
+  "artifacts": [
+    {
+      "byteSize": "77263980",
+      "path": "db.dump",
+      "sha256": "5437c9b0c70001340cc92de777108a55d09c4ced6b0df886c1929c97dbcb6d44"
+    },
+    {
+      "byteSize": "135522998",
+      "path": "inventory.json",
+      "sha256": "c775538e78e4b8505526d3d38cdf4c58da723f09c0fde1dc4b8cc4b38204e2b6"
+    },
+    {
+      "byteSize": "44",
+      "path": "media.package",
+      "sha256": "76209e72afee854a0a3992d371d1033f940b48d74491afeb3a78d390f2e33c9c"
+    }
+  ],
+  "journalComplete": true,
+  "lockReleased": true,
+  "originalApiRemainedStopped": true,
+  "priorBundlesUnchanged": true,
+  "startedOwnedContainersStopped": true,
+  "endedAt": "2026-11-02T15:59:09.473097+00:00"
+}

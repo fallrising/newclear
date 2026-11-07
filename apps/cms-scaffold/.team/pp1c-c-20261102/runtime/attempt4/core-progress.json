@@ -1,0 +1,47 @@
+{
+  "sourceRunId": "cabbc95e0d5440d3ac4416323dece4a7",
+  "targetRunId": "72e74a1f10ca40b793b579a83e6ec7d8",
+  "operationId": "8c54b976-6cb9-4d0b-ab1e-ad7de0dd04f9",
+  "steps": [
+    {
+      "name": "true-tty-bootstrap",
+      "at": "2026-11-02T18:04:07.249Z",
+      "exitCode": 0,
+      "prompts": 2,
+      "success": true,
+      "code": null
+    },
+    {
+      "name": "synthetic-stream-observation-load",
+      "at": "2026-11-02T18:04:15.449Z",
+      "rows": 4096,
+      "syntheticPayloadBytes": 134217728,
+      "sqlSha256": "cd7d23b12510f789ae15971fa5863781940a79c25e9450773aaf1c8fe12b04b8",
+      "note": "C test data before capture; no D fixture acceptance"
+    },
+    {
+      "name": "actual-session-config",
+      "at": "2026-11-02T18:04:19.494Z",
+      "sessionAbsoluteSeconds": "43200",
+      "sessionMaxSeconds": "604800"
+    },
+    {
+      "name": "source-orphan-created",
+      "at": "2026-11-02T18:04:21.769Z",
+      "fixedBytes": 12,
+      "helperId": "129951c02d50558252b179d68c3a766e29d84dc1d66cea6bdbb8df5fd45ba080"
+    },
+    {
+      "name": "fixed-annex-api-fixture",
+      "at": "2026-11-02T18:04:21.914Z",
+      "httpRequests": 66,
+      "pngSha256": {
+        "public": "c6bb61e535e53a5765dabdec9dc5351ccc0c9ce8a95da9c7d98e484f8b6419b0",
+        "replacement": "7ec4b28253dfd9b6d3ad4d3e747edb8098b735b52634534ab107c7cae7724e17",
+        "draft": "2d43c785f7857ba3bf378df2fda188ffb7137f95f3fa5683ed12912381bfcdb1",
+        "private": "62edc9f1676c2a31415b4dd713c00fab85d9c22cbd0ee101c799292b6d6451f1",
+        "deleted": "de872e9d55c29f03bd73e50549d929c56e0828f3815356be1a2ee11af733db30"
+      }
+    }
+  ]
+}

@@ -1,0 +1,120 @@
+{
+  "id": "deckbuilding-card-upgrade",
+  "system": "deckbuilding",
+  "edition": 2,
+  "name": {
+    "zh": "把资源投给已有卡牌",
+    "en": "Investing in existing cards"
+  },
+  "summary": {
+    "zh": "不扩大牌库，而是挑一张值得反复使用的牌进行强化。",
+    "en": "Improve a card you already own instead of enlarging the deck."
+  },
+  "rules": {
+    "zh": "玩家花金币、休息机会或升级材料强化已有卡牌，增强数值或改变费用与效果。升级机会有限，因此需要判断哪张牌最常发挥作用；收益在之后每次抽到它时重复出现。",
+    "en": "Spend money, a rest opportunity or materials to improve an owned card. Limited upgrades make reliability matter: an improvement pays off each time that card is drawn."
+  },
+  "loop": [
+    {
+      "zh": "找到经常使用的牌",
+      "en": "Find a frequently used card"
+    },
+    {
+      "zh": "预览升级前后",
+      "en": "Preview the change"
+    },
+    {
+      "zh": "支付机会成本",
+      "en": "Pay the opportunity cost"
+    },
+    {
+      "zh": "重复享受强化收益",
+      "en": "Reuse the improved effect"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "升级主力输出，还是把一张昂贵牌降费以便整回合顺畅？",
+      "en": "Improve damage, or reduce a cost to make whole turns work?"
+    },
+    {
+      "zh": "现在升级，还是用同一次休息机会恢复生命？",
+      "en": "Upgrade now, or spend that stop recovering health?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "升级幅度",
+        "en": "Upgrade impact"
+      },
+      "effect": {
+        "zh": "小幅数值提升适合稳定累积，改变费用更容易重塑组合。",
+        "en": "Small gains accumulate; cost changes can reshape combinations."
+      }
+    },
+    {
+      "name": {
+        "zh": "升级上限",
+        "en": "Upgrade limit"
+      },
+      "effect": {
+        "zh": "限制单牌强化次数，能促使投资分散到不同功能。",
+        "en": "Per-card limits encourage investment across different roles."
+      }
+    }
+  ],
+  "tags": [
+    "progression",
+    "economy",
+    "optimization"
+  ],
+  "related": [
+    "deckbuilding-duplicate-investment",
+    "commerce-debt-pressure",
+    "commerce-dynamic-market",
+    "commerce-trade-route-programming"
+  ],
+  "contrast": {
+    "zh": "前者把升级与当下生存放在同一选择里；后者更强调购买不同升级并分配有限槽位。",
+    "en": "The first trades improvement against immediate recovery; the second emphasizes paid upgrades and slot allocation."
+  },
+  "combination": {
+    "zh": "设计提案：让旅行商人对不同卡牌强化收取不同价格，玩家在维修主力与等待折扣之间选择。",
+    "en": "Design proposal: Give traveling merchants different upgrade prices so players choose between improving now and waiting."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "编辑示例：火球耗两点能量，每回合只有三点。",
+      "en": "Editorial example: Fireball costs two energy out of a three-energy turn."
+    },
+    "action": {
+      "zh": "玩家花本次升级机会，把火球费用降为一点。",
+      "en": "Spend the upgrade to reduce Fireball’s cost to one."
+    },
+    "result": {
+      "zh": "下一次抽到火球时，还能同时打出两张一点费用牌。",
+      "en": "The next draw allows Fireball plus two other one-cost cards."
+    },
+    "next": {
+      "zh": "玩家开始寻找能利用剩余能量的配合牌。",
+      "en": "Now look for cards that exploit the freed energy."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "做四张牌，每张只有一个明确升级；用两场战斗对比升级前后。",
+      "en": "Use four cards with one upgrade each and compare them across two encounters."
+    },
+    "pitfall": {
+      "zh": "同时加入随机词缀和多层强化会让玩家看不出这次投资改变了什么。",
+      "en": "Random affixes and layered upgrades can hide what the investment actually changed."
+    },
+    "test": {
+      "zh": "玩家能在升级前预测下一回合多做哪一步，升级后观察到它。",
+      "en": "Players predict an extra action before upgrading and see it happen afterward."
+    }
+  }
+}

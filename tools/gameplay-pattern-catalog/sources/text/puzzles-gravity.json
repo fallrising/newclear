@@ -1,0 +1,120 @@
+{
+  "id": "puzzles-gravity",
+  "system": "puzzles",
+  "edition": 1,
+  "name": {
+    "zh": "重力方向切换",
+    "en": "Changing gravity direction"
+  },
+  "summary": {
+    "zh": "重新定义下方，把障碍变成落脚点。",
+    "en": "Redefine down to turn obstacles into footholds."
+  },
+  "rules": {
+    "zh": "玩家改变角色或场景的重力方向，用坠落跨越常规跳跃无法到达的路径。每次切换都要预判落点、障碍与移动物体；角色轨迹直接显示推理是否正确。",
+    "en": "Change character or world gravity to fall across routes that normal jumps cannot reach. Predict landing points, hazards and moving objects before switching; motion tests the prediction."
+  },
+  "loop": [
+    {
+      "zh": "观察下一个安全面",
+      "en": "Find the next safe surface"
+    },
+    {
+      "zh": "选择切换位置",
+      "en": "Choose a switching position"
+    },
+    {
+      "zh": "改变重力并移动",
+      "en": "Change gravity and move"
+    },
+    {
+      "zh": "落稳后规划下一步",
+      "en": "Land and plan the next step"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "提前翻转获得反应时间，还是贴近边缘获得更好轨迹？",
+      "en": "Switch early for reaction time or near an edge for a better trajectory?"
+    },
+    {
+      "zh": "全场重力改变时，危险物会不会先到终点？",
+      "en": "Will a falling hazard reach the destination first?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "切换条件",
+        "en": "Switch conditions"
+      },
+      "effect": {
+        "zh": "接触地面才能切换强化路径推理；空中切换更偏操控。",
+        "en": "Surface-only switching favors routing; midair switching favors control."
+      }
+    },
+    {
+      "name": {
+        "zh": "影响范围",
+        "en": "Affected scope"
+      },
+      "effect": {
+        "zh": "只影响角色易读；影响全场增加联动解谜。",
+        "en": "Character-only gravity is readable; global gravity creates interactions."
+      }
+    }
+  ],
+  "tags": [
+    "spatial",
+    "dexterity",
+    "planning"
+  ],
+  "related": [
+    "puzzles-beam-routing",
+    "puzzles-box-pushing",
+    "puzzles-linked-portals",
+    "puzzles-paper-folding"
+  ],
+  "contrast": {
+    "zh": "前者强调快速读图与精确移动；后者更关注旋转整个结构后的物理关系。",
+    "en": "The former emphasizes quick reading and precision; the latter considers physical relationships in a rotated structure."
+  },
+  "combination": {
+    "zh": "组合提案：太空温室切换重力运输水和种子，但必须先固定脆弱作物。",
+    "en": "Design proposal: shift greenhouse gravity to move water and seeds, securing fragile plants first."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "出口在天花板，地板与天花板之间有错开的尖刺。",
+      "en": "The exit is on the ceiling, with offset spikes between floor and ceiling."
+    },
+    "action": {
+      "zh": "你走到安全缺口下方，再把重力翻向天花板。",
+      "en": "Move below a safe opening, then reverse gravity toward the ceiling."
+    },
+    "result": {
+      "zh": "角色沿新方向坠落，落在天花板平台而不是刺上。",
+      "en": "The character falls upward onto the ceiling platform instead of the spikes."
+    },
+    "next": {
+      "zh": "重新把当前位置当落脚面，判断下次翻转的安全位置。",
+      "en": "Treat the ceiling as your footing and choose a safe position for the next reversal."
+    }
+  },
+  "prototype": {
+    "scope": "medium",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "先只切换角色的上下重力，制作一间有静态障碍的房间。",
+      "en": "Initially reverse only the character’s vertical gravity in one room with static hazards."
+    },
+    "pitfall": {
+      "zh": "让所有物体一起翻转会增加碰撞状态；先确认角色操作和镜头容易理解。",
+      "en": "Reversing every object adds collision states; establish readable character control and camera behavior first."
+    },
+    "test": {
+      "zh": "让玩家翻转前指出预计落点，检查是否理解轨迹而非碰运气。",
+      "en": "Ask for the expected landing before each reversal to distinguish prediction from guessing."
+    }
+  }
+}

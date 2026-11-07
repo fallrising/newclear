@@ -1,0 +1,18 @@
+{
+  "files": {
+    "local-recovery-verify.mjs": {
+      "changedLines": 0,
+      "sha256": "6fc41628d4eafac391de214302553739fbf10c4b4ab630a918b977d24c34b70c"
+    },
+    "local-recovery-verify.test.mjs": {
+      "changedLines": 157,
+      "sha256": "3a6e02a43c5ab54d034a43fdd2575782206a3d690614dff1ed04491daee77e21"
+    },
+    "local-recovery.fixture.mjs": {
+      "changedLines": 0,
+      "sha256": "221f40105646a626f932ac0f53ca230bf9c4b1574d9a951699cbea5988fce96a"
+    }
+  },
+  "total": 157,
+  "note": "Checkpoint B adds regression coverage only. Initial5base-template derived-hash setup failures retained and corrected by test-only rehash. No additional production changes beyond checkpoint A."
+}

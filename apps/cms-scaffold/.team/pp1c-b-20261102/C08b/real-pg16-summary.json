@@ -1,0 +1,11 @@
+{
+  "container_id": "f521d86647ff246fbbdc142ee25a15627e0e73991fa03b4a0fb141d2eef27ef5",
+  "image_id": "sha256:6a2e324ebe59af6031c4c1cd96c1d5072c2ebc36563d2196365e43b8297c062d",
+  "purpose": "network-none synthetic PG16 custom archive compatibility only",
+  "source_fixture": "20 public tables, synthetic text columns; no credentials or application records",
+  "dump_sha256": "e8178b46f49e170e0731c03e2534ea89cf0d9b5d211abe7a1f143e7b77f73007",
+  "byte_size": 15447,
+  "postgresServerVersion": "16.15",
+  "pgDumpOutput": "pg_dump (PostgreSQL) 16.15",
+  "stopped": true
+}

@@ -1,0 +1,118 @@
+# T-0003 自動檢查實跑
+
+日期：2026-11-03。基準 `a285669c`。沒有改任何筆記的 `note_status`，沒有執行 `promote.py --apply`。
+
+- 命令：`CATALOG_REVIEW_COMMAND="python3 review/pi_review.py" python3 review/auto_check.py`，pi 1.4.0、OpenCode Go `deepseek-v4.1-flash`、thinking `low`。以 `--id` 分 8 批並行。
+- 第一輪有 21 篇因並行過多逾時而得 `checker-error`，另一批 35 篇中途被中止。這些筆記重跑兩輪後全部取得 verdict。最終 `review/auto-check.json`：280 篇，pass 100、flag 180、checker-error 0。
+- flag 種類（以篇計）：broken-example-logic 152、missing-key-point 53、fabricated-claim 12、over-inference 12、wrong-number 5。多數是原型驗收例子的前提與結論對不上。這些是模型判斷，尚未人工確認。
+- `python3 review/sample.py --count 15 --write review/sample.json`，seed `atlas-public-2026-11-02`，只從 pass 抽。
+- `python3 status.py --write` 後 flagged 180、`auto_check: present`、auto_checked 280；`source_commit` 不變。
+- `tests/test_review.py` 與 `tests/test_status.py` 原本斷言 repo 裡沒有 `auto-check.json`；改成斷言略過時不改動已提交的 verdict，以及 flagged 與檔案內的 flag 數相同。
+- `sources/inventory.py --check`、`sources/text_cache.py --check`、`status.py --check`、`build.py --check`、`unittest`（catalog 與 scripts）、`check_project_success.py --write-index`、`check_indexes.py` 通過。
+
+# T-0003 驗證紀錄
+
+日期：2026-11-03。沒有呼叫模型，沒有改任何筆記的 `note_status`，沒有 merge 或打 tag。
+
+- `python3 sources/text_cache.py --fetch` 對上 manifest 的 280 條雜湊後寫入 `sources/text/`。案例長文沒有進快取。
+- `python3 sources/text_cache.py --check`、`python3 sources/inventory.py --check`、`python3 status.py --check`、`python3 build.py --check` 通過。
+- `python3 status.py --write` 產生 total 280、draft 280、reviewed 0、flagged 0、`auto_check: absent`。`source_commit` 是筆記檔 git tree `59a5f13201bff024e059b647b07ad711927a7a8f`，與 `git mktree` 一致。
+- `python3 -m unittest discover -s tests -v`：44 項通過。`python3 -m unittest discover -s scripts/tests -v`：21 項通過。涵蓋 skip、外部命令、本機 API、不跟隨重新導向、抽樣、promote 的 dry-run 與拒絕 flag。CI workflow 不含 `auto_check.py` 或 `promote.py`。
+- 筆記仍全部是 draft。GitHub CI 以 PR 為準，這裡不把尚未回讀的 run 寫成通過。
+
+# T-0002 驗證紀錄
+
+## 2026-11-03 分析重寫
+
+- 原因：抽查發現新增筆記的分析由 `write_notes.py` 的固定句型產生，`reviewed` 也是寫死的。
+- 作法：新增筆記的分析各節逐篇由模型（pi，OpenCode `deepseek-v4.1-flash`）依該篇來源摘要重寫；舊 14 篇只換掉模板插入的「核心循環」。全部改為 `draft`。
+- 重複句型：把「」內文字遮蔽後，統計出現在 3 篇以上筆記的同一句。分析各節從 109 種、10,493 次降到 5 種、826 次；剩下的 5 種都是刻意保留的標示句（模型起草聲明、原型未實玩聲明）。
+- 自動檢查：簡體字、占位字、無結尾的截斷行、JSON 殘留。被拒的模型輸出重新產生。
+- 人工抽讀 10 篇並對照來源摘要：relationships-secrets-leverage、puzzles-visual-rule-learning、incremental-farm-or-push、gathering-gathering-quota、deckbuilding-reward-choice、movement-moving-platform、defense-tower-upgrade-budget、movement-ledge-catch、defense-trap-sequence、combat-friendly-fire。修正了三篇原型數字矛盾與一條相關模式理由。其餘筆記未經人工審閱。
+- 另修正：三個重複字標題、來源摘要中的 OpenCC 誤轉（「還是隻」「透過」應為「只」「通過」）。
+- PR 審查後修正 defense-early-wave-call 的原型驗收：提前開波會結束休息期，改為斷言在兩波重疊的戰鬥中能立刻買補強；並補上兩個例子的下一波敵人數（3 隻、2 隻），讓重疊數可以核算。
+
+
+日期：2026-11-02。快照：`atlas-public-2026-11-02`，觀察時間 `2026-11-02T14:47:12Z`。未 merge、deploy 或 release。
+
+以下 T-0001 各節是精選里程碑的歷史紀錄。那次的 14 篇與 CI 不計入本次全量。
+
+## 本輪已跑
+
+- 來源入口：sitemap、`index.json`、`catalog.json`、280 個機制頁內嵌條目、280 個 `mechanics/<id>.json`。頁面與兩份 JSON 的文字投影雜湊全部一致，沒有重新導向。
+- `python3 sources/inventory.py --check`：通過。
+- `python3 build.py --check`：通過，筆記數等於 manifest 條目數。
+- `python3 -m unittest discover -s tests -v`：23 項通過。負向案例包含 pending、blocked、缺筆記、重複來源 ID、首頁觀察漂移、搜尋索引摘錄不能 reviewed。
+- `node --check app.js`：通過。
+- 瀏覽器 smoke：本機 `/usr/bin/google-chrome` 與 Playwright 1.57.0，完整 HTTP 模式通過。路徑是 `/nested/catalog/`。測過搜尋、inventory 分類交集、空結果、重設、NFKC、狀態 pending 的空結果、完整度頁、形狀背包詳情與來源連結、相鄰模式、metadata、390px 無水平溢出、無 JavaScript。沒有 pageerror，也沒有頁面外的請求。
+- `python3 scripts/check_project_success.py --write-index` 與 `python3 scripts/check_indexes.py`：本機通過，55 個契約，llms 0 error。
+
+## GitHub CI 回讀
+
+回讀 commit：`16ca12fc0aebef7347ab4acbb6f356e60993299d`。三項因路徑觸發的 workflow 都是 completed / success。沒有改 workflow 檔，所以 Workflow static validation 這次沒有跑。
+
+| Workflow | 結果 | 來源 |
+| --- | --- | --- |
+| Gameplay pattern catalog | success | [run 41467066827](https://github.com/fallrising/newclear/actions/runs/41467066827) |
+| Project success contracts | success | [run 41467066361](https://github.com/fallrising/newclear/actions/runs/41467066361) |
+| llms.txt CI | success | [run 41467066578](https://github.com/fallrising/newclear/actions/runs/41467066578) |
+
+Catalog job 在 Ubuntu、Python 3.11.17 實跑：`build.py --check` 為 280 篇對 280 個來源、23 項單元測試 OK、靜態建置通過、55 個專案契約通過、llms 0 error。2026-11-02T14:59:39Z 完整瀏覽器測試成功，日誌有 `PASS: full browser HTTP navigation`，涵蓋搜尋、分類、空結果、重設、NFKC、詳情、來源、390px 與無 JavaScript。這次沒有把未跑項目改成通過。
+
+# T-0001 驗證紀錄
+
+日期：2026-11-02。交付：[Draft PR #960](https://github.com/fallrising/newclear/pull/960)。未 merge、deploy 或 release。
+
+## 已通過的 CI 候選
+
+- 認領／規格：`fffc1c84ff94f4d8bdf94e9ecf1705c09e759f32`。
+- 實作：`431ccaace7af39fbffb44ed73c73df0fd4d7b0c7`。
+- 補齊 root llms 導航、四項 CI 全部成功的候選：`46b38c2703d1d5b941fc091ec67df8e0949ad022`。
+- CI 使用 GitHub 自動產生的 PR 測試合併快照 `8e6da0616a4bee645b44aeff18a0a03f309b28fd`；這不是合併到 main 的操作。基準 main 仍為 `244c7f7b416508aedd8f5f8d4a082ae2bb17d022`。
+
+| Workflow | 結果 | 來源 |
+| --- | --- | --- |
+| Gameplay pattern catalog | success | [run 41426641034](https://github.com/fallrising/newclear/actions/runs/41426641034) |
+| Project success contracts | success | [run 41426641185](https://github.com/fallrising/newclear/actions/runs/41426641185) |
+| llms.txt CI | success | [run 41426641051](https://github.com/fallrising/newclear/actions/runs/41426641051) |
+| Workflow static validation | success | [run 41426641581](https://github.com/fallrising/newclear/actions/runs/41426641581) |
+
+已回讀 catalog job `125214721973` 完整日誌。Ubuntu 24.04、Python 3.11.17 的實跑結果：metadata 14 篇通過、18 項單元測試通過、靜態建置與 JavaScript 語法通過、53 個專案契約通過、PROJECTS 重建無差異、9 個 llms 檔案零錯誤。2026-11-02T10:11:46Z 完整瀏覽器測試成功。
+
+完整模式使用真瀏覽器與 HTTP `/nested/catalog/` 子路徑，實際點擊詳情、相關模式與 metadata 頁；測試搜尋、分類交集、NFKC、空結果、清除、逐篇來源、390px 無水平溢出及無 JavaScript 導航。沒有 pageerror 或頁面外部請求。這補足本機環境無法導航的缺口，不把 render-only 當完整測試。
+
+## 本機實跑與限制
+
+環境：Python 3.13.5、Node 22.16.0、Playwright 1.57.0、環境提供的 Chromium。建置 runtime 只用 Python 標準函式庫，瀏覽器 QA 套件不屬 runtime 依賴。
+
+| 檢查 | 結果 | 證據摘要 |
+| --- | --- | --- |
+| `python3 build.py --check` | passed | 14 篇、13 個分類；欄位、來源末節、關聯與日期一致 |
+| `python3 -m unittest discover -s tests -v` | passed | 18 tests；危險 URL、JSON 重複欄位、來源錯配、HTML escaping、輸出保護、symlink、確定性與本地 HTML 連結 |
+| `python3 build.py` | passed | 14 詳情頁、首頁、metadata 頁與 JSON；兩次建置逐檔 SHA-256 相同 |
+| `node --check app.js` | passed | 原生 JavaScript 語法檢查 |
+| JSON Schema 2020-12 額外檢查 | passed | 本機 jsonschema 驗證 14 個 frontmatter；未加入 runtime |
+| Python HTTP client | passed | 19 個生成資源為 HTTP 200 且非空；不是瀏覽器導航 |
+| `python3 tests/browser_smoke.py --render-only` | passed | 真 Chromium 渲染建置 bytes，驗證 DOM、CSS、JS、390px 和 no-JS 內容；不驗證 URL 導航 |
+| 本機完整瀏覽器導航 | blocked | `net::ERR_BLOCKED_BY_ADMINISTRATOR`，HTTP／file URL 皆受政策限制；沒有繞過政策，完整模式已於上述 CI 補驗 |
+| 本機全 repo 索引 | not run | 無完整 checkout；上述 CI 以完整 repository 成功執行 |
+
+## 首輪 CI 失敗與修正
+
+[run 41425866755](https://github.com/fallrising/newclear/actions/runs/41425866755) 在實作 commit 的 metadata、18 項測試、建置及專案契約均成功，但 `check_indexes.py` 報 `llms.txt: root index does not link catalog component tools/gameplay-pattern-catalog`，因此當輪瀏覽器步驟被跳過。
+
+修正只新增 root llms 的元件入口並更新任務活動時間，未刪除檢查或把 skipped 改作通過。重新觸發的四項 CI 全部成功，詳見上表。
+
+## 內容來源
+
+13 篇核對 Gameplay Atlas 公開頁面文字摘錄；commerce-price-discovery 的直連頁面當次只回傳開啟提示，因此採用搜尋索引摘錄，sources.access_method 明列為 search-index-excerpt。查閱日期是本次讀取日期，不推定為來源發表／更新日。每篇最後一節提供具體機制頁 canonical URL。
+
+網站自述的 280／28 是帶日期的來源範圍；實際收錄為 14／13。沒有全站盤點、原遊戲執行、原站完整互動頁驗證、圖片或全文下載。原創 prototype 的數字不是來源遊戲參數。
+
+## 提交與回讀
+
+終端 `git ls-remote` 因 `Could not resolve host: github.com` 失敗；GitHub App 讀寫成功。使用 tree → 原子 commit → 非 force、帶 expected_sha 的 fast-forward update_ref，每次更新保留最新基準與回讀。
+
+實作的 34 個元件檔案經本機計算 Git tree `2ee39bb810a7abc8c19b5376b715df3544b95aef`，與遠端完全一致；root README／PROJECTS／inventory／workflow 的 blob SHA 也一致。root llms 修正前先核對完整基準 blob，修正後遠端與本機同為 `39457815ef55011b393ba3142fde8046853e5f03`。runtime、筆記與測試內容另以 [checksums.json](checksums.json) 固定；交付文件可後續補充 CI 證據。
+
+自動驗證成功不等於 owner 審查或獨立 review。Draft PR 未合併，任務維持 in_progress，沒有 usable tag。

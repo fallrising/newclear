@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.fallrising.cms.ops.RestoreSessionRevokerTests" tests="9" skipped="0" failures="0" errors="0" timestamp="2026-11-02T14:36:23.640Z" hostname="hrv" time="0.08">
+  <properties/>
+  <testcase name="PP1c_revokeNoncanonicalDuplicateUtf8Rejected()" classname="com.fallrising.cms.ops.RestoreSessionRevokerTests" time="0.009"/>
+  <testcase name="PP1c_revokeReadyThenEOFRejectsBeforeMutation()" classname="com.fallrising.cms.ops.RestoreSessionRevokerTests" time="0.008"/>
+  <testcase name="PP1c_revokeBackendReplacementAfterReadonlyRollbackRejected()" classname="com.fallrising.cms.ops.RestoreSessionRevokerTests" time="0.008"/>
+  <testcase name="PP1c_revokePrivateRequestAndSecretNoLinksOrPublicModes()" classname="com.fallrising.cms.ops.RestoreSessionRevokerTests" time="0.005"/>
+  <testcase name="PP1c_revokeMalformedArgsNeverConnect()" classname="com.fallrising.cms.ops.RestoreSessionRevokerTests" time="0.002"/>
+  <testcase name="PP1c_revokePermitExtraBytesAndOversizeRejected()" classname="com.fallrising.cms.ops.RestoreSessionRevokerTests" time="0.014"/>
+  <testcase name="PP1c_revokeSecretHardlinkAndJDBCQueryRejected()" classname="com.fallrising.cms.ops.RestoreSessionRevokerTests" time="0.005"/>
+  <testcase name="PP1c_revokeRequestFieldsFailBeforeConnection()" classname="com.fallrising.cms.ops.RestoreSessionRevokerTests" time="0.009"/>
+  <testcase name="PP1c_revokeWrongPermitBindingsNeverMutate()" classname="com.fallrising.cms.ops.RestoreSessionRevokerTests" time="0.016"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[INPUT_INVALID
+INPUT_INVALID
+INPUT_INVALID
+INPUT_INVALID
+SESSION_REVOKE_FAILED
+INPUT_INVALID
+INPUT_INVALID
+INPUT_INVALID
+INPUT_INVALID
+INPUT_INVALID
+INPUT_INVALID
+INPUT_INVALID
+INPUT_INVALID
+INPUT_INVALID
+INPUT_INVALID
+INPUT_INVALID
+INPUT_INVALID
+INPUT_INVALID
+INPUT_INVALID
+INPUT_INVALID
+INPUT_INVALID
+INPUT_INVALID
+INPUT_INVALID
+INPUT_INVALID
+INPUT_INVALID
+INPUT_INVALID
+INPUT_INVALID
+INPUT_INVALID
+INPUT_INVALID
+INPUT_INVALID
+INPUT_INVALID
+INPUT_INVALID
+INPUT_INVALID
+]]></system-err>
+</testsuite>

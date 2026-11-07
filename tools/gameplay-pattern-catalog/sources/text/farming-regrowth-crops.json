@@ -1,0 +1,120 @@
+{
+  "id": "farming-regrowth-crops",
+  "system": "farming",
+  "edition": 1,
+  "name": {
+    "zh": "多次采收作物",
+    "en": "Regrowing crops"
+  },
+  "summary": {
+    "zh": "一次建立植株，之后反复回收较小的收益。",
+    "en": "Establish a plant once, then collect repeated smaller payouts."
+  },
+  "rules": {
+    "zh": "部分作物首次成熟较慢，但采收后植株继续存在，并在下一段周期再次产出。玩家持续占用土地和照料资源，换取不必每轮重新购买种子的长期收益。",
+    "en": "Some crops mature slowly at first but survive harvest and produce again after another interval. They occupy land and ongoing care in exchange for returns without buying new seeds every cycle."
+  },
+  "loop": [
+    {
+      "zh": "比较首次成熟与再生时间",
+      "en": "Compare initial growth and regrowth"
+    },
+    {
+      "zh": "提前种下并照料",
+      "en": "Plant early and maintain"
+    },
+    {
+      "zh": "采收但保留植株",
+      "en": "Harvest while retaining the plant"
+    },
+    {
+      "zh": "判断保留还是改种",
+      "en": "Decide whether to keep or replace"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "越早种下越能摊薄初始投入；季末再种可能毫无优势。",
+      "en": "Early planting amortizes setup; planting near season end may offer little advantage."
+    },
+    {
+      "zh": "成熟旧作物稳定赚钱，但可能阻挡更符合当前需求的新作物。",
+      "en": "Established crops yield reliably but can block crops better suited to current demand."
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "首次成熟时间",
+        "en": "Initial maturity"
+      },
+      "effect": {
+        "zh": "越长越强调提前布局，并提高换种成本。",
+        "en": "Longer setup rewards early planning and raises the cost of switching."
+      }
+    },
+    {
+      "name": {
+        "zh": "再生间隔",
+        "en": "Regrowth interval"
+      },
+      "effect": {
+        "zh": "短间隔产生稳定任务，长间隔更适合并行副业。",
+        "en": "Short intervals create a routine; long intervals support parallel activities."
+      }
+    }
+  ],
+  "tags": [
+    "planning",
+    "economy",
+    "time"
+  ],
+  "related": [
+    "farming-orchard-investment",
+    "farming-season-window",
+    "commerce-timed-contracts",
+    "farming-growth-care"
+  ],
+  "contrast": {
+    "zh": "共同的长期投资循环，在Dinkum中还与果实占地结合，不能只比较每株产量。",
+    "en": "The shared investment loop gains an extra footprint constraint in Dinkum, so yield per plant is insufficient for comparison."
+  },
+  "combination": {
+    "zh": "设计提案：让再生作物按订单需求修剪，暂时牺牲一轮产量来改变后续产出品种。",
+    "en": "Design proposal: prune regrowing crops for new orders, sacrificing one harvest to change later output."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "一株莓果已经成熟，每隔2天产一份；另一种作物眼下卖得更贵。",
+      "en": "A mature berry plant yields every two days, while another crop currently sells for more."
+    },
+    "action": {
+      "zh": "你先保留莓果，比较剩余天数内的累计收成。",
+      "en": "Keep the berry plant while comparing total returns over the remaining days."
+    },
+    "result": {
+      "zh": "采完果实后植株还在，只重置下一次采收倒计时。",
+      "en": "Harvesting leaves the plant intact and resets its next yield timer."
+    },
+    "next": {
+      "zh": "当订单变化或季节临近结束，再决定拔掉改种。",
+      "en": "Reconsider replacement when an order changes or the season nears its end."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "做一株可重复采收的植物和一株一次收获植物，明确区分首次成熟与再生计时。",
+      "en": "Compare one regrowing plant with one single-harvest crop, separating first maturity from regrowth."
+    },
+    "pitfall": {
+      "zh": "长期收益若只靠隐藏公式，玩家容易误判；先把未来几次收获显示出来。",
+      "en": "Hidden long-term calculations encourage confusion; make the next few harvests visible."
+    },
+    "test": {
+      "zh": "检查玩家是否理解“收获没有清空地块”，并会把已成熟植株的价值算进换种决策。",
+      "en": "Check that players understand the plot remains occupied and consider its established production before replacing it."
+    }
+  }
+}

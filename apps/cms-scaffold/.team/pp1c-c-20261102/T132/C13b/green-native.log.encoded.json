@@ -1,0 +1,8 @@
+{
+  "version": 1,
+  "original": "T132/C13b/green-native.log",
+  "sha256": "4cabe78a36503da837b2ba931688ff237af25ee03cd7ee66e126d1eff9a4ec0c",
+  "byteSize": "1334",
+  "encoding": "utf-8",
+  "text": "To honour the JVM settings for this build a single-use Daemon process will be forked. For more on this, please refer to https://docs.gradle.org/9.7.1/userguide/gradle_daemon.html#sec:disabling_the_daemon in the Gradle documentation.\nDaemon will be stopped at the end of the build \n> Task :services:cms-api:compileJava\n> Task :services:cms-api:processResources UP-TO-DATE\n> Task :services:cms-api:classes\n> Task :services:cms-api:compileTestJava\n> Task :services:cms-api:processTestResources UP-TO-DATE\n> Task :services:cms-api:testClasses\nOpenJDK 64-Bit Server VM warning: Sharing is only supported for boot loader classes because bootstrap classpath has been appended\n> Task :services:cms-api:test\n\n[Incubating] Problems report is available at: file:///home/ckc/test/codex/wt/newclear/cms-pp1c-c-revoke-20261102/apps/cms-scaffold/build/reports/problems/problems-report.html\n\nDeprecated Gradle features were used in this build, making it incompatible with Gradle 10.\n\nYou can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.\n\nFor more on this, please refer to https://docs.gradle.org/9.7.1/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.\n\nBUILD SUCCESSFUL in 11s\n5 actionable tasks: 3 executed, 2 up-to-date\n"
+}

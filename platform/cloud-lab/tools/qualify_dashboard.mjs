@@ -33,14 +33,16 @@ const jwk={...await crypto.subtle.exportKey('jwk',pair.publicKey),kid:'browser-f
 const b64=x=>Buffer.from(x).toString('base64url');
 const prefix=b64(JSON.stringify({alg:'RS256',kid:jwk.kid}))+'.'+b64(JSON.stringify({iss:issuer,aud:[audience],sub:'human',iat:Math.floor(now/1000),exp:Math.floor(now/1000)+600}));
 const jwt=prefix+'.'+b64(await crypto.subtle.sign('RSASSA-PKCS1-v1_5',pair.privateKey,new TextEncoder().encode(prefix)));
-const common={workspace_id:'browser-lab',resource_ref:{resource_id:'browser-node',generation:1},recipe_ref:ref,not_before:stamp(now-1000),expires_at:stamp(now+600000),max_timeout_seconds:30,max_output_bytes:16384};
+const common={workspace_id:'browser-lab',resource_ref:{resource_id:'browser-node',generation:1},recipe_ref:ref,not_before:stamp(now-1000),expires_at:stamp(now+3600000),max_timeout_seconds:30,max_output_bytes:16384};
 const caps=['commands:read','commands:submit','commands:cancel-request','node:health:read','artifact:read'];
 const mf=new Miniflare(convertV4MiniflareOptions({host:'127.0.0.1',cf:false,telemetry:{enabled:false},resourcePersistencePath:join(directory,'state'),resourceTmpPath:join(directory,'tmp'),workers:[{
- name:'browser-qualification',modulesRoot:join(root,'apps/control/worker'),modules:['index.mjs','auth.mjs','protocol.mjs'].map(name=>({type:'ESModule',path:join(root,'apps/control/worker',name)})),compatibilityDate:'2026-10-26',d1Databases:{DB:'browser'},
+ name:'browser-qualification',modulesRoot:join(root,'apps/control'),modules:['worker/index.mjs','worker/auth.mjs','worker/protocol.mjs','worker/inventory.mjs','public/inventory.mjs'].map(name=>({type:'ESModule',path:join(root,'apps/control',name)})),compatibilityDate:'2026-10-26',d1Databases:{DB:'browser'},
  assets:{directory:join(root,'apps/control/public'),binding:'ASSETS',run_worker_first:true,routerConfig:{has_user_worker:true}},
  outboundService:async request=>{assert.equal(request.url,issuer+'/cdn-cgi/access/certs');return Response.json({keys:[jwk]});},
- bindings:{ACCESS_CONFIG:JSON.stringify({issuer,audience,subjects:{human:{principal_id:'human',grant_id:'human'}}}),PUBLIC_ORIGIN:origin,AUDIENCE:audience,MACHINE_KEYS:JSON.stringify({runner:{principal_id:'runner',grant_id:'runner',generation:1,secret_hex:secret,expires_at:common.expires_at}})}
+ bindings:{HEALTH_SCHEDULE:JSON.stringify({revision:1,interval_minutes:15,not_before:stamp(Math.floor(now/60000)*60000),expires_at:stamp(now+3600000)}),ACCESS_CONFIG:JSON.stringify({issuer,audience,subjects:{human:{principal_id:'human',grant_id:'human'}}}),PUBLIC_ORIGIN:origin,AUDIENCE:audience,MACHINE_KEYS:JSON.stringify({runner:{principal_id:'runner',grant_id:'runner',generation:1,secret_hex:secret,expires_at:common.expires_at}})}
 }]}));
+let usageCalls=0,usageMode='normal';
+let tamperArtifact=false, snapshotMode='normal';
 let browser,session,server,mode='normal',dropSubmit=false,apiCalls=0,loginHits=0,submitBodies=[],errors=[],checks=[],pending=new Map(),serial=0,holdArtifactStatus=null,heldArtifact=null,downloadsStarted=0;
 const children=[];
 function send(method,params={},target=session){
@@ -69,17 +71,20 @@ try {
   const response=await mf.dispatchFetch(origin+path,{method:'POST',body:raw,headers:{'Content-Type':'application/json','X-Lab-Key-Id':'runner','X-Lab-Time':time,'X-Lab-Nonce':nonce,'X-Lab-Signature':signature}});
   assert.equal(response.status,200);return response.json();
  }
- await db.batch(readFileSync(join(root,'apps/control/migrations/0001.sql'),'utf8').replace(/^--.*$/gm,'').split(';').filter(x=>x.trim()).map(x=>db.prepare(x)));
+ await db.batch(['0001.sql','0002.sql'].map(name=>readFileSync(join(root,'apps/control/migrations',name),'utf8')).join('\n').replace(/^--.*$/gm,'').split(';').filter(x=>x.trim()).map(x=>db.prepare(x)));
  for(const [id,capabilities] of [['human',caps],['runner',['dispatch:claim','runs:report','runs:reconcile']]])await db.prepare('INSERT INTO grants VALUES (?,1,0,?)').bind(id,JSON.stringify({...common,principal_id:id,capabilities})).run();
+ await db.prepare('INSERT INTO grants VALUES (?,1,0,?)').bind('scheduler',JSON.stringify({...common,principal_id:'scheduler',capabilities:['commands:submit','node:health:read']})).run();
+ await db.prepare('INSERT INTO schedules VALUES (?,1,0,?,NULL)').bind('health-minute','scheduler').run();
  server=http.createServer(async(req,res)=>{
   try{
    if(req.headers.host!==`127.0.0.1:${server.address().port}`){res.writeHead(403);res.end();return;}
    if(req.url==='/favicon.ico'){res.writeHead(204);res.end();return;}
    if(req.url==='/login'){loginHits++;res.writeHead(200,{'Content-Type':'text/html'});res.end('<html>synthetic login</html>');return;}
-   assert(['/','/styles.css','/dashboard.mjs','/api/bootstrap','/api/commands','/api/runner/claim','/api/runner/report'].includes(req.url)||/^\/api\/commands\/[a-zA-Z0-9-]+(?:\/artifact|\/cancel)?$/.test(req.url));
+   assert(['/','/styles.css','/dashboard.mjs','/api/bootstrap','/api/commands','/api/health-schedule','/api/usage','/api/runner/claim','/api/runner/report'].includes(req.url)||/^\/api\/commands\/[a-zA-Z0-9-]+(?:\/artifact|\/cancel)?$/.test(req.url));
    const chunks=[];let length=0;for await(const b of req){length+=b.length;assert(length<=32768);chunks.push(b);}const body=Buffer.concat(chunks);
    if(req.url.startsWith('/api/')){
     apiCalls++;assert(apiCalls<=300);
+    if(req.url==='/api/usage'){usageCalls++;if(usageMode==='offline'){res.destroy();return;}}
     if(mode==='offline'){res.destroy();return;}
     if(mode==='html'||mode==='401'||mode==='403'){res.writeHead(mode==='html'?200:Number(mode),{'Content-Type':'text/html'});res.end('<html>'+('synthetic login '.repeat(3000))+'</html>');return;}
     if(mode==='redirect'){res.writeHead(302,{Location:'/login'});res.end();return;}
@@ -89,7 +94,15 @@ try {
    if(!headers.has('x-lab-key-id'))headers.set('Cf-Access-Jwt-Assertion',jwt);
    if(req.method==='POST'&&req.url==='/api/commands')submitBodies.push(body.toString());
    const response=await mf.dispatchFetch(origin+req.url,{method:req.method,headers,...(req.method==='POST'?{body}:{}),redirect:'manual'});
-   const data=Buffer.from(await response.arrayBuffer());
+   let data=Buffer.from(await response.arrayBuffer());
+   if(tamperArtifact&&req.url.endsWith('/artifact')&&response.status===200)data=Buffer.concat([data,Buffer.from(' ')]);
+   if(snapshotMode!=='normal'&&req.method==='GET'&&req.url==='/api/commands'&&response.status===200){
+    const value=JSON.parse(data);assert.equal(value.commands.length,1);
+    if(snapshotMode==='older')value.commands[0].revision--;
+    value.commands[0].result=null;value.commands[0].delivery='reconciling';
+    data=Buffer.from(JSON.stringify(value));
+   }
+   if(req.url==='/api/usage'&&usageMode==='stale'&&response.status===200){const value=JSON.parse(data);value.observed_at=stamp(Date.now()-120000);value.application.rolling_24h.window_start_exclusive=stamp(Date.parse(value.observed_at)-86400000);data=Buffer.from(JSON.stringify(value));}
    if(req.url.endsWith('/artifact')&&holdArtifactStatus!==null){
     const status=holdArtifactStatus;holdArtifactStatus=null;
     await new Promise(resolve=>{heldArtifact={release:resolve};});heldArtifact=null;
@@ -114,6 +127,16 @@ try {
  await send('Runtime.enable');await send('Page.enable');
  await send('Emulation.setDeviceMetricsOverride',{width:1280,height:900,deviceScaleFactor:1,mobile:false});
  await send('Page.navigate',{url:base});await until('document.querySelector("#submit") && !document.querySelector("#submit").disabled');
+ assert(await evaluate('document.querySelector("#schedule").textContent.includes("已停用") && document.querySelector("#schedule").textContent.includes("15 分鐘")'));
+ checks.push('bounded schedule panel shows disabled15minute policy without liveness claim');
+ assert.equal(usageCalls,0);await click('#usage-refresh');await until('!document.querySelector("#usage-refresh").disabled');
+ assert(await evaluate('document.querySelector("#usage").textContent.includes("0 / 10000") && document.querySelector("#usage").textContent.includes("尚未接入")'));
+ const usageBeforePoll=usageCalls;await wait(5200);assert.equal(usageCalls,usageBeforePoll,'five-second poll must not fetch usage');
+ usageMode='stale';await click('#usage-refresh');await until('!document.querySelector("#usage-refresh").disabled');assert(await evaluate('document.querySelector("#usage").textContent.includes("過期")'));
+ usageMode='offline';await click('#usage-refresh');await until('!document.querySelector("#usage-refresh").disabled');assert(await evaluate('document.querySelector("#usage").textContent.includes("未確認") && document.querySelector("#usage").textContent.includes("0 / 10000")'));
+ usageMode='normal';await click('#usage-refresh');await until('!document.querySelector("#usage-refresh").disabled');
+ checks.push('manual application usage uses actual Worker/D1, no five-second usage polling; injected old snapshot and lost response stay stale/unconfirmed, provider unknown');
+
  dropSubmit=true;await click('#submit');await until('!document.querySelector("#retry").hidden && !document.querySelector("#retry").disabled');
  assert(submitBodies.length>=1);assert.equal(new Set(submitBodies).size,1);assert.equal(await db.prepare('SELECT count(*) n FROM commands').first('n'),1);
  mode='401';await refresh();assert(await evaluate('!document.querySelector("#retry").hidden && document.querySelector("#retry").disabled'));
@@ -130,16 +153,34 @@ try {
  await python(config);await refresh();await until('document.querySelector("#commands").textContent.includes("已保存結果")');
  assert.equal(await db.prepare("SELECT json_extract(record,'$.result.validation.status') s FROM commands").first('s'),'passed');
  const completed=JSON.parse(await db.prepare('SELECT record FROM commands').first('record'));
+ const beforeSnapshots=await db.prepare('SELECT * FROM commands').all();
+ for(const injection of ['older','conflict']){
+  snapshotMode=injection;await refresh();
+  assert(await evaluate('document.querySelector("#commands").textContent.includes("已保存結果") && document.querySelector("#message").textContent.includes("快照") && document.querySelector("#submit").disabled && [...document.querySelectorAll(".command-card button")].every(b=>b.disabled)'));
+  snapshotMode='normal';await refresh();
+  assert(await evaluate('!document.querySelector("#submit").disabled && document.querySelector("#message").hidden && document.querySelector("#commands").textContent.includes("已保存結果")'));
+ }
+ assert.deepEqual((await db.prepare('SELECT * FROM commands').all()).results,beforeSnapshots.results);
+ checks.push('older and conflicting command snapshots rejected in real browser; original completed view retained, actions blocked, fresh polling recovers; D1 command row unchanged');
  const downloads=join(evidence,'downloads');mkdirSync(downloads);
  await send('Browser.setDownloadBehavior',{behavior:'allow',downloadPath:downloads,eventsEnabled:true},null);
  await evaluate('[...document.querySelectorAll(".command-card button")].find(b=>b.textContent==="下載 JSON 成果").click()');
  const download=join(downloads,'node-health.json'),downloadDeadline=Date.now()+5000;
  while(!existsSync(download)&&Date.now()<downloadDeadline)await wait(50);
- assert.deepEqual(JSON.parse(readFileSync(download,'utf8')),JSON.parse(completed.artifact));
- checks.push('browser downloads original actual-collector artifact JSON');
+ assert.deepEqual(readFileSync(download),Buffer.from(completed.artifact));
+ assert.equal('sha256:'+createHash('sha256').update(readFileSync(download)).digest('hex'),completed.result.artifact_sha256);
+ checks.push('browser verifies SHA-256 and downloads exact original actual-collector artifact bytes');
+ const beforeTamper=downloadsStarted;tamperArtifact=true;
+ await evaluate('[...document.querySelectorAll(".command-card button")].find(b=>b.textContent==="下載 JSON 成果").click()');
+ await until('document.querySelector("#message").textContent.includes("成果完整性核對失敗")');
+ assert.equal(downloadsStarted,beforeTamper);assert.deepEqual(readFileSync(download),Buffer.from(completed.artifact));
+ assert.equal(await evaluate('document.querySelectorAll(".command-card").length'),1);tamperArtifact=false;
+ checks.push('browser rejects whitespace-tampered artifact without downloading or altering saved bytes');
  mode='403';await evaluate('[...document.querySelectorAll(".command-card button")].find(b=>b.textContent==="下載 JSON 成果").click()');
  await until('document.querySelectorAll(".command-card").length===0');
  assert(await evaluate('document.querySelector("#total-count").textContent==="—" && document.querySelector("#submit").disabled'));
+ assert(await evaluate('!document.querySelector("#usage").textContent.includes("/ 10000") && document.querySelector("#usage-refresh").disabled'));
+ checks.push('action-level revocation also clears application usage snapshot');
  mode='normal';await refresh();await until('!document.querySelector("#submit").disabled');
  assert(await evaluate('document.querySelector("#message").hidden'));
  checks.push('action-level403 clears authorization; uncertain submission survives401 and explicit revalidation with original bytes');
@@ -153,6 +194,7 @@ try {
   assert.equal(downloadsStarted,before,'obsolete success must not trigger a download');
  }
  checks.push('retry POST401/403 retains original identity; late artifact200/403 after revalidation is discarded without session/message/download changes');
+ await click('#usage-refresh');await until('!document.querySelector("#usage-refresh").disabled');assert(await evaluate('document.querySelector("#usage").textContent.includes("1 / 10000")'));
  await screenshot('desktop-completed');checks.push('browser exact-body retry after stored-submit ACK loss; actual Worker/D1 + Python collector result');
  for(const width of [390,320]){
   await send('Emulation.setDeviceMetricsOverride',{width,height:844,deviceScaleFactor:1,mobile:true});await send('Emulation.setTouchEmulationEnabled',{enabled:true});
@@ -192,6 +234,12 @@ try {
  await db.prepare("UPDATE grants SET revision=revision+1,policy=? WHERE id='human'").bind(JSON.stringify({...common,principal_id:'human',capabilities:['commands:read']})).run();
  await refresh();assert(await evaluate('document.querySelector("#submit").disabled && document.querySelectorAll(".command-card button").length===0 && document.querySelectorAll(".command-card").length===3'));
  checks.push('read-only capability refresh retains history and removes submit/cancel/artifact controls');
+ await db.prepare('UPDATE schedules SET enabled=1 WHERE id=?').bind('health-minute').run();
+ const trigger=await (await mf.getWorker()).scheduled({scheduledTime:new Date(Math.floor(now/60000)*60000),cron:'*/15 * * * *'});
+ assert.equal(trigger.outcome,'ok');
+ await refresh();assert(await evaluate('document.querySelector("#schedule").textContent.includes("最近觸發") && /已有工作|錯過時段/.test(document.querySelector("#schedule").textContent)'));
+ assert.equal(await db.prepare('SELECT count(*) n FROM commands').first('n'),3);
+ await screenshot('schedule');checks.push('actual scheduled callback records overlap/misfire; read-only browser sees skipped trigger with unchanged unknown command');
  assert.deepEqual(errors,[]);
  writeFileSync(join(evidence,'browser.json'),JSON.stringify({status:'passed',scope:'local actual workerd/D1; synthetic JWT; Chromium viewport, not physical mobile or real Access',version,miniflare:require('miniflare/package.json').version,checks,sourceHashes,apiCalls,errors},null,2)+'\n',{flag:'wx'});
  console.log(JSON.stringify({status:'passed',checks,version:version.product}));

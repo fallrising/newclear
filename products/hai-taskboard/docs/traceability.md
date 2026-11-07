@@ -11,8 +11,8 @@ required acceptance decision. `Candidate` means executed worker evidence still a
 | HAI-BOUNDARY-001..004 | SDD §3 | architecture/package dependency tests; Fake capability tests | NotRun |
 | HAI-AUTH-001..006 | SDD §4, ADR-001/005 | transaction, import, artifact, migration, backup tests | Passing bounded command/artifact transaction subset (T-090); backup and full group remain NotRun |
 | HAI-DOMAIN-001..005 | SDD §5, ADR-002 | domain identity, immutability, blocker, version/idempotency tests | Passing bounded version/current-subject subset (T-090); full group remains NotRun |
-| HAI-STATE-001..006 | SDD §5 | table-driven WorkItem transition tests; UI parity tests | NotRun |
-| HAI-DONE-001..004 | SDD §5, ADR-002 | positive and exhaustive negative completion tests | NotRun |
+| HAI-STATE-001..008 | SDD §5 | table-driven WorkItem transition tests; UI parity tests | Passing bounded HAI-STATE-005/007 rework/redispatch subset (HRWK) and HAI-STATE-008 reopen subset (HROP); full group and UI parity remain NotRun |
+| HAI-DONE-001..004 | SDD §5, ADR-002 | positive and exhaustive negative completion tests | Passing bounded lawful HAI-DONE-002/004 rework subset (HRWK); exhaustive group remains NotRun |
 | HAI-EXEC-001..008 | SDD §6, ADR-003 | outbox, fencing, cancel, expiry, stale publisher, Fake tests | Passing bounded Fake/manual vertical and persistent polling subsets (T-073/T-089/T-099); restore remains NotRun |
 | HAI-RECON-001..007 | SDD §7, ADR-004 | DAG/cycle, old+new closure, stale-plan, reuse tests | Passing bounded pure kernel (T-024); durable import/activation remains NotRun |
 | HAI-API-001,005 | SDD §8 | stable full-command error matrix; deterministic projection rebuild | NotRun |
@@ -115,10 +115,10 @@ implicitly passed. AC-54 belongs exclusively to G2/P0-B.
 
 | Source ID | Required oracle | P0-A status |
 | --- | --- | --- |
-| AC-01 | Run success with one missing required AC cannot complete; exact gap returned | NotRun |
-| AC-02 | Candidate B cannot use Candidate A evidence; history remains | NotRun |
+| AC-01 | Run success with one missing required AC cannot complete; exact gap returned | Passing bounded lawful real SQLite/HTTP (HRWK `TestReworkLoop_CandidateBCannotUseCandidateAEvidence`); UI NotRun |
+| AC-02 | Candidate B cannot use Candidate A evidence; history remains | Passing bounded lawful real SQLite/Fake/HTTP (HRWK); UI NotRun |
 | AC-03 | Changed AC/policy makes old evidence inapplicable | NotRun |
-| AC-04 | Forged/self human or verifier identity is denied without mutation | NotRun |
+| AC-04 | Forged/self human or verifier identity is denied without mutation | Passing bounded: forged principal and producer-class reviewer refused without domain writes (HRWK); OS/provider identity NotRun |
 | AC-05 | Skipped/Error/Inconclusive required check is not Passing | NotRun |
 | AC-06 | Replaced artifact bytes fail digest and become Missing/Quarantined | NotRun |
 | AC-07 | Concurrent same key/request yields one result/event group | Passing (application T-067; HTTP boundary T-081; vertical replay T-089; concurrent vertical NotRun) |
@@ -444,3 +444,121 @@ Whole HAI-DONE/UX/ops acceptance remains pending: completion/artifact/report rea
 current-policy detail/coverage, full attention/impact, durable activation, verified restore and
 ContextPack fresh-context resume. No Git publication, tag or deployment. Historical failures,
 worker socket-denied tests and private-harness errors were not rewritten as first-run successes.
+
+## 2026-10-30 M1a completion preparation
+
+Owner-approved [HAI-PREP-001..005](sdd/completion-preparation.md) refine HAI-API-001 and support HAI-DONE
+without moving completion authority. PREP-AC-01..04 map to the four named HTTP oracles and
+`TestCompletionPreparation_PolicyPrecedence`; transport tests are in `backend/internal/transport/httpapi`,
+real SQLite HTTP/no-write/reopen tests in `backend/internal/application/service`. C01/HAI-DELIVERY-004
+aligns BOARD/bootstrap authority; C06 aligns preflight wording with HAI-INTEGRITY-003/004.
+[Current M1a evidence](evidence/m1a-completion-preparation-20261030.md) distinguishes focused results,
+root gates, independent review and delivery. No whole-product or historical oracle is promoted.
+
+## 2026-10-30 M1b output access
+
+[ACCESS-AC-01..04](plans/m1b-output-access-20261030.md) refine the authorized M1b read slice
+under HAI-OUTPUT-001..003, HAI-AUTH-004, HAI-SEC-003 and HAI-API. Scope is authenticated
+project/WorkItem/Run output metadata and bound verified byte access, with unchanged historical
+identity and zero writes. [M1b evidence](evidence/m1b-output-access-20261030.md) maps the four
+ACs to actual HTTP/service/SQLite/runtime oracles and root/Claude acceptance; Git delivery is in BOARD.
+Full v0.2 AC-06/44/46 and SUCCESS AC-02..04 are not accepted by this bounded slice.
+
+
+## 2026-10-31 M1c human report submission and reads
+
+[REPORT-AC-01..05](plans/m1c-human-reports-20261031.md) cover explicit bounded human text,
+server-owned actor/digest/time, immutable subject/scope provenance, atomic separate Review/Evidence
+and command bookkeeping, replay and historical verified downloads. [M1c evidence](evidence/m1c-human-reports-20261031.md)
+maps each AC to command/service/HTTP/SQLite/confined-store tests and separates worker/root/reviewer
+acceptance. Migration0005 is appended;0001..0004 and fixture/Done contracts are unchanged.
+
+`TestHumanReport_PostIOSnapshotDecisions` distinguishes version-stable material changes from count-only
+report changes and checks recorded stale replay versus unrecorded conflict.
+`TestHumanReport_CompletionConsumesHumanRecords` exercises real QA/approval/completion joins containing
+both submitted semantic IDs, isolated missing Evidence and ChangesRequested failures, and completion
+with missing Review bytes under the unchanged predicate. These are bounded backend integration tests;
+full connected completion UI and SUCCESS AC-02..04 remain pending. Current delivery status is BOARD HM1C.
+
+
+## 2026-10-31 M2 accepted-workflow AC identity
+
+[Plan](plans/m2-ac-identity-20261031.md) ID-AC-01..04 and [evidence](evidence/m2-ac-identity-20261031.md)
+map HAI-IMPORT-003/004, HAI-FIRST-001, HAI-INPUT-002/005/006 and HAI-CONNECT-007 without changing
+their acceptance criteria. TestACIdentity_AcceptedBoundary/CommandIngress/HTTPIngress and
+CanonicalCompatibility cover exact byte/Unicode agreement and historical canonical identity.
+TestAcceptedACIdentity_EvidenceAndCompletionBoundary covers real SQLite/proposal/Fake plus HTTP
+acceptance/human reports/QA/Done, missing explicit policy and Store reopen/replay. Existing
+TestAdmission_AllPublicationConsumersRejectStaleInputs, ModeledCurrentSemanticChangesRejectAllConsumers,
+TestCompletionPreparation_PolicyPrecedence and runtime/domain independence/Done regressions passed
+in the final full gate; those negatives retain original IDs. No full HAI-DONE/UX/OPS claim follows.
+Legacy nonempty Draft and domain rehydration stay unchanged. The approved policy-source successor
+is tracked below. At this historical checkpoint, TestCoverageProjection_MatchesCurrentDonePredicate was Proposed/NotRun; the 2026-11-01 section below supersedes that test status. Full M2 remains incomplete.
+
+## 2026-10-31 immutable local project policy
+
+[Contract](sdd/local-project-policy.md) POL-AC-01..05 is the approved policy-source successor to
+HAI-CONNECT-005, preserving HAI-FIRST-002/005, HAI-INPUT-002/005/006 and preparation error precedence.
+Claude plan/code revision ACCEPT and named codec/admission, immutable registration, project selection
+matrix and actual runtime completion/restart oracles pass locally. [Evidence](evidence/project-policy-20261031.md)
+records full-gate/test-delta binding and limitations. Migration 0006 is implemented; 0001..0005
+remain frozen. Final CI/delivery status is BOARD HMPOL.
+At this historical checkpoint, TestCoverageProjection_MatchesCurrentDonePredicate was Proposed/NotRun; the 2026-11-01 section below supersedes that test status. Full M2 remains incomplete.
+
+
+## 2026-11-01 verified coverage
+
+[Approved contract](sdd/verified-coverage.md) COV-AC-01..06 maps the bounded coverage portion of
+HAI-CONNECT-007, HAI-DONE and M2 to an authenticated observation-only API. It does not accept the
+remaining completion UI or all M2. `TestCoverageProjection_MatchesCurrentDonePredicate` now runs
+against real accepted SQLite state and follows a satisfied QA observation with explicit Complete.
+`TestVerifiedCoverage_AcceptedMultiACHTTPAndRestart` adds authenticated multi-AC Git acceptance,
+selected immutable policy, 120-byte Unicode identity, sealed human reports, HTTP observations,
+reopen and explicit Done. `TestVerifiedCoverageHTTP_*` checks closed wire/auth/scope/byte limits;
+service matrices check all-match vetoes, artifact budgets, two-snapshot races and all-table no-writes.
+Exact gate results and residual limits are recorded in [delivery evidence](evidence/m2-verified-coverage-20261101.md).
+
+
+## 2026-11-01 WorkItem material index
+
+[Approved IDX-01..05](sdd/work-item-material-index.md) refines HAI-API-001/004/005 and supports
+HAI-CONNECT-007 through stored identity discovery. Fixed IDX-AC-01..06 map to
+`TestWorkItemMaterialIndexHTTP_*` (auth, closed wire, bounds and optional adapter),
+`TestWorkItemMaterialIndex_StoredIdentityAndHistory/AcceptedRelations/BoundsAndCorruption/RunEnumVocabulary/AcceptedBoundsAndCorruption`,
+`TestWorkItemMaterialIndex_SnapshotAndNoWrites` (real WAL concurrent writer and reopen), and
+`TestWorkItemMaterialIndex_DiscoverThenComplete/MissingPolicyAndArtifactsStillReadable` (real
+accepted SQLite/Fake/HTTP, downstream discovered IDs, explicit completion and semantic stale rejection).
+[Evidence](evidence/work-item-material-index-20261101.md) distinguishes injected Impact rows,
+actual accepted command history, synthetic wire bounds and source-bound native gates.
+No full WorkItemDetail/history, M2 or connected completion acceptance is inferred.
+
+## Rework loop (HRWK, T-0339)
+
+[Accepted contract](sdd/rework-loop.md) RWK-01..04 implements HAI-STATE-005 RequestRework, adds HAI-STATE-007
+Developing redispatch and defines the current Candidate for Done predicate term 2. Named oracles:
+`TestRequestRework_GuardsAndHistory`, `TestDispatchRun_RedispatchFromDeveloping`,
+`TestCurrentCandidate_LatestRunOnly`, `TestReworkLoop_CandidateBCannotUseCandidateAEvidence`
+([evidence](evidence/rework-loop-20261101.md)). They cover lawful command history only; v0.2 AC-05 nonpassing
+Evidence stays domain-only, AC-03/29/30/47/48 need M4 Impact, AC-06 needs M6. Completion UI and SUCCESS
+AC-02..04 remain pending.
+
+## 2026-11-02 Truthful WorkItem detail (HDTL)
+
+[Accepted DTL-01..04](sdd/work-item-detail.md) implements HAI SDD §UX surface 2's read and the M2
+"detail/coverage authoritative interpretation" row for reads. Fixed DTL-AC-01..06 map to
+`TestWorkItemDetailHTTP_ScopeAndPrecedence` (AC-01), `TestWorkItemDetail_TruthfulShape` and the schema
+fixtures (AC-02), `TestWorkItemDetail_AttributionAcrossItemsAndRework` (AC-03, real SQLite/Fake/HTTP:
+rework A→B, consumed Approval, fixture-only rows on a second item, acceptance and runtime audit),
+`TestWorkItemDetail_AttributionCorruption` (AC-04) and `TestWorkItemDetail_SnapshotCapacityCorruption`
+(AC-05, real WAL concurrent writer). [Evidence](evidence/work-item-detail-20261102.md) records Red,
+mutation, gates and review. No coverage, Done validity, completion UI or whole-M2 acceptance is inferred.
+
+## 2026-11-02 ReopenWorkItem (HROP)
+
+[Accepted ROP-01..03](sdd/reopen-work-item.md) implements HAI-STATE-008 and the domain-and-gates `ReopenWorkItem` row,
+and applies the HAI-STATE-007 settled/strict-order guards to Ready dispatch with Run history. Named oracles:
+`TestReopenWorkItem_GuardsAndHistory` (ROP-AC-01), `TestDispatchRun_FromReadyWithRunHistory` (ROP-AC-02) and
+`TestReopen_SecondCompletionUsesOnlyNewCandidate` (ROP-AC-03, real SQLite/Fake/HTTP: complete A, reopen, second
+Candidate, second CompletionRecord, restart) ([evidence](evidence/reopen-work-item-20261102.md)). The pure
+`TestCompleteWorkItem_PreservesHistoryOnReopenAndStale` stays domain-only; Done-Stale
+(`TestDoneStale_PreservesCompletionAndBlocksDownstreamReadiness`) stays M4. No Done validity, completion UI or SUCCESS AC-02..04 claim.

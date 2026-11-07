@@ -1,0 +1,21 @@
+{
+  "ownerDecision": "APPROVED",
+  "utterance": "\u6279\u51c6\u3002",
+  "exactMessageTime": null,
+  "firstObservedContinuationAtUtc": "2026-11-06T21:14:25.173548+00:00",
+  "proposalPr": 1038,
+  "proposalHead": "a52da0b672a543c704696f4fa9bdff42a8a462b4",
+  "scope": "Full readonly observation proposal including six original D01 probes, registry continuity, C17 readonly before fresh recover lock",
+  "excludes": "Failed-runtime retirement, release/deploy/new dependency/expanded permissions",
+  "effectiveAfter": "required review, exact-head CI, normal merge, remote verification",
+  "before": {
+    "apps/cms-scaffold/docs/v2/decisions/pp1c-readonly-observation-20261106.md": "243318c74f5f2481a0e9d46e02880325d555a6ef25c066406c74997f6b7ddfaa",
+    "apps/cms-scaffold/docs/v2/waves/PP1c.md": "759dca80b5199558d58e8183f577d9f4dd752a7126c5709456fc29a8c1725b26",
+    "apps/cms-scaffold/docs/v2/contracts/PP1c-local-adapters.md": "bd73d178ac5ac7a0ec3ce0c91e1815d232f7a01bfb18f761cbd6e6e9a1c51cab"
+  },
+  "after": {
+    "apps/cms-scaffold/docs/v2/decisions/pp1c-readonly-observation-20261106.md": "39353e82fb8330f67d34f7aa100787f4d1b6e2ae1b674ef7a92956a10d0e8132",
+    "apps/cms-scaffold/docs/v2/waves/PP1c.md": "383f3b13a8acb0b4182fac0c780a6f05b768ffb7156d935511d565328e5d973f",
+    "apps/cms-scaffold/docs/v2/contracts/PP1c-local-adapters.md": "4b4c0966da26884024712de11673dd5e84f90f3810d10d9287969725f38b340b"
+  }
+}

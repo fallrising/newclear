@@ -1,0 +1,123 @@
+{
+  "date": "2026-11-01",
+  "status": "completed",
+  "scope": "authenticated native startup without prompt; AC-03 real task pending",
+  "baseline_commit": "4a0ec98332843c418a91a59c7b39bdacffb6bfee",
+  "provider": "grok",
+  "version": "1.0.70",
+  "model": "grok-4.6",
+  "source_sha256": {
+    "run_grok_work.py": "04a991a24ab25f492d9d9b215d9f02fd9e5785782443cb342eaad04ff0d060e4",
+    "grok_task_hook.py": "da1addd60fc90cc4e76667dfdb54826c03119c299c9e7bc07cf2dc8bc223a792",
+    "grok_work_policy.mjs": "123326e29da8351e483f1ef4439c358223cb3468bc20bb19060aa55d75b4ad80",
+    "office_grok_work.mjs": "a8d8e551b37ba0419d34a2e090db720c531a4fb20176b7d7529d2c560b93d4c6",
+    "grok-work/grok": "b2e9750e43488c136e8b73b3cc83789148ab9b0056cf34e856e6db0b80bb7485",
+    "remote_cli.py": "9a0ee26503ef76b003b9d8d387f6381acd1a043723374f62793a7f75bf97bb89",
+    "run_grok_startup.py": "8b5b556ae1c5bb6f1232738b9fc6549c8df5de77945a04e14ee7efa15c1d02c5",
+    "grok_startup.py": "af5188f82d05ebfb0830bbe7a7cb0e3c6838e37cd947424252b8ac7ea9b4af72",
+    "cursor_task_hook.py": "55b59876b6040665e0352c94dfff2c6ffe9c19b59655a0f816e6142828d18684",
+    "grok_native_evidence.py": "d56ae4c5eb032b30baba05475b1e0e523442c21969a581b26c00a49c7093cf66"
+  },
+  "model_inference_verified": false,
+  "prompt_supplied": false,
+  "credentials_source": "private isolated owner auth copy",
+  "native_config_inspection_verified": true,
+  "session_hook_verified": true,
+  "model_selection_source": "same-session versioned native log model changed event; SessionStart in this pinned binary omits modelId",
+  "native_model_selection_verified": true,
+  "elapsed_s": 12.516981958178803,
+  "events": [
+    {
+      "event": "SessionStart",
+      "model_field_present": false,
+      "allowed": true
+    },
+    {
+      "event": "Stop",
+      "cleanup_event": true
+    }
+  ],
+  "cleanup": {
+    "completed": true,
+    "owned_processes_seen": 20,
+    "errors": [],
+    "copied_credentials_removed": true
+  },
+  "offline_tests": {
+    "node": 35,
+    "python": 43
+  },
+  "prior_and_current_startup_attempts": [
+    {
+      "status": "failed",
+      "startup_only": true,
+      "model_inference_verified": false,
+      "elapsed_s": 12.524252417031676,
+      "cleanup_errors": [],
+      "copied_credentials_removed": true
+    },
+    {
+      "status": "failed",
+      "startup_only": true,
+      "model_inference_verified": false,
+      "elapsed_s": 12.593684416031465,
+      "cleanup_errors": [],
+      "copied_credentials_removed": true
+    },
+    {
+      "status": "failed",
+      "startup_only": true,
+      "model_inference_verified": false,
+      "elapsed_s": 12.647226833039895,
+      "cleanup_errors": [],
+      "copied_credentials_removed": true
+    },
+    {
+      "status": "completed",
+      "startup_only": true,
+      "model_inference_verified": false,
+      "elapsed_s": 12.553777749883011,
+      "cleanup_errors": [],
+      "copied_credentials_removed": true
+    },
+    {
+      "status": "completed",
+      "startup_only": true,
+      "model_inference_verified": false,
+      "elapsed_s": 12.648395542055368,
+      "cleanup_errors": [],
+      "copied_credentials_removed": true
+    },
+    {
+      "status": "completed",
+      "startup_only": true,
+      "model_inference_verified": false,
+      "elapsed_s": 12.516981958178803,
+      "cleanup_errors": [],
+      "copied_credentials_removed": true
+    }
+  ],
+  "initial_failures": [
+    "Inspector reports hook source directories and executable targets, not JSON filenames; corrected launch gate.",
+    "Pinned binary omits modelId in SessionStart; switched to actual same-session native model-selection evidence."
+  ],
+  "prepared_limits": {
+    "prompts": 1,
+    "hook_tool_calls": 4,
+    "native_max_turns": 6,
+    "timeout_seconds": 240,
+    "max_edit_bytes": 4096,
+    "host_retries": 0,
+    "provider_request_cap": null,
+    "token_cap": null,
+    "money_cap": null
+  },
+  "limitations": [
+    "No paid model prompt was sent. HTTPS startup metadata was allowed.",
+    "Native hook crashes and timeouts fail open; the four-tool gate is not a provider-enforced hard cap.",
+    "Native dontAsk, read/edit allow rules and OS write restrictions complement hooks; full file-read/egress isolation remains unverified.",
+    "PostToolUse success result shapes and normal end_turn Stop are required for live acceptance; fixture tests do not establish live tool-loop compatibility.",
+    "No usage or cost evidence exists yet; unknown values must not be treated as zero."
+  ],
+  "protocol_reference_commit": "2bdd1d6a6369de0e8c68132ea4539e9abd9e14a8"
+}

@@ -1,0 +1,120 @@
+{
+  "id": "ecology-population-limits",
+  "system": "ecology",
+  "edition": 2,
+  "name": {
+    "zh": "控制繁殖数量与种群规模",
+    "en": "Control breeding and population size"
+  },
+  "summary": {
+    "zh": "出生是好消息，但下一批幼崽也会占用食物、空间和照料时间。",
+    "en": "Births are welcome, but the next generation also consumes food, space and care."
+  },
+  "rules": {
+    "zh": "种群会繁殖增长，而承载资源有限。玩家设置保留数量、暂停部分繁殖或转移多余个体，在持续产出与维持可照料规模之间形成长期循环。",
+    "en": "Populations grow through breeding while resources remain limited. Set retention targets, pause breeding or move surplus animals to balance ongoing production with a manageable population."
+  },
+  "loop": [
+    {
+      "zh": "估计下一轮出生与消耗",
+      "en": "Forecast births and consumption"
+    },
+    {
+      "zh": "设置保留数量或繁殖开关",
+      "en": "Set retention targets or breeding controls"
+    },
+    {
+      "zh": "安置或移出新增个体",
+      "en": "House or move new arrivals"
+    },
+    {
+      "zh": "根据剩余容量再调整",
+      "en": "Readjust to remaining capacity"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "现在保留更多幼体准备扩张，还是先把种群控制在当前食物能支持的范围？",
+      "en": "Keep more young for expansion or stay within current food capacity?"
+    },
+    {
+      "zh": "暂停哪一对的繁殖，才不会丢掉之后需要的亲本组合？",
+      "en": "Which pair should stop breeding without losing useful future options?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "繁殖速度",
+        "en": "Reproduction rate"
+      },
+      "effect": {
+        "zh": "出生快于玩家能调整的速度会变成清理负担；预告应留出处理窗口。",
+        "en": "Births faster than players can react become cleanup; forecasts should leave time to act."
+      }
+    },
+    {
+      "name": {
+        "zh": "数量控制粒度",
+        "en": "Control granularity"
+      },
+      "effect": {
+        "zh": "按物种、年龄或性别管理能减少重复操作，但应保留关键个体的例外。",
+        "en": "Species, age or sex controls reduce repetition while allowing exceptions for important individuals."
+      }
+    }
+  ],
+  "tags": [
+    "planning",
+    "economy",
+    "optimization"
+  ],
+  "related": [
+    "ecology-habitat-capacity",
+    "ecology-species-compatibility",
+    "automation-aerial-logistics",
+    "automation-belt-routing"
+  ],
+  "contrast": {
+    "zh": "环世界侧重出生后的存栏政策和资源回收；动物园之星允许在出生前暂停繁殖，管理动作发生在不同阶段。",
+    "en": "RimWorld emphasizes retention policies after births; Planet Zoo can pause breeding beforehand, shifting the point of intervention."
+  },
+  "combination": {
+    "zh": "设计提案：当饲料只够三轮时自动提醒暂停繁殖，但由玩家决定保留哪些亲本例外。",
+    "en": "Design proposal: warn when feed falls below three rounds, while letting players choose breeding exceptions."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "演示设定：栏位容量六只，已有四只成体，两只幼体即将出生。",
+      "en": "Example: capacity is six, with four adults and two births expected."
+    },
+    "action": {
+      "zh": "暂停另一对繁殖，保留当前孕育中的一对。",
+      "en": "Pause the other pair while keeping the expected births."
+    },
+    "result": {
+      "zh": "下一轮刚好达到六只，没有新增的空间缺口。",
+      "en": "The next round reaches six without an additional space shortfall."
+    },
+    "next": {
+      "zh": "扩建完成后再恢复被暂停的配对。",
+      "en": "Resume the paused pair after expansion."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "用一个物种、六个栏位、每轮出生和一个繁殖开关验证循环。",
+      "en": "Use one species, six slots, turn-based births and a breeding switch."
+    },
+    "pitfall": {
+      "zh": "不要先加完整经济和自动化策略编辑器；先显示未来两轮的数量预告。",
+      "en": "Skip a full economy and policy editor; start with a two-round population forecast."
+    },
+    "test": {
+      "zh": "连续推进五轮，观察玩家能否提前控制规模而非出生后反复清理。",
+      "en": "Run five rounds and see whether players manage growth before births rather than repeatedly clear overflow."
+    }
+  }
+}

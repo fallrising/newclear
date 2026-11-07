@@ -1,0 +1,9 @@
+{
+  "observationScope": "readonlycapacityinventory; oldresourcesuntouched",
+  "dockerNetworkCount": 31,
+  "defaultAddressPoolsObserved": null,
+  "fixedCandidatePool": "192.168.240.0/20",
+  "rawObservationSha256": "d279d2a7b9120d4334ae8821369a770b568751e178a6f7d40ef01f19ad39609f",
+  "privateOriginal": "local/network-capacity-private/network-capacity-original.json",
+  "publication": "only capacity summary; unrelated host routes/network names remain private; all-table overlap check in network-route-check.json"
+}

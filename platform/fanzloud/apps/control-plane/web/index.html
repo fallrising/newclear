@@ -57,18 +57,18 @@
 
         <section class="card">
           <div class="panel-heading">
-            <h3>Ordered activity</h3>
+            <h3 id="activity-heading">Ordered activity</h3>
             <span id="stream-status" class="pill">Disconnected</span>
           </div>
-          <pre id="event-list" class="timeline">No retained activity in this tab.</pre>
+          <pre id="event-list" class="timeline" tabindex="0" role="region" aria-labelledby="activity-heading">No retained activity in this tab.</pre>
         </section>
 
         <section class="card">
           <div class="panel-heading">
-            <h3>Final diff</h3>
+            <h3 id="diff-heading">Final diff</h3>
             <button id="show-diff" type="button" class="secondary">Show diff</button>
           </div>
-          <pre id="diff-output" class="diff">No diff loaded.</pre>
+          <pre id="diff-output" class="diff" tabindex="0" role="region" aria-labelledby="diff-heading">No diff loaded.</pre>
         </section>
 
         <button id="logout" type="button" class="quiet">Log out of Codebox</button>

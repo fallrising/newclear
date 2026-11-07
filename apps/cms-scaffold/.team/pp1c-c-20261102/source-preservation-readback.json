@@ -1,0 +1,8 @@
+{
+  "archive": "/home/ckc/test/backup/cms-pp1c-c-20261102-raw-mismatch/source-evidence.tar.gz",
+  "sha256": "d58f1ff91d57d681edf7ea7d402f5bddb6e720ec1c91008c29815bec8fe8615d",
+  "tarEntries": 2088,
+  "ignoredRestoreTargetIncluded": true,
+  "newRestoreVerifierAndPatchIncluded": true,
+  "rawRuntimeExcludedAndRetainedInPlace": true
+}

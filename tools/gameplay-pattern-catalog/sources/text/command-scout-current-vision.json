@@ -1,0 +1,119 @@
+{
+  "id": "command-scout-current-vision",
+  "system": "command",
+  "edition": 3,
+  "name": {
+    "zh": "派人侦察，换取眼前信息",
+    "en": "Send scouts to reveal current information"
+  },
+  "summary": {
+    "zh": "地图上去过，不等于现在知道敌人在哪。",
+    "en": "Having visited a place does not mean knowing what is there now."
+  },
+  "rules": {
+    "zh": "未探索区域或视野外敌人被隐藏，玩家派单位前进获得信息，再决定主力是否跟上。侦察占用人员和时间，也可能暴露侦察者；静态地形记忆与当前敌情要分开显示。",
+    "en": "Unexplored areas or enemies outside vision are hidden. Send a unit to gather information before committing the main force. Scouting costs time and personnel and risks exposure; remembered terrain and live enemy information should look different."
+  },
+  "loop": [
+    {
+      "zh": "识别信息盲区",
+      "en": "Identify a blind spot"
+    },
+    {
+      "zh": "派出侦察单位",
+      "en": "Send a scout"
+    },
+    {
+      "zh": "读取新出现的威胁",
+      "en": "Read revealed threats"
+    },
+    {
+      "zh": "据此推进或撤回",
+      "en": "Advance or retreat accordingly"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "让快单位独自深入，还是让主力靠近保护它？",
+      "en": "Send a fast scout alone or keep the army close enough to protect it?"
+    },
+    {
+      "zh": "为了提前知道侧路情况，是否放弃正面一部分力量？",
+      "en": "Is side-route information worth reducing the main force?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "视野范围",
+        "en": "Vision radius"
+      },
+      "effect": {
+        "zh": "范围小更紧张，但也更容易出现无法预判的遭遇。",
+        "en": "Small vision adds tension but increases surprising encounters."
+      }
+    },
+    {
+      "name": {
+        "zh": "信息保持方式",
+        "en": "Information persistence"
+      },
+      "effect": {
+        "zh": "保留地形但隐藏移动敌人，可区分探索记忆与当前侦察。",
+        "en": "Remembering terrain but hiding moving enemies separates exploration from current scouting."
+      }
+    }
+  ],
+  "tags": [
+    "information",
+    "risk"
+  ],
+  "related": [
+    "command-interrupt-action",
+    "command-focus-fire",
+    "command-frontline-shielding",
+    "command-initiative-order"
+  ],
+  "contrast": {
+    "zh": "北境之地把侦察做成经济人口的专职工作；幽浮2让小队推进直接承担揭露敌人的风险。",
+    "en": "Northgard makes scouting a dedicated population role; XCOM 2 ties discovery risk directly to squad movement."
+  },
+  "combination": {
+    "zh": "组合提案：资源探测器只报告矿物，侦察单位负责确认附近敌情，两种信息结合后才安排采集队。",
+    "en": "Design proposal: a resource scanner reveals deposits, while scouts reveal threats; combine both before sending gatherers."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "两条通路都通向矿点，右侧地形还没看见。",
+      "en": "Two routes reach the mine, but the right route is unseen."
+    },
+    "action": {
+      "zh": "派一个快单位绕右侧探路。",
+      "en": "Send a fast unit along the right route."
+    },
+    "result": {
+      "zh": "发现一支巡逻队，主力暂时没有暴露。",
+      "en": "A patrol is revealed while the main force remains unexposed."
+    },
+    "next": {
+      "zh": "决定绕左路，或等巡逻离开后再前进。",
+      "en": "Choose the left route or wait for the patrol to leave."
+    }
+  },
+  "prototype": {
+    "scope": "medium",
+    "interaction": "solo",
+    "firstStep": {
+      "zh": "用格子地图、一个侦察点和一个隐藏移动目标验证视野刷新。",
+      "en": "Use a grid, one scout and one hidden moving target to test vision updates."
+    },
+    "pitfall": {
+      "zh": "过期敌情不能仍像实时信息一样可靠。",
+      "en": "Stale intelligence must not look like live information."
+    },
+    "test": {
+      "zh": "玩家会不会先探路，再让高价值单位进入未知区域？",
+      "en": "Do players scout before sending valuable units into unknown ground?"
+    }
+  }
+}

@@ -1,0 +1,82 @@
+{
+  "task": "T-182",
+  "atUtc": "2026-11-06T21:16:34.065180+00:00",
+  "proposalHead": "a52da0b672a543c704696f4fa9bdff42a8a462b4",
+  "ownerApprovalSource": "Latest user utterance as supplied in bounded assignment and root decision record; exact message timestamp unknown",
+  "firstObservedContinuationAtUtc": "2026-11-06T21:14:25.173548+00:00",
+  "files": [
+    {
+      "path": "apps/cms-scaffold/docs/v2/decisions/pp1c-readonly-observation-20261106.md",
+      "beforeSha256": "243318c74f5f2481a0e9d46e02880325d555a6ef25c066406c74997f6b7ddfaa",
+      "afterSha256": "39353e82fb8330f67d34f7aa100787f4d1b6e2ae1b674ef7a92956a10d0e8132",
+      "beforeMatchesT177": true,
+      "unifiedDiffAdded": 4,
+      "unifiedDiffRemoved": 4,
+      "stableSequenceMatcherAddedRemoved": 8,
+      "numberedNormativeClausesUnchanged": true,
+      "trailingWhitespaceLines": [],
+      "localLinksExist": []
+    },
+    {
+      "path": "apps/cms-scaffold/docs/v2/waves/PP1c.md",
+      "beforeSha256": "759dca80b5199558d58e8183f577d9f4dd752a7126c5709456fc29a8c1725b26",
+      "afterSha256": "383f3b13a8acb0b4182fac0c780a6f05b768ffb7156d935511d565328e5d973f",
+      "beforeMatchesT177": true,
+      "unifiedDiffAdded": 3,
+      "unifiedDiffRemoved": 3,
+      "stableSequenceMatcherAddedRemoved": 4,
+      "numberedNormativeClausesUnchanged": true,
+      "trailingWhitespaceLines": [],
+      "localLinksExist": [
+        "PP1.md",
+        "../contracts/PP1-recovery.md",
+        "../contracts/PP1c-local-adapters.md",
+        "../contracts/PP1-recovery.md",
+        "../contracts/PP1-recovery.md",
+        "../../../.team/pp1c-clarifications-20261101/DECISIONS.md",
+        "../contracts/PP1c-local-adapters.md",
+        "../contracts/PP1c-local-adapters.md#1-d01已觀察工具與固定參數",
+        "../decisions/pp1c-readonly-observation-20261106.md",
+        "../contracts/PP1c-local-adapters.md",
+        "../contracts/PP1-recovery.md#51-db檔案inventory只讀",
+        "../contracts/PP1c-local-adapters.md#21-已批准pg1615-九組-check-deparse-配對",
+        "../contracts/PP1-recovery.md#12-已批准pg1615-check-配對與-target-raw-snapshot",
+        "../contracts/PP1-recovery.md#8-失敗模式與固定退出"
+      ]
+    },
+    {
+      "path": "apps/cms-scaffold/docs/v2/contracts/PP1c-local-adapters.md",
+      "beforeSha256": "bd73d178ac5ac7a0ec3ce0c91e1815d232f7a01bfb18f761cbd6e6e9a1c51cab",
+      "afterSha256": "4b4c0966da26884024712de11673dd5e84f90f3810d10d9287969725f38b340b",
+      "beforeMatchesT177": true,
+      "unifiedDiffAdded": 4,
+      "unifiedDiffRemoved": 4,
+      "stableSequenceMatcherAddedRemoved": 6,
+      "numberedNormativeClausesUnchanged": true,
+      "trailingWhitespaceLines": [],
+      "localLinksExist": [
+        "../waves/PP1c.md",
+        "PP1-recovery.md",
+        "../../../.team/pp1c-seal-20261101/TOOL-PROBES.json",
+        "../../../.team/pp1c-pg-volume-20261102/DECISION.md",
+        "fixtures/pp1c-check-definition-pairs-v1.json",
+        "../decisions/pp1c-readonly-observation-20261106.md"
+      ]
+    }
+  ],
+  "totalUnifiedDiffAddedRemoved": 22,
+  "totalStableSequenceMatcherAddedRemoved": 18,
+  "entireAnnex7ObligationsAndRegressionsUnchanged": true,
+  "entireAnnex71BodyUnchanged": true,
+  "waveNormativeParagraphAndSuffixUnchanged": true,
+  "allStatusChangesManuallyReviewed": true,
+  "findings": [],
+  "historicalReadOnlyHashes": {
+    "apps/cms-scaffold/.team/pp1c-readonly-proposal-20261106/T177/final-doc-review-readback.json": "82de3fb018065a2c84f6b271e6bf7ba97df50f154bf4f21f769e874bd8cda235",
+    "apps/cms-scaffold/.team/pp1c-readonly-proposal-20261106/source-freeze.json": "0e5b1ffc25a4a6b8abdc7022a16fb1b00f9c0d9449adbcf813f26883e07a2ab8",
+    "apps/cms-scaffold/.team/reports/T-177.md": "3ad0c4827a4e6334c7322228cd85d90d890257e4ca87ab5389f9c8a4ff30fc9b",
+    "apps/cms-scaffold/.team/pp1c-readonly-proposal-20261106/ci-status.json": "7a8cd85c3b25dd76cc15956e10c80862e7eaf6cba71337fc6720b78f52b963d1"
+  },
+  "runtimeGitNetworkDelegationPerformed": false,
+  "scope": "Status-only; actual new-head CI/merge/readback/ledger/adapter and D acceptance belong to root"
+}

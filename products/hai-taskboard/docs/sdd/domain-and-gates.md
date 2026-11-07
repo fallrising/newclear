@@ -37,12 +37,12 @@ The application resolves actor permissions, canonicalizes the request, and opens
 | Command | Guard summary | Durable result |
 | --- | --- | --- |
 | `MarkReady` | accepted AC/spec, owner, dependency and scope readiness | readiness evaluation + phase |
-| `DispatchRun` | Ready/current inputs, no active blockers/unknown mutation, budget/WIP | new Run + outbox intent + Developing |
+| `DispatchRun` | Ready, or Developing; with existing Runs every Run settled and the clock after the latest ([rework loop](rework-loop.md), [reopen](reopen-work-item.md)); current inputs, no active blockers/unknown mutation, budget/WIP | new Run + outbox intent + Developing |
 | `SubmitCandidate` | current input, sealed candidate and manifest, complete Run report | Candidate + Review phase |
 | `RequestQA` | required Reviews approve exact subject | QA phase + verifier intents |
-| `RequestRework` | Review/QA, finding and exact subject | new work revision + Developing |
+| `RequestRework` | Review/QA, reason and exact current-Candidate subject | version+1 + Developing; history unchanged |
 | `CompleteWorkItem` | full HAI-DONE predicate | CompletionRecord + Done atomically |
-| `ReopenWorkItem` | human, reason and new work revision | Draft or Ready; old completion retained |
+| `ReopenWorkItem` | human, Done, reason; Ready target needs current inputs ([reopen](reopen-work-item.md)) | version+1 + Draft or Ready; old completion retained |
 | `RequestCancellation` | human policy, current mutable work | cancellation condition; no new dispatch |
 | `FinalizeCancellation` | no unverified active/unknown side effect | Canceled terminal result |
 
@@ -69,3 +69,12 @@ Minimum rejection codes include `phase_not_qa`, `active_blocker`, `active_or_unk
 - `TestCompleteWorkItem_RejectsEveryNonPassingEvidenceState`
 - `TestCompleteWorkItem_RejectsSubjectTOCTOU`
 - `TestCompleteWorkItem_PreservesHistoryOnReopenAndStale`
+
+## 2026-11-01 owner-approved V1 vocabulary mapping
+
+For P0-A V1 coverage, Accepted disposition means an admitted immutable semantic Evidence record
+created through existing command/provenance validation, rather than an unadmitted Run output.
+Fresh applicability maps to stored Current; Stale and Superseded are not fresh. Admission is not a
+Passing verdict: exact subject, terminal Passed, verified Present bytes, verifier class and independence
+remain required. V1 has no separately editable disposition field.
+The [verified coverage contract](verified-coverage.md) defines the observation API; it grants no Done authority.

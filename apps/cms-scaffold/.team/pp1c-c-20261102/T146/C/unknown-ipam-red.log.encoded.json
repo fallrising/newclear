@@ -1,0 +1,8 @@
+{
+  "version": 1,
+  "original": "T146/C/unknown-ipam-red.log",
+  "sha256": "00344dd741022b48cb87781f16b0948d9e51ac8fa441b390a54cc2a280a01a8e",
+  "byteSize": "933",
+  "encoding": "utf-8",
+  "text": "✖ T146 unknown IPAM driver is refused instead of assuming default allocator semantics (197.355184ms)\nℹ tests 1\nℹ suites 0\nℹ pass 0\nℹ fail 1\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 272.460288\n\n✖ failing tests:\n\ntest at scripts/local/prepare.test.mjs:270:1\n✖ T146 unknown IPAM driver is refused instead of assuming default allocator semantics (197.355184ms)\n  AssertionError [ERR_ASSERTION]: Missing expected rejection.\n      at async TestContext.<anonymous> (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-c-revoke-20261102/apps/cms-scaffold/scripts/local/prepare.test.mjs:273:3)\n      at async Test.run (node:internal/test_runner/test:1332:7)\n      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:385:3) {\n    generatedMessage: false,\n    code: 'ERR_ASSERTION',\n    actual: undefined,\n    expected: { code: 'ADAPTER_UNSEALED' },\n    operator: 'rejects',\n    diff: 'simple'\n  }\n"
+}

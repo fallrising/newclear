@@ -1,0 +1,66 @@
+[
+  {
+    "name": "front-serial",
+    "command": [
+      "npm",
+      "run",
+      "test",
+      "-w",
+      "@cms/web-front",
+      "--",
+      "--maxWorkers=1"
+    ],
+    "exit": 0,
+    "elapsed_seconds": 57.34810859290883
+  },
+  {
+    "name": "lint",
+    "command": [
+      "npm",
+      "run",
+      "lint"
+    ],
+    "exit": 0,
+    "elapsed_seconds": 10.124597354093567
+  },
+  {
+    "name": "typecheck",
+    "command": [
+      "npm",
+      "run",
+      "typecheck"
+    ],
+    "exit": 0,
+    "elapsed_seconds": 25.76163647789508
+  },
+  {
+    "name": "build",
+    "command": [
+      "npm",
+      "run",
+      "build"
+    ],
+    "exit": 0,
+    "elapsed_seconds": 12.382068091072142
+  },
+  {
+    "name": "bundle",
+    "command": [
+      "npm",
+      "run",
+      "test:bundle"
+    ],
+    "exit": 0,
+    "elapsed_seconds": 0.16429512202739716
+  },
+  {
+    "name": "measure-bundle",
+    "command": [
+      "npm",
+      "run",
+      "measure:bundle"
+    ],
+    "exit": 0,
+    "elapsed_seconds": 1.3171249490696937
+  }
+]

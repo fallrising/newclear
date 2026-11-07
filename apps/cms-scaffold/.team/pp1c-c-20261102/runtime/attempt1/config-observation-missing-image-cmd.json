@@ -1,0 +1,83 @@
+{
+  "runId": "710a1bcfea024de59f81cb4cfc6d6f20",
+  "scope": "actual fixed session-config accessor on root-created controlled fresh C source",
+  "controlledFreshLifecycle": true,
+  "startedAt": "2026-11-02T16:39:44.180Z",
+  "commands": [
+    {
+      "tool": "docker",
+      "action": "ps",
+      "exitCode": 0,
+      "stdoutBytes": 3185,
+      "stderrBytes": 0,
+      "milliseconds": 26
+    },
+    {
+      "tool": "docker",
+      "action": "inspect",
+      "exitCode": 0,
+      "stdoutBytes": 644497,
+      "stderrBytes": 0,
+      "milliseconds": 51
+    },
+    {
+      "tool": "docker",
+      "action": "network",
+      "exitCode": 0,
+      "stdoutBytes": 4582,
+      "stderrBytes": 0,
+      "milliseconds": 22
+    },
+    {
+      "tool": "docker",
+      "action": "image",
+      "exitCode": 0,
+      "stdoutBytes": 3189,
+      "stderrBytes": 0,
+      "milliseconds": 16
+    },
+    {
+      "tool": "docker",
+      "action": "image",
+      "exitCode": 0,
+      "stdoutBytes": 4445,
+      "stderrBytes": 0,
+      "milliseconds": 17
+    },
+    {
+      "tool": "docker",
+      "action": "image",
+      "exitCode": 0,
+      "stdoutBytes": 4729,
+      "stderrBytes": 0,
+      "milliseconds": 17
+    },
+    {
+      "tool": "docker",
+      "action": "image",
+      "exitCode": 0,
+      "stdoutBytes": 3577,
+      "stderrBytes": 0,
+      "milliseconds": 17
+    },
+    {
+      "tool": "docker",
+      "action": "volume",
+      "exitCode": 0,
+      "stdoutBytes": 1328,
+      "stderrBytes": 0,
+      "milliseconds": 16
+    },
+    {
+      "tool": "docker",
+      "action": "exec",
+      "exitCode": 0,
+      "stdoutBytes": 6,
+      "stderrBytes": 0,
+      "milliseconds": 70
+    }
+  ],
+  "success": false,
+  "code": "ADAPTER_UNSEALED",
+  "endedAt": "2026-11-02T16:39:44.736Z"
+}

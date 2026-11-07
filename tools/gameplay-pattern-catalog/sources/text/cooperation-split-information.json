@@ -1,0 +1,120 @@
+{
+  "id": "cooperation-split-information",
+  "system": "cooperation",
+  "edition": 2,
+  "name": {
+    "zh": "信息分开，靠描述拼起来",
+    "en": "Communicating split information"
+  },
+  "summary": {
+    "zh": "一人看现场，一人拿线索，只有讲清楚才能一起解决问题。",
+    "en": "One player sees the situation and another holds the clues; clear descriptions connect them."
+  },
+  "rules": {
+    "zh": "把解题所需的信息分给不同玩家，并限制直接看对方画面。玩家描述图案、位置或状态，伙伴据此查规则并给指令；操作结果再成为下一轮交流的信息。",
+    "en": "Split essential information between players who cannot directly inspect each other’s view. One describes symbols or states, another interprets them, and the result becomes the next message."
+  },
+  "loop": [
+    {
+      "zh": "描述眼前的特征",
+      "en": "Describe visible features"
+    },
+    {
+      "zh": "追问并对照线索",
+      "en": "Ask and interpret clues"
+    },
+    {
+      "zh": "执行约定的操作",
+      "en": "Carry out the agreed action"
+    },
+    {
+      "zh": "报告结果再处理下一项",
+      "en": "Report the result and continue"
+    }
+  ],
+  "decisions": [
+    {
+      "zh": "先讲颜色、形状还是位置，哪一种最能排除歧义？",
+      "en": "Which description—color, shape or position—removes ambiguity first?"
+    },
+    {
+      "zh": "听到模糊指令时立即尝试，还是花时间复述确认？",
+      "en": "Try an uncertain instruction or spend time confirming it?"
+    }
+  ],
+  "parameters": [
+    {
+      "name": {
+        "zh": "信息重叠",
+        "en": "Shared information"
+      },
+      "effect": {
+        "zh": "少量共同参照物帮助沟通，完全没有共同参照容易变成猜词。",
+        "en": "Some shared reference points aid communication; none can reduce it to guessing words."
+      }
+    },
+    {
+      "name": {
+        "zh": "错误代价",
+        "en": "Error cost"
+      },
+      "effect": {
+        "zh": "轻惩罚允许试探，重惩罚迫使双方先确认。",
+        "en": "Light penalties permit experiments; heavy penalties encourage confirmation."
+      }
+    }
+  ],
+  "tags": [
+    "information",
+    "cooperation",
+    "timing"
+  ],
+  "related": [
+    "cooperation-discussion-vote",
+    "cooperation-downed-revival",
+    "cooperation-hidden-role",
+    "cooperation-shared-vehicle"
+  ],
+  "contrast": {
+    "zh": "前者让现场操作与规则查阅分工；后者让双方探索不同空间，再把线索拼起来。",
+    "en": "The first separates operation from rule lookup; the second joins clues from different spaces."
+  },
+  "combination": {
+    "zh": "设计提案：一人看到古文字，一人拿到不完整词典；每解出一扇门，就补充双方下一轮能用的词。",
+    "en": "Design proposal: one player sees inscriptions and another has a partial dictionary; each solved door expands their shared vocabulary."
+  },
+  "walkthrough": {
+    "setup": {
+      "zh": "编辑示例：A看到三盏灯，B拿着“红蓝红对应左键”的纸条，双方不能互看。",
+      "en": "Editorial example: A sees three lights; B has a note saying red-blue-red means left, and they cannot look across."
+    },
+    "action": {
+      "zh": "A报出灯的顺序，B复述一遍，再让A按左键。",
+      "en": "A reports the order; B repeats it before asking A to press left."
+    },
+    "result": {
+      "zh": "门打开，A告诉B成功，双方确认这套叫法有效。",
+      "en": "The door opens; A reports success, confirming their terminology worked."
+    },
+    "next": {
+      "zh": "下一门换成图形，他们先约定如何描述，再继续。",
+      "en": "The next door uses shapes, so they agree on descriptions before trying again."
+    }
+  },
+  "prototype": {
+    "scope": "small",
+    "interaction": "cooperative",
+    "firstStep": {
+      "zh": "先用两张互不相见的纸做三组符号谜题，一张画现场，一张写对应规则。",
+      "en": "Start with two concealed sheets and three symbol puzzles: a scene sheet and a rule sheet."
+    },
+    "pitfall": {
+      "zh": "谜题数量增加前，先排除只有作者才懂的描述；联网和语音不是第一版的必要条件。",
+      "en": "Remove descriptions only the author understands before adding puzzles; networking and voice software are unnecessary for the first version."
+    },
+    "test": {
+      "zh": "交换角色后，陌生试玩者仍能通过追问完成一道题，并能说出误会发生在哪。",
+      "en": "After swapping roles, new testers can solve a puzzle by asking questions and identify where a misunderstanding occurred."
+    }
+  }
+}

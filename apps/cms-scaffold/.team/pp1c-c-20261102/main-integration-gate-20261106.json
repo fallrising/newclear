@@ -1,0 +1,13 @@
+{
+  "ownCCommit": "3f689cb72ea33cac7c4cfb28a82241986a9a1b9b",
+  "untrackedDiffPreserved": true,
+  "fourDocumentConflictsResolvedWithAllThreeVersionsSaved": true,
+  "source246Unchanged": true,
+  "initialProjectTests": "15pass/1fail missing existing CI tool opencc",
+  "correction": "isolated devtool venv pinned opencc-python-reimplemented==0.1.7",
+  "cmsRuntimeDependencyChanged": false,
+  "finalProjectTests": 16,
+  "finalProjectTestsPassed": 16,
+  "cmsContractPassed": 1,
+  "cachedWhitespacePassed": true
+}

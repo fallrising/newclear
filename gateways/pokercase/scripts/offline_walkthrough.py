@@ -10,6 +10,7 @@ import json
 import math
 import os
 from pathlib import Path
+import re
 import secrets
 import signal
 import socket
@@ -175,6 +176,46 @@ def cost_summary(rows):
             "coverage": len(known) / total if total else None,
             "status": "no_data" if not total else "unknown" if not known else "complete" if len(known) == total else "partial",
             "basis": "stored_estimate_usd"}
+
+
+def require_stream_accounting(row):
+    """Require persisted raw Chat-upstream usage, never converter default counters."""
+    values = (row["prompt_tokens"], row["completion_tokens"], row["estimated_cost_usd"])
+    require(values == (5, 3, 2.0), "stream_usage_false_value")
+    require(row.get("outcome") == "succeeded" and row.get("usage_status") == "complete",
+            "stream_accounting_terminal")
+    require(row.get("usage_source") == "openai_chat_v1" and row.get("upstream_model") == "demo-text",
+            "stream_accounting_source")
+    for field in ("request_id", "attempt_id", "finalized_at"):
+        require(isinstance(row.get(field), str) and bool(row[field].strip()), "stream_accounting_identity")
+    timings = tuple(row.get(field) for field in ("headers_ms", "first_output_ms", "total_observed_ms"))
+    require(all(type(value) is int for value in timings), "stream_accounting_timing")
+    require(0 <= timings[0] <= timings[1] <= timings[2], "stream_accounting_timing")
+    require(row["status"] == 200 and row["error"] is None, "stream_accounting_status")
+    return {field: row[field] for field in (
+        "prompt_tokens", "completion_tokens", "estimated_cost_usd", "outcome", "usage_status",
+        "usage_source", "upstream_model", "request_id", "attempt_id", "finalized_at",
+        "headers_ms", "first_output_ms", "total_observed_ms")}
+
+
+def require_html_cost_summary(raw, summary):
+    phrase = {"partial": "Partial estimate", "complete": "Estimated total"}[summary["status"]]
+    pattern = (re.escape(phrase) + r' \$([0-9]+(?:\.[0-9]+)?) · ' +
+               f'{summary["known_count"]}/{summary["total_count"]} rows')
+    match = re.search(pattern, raw.decode())
+    require(match is not None and float(match.group(1)) == summary["known_sum"],
+            "html_cost_reconciliation")
+
+
+def require_csv_accounting(original, exported):
+    for field in ("status", "latency_ms", "prompt_tokens", "completion_tokens", "estimated_cost_usd",
+                  "headers_ms", "first_output_ms", "total_observed_ms"):
+        require((exported[field] == "" if original[field] is None else float(exported[field]) == original[field]),
+                "csv_usage_reconciliation")
+    for field in ("ts", "public_model", "connection_id", "error", "request_id", "attempt_id", "upstream_model",
+                  "finalized_at", "outcome", "usage_status", "usage_source"):
+        require(exported[field] == ("" if original[field] is None else str(original[field])),
+                "csv_metadata_reconciliation")
 
 
 class Gateway:
@@ -355,6 +396,7 @@ def run_journey(gateway, fixture, report, update):
         rows = g.api("GET", "usage")["data"]
         require(len(rows) == sum(map(len, expected.values())), "usage_row_count")
         unknown = 0
+        normal_streams = {}
         for name, want in expected.items():
             actual = sorted((r for r in rows if r["public_model"] == name), key=lambda r: r["id"])
             require(len(actual) == len(want), "usage_route_count")
@@ -364,12 +406,15 @@ def run_journey(gateway, fixture, report, update):
                 if kind == "buffered":
                     require(values == (5, 3, 2.0), "buffered_usage")
                 elif kind == "stream":
-                    require(values in ((None, None, None), (5, 3, 2.0)), "stream_usage_false_value")
+                    normal_streams[name] = require_stream_accounting(row)
                 else:
                     require(values == (None, None, None), "unfinished_usage_false_value")
                 if kind == "failed":
                     require(row["error"] == "upstream_attempt_failed", "persisted_error_contract")
                 unknown += values[0] is None
+        for field in ("request_id", "attempt_id"):
+            require(len({row[field] for row in normal_streams.values()}) == len(ENDPOINTS),
+                    "stream_accounting_duplicate_identity")
         summary = cost_summary(rows)
         stats = g.api("GET", "stats")
         require(stats["cost_summary"] == summary and stats["usage_events"] == len(rows), "stats_reconciliation")
@@ -383,24 +428,25 @@ def run_journey(gateway, fixture, report, update):
         for path in ("/admin", "/admin/usage"):
             status, raw = g.request("GET", path, admin=True)
             require(status == 200 and b"All-time" in raw, "admin_html")
-            phrase = {"partial": "Partial estimate", "complete": "Estimated total"}[summary["status"]]
-            require(phrase.encode() in raw and f'{summary["known_count"]}/{len(rows)} rows'.encode() in raw, "html_cost_reconciliation")
+            require_html_cost_summary(raw, summary)
             surfaces.append(raw.decode())
         status, raw = g.request("GET", "/admin/api/usage/export.csv", admin=True)
         require(status == 200, "csv_status")
         exported = list(csv.DictReader(io.StringIO(raw.decode())))
         require(len(exported) == len(rows), "csv_row_count")
         by_id = {str(r["id"]): r for r in rows}
+        require({r["id"] for r in exported} == set(by_id), "csv_row_identity")
         for row in exported:
             original = by_id[row["id"]]
-            for field in ("prompt_tokens", "completion_tokens", "estimated_cost_usd"):
-                require((row[field] == "" if original[field] is None else float(row[field]) == original[field]), "csv_usage_reconciliation")
+            require_csv_accounting(original, row)
         surfaces.append(raw.decode())
         surfaces.append((g.directory / "gateway.log").read_text())
         for sensitive in (ERROR_CANARY, g.admin, g.key, fixture.api_key):
             require(not any(sensitive in surface for surface in surfaces), "sensitive_persistence")
         report["usage"] = {"rows": len(rows), "unknown_token_rows": unknown, "cost_summary": summary,
-            "terminal_outcomes": "verified_by_client_separately_from_ledger_http_status",
+            "normal_streams": normal_streams,
+            "terminal_outcomes": "normal_streams_client_terminal_and_persisted_succeeded_verified",
+            "remaining_unknowns": "failed_or_cancelled_usage_may_be_unknown_buffered_outcome_is_legacy",
             "prices": "synthetic_fixture_only_not_provider_pricing"}
         return rows
     stage("admin_usage_html_csv", inspect)

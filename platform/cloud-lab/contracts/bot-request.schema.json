@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cloud-lab.example/contracts/bot-request.schema.json",
+  "title": "Cloud Lab fixed bot request",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "operation",
+    "request_id"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "cloudlab.bot-request.v1"
+    },
+    "operation": {
+      "enum": [
+        "health.check",
+        "health.status"
+      ]
+    },
+    "request_id": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+    }
+  },
+  "$comment": "UTF-8 input at most4096bytes, duplicate JSON keys rejected. CLI config/state/allow-submit are trusted host settings and never request fields."
+}

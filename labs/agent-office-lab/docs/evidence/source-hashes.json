@@ -1,0 +1,17 @@
+{
+  "description": "Original lab source hashes before publication path changes; raw runs remain local.",
+  "files": {
+    "scripts/local_office_policy.mjs": "0a3648cbec6e39c1f7f01c5f6d60d8388987c7b39f4bc04342f5d9d3f29dcf20",
+    "scripts/local_office_policy.test.mjs": "21085ef489763a03fdeba126b39dad97ce4292d4156f2926e707827efb5325ee",
+    "scripts/office.mjs": "d2f92a3d490c18e1c7e7d15dfd346752b629050dd407dd522e5aca8af928da07",
+    "scripts/check_opencode_sandbox.py": "d79b9272215cc09885634b1945af13b1abca0dc59141ebe59e7c90d3e448c383",
+    "scripts/probe_local_codex.py": "a33bd8c41543bad645b046462e2a932116063bba93444cad035486a0b430eb5f",
+    "scripts/probe_strata.py": "4fdfad20eb03e42dc5bd70be9c1bc85311a173191a6425406242375d1d97dd3c",
+    "scripts/strata_research.py": "7deeacc7129290f072b3b2bf2af656039aad05dba4fb4e312935e65e40ce32ad",
+    "scripts/local_opencode.py": "8cbec6cf6b5ced172baec2323d02395fa491a662e9b9e7524eef155f4f6276fc",
+    "scripts/verify_queue_repair.py": "6c2f775b8131c998c8bb4487dc4103d288e308a36a5eb2350e8c9986861d38a9",
+    "scripts/run_local_work.py": "a0752e8afd7c75a1cebf13178ed96c36362298d6ec89ce024a9c4a7f9e091881",
+    "scripts/office_opencode.mjs": "74edc9a452fac8ac05c95a958b903527bafd567a2c6bb1e4e9b4a7d78cb1315e",
+    "scripts/bin/opencode": "8b1315eb0cbbf062233e7542b44c5b5232958490a7b2b0152f7cba40179174a7"
+  }
+}

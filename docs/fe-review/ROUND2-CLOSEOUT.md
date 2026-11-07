@@ -1,8 +1,8 @@
-# FE第2輪：依已交付範圍結案
+# FE第2輪：結案紀錄
 
-2026-10-28，T-0379／T-0380／T-0381。**原19個FE改善單位交付18個，Fanzloud暫緩、未完成。** 這是已交付範圍結案，不是19項原驗收全部通過、18項新功能、全產品主線或第3輪完成。
+**原19個FE改善單位已全部交付（19/19）。** 2026-10-28先依已交付範圍以18項結案（T-0379／T-0380／T-0381），Fanzloud由desk T-0433續做，2026-10-29交付（見下方Fanzloud一節）。這是各單位R2範圍的交付，不是全產品主線、真實後端／Cloud或第3輪完成。
 
-Owner在進度盤點後接受「停止無期限Chromium深挖、保留18項、將Fanzloud明確列為未完成」的建議，回覆「按你建議，完成主線任務。」首次觀測2026-10-28T10:07:31Z（18:07:31 SGT），訊息發送時間未知。依desk運作方法§3「依已交付範圍結案」，T-0380按13項、T-0381按5項、父卡按18項結案。
+2026-10-28的結案決定：owner在進度盤點後接受「停止無期限Chromium深挖、保留18項、將Fanzloud明確列為未完成」的建議，回覆「按你建議，完成主線任務。」首次觀測2026-10-28T10:07:31Z（18:07:31 SGT），訊息發送時間未知。依desk運作方法§3「依已交付範圍結案」，T-0380按13項、T-0381按5項、父卡按18項結案。
 
 ## newclear：13項已交付
 
@@ -135,20 +135,18 @@ Owner在進度盤點後接受「停止無期限Chromium深挖、保留18項、�
 - 結果：原R2範圍通過；原R3／provider／產品限制保留。
 - 證據：[PR352](https://github.com/fallrising/kernel/pull/352)，merge 33a3ade23bc8b01588cd196e3637f79e64f7c424；[固定中央表的實跑／獨立審查／必要CI](https://github.com/fallrising/kernel/blob/77d081f368709c93871dba7542f1303d353153ba/docs/fe-review/ROUND2-ACCEPTANCE.md)。
 
-## Fanzloud：未完成，暫停投入
+## Fanzloud：R2-AC-14已交付（desk T-0433）
 
-Fanzloud剩餘工作留在[issue706](https://github.com/fallrising/newclear/issues/706)與項目板FE2-14／FE2-E，不計入已交付管理卡的結案範圍。原SDD各AC及判準保留；R2-AC-14與原全範圍R2-AC-E仍未通過。
-
-[PR604](https://github.com/fallrising/newclear/pull/604)保持Draft/unmerged，head 8ba9092ff99aadf54668f43433f62ca711004fef。矩陣8/27：8格desktop已接受，剩desktop recovery1格及tablet/mobile各9格。M2實際UI／鍵盤／對比／秘密回歸及完整有限HTTP/WSS conformance仍未接受。
-
-Recovery007在AUTHENTICATE以REVIEW_BOOTSTRAP_DIAGNOSTIC失敗：初始401及POST201通過，後續session GET200 ERR_ABORTED／正文拒絕；1.943秒含清理，單次授權已消耗、無自動重試。條件式來源路徑不是已證實唯一根因。九案例上游patch未編譯／執行，R9/R10真context/V8仍缺；有限環境盤點未識別可用Blink路徑，不代表全域不存在。
-
-停止延伸Chromium調查；先確認此項優先級及可執行、有界驗證路徑才恢復，涉及新runtime/build/model時依範圍另定授權。無待執行嘗試，不換名重置額度、不推進tablet/mobile；不記錄憑證、原始headers/body，不增加請求或正文重讀，不放寬原判準。舊FAIL、未提交工作、備份全部保留。
+- 行為：合成HTTPS/WSS review harness上的operator狀態、明確操作、fail-closed與秘密回歸；三種尺寸dark 27格、N01–N09 focused journeys、共用capture.mjs。
+- 結果：ROUND2-SDD第17行各條件均有證據成立，`targets.json`改為`verified:true`；[R2報告](../../platform/fanzloud/fe-review/tasks/round2/report.md)列出來源、命令、工具版本、逐條收據、mock/real界線、清理、PR/CI讀回、限制與產品findings。
+- 來源：PR604、725、731、735、739、743、752、754、761、764、765及最終整合PR；各head／merge／CI見報告。
+- 必要CI：每個PR的Rust and operator web與validate均SUCCESS。
+- 保留：recovery007等舊FAIL與`capture-001` FAIL不改寫；真實後端／Cloud整合、SUCCESS AC-04／AC-05與第3輪仍未開始。
 
 ## 證據與結案界線
 
-R2-AC-E對已交付18項的來源、命令、審查、CI與合併可追溯；Fanzloud部分未通過。FE2-14仍in_progress（owner暫緩），FE2-E仍todo（原全14項整合），不得用desk管理卡done替代PASS。
+R2-AC-E對全部19項的來源、命令、審查、CI與合併可追溯；FE2-14與FE2-E均為done。desk管理卡done不替代各單位的PASS證據。
 
-各原報告保留synthetic/mock/native/provider界線、axe未跑／contrast incomplete、瀏覽器健康問題及產品mainline缺口。無release/deploy/usable tag；Fanzloud mainline incomplete與targets false不變。
+各原報告保留synthetic/mock/native/provider界線、axe未跑／contrast incomplete、瀏覽器健康問題及產品mainline缺口。無release/deploy/usable tag；Fanzloud mainline incomplete不變，`verified:true`只是合成review origin的metadata。
 
-本次只核對證據與更新文件。交付門檻為scoped project-success、索引／連結／staged diff、獨立審查、必要CI、正常合併及遠端精確回讀；結果見本結案PR和journal，不以文件CI推成Fanzloud執行通過。
+交付門檻為scoped project-success、索引／連結／staged diff、獨立審查、必要CI、正常合併及遠端精確回讀；不以文件CI推成產品完成。

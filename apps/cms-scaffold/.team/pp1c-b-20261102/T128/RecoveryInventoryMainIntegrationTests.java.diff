@@ -1,0 +1,165 @@
+--- RecoveryInventoryMainIntegrationTests.java.before
++++ services/cms-api/src/integrationTest/java/com/fallrising/cms/ops/RecoveryInventoryMainIntegrationTests.java
+@@ -0,0 +1,162 @@
++package com.fallrising.cms.ops;
++
++import com.fasterxml.jackson.databind.JsonNode;
++import com.fasterxml.jackson.databind.ObjectMapper;
++import org.flywaydb.core.Flyway;
++import org.junit.jupiter.api.Test;
++import org.junit.jupiter.api.Timeout;
++import org.junit.jupiter.api.io.TempDir;
++import org.testcontainers.containers.PostgreSQLContainer;
++import org.testcontainers.junit.jupiter.Container;
++import org.testcontainers.junit.jupiter.Testcontainers;
++
++import java.io.BufferedReader;
++import java.io.InputStreamReader;
++import java.io.PipedInputStream;
++import java.io.PipedOutputStream;
++import java.io.PrintStream;
++import java.nio.charset.StandardCharsets;
++import java.nio.file.Files;
++import java.nio.file.Path;
++import java.nio.file.attribute.PosixFilePermissions;
++import java.sql.Connection;
++import java.sql.DriverManager;
++import java.util.Map;
++import java.util.TreeMap;
++import java.util.concurrent.Executors;
++import java.util.concurrent.TimeUnit;
++import java.util.concurrent.atomic.AtomicReference;
++
++import static org.junit.jupiter.api.Assertions.*;
++
++@Testcontainers
++class RecoveryInventoryMainIntegrationTests {
++    private static final String OPERATION = "00112233-4455-6677-8899-aabbccddeeff";
++    private static final String SECRET = "synthetic-runner-secret-canary";
++    private static final String RAW_ROW = "private-runner-row-canary";
++    private static final ObjectMapper JSON = new ObjectMapper();
++
++    @Container
++    static final PostgreSQLContainer<?> POSTGRES = new PostgreSQLContainer<>("postgres:16-alpine")
++            .withDatabaseName("cms").withUsername("cms_local").withPassword(SECRET);
++
++    @TempDir Path root;
++
++    private Path path(Path fixed) {
++        return root.resolve(fixed.toString().substring(1));
++    }
++
++    private void privateFile(String fixed, byte[] bytes) throws Exception {
++        Path file = path(Path.of(fixed));
++        Files.createDirectories(file.getParent());
++        Files.setPosixFilePermissions(file.getParent(), PosixFilePermissions.fromString("rwx------"));
++        Files.write(file, bytes);
++        Files.setPosixFilePermissions(file, PosixFilePermissions.fromString("rw-------"));
++    }
++
++    @Test
++    @Timeout(45)
++    void PP1c_actualPg16ReadyMatchesIndependentObserverBeforePermitAndPrivateResult() throws Exception {
++        Flyway.configure().dataSource(POSTGRES.getJdbcUrl(), "cms_local", SECRET)
++                .locations("classpath:db/migration").load().migrate();
++        try (var seed = DriverManager.getConnection(POSTGRES.getJdbcUrl(), "cms_local", SECRET);
++             var statement = seed.prepareStatement("INSERT INTO cms_principal(id,username,display_name,status) "
++                     + "VALUES ('10000000-0000-0000-0000-000000000001','runner-fixture',?,'active')")) {
++            statement.setString(1, RAW_ROW);
++            statement.executeUpdate();
++        }
++        Map<String, Object> request = new TreeMap<>(Map.of(
++                "version", 1, "mode", "INVENTORY", "operationId", OPERATION, "side", "source",
++                "targetId", "pp1-local:" + "a".repeat(32), "releaseId", "sha256:" + "b".repeat(64),
++                "jdbcUrl", "jdbc:postgresql://" + POSTGRES.getHost() + ":" + POSTGRES.getMappedPort(5432) + "/cms", "dbUser", "cms_local",
++                "passwordFile", "/run/secrets/spring.datasource.password", "mediaRoot", "/media"));
++        request.put("outputFile", "/run/pp1/output/inventory.json");
++        request.put("backupId", null);
++        request.put("rawProofSha256", null);
++        byte[] requestBytes = RecoveryInventory.canonicalBytes(request);
++        privateFile("/run/pp1/request.json", requestBytes);
++        privateFile("/run/secrets/spring.datasource.password", SECRET.getBytes(StandardCharsets.UTF_8));
++        Path output = path(Path.of("/run/pp1/output/inventory.json"));
++        Files.createDirectories(output.getParent());
++        Files.setPosixFilePermissions(output.getParent(), PosixFilePermissions.fromString("rwx------"));
++        Files.createDirectory(path(Path.of("/media")));
++
++        AtomicReference<Connection> pinned = new AtomicReference<>();
++        var executor = Executors.newSingleThreadExecutor(Thread.ofPlatform().daemon().factory());
++        try (var input = new PipedInputStream(); var permit = new PipedOutputStream(input);
++             var outputBytes = new PipedInputStream(65536); var writer = new PipedOutputStream(outputBytes);
++             var stdout = new PrintStream(writer, true, StandardCharsets.UTF_8);
++             var lines = new BufferedReader(new InputStreamReader(outputBytes, StandardCharsets.UTF_8))) {
++            var completion = executor.submit(() -> RecoveryInventoryMain.run(
++                    new String[]{"--request", "/run/pp1/request.json"}, Map.of(), stdout, input, this::path,
++                    (url, properties) -> {
++                        Connection connection = DriverManager.getConnection(url, properties);
++                        pinned.set(connection);
++                        return connection;
++                    }, (connection, media) -> {
++                        assertSame(pinned.get(), connection);
++                        assertTrue(connection.isReadOnly());
++                        assertFalse(connection.getAutoCommit());
++                        assertEquals(Connection.TRANSACTION_REPEATABLE_READ, connection.getTransactionIsolation());
++                        return RecoveryInventory.inspect(connection, media);
++                    }));
++            String readyLine = lines.readLine();
++            JsonNode ready = JSON.readTree(readyLine);
++            assertTrue(ready.path("readOnly").booleanValue());
++            assertEquals(OPERATION, ready.path("operationId").textValue());
++            assertEquals(RecoveryInventory.sha256(requestBytes), ready.path("requestSha256").textValue());
++            assertFalse(Files.exists(output));
++            JsonNode backend = ready.path("backend");
++            int pid = backend.path("pid").intValue();
++            try (var observer = DriverManager.getConnection(POSTGRES.getJdbcUrl(), "cms_local", SECRET);
++                 var statement = observer.prepareStatement("SELECT pid, extract(epoch FROM backend_start)::text, "
++                         + "datname, usename, host(client_addr), application_name, client_addr::text "
++                         + "FROM pg_stat_activity WHERE pid=?")) {
++                statement.setInt(1, pid);
++                try (var row = statement.executeQuery()) {
++                    assertTrue(row.next());
++                    assertEquals(pid, row.getInt(1));
++                    assertEquals(row.getString(2), backend.path("backendStartEpoch").textValue());
++                    assertEquals("cms", row.getString(3));
++                    assertEquals(row.getString(3), backend.path("db").textValue());
++                    assertEquals("cms_local", row.getString(4));
++                    assertEquals(row.getString(4), backend.path("role").textValue());
++                    assertTrue(row.getString(7).contains("/"), "actual inet::text includes a prefix");
++                    assertEquals(row.getString(5), backend.path("clientAddr").textValue(),
++                            "Ready must match the independent host(client_addr) observer");
++                    assertEquals(OPERATION, row.getString(6));
++                    assertEquals(row.getString(6), backend.path("applicationName").textValue());
++                    assertFalse(row.next());
++                }
++            }
++            permit.write(RecoveryInventory.canonicalBytes(Map.of("version", 1, "operationId", OPERATION,
++                    "requestSha256", ready.path("requestSha256").textValue(),
++                    "backendSha256", RecoveryInventory.sha256(RecoveryInventory.canonicalBytes(backend)),
++                    "action", "READ_INVENTORY")));
++            permit.close();
++            String resultLine = lines.readLine();
++            assertEquals(0, completion.get(15, TimeUnit.SECONDS));
++            assertTrue(pinned.get().isClosed());
++            JsonNode result = JSON.readTree(resultLine);
++            byte[] artifact = Files.readAllBytes(output);
++            assertEquals(RecoveryInventory.sha256(artifact), result.path("inventorySha256").textValue());
++            assertEquals(JSON.readTree(artifact).path("dbSnapshotSha256"), result.path("dbSnapshotSha256"));
++            assertEquals(20, JSON.readTree(artifact).path("tables").size());
++            assertEquals(PosixFilePermissions.fromString("rw-------"), Files.getPosixFilePermissions(output));
++            assertTrue(new String(artifact, StandardCharsets.UTF_8).contains(RAW_ROW));
++            for (String line : new String[]{readyLine, resultLine}) {
++                assertFalse(line.contains(SECRET));
++                assertFalse(line.contains(RAW_ROW));
++                assertFalse(line.contains("jdbc:"));
++            }
++            try (var observer = DriverManager.getConnection(POSTGRES.getJdbcUrl(), "cms_local", SECRET);
++                 var statement = observer.prepareStatement("SELECT count(*) FROM pg_stat_activity WHERE pid=?")) {
++                statement.setInt(1, pid);
++                try (var row = statement.executeQuery()) { assertTrue(row.next()); assertEquals(0, row.getInt(1)); }
++            }
++        } finally {
++            executor.shutdownNow();
++            assertTrue(executor.awaitTermination(5, TimeUnit.SECONDS));
++        }
++    }
++}

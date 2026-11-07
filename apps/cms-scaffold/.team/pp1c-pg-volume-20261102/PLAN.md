@@ -1,0 +1,5 @@
+# T-0351 PG helper volume proposal
+
+Docs-only scoped proposal, pending owner. Root owns DECISION.md and probe evidence; existing T124 independently reviews exact delta within reserved review scope. Product source and approved contract remain unchanged. Check project contracts, whitespace, source absence; normal draft PR/CI/readback authorized. No merge before explicit owner decision. Probe resources are synthetic network-none and retained. Required source correction for Docker lowercase exact-ID absence is separate existing-policy compatibility work. Aggregate tool/provider/time counts unknown/null.
+
+Owner latest「批准。」selects the exact proposal, recorded 2026-11-02T12:22:17.868373+00:00. Root updates formal annex/wave and approval status only; existing T124 proposal review remains historical. T125 independent approved-delta review <=10active minutes, then project checks/newheadCI/normalmerge/exactremote readback before B policy changes. Docs delivery estimate15–25minutes; remainingB60–90combinedactive estimate, previouswork notreset; C/D estimates renewed after B delivered. Tests/CI15minute bounds and initial+2reasoned corrections retained.

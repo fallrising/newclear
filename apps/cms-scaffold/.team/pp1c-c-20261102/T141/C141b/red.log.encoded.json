@@ -1,0 +1,8 @@
+{
+  "version": 1,
+  "original": "T141/C141b/red.log",
+  "sha256": "30a1fd9de979d521d30aec80d33a0b70d79b267cec5593d3ac9fa32a32732ca4",
+  "byteSize": "939",
+  "encoding": "utf-8",
+  "text": "✖ T141 fixed read-only config observation covers both directories and prod variants (31.480218ms)\nℹ tests 1\nℹ suites 0\nℹ pass 0\nℹ fail 1\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 93.044778\n\n✖ failing tests:\n\ntest at scripts/local/maintenance-target.test.mjs:307:1\n✖ T141 fixed read-only config observation covers both directories and prod variants (31.480218ms)\n  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n  \n  0 !== 16\n  \n      at TestContext.<anonymous> (file:///home/ckc/test/codex/wt/newclear/cms-pp1c-c-revoke-20261102/apps/cms-scaffold/scripts/local/maintenance-target.test.mjs:311:10)\n      at async Test.run (node:internal/test_runner/test:1332:7)\n      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:385:3) {\n    generatedMessage: true,\n    code: 'ERR_ASSERTION',\n    actual: 0,\n    expected: 16,\n    operator: 'strictEqual',\n    diff: 'simple'\n  }\n"
+}

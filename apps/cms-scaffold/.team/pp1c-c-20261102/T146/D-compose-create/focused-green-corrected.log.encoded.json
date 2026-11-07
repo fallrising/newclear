@@ -1,0 +1,8 @@
+{
+  "version": 1,
+  "original": "T146/D-compose-create/focused-green-corrected.log",
+  "sha256": "68914d360edff0dc8ce945ec9f9a4822f90d056eecaa0015c63338717f15de66",
+  "byteSize": "1512",
+  "encoding": "utf-8",
+  "text": "✔ T131_T02_factory_creates_PG_first_and_only_after_blank_creates_stopped_services (1676.660548ms)\n✔ T131_T02_factory_rejects_relations_without_starting_application (1089.71078ms)\n✔ T131_T02_factory_rejects_compose-drift_without_starting_application (546.93325ms)\n✔ T131_T02_factory_rejects_pg-started_without_starting_application (700.959462ms)\n✔ T131_T02_factory_rejects_pg-command_without_starting_application (454.977864ms)\n✔ T131_T02_factory_rejects_pg-mount_without_starting_application (736.262202ms)\n✔ T131_T02_factory_rejects_pg-network_without_starting_application (731.94786ms)\n✔ T131_T02_factory_rejects_pg-port_without_starting_application (459.969573ms)\n✔ T146 factory preserves both privately created network IDs through unchanged Compose (1225.427569ms)\n✔ T146 factory rejects Compose network web-id drift before PG start (1140.787081ms)\n✔ T146 factory rejects Compose network data-id drift before PG start (902.5492ms)\n✔ T146 factory rejects Compose network subnet drift before PG start (993.615931ms)\n✔ T146d supported Compose create retains already-created dependencies and does not start apps (1558.233025ms)\n✔ T146d rejects pg-recreated during dependency-aware create (1249.385816ms)\n✔ T146d rejects api-recreated during dependency-aware create (878.793361ms)\n✔ T146d rejects dependency-started during dependency-aware create (495.997498ms)\nℹ tests 16\nℹ suites 0\nℹ pass 16\nℹ fail 0\nℹ cancelled 0\nℹ skipped 0\nℹ todo 0\nℹ duration_ms 14955.981764\n"
+}

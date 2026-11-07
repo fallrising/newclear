@@ -1,7 +1,40 @@
-import { fireEvent, screen, waitFor, within } from "@testing-library/react";
+import { act, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
+import { StrictMode } from "react";
+import { QueryClientProvider } from "@tanstack/react-query";
+import { createMemoryRouter, RouterProvider } from "react-router";
+import { keys } from "@cms/api";
+import { createAppQueryClient, SessionProvider } from "@cms/auth";
 import { db, setUser } from "@cms/mocks";
-import { describe, expect, it } from "vitest";
+import { http, HttpResponse } from "msw";
+import { describe, expect, it, vi } from "vitest";
+import { server } from "@cms/mocks/node";
+import { toast, Toaster } from "@cms/ui";
+import { api } from "./api";
+import { routes } from "./routes";
 import { IDS, openMoreActions, recordRequests, renderRoute, writes } from "./test-utils";
+
+function completePurgeConfirmation(dialog: HTMLElement, phrase: string) {
+  fireEvent.change(within(dialog).getByTestId("confirm-input"), { target: { value: phrase } });
+  fireEvent.change(within(dialog).getByTestId("confirm-word"), { target: { value: "DELETE" } });
+  fireEvent.click(within(dialog).getByTestId("confirm-acknowledgement"));
+}
+
+function renderStrictRoute(path: string) {
+  const queryClient = createAppQueryClient();
+  queryClient.setDefaultOptions({ queries: { ...queryClient.getDefaultOptions().queries, retry: false } });
+  const router = createMemoryRouter(routes, { initialEntries: [path] });
+  render(
+    <StrictMode>
+      <QueryClientProvider client={queryClient}>
+        <SessionProvider auth={api.auth}>
+          <RouterProvider router={router} />
+          <Toaster />
+        </SessionProvider>
+      </QueryClientProvider>
+    </StrictMode>,
+  );
+  return { router, queryClient };
+}
 
 describe("web-admin emergency entry inspector", () => {
   it("surface-admin §4.4 lookup: pick a type, search by title; rows show metadata only", async () => {
@@ -75,7 +108,7 @@ describe("web-admin emergency entry inspector", () => {
     fireEvent.click(await screen.findByTestId("entry-purge"));
     const dialog = await screen.findByTestId("confirm-dialog");
     expect(within(dialog).getByTestId("confirm-submit")).toBeDisabled();
-    fireEvent.change(within(dialog).getByTestId("confirm-input"), { target: { value: "private-studio" } });
+    completePurgeConfirmation(dialog, "private-studio");
     fireEvent.click(within(dialog).getByTestId("confirm-submit"));
     expect(await screen.findByText("還有其他條目連到它，請先在 Back 移除這些連結。")).toBeInTheDocument();
     expect(db.workEntries.some((e) => e.id === IDS.studio)).toBe(true);
@@ -87,11 +120,155 @@ describe("web-admin emergency entry inspector", () => {
     await openMoreActions();
     fireEvent.click(await screen.findByTestId("entry-purge"));
     const dialog = await screen.findByTestId("confirm-dialog");
-    fireEvent.change(within(dialog).getByTestId("confirm-input"), { target: { value: "coast-harbour" } });
+    completePurgeConfirmation(dialog, "coast-harbour");
     fireEvent.click(within(dialog).getByTestId("confirm-submit"));
     expect(await screen.findByText("已永久刪除")).toBeInTheDocument();
     await waitFor(() => expect(router.state.location.pathname + router.state.location.search).toBe("/entries?type=photo"));
     expect(db.workEntries.some((e) => e.id === IDS.harbour)).toBe(false);
+  });
+
+  it("PP1-FM07 submits a same-tick double click once and keeps normal success under StrictMode", async () => {
+    setUser("seed-admin");
+    const requests = recordRequests();
+    const { router } = renderStrictRoute(`/entries/${IDS.harbour}`);
+    await openMoreActions();
+    fireEvent.click(await screen.findByTestId("entry-purge"));
+    const dialog = await screen.findByTestId("confirm-dialog");
+    completePurgeConfirmation(dialog, "coast-harbour");
+    const submit = within(dialog).getByTestId("confirm-submit");
+    act(() => {
+      fireEvent.click(submit);
+      fireEvent.click(submit);
+    });
+    expect(await screen.findByText("已永久刪除")).toBeInTheDocument();
+    await waitFor(() => expect(router.state.location.pathname).toBe("/entries"));
+    expect(writes(requests).filter((request) => request.path.endsWith(`/entries/${IDS.harbour}/purge`))).toHaveLength(1);
+  });
+
+  it("PP1-FM07 stale purge success invalidates only its captured list and target audit", async () => {
+    setUser("seed-admin");
+    let release!: () => void;
+    let started!: () => void;
+    const held = new Promise<void>((resolve) => { release = resolve; });
+    const requestStarted = new Promise<void>((resolve) => { started = resolve; });
+    server.use(http.post("*/api/v1/admin/entries/:id/purge", async () => {
+      started();
+      await held;
+      return new HttpResponse(null, { status: 204 });
+    }));
+    const { router, queryClient } = renderRoute(`/entries/${IDS.harbour}`);
+    const invalidate = vi.spyOn(queryClient, "invalidateQueries");
+    const successToast = vi.spyOn(toast, "success");
+    await openMoreActions();
+    fireEvent.click(await screen.findByTestId("entry-purge"));
+    const dialog = await screen.findByTestId("confirm-dialog");
+    completePurgeConfirmation(dialog, "coast-harbour");
+    fireEvent.click(within(dialog).getByTestId("confirm-submit"));
+    await requestStarted;
+    queryClient.setQueryData(keys.entries.detail(IDS.coast), structuredClone(db.workEntries.find((entry) => entry.id === IDS.coast)!));
+    await act(async () => { await router.navigate(`/entries/${IDS.coast}`); });
+    await screen.findByRole("heading", { level: 1, name: "Coast Light 2026" });
+    await act(async () => { release(); });
+    await waitFor(() => expect(invalidate).toHaveBeenCalledWith({ queryKey: keys.admin.audit({ targetId: IDS.harbour, action: "entry.", size: 20 }), exact: true }));
+    const keysInvalidated = invalidate.mock.calls.map(([filters]) => filters?.queryKey);
+    expect(keysInvalidated).toContainEqual(keys.entries.lists("photo"));
+    expect(keysInvalidated).not.toContainEqual(keys.entries.lists("album"));
+    expect(keysInvalidated).not.toContainEqual(keys.admin.audit({ targetId: IDS.coast, action: "entry.", size: 20 }));
+    expect(keysInvalidated).not.toContainEqual(keys.admin.auditAll());
+    expect(successToast).not.toHaveBeenCalled();
+    expect(router.state.location.pathname).toBe(`/entries/${IDS.coast}`);
+    successToast.mockRestore();
+  });
+
+  it("PP1-FM07 clears a fully completed purge when the target changes to another id with the same slug", async () => {
+    setUser("seed-admin");
+    const requests = recordRequests();
+    const { router, queryClient } = renderRoute(`/entries/${IDS.harbour}`);
+    await screen.findByRole("heading", { level: 1, name: "Harbour wall" });
+    await openMoreActions();
+    fireEvent.click(await screen.findByTestId("entry-purge"));
+    const dialog = await screen.findByTestId("confirm-dialog");
+    completePurgeConfirmation(dialog, "coast-harbour");
+
+    const sameSlugDifferentEntry = structuredClone(db.workEntries.find((entry) => entry.id === IDS.coast)!);
+    sameSlugDifferentEntry.slug = "coast-harbour";
+    queryClient.setQueryData(keys.entries.detail(IDS.coast), sameSlugDifferentEntry);
+    await router.navigate(`/entries/${IDS.coast}`);
+
+    await screen.findByRole("heading", { level: 1, name: "Coast Light 2026" });
+    expect(screen.queryByTestId("confirm-dialog")).not.toBeInTheDocument();
+    await openMoreActions();
+    fireEvent.click(await screen.findByTestId("entry-purge"));
+    const reopened = await screen.findByTestId("confirm-dialog");
+    expect(within(reopened).getByTestId("confirm-input")).toHaveValue("");
+    expect(within(reopened).getByTestId("confirm-word")).toHaveValue("");
+    expect(within(reopened).getByTestId("confirm-acknowledgement")).not.toBeChecked();
+    expect(within(reopened).getByTestId("confirm-submit")).toBeDisabled();
+    expect(writes(requests)).toEqual([]);
+  });
+
+  it("PP1-FM07 resets confirmation when the same entry version changes", async () => {
+    setUser("seed-admin");
+    const requests = recordRequests();
+    const { queryClient } = renderRoute(`/entries/${IDS.harbour}`);
+    await screen.findByRole("heading", { level: 1, name: "Harbour wall" });
+    await openMoreActions();
+    fireEvent.click(await screen.findByTestId("entry-purge"));
+    const dialog = await screen.findByTestId("confirm-dialog");
+    fireEvent.change(within(dialog).getByTestId("confirm-input"), { target: { value: "coast-harbour" } });
+
+    const changed = structuredClone(db.workEntries.find((entry) => entry.id === IDS.harbour)!);
+    changed.version += 1;
+    queryClient.setQueryData(keys.entries.detail(IDS.harbour), changed);
+
+    await waitFor(() => expect(screen.getByTestId("entry-meta")).toHaveTextContent(String(changed.version)));
+    expect(screen.queryByTestId("confirm-dialog")).not.toBeInTheDocument();
+    expect(writes(requests)).toEqual([]);
+  });
+
+  it("PP1-FM07 resets confirmation when the same entry slug changes", async () => {
+    setUser("seed-admin");
+    const requests = recordRequests();
+    const { queryClient } = renderRoute(`/entries/${IDS.harbour}`);
+    await screen.findByRole("heading", { level: 1, name: "Harbour wall" });
+    await openMoreActions();
+    fireEvent.click(await screen.findByTestId("entry-purge"));
+    completePurgeConfirmation(await screen.findByTestId("confirm-dialog"), "coast-harbour");
+
+    const changed = structuredClone(db.workEntries.find((entry) => entry.id === IDS.harbour)!);
+    changed.slug = "coast-harbour-revised";
+    queryClient.setQueryData(keys.entries.detail(IDS.harbour), changed);
+
+    await waitFor(() => expect(screen.getByTestId("entry-meta")).toHaveTextContent(changed.slug!));
+    expect(screen.queryByTestId("confirm-dialog")).not.toBeInTheDocument();
+    expect(writes(requests)).toEqual([]);
+  });
+
+  it("PP1-FM07 purge cancel then archive action and reopening purge never reuses fields or submits", async () => {
+    setUser("seed-admin");
+    const requests = recordRequests();
+    renderRoute(`/entries/${IDS.harbour}`);
+    await openMoreActions();
+    fireEvent.click(await screen.findByTestId("entry-purge"));
+    const purge = await screen.findByTestId("confirm-dialog");
+    completePurgeConfirmation(purge, "coast-harbour");
+    fireEvent.click(within(purge).getByTestId("confirm-cancel"));
+
+    await openMoreActions();
+    fireEvent.click(await screen.findByTestId("entry-archive"));
+    const archive = await screen.findByTestId("confirm-dialog");
+    expect(within(archive).queryByTestId("confirm-word")).not.toBeInTheDocument();
+    expect(within(archive).queryByTestId("confirm-acknowledgement")).not.toBeInTheDocument();
+    fireEvent.click(within(archive).getByTestId("confirm-cancel"));
+
+    await openMoreActions();
+    fireEvent.click(await screen.findByTestId("entry-purge"));
+    const reopenedPurge = await screen.findByTestId("confirm-dialog");
+    expect(within(reopenedPurge).getByTestId("confirm-input")).toHaveValue("");
+    expect(within(reopenedPurge).getByTestId("confirm-word")).toHaveValue("");
+    expect(within(reopenedPurge).getByTestId("confirm-acknowledgement")).not.toBeChecked();
+    expect(within(reopenedPurge).getByTestId("confirm-submit")).toBeDisabled();
+    expect(writes(requests)).toEqual([]);
   });
 
   it("01 Q-13 B member binding: an owner's principal-ref is linked here with the entry version", async () => {

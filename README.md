@@ -39,7 +39,9 @@
 
 | 路徑 | 說明 | 技術 | 文檔檔 |
 | --- | --- | --- | --- |
+| [`gateways/edge-relay`](gateways/edge-relay/) | 通用反向應用通道與可插拔 ntfy/Bark 通知（SDD-only，未實作） | TypeScript、Workers、Durable Objects（規劃） | 未分級 |
 | [`gateways/pokercase`](gateways/pokercase/) | Multi-provider LLM gateway（thinrouter） | Rust, SQLite | C |
+| [`systems/agent-secrets`](systems/agent-secrets/) | HSM 概念的加密秘密 Store 與 Agent 受控憑證 Broker SDD；未實作 | Workers, KV, TypeScript（規劃） | 未分級 |
 | [`systems/clarkq`](systems/clarkq/) | HTTP FIFO queue | Go | C |
 | [`systems/snail`](systems/snail/) | RESP2 相容 in-memory data server | Rust | C |
 | [`systems/ojbquay`](systems/ojbquay/) | Kafka-based messaging control/data plane | Java, Kafka, gRPC | C |
@@ -54,7 +56,8 @@
 | [`platform/agent-platform`](platform/agent-platform/) | 自託管多 agent 工作平台（OpenHands Agent Canvas 範本） | React, Python, PostgreSQL, Cocoon | A |
 | [`platform/agent-workforce`](platform/agent-workforce/) | 跨產品數位工作者：M1 離線核心與有界 M2 原生 adapter；完整 M2／跨產品整合仍有缺口 | Python、SQLite；可替換 adapters | A |
 | [`platform/dim-gate`](platform/dim-gate/) | CMDB 核心企業運維自助平台前端（demo） | React, TypeScript | A |
-| [`platform/cloud-lab`](platform/cloud-lab/) | 個人 CF 工具框架：知識樹、唯讀節點檢查、持久任務與看板（雲端閉環／恢復撤權與本機瀏覽器子集通過，新版已部署，實機驗收待完成） | Workers Web APIs、D1、Python、原生網頁 | 未分級 |
+| [`platform/spring-pool`](platform/spring-pool/) | 單人版本化腳本庫與 runbook 編排；不執行腳本（開發中） | Hono, Rust/Wasm；Workers, D1 | A |
+| [`platform/cloud-lab`](platform/cloud-lab/) | 個人CF工具整合入口：固定node-health歷史閉環、Access看板與bot；既有工具盤點及重複判定已整理，inventory報告adapter已上線，4個Worker用途已對照；多VPS唯讀agent來源與設計已整理。主線未完成、當前授權另見元件SUCCESS | Workers Web APIs、D1、Python、原生網頁 | 未分級 |
 | [`platform/edge-ops`](platform/edge-ops/) | Cloudflare 主機監控、受控作業與可選初始化（SDD + M0 契約層，無部署） | TypeScript, Go；Workers, D1, DO, R2, React（規劃） | A |
 | [`platform/signal-hub`](platform/signal-hub/) | 個人事件中樞／戰情室：CloudEvents 事件庫、規則生成指標看板、訂閱投遞（M3 runtime） | Go, SQLite, React | A |
 | [`platform/ice-maker`](platform/ice-maker/) | Local-first 個人工程知識編譯器 | Python | A |
@@ -65,6 +68,7 @@
 | [`apps/cloudform`](apps/cloudform/) | Terraform-schema-driven cloud provisioning form designer | TypeScript, Java | D |
 | [`apps/cms-scaffold`](apps/cms-scaffold/) | 可重複使用的 CMS kernel（API + Front/Back/Admin） | Java, React, PostgreSQL | C |
 | [`tools/codex-usage`](tools/codex-usage/) | Agent Usage 統一唯讀總覽：重用 Codex／Claude 來源，分清訂閱額度、本機統計與 API 支出 | Python, Codex App Server | A |
+| [`tools/gameplay-pattern-catalog`](tools/gameplay-pattern-catalog/) | 以 Gameplay Atlas 公開快照為分母的繁中設計模式筆記、來源 manifest 與靜態網站（Draft，未部署） | Python、原生 JavaScript | 未分級 |
 | [`tools/motion-prompt`](tools/motion-prompt/) | 繁中／英文動態術語圖鑑：120 項動畫、雙語搜尋與提示詞複製（待 owner 驗收） | 原生 JavaScript, Canvas | 未分級 |
 | [`tools/streaming-converter`](tools/streaming-converter/) | FFmpeg HLS conversion 與 web player | Bash, FFmpeg | D |
 
@@ -74,6 +78,10 @@
 | --- | --- | --- |
 | [`specs/fleet`](specs/fleet/) | **可執行**的 Fleet Catalog（`fleet.yaml`、Compose、agents、Cloudflare）。路徑在 `specs/`，但內容是系統元件／公開契約，**不是**根目錄文檔。見 [taxonomy](docs/taxonomy.md)。 | B |
 | [`examples/bite-pi`](examples/bite-pi/) | Pi agent 公開示範 | D |
+| [`labs/agent-office-lab`](labs/agent-office-lab/) | 本地優先的三 provider Office 實驗：OpenCode 原生任務已驗證，完整 MVP 待完成 | 未分級 |
+| [`labs/memvid-lab`](labs/memvid-lab/) | 固定 Memvid 的 11 類場景＋PDF／語意／CLIP／Whisper（15 項實跑通過並已合併；繁中筆記實測不建議直接採用） | 未分級 |
+| [`labs/token-economizer-lab`](labs/token-economizer-lab/) | 真 TokenEconomizer 固定版本 hooks／CLI 離線實驗；合成 traces、無 provider 呼叫 | 未分級 |
+| [`labs/graphify-lab`](labs/graphify-lab/) | Graphify 開發場景、固定參考程式碼與索引單份共用實驗 | 未分級 |
 | [`labs/bee-swarm`](labs/bee-swarm/) | AI 角色協作 workflow 模擬（歷史） | D |
 | [`labs/aweshore`](labs/aweshore/) | 個人筆記／PKM 早期嘗試（已停止） | D |
 | [`labs/eru-vps-mvp`](labs/eru-vps-mvp/) | Project Eru 四機 VPS MVP 實驗 | A |

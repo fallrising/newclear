@@ -49,3 +49,28 @@ Import依官方init回應的signed URL PUT原始SQL，校驗ETag與原檔MD5，�
 [resident契約](resident-runner.md)與[實機證據](evidence/m1-resident.md)補充先前one-shot階段：現已驗證有期限的user service自動拾取一筆任務，以及正常重啟journal不變。繼續使用原私人config及journal，先停服務再人工once；不要重啟不持鎖的舊版並行執行。期限與續權仍由operator核實；不假設linger、開機恢復或完整故障矩陣已通過。
 
 [隔離恢復工具](recovery-qualification.md)使用synthetic身份及專用journal，不能指向live配置。遇到live unknown時先保留命令／external_ref／journal對帳；本機故障工具通過不授權清空unknown、刷新deadline或重跑原命令。
+
+## 排程接續與版本回退的實測注意事項
+
+[HL首次真實觸發](evidence/m1-health-schedule-live.md)保留了派送前過期及補償；[HW修正](schedule-window.md)將命令預算改從handler實際時間計算，due仍作去重身份。接手必須讀最新證據、固定已合併候選，不能只看Cron存在或舊healthy結果。
+
+- fresh核對原active版本、最新設定、disabled schedule、active命令、原journal、self與resident截止。資產成功後再規劃CAS與新UTC起點；在實際寫入Cron前再次確認至少15分鐘傳播餘裕，舊not_before或JWT不得重用。
+- 記錄due、實際admitted_at、dispatch／execution deadline、runner claim與finished_at。provider在當分鐘內延遲不等於錯過整個slot；但handler時間亦不是D1持久提交時間，不保證任意延遲下都有足夠執行窗口。
+- 失敗先依批准方案停用並提升schedule revision、移除本次Cron及對帳；還原grant也使用新CAS revision。保留failed firing／command和journal，不刪除或重播未知工作。
+- Worker版本回退後，GET script/settings可能仍反映最後上傳設定。本次實測active版本已回原版本、其六個bindings與原值相符，而settings視圖仍帶inactive HEALTH_SCHEDULE。遇到此差異先讀deployments與該active version的resources/bindings，逐欄核對；不要為了讓兩個視圖相等而盲目PATCH bindings、重播回退或覆寫secret。把例外與實際D1停用／revision狀態記進收據。
+
+## Unknown結案的版本邊界
+
+原命令unknown先留存D1與原journal證據；只按[UR操作條件](unknown-resolution.md)準備私人plan。計畫生成不等於批准或執行。不得為使active0而直接UPDATE／刪row／清journal；先確認新Worker支援closed_unknown，再按具體批准暫停runner、排空在途、fresh完整CAS一次、回讀及恢復原service與截止。原unknown不得重跑，恢復只接受新ID；結案後舊Worker rollback不安全，需保留新護欄。
+
+## 看板資產更新的計數
+
+[PSL](evidence/m1-snapshot-rollout.md)沿用direct upload：manifest條目不等於實際上傳份數，已存在hash會重用。保存session buckets與每個upload intent／response，最終分列manifest_entries與actual_uploaded_assets；勿由舊helper欄位名稱推論上傳數量。發布後驗active100%與原modules/settings及資料保全，secret繼承不等於逐值讀回。
+
+## 盤點上線的可重用步驟
+
+[ML上線證據](evidence/inventory-live.md)沿用已批准的候選：fresh比對原版本、settings、Access、grants、schema；9檔逐byte比對已合併來源；固定MCP capture→原producer離線轉換→既有validator canonical body／digest。原D1只新增0003快照表，首報以參數化INSERT且workspace不存在條件匯入，received_at取實際D1保存時間，不把management import寫成人類API登入。
+
+四份資產manifest實際上傳四份；completion JWT只留私人receipt，經stdin傳curl，不放argv或公開文件。五個modules保留相對路徑，main_module=worker/index.mjs；原plaintext／D1 bindings沿用，keep_bindings保留secret_text。發布成功並回讀100%與exact modules後才CAS human revision2→3；其他grants不變。
+
+MCP下載Worker回傳raw multipart，即使包在回傳物件的source欄位也不是{result:...}；按boundary解析。首次驗證器型別假設錯誤只修解析器、重讀既有receipt，不重播發布。最後比對Access／Cron／其他grants、資產先經Worker與匿名302。回退保留快照表／報告，恢復保存的舊版本；human回復須新revision，不倒退。私人intent、response、查核、原版本及rollback皆保留於當次launcher evidence。

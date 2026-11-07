@@ -291,7 +291,7 @@ Owner 指示維持 Claude 指導、Pi 實作的協作模式，繼續開發；產
 
 | ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| T-0025-01 | 原生確認流程、拒絕／接受與零請求 gate | AC-05／11 子集 | in_progress | 2026-11-07T04:05:44Z | — | 2026-11-07T04:20:45Z |
-| T-0025-02 | 固定派工、結果／介面與原生驗收 | AC-09 子集 | in_progress | 2026-11-07T04:05:44Z | — | 2026-11-07T04:20:45Z |
+| T-0025-01 | 原生確認流程、拒絕／接受與零請求 gate | AC-05／11 子集 | done | 2026-11-07T04:05:44Z | 2026-11-07T04:23:21Z | 2026-11-07T04:23:53Z |
+| T-0025-02 | 固定派工、結果／介面與原生驗收 | AC-09 子集 | done | 2026-11-07T04:05:44Z | 2026-11-07T04:23:21Z | 2026-11-07T04:23:53Z |
 
-實作與原生驗收完成，PR／CI／合併待交付；248 tests、兩輪真實確認與 67 筆結果回歸通過，零產品模型請求。[證據](../evidence/pi-question-2026-11-07.json)。
+T-0025 結案：[PR #1039](https://github.com/fallrising/newclear/pull/1039) 已合併，commit `5d6d78c208daa98a6d16a9f3c27ed58ea278f17f`，offline／validate 兩項 CI success。已回讀主線證據：248 tests、兩輪真實 Pi 確認介面與 67 筆結果瀏覽器回歸通過；同 session 拒絕／接受／原生逾時、重複指令拒絕，只有接受寫一次私有 marker。外層 43／35 個程序全部退出、鎖釋放；結果 stopped、零 relay／產品模型請求，沒有 Strata 推論或真實付費 grant。Claude Opus 5.5 實際指導，兩個 Pi CLI（OpenAI GPT-5.5）平行實作，各達 24 次請求上限後由主導 agent 完成審查；開發用量估算合計 2.98099 美元，非帳單，臨時憑證副本已移除。完成 AC-05／09／11 子集；模型驅動權限、其他 provider、遠端端到端及完整 MVP／安全仍 pending，沒有 release／deploy／usable tag。[證據](../evidence/pi-question-2026-11-07.json)。

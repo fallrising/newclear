@@ -84,10 +84,10 @@ def _fingerprints(value):
     return normalized
 
 
-def verify_local_hostkeys(alias, fingerprints, known_hosts_dir):
+def verify_local_hostkeys(alias, fingerprints, known_hosts_dir, *, allowed_aliases=None):
     """Require the owner's OOB fingerprint to match the already trusted alias key."""
-    if alias not in {"ckc-disposable-02", "ckc-disposable-03", "ckc-disposable-04"}:
-        raise ValueError("replacement host key is not bound to a reviewed worker SSH alias")
+    if allowed_aliases is None or alias not in allowed_aliases:
+        raise ValueError('replacement host key is not bound to a reviewed worker SSH alias')
     expected = _fingerprints(fingerprints)
     directory = Path(known_hosts_dir)
     path = directory / alias.removeprefix("ckc-")

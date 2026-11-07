@@ -50,8 +50,8 @@
 ## 實機診斷工具
 
 ```bash
-python3 scripts/preflight.py --output-dir private/preflight
-python3 scripts/check-binaries.py --output-dir private/binary-checks
+python3 scripts/preflight.py --inventory private/operator-inventory.json --output-dir private/preflight
+python3 scripts/check-binaries.py --inventory private/operator-inventory.json --output-dir private/binary-checks
 ```
 
 所有遠端執行透過已配置的四個 SSH alias。二進位檢查只在臨時目錄執行 version 命令，未安裝 systemd 服務；輸出含主機資料，保留在被忽略的 private 目錄。完整語意與限制見實機報告。
@@ -62,12 +62,12 @@ controller B 的 SSH 入口是 `~/.ssh/config`，匯入 `~/.ssh/hzd-vps/config`�
 
 ```bash
 # 只在 B 產生 private/deployment-plan.json，沒有遠端變更。
-python3 scripts/deploy-lab.py
+python3 scripts/deploy-lab.py --inventory private/operator-inventory.json
 # 建立唯一命名的 nginx、驗證、清除；預設三台，可用 --node worker-2 限制。
 python3 scripts/smoke-lab.py
 ```
 
-首次部署使用 `scripts/deploy-lab.py --apply`，已於本次批准後完成。此工具依賴本機 private preflight、已驗證 host public keys 與現有可信 SSH 設定；尚不能在新 controller 上直接 bootstrap。現有完整環境的同版本重複 apply 已通過一次驗收，請見 [操作手冊的 Debian 路徑](docs/RUNBOOK.md)。
+目前首次部署命令為 `scripts/deploy-lab.py --inventory private/operator-inventory.json --apply`；執行仍需既有 operator 授權。本次 alias 配置維護未執行部署。此工具依賴本機 private preflight、已驗證 host public keys 與現有可信 SSH 設定；尚不能在新 controller 上直接 bootstrap。現有完整環境的同版本重複 apply 已通過一次驗收，請見 [操作手冊的 Debian 路徑](docs/RUNBOOK.md)。
 
 ## Fresh-run 本機主線
 
@@ -82,3 +82,7 @@ python3 scripts/smoke-lab.py
 ## Metadata 備份本機切片
 
 ERU-016 已完成本機實作與驗證： [本機備份格式與不可執行還原計畫](docs/M3-METADATA-BACKUP-LOCAL-2026-10-09.md)。此功能檢查操作者提供的私有檔案之精確 bytes 與 checksum；不取得 snapshot、不驗證 bbolt、不連線或還原 etcd。完整原生 1,284 項／20,949.108 秒／OK／exit 0 與 candidate02 獨立審查已通過，見 本機驗收（journal `archive/team-ledgers/newclear/labs/eru-vps-mvp/.team/reports/T-297.md`）。遠端 CI／合併仍待，實機 V10 保持 UNEXECUTED。
+
+### 私有 operator inventory
+
+SSH alias 由私有 inventory 明確提供；程式不預設任何部署主機。格式、CLI 必要參數、可信 key 與 plan 重新審核規則見 [Operator inventory](docs/OPERATOR-INVENTORY.md)。此配置變更只通過本機 synthetic tests，未執行新的部署或主機操作。

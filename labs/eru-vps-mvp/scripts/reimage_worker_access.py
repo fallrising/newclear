@@ -1,4 +1,5 @@
 """Prepare the core's exact SSH and firewall access for one replacement worker."""
+from operator_inventory import workers
 from datetime import datetime, timezone
 import base64
 import hashlib
@@ -218,7 +219,7 @@ def _trusted_keys(operator, bootstrap, owner_receipt, trusted):
 
     fingerprints = owner_receipt["receipt"]["host_key_fingerprints"]
     current_check = verify_local_hostkeys(bootstrap["target"]["alias"], fingerprints,
-                                         operator.trusted_hostkeys_dir)
+                                         operator.trusted_hostkeys_dir, allowed_aliases=set(workers(operator.inventory).values()))
     if current_check != trusted:
         raise ValueError("trusted replacement host-key file changed")
     path = operator.trusted_hostkeys_dir / current_check["path"]

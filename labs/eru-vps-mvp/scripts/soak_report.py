@@ -6,7 +6,8 @@ import math
 from pathlib import Path
 
 from labops import atomic_json
-from soak_evidence import HOSTS, validate_manifest
+from soak_evidence import validate_manifest
+from operator_inventory import aliases
 from soak_runner import MAX_BYTES, MAX_RECORD, Summary, iso
 
 
@@ -233,11 +234,12 @@ def analyze_host(path, item, entry, source_hashes):
         'event_samples': event_count, 'events': events, 'events_omitted': max(0, event_count - len(events))}
 
 
-def report(directory):
+def report(directory, *, inventory=None):
+    HOSTS = aliases(inventory)[:3]
     directory = Path(directory)
     manifest = json.loads((directory / 'manifest.json').read_text())
     record = json.loads((directory / 'collection.json').read_text())
-    validate_manifest(manifest)
+    validate_manifest(manifest, inventory=inventory)
     if record['run_id'] != manifest['id'] or not set(record['hosts']) <= set(HOSTS):
         raise ValueError('collection identity mismatch')
     results = {}

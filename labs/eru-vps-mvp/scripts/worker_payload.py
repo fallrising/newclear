@@ -2,13 +2,9 @@
 import ipaddress
 import json
 import re
+from operator_inventory import topology
 
 
-WORKERS = {
-    "ckc-disposable-02": ("worker-2", 2),
-    "ckc-disposable-03": ("worker-3", 3),
-    "ckc-disposable-04": ("worker-4", 4),
-}
 WORKER_REPOSITORIES = {"projecteru2/agent", "containernetworking/plugins"}
 
 
@@ -28,10 +24,11 @@ def _tailnet_ipv4(value, label):
     return str(address)
 
 
-def build_worker_payload(host, core_ip, lock):
+def build_worker_payload(host, core_ip, lock, *, inventory=None):
     """Create one worker's scoped files and locked artifact mappings; no I/O occurs."""
+    WORKERS = {alias: (node, index) for index, (alias, node, role) in enumerate(topology(inventory), 1) if role == 'worker'}
     if not isinstance(host, dict) or host.get("alias") not in WORKERS:
-        raise ValueError("worker payload requires a reviewed ckc-disposable worker alias")
+        raise ValueError("worker payload requires a reviewed inventory worker alias")
     node, index = WORKERS[host["alias"]]
     if host.get("node") != node or type(host.get("index")) is not int or host["index"] != index:
         raise ValueError("worker alias, node and index identity do not match")

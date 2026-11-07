@@ -1,6 +1,7 @@
 """Single-use worker-only install stage after a manual provider-console reimage.
 Interrupted runs are reconciled by observation only; this plan is never replayed.
 """
+from operator_inventory import workers, topology
 from datetime import datetime, timezone
 import base64, hashlib, ipaddress, json, re, subprocess
 from pathlib import Path
@@ -123,8 +124,9 @@ def _validated_context(operator,plan_id,expected_hash):
     from reimage_prepare import _load_plan,require_prepared
     from reimage_receipt import load_receipt,verify_local_hostkeys
     from reimage_host import REQUIRED_FACTS,validate_facts
-    from reimage_worker_plan import POST_REIMAGE_BLOCKER,WORKER_ACCESS_STEPS,WORKER_INDEX,_safe_json
+    from reimage_worker_plan import POST_REIMAGE_BLOCKER,WORKER_ACCESS_STEPS,_safe_json
 
+    WORKER_INDEX = {alias: (node, index) for index, (alias, node, role) in enumerate(topology(operator.inventory), 1) if role == 'worker'}
     plan=_bootstrap(operator,plan_id,expected_hash)
     source=plan.get("source_reimage_plan",{})
     source_plan,host=_load_plan(operator,source.get("id"),source.get("sha256"))
@@ -142,7 +144,7 @@ def _validated_context(operator,plan_id,expected_hash):
     receipt=load_receipt(operator.project,record.get("receipt_path",""),plan=source_plan,plan_sha256=source["sha256"])
     if receipt["sha256"]!=record.get("receipt_sha256") or receipt["receipt"]!=record.get("receipt"):
         raise ValueError("owner receipt changed after worker bootstrap planning")
-    trusted=verify_local_hostkeys(alias,receipt["receipt"]["host_key_fingerprints"],operator.trusted_hostkeys_dir)
+    trusted=verify_local_hostkeys(alias,receipt["receipt"]["host_key_fingerprints"],operator.trusted_hostkeys_dir, allowed_aliases=set(workers(operator.inventory).values()))
     if trusted!=record.get("trusted_host_key_file_check"):
         raise ValueError("replacement worker trusted host-key file changed")
 
@@ -178,7 +180,7 @@ def _validated_context(operator,plan_id,expected_hash):
     index=WORKER_INDEX[alias][1]
     core_ip=next(row["ip"] for row in bindings["inventory"] if row["role"]=="core")
     payload=build_worker_payload({"alias":alias,"node":node,"index":index,
-                                  "ip":facts["tailscale_ipv4"]},core_ip,json.loads(lock_raw))
+                                  "ip":facts["tailscale_ipv4"]},core_ip,json.loads(lock_raw), inventory=operator.inventory)
     repos={item.get("repository") for item in payload.get("artifacts",[])}
     if (plan.get("worker_payload")!=payload or plan.get("worker_payload_sha256")!=digest(payload)
         or payload.get("role")!="worker" or payload.get("start_units")!=["eru-containerd-proxy.socket"]
@@ -305,7 +307,7 @@ def _read_replacement(operator,alias,receipt,observation,trusted):
     from reimage_host import REQUIRED_FACTS
     current=inspect_replacement_host(alias,receipt["receipt"]["replacement"] |
         {"host_key_fingerprints":receipt["receipt"]["host_key_fingerprints"]},
-        operator.trusted_hostkeys_dir,runner=_recorded_runner(operator,alias))
+        operator.trusted_hostkeys_dir,runner=_recorded_runner(operator,alias), inventory=operator.inventory)
     if current.get("host_key_file_check")!=trusted:
         raise ValueError("replacement host trusted key changed during worker install")
     for name in ("machine_id","boot_id","os_release","tailscale_ipv4","services",
@@ -467,7 +469,7 @@ def _reconcile_context(operator,journal):
         or source_env.get("sha256")!=source.get("sha256")):
         raise ValueError("source reimage plan hash mismatch during reconciliation")
     alias=plan["target"].get("alias")
-    if alias not in {"ckc-disposable-02","ckc-disposable-03","ckc-disposable-04"}:
+    if alias != workers(operator.inventory).get(plan['target'].get('node')):
         raise ValueError("worker reconcile target is not a reviewed SSH alias")
     if journal.get("target_alias")!=alias or journal.get("target")!=plan["target"].get("node"):
         raise ValueError("worker install journal target differs from its plan")
@@ -478,7 +480,7 @@ def _reconcile_context(operator,journal):
     if (record.get("plan_id")!=source["id"] or record.get("plan_sha256")!=source["sha256"]
         or record.get("status")!="owner-receipt-recorded" or not isinstance(receipt,dict)):
         raise ValueError("owner receipt record is unavailable for read-only reconciliation")
-    trusted=verify_local_hostkeys(alias,receipt.get("host_key_fingerprints"),operator.trusted_hostkeys_dir)
+    trusted=verify_local_hostkeys(alias,receipt.get("host_key_fingerprints"),operator.trusted_hostkeys_dir, allowed_aliases=set(workers(operator.inventory).values()))
     if trusted!=record.get("trusted_host_key_file_check"):
         raise ValueError("trusted replacement host key changed during reconciliation")
     return plan,source_plan,receipt,trusted

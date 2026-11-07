@@ -14,7 +14,6 @@ import sys
 LIMIT = 256 * 1024
 SLOT = '.fresh-network-stage'
 OPERATION = 'fresh-network-file-staging'
-ALIASES = tuple('ckc-disposable-%02d' % i for i in range(1, 5))
 PRIVATE = tuple(ipaddress.IPv4Network(n) for n in
                 ('10.0.0.0/8', '172.16.0.0/12', '192.168.0.0/16', '100.64.0.0/10'))
 
@@ -89,7 +88,8 @@ def validate_request(request):
         _match(action[field], r'[0-9a-f]{64}')
     host, index = action['host'], action['host_index']
     _exact(host, {'alias', 'node', 'ip', 'machine_id', 'boot_id', 'host_key_sha256', 'files'})
-    if host['alias'] != ALIASES[index] or host['node'] != 'worker-' + str(index + 1):
+    if (type(host['alias']) is not str or not re.fullmatch(r'[A-Za-z0-9][A-Za-z0-9_.-]{0,127}', host['alias'])
+            or host['node'] != 'worker-' + str(index + 1)):
         raise ValueError('invalid host role')
     if type(host['ip']) is not str:
         raise ValueError('invalid endpoint')

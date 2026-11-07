@@ -44,7 +44,7 @@ class HostFixture:
         self.action = {'schema_version': 1, 'operation': 'fresh-network-directory-preparation',
             'plan_id': 'review-plan', 'plan_sha256': 'a' * 64, 'run_id': 'review-run',
             'execution_sha256': 'b' * 64, 'pending_sha256': 'c' * 64, 'host_index': 0,
-            'host': {'alias': 'ckc-disposable-01', 'node': 'worker-1', 'ip': '10.7.0.1',
+            'host': {'alias': 'lab-host-01', 'node': 'worker-1', 'ip': '10.7.0.1',
                      'machine_id': 'review-machine', 'boot_id': '11111111-2222-3333-4444-555555555555',
                      'host_key_sha256': key(1)[1]},
             'directory': {'path': '/etc/eru', 'uid': 0, 'gid': 0, 'mode': '0700'}}
@@ -263,7 +263,7 @@ class DirectoryAdapterReview(unittest.TestCase):
     def setUp(self):
         self.f = HostFixture()
         self.addCleanup(self.f.close)
-        self.keys = {'ckc-disposable-%02d' % i: key(i)[0] for i in range(1, 5)}
+        self.keys = {'lab-host-%02d' % i: key(i)[0] for i in range(1, 5)}
 
     def test_mismatched_key_never_calls_transport_and_keys_are_copied(self):
         called = []
@@ -272,7 +272,7 @@ class DirectoryAdapterReview(unittest.TestCase):
             return canonical({'observed_at': self.f.now.isoformat(), 'host': self.f.action['host'],
                               'directory': {'path': '/etc/eru', 'kind': 'absent'}})
         adapter = SSHNetworkDirectoryAdapter(self.keys, transport=transport)
-        self.keys['ckc-disposable-01'] = key(9)[0]
+        self.keys['lab-host-01'] = key(9)[0]
         self.assertEqual(adapter.observe(self.f.action)['directory']['kind'], 'absent')
         self.assertEqual(len(called), 1)
         altered = copy.deepcopy(self.f.action)

@@ -9,18 +9,18 @@ import time
 import uuid
 
 from labops import atomic_json, lock_fds
+from operator_inventory import workers
 
-NODES = {'worker-2': 'ckc-disposable-02', 'worker-3': 'ckc-disposable-03',
-         'worker-4': 'ckc-disposable-04'}
 
-def canary_nodes(excluded='worker-4'):
-    if excluded not in NODES:
+def canary_nodes(excluded='worker-4', *, inventory=None):
+    nodes = workers(inventory)
+    if excluded not in nodes:
         raise ValueError('canary target must be a reviewed worker')
-    return {node: alias for node, alias in NODES.items() if node != excluded}
+    return {node: alias for node, alias in nodes.items() if node != excluded}
 
 
 def start_canaries(op, plan, before):
-    nodes = canary_nodes(plan.get('guard_exclude', 'worker-4'))
+    nodes = canary_nodes(plan.get('guard_exclude', 'worker-4'), inventory=op.inventory)
     if plan.get('guard_nodes') != list(nodes) or before['workloads']:
         raise ValueError('canary placement or empty-cluster preflight changed')
     run_id = plan['id']
@@ -114,9 +114,9 @@ def guard_targets(op, snapshot, run_id, expected_nodes=None):
     evidence = json.loads((op.project / 'private/smoke' / (identifier(run_id) + '.json')).read_text())
     nodes = evidence.get('nodes')
     if (evidence.get('purpose') != 'reinstall-canaries' or evidence.get('status') != 'running'
-            or not isinstance(nodes, dict) or len(nodes) != 2 or not set(nodes) <= set(NODES)
+            or not isinstance(nodes, dict) or len(nodes) != 2 or not set(nodes) <= set(workers(op.inventory))
             or (expected_nodes is not None and set(nodes) != set(expected_nodes))
-            or any(not isinstance(item, dict) or item.get('worker_alias') != NODES[node]
+            or any(not isinstance(item, dict) or item.get('worker_alias') != workers(op.inventory)[node]
                    for node, item in nodes.items())):
         raise ValueError('canary placement/alias differs from reviewed worker pair')
     rows = cleanup_targets(evidence, snapshot['workloads'])
@@ -125,7 +125,7 @@ def guard_targets(op, snapshot, run_id, expected_nodes=None):
     for row in rows:
         if nodes[row['node']].get('workload_ids') != [row['id']]:
             raise ValueError('canary evidence workload ID differs from live ownership')
-        row['alias'] = NODES[row['node']]
+        row['alias'] = workers(op.inventory)[row['node']]
         data = json.loads(op.command(row['alias'], ['sudo', '-n', 'ctr', '--namespace', 'eru', 'containers', 'info', row['id']]))
         address = str(ipaddress.ip_address(data['Labels']['eru.network.eru']))
         if ':' in address: address = '[' + address + ']'

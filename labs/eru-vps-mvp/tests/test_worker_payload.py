@@ -1,3 +1,4 @@
+import fixture_inventory
 """Offline checks for exact worker-only bootstrap payload generation."""
 import json
 from pathlib import Path
@@ -21,14 +22,14 @@ LOCK = {
          'url': 'https://example.invalid/cli.tar.gz'},
     ],
 }
-HOST = {'alias': 'ckc-disposable-04', 'ip': '100.64.0.4', 'node': 'worker-4', 'index': 4}
+HOST = {'alias': 'lab-host-04', 'ip': '100.64.0.4', 'node': 'worker-4', 'index': 4}
 
 
 class WorkerPayloadTests(unittest.TestCase):
     def test_builds_one_worker_payload_with_only_worker_artifacts_and_files(self):
-        plan = build_worker_payload(HOST, '100.64.0.1', LOCK)
+        plan = build_worker_payload(HOST, '100.64.0.1', LOCK, inventory=fixture_inventory.inventory())
         self.assertEqual((plan['alias'], plan['node'], plan['role']),
-                         ('ckc-disposable-04', 'worker-4', 'worker'))
+                         ('lab-host-04', 'worker-4', 'worker'))
         self.assertEqual(plan['core_ip'], '100.64.0.1')
         self.assertEqual({row['repository'] for row in plan['artifacts']}, {
             'projecteru2/agent', 'containernetworking/plugins'})
@@ -56,20 +57,20 @@ class WorkerPayloadTests(unittest.TestCase):
 
     def test_builds_correct_fixed_subnet_for_each_worker_alias(self):
         for alias, (node, index) in {
-            'ckc-disposable-02': ('worker-2', 2),
-            'ckc-disposable-03': ('worker-3', 3),
-            'ckc-disposable-04': ('worker-4', 4),
+            'lab-host-02': ('worker-2', 2),
+            'lab-host-03': ('worker-3', 3),
+            'lab-host-04': ('worker-4', 4),
         }.items():
             with self.subTest(alias=alias):
                 plan = build_worker_payload({'alias': alias, 'node': node, 'index': index,
-                                             'ip': f'100.64.0.{index}'}, '100.64.0.1', LOCK)
+                                             'ip': f'100.64.0.{index}'}, '100.64.0.1', LOCK, inventory=fixture_inventory.inventory())
                 config = next(row['content'] for row in plan['files']
                               if row['path'] == '/etc/cni/net.d/10-eru.conflist')
                 self.assertIn(f'10.66.{index}.0/24', config)
 
     def test_rejects_identity_address_architecture_and_artifact_drift(self):
         invalid = [
-            ({'alias': 'ckc-disposable-01', 'node': 'worker-1', 'index': 1, 'ip': '100.64.0.1'}, LOCK, 'worker alias'),
+            ({'alias': 'lab-host-01', 'node': 'worker-1', 'index': 1, 'ip': '100.64.0.1'}, LOCK, 'worker alias'),
             ({**HOST, 'node': 'worker-3'}, LOCK, 'identity'),
             ({**HOST, 'index': 3}, LOCK, 'identity'),
             ({**HOST, 'ip': '192.0.2.4'}, LOCK, 'Tailscale IPv4'),
@@ -85,10 +86,10 @@ class WorkerPayloadTests(unittest.TestCase):
         for host, lock, message in invalid:
             with self.subTest(host=host, message=message):
                 with self.assertRaisesRegex(ValueError, message):
-                    build_worker_payload(host, '100.64.0.1', lock)
+                    build_worker_payload(host, '100.64.0.1', lock, inventory=fixture_inventory.inventory())
 
     def test_plan_payload_is_serializable_and_contains_no_private_material(self):
-        plan = build_worker_payload(HOST, '100.64.0.1', LOCK)
+        plan = build_worker_payload(HOST, '100.64.0.1', LOCK, inventory=fixture_inventory.inventory())
         encoded = json.dumps(plan, sort_keys=True)
         self.assertIn('worker-4', encoded)
         self.assertNotIn('private/', encoded)

@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Plan, execute and reconcile bounded ERU lab operations from controller B."""
+from operator_inventory import workers
 import argparse
 from datetime import datetime, timezone
 import hashlib
@@ -15,7 +16,6 @@ import uuid
 from labops import ClusterLock, atomic_json, digest, lock_fds
 
 PROJECT = Path(__file__).resolve().parent.parent
-ALIASES = [f'ckc-disposable-{i:02d}' for i in range(1, 5)]
 OWNER = 'eru-vps-mvp'
 
 # Read-only commands; no key material, config secrets or environment dumps.
@@ -68,12 +68,8 @@ def code_inputs(project):
 
 
 def load_inventory(project):
-    rows = read(project / 'private/deployment-plan.json')
-    if [r['alias'] for r in rows] != ALIASES or [r['role'] for r in rows] != ['core', 'worker', 'worker', 'worker']:
-        raise ValueError('only the reviewed four-host basic topology is supported')
-    if [r['node'] for r in rows[1:]] != ['worker-2', 'worker-3', 'worker-4']:
-        raise ValueError('unexpected worker identities')
-    return [{k: r[k] for k in ['alias', 'node', 'role', 'ip']} for r in rows]
+    from operator_inventory import load_inventory as validated_inventory
+    return validated_inventory(project)
 
 
 def membership(snapshot):
@@ -127,10 +123,10 @@ def cleanup_targets(evidence, workloads):
 class Operator:
     def __init__(self, project=PROJECT):
         self.project = project
+        self.inventory = load_inventory(project)
         self.root = project / 'private/operations'
         self.root.mkdir(parents=True, exist_ok=True, mode=0o700)
         self.trusted_hostkeys_dir = Path.home() / '.ssh/hzd-vps/known_hosts'
-        self.inventory = load_inventory(project)
         self.core = self.inventory[0]
         self.events = []
         self.journal_path = None
@@ -280,7 +276,7 @@ class Operator:
         plan = {'schema': 1, 'id': datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%SZ') + '-' + uuid.uuid4().hex[:8],
                 'created_at': now(), 'operation': operation, 'node': node, 'bindings': bindings,
                 'snapshot': snap, 'etcd_health': health, 'executable': operation != 'rebuild-node' and not issues, 'blockers': issues,
-                'targets': [], 'steps': [], 'mutation_hosts': ALIASES if operation == 'reapply' else []}
+                'targets': [], 'steps': [], 'mutation_hosts': [row['alias'] for row in self.inventory] if operation == 'reapply' else []}
         if operation == 'reapply' and core_artifact:
             if not health_file:
                 plan['blockers'].append('patched reapply requires --health')
@@ -291,7 +287,7 @@ class Operator:
             plan['executable'] = not plan['blockers']
         if operation == 'canary-start':
             from canaries import canary_nodes
-            guards = canary_nodes(guard_exclude or 'worker-4')
+            guards = canary_nodes(guard_exclude or 'worker-4', inventory=self.inventory)
             plan['guard_exclude'] = guard_exclude or 'worker-4'
             plan['guard_nodes'] = list(guards)
             if snap['workloads']:
@@ -489,7 +485,7 @@ class Operator:
         preparation = require_prepared(self, plan, expected_hash)
         trusted_host_key_check = verify_local_hostkeys(
             receipt['receipt']['target']['alias'], receipt['receipt']['host_key_fingerprints'],
-            self.trusted_hostkeys_dir)
+            self.trusted_hostkeys_dir, allowed_aliases=set(workers(self.inventory).values()))
         path = self.root / 'reimage-receipts' / (plan_id + '.json')
         if path.exists():
             raise ValueError('reimage receipt already recorded; inspect it and do not overwrite')
@@ -548,7 +544,7 @@ class Operator:
             raise ValueError('provider reimage preparation journal changed after receipt recording')
         trusted = verify_local_hostkeys(receipt['receipt']['target']['alias'],
                                         receipt['receipt']['host_key_fingerprints'],
-                                        self.trusted_hostkeys_dir)
+                                        self.trusted_hostkeys_dir, allowed_aliases=set(workers(self.inventory).values()))
         if trusted != receipt_record.get('trusted_host_key_file_check'):
             raise ValueError('trusted worker host-key file changed after receipt recording')
 
@@ -559,7 +555,7 @@ class Operator:
         expected = {**receipt['receipt']['replacement'],
                     'host_key_fingerprints': receipt['receipt']['host_key_fingerprints']}
         observation = inspect_replacement_host(receipt['receipt']['target']['alias'], expected,
-                                               self.trusted_hostkeys_dir)
+                                               self.trusted_hostkeys_dir, inventory=self.inventory)
         atomic_json(path, {
             'plan_id': plan_id,
             'plan_sha256': expected_hash,

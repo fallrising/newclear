@@ -1,3 +1,4 @@
+import fixture_inventory
 """Offline safety tests for nonempty ERU worker drain planning."""
 import copy
 import json
@@ -57,7 +58,7 @@ def snapshot(workloads):
 class WorkerDrainPlanTests(unittest.TestCase):
     def plan(self, state, apps, destinations, **kwargs):
         return build_plan('worker-4', state, apps, destinations, True,
-                          plan_id='20260926T120000Z-drain1', **kwargs)
+                          plan_id='20260926T120000Z-drain1', **kwargs, inventory=fixture_inventory.inventory())
 
     def test_complete_owned_apps_plan_explicit_revisions_without_enabling_execution(self):
         hello = spec()
@@ -143,7 +144,7 @@ class WorkerDrainPlanTests(unittest.TestCase):
         state = snapshot(rows_for(document))
         plan = build_plan('worker-4', state, [document], {'hello-api': 'worker-2'},
                           False, ['metadata drift'],
-                          plan_id='20260926T120000Z-drain1')
+                          plan_id='20260926T120000Z-drain1', inventory=fixture_inventory.inventory())
         self.assertEqual(plan['decision'], 'blocked')
         self.assertTrue(any('health preflight' in reason for reason in plan['blockers']))
         self.assertTrue(any('consistency preflight' in reason for reason in plan['blockers']))
@@ -190,11 +191,13 @@ class WorkerDrainPlanTests(unittest.TestCase):
             'consistency_issues': [],
         }
         with tempfile.TemporaryDirectory() as directory:
+            (Path(directory) / 'private').mkdir()
+            (Path(directory) / 'private/deployment-plan.json').write_text(json.dumps(fixture_inventory.inventory()))
             input_path = Path(directory) / 'input.json'
             input_path.write_text(json.dumps(payload))
             result = subprocess.run(
                 [sys.executable, str(Path(__file__).resolve().parents[1] / 'scripts/worker_drain.py'),
-                 '--target', 'worker-4', '--input', str(input_path),
+                 '--project', directory, '--target', 'worker-4', '--input', str(input_path),
                  '--plan-id', '20260926T120000Z-drain1'],
                 capture_output=True, text=True, check=True)
         plan = json.loads(result.stdout)

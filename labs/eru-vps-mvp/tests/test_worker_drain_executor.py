@@ -1,3 +1,4 @@
+import fixture_inventory
 """Exercise multi-app worker drains with an in-memory ERU adapter only."""
 import contextlib
 import copy
@@ -22,9 +23,9 @@ from worker_drain_ops import (execute_fresh_cleanup, execute_saved_plan,
 
 
 WORKERS = {
-    'worker-2': 'ckc-disposable-02',
-    'worker-3': 'ckc-disposable-03',
-    'worker-4': 'ckc-disposable-04',
+    'worker-2': 'lab-host-02',
+    'worker-3': 'lab-host-03',
+    'worker-4': 'lab-host-04',
 }
 
 
@@ -72,7 +73,7 @@ def make_snapshot(workloads):
             'containers': '\n'.join(ids),
             'tasks': 'TASK PID STATUS\n' + ''.join(item + ' 1 RUNNING\n' for item in ids),
         }
-    hosts['ckc-disposable-01'] = {
+    hosts['lab-host-01'] = {
         'machine_id': 'machine-core', 'boot_id': 'boot-core', 'hostname': 'core',
         'tailscale': '100.64.0.1', 'owner': OWNER, 'core_config': True,
         'etcd_data': True, 'docker': '', 'containers': '', 'tasks': 'TASK PID STATUS\n',
@@ -181,6 +182,9 @@ class FakeDrainAPI:
 class WorkerDrainExecutorTests(unittest.TestCase):
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory()
+        private = Path(self.temp.name) / 'private'
+        private.mkdir()
+        (private / 'deployment-plan.json').write_text(json.dumps(fixture_inventory.inventory()))
         self.addCleanup(self.temp.cleanup)
         self.private = Path(self.temp.name) / 'private/operations'
         self.root = self.private / 'worker-drain'
@@ -192,7 +196,7 @@ class WorkerDrainExecutorTests(unittest.TestCase):
         self.initial = make_snapshot(self.sources)
         self.destinations = {'hello-api': 'worker-2', 'metrics-api': 'worker-3'}
         self.review = build_plan('worker-4', self.initial, self.apps, self.destinations,
-                                 True, (), '20260926T120000Z-drainrun')
+                                 True, (), '20260926T120000Z-drainrun', inventory=fixture_inventory.inventory())
 
     def private_inputs(self):
         private = Path(self.temp.name) / 'private'
@@ -208,12 +212,21 @@ class WorkerDrainExecutorTests(unittest.TestCase):
         return source, desired
 
     def prepared(self, api):
-        return execution_plan(self.review, self.apps, api)
+        return execution_plan(self.review, self.apps, api, inventory=fixture_inventory.inventory())
+
+    def test_injected_inventory_mismatch_fails_before_api_calls(self):
+        changed = fixture_inventory.inventory()
+        changed[3]['alias'] = 'other-reviewed-host'
+        api = FakeDrainAPI(self.initial)
+        with self.assertRaisesRegex(ValueError, 'plan hash'):
+            execution_plan(self.review, self.apps, api, inventory=changed)
+        self.assertEqual(api.fence_calls, 0)
+        self.assertEqual(api.deploy_calls, [])
 
     def test_multi_app_keeps_every_source_until_all_alternatives_are_ready(self):
         api = FakeDrainAPI(self.initial)
         plan = self.prepared(api)
-        result = WorkerDrainExecutor(self.root, api, self.app_root).execute(
+        result = WorkerDrainExecutor(self.root, api, self.app_root, inventory=fixture_inventory.inventory()).execute(
             plan, plan['plan_sha256'], self.apps)
 
         self.assertEqual(result['status'], 'complete')
@@ -234,7 +247,7 @@ class WorkerDrainExecutorTests(unittest.TestCase):
     def test_uncertain_second_replacement_keeps_all_sources_and_skips_cleanup(self):
         api = FakeDrainAPI(self.initial, fail_deploy_app='metrics-api')
         plan = self.prepared(api)
-        executor = WorkerDrainExecutor(self.root, api, self.app_root)
+        executor = WorkerDrainExecutor(self.root, api, self.app_root, inventory=fixture_inventory.inventory())
         with self.assertRaises(UncertainExecution):
             executor.execute(plan, plan['plan_sha256'], self.apps)
         saved = json.loads(executor.run_path(plan['id']).read_text())
@@ -249,7 +262,7 @@ class WorkerDrainExecutorTests(unittest.TestCase):
     def test_failed_http_readiness_keeps_every_source_and_skips_cleanup(self):
         api = FakeDrainAPI(self.initial, fail_probe_app='metrics-api')
         plan = self.prepared(api)
-        executor = WorkerDrainExecutor(self.root, api, self.app_root)
+        executor = WorkerDrainExecutor(self.root, api, self.app_root, inventory=fixture_inventory.inventory())
         with self.assertRaisesRegex(RuntimeError, 'HTTP readiness failed'):
             executor.execute(plan, plan['plan_sha256'], self.apps)
         self.assertEqual(api.remove_calls, [])
@@ -260,7 +273,7 @@ class WorkerDrainExecutorTests(unittest.TestCase):
     def test_lost_fence_reply_is_read_only_reconciled_once(self):
         api = FakeDrainAPI(self.initial, lost_fence_reply=True)
         plan = self.prepared(api)
-        result = WorkerDrainExecutor(self.root, api, self.app_root).execute(
+        result = WorkerDrainExecutor(self.root, api, self.app_root, inventory=fixture_inventory.inventory()).execute(
             plan, plan['plan_sha256'], self.apps)
         self.assertEqual(result['status'], 'complete')
         self.assertEqual(api.fence_calls, 1)
@@ -269,7 +282,7 @@ class WorkerDrainExecutorTests(unittest.TestCase):
     def test_unconfirmed_fence_stops_before_any_app_mutation(self):
         api = FakeDrainAPI(self.initial, fence_before=True)
         plan = self.prepared(api)
-        executor = WorkerDrainExecutor(self.root, api, self.app_root)
+        executor = WorkerDrainExecutor(self.root, api, self.app_root, inventory=fixture_inventory.inventory())
         with self.assertRaises(UncertainExecution):
             executor.execute(plan, plan['plan_sha256'], self.apps)
         self.assertEqual(api.fence_calls, 1)
@@ -285,7 +298,7 @@ class WorkerDrainExecutorTests(unittest.TestCase):
                                 and row['id'].endswith('_2'))
         api = FakeDrainAPI(self.initial, fail_remove_id=first_source_id)
         plan = self.prepared(api)
-        executor = WorkerDrainExecutor(self.root, api, self.app_root)
+        executor = WorkerDrainExecutor(self.root, api, self.app_root, inventory=fixture_inventory.inventory())
         with self.assertRaises(UncertainExecution):
             executor.execute(plan, plan['plan_sha256'], self.apps)
         before = (api.fence_calls, list(api.deploy_calls), list(api.remove_calls),
@@ -317,7 +330,7 @@ class WorkerDrainExecutorTests(unittest.TestCase):
         api = FakeDrainAPI(self.initial, fail_remove_id=first_source_id)
         plan = self.prepared(api)
         with self.assertRaises(UncertainExecution):
-            WorkerDrainExecutor(self.root, api, self.app_root).execute(
+            WorkerDrainExecutor(self.root, api, self.app_root, inventory=fixture_inventory.inventory()).execute(
                 plan, plan['plan_sha256'], self.apps)
 
         calls_before_plan = (api.fence_calls, list(api.deploy_calls),
@@ -395,7 +408,7 @@ class WorkerDrainExecutorTests(unittest.TestCase):
         api = FakeDrainAPI(self.initial, fail_remove_id=first_source_id)
         plan = self.prepared(api)
         with self.assertRaises(UncertainExecution):
-            WorkerDrainExecutor(self.root, api, self.app_root).execute(
+            WorkerDrainExecutor(self.root, api, self.app_root, inventory=fixture_inventory.inventory()).execute(
                 plan, plan['plan_sha256'], self.apps)
         api.live['workloads'].append({
             'id': 'foreign-workload', 'nodename': 'worker-3', 'labels': {},
@@ -421,7 +434,7 @@ class WorkerDrainExecutorTests(unittest.TestCase):
         api = FakeDrainAPI(self.initial, fail_remove_id=first_source_id)
         execution = self.prepared(api)
         with self.assertRaises(UncertainExecution):
-            WorkerDrainExecutor(self.root, api, self.app_root).execute(
+            WorkerDrainExecutor(self.root, api, self.app_root, inventory=fixture_inventory.inventory()).execute(
                 execution, execution['plan_sha256'], self.apps)
 
         def invoke(argv):
@@ -470,7 +483,7 @@ class WorkerDrainExecutorTests(unittest.TestCase):
             'id': 'foreign-workload', 'nodename': 'worker-3', 'labels': {},
         })
         api._refresh_runtime()
-        executor = WorkerDrainExecutor(self.root, api, self.app_root)
+        executor = WorkerDrainExecutor(self.root, api, self.app_root, inventory=fixture_inventory.inventory())
         with self.assertRaisesRegex(ValueError, 'preflight|snapshot changed|workload identities'):
             executor.execute(plan, plan['plan_sha256'], self.apps)
         self.assertEqual(api.fence_calls, 0)
@@ -480,7 +493,7 @@ class WorkerDrainExecutorTests(unittest.TestCase):
     def test_journaled_plan_cannot_be_replayed(self):
         api = FakeDrainAPI(self.initial)
         plan = self.prepared(api)
-        executor = WorkerDrainExecutor(self.root, api, self.app_root)
+        executor = WorkerDrainExecutor(self.root, api, self.app_root, inventory=fixture_inventory.inventory())
         executor.execute(plan, plan['plan_sha256'], self.apps)
         with self.assertRaisesRegex(ValueError, 'do not replay'):
             executor.execute(plan, plan['plan_sha256'], self.apps)
@@ -489,7 +502,8 @@ class WorkerDrainExecutorTests(unittest.TestCase):
 
     def test_live_adapter_fence_is_one_exact_core_command(self):
         class Operator:
-            core = {'role': 'core', 'alias': 'ckc-disposable-01', 'ip': '100.64.0.1'}
+            inventory = fixture_inventory.inventory()
+            core = {'role': 'core', 'alias': 'lab-host-01', 'ip': '100.64.0.1'}
 
             def __init__(self):
                 self.commands = []
@@ -501,7 +515,7 @@ class WorkerDrainExecutorTests(unittest.TestCase):
         EruCLIAdapter(operator).fence_node('worker-4')
         self.assertEqual(len(operator.commands), 1)
         host, argv, kwargs = operator.commands[0]
-        self.assertEqual(host, 'ckc-disposable-01')
+        self.assertEqual(host, 'lab-host-01')
         self.assertEqual(argv[-2:], ['down', 'worker-4'])
         self.assertIn('node', argv)
         self.assertEqual(kwargs['timeout'], 90)

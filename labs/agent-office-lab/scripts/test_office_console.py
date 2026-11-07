@@ -259,6 +259,33 @@ class ConsoleTests(unittest.TestCase):
             self.assertEqual(snapshot['remote_grants']['pending'],[])
             self.assertEqual(snapshot['remote_grants']['errors'][0]['error'],'remote_grant_source_changed')
 
+    def test_pi_question_console_plan_is_fixed_local_and_single_use(self):
+        code, raw, _ = self.request('/api/plan', {'provider':'pi','mode':'question'})
+        self.assertEqual(code, 200); plan = json.loads(raw)
+        self.assertTrue(plan['executable']); self.assertFalse(plan['plan']['remote'])
+        self.assertTrue(plan['plan']['native_question_check'])
+        self.assertEqual(plan['plan']['command'][2:], ['run','pi','--execute','--check-question'])
+        key, job, commands = self.launch_helper({'provider':'pi','mode':'question'}, 'pass')
+        self.wait_job(job); self.assertEqual(commands[0][2:], ['run','pi','--execute','--check-question'])
+        with self.assertRaises(console.ConsoleError): self.app.execute(key)
+
+    def test_question_mode_rejects_malicious_result_strings(self):
+        run = self.lab/'runs/pi-work-question'; (run/'workspace').mkdir(parents=True)
+        report = {'provider':'pi','model':'deepseek-flash','status':'stopped','reason':'<b>ok</b>',
+                  'result_kind':'native_question_check','permission_kind':'synthetic_ui_confirm',
+                  'model_driven_permission':False,'model_inference_verified':False,
+                  'question_check_passed':'true','requests':[],'client_requests':0,'external_requests':0,
+                  'remote_usage':{'requests':0,'output_tokens':0},'remaining_owned_processes':0,'cleanup_errors':[],
+                  'office':{'provider':'pi','model':'deepseek/deepseek-flash','status':'question_verified',
+                            'permission_kind':'synthetic_ui_confirm','model_driven_permission':False,
+                            'model_inference_verified':False,'cleanup_completed':True}}
+        (run/'result.json').write_text(json.dumps(report))
+        row = self.app.snapshot()['results']['runs'][0]
+        self.assertEqual(row['test_scenario'], 'native_pi_question')
+        self.assertFalse(row['question_check_passed'])
+        self.assertEqual(row['status'], 'unverified')
+        self.assertNotIn('<b>', json.dumps(row))
+
     def test_terminal_dispatch_only_local_and_cannot_mix_modes(self):
         with patch.object(dispatch,'detect') as detect:
             for provider,options in [('pi',{}),('grok',{}),('opencode',{'check_cancel':True}),('opencode',{'check_failure':401})]:

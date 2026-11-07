@@ -45,6 +45,7 @@ def selection_plan(selection, lab=LAB):
     elif mode == 'host_restart' and provider == 'pi': options['check_host_restart'] = True
     elif mode == 'resume' and provider == 'pi': options['check_resume'] = True
     elif mode == 'cancel' and provider == 'pi': options['check_cancel'] = True
+    elif mode == 'question' and provider == 'pi': options['check_question'] = True
     elif mode == 'crash' and provider == 'pi': options['check_crash'] = True
     elif mode != 'task': raise ConsoleError('invalid_selection')
     return dispatch.plan(provider, **options)

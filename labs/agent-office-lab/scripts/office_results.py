@@ -131,6 +131,73 @@ def _normalize(run_fd, run_id):
     elapsed = report.get('elapsed_s')
     if type(elapsed) in (int, float) and 0 <= elapsed < 10**7 and math.isfinite(elapsed):
         row['elapsed_seconds'] = round(elapsed, 2)
+    row['artifact'] = artifact(run_fd, office.get('artifact_sha256'))
+    if report.get('result_kind') != 'native_question_check' and any(k in report for k in ('permission_kind','model_driven_permission','question_check_passed')):
+        return dict(row, status='invalid', reason='invalid_question_test_metadata', question_check_passed=False)
+    if report.get('result_kind') == 'native_question_check':
+        forbidden = ('host_restart_check','resume_check','cancellation_check','fault_injection','crash_injection',
+                     'authorization','retry_of','retry','task','text_output','text_task','revision')
+        if (provider != 'pi' or any(k in report for k in forbidden)
+                or any(k in office for k in ('fault_injection','authorization','retry'))
+                or report.get('permission_kind') != 'synthetic_ui_confirm'
+                or report.get('model_driven_permission') is not False
+                or report.get('startup_only', False) is not False
+                or office.get('provider') != 'pi'):
+            row.pop('authorization', None); row.pop('remote_usage', None)
+            return dict(row, status='invalid', reason='invalid_question_test_metadata', question_check_passed=False)
+        row['test_scenario'] = 'native_pi_question'
+        expected_responses = [{'index':0,'input':'deny','ui_result':False},
+                              {'index':1,'input':'allow','ui_result':True},
+                              {'index':2,'input':'timeout','ui_result':False}]
+        usage = report.get('remote_usage')
+        usage_ok = (isinstance(usage, dict) and set(usage) == {'requests','output_tokens'}
+                    and type(usage.get('requests')) is int and usage['requests'] == 0
+                    and type(usage.get('output_tokens')) is int and usage['output_tokens'] == 0)
+        responses = office.get('question_responses')
+        responses_ok = (isinstance(responses, list) and len(responses) == 3 and all(
+            isinstance(item, dict) and set(item) == {'index','input','ui_result'}
+            and type(item.get('index')) is int and item['index'] == expected_responses[i]['index']
+            and type(item.get('input')) is str and item['input'] == expected_responses[i]['input']
+            and type(item.get('ui_result')) is bool and item['ui_result'] is expected_responses[i]['ui_result']
+            for i, item in enumerate(responses)))
+        artifact_absent = False
+        try:
+            workspace_fd = os.open('workspace', os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW, dir_fd=run_fd)
+            try:
+                try: os.stat('result.json', dir_fd=workspace_fd, follow_symlinks=False)
+                except FileNotFoundError: artifact_absent = True
+            finally: os.close(workspace_fd)
+        except OSError: pass
+        question_ok = bool(report.get('question_check_passed') is True
+            and report.get('status') == 'stopped' and report.get('reason') == 'native_question_check'
+            and report.get('model_inference_verified') is False
+            and report.get('permission_kind') == 'synthetic_ui_confirm'
+            and report.get('model_driven_permission') is False
+            and isinstance(report.get('requests'), list) and report.get('requests') == []
+            and type(report.get('client_requests')) is int and report['client_requests'] == 0
+            and type(report.get('external_requests')) is int and report['external_requests'] == 0
+            and usage_ok
+            and type(report.get('remaining_owned_processes')) is int and report['remaining_owned_processes'] == 0
+            and report.get('cleanup_errors') == []
+            and office.get('status') == 'question_verified'
+            and office.get('provider') == 'pi' and office.get('model') == 'deepseek/deepseek-flash'
+            and model_matches and row['cleanup_verified']
+            and office.get('input_path') == 'office_ws_terminal_input'
+            and isinstance(office.get('marker_sha256'), str) and SHA256.fullmatch(office['marker_sha256'])
+            and responses_ok
+            and type(office.get('question_prompt_starts')) is int and office['question_prompt_starts'] == 3
+            and type(office.get('question_prompt_ends')) is int and office['question_prompt_ends'] == 3
+            and all(office.get(k) is True for k in ('marker_written_after_allow','native_question_verified',
+                'provider_request_detector_installed','same_session_verified','denial_preserved_workspace',
+                'replay_rejected','cleanup_completed'))
+            and office.get('model_inference_verified') is False
+            and artifact_absent and row['artifact']['status'] == 'unavailable')
+        row['question_check_passed'] = question_ok
+        return dict(row, status='stopped' if question_ok else 'failed' if report.get('status') == 'failed' else 'unverified',
+                    reason='native_question_check')
+    if report.get('result_kind') is not None:
+        row.pop('authorization', None); row.pop('remote_usage', None)
+        return dict(row, status='invalid', reason='invalid_result_kind')
     if report.get('task') in ('local_text','local_revision'):
         row['task_kind'] = report['task']
         if provider != 'opencode': return dict(row,reason='invalid_text_provider')
@@ -161,7 +228,6 @@ def _normalize(run_fd, run_id):
                     and model_matches and row['cleanup_verified'] and row['artifact']['status'] == 'verified')
         row['content_review_required'] = True
         return dict(row,status='completed' if verified else report['status'] if report.get('status') in ('failed','cancelled') else 'unverified',reason=report['task']+'_task')
-    row['artifact'] = artifact(run_fd, office.get('artifact_sha256'))
     if 'host_restart_check' in report:
         if (provider != 'pi' or report['host_restart_check'] != {'source':'loopback','http_status':429,'signal':'SIGKILL'}
                 or any(k in report for k in ('resume_check','cancellation_check','fault_injection','crash_injection'))):
@@ -282,16 +348,16 @@ def normalize(run_fd, run_id):
     except FileNotFoundError:
         return row
     except (OSError, ValueError, UnicodeError, RecursionError):
-        return dict(row, status='invalid', reason='invalid_retry_metadata')
+        return dict(row, status='invalid', reason='invalid_retry_metadata', **({'question_check_passed':False} if 'question_check_passed' in row else {}))
     try:
         from pi_retry import receipt
         saved = receipt(saved)
         name = run_id.split(':')[-1]
-        if row['provider'] != 'pi' or (saved['attempt'] == 0 and saved['root'] != name):
+        if row.get('test_scenario') == 'native_pi_question' or row['provider'] != 'pi' or (saved['attempt'] == 0 and saved['root'] != name):
             raise ValueError('invalid_retry_source')
         row['retry'] = {k:saved[k] for k in ('root','parent','attempt')}
     except (ValueError, TypeError, KeyError):
-        return dict(row, status='invalid', reason='invalid_retry_metadata')
+        return dict(row, status='invalid', reason='invalid_retry_metadata', **({'question_check_passed':False} if 'question_check_passed' in row else {}))
     return row
 
 

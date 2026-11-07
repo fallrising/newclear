@@ -3,7 +3,7 @@ const $=id=>document.getElementById(id), el=(tag,text)=>{const n=document.create
 const titles={opencode:'OpenCode',grok:'Grok',pi:'Pi',cursor:'Cursor'};
 const models={opencode:'Strata · Qwen3.8 Flash Next Q2_0',grok:'grok-4.6',pi:'DeepSeek · deepseek-flash',cursor:'Composer 2.5'};
 const labels={completed:'完成且產物已核對',failed:'失敗',stopped:'已停止',cancelled:'已取消',startup_only:'僅啟動檢查',incomplete:'尚無最終報告',unverified:'證據不足',invalid:'無效紀錄'};
-const modes={revision:'單檔修改提案',text:'本地文字任務',task:'合成檔案任務',terminal:'合成任務＋保留原生終端',http_401:'本機 401 故障檢查',http_429:'本機 429 故障檢查',crash:'本機 CLI 崩潰檢查',cancel:'本機原生取消檢查',host_restart:'Office 重啟檢查',resume:'原生 session 重新連接檢查'};
+const modes={revision:'單檔修改提案',text:'本地文字任務',task:'合成檔案任務',terminal:'合成任務＋保留原生終端',http_401:'本機 401 故障檢查',http_429:'本機 429 故障檢查',crash:'本機 CLI 崩潰檢查',cancel:'本機原生取消檢查',question:'原生問答確認檢查',host_restart:'Office 重啟檢查',resume:'原生 session 重新連接檢查'};
 const errors={project_text_unavailable:'來源目錄無法讀取，或超出文字檔限制。請查看登記目錄及操作說明。',unknown_project:'請先選擇已登記的工作目錄。',plan_changed:'來源檔案已變更，請重新查看計畫。',cleanup_unconfirmed:'上次執行的清理尚未確認。請先核對所屬程序，再依 CLI 流程確認；重啟頁面不會解除阻擋。',execution_state_unavailable:'無法確認共用執行狀態，暫停派工。請檢查本機狀態檔與權限。',forbidden:'連線未授權。請使用啟動時顯示的登入網址。',execution_busy:'已有工作執行中。請等候清理完成。',plan_expired_or_used:'計畫已使用或逾時，請重新查看計畫。',remote_execution_requires_cli:'遠端付費執行需使用已授權的 CLI 流程。',remote_grants_not_enabled:'此操作台未以 --accept-remote-grant pi 啟動；請回到 CLI 建立並接受一次性授權。',remote_grant_unavailable:'找不到可用的一次性遠端授權；請由 operator 重新以 CLI 建立。',remote_grant_used:'這個一次性授權已被使用或撤銷；請重新查看計畫並由 CLI 建立新授權。',remote_grant_expired:'一次性授權已逾時；請由 operator 重新以 CLI 建立。',remote_grant_source_changed:'執行程式或限制已變更；舊授權不可再用，請重新建立。',remote_grant_provider_not_supported:'此工位不支援一次性遠端授權。',remote_grant_invalid:'一次性授權格式或安全檢查未通過；請重新建立。',retry_limit_reached:'此任務已用完兩次重試。',retry_requires_latest_attempt:'請選擇這個任務最新的失敗紀錄。',retry_source_changed:'執行程式已更新，此舊紀錄不能直接重試。',retry_history_unavailable_or_invalid:'這筆紀錄沒有可驗證的重試歷史。',retry_requires_clean_failed_run:'只有已失敗且清理完成的任務可以重試。'};
 const fragment=new URLSearchParams(location.hash.slice(1));
 if(fragment.get('token')){sessionStorage.setItem('office-token',fragment.get('token'));history.replaceState(null,'',location.pathname);}
@@ -29,11 +29,11 @@ function selectProvider(next){
  provider=next;invalidate();$('selected').textContent=titles[provider];$('model').textContent=models[provider];
  for(const button of $('providers').children)button.setAttribute('aria-pressed',String(button.dataset.provider===provider));
  $('mode').replaceChildren();
- const available=provider==='opencode'?['task','terminal','text','revision']:provider==='pi'?['task','http_401','http_429','crash','cancel','resume','host_restart']:['task'];
+ const available=provider==='opencode'?['task','terminal','text','revision']:provider==='pi'?['task','http_401','http_429','crash','cancel','question','resume','host_restart']:['task'];
  for(const mode of available){const option=el('option',modes[mode]);option.value=mode;$('mode').append(option);}
  updateNote();showCheck();
 }
-function updateNote(suppressInvalidate=false){if(suppressInvalidate!==true)invalidate();const mode=$('mode').value;$('text-fields').hidden=!['text','revision'].includes(mode);$('target-fields').hidden=mode!=='revision';if(suppressInvalidate!==true)refreshTargets();let note=mode==='revision'?'選擇一個來源檔案並描述修改需求，完成後審閱差異、下載替代檔案。':mode==='text'?'使用本地 Strata 閱讀文字檔，依你的要求產生一份可下載的文件。':mode==='terminal'?'任務完成後保留本地模型與原生終端，直到你停止執行。':mode==='host_restart'?'重啟 Office 後保留中斷工位，再明確接回相同 session；不呼叫模型。':mode==='resume'?'用本機錯誤建立歷史，再明確接回同一 session；不重送任務、不呼叫模型。':mode==='cancel'?'讓真實 Pi 等待本機請求，再驗證原生取消；不呼叫模型。':mode.startsWith('http_')||mode==='crash'?'使用真實 Pi CLI 與本機故障，不呼叫模型。':provider==='opencode'?'使用本機 Strata，讀取合成 input.json 並寫入 result.json。':'此工位目前可查看計畫，頁面不啟動付費任務。';
+function updateNote(suppressInvalidate=false){if(suppressInvalidate!==true)invalidate();const mode=$('mode').value;$('text-fields').hidden=!['text','revision'].includes(mode);$('target-fields').hidden=mode!=='revision';if(suppressInvalidate!==true)refreshTargets();let note=mode==='revision'?'選擇一個來源檔案並描述修改需求，完成後審閱差異、下載替代檔案。':mode==='text'?'使用本地 Strata 閱讀文字檔，依你的要求產生一份可下載的文件。':mode==='terminal'?'任務完成後保留本地模型與原生終端，直到你停止執行。':mode==='host_restart'?'重啟 Office 後保留中斷工位，再明確接回相同 session；不呼叫模型。':mode==='resume'?'用本機錯誤建立歷史，再明確接回同一 session；不重送任務、不呼叫模型。':mode==='question'?'測試指令的原生確認介面；拒絕、接受與逾時，不呼叫模型。':mode==='cancel'?'讓真實 Pi 等待本機請求，再驗證原生取消；不呼叫模型。':mode.startsWith('http_')||mode==='crash'?'使用真實 Pi CLI 與本機故障，不呼叫模型。':provider==='opencode'?'使用本機 Strata，讀取合成 input.json 並寫入 result.json。':'此工位目前可查看計畫，頁面不啟動付費任務。';
  if(provider==='pi'&&mode==='task'){const grant=piGrant();note=grant?`operator 已以 CLI 建立一次性授權（指紋 ${grant.fingerprint}，到期 ${formatTime(grant.expires_at)}）。瀏覽器只能使用伺服器端已存在的授權，不能建立授權。`:`${piGrantsEnabled()?'尚無可用的一次性授權。':'此操作台未接受遠端授權。'}請由 operator 在終端執行 grant pi --confirm-paid-remote-run，並以 --accept-remote-grant pi 啟動操作台；本頁不提供建立授權的按鈕。`;}
  $('mode-note').textContent=note;}
 let targetGeneration=0;
@@ -66,6 +66,7 @@ function showDetail(run){const d=$('detail');d.replaceChildren(el('h3',`${titles
  if(run.test_scenario==='native_pi_host_restart')d.append(el('p',run.host_restart_check_passed?'Office 重啟驗收通過；歷史保留、無自動重跑，原任務未完成。':'Office 重啟驗收尚未通過。'));
  else if(run.test_scenario==='native_pi_resume')d.append(el('p',run.resume_check_passed?'同 session 重新連接驗收通過；原任務未完成，沒有模型推論。':'重新連接驗收尚未通過。'));
  else if(run.test_scenario==='native_pi_cancel')d.append(el('p',run.cancel_check_passed?'原生取消驗收通過，沒有模型推論。':'取消驗收尚未通過，沒有模型推論。'));
+ else if(run.test_scenario==='native_pi_question')d.append(el('p',run.question_check_passed?'原生問答確認檢查通過（無模型推論）。':'原生問答確認檢查未驗證／失敗，沒有模型推論。'));
  else if(run.test_scenario)d.append(el('p','本機故障注入；沒有模型推論。'),el('p',run.failure_check_passed?'故障驗收通過，任務仍為失敗。':'故障驗收證據不足。'));
  if(run.retry)d.append(el('p',`原始紀錄：${run.retry.root}；${run.retry.attempt===0?'首次執行':`明確重試 ${run.retry.attempt} / 2`}`));
  if(run.task_kind==='local_text')d.append(el('p','本地文字任務；執行狀態與檔案 hash 已核對，內容仍需你確認。'));

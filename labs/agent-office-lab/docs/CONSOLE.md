@@ -11,6 +11,7 @@ python3 scripts/office_console.py
 ## 本輪可操作範圍
 
 - 四 provider 的固定 CLI／環境偵測與計畫。
+- [Pi 原生問答確認檢查](PI-QUESTION.md)：測試專用確認指令、拒絕／接受／逾時；通過仍顯示已停止，沒有模型推論。
 - [單檔修改提案](LOCAL-FILE-PROPOSAL.md)：選擇目標、自訂修改、查看差異並下載替代檔案，原檔不套用。
 - [本地文字任務](LOCAL-TEXT-TASK.md)：登記目錄、自訂要求、查看及下載 output.md，原目錄不變。
 - 本地 OpenCode／Strata 合成檔案任務。

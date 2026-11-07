@@ -11,6 +11,8 @@ import secrets
 import shutil
 import re
 import signal
+import stat
+from contextlib import contextmanager
 import subprocess
 import sys
 import time
@@ -20,7 +22,184 @@ import pi_retry
 from process_ownership import process_table, collect_owned, alive_owned, crash_owned, terminate_owned
 
 
-def prepare(out, port, token, fixture):
+QUESTION_RESPONSES = [
+    {'index': 0, 'input': 'deny', 'ui_result': False},
+    {'index': 1, 'input': 'allow', 'ui_result': True},
+    {'index': 2, 'input': 'timeout', 'ui_result': False},
+]
+QUESTION_EVENT_TYPES = ['detector_installed', 'confirm_start', 'confirm_result', 'confirm_start',
+                        'confirm_result', 'marker_written', 'confirm_start', 'confirm_result',
+                        'command_complete', 'command_rejected']
+
+
+def _json_no_duplicates(data):
+    def hook(pairs):
+        obj = {}
+        for key, value in pairs:
+            if key in obj:
+                raise ValueError('duplicate JSON key')
+            obj[key] = value
+        return obj
+    return json.loads(data, object_pairs_hook=hook)
+
+
+@contextmanager
+def _question_directory(path):
+    """Pin every path component; the run directory itself must be private."""
+    absolute = Path(path).absolute()
+    fd = os.open(absolute.anchor, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW)
+    try:
+        for part in absolute.parts[1:]:
+            child = os.open(part, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW, dir_fd=fd)
+            os.close(fd)
+            fd = child
+        _private_directory_fd(fd)
+        yield fd
+    finally:
+        os.close(fd)
+
+
+def _private_directory_fd(fd):
+    st = os.fstat(fd)
+    if not stat.S_ISDIR(st.st_mode) or st.st_uid != os.getuid() or st.st_mode & 0o077:
+        raise ValueError('unsafe question directory')
+
+
+def _safe_file_bytes(directory_fd, name, limit):
+    fd = os.open(name, os.O_RDONLY | os.O_NOFOLLOW | os.O_NONBLOCK, dir_fd=directory_fd)
+    with os.fdopen(fd, 'rb') as stream:
+        st = os.fstat(stream.fileno())
+        if (not stat.S_ISREG(st.st_mode) or st.st_nlink != 1 or st.st_uid != os.getuid()
+                or st.st_mode & 0o077 or st.st_size > limit):
+            raise ValueError('unsafe question artifact')
+        data = stream.read(limit + 1)
+        after = os.fstat(stream.fileno())
+        if len(data) > limit or (st.st_size, st.st_mtime_ns) != (after.st_size, after.st_mtime_ns):
+            raise ValueError('changed or oversized question artifact')
+        return data
+
+
+def _question_artifacts(out):
+    with _question_directory(out) as run_fd:
+        qfd = os.open('question', os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW, dir_fd=run_fd)
+        try:
+            _private_directory_fd(qfd)
+            if os.listdir(qfd) != ['allow-marker.json']:
+                raise ValueError('unexpected question artifact')
+            marker = _safe_file_bytes(qfd, 'allow-marker.json', 512)
+        finally:
+            os.close(qfd)
+        wfd = os.open('workspace', os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW, dir_fd=run_fd)
+        try:
+            _private_directory_fd(wfd)
+            try:
+                os.stat('result.json', dir_fd=wfd, follow_symlinks=False)
+            except FileNotFoundError:
+                pass
+            else:
+                raise ValueError('unexpected task artifact')
+        finally:
+            os.close(wfd)
+        events = _safe_file_bytes(run_fd, 'question-events.jsonl', 64 * 1024)
+        pi_events = _safe_file_bytes(run_fd, 'pi-events.jsonl', 64 * 1024)
+        return marker, events, pi_events
+
+
+def _strict_responses(value):
+    if type(value) is not list or len(value) != len(QUESTION_RESPONSES):
+        return False
+    for got, expected in zip(value, QUESTION_RESPONSES):
+        if type(got) is not dict or set(got) != {'index', 'input', 'ui_result'}:
+            return False
+        if type(got.get('index')) is not int or type(got.get('input')) is not str or type(got.get('ui_result')) is not bool:
+            return False
+        if got != expected:
+            return False
+    return True
+
+
+def verify_question(office, relay_summary, out, nonce):
+    try:
+        out = Path(out)
+        if type(office) is not dict or type(relay_summary) is not dict or type(nonce) is not str or not re.fullmatch(r'[0-9a-f]{32}', nonce):
+            return False
+        session = office.get('session_id')
+        if not isinstance(session, str) or not session:
+            return False
+        expected_office = {
+            'provider': 'pi', 'model': 'deepseek/deepseek-flash', 'status': 'question_verified',
+            'model_inference_verified': False, 'input_path': 'office_ws_terminal_input',
+            'question_prompt_starts': 3, 'question_prompt_ends': 3, 'native_question_verified': True,
+            'provider_request_detector_installed': True, 'same_session_verified': True,
+            'denial_preserved_workspace': True, 'replay_rejected': True, 'cleanup_completed': True,
+            'marker_written_after_allow': True,
+        }
+        for key, expected in expected_office.items():
+            if office.get(key) != expected or type(office.get(key)) is not type(expected):
+                return False
+        if type(office.get('marker_sha256')) is not str or not re.fullmatch(r'[0-9a-f]{64}', office.get('marker_sha256')):
+            return False
+        if not _strict_responses(office.get('question_responses')):
+            return False
+        if relay_summary.get('records') != [] or type(relay_summary.get('records')) is not list:
+            return False
+        for key in ('client_requests', 'external_requests'):
+            if relay_summary.get(key) != 0 or type(relay_summary.get(key)) is not int:
+                return False
+        hooks = office.get('authenticated_hooks')
+        if type(hooks) is not list or len(hooks) != 7 or any(type(h) is not dict for h in hooks):
+            return False
+        expected_hooks = [('session','starting')] + [('question','needs_input'),('session','done')] * 3
+        if [(h.get('type'), h.get('status')) for h in hooks] != expected_hooks or any(h.get('session') != session for h in hooks):
+            return False
+        states = office.get('states')
+        if type(states) is not list or states.count('needs_input') != 3:
+            return False
+        marker_bytes, event_bytes, pi_event_bytes = _question_artifacts(out)
+        pi_events = [_json_no_duplicates(line) for line in pi_event_bytes.decode('utf-8').splitlines() if line]
+        if pi_events != [{'type':'session_start','session':session,'provider':'deepseek','model':'deepseek-flash'}]:
+            return False
+        marker_obj = _json_no_duplicates(marker_bytes.decode('utf-8'))
+        if type(marker_obj) is not dict or set(marker_obj) != {'schema', 'session', 'index', 'nonce'} or type(marker_obj.get('index')) is not int:
+            return False
+        if marker_obj != {'schema': 'lab.pi.question.v1', 'session': session, 'index': 1, 'nonce': nonce}:
+            return False
+        if hashlib.sha256(marker_bytes).hexdigest() != office.get('marker_sha256'):
+            return False
+        lines = [line for line in event_bytes.decode('utf-8').splitlines() if line]
+        events = [_json_no_duplicates(line) for line in lines]
+        if any(type(event) is not dict for event in events):
+            return False
+        if [event.get('type') for event in events] != QUESTION_EVENT_TYPES:
+            return False
+        if any(event.get('type') == 'provider_request_attempt' for event in events):
+            return False
+        for event in events:
+            keys = {'type','session','provider','model'}
+            if event['type'] in ('confirm_start','confirm_result','marker_written'): keys.add('index')
+            if event['type'] == 'confirm_result': keys.add('ui')
+            if set(event) != keys:
+                return False
+            if event.get('session') != session or event.get('provider') != 'deepseek' or event.get('model') != 'deepseek-flash':
+                return False
+        starts = [event for event in events if event.get('type') == 'confirm_start']
+        results = [event for event in events if event.get('type') == 'confirm_result']
+        if [event.get('index') for event in starts] != [0, 1, 2] or [event.get('index') for event in results] != [0, 1, 2]:
+            return False
+        if any(type(event.get('index')) is not int for event in starts + results):
+            return False
+        values = [event.get('ui') for event in results]
+        if values != [False, True, False] or any(type(value) is not bool for value in values):
+            return False
+        marker_index = [i for i, event in enumerate(events) if event.get('type') == 'marker_written']
+        if marker_index != [5] or events[5].get('index') != 1 or type(events[5].get('index')) is not int:
+            return False
+        return True
+    except (OSError, ValueError, TypeError, UnicodeError, RecursionError):
+        return False
+
+
+def prepare(out, port, token, fixture, check_question=False, question_nonce=None):
     workspace = private_directory(out / 'workspace')
     home = private_directory(out / 'home')
     agent = private_directory(home / 'pi')
@@ -45,6 +224,10 @@ def prepare(out, port, token, fixture):
     env = isolated_env(home, 'pi')
     env.update(TMPDIR=str(tmp), LAB_PI_OUT=str(out), LAB_PI_WORKSPACE=str(workspace),
                PATH=str(LAB / 'scripts/bin') + os.pathsep + os.environ['PATH'])
+    if check_question:
+        if not re.fullmatch(r'[0-9a-f]{32}', question_nonce or ''):
+            raise ValueError('Invalid question nonce')
+        env.update(LAB_PI_QUESTION_MODE='1', LAB_PI_QUESTION_NONCE=question_nonce)
     return env
 
 
@@ -58,12 +241,13 @@ def main():
     group.add_argument('--check-cancel', action='store_true', help='Cancel the working Pi through native Office with a held loopback request; no model calls')
     group.add_argument('--check-resume', action='store_true', help='Reconnect the same persisted Pi session after a local error and owned CLI exit; no model calls')
     group.add_argument('--check-host-restart', action='store_true', help='Crash and restart the native Office host; reconnect Pi without a prompt or model calls')
+    group.add_argument('--check-question', action='store_true', help='Exercise native Pi confirm UI with deny, allow and timeout; no model calls')
     parser.add_argument('--authorization-ref', help='Server-side remote grant reference; only valid with --allow-remote')
     args = parser.parse_args()
     if args.authorization_ref is not None and (not args.allow_remote or not re.fullmatch(r'[0-9a-f]{32}', args.authorization_ref)):
         raise ValueError('Invalid authorization reference')
     authorization_fingerprint = hashlib.sha256(args.authorization_ref.encode()).hexdigest()[:12] if args.authorization_ref else None
-    if not args.allow_remote and not args.check_startup and args.check_failure is None and not args.check_crash and not args.check_cancel and not args.check_resume and not args.check_host_restart:
+    if not args.allow_remote and not args.check_startup and args.check_failure is None and not args.check_crash and not args.check_cancel and not args.check_resume and not args.check_host_restart and not args.check_question:
         print(json.dumps({'mode': 'plan', 'command': 'python3 scripts/run_pi_work.py --allow-remote',
                           'provider': 'pi', 'model': 'deepseek-flash', 'max_requests': MAX_REQUESTS,
                           'max_output_tokens_per_request': MAX_OUTPUT, 'max_request_bytes': MAX_BODY,
@@ -83,13 +267,14 @@ def main():
     mark_started()
     out = private_directory(LAB / 'runs' / ('pi-work-' + datetime.datetime.now(datetime.timezone.utc).strftime('%Y%m%dT%H%M%S%fZ')))
     fixture = {'marker': secrets.token_hex(12), 'values': [7, 11, -2, 9]}
-    if not args.check_startup and not args.check_cancel and not args.check_resume and not args.check_host_restart:
+    if not args.check_startup and not args.check_cancel and not args.check_resume and not args.check_host_restart and not args.check_question:
         mode = 'crash' if args.check_crash else 'http_' + str(args.check_failure) if args.check_failure else 'task'
         _, fixture = pi_retry.register(LAB, out, mode, fixture)
     elif pi_retry.slots.retry_parent(LAB) is not None:
-        raise ValueError('Startup, cancellation or reconnect check cannot retry a task')
+        raise ValueError('Startup, cancellation, reconnect or question check cannot retry a task')
     token = secrets.token_urlsafe(32)
-    relay = Relay(token, api_key, fault_status=429 if args.check_resume or args.check_host_restart else args.check_failure, hold_request=args.check_crash or args.check_cancel)
+    question_nonce = secrets.token_hex(16) if args.check_question else None
+    relay = Relay(token, api_key, fault_status=429 if args.check_resume or args.check_host_restart or args.check_question else args.check_failure, hold_request=args.check_crash or args.check_cancel)
     process = None; owned = {}
     report = {'status': 'starting', 'startup_only': args.check_startup, 'provider': 'pi', 'model': 'deepseek-flash',
               'model_inference_verified': False, 'cleanup_errors': [], 'cloud_fallback': False}
@@ -106,6 +291,9 @@ def main():
         report.update(resume_check={'source':'loopback','http_status':429}, resume_check_passed=False, resume_target_verified=False)
     if args.check_host_restart:
         report.update(host_restart_check={'source':'loopback','http_status':429,'signal':'SIGKILL'}, host_restart_check_passed=False, host_target_verified=False)
+    if args.check_question:
+        report.update(result_kind='native_question_check', permission_kind='synthetic_ui_confirm',
+                      model_driven_permission=False, question_check_passed=False, startup_only=False)
     started = time.monotonic()
     def interrupted(*_):
         raise InterruptedError('Interrupted')
@@ -113,16 +301,17 @@ def main():
     signal.signal(signal.SIGTERM, interrupted)
     try:
         port = relay.start()
-        env = prepare(out, port, token, fixture)
-        for name in ('pi_retry.py', 'execution_slot.py', 'process_ownership.py', 'run_pi_work.py', 'deepseek_relay.py', 'office_pi.mjs', 'office_pi_host.mjs', 'office_pi_restart.mjs', 'manual_recovery.mjs', 'pi_boundary.mjs', 'pi_office_policy.mjs', 'pi_session_evidence.mjs', 'remote_cli.py'):
+        env = prepare(out, port, token, fixture, args.check_question, question_nonce)
+        for name in ('pi_retry.py', 'execution_slot.py', 'process_ownership.py', 'run_pi_work.py', 'deepseek_relay.py', 'office_pi.mjs', 'office_pi_question.mjs', 'office_pi_host.mjs', 'office_pi_restart.mjs', 'manual_recovery.mjs', 'pi_boundary.mjs', 'pi_question_check.mjs', 'pi_office_policy.mjs', 'pi_session_evidence.mjs', 'remote_cli.py'):
             shutil.copy2(LAB / 'scripts' / name, out / name)
         shutil.copy2(LAB / 'scripts/bin/pi', out / 'pi-launcher.py')
-        command = [shutil.which('node'), str(LAB / ('scripts/office_pi_restart.mjs' if args.check_host_restart else 'scripts/office_pi.mjs')), str(out)]
+        command = [shutil.which('node'), str(LAB / ('scripts/office_pi_question.mjs' if args.check_question else 'scripts/office_pi_restart.mjs' if args.check_host_restart else 'scripts/office_pi.mjs')), str(out)]
         if args.check_startup: command.append('--check-startup')
         if args.check_failure is not None: command += ['--check-failure', str(args.check_failure)]
         if args.check_crash: command.append('--check-crash')
         if args.check_cancel: command.append('--check-cancel')
         if args.check_resume: command.append('--check-resume')
+        if args.check_question: command.append('--check-question')
         with (out / 'office.stdout.log').open('w') as stdout, (out / 'office.stderr.log').open('w') as stderr:
             process = subprocess.Popen(command, cwd=out, env=env, stdin=subprocess.DEVNULL, stdout=stdout, stderr=stderr, start_new_session=True)
             deadline = time.monotonic() + 180
@@ -159,7 +348,14 @@ def main():
             code = process.returncode
         office = json.loads((out / 'office-result.json').read_text())
         report['office'] = office
-        if args.check_host_restart:
+        if args.check_question:
+            relay_summary = {'records': relay.records, 'client_requests': relay.client_requests, 'external_requests': relay.external_requests}
+            if code or not verify_question(office, relay_summary, out, question_nonce):
+                raise ValueError('Native Pi question acceptance failed')
+            report.update(status='stopped', reason='native_question_check', result_kind='native_question_check',
+                          permission_kind='synthetic_ui_confirm', model_driven_permission=False,
+                          question_check_passed=True, model_inference_verified=False)
+        elif args.check_host_restart:
             if (code or office.get('status') != 'stopped'
                     or not all(office.get(k) is True for k in ('crash_recovery_verified','repeated_restart_preserved','old_processes_exited','session_history_preserved','native_resume_verified','new_process_same_session','distinct_host_processes','browser_interrupted_visible','browser_refresh_without_replay'))
                     or office.get('host_generations') != 3 or report['host_target_verified'] is not True
@@ -217,7 +413,7 @@ def main():
             if not any(r.get('output_tokens', 0) > 0 for r in relay.records): raise ValueError('No provider usage evidence')
             if not office.get('file_task_passed') or not office.get('agent_settled_verified'): raise ValueError('Missing native evidence')
             report['model_inference_verified'] = True
-        if args.check_failure is None and not args.check_crash and not args.check_cancel and not args.check_resume and not args.check_host_restart: report['status'] = 'completed'
+        if args.check_failure is None and not args.check_crash and not args.check_cancel and not args.check_resume and not args.check_host_restart and not args.check_question: report['status'] = 'completed'
     except InterruptedError:
         if args.allow_remote:
             report['status'] = 'stopped'; report['reason'] = 'operator_interrupt'
@@ -233,8 +429,8 @@ def main():
             try: process.wait(timeout=15)
             except subprocess.TimeoutExpired:
                 os.killpg(process.pid, signal.SIGKILL); process.wait(); report['cleanup_errors'].append('forced_process_group_stop')
-        if (args.check_cancel or args.check_resume or args.check_host_restart) and process and process.poll() is not None:
-            report['cancel_background_processes_signalled' if args.check_cancel else 'resume_background_processes_signalled'] = terminate_owned(owned)
+        if (args.check_cancel or args.check_resume or args.check_host_restart or args.check_question) and process and process.poll() is not None:
+            report['question_background_processes_signalled' if args.check_question else 'cancel_background_processes_signalled' if args.check_cancel else 'resume_background_processes_signalled'] = terminate_owned(owned)
         remaining = alive_owned(process_table(), owned)
         deadline = time.monotonic() + 10
         while remaining and time.monotonic() < deadline:
@@ -260,6 +456,7 @@ def main():
             if args.check_cancel: report['cancel_check_passed'] = False
             if args.check_host_restart: report['host_restart_check_passed'] = False
             if args.check_resume: report['resume_check_passed'] = False
+            if args.check_question: report['question_check_passed'] = False
         if args.check_cancel and report.get('cancel_check_passed'):
             duration = time.time() * 1000 - report['office']['cancel_started_at']
             report['cancel_cleanup_duration_ms'] = round(duration)
@@ -267,16 +464,17 @@ def main():
                 report.update(status='failed', cancel_check_passed=False, reason='cancel_cleanup_deadline_exceeded')
         (out / 'result.json').write_text(json.dumps(report, indent=2) + '\n')
         print(json.dumps({'status': report['status'], 'model_inference_verified': report['model_inference_verified'],
+              'result_kind': report.get('result_kind'), 'question_check_passed': report.get('question_check_passed'),
               'failure_check_passed': report.get('failure_check_passed'), 'external_requests': relay.external_requests,
               'host_restart_check_passed':report.get('host_restart_check_passed'), 'resume_check_passed':report.get('resume_check_passed'), 'crash_check_passed': report.get('crash_check_passed'), 'cancel_check_passed': report.get('cancel_check_passed'),
               'requests': len(relay.records), 'cleanup_errors': report['cleanup_errors'], 'artifacts': str(out)}, indent=2))
     if not report['cleanup_errors']:
         mark_clean()
-    return 0 if report['status'] == 'completed' or report.get('failure_check_passed') is True or report.get('crash_check_passed') is True or report.get('cancel_check_passed') is True or report.get('resume_check_passed') is True or report.get('host_restart_check_passed') is True else 1
+    return 0 if report['status'] == 'completed' or report.get('failure_check_passed') is True or report.get('crash_check_passed') is True or report.get('cancel_check_passed') is True or report.get('resume_check_passed') is True or report.get('host_restart_check_passed') is True or report.get('question_check_passed') is True else 1
 
 
 if __name__ == '__main__':
-    try: raise SystemExit(guarded_main(main, bool(set(sys.argv[1:]) & {'--allow-remote', '--check-startup', '--check-crash', '--check-cancel', '--check-resume', '--check-host-restart'}) or any(a == '--check-failure' or a.startswith('--check-failure=') for a in sys.argv[1:])))
+    try: raise SystemExit(guarded_main(main, bool(set(sys.argv[1:]) & {'--allow-remote', '--check-startup', '--check-crash', '--check-cancel', '--check-resume', '--check-host-restart', '--check-question'}) or any(a == '--check-failure' or a.startswith('--check-failure=') for a in sys.argv[1:])))
     except (OSError, ValueError):
         print('Pi fixture could not start; check preflight and isolated credentials. No secret is printed.', file=sys.stderr)
         raise SystemExit(1)

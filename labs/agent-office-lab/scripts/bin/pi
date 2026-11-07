@@ -18,11 +18,18 @@ try:
     for flag, value in expected.items():
         if args.count(flag) != 1 or args[args.index(flag) + 1] != value:
             raise ValueError('Invalid native Pi launch')
+    question_mode = os.environ.get('LAB_PI_QUESTION_MODE')
+    question_nonce = os.environ.get('LAB_PI_QUESTION_NONCE')
+    question_extension = []
+    if question_mode is not None or question_nonce is not None:
+        if question_mode != '1' or not isinstance(question_nonce, str) or __import__('re').fullmatch(r'[0-9a-f]{32}', question_nonce) is None:
+            raise ValueError('Invalid native Pi question mode')
+        question_extension = ['--extension', str(LAB / 'scripts/pi_question_check.mjs')]
     binary = installed_cli('pi')
     command = ['/usr/bin/sandbox-exec', '-f', str(out / 'pi.sb'), str(binary),
                '--offline', '--no-extensions', '--no-mcp', '--no-skills', '--no-prompt-templates',
                '--no-context-files', '--no-themes', '--no-approve', '--tools', 'read,write',
-               '--thinking', 'off', '--system-prompt', 'Complete the synthetic file task using only read and write. Read input.json and write result.json. Do not access any other path.', '--extension', str(LAB / 'scripts/pi_boundary.mjs'), *args]
+               '--thinking', 'off', '--system-prompt', 'Complete the synthetic file task using only read and write. Read input.json and write result.json. Do not access any other path.', '--extension', str(LAB / 'scripts/pi_boundary.mjs'), *question_extension, *args]
     os.execve(command[0], command, dict(os.environ))
 except Exception:
     print('Pi fixture launch rejected; no credential is printed', file=sys.stderr)

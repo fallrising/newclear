@@ -177,3 +177,7 @@ T-0024：依 owner 指示，由 Claude Opus 5.5 提供技術指導，Pi agent �
 驗證計畫：Claude 指導先固定 API 與檔案分工，Pi 後端與介面工作分離；主導 agent 審查整合、離線授權／競態／失敗回歸及瀏覽器驗收。開發委託的模型呼叫與產品遠端實測分開記錄；沒有產品付費任務批准前，只跑本機故障／測試替身，不能宣稱遠端模型端到端驗收。原限制、共用執行鎖及完整清理要求保留。
 
 T-0024 的[一次性遠端操作台授權](REMOTE-GRANT.md)已通過離線、測試替身瀏覽器與真實 Pi 本機 429／取消回歸；[證據](evidence/remote-grant-2026-11-07.json)。這是控制層子集，尚無新入口到 DeepSeek 產物的真實付費驗收，完整 AC 不變。
+
+T-0025：Pi 原生問答／確認互動。維持 Claude Opus 5.5 技術指導、Pi agent 實作、主導 agent 審查與交付。以真實 Pi 的測試專用 slash command 與原生確認視窗驗證 needs_input、拒絕及接受後繼續；只執行固定合成動作，沒有模型 prompt、遠端費用或產品 grant。
+
+驗證計畫：固定獨立 check 模式、與遠端／retry／其他模式互斥；原生 authenticated question hooks、同 session、拒絕無產物、接受後固定 marker、零模型請求、完整程序清理與操作台結果分類。此為 AC-05／09／11 子集，不把測試指令當成真實模型工具權限，也不標完整跨 provider AC 通過。

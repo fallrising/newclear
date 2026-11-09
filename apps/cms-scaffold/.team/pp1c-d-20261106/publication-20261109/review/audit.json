@@ -1,0 +1,46 @@
+{
+  "verdict": "ACCEPTED_CHECKPOINT_PUBLICATION_SCOPE_ONLY",
+  "stagedFiles": 46,
+  "worktreeAndIndexSourceHashesMatch": 260,
+  "unchangedSinceT193": 257,
+  "changedSinceT193": [
+    "e2e-pp1-local/recovery.spec.ts",
+    "scripts/ops/local-restore-smoke.mjs",
+    "scripts/ops/local-restore-smoke.test.mjs"
+  ],
+  "allNineNewSourcesStaged": true,
+  "fourIgnoredNewSourcesStaged": [
+    "scripts/local/maintenance-source.fixture.mjs",
+    "scripts/local/maintenance-observation.mjs",
+    "scripts/local/maintenance-observation.test.mjs",
+    "scripts/local/maintenance-readonly-runner.fixture.mjs"
+  ],
+  "logs": {
+    "node-full-native-D9.log": {
+      "sha256": "db9b64f3d441d5a84090a2c6d49b4cba0106e2be7c59ccab72eee1e3ba4971db",
+      "namedPassingCases": 1413
+    },
+    "setup-smoke-suite.log": {
+      "sha256": "b45ad1acbe3c44e2989ccd4ef35b53b4e20bdb61769a58ee93495119725357d9",
+      "namedPassingCases": 53
+    },
+    "setup-green.log": {
+      "sha256": "be1cd4060c7a2fb67bb45388113d6ce2285bbcd3dece5bab8dd6843caa3bd61f",
+      "namedPassingCases": 3
+    }
+  },
+  "redOriginalHashVerified": true,
+  "redOnlyWorktreePrefixRedacted": true,
+  "redNamedFailures": 3,
+  "metadataAndTypeListHashesVerified": true,
+  "unchangedJavaSources": 208,
+  "jarHashVerified": true,
+  "secretPatternHits": 0,
+  "soleHostPathIsExistingPinnedJavaExecutable": true,
+  "stagedWhitespaceExit": 0,
+  "DActualAccepted": false,
+  "D4BrowserEndAbsent": true,
+  "D4CompleteAbsent": true,
+  "actualReadbackReadonlyRecoverStillPending": true,
+  "wholeSourceAuditOrNativeRerunPerformed": false
+}

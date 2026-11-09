@@ -10,6 +10,14 @@ source_commit: b97319d74f8442b5173ef42be72a0aa757d87df0
 
 # cms-scaffold 成功契約
 
+## 2026-11-09 保存進度
+
+Owner 要求停止本輪實作並提交、合併目前程式。本次交付只保存 D 來源及證據，不改已批准的驗收條件；CMS-C-D 與 desk T-0351 均保持 `in_progress`。A/B/C 已交付。最新 D4 仍 `SMOKE_FAILED`，browser 根因未確認，沒有 COMPLETE/full-proof/locator，尚未執行 T172 實際獨立 readback、default readonly CLI 或新鎖 default trueTTY RECOVER。
+
+來源審查與歷史 1413 原生測試僅支持 after-T193 版本；其後三檔診斷修改另有 3 例 Red→Green、53/53 受影響 smoke、TypeScript、單項 Playwright list 及 T196 獨立審查。沒有新增實機成功證據。[交接](.team/pp1c-d-20261106/CHECKPOINT.md)及[證據](.team/pp1c-d-20261106/EVIDENCE.md)保存版本、失敗與剩餘工作；PR 的必要 CI 仍須通過才可合併。
+
+本次 PR 首輪 web CI 發現 T178 測試意外依賴開發機 browser 快取；Java／PG／contracts 通過，六個失敗保留。只做[三檔測試可攜修正](.team/pp1c-d-20261106/CI-PORTABILITY.md)，保留 production pins 與真正 registry／material rechecks，不啟動 D 實機。當前來源由新 261 檔 freeze 固定，原 1413／53 仍只屬歷史版本；新 head 必要 CI 及本次 scoped evidence 另行核對。後續 T178 已於 CI 全通過，但另一 T174 計時間隔斷言失敗；[最後一次有界修正](.team/pp1c-d-20261106/CI-TIMING.md)僅把測試記時移到診斷前的 command entry，原100ms閾值與產品取樣器不變，Red→Green及相關16項通過。
+
 ## 主線與範圍
 
 [凍結總綱](docs/sdd/00-overview.md) 定義一個 Java API、三個獨立操作面，

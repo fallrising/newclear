@@ -1,0 +1,146 @@
+{
+  "historicalD9": {
+    "atUtc": "2026-11-06T23:51:28.520866+00:00",
+    "command": [
+      "NODE24",
+      "--test",
+      "--test-reporter=spec",
+      "scripts/local/forward.test.mjs",
+      "scripts/local/ingress.test.mjs",
+      "scripts/local/maintenance-guard.test.mjs",
+      "scripts/local/maintenance-helper-integration.test.mjs",
+      "scripts/local/maintenance-helper-session.test.mjs",
+      "scripts/local/maintenance-helper.test.mjs",
+      "scripts/local/maintenance-observation.test.mjs",
+      "scripts/local/maintenance-store.test.mjs",
+      "scripts/local/maintenance-target.test.mjs",
+      "scripts/local/maintenance-workflow.test.mjs",
+      "scripts/local/maintenance.test.mjs",
+      "scripts/local/prepare.test.mjs",
+      "scripts/local/verify-accounts.test.mjs",
+      "scripts/local/verify.test.mjs",
+      "scripts/ops/local-bundle.test.mjs",
+      "scripts/ops/local-media.test.mjs",
+      "scripts/ops/local-recovery-verify.test.mjs",
+      "scripts/ops/local-restore-smoke.test.mjs",
+      "scripts/ops/local-restore.test.mjs",
+      "scripts/ops/recovery-protocol.test.mjs"
+    ],
+    "exitCode": 0,
+    "timedOut": false,
+    "elapsedSeconds": 405.26361280702986,
+    "summary": {
+      "tests": "1413",
+      "pass": "1413",
+      "fail": "0",
+      "cancelled": "0",
+      "skipped": "0",
+      "todo": "0",
+      "duration_ms": "405200.168572"
+    },
+    "namedPassingCases": 1413,
+    "expectedTestsAfterFiveNewT193Cases": 1413,
+    "sourceFileCount": 260,
+    "allFrozenSourcesUnchanged": true,
+    "logSha256": "db9b64f3d441d5a84090a2c6d49b4cba0106e2be7c59ccab72eee1e3ba4971db",
+    "actualDComplete": false
+  },
+  "currentDiagnosticSmoke": {
+    "command": [
+      "NODE24",
+      "--test",
+      "--test-reporter=spec",
+      "scripts/ops/local-restore-smoke.test.mjs"
+    ],
+    "exitCode": 0,
+    "elapsedSeconds": 59.16405765688978,
+    "runtimeOrProbe": false,
+    "summary": {
+      "tests": 53,
+      "pass": 53,
+      "fail": 0,
+      "cancelled": 0,
+      "skipped": 0,
+      "todo": 0
+    },
+    "namedPassingCases": 53,
+    "logSha256": "b45ad1acbe3c44e2989ccd4ef35b53b4e20bdb61769a58ee93495119725357d9"
+  },
+  "typeAndList": [
+    {
+      "check": "typecheck",
+      "command": [
+        "NODE24",
+        "node_modules/typescript/bin/tsc",
+        "--noEmit",
+        "--allowImportingTsExtensions",
+        "--target",
+        "es2022",
+        "--module",
+        "esnext",
+        "--moduleResolution",
+        "bundler",
+        "--esModuleInterop",
+        "--skipLibCheck",
+        "--types",
+        "node",
+        "e2e-pp1-local/recovery.spec.ts",
+        "playwright.pp1-local.config.ts"
+      ],
+      "exitCode": 0,
+      "stdoutBytes": 0,
+      "stderrBytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "check": "list",
+      "command": [
+        "NODE24",
+        "node_modules/@playwright/test/cli.js",
+        "test",
+        "--config",
+        "playwright.pp1-local.config.ts",
+        "--list"
+      ],
+      "exitCode": 0,
+      "stdoutBytes": 121,
+      "stderrBytes": 0,
+      "sha256": "c7c148c313275685d51b7fca0e1e770f212aff6c5a125f4f1fe4dbdb7e1246c1",
+      "oneTestListed": true,
+      "diagnosticMarkers": 0,
+      "browserLaunched": false,
+      "inputRead": false,
+      "socketConnected": false
+    }
+  ],
+  "javaSourceBoundReuse": {
+    "unchangedJavaSourceFiles": 208,
+    "fromFreeze": "source-freeze-before-D1.json",
+    "throughFreeze": "source-freeze-before-C1.json",
+    "javaUnit": {
+      "files": 61,
+      "tests": 630,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 16.432999999999996
+    },
+    "realPostgres": {
+      "files": 20,
+      "tests": 223,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 340.96600000000007
+    },
+    "jarHashRechecked": {
+      "path": "services/cms-api/build/libs/cms-api-0.1.0-SNAPSHOT.jar",
+      "sha256": "1222e9c95109184c672adbd819f8854199b101642e01315eb3e89ae2afa69568",
+      "byteSize": 41553836
+    },
+    "newJavaTestsRun": false,
+    "wholeNodeAfterReadonlyStillRequired": true
+  },
+  "actualD": "FAILED / not accepted",
+  "publicationCI": "required on PR head; not yet observed"
+}

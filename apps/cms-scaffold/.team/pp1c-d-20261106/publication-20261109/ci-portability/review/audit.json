@@ -1,0 +1,164 @@
+{
+  "verdict": "ACCEPTED_CI_PORTABILITY_SOURCE_ONLY",
+  "sourceFiles": 261,
+  "unchangedExistingSources": 258,
+  "changedExisting": [
+    "scripts/local/maintenance-workflow.test.mjs",
+    "scripts/ops/local-restore-smoke.mjs"
+  ],
+  "newSources": [
+    "scripts/ops/local-restore-browser-material.mjs"
+  ],
+  "mismatches": [],
+  "preparerBodyPreservedExceptFixedHelperArgumentAndCopiedSibling": true,
+  "mainExactlyMechanicalExtractionAndFixedHelperCall": true,
+  "handwrittenAdded": 70,
+  "handwrittenRemoved": 35,
+  "logs": {
+    "red.log": {
+      "sha256": "f86d00ec8bd63691b5914c8ad2a31597cc98c0aca51d3d7f039c152d35c68d26",
+      "summary": {
+        "tests": [
+          "13"
+        ],
+        "pass": [
+          "7"
+        ],
+        "fail": [
+          "6"
+        ],
+        "cancelled": [
+          "0"
+        ],
+        "skipped": [
+          "0"
+        ],
+        "todo": [
+          "0"
+        ],
+        "duration_ms": [
+          "18552.660595"
+        ]
+      },
+      "namedPassingCases": 7,
+      "distinctNamedFailures": 6
+    },
+    "assertion-red.log": {
+      "sha256": "8c20e131281c550b0f6218fc28afff90a1a0e61848b31b79bfac759310339490",
+      "summary": {
+        "tests": [
+          "13"
+        ],
+        "pass": [
+          "2"
+        ],
+        "fail": [
+          "11"
+        ],
+        "cancelled": [
+          "0"
+        ],
+        "skipped": [
+          "0"
+        ],
+        "todo": [
+          "0"
+        ],
+        "duration_ms": [
+          "18624.132829"
+        ]
+      },
+      "namedPassingCases": 2,
+      "distinctNamedFailures": 11
+    },
+    "green.log": {
+      "sha256": "aa54bf4dd273e098e7ce31f0fdd970ddd9350e033eb13c982a37733afd38557e",
+      "summary": {
+        "tests": [
+          "13"
+        ],
+        "pass": [
+          "13"
+        ],
+        "fail": [
+          "0"
+        ],
+        "cancelled": [
+          "0"
+        ],
+        "skipped": [
+          "0"
+        ],
+        "todo": [
+          "0"
+        ],
+        "duration_ms": [
+          "15776.736547"
+        ]
+      },
+      "namedPassingCases": 13,
+      "distinctNamedFailures": 0
+    },
+    "affected.log": {
+      "sha256": "d18c35d3eeca8a196de682ef673d2920931e52385226ffea1c2fe1e4aae3af49",
+      "summary": {
+        "tests": [
+          "276"
+        ],
+        "pass": [
+          "276"
+        ],
+        "fail": [
+          "0"
+        ],
+        "cancelled": [
+          "0"
+        ],
+        "skipped": [
+          "0"
+        ],
+        "todo": [
+          "0"
+        ],
+        "duration_ms": [
+          "122579.138663"
+        ]
+      },
+      "namedPassingCases": 276,
+      "distinctNamedFailures": 0
+    },
+    "typecheck.log": {
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "summary": {
+        "tests": [],
+        "pass": [],
+        "fail": [],
+        "cancelled": [],
+        "skipped": [],
+        "todo": [],
+        "duration_ms": []
+      },
+      "namedPassingCases": 0,
+      "distinctNamedFailures": 0
+    },
+    "list.log": {
+      "sha256": "c7c148c313275685d51b7fca0e1e770f212aff6c5a125f4f1fe4dbdb7e1246c1",
+      "summary": {
+        "tests": [],
+        "pass": [],
+        "fail": [],
+        "cancelled": [],
+        "skipped": [],
+        "todo": [],
+        "duration_ms": []
+      },
+      "namedPassingCases": 0,
+      "distinctNamedFailures": 0
+    }
+  },
+  "auditCorrection": "Initial comparator expected an extra blank line after extraction; fixed comparator, no source or evidence changed.",
+  "runtimeAccepted": false,
+  "beforeSnapshotsMatchOldFreeze": true,
+  "nativeMetadataAndTypeListHashesMatch": true,
+  "recoveryListOneNoDiagnosticOutput": true
+}

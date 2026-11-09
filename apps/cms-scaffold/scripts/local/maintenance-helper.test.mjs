@@ -1,8 +1,15 @@
-import { EventEmitter } from 'node:events';
+import { run as runReadonlyCli193 } from '../ops/local-recovery-verify.mjs';
+import { readFile } from 'node:fs/promises';
+import { mkdirSync } from 'node:fs';
+import { join } from 'node:path';
+import { appendFileSync } from 'node:fs';
+import { readonlyRunnerFixture } from './maintenance-readonly-runner.fixture.mjs';
+import * as helperAuthority188 from './maintenance-helper.mjs';
+import { EventEmitter, getEventListeners } from 'node:events';
 import { PassThrough } from 'node:stream';
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { buildHelperPolicy, helperCreateArgs, assertHelperPolicy, executeHelperLifecycle } from './maintenance-helper.mjs';
+import { buildHelperPolicy, helperCreateArgs, assertHelperPolicy, executeHelperLifecycle, runJdbcHandshake, runPgTool } from './maintenance-helper.mjs';
 import { canonicalBytes, sha256 } from '../ops/recovery-protocol.mjs';
 const full = n => n.repeat(64), operationId = 'aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee';
 function context(kind = 'INVENTORY', side = 'source') {
@@ -219,4 +226,178 @@ for(const [fault,mutate] of Object.entries({
 for(const state of ['created','exited'])test(`T126_none_${state}_rejects_internal_endpoint`,()=>{
   const {p,expected,container}=fixture('MEDIA_PACK');expected.state=state;container.State={Status:state,Running:false};
   container.NetworkSettings.Networks.none.EndpointID=full('8');assert.throws(()=>assertHelperPolicy(container,p,expected));
+});
+
+
+function browserFixture() {
+  const c = context('BROWSER', 'target'); c.image.Id = c.target.images.node; c.runRoot = '/private/target';
+  c.browser = {worktreeRoot: '/private/helper/1/browser-worktree', chromiumRoot: '/verified/chromium', nssToolsRoot: '/verified/nss',
+    caFile: '/private/target/tls/ca.crt', inputFile: '/private/helper/1/browser.json', socketFile: '/tmp/cms-pp1c-test/credential.sock'};
+  const p = buildHelperPolicy(c), f = fixture();
+  f.expected.webNetworkName = 'owned_web';
+  f.expected.labels['org.cms.pp1c.kind'] = 'BROWSER'; f.expected.labels['org.cms.pp1c.policy'] = sha256(canonicalBytes(p));
+  const container = f.container; Object.assign(container, {Image: p.imageId});
+  Object.assign(container.Config, {Env: [...p.env], Entrypoint: [p.entrypoint], Cmd: [...p.args], Labels: f.expected.labels});
+  container.HostConfig.NetworkMode = p.networkId; container.HostConfig.Tmpfs = {'/tmp': 'rw,nosuid,nodev,size=536870912'};
+  container.Mounts = p.mounts.map(m => ({Type: m.type, Source: m.source, Destination: m.destination, RW: !m.readOnly}));
+  container.NetworkSettings.Networks = {owned_web: {NetworkID: '', IPAddress: '', EndpointID: ''}};
+  return {c, p, expected: f.expected, container};
+}
+test('T162_B1_browser_exact_child_web_seven_RO_mounts_fixed_env_and_tmpfs', () => {
+  const {c, p, expected, container} = browserFixture();
+  assert.equal(p.imageId, c.target.images.node); assert.equal(p.networkId, c.target.networkIds.web);
+  assert.equal(p.entrypoint, '/opt/pp1-node'); assert.deepEqual(p.args, ['/work/scripts/ops/local-restore-smoke.mjs', 'browser-child']);
+  assert.equal(p.mounts.length, 7); assert.ok(p.mounts.every(m => m.type === 'bind' && m.readOnly));
+  assert.deepEqual(p.mounts.map(m => m.destination), ['/chromium', '/fixture/browser.json', '/fixture/ca.crt', '/nss-tools', '/opt/pp1-node', '/run/pp1/credential.sock', '/work']);
+  for (const variable of ['CMS_PP1_SUITE=recovery', 'CMS_PP1_TLS_MODE=trusted', 'HOME=/tmp/browser-home', 'XDG_CACHE_HOME=/tmp/browser-cache']) assert.ok(p.env.includes(variable));
+  const args = helperCreateArgs(p, expected);
+  assert.ok(args.includes('--tmpfs=/tmp:rw,nosuid,nodev,size=536870912'));
+  assert.ok(args.includes('CMS_PP1_RECOVERY_INPUT=/fixture/browser.json'));
+  assert.equal(assertHelperPolicy(container, p, expected), container);
+});
+for (const fault of ['full_id', 'source_network', 'data_network', 'second_endpoint', 'rw_socket', 'extra_mount', 'env', 'tmpfs', 'argv']) {
+  test(`T162_B1_browser_${fault}_policy_rejected`, () => {
+    const {c, p, expected, container} = browserFixture();
+    if (fault === 'full_id') container.Id = full('0');
+    if (fault === 'source_network') container.NetworkSettings.Networks = {source_web: container.NetworkSettings.Networks.owned_web};
+    if (fault === 'data_network') container.HostConfig.NetworkMode = c.target.networkIds.data;
+    if (fault === 'second_endpoint') container.NetworkSettings.Networks.other = {};
+    if (fault === 'rw_socket') container.Mounts.find(m => m.Destination === '/run/pp1/credential.sock').RW = true;
+    if (fault === 'extra_mount') container.Mounts.push({Type: 'bind', Source: '/private/source', Destination: '/source', RW: false});
+    if (fault === 'env') container.Config.Env.push('NODE_OPTIONS=--inspect');
+    if (fault === 'tmpfs') container.HostConfig.Tmpfs['/tmp'] = 'rw,size=1073741824';
+    if (fault === 'argv') container.Config.Cmd.push('arbitrary');
+    assert.throws(() => assertHelperPolicy(container, p, expected), e => e.code === 'ADAPTER_UNSEALED');
+  });
+}
+test('T162_B1_browser_source_side_or_unknown_material_rejected', () => {
+  const {c} = browserFixture();
+  assert.throws(() => buildHelperPolicy({...c, side: 'source'}), e => e.code === 'ADAPTER_UNSEALED');
+  assert.throws(() => buildHelperPolicy({...c, browser: {...c.browser, arbitrary: '/bad'}}), e => e.code === 'ADAPTER_UNSEALED');
+});
+
+for(const when of ['already','created','consume'])test(`T169_external_abort_${when}_never_allows_late_helper_work`,async()=>{
+  const f=lifecycleFixture(),controller=new AbortController();f.deps.signal=controller.signal;
+  if(when==='already')controller.abort();
+  if(when==='created'){const created=f.deps.onCreated;f.deps.onCreated=async(...args)=>{await created(...args);controller.abort();};}
+  if(when==='consume')f.consume=async child=>{controller.abort();child.stdin.end();return{verified:true};};
+  await assert.rejects(executeHelperLifecycle(f.p,f.expected,f.consume,f.deps),e=>e.code==='INTERRUPTED');
+  if(when==='already')assert.equal(f.calls.length,0);
+  else {assert.equal(f.wasRemoved(),true);assert.equal(f.wasStarted(),when==='consume');}
+});
+
+test('T169_active_external_abort_stops_removes_owned_ID_and_detaches_listener',async()=>{
+  const f=lifecycleFixture(),controller=new AbortController();f.deps.signal=controller.signal;
+  f.consume=()=>{queueMicrotask(()=>controller.abort());return new Promise(()=>{});};
+  await assert.rejects(executeHelperLifecycle(f.p,f.expected,f.consume,f.deps),e=>e.code==='INTERRUPTED');
+  assert.ok(f.calls.some(args=>args[0]==='stop'&&args.at(-1)===f.expected.fullContainerId));
+  assert.ok(f.wasRemoved());assert.equal(getEventListeners(controller.signal,'abort').length,0);
+});
+
+function permitCancellationFixture(when) {
+  const controller=new AbortController(),sent=[],hash='a'.repeat(64);
+  const request={version:1,mode:'INVENTORY',operationId,side:'source',targetId:`pp1-local:${'b'.repeat(32)}`,
+    releaseId:`sha256:${hash}`,jdbcUrl:'jdbc:postgresql://172.30.0.2:5432/cms',dbUser:'cms_local',
+    passwordFile:'/run/secrets/spring.datasource.password',mediaRoot:'/media',outputFile:'/run/pp1/output/inventory.json',backupId:null,rawProofSha256:null};
+  const backend={pid:71,backendStartEpoch:'1793550000.123456',db:'cms',role:'cms_local',clientAddr:'172.30.0.9',applicationName:operationId};
+  const ready={version:1,operationId,side:'source',mode:'INVENTORY',requestSha256:sha256(canonicalBytes(request)),backend,readOnly:true};
+  const result={version:1,operationId,mode:'INVENTORY',inventorySha256:hash,dbSnapshotSha256:hash,
+    assetCount:'0',referencedFileCount:'0',orphanFileCount:'0',fileCount:'0',fileBytes:'0'};
+  const child={stdin:new PassThrough(),stdout:new PassThrough(),stderr:new PassThrough()};let checks=0,observations=0;
+  child.stdin.on('data',bytes=>{sent.push(bytes);if(when==='write')controller.abort();});
+  child.stdin.on('finish',()=>{child.stdout.end(canonicalBytes(result));child.stderr.end();});
+  queueMicrotask(()=>child.stdout.write(canonicalBytes(ready)));
+  const deps={signal:controller.signal,address:backend.clientAddr,
+    assertCurrent:async()=>{if(++checks===3&&when==='current'){await Promise.resolve();controller.abort();}},
+    observe:async()=>++observations===1?[backend]:[],onReady:async()=>{},
+    onPermitted:async()=>{if(when==='permitted'){await Promise.resolve();controller.abort();}}};
+  return{child,request,deps,sent,controller};
+}
+for(const when of ['permitted','current','write'])test(`T169_JDBC_abort_during_${when}_cannot_admit_late_permit_or_result`,async()=>{
+  const f=permitCancellationFixture(when);
+  try {
+    await assert.rejects(runJdbcHandshake(f.child,f.request,f.deps),e=>e.code==='INTERRUPTED');
+    if(when!=='write')assert.equal(Buffer.concat(f.sent).length,0);
+    assert.equal(getEventListeners(f.controller.signal,'abort').length,0);
+  }finally{f.child.stdin.destroy();f.child.stdout.destroy();f.child.stderr.destroy();}
+});
+
+test('T174_JSON_historical_backend_is_not_a_private_PG_live_witness',async()=>{
+  await assert.rejects(runPgTool({}, {policy:{kind:'PG_DUMP'},liveWitness:{claimed:true,backend:{pid:71}}}),e=>e.code==='CAPTURE_FAILED');
+});
+
+test('T188_readonly_creation_and_result_authority_reject_JSON_without_normal_authority',()=>{
+  for(const name of ['claimReadonlyCreation','verifiedReadonlyInventoryResult'])
+    assert.throws(()=>helperAuthority188[name]({}, {}, {}),{code:'ADAPTER_UNSEALED'});
+});
+
+test('T188_real_observation_six_profiles_then_inventory_survives_ended_child_delayed_EOF',async t=>{
+  const f=await readonlyRunnerFixture(t),paths=['lease.json','target.json','recovery-candidate.json',`operations/${f.lease.operationId}.json`,`operations/${f.lease.operationId}.request.json`];
+  const before=await Promise.all(paths.map(path=>readFile(join(f.base,path))));
+  const result=await helperAuthority188.runReadonlyInventory(f.token,f.deps);
+  assert.deepEqual(await Promise.all(paths.map(path=>readFile(join(f.base,path)))),before);assert.equal(f.state.containers.length,3);
+  assert.equal(f.events.created.length,7);assert.equal(f.events.maxActive,1);
+  assert.deepEqual(f.events.started,f.events.created);assert.deepEqual(f.events.removed,f.events.created);
+  assert.equal(f.events.permits.length,1);assert.equal(f.events.endedBeforeFrames,1);
+  assert.deepEqual(result.inventory,f.captured.inventory);
+  assert.throws(()=>{result.profile.javaRuntimeVersion='forged';},TypeError);
+  assert.throws(()=>{result.inventory.tables.push({});},TypeError);
+  assert.throws(()=>helperAuthority188.verifiedInventoryResult(f.token,result),{code:'ADAPTER_UNSEALED'});
+  assert.throws(()=>helperAuthority188.verifiedReadonlyInventoryResult({},result),{code:'ADAPTER_UNSEALED'});
+  assert.throws(()=>helperAuthority188.verifiedReadonlyInventoryResult(f.token,structuredClone(result)),{code:'ADAPTER_UNSEALED'});
+  const profile=await helperAuthority188.verifiedReadonlyHelperProfile(f.token,f.deps);
+  assert.deepEqual(await helperAuthority188.verifiedReadonlyHelperProfile(f.token,f.deps),profile);
+  const metadata=helperAuthority188.verifiedReadonlyInventoryResult(f.token,result);
+  assert.throws(()=>{metadata.profile.javaRuntimeVersion='forged';},TypeError);
+  assert.equal(metadata.requestSha256,f.events.permits[0].requestSha256);assert.equal(metadata.fullContainerId,f.events.created[6]);
+  assert.throws(()=>helperAuthority188.verifiedReadonlyInventoryResult(f.token,result),{code:'ADAPTER_UNSEALED'});
+  await f.observation.finishObservation(f.token,f.deps);f.observation.assertObservationGate(f.token);
+  f.observation.closeObservation(f.token);await assert.rejects(helperAuthority188.verifiedReadonlyHelperProfile(f.token,f.deps));
+});
+
+for(const fault of ['request','compiled-class'])test(`T188_real_observation_rejects_${fault}_bytes_changed_during_delayed_drain`,async t=>{
+  const f=await readonlyRunnerFixture(t,{afterBackendEnded:({c})=>{
+    const path=fault==='request'?c.Mounts.find(m=>m.Destination==='/run/pp1/request.json').Source:
+      c.Mounts.find(m=>m.Destination==='/run/pp1/request.json').Source.replace(/request.json$/,'profile/classes/Profile.class');
+    appendFileSync(path,' ');
+  }});
+  await assert.rejects(helperAuthority188.runReadonlyInventory(f.token,f.deps));
+});
+
+for(const fault of ['pid','epoch','endpoint','extra'])test(`T188_real_observation_rejects_wrong_${fault}_before_Permit`,async t=>{
+  const f=await readonlyRunnerFixture(t,{afterReady:({state})=>{
+    if(fault==='pid')state.backends[0].pid++;if(fault==='epoch')state.backends[0].backend_start_epoch='1770000001.123';
+    if(fault==='endpoint')state.backends[0].client_addr='172.31.0.10';
+    if(fault==='extra')state.backends.push({...state.backends[0],pid:92});
+  }});
+  await assert.rejects(helperAuthority188.runReadonlyInventory(f.token,f.deps));assert.equal(f.events.permits.length,0);
+});
+for(const fault of ['reappearing','registry','source','cancel'])test(`T188_real_observation_rejects_${fault}_during_delayed_EOF`,async t=>{
+  const abort=new AbortController(),f=await readonlyRunnerFixture(t,{signal:abort.signal,delay:350,reappearAfterZero:fault==='reappearing',afterBackendEnded:({state,f})=>{
+    if(fault==='registry')mkdirSync(join(f.base,'operation.lock'),{mode:0o700});
+    if(fault==='source')state.oid='99999';if(fault==='cancel')abort.abort();
+  }});
+  await assert.rejects(helperAuthority188.runReadonlyInventory(f.token,f.deps),fault==='cancel'?{code:'INTERRUPTED'}:undefined);
+  assert.equal(f.events.permits.length,1);await assert.rejects(f.observation.observationContext(f.token,f.deps));
+});
+
+for(const fault of ['abort','registry','policy','identity'])test(`T193_real_default_cleanup_${fault}`,async t=>{
+  const abort=new AbortController(),f=await readonlyRunnerFixture(t,{signal:abort.signal,afterBackendEnded:({c,f})=>{
+    if(fault==='registry')mkdirSync(join(f.base,'operation.lock'),{mode:0o700});
+    else {if(fault==='policy')c.Image='sha256:'+'0'.repeat(64);if(fault==='identity')c.Id='f'.repeat(64);abort.abort();}
+  }});f.observation.closeObservation(f.token);const chunks=[];
+  const args=['--run-id',f.readonlyIds.runId,'--backup-id',f.readonlyIds.backupId,'--restore-operation-id',f.readonlyIds.restoreOperationId];
+  const exit=await runReadonlyCli193(args,{...f.deps,stdout:{write:b=>chunks.push(Buffer.from(b))}});
+  assert.notEqual(exit,0);assert.equal(chunks.length,1);assert.equal(JSON.parse(chunks[0]).phase,null);
+  assert.equal(f.events.created.length,7);
+  if(fault==='abort'||fault==='registry')assert.deepEqual(f.events.removed,f.events.created);
+  else {assert.equal(f.events.removed.length,6);assert.ok(!f.events.removed.includes(f.events.created[6]));assert.ok(!f.events.removed.includes('f'.repeat(64)));}
+  t.diagnostic(JSON.stringify({fault,created:f.events.created.length,removed:f.events.removed.length,code:JSON.parse(chunks[0]).code}));
+});
+test('T193_unbranded_caller_flags_cannot_skip_normal_onExited',async()=>{
+  const f=lifecycleFixture('consume');let exited=0;
+  f.deps.readonlyCleanup=true;f.deps.cleanup=true;f.deps.owner={verified:true};f.deps.onCleanup=async()=>({verified:true});
+  f.deps.onExited=async()=>{exited++;throw Error('mandatory operational check');};
+  await assert.rejects(executeHelperLifecycle(f.p,f.expected,f.consume,f.deps),{code:'CAPTURE_FAILED'});
+  assert.equal(exited,1);assert.equal(f.wasRemoved(),false);
 });

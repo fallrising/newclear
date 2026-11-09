@@ -1,0 +1,13 @@
+# Second bounded checkpoint CI correction — 2026-11-09
+
+Head f439e8a4 / [CMS run42681365811](https://github.com/fallrising/newclear/actions/runs/42681365811) passed Java/PG/contracts and all T178 cases. Web's local suite had 668 cases, 667 pass and one failure: T174_real_registry_live_PG_witness_survives_exit_during_slow_source_checks. The test's unchanged assertion requires at least100ms between serialized observation dispatches. Raw CI failure is retained privately; the original CI log remains linked.
+
+The production sampleRaw sampler already waits in a monotonic loop until100ms and serializes calls. The test recorded its start after reading and parsing lease.json; variable diagnostic latency could make the measured interval shorter. Only this test changes: capture command-entry time before instrumentation, then use that timestamp. An explicit30ms first-observation diagnostic delay makes the old late timestamp fail deterministically. Activity accounting now covers that delay too. The production sampler, 100000000ns assertion, concurrency/closed-during-checks/output/registry checks, policies and timeouts are unchanged.
+
+The exact single-test command first failed for the same >=100000000n assertion, then passed with the corrected command-entry timestamp. The T174 subgroup is the proportional check; no full native repeat, new runtime/probe or actual D work is part of this correction. This is the second and last grounded publication correction under the existing retry bound. Required new-head CI and independent scoped review remain gates, with every original failure retained.
+
+Current source freeze is source-freeze-after-ci-timing.json:261 files, one test file changed from the portability freeze and260unchanged. Earlier1413/53/276 evidence keeps its original version scope. D4 remains SMOKE_FAILED; COMPLETE/fullproof/T172 actual/default readonly/default new-lock RECOVER and D acceptance remain pending.
+
+Observed native results: same named command Red1/1 then Green1/1 (900.50365ms); `NODE24 --test --test-reporter=spec --test-name-pattern=T174_ scripts/local/maintenance-workflow.test.mjs` passed16/16, zero fail/cancel/skip,7581.022402ms. [Exact commands/exit metadata/hashes](publication-20261109/ci-timing/results.json) and original/redacted Red are retained.
+
+[T200 independent single-test review](../reports/T-200.md) accepted the seven-line diff, unchanged production sampler/assertions, Red/Green,16-case subgroup and261-source identity; [audit receipt](publication-20261109/ci-timing/review/audit.json). This is test/source acceptance only. Final PR CI/normal merge/readback remain required.

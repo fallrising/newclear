@@ -1,0 +1,71 @@
+✔ T162_A1_real_private_socket_delivers_exactly_one_frame_then_accepts_frames_and_EOF (16.832468ms)
+✔ T162_A1_wrong_request_fails_without_second_credential_delivery (2.541208ms)
+✔ T162_A1_overflow_fails_without_second_credential_delivery (1.998371ms)
+✔ T162_A1_early_eof_fails_without_second_credential_delivery (1.780564ms)
+✔ T162_A1_pipelined_observations_fails_without_second_credential_delivery (1.901881ms)
+✔ T162_A1_second_connection_fails_without_second_credential_delivery (1.943131ms)
+✔ T162_A2_exact_input_frames_and_time_bindings (4.58685ms)
+✔ T162_A2_changed_socket_mode_blocks_credentials_before_peer_callback (2.431479ms)
+PP1C_DIAG:L_ENV
+PP1C_DIAG:L_NSS_INIT
+PP1C_DIAG:L_NSS_TRUST
+PP1C_DIAG:L_PW_SPAWN
+✔ T162_A2_request_deadline_is_bounded_without_credentials (11.193022ms)
+PP1C_DIAG:L_ENV
+PP1C_DIAG:L_ENV
+PP1C_DIAG:L_ENV
+PP1C_DIAG:L_ENV
+PP1C_DIAG:L_ENV
+PP1C_DIAG:L_NSS_INIT
+✔ T162_B2_browser_child_installs_NSS_before_only_fixed_Playwright_command (1.701332ms)
+✔ T162_B2_arbitrary_argv_rejects_before_runner (0.23165ms)
+✔ T162_B2_untrusted_rejects_before_runner (0.08449ms)
+✔ T162_B2_extra_env_rejects_before_runner (0.087529ms)
+✔ T162_B2_node_options_rejects_before_runner (0.073019ms)
+✔ T162_B2_NSS_failure_rejects_before_runner (0.19067ms)
+✔ T162_C1_real_files_socket_policy_and_private_result_bind_actual_completion (8527.733518ms)
+✔ T162_C1_wrong_live_full_ID_cannot_receive_credentials (2294.868347ms)
+✔ T162_C1_peer_network_cannot_mint_a_smoke_result (2380.62626ms)
+✔ T162_C1_peer_mount_cannot_mint_a_smoke_result (2345.582629ms)
+✔ T162_C1_input_changed_cannot_mint_a_smoke_result (2971.840867ms)
+✔ T162_C1_nonzero_exit_cannot_mint_a_smoke_result (5181.71427ms)
+✔ T162_C1_wrong_fixture_refused_before_delivery (2.467509ms)
+✔ T162_C1_wrong_startup_refused_before_delivery (1.713773ms)
+✔ T162_C1_wrong_old_token_hash_refused_before_delivery (1.938682ms)
+✔ T162_C1_wrong_foreign_token_refused_before_delivery (2.849147ms)
+✔ T162_A2_completed_frames_without_EOF_never_succeed (13.509632ms)
+✔ T162_E1_abort_during_suspended_peer_never_delivers_credentials (31.426955ms)
+✔ T162_E1_already_aborted_signal_refuses_channel_creation (0.377439ms)
+✔ T162_E1_before-arm_detaches_abort_listener (1.310924ms)
+✔ T162_E1_ordinary-frame_detaches_abort_listener (1.647423ms)
+✔ T162_E1_abort_during_final_EOF_peer_check_cannot_seal_success (4.221982ms)
+✔ T162_E2_preaborted_workflow_signal_prevents_helper_reservation (2.11256ms)
+✔ T162_E2_preaborted_caller_signal_prevents_helper_reservation (1.552614ms)
+✔ T162_E2_cancelled_workflow_cannot_reuse_completed_private_browser_result (6092.925422ms)
+✔ T162_E2_cancelled_caller_cannot_reuse_completed_private_browser_result (6034.054958ms)
+✔ T162_E2_workflow_abort_suspended_real_peer_cleans_owned_helper_and_socket (3021.439023ms)
+✔ T162_E2_caller_abort_suspended_real_peer_cleans_owned_helper_and_socket (3060.094737ms)
+✔ T162_E2_abort_after_actual_EOF_and_owned_removal_cannot_mint_private_proof (5431.491239ms)
+✔ T162_E2_lowlevel_rejects_non_AbortSignal_[object Object] (0.270019ms)
+✔ T162_E2_lowlevel_rejects_non_AbortSignal_false (0.056819ms)
+✔ T162_E2_lowlevel_rejects_non_AbortSignal_null (0.03338ms)
+✔ T162_E2_private_workflow_signal_cannot_be_JSON_authority (2.41669ms)
+✔ T178_registration_material_cannot_be_minted_from_JSON_or_normal_browser_slot (1.726913ms)
+✔ T180_closed_byte_parser_never_forwards_unknown_secret_or_incomplete_prefix (0.620057ms)
+✔ T180_launcher_reports_only_fixed_stage_when_NSS_error_contains_secret (0.263728ms)
+✔ T180_launcher_discards_raw_runner_output_and_forwards_only_whole_journey_markers (1.412404ms)
+✔ setup_stage_J_ENV_CHECK_preserves_failed_prefix_without_raw_output (0.777186ms)
+✔ setup_stage_J_MODULE_IMPORT_preserves_failed_prefix_without_raw_output (0.658777ms)
+✔ setup_stage_J_BINDINGS_preserves_failed_prefix_without_raw_output (0.820717ms)
+✔ T180_page_error_classification_never_contains_message_url_or_secret (0.480177ms)
+✔ T180_failure_artifact_is_private_constant_only (5388.805547ms)
+✔ T180_failure_diagnostic_cannot_overwrite_existing_evidence (6192.241496ms)
+✔ T180_parser_deduplicates_to_closed_bounded_enum (1.250075ms)
+ℹ tests 53
+ℹ suites 0
+ℹ pass 53
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 59129.258527

@@ -1,0 +1,11 @@
+✔ setup_stage_J_ENV_CHECK_preserves_failed_prefix_without_raw_output (5.819985ms)
+✔ setup_stage_J_MODULE_IMPORT_preserves_failed_prefix_without_raw_output (2.688439ms)
+✔ setup_stage_J_BINDINGS_preserves_failed_prefix_without_raw_output (1.724603ms)
+ℹ tests 3
+ℹ suites 0
+ℹ pass 3
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 77.723748

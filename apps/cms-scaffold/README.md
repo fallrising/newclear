@@ -145,3 +145,10 @@ W4 共用 Admin 治理已於 [PR #289](https://github.com/fallrising/newclear/pu
 ### PP1c local recovery implementation checkpoint — 2026-11-06
 
 C now has fresh private target creation, immutable bundle verification, complete raw DB/media comparison and atomic restored-session revocation. The controlled local drill restored17files/14089bytes and20tables, preserved source bytes and verified the exact two-session/one-AUTH delta independently. [Evidence and retained failures](.team/pp1c-c-20261102/EVIDENCE.md) record source hashes, commands and scoped acceptance gates. The public restore/verifier CLI stays unsealed until D supplies startup/browser/restart/full-proof and recovery integration; C does not emit a complete recovery proof. Same-host protected copy is local evidence; overall AC04/05 and formal/offsite operation remain pending.
+
+
+### PP1c D source checkpoint — 2026-11-09
+
+D 的還原、browser/full-proof、readonly verifier 與 RECOVER 接線已實作並保存；本次依 owner 要求提交目前進度。四次實機嘗試仍未成功，最新 D4 為 `SMOKE_FAILED`，沒有完整 proof 或 COMPLETE。D 與整體 AC04/05 保持未完成。
+
+[交接與剩餘主線](.team/pp1c-d-20261106/CHECKPOINT.md)列出續作順序；[來源與驗證證據](.team/pp1c-d-20261106/EVIDENCE.md)區分原生測試、來源審查與失敗實機。正式 readonly CLI 需要完整還原且原工作流程已釋放，目前尚未達此前提。

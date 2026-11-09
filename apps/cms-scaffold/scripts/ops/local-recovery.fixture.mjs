@@ -45,7 +45,7 @@ function archive() {
 export async function fixture(t) {
   const cwd = await mkdtemp(join(tmpdir(), 'cms-bundle-'));
   t.after(() => rm(cwd, { recursive: true, force: true }));
-  const root = join(cwd, 'run'), base = join(root, 'maintenance');
+  const root = join(cwd, 'local/pp1', 'a'.repeat(32)), base = join(root, 'maintenance');
   await mkdir(base, { recursive: true, mode: 0o700 });
   const target = { runId: 'a'.repeat(32), targetId: `pp1-local:${'a'.repeat(32)}`, project: `cms-pp1-local-${'a'.repeat(32)}`,
     sourceCommit: 'b'.repeat(40), images: { api: `sha256:${full('c')}`, postgres: `sha256:${full('d')}` },
@@ -188,8 +188,8 @@ export function revocationFixture() {
   rehashInventory(after);return{raw,after,receipt,context};
 }
 
-export async function revokedFixture(t) {
-  const r=revocationFixture(),f=await rawFixture(t,{baseInventory:r.raw});
+export async function revokedFixture(t,{revocation=revocationFixture(),configure}={}) {
+  const r=revocation,f=await rawFixture(t,{baseInventory:r.raw,configure});
   const {compareRestoredBundle,restoreBundleMaterial}=await import('./local-recovery-verify.mjs');
   await compareRestoredBundle(f.token,f.results,f.deps);
   const material=await restoreBundleMaterial(f.token,f.deps);
@@ -197,7 +197,7 @@ export async function revokedFixture(t) {
   const post=structuredClone(f.captured.inventory);
   post.tables.find(t=>t.tableName==='cms_session').rows=structuredClone(r.after.tables.find(t=>t.tableName==='cms_session').rows);
   post.tables.find(t=>t.tableName==='cms_audit_event').rows=structuredClone(r.after.tables.find(t=>t.tableName==='cms_audit_event').rows);
-  post.tables.find(t=>t.tableName==='cms_audit_event').rows[0].detail_json=JSON.stringify({operationId:f.ctx.operationId,backupId:material.backupId,targetRef:f.child.targetId,revokedCount:'2'});
+  post.tables.find(t=>t.tableName==='cms_audit_event').rows.find(row=>row.id===receipt.auditEventId).detail_json=JSON.stringify({operationId:f.ctx.operationId,backupId:material.backupId,targetRef:f.child.targetId,revokedCount:'2'});
   const dir=join(f.base,'operations',f.ctx.operationId,'helper/9');await mkdir(dir,{mode:0o700});
   const path=join(dir,'commit-receipt.json');await writeFile(path,canonicalBytes(receipt),{mode:0o600});
   const request={version:1,mode:'REVOKE_SESSIONS',operationId:f.ctx.operationId,side:'target',targetId:f.child.targetId,releaseId:`sha256:${f.child.apiBuild.jarSha256}`,
@@ -209,5 +209,6 @@ export async function revokedFixture(t) {
     path,sha256:digest(receipt),byteSize:String(canonicalBytes(receipt).length),requestSha256:digest(request),backupId:material.backupId,rawProofSha256:material.rawProofSha256});
   f.deps.commitAuthority=(token,value)=>{const m=owned.get(value);if(token!==f.token||!m)throw new OpsError('ADAPTER_UNSEALED');return m;};
   f.ctx.lease.phase='SESSIONS_REVOKED';f.ctx.helperSequence=10;
+  for(const table of post.tables)table.rows.sort((a,b)=>Buffer.compare(canonicalBytes(a),canonicalBytes(b)));
   const inventory=await f.issueInventory('target','10',post);return {...f,commit,post,inventory,receipt};
 }

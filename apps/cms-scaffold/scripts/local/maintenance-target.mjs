@@ -57,16 +57,18 @@ async function tree(root) {
   await walk(); ensure(files['index.html']); return files;
 }
 function freeze(value) { for (const child of Object.values(value)) if (object(child)) freeze(child); return Object.freeze(value); }
-export async function inspectTarget(runRoot, deps = {}, { apiState, workflow } = {}) {
+export async function inspectTarget(runRoot, deps = {}, { apiState, workflow, observation } = {}) {
   try {
+    ensure(!(workflow && observation));
     ensure(apiState === 'running' || apiState === 'stopped'); ensure(typeof runRoot === 'string' && runRoot.length > 0);
     const root = resolve(runRoot), runId = root.split('/').at(-1), cwd = dirname(dirname(dirname(root)));
     ensure(hex(runId, 32) && root === join(cwd, 'local/pp1', runId)); await ancestors(root);
     const rootStat = await lstat(root); ensure(rootStat.isDirectory() && (rootStat.mode & 0o7777) === 0o700 && rootStat.uid === process.getuid());
-    const workflowContext=workflow ? await (await import('./maintenance-workflow.mjs')).workflowInspectionContext(workflow,root,deps) : null;
+    const workflowContext=observation ? await (await import('./maintenance-observation.mjs')).observationInspectionContext(observation,root,deps)
+      : workflow ? await (await import('./maintenance-workflow.mjs')).workflowInspectionContext(workflow,root,deps) : null;
     const restore=workflowContext?.restoreRoot===root;
-    try { await lstat(join(root,'restore-target.json')); ensure(restore&&apiState==='stopped'); } catch(error) { if(error.code!=='ENOENT')throw error; }
-    if(restore)ensure(apiState==='stopped');
+    try { await lstat(join(root,'restore-target.json')); ensure(restore&&apiState===workflowContext.apiState); } catch(error) { if(error.code!=='ENOENT')throw error; }
+    if(restore)ensure(apiState===workflowContext.apiState&&['running','stopped'].includes(workflowContext.ingressState));
     const receipt = JSON.parse(await regular(join(root, 'receipt.json'), true));
     const artifacts = JSON.parse(await regular(join(root, 'artifacts.json'), true));
     const project = `cms-pp1-local-${runId}`, build = receipt.apiBuild;
@@ -96,9 +98,9 @@ export async function inspectTarget(runRoot, deps = {}, { apiState, workflow } =
     let permitted=null;
     if(workflowContext?.helper) {
       const {helper,policy,expected}=workflowContext;permitted=all.find(c=>c.Id===helper.fullContainerId);ensure(permitted);
-      const state=workflowContext.allowExited&&permitted.State?.Status==='exited'?'exited':
+      const state=workflowContext.profileTransition ? permitted.State?.Status : workflowContext.allowExited&&permitted.State?.Status==='exited'?'exited':
         {CREATED:'created',RUNNING:'running',READY:'running',PERMITTED:'running',EXITED:'exited'}[helper.state];
-      if(state==='exited'&&workflowContext.allowExited)ensure(permitted.State.ExitCode===0);
+      if(state==='exited'&&(workflowContext.allowExited||workflowContext.profileTransition))ensure(permitted.State.ExitCode===0);
       (await import('./maintenance-helper.mjs')).assertHelperPolicy(permitted,policy,{...expected,state});
       if(state==='running'&&helper.endpoint) {
         const endpoints=Object.values(permitted.NetworkSettings.Networks);
@@ -126,7 +128,8 @@ export async function inspectTarget(runRoot, deps = {}, { apiState, workflow } =
     const containerIds = {}, mounts = new Map(); let sessionMetadata;
     for (const [name, c] of service) {
       const kind = { postgres: 'postgres', 'cms-api': 'api', ingress: 'node' }[name]; containerIds[name] = c.Id;
-      ensure(c.Name === `/${project}-${name}-1` && c.Image === receipt.images[kind] && c.State?.Running === (restore?name==='postgres':name !== 'cms-api' || apiState === 'running'));
+      ensure(c.Name === `/${project}-${name}-1` && c.Image === receipt.images[kind] && c.State?.Running === (name==='postgres'||name==='cms-api'&&apiState==='running'||name==='ingress'&&(!restore||workflowContext.ingressState==='running')));
+      if(restore&&name==='cms-api'&&apiState==='running'&&workflowContext.apiHealthy)ensure(c.State.Health?.Status==='healthy');
       const expectedEnv = name === 'postgres' ? { POSTGRES_DB: 'cms', POSTGRES_USER: 'cms_local', POSTGRES_PASSWORD_FILE: '/run/secrets/spring.datasource.password' } : name === 'cms-api' ? {
         SPRING_PROFILES_ACTIVE: 'prod', CMS_RUNTIME_PRODUCTION_REQUIRED: 'true', CMS_SITE_DOMAIN: 'cms.test', CMS_API_ORIGIN: receipt.apiOrigin,
         CMS_CORS_ORIGINS: 'https://front.cms.test:8443,https://back.cms.test:8443,https://admin.cms.test:8443',
@@ -144,7 +147,7 @@ export async function inspectTarget(runRoot, deps = {}, { apiState, workflow } =
       ensure(keys(c.NetworkSettings.Networks, names.map(n => `${project}_${n}`)));
       for (const n of names) {
         const network = networkMap.get(n), endpoint = c.NetworkSettings.Networks[network.Name];
-        const inactive=restore&&name!=='postgres'||name==='cms-api'&&apiState==='stopped';
+        const inactive=name==='cms-api'&&apiState==='stopped'||restore&&name==='ingress'&&workflowContext.ingressState==='stopped';
         ensure(endpoint.NetworkID === network.Id||restore&&inactive&&endpoint.NetworkID==='');
         const aliases = [`${project}-${name}-1`, name, ...(name === 'ingress' ? ['front.cms.test', 'back.cms.test', 'admin.cms.test', 'api.cms.test'] : [])];
         ensure(Array.isArray(endpoint.Aliases) && equal([...endpoint.Aliases].sort(), aliases.sort()));
@@ -202,7 +205,9 @@ export async function inspectTarget(runRoot, deps = {}, { apiState, workflow } =
     catch (error) { if (error.code !== 'ENOENT') throw error; }
     const endpoint = service.get('postgres').NetworkSettings.Networks[`${project}_data`];
     const inspection = freeze({ target, jdbcUrl: `jdbc:postgresql://${endpoint.IPAddress}:5432/cms`, dataGateway: networkMap.get('data').IPAM.Config[0].Gateway });
-    capabilities.set(inspection, { nodeBinary, probe, env, apiState, runRoot: root, workflow, jar: join(libs, jars[0]), sessionMetadata }); return inspection;
+    capabilities.set(inspection, { nodeBinary, probe, env, apiState, runRoot: root, workflow, jar: join(libs, jars[0]), sessionMetadata,
+      apiDataAddress:service.get('cms-api').NetworkSettings.Networks[`${project}_data`].IPAddress,
+      ingressWebAddress:service.get('ingress').NetworkSettings.Networks[`${project}_web`].IPAddress }); return inspection;
   } catch { fail(); }
 }
 export function mediaProbeCommand(inspection, operationId) {
@@ -219,7 +224,7 @@ export function mediaProbeCommand(inspection, operationId) {
 
 export function inspectionDetails(inspection) {
   const details=capabilities.get(inspection);ensure(details);
-  return Object.freeze({nodeBinary:details.nodeBinary,apiState:details.apiState,runRoot:details.runRoot});
+  return Object.freeze({nodeBinary:details.nodeBinary,apiState:details.apiState,runRoot:details.runRoot,apiDataAddress:details.apiDataAddress,ingressWebAddress:details.ingressWebAddress});
 }
 
 // This observation is valid for the controlled fresh local lifecycle. Its caller

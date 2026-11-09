@@ -7,6 +7,8 @@ import { join, resolve, parse, isAbsolute } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { inspectTarget } from './maintenance-target.mjs';
 import { acquire, finish } from './maintenance-guard.mjs';
+import * as workflow from './maintenance-workflow.mjs';
+import { canonicalBytes } from '../ops/recovery-protocol.mjs';
 const execute=promisify(execFile), cleanEnv=()=>({PATH:'/usr/bin:/bin',LANG:'C.UTF-8'});
 const codes={INPUT_INVALID:2,SECRET_INPUT_INVALID:2,DUPLICATE_OPERATION:3,MAINTENANCE_BUSY:4,MAINTENANCE_INTERNAL_ERROR:5,COMMITTED_HOST_RESTORE_FAILED:5,QUIESCENCE_NOT_PROVEN:6,RECOVERY_BACKUP_REQUIRED:6};
 const fail=name=>{throw new Error(name);}, requireSafe=value=>{if(!value)fail('QUIESCENCE_NOT_PROVEN');};
@@ -54,23 +56,43 @@ function childEnvironment(options,inspection,guardSha,password) {
     CMS_MAINTENANCE_RUN_ID:options.runId,CMS_MAINTENANCE_NODE_BINARY:process.execPath,
     CMS_MAINTENANCE_NODE_SHA256:inspection.target.nodeBinarySha256,CMS_MAINTENANCE_GUARD_SHA256:guardSha};
 }
-async function launch(options,cwd,env,deps) {
+async function launch(options,cwd,env,deps,ownedSignal=null) {
+  if(ownedSignal?.aborted)return {exit:143,spawnFailure:false};
   let child;try{child=(deps.spawn??spawn)(options.javaBin,['-jar',options.jar,'maintenance',...options.maintenanceArgs],{env,cwd,shell:false,stdio:'inherit'});}catch{return {exit:5,spawnFailure:true};}
-  const forward=signal=>()=>{try{child.kill(signal);}catch{}}, handlers={SIGINT:forward('SIGINT'),SIGTERM:forward('SIGTERM')};
+  const forward=signal=>()=>{try{child.kill(signal);}catch{}},handlers={SIGINT:forward('SIGINT'),SIGTERM:forward('SIGTERM')};
+  const schedule=deps.setRecoverTimeout??setTimeout,clear=deps.clearRecoverTimeout??clearTimeout;
+  let termTimer,killTimer,onAbort,onExit,onError;
   try{return await new Promise(done=>{
-    let failed=false;
-    child.once('error',()=>{failed=true;if(!child.pid)done({exit:5,spawnFailure:true});});
-    child.once('exit',(status,signal)=>done({exit:signal?({SIGINT:130,SIGTERM:143}[signal]??5):failed?5:Number.isInteger(status)&&status>=0?status:5,spawnFailure:failed&&!child.pid}));
-    for(const [signal,handler] of Object.entries(handlers))process.on(signal,handler);
-  });}finally{for(const [signal,handler] of Object.entries(handlers))process.removeListener(signal,handler);}
+    let failed=false,settled=false;
+    const finish=outcome=>{if(!settled){settled=true;done(outcome);}};
+    const observedExit=()=>{if(child.exitCode!=null||child.signalCode!=null){onExit(child.exitCode,child.signalCode);return true;}return settled;};
+    onError=()=>{failed=true;if(!child.pid)finish({exit:5,spawnFailure:true});};
+    onExit=(status,signal)=>finish({exit:signal?({SIGINT:130,SIGTERM:143}[signal]??5):failed?5:Number.isInteger(status)&&status>=0?status:5,spawnFailure:failed&&!child.pid});
+    child.once('error',onError);child.once('exit',onExit);
+    onAbort=()=>{
+      if(observedExit())return;try{child.kill('SIGTERM');}catch{}
+      termTimer=schedule(()=>{
+        if(observedExit())return;try{child.kill('SIGKILL');}catch{}
+        killTimer=schedule(()=>{if(!observedExit()){child.unref?.();finish({exit:5,spawnFailure:false});}},30000);
+      },30000);
+    };
+    for(const [signal,handler]of Object.entries(handlers))process.on(signal,handler);
+    ownedSignal?.addEventListener('abort',onAbort,{once:true});if(ownedSignal?.aborted)onAbort();
+  });}finally{
+    for(const [signal,handler]of Object.entries(handlers))process.removeListener(signal,handler);
+    if(onAbort)ownedSignal?.removeEventListener('abort',onAbort);
+    if(termTimer!==undefined)clear(termTimer);if(killTimer!==undefined)clear(killTimer);
+    if(onExit)child.removeListener('exit',onExit);if(onError)child.removeListener('error',onError);
+  }
 }
 export async function run(options,deps={}) {
-  let secret,env,lease;
+  let secret,env,lease,recoveryToken,ownedSignal,attaching=false,launched=false;
   try{
     const validated=parseArgs(['--run-id',options.runId,'--java-bin',options.javaBin,'--jar',options.jar,'--',...options.maintenanceArgs]);
     if(Object.keys(options).length!==7||JSON.stringify(validated)!==JSON.stringify(options))fail('INPUT_INVALID');
     const cwd=resolve(deps.cwd??process.cwd()),root=join(cwd,'local/pp1',options.runId);requireSafe(options.targetId===`pp1-local:${options.runId}`);
-    const inspection=await(deps.inspect??inspectTarget)(root,deps,{apiState:'running'});
+    const recovery=options.operation==='RECOVER_ADMIN';
+    const inspection=await(deps.inspect??inspectTarget)(root,deps,{apiState:recovery?'stopped':'running'});
     requireSafe(inspection.target.runId===options.runId&&inspection.target.targetId===options.targetId);
     const tty=deps.tty??{stdin:process.stdin.isTTY,stdout:process.stdout.isTTY,stderr:process.stderr.isTTY};if(!tty.stdin||!tty.stdout||!tty.stderr)fail('SECRET_INPUT_INVALID');
     const libs=join(cwd,'services/cms-api/build/libs');await ancestors(libs);requireSafe((await readdir(libs)).filter(v=>v.endsWith('.jar')).length===1);
@@ -81,14 +103,53 @@ export async function run(options,deps={}) {
     const version=await(deps.command??execute)(options.javaBin,['-XshowSettings:properties','-version'],{env:cleanEnv(),cwd,shell:false,timeout:30000,maxBuffer:65536});
     requireSafe((version.code===undefined||version.code===0)&&/^\s*java.specification.version\s*=\s*25\s*$/m.test((version.stdout??'')+'\n'+(version.stderr??'')));
     await privateDirectory(root);await privateDirectory(join(root,'secrets'));secret=await file(join(root,'secrets/spring.datasource.password'),true);requireSafe(secret.length>0&&secret.length<=65536);
-    if(options.operation==='RECOVER_ADMIN')fail('RECOVERY_BACKUP_REQUIRED');
-    lease=await(deps.acquire??acquire)(inspection,{operationId:options.operationId,operation:options.operation});
-    requireSafe(lease.targetId===inspection.target.targetId&&lease.connection?.jdbcUrl===inspection.jdbcUrl&&lease.connection?.dataGateway===inspection.dataGateway);
+    if(recovery) {
+      attaching=true;
+      recoveryToken=await(deps.attachRecovery??workflow.attachRecovery)(inspection,{operationId:options.operationId},deps);
+      const current=await(deps.assertWorkflow??workflow.assertWorkflow)(recoveryToken,{side:'source',stage:'ACCOUNT_PRE_CONNECTION'},deps);
+      assertRecoveryContext(current,inspection,options,root);
+      const cancellation=await(deps.workflowSignalContext??workflow.workflowSignalContext)(recoveryToken,deps);
+      requireSafe(cancellation&&Object.keys(cancellation).join(',')==='signal'&&cancellation.signal instanceof AbortSignal);ownedSignal=cancellation.signal;
+    }else {
+      lease=await(deps.acquire??acquire)(inspection,{operationId:options.operationId,operation:options.operation});
+      requireSafe(lease.targetId===inspection.target.targetId&&lease.connection?.jdbcUrl===inspection.jdbcUrl&&lease.connection?.dataGateway===inspection.dataGateway);
+    }
     env=childEnvironment(options,inspection,guardSha,secret.toString('utf8'));
-    const waiting=launch(options,cwd,env,deps);delete env.SPRING_DATASOURCE_PASSWORD;secret.fill(0);const outcome=await waiting;
-    await(deps.finish??finish)(lease,outcome.exit);return outcome.spawnFailure?fixedError('MAINTENANCE_INTERNAL_ERROR',options.operationId):outcome.exit;
-  }catch(error){return fixedError(Object.hasOwn(codes,error.message)?error.message:lease?'MAINTENANCE_INTERNAL_ERROR':'QUIESCENCE_NOT_PROVEN',options?.operationId);}
+    launched=!ownedSignal?.aborted;const waiting=launch(options,cwd,env,deps,ownedSignal??null);delete env.SPRING_DATASOURCE_PASSWORD;secret.fill(0);const outcome=await waiting;
+    if(recovery)await(deps.finishRecoverWorkflow??workflow.finishRecoverWorkflow)(recoveryToken,{exitCode:outcome.exit,spawnFailure:outcome.spawnFailure},deps);
+    else await(deps.finish??finish)(lease,outcome.exit);
+    return outcome.spawnFailure?fixedError('MAINTENANCE_INTERNAL_ERROR',options.operationId):outcome.exit;
+  }catch(error){
+    const name=options?.operation==='RECOVER_ADMIN'?recoveryFailure(error,{attaching,attached:recoveryToken!==undefined,launched}):
+      Object.hasOwn(codes,error.message)?error.message:lease?'MAINTENANCE_INTERNAL_ERROR':'QUIESCENCE_NOT_PROVEN';
+    return fixedError(name,options?.operationId);
+  }
   finally{if(secret)secret.fill(0);if(env)delete env.SPRING_DATASOURCE_PASSWORD;}
+}
+function assertRecoveryContext(current,inspection,options,root) {
+  try {
+  const l=current?.lease,p=l?.proof;
+  const same=(a,b)=>canonicalBytes(a).equals(canonicalBytes(b));
+  const connection={jdbcUrl:inspection.jdbcUrl,dataGateway:inspection.dataGateway};
+  requireSafe(current?.root===root&&current.operationId===options.operationId&&l?.operationId===options.operationId
+    &&l.purpose==='RECOVER_ADMIN'&&l.phase==='ACCOUNT_PRE_CONNECTION'&&l.originalApiState==='stopped'
+    &&l.completionPolicy==='KEEP_STOPPED'&&l.target===null&&l.helper===null
+    &&l.releaseId===`sha256:${inspection.target.apiBuild.jarSha256}`);
+  requireSafe(same(current.target,inspection.target)&&same(l.source,inspection.target)
+    &&same(current.connection,connection)&&same(l.sourceConnection,connection));
+  requireSafe(p&&typeof p.backupId==='string'&&/^pp1-\d{8}T\d{9}Z-[a-f0-9]{32}$/.test(p.backupId)
+    &&p.sourceIdentitySha256===digest(canonicalBytes(inspection.target))
+    &&l.account?.operation==='RECOVER_ADMIN'&&l.account.phase==='PRE_CONNECTION'&&l.account.boundBackend===null);
+  } catch { fail('QUIESCENCE_NOT_PROVEN'); }
+}
+function recoveryFailure(error,{attaching,attached,launched}) {
+  const name=error?.message;
+  if(name==='INPUT_INVALID'&&attaching)return attached?(launched?'MAINTENANCE_INTERNAL_ERROR':'QUIESCENCE_NOT_PROVEN'):'RECOVERY_BACKUP_REQUIRED';
+  if(Object.hasOwn(codes,name))return name;
+  if(name==='LOCK_BUSY')return 'MAINTENANCE_BUSY';
+  if(!launched&&['SOURCE_CHANGED','WRITER_NOT_QUIESCED','TARGET_NOT_OWNED','JOURNAL_INCOMPLETE'].includes(name))return 'QUIESCENCE_NOT_PROVEN';
+  if(attaching&&!attached)return 'RECOVERY_BACKUP_REQUIRED';
+  return launched?'MAINTENANCE_INTERNAL_ERROR':'QUIESCENCE_NOT_PROVEN';
 }
 if(process.argv[1]&&import.meta.url===pathToFileURL(resolve(process.argv[1])).href){
   try{process.exitCode=await run(parseArgs(process.argv.slice(2)));}catch(error){process.exitCode=fixedError(Object.hasOwn(codes,error.message)?error.message:'INPUT_INVALID',null);}

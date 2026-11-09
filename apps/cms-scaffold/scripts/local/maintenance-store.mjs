@@ -162,7 +162,8 @@ export function validateLeaseV2(l) {
     if (l.purpose === 'BACKUP_LOCAL') ensure(l.proof === null);
     else if (!failed) {
       const start = phases.indexOf(l.purpose === 'RECOVER_ADMIN' ? 'PROOF_REVALIDATED' : 'RESTART_VERIFIED');
-      ensure(index < start ? l.proof === null : l.proof !== null);
+      if (index < start) ensure(l.proof === null);
+      else if (l.purpose === 'RECOVER_ADMIN' || index > start) ensure(l.proof !== null);
     }
     if (l.proof !== null) proof(l.proof,l);
     if (l.purpose !== 'RECOVER_ADMIN') ensure(l.account === null);
@@ -214,6 +215,10 @@ export function validateJournalV2(j,l,{allowPending=false}={}) {
       exact(r,'seq event phase at failureCode leaseSha256 proofSha256');utc(r.at);
       ensure(r.seq===String(i+1) && r.phase===phases[phaseIndex] && !failed && r.at>=previousAt);previousAt=r.at;
       ensure(isHex(r.leaseSha256,64) && (r.proofSha256===null || isHex(r.proofSha256,64)));
+      if (l.purpose === 'RESTORE_VERIFY_LOCAL' && r.phase === 'RESTART_VERIFIED') {
+        if (r.event === 'BEGIN') ensure(r.proofSha256 === null);
+        if (r.event === 'END') ensure(l.proof !== null && r.proofSha256 === l.proof.proofSha256);
+      }
       if(r.event==='BEGIN') {ensure(!pending && r.failureCode===null);pending=true;}
       else {
         ensure(pending && ['END','FAIL'].includes(r.event));pending=false;
@@ -236,7 +241,12 @@ export async function reserveWorkflow(inspection, input, deps={}) {
   exact(input,'operationId purpose completionPolicy targetRunId incidentStartedAt');
   ensure(isUuid(input.operationId) && Object.hasOwn(WORKFLOW_PHASES,input.purpose));
   const root=rootFor(inspection.target.runId,deps),base=join(root,'maintenance'),operations=join(base,'operations');
-  const createdAt=now(deps),request={version:1,operationId:input.operationId,sourceRunId:inspection.target.runId,
+  let createdAt;
+  if(input.purpose==='RESTORE_VERIFY_LOCAL'&&Object.hasOwn(deps,'workflowStartedAt')) {
+    try {const observedAt=now(deps);utc(deps.workflowStartedAt);ensure(deps.workflowStartedAt<=observedAt);createdAt=deps.workflowStartedAt;}
+    catch {throw new OpsError('OBJECTIVE_UNKNOWN');}
+  } else createdAt=now(deps);
+  const request={version:1,operationId:input.operationId,sourceRunId:inspection.target.runId,
     purpose:input.purpose,targetRunId:input.targetRunId,incidentStartedAt:input.incidentStartedAt,startedAt:createdAt,
     environment:input.purpose==='RESTORE_VERIFY_LOCAL'?'isolated-drill':null};
   const lease={version:2,operationId:input.operationId,purpose:input.purpose,releaseId:`sha256:${inspection.target.apiBuild.jarSha256}`,
@@ -298,7 +308,7 @@ export async function releaseWorkflow(record,deps={}) {
     && current.lease.helper===null,'JOURNAL_INCOMPLETE');
   const lock=join(record.base,'operation.lock');ensure((await readdir(lock)).length===0);
   const identity=await directory(lock);ensure(identity.dev===record.identity.dev && identity.ino===record.identity.ino);
-  await rmdir(lock);await syncDirectory(record.base);
+  await rmdir(lock);record.identity=null;await deps.fault?.('after-lock-remove');await syncDirectory(record.base);
 }
 
 // In-flight helper metadata changes only inside an open phase. The immutable BEGIN

@@ -1,0 +1,77 @@
+{
+  "sourceFreeze": "source-freeze-after-ci-timing.json",
+  "runtime": "Node24.18.0",
+  "productionChanged": false,
+  "runtimeOrProbe": false,
+  "checks": [
+    {
+      "check": "red",
+      "command": [
+        "NODE24",
+        "--test",
+        "--test-reporter=spec",
+        "--test-name-pattern=T174_real_registry_live_PG_witness_survives_exit_during_slow_source_checks",
+        "scripts/local/maintenance-workflow.test.mjs"
+      ],
+      "cwd": "apps/cms-scaffold",
+      "exitCode": 1,
+      "exitProvenance": "Root native exec observed actual exit; not inferred solely from log",
+      "summary": {
+        "tests": 1,
+        "pass": 0,
+        "fail": 1,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 910.421375
+      },
+      "logSha256": "d988a065e474133360e9b175dd878569dd4574da7d5b14dc76550cdf313faeb6"
+    },
+    {
+      "check": "green",
+      "command": [
+        "NODE24",
+        "--test",
+        "--test-reporter=spec",
+        "--test-name-pattern=T174_real_registry_live_PG_witness_survives_exit_during_slow_source_checks",
+        "scripts/local/maintenance-workflow.test.mjs"
+      ],
+      "cwd": "apps/cms-scaffold",
+      "exitCode": 0,
+      "exitProvenance": "Root native exec observed actual exit; not inferred solely from log",
+      "summary": {
+        "tests": 1,
+        "pass": 1,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 900.50365
+      },
+      "logSha256": "87a2c1f7059b0c22d41e8d391c1d2aae1dbda9adb98ad9f925116bcc05c0bf66"
+    },
+    {
+      "check": "affected",
+      "command": [
+        "NODE24",
+        "--test",
+        "--test-reporter=spec",
+        "--test-name-pattern=T174_",
+        "scripts/local/maintenance-workflow.test.mjs"
+      ],
+      "cwd": "apps/cms-scaffold",
+      "exitCode": 0,
+      "exitProvenance": "Root native exec observed actual exit; not inferred solely from log",
+      "summary": {
+        "tests": 16,
+        "pass": 16,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 7581.022402
+      },
+      "logSha256": "ae77ff08a67113698b2c9adec56bb8d14ec57be556a804ead5c5ba9a215a969b"
+    }
+  ]
+}

@@ -1,8 +1,8 @@
 import { OpsError, canonicalBytes, parseStrictJson, sha256 } from './recovery-protocol.mjs';
 import { createServer } from 'node:net';
-import { mkdtemp, chmod, lstat, unlink, rmdir, mkdir, readFile, readdir, open } from 'node:fs/promises';
+import { mkdtemp, chmod, lstat, unlink, rmdir, readFile, readdir, open } from 'node:fs/promises';
 import { join, dirname, resolve } from 'node:path';
-import { homedir } from 'node:os';
+import { prepareBrowserMaterial } from './local-restore-browser-material.mjs';
 import { constants } from 'node:fs';
 import { createHash } from 'node:crypto';
 import { execFile, spawn } from 'node:child_process';
@@ -277,37 +277,6 @@ async function writePrivateNew(path, bytes) {
   try { await fd.writeFile(bytes); await fd.sync(); } finally { await fd.close(); }
   const directory = await open(dirname(path), constants.O_RDONLY); try { await directory.sync(); } finally { await directory.close(); }
 }
-async function prepareBrowserMaterial(context, input, channel) {
-  const worktreeRoot = join(context.helperRoot, 'browser-worktree'); await mkdir(worktreeRoot, {mode: 0o700});
-  const lock = JSON.parse(await readFile(join(context.cwd, 'package-lock.json')));
-  async function copy(source, target) {
-    const info = await lstat(source);
-    if (info.isDirectory()) {
-      await mkdir(target, {recursive: true, mode: 0o700});
-      for (const name of (await readdir(source)).sort()) await copy(join(source, name), join(target, name));
-    } else {
-      const before = await fileStamp(source), bytes = await readFile(source); ensure(sha256(bytes) === before.sha256);
-      await mkdir(dirname(target), {recursive: true, mode: 0o700}); await writePrivateNew(target, bytes);
-      ensure(digest(before) === digest(await fileStamp(source)));
-    }
-  }
-  for (const path of ['package.json', 'package-lock.json', 'playwright.pp1-local.config.ts', 'e2e-pp1-local/recovery.spec.ts',
-    'scripts/ops/local-restore-smoke.mjs', 'scripts/ops/recovery-protocol.mjs']) await copy(join(context.cwd, path), join(worktreeRoot, path));
-  for (const name of ['@playwright/test', 'playwright', 'playwright-core']) {
-    const path = `node_modules/${name}`, actual = JSON.parse(await readFile(join(context.cwd, path, 'package.json')));
-    ensure(lock.packages[path]?.version === actual.version); await copy(join(context.cwd, path), join(worktreeRoot, path));
-  }
-  const material = Object.freeze({worktreeRoot, chromiumRoot: join(homedir(), '.cache/ms-playwright/chromium-1243/chrome-linux64'),
-    nssToolsRoot: join(homedir(), '.cache/devbox/cms-pp1-tooling-20261101/nss/usr/bin'), caFile: join(context.root, 'tls/ca.crt'),
-    inputFile: join(context.helperRoot, 'browser.json'), socketFile: channel.path});
-  await writePrivateNew(material.inputFile, canonicalBytes(input));
-  ensure((await fileStamp(context.nodeBinary)).sha256 === context.target.nodeBinarySha256
-    && (await fileStamp(join(material.chromiumRoot, 'chrome'))).sha256 === '8c599d43aec53f2460a31ae2f4af6bd863f8258b34ff519564bc5d4726bfaa1e'
-    && (await fileStamp(join(material.nssToolsRoot, 'certutil'))).sha256 === '2bd9deab438d1a76b0406a648c762dfe3255c0423b7ed8eac6de95df1efb4faf');
-  const stamps = {worktree: await treeStamp(worktreeRoot), chromium: await treeStamp(material.chromiumRoot), nss: await treeStamp(material.nssToolsRoot),
-    ca: await fileStamp(material.caFile), input: await fileStamp(material.inputFile, true), node: await fileStamp(context.nodeBinary)};
-  return {material, stamps};
-}
 
 const browserRuns = new WeakMap(), smokeResults = new WeakMap();
 const deepFreeze = value => { if (value && typeof value === 'object') { for (const item of Object.values(value)) deepFreeze(item); Object.freeze(value); } return value; };
@@ -394,7 +363,7 @@ export async function runRestoreSmoke(token, options, deps = {}) {
         validateSmokeFrames(input, record.observations, value);
         for (const actor of ['admin', 'operator']) ensure(Date.parse(record.observations[actor].oldRejectedAt) < Date.parse(proofContext.credentialBindings[actor].oldSessionExpiresAt));
       }});
-    notCancelled(signal);const prepared = await prepareBrowserMaterial(c, input, channel);notCancelled(signal);
+    notCancelled(signal);const prepared = await prepareBrowserMaterial(c, input, channel, {fileStamp, treeStamp, writePrivateNew});notCancelled(signal);
     record = {...prepared, channel, signal, workflowSignal:ownedSignal, context: c, input, proofContextSha256: digest(proofContext), inputSha256: digest(input),
       diagnosticCodes:[],targetSha256: digest(c.target), status: 'active', running: false, stopped: false, removed: false};
     browserRuns.set(token, record);

@@ -5,8 +5,9 @@ This is source/evidence acceptance only. D actual acceptance is **FAILED / pendi
 ## Source identity
 
 - `source-freeze-after-T193.json`: historical 260-file source used by D9.
-- `source-freeze-after-setup-stage.json`: current 260-file source. Exactly three paths differ: recovery.spec.ts and local-restore-smoke.mjs/test; 257 are unchanged.
-- All nine new sources are included, including the four explicitly staged ignored local modules/fixtures/tests. No runtime dependency or permission change is introduced.
+- `source-freeze-after-setup-stage.json`: historical diagnostic 260-file source. Exactly three paths differ: recovery.spec.ts and local-restore-smoke.mjs/test; 257 are unchanged.
+- `source-freeze-after-ci-portability.json`: current 261-file source. The [bounded CI portability correction](CI-PORTABILITY.md) adds one material module and modifies two existing files; 258 remain unchanged from the setup-stage freeze.
+- All original nine new sources plus the new material module are included, including the four explicitly staged ignored local modules/fixtures/tests. No runtime dependency or permission change is introduced.
 
 ## Observed checks
 
@@ -31,3 +32,7 @@ T190 accepted source/evidence only after its independent transient-lock I1 and c
 Actual D1–D4 remain failed. D4 browser phase began and failed; earlier progress text claiming browser success was corrected. No complete proof, independent actual readback, actual default readonly CLI or default RECOVER success exists. These gates cannot be replaced by native tests, listing or source review. Current PR CI and remote merge/readback receipts must be observed before declaring this checkpoint delivered; they do not accept D.
 
 Private source/evidence backups were individually read back: final pre-I2 636-file archive SHA256 `2e85fb66b65bf95a025c53554e710aec6f907414677a8be2990a712ad1d7eb52`; I2/actual4 325-member archive `9a52a303370e0c86a30f085a5ccf39542614527fac0a43bc3837d85c16f08190`; latest setup 294-member archive `12ace4d59f4f0b6477a3c70615028d5d3e7ce6e2634034a8d143a6523b6a09b9`. Receipts and original private runtime/data remain local; no DB/media/credentials/JAR/cache or raw model events are published.
+
+## First PR CI failure and scoped correction
+
+The first head passed Java/PG/contracts but web failed six T178 cases due to workstation-only test assets. This failure is retained in [CI-PORTABILITY.md](CI-PORTABILITY.md); its Red/Green and current 261-file source freeze supplement the historical evidence above. It does not change D4's failed actual result or authorize a new drill.

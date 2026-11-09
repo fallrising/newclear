@@ -1419,7 +1419,34 @@ test('T174_real_registry_initial_zero_can_precede_first_genuine_backend',async t
   assert.ok(samples>=3);assert.equal(await readFile(result.path,'utf8'),'PGDMP-synthetic');
 });
 
-import * as smoke178 from '../ops/local-restore-smoke.mjs';
+// T178 exercises real smoke/registry admission, with synthetic external browser assets.
+// The exact module-only hook is removed immediately; no production dependency override exists.
+const { registerHooks } = await import('node:module');
+const materialUrl178 = new URL('../ops/local-restore-browser-material.mjs', import.meta.url).href;
+let materialLoads178 = 0;
+const materialHook178 = registerHooks({load(url, context, nextLoad) {
+  if (url !== materialUrl178) return nextLoad(url, context);
+  materialLoads178++;
+  return {format:'module', shortCircuit:true, source:`
+    import { mkdir, writeFile } from 'node:fs/promises';
+    import { join } from 'node:path';
+    import { canonicalBytes } from './recovery-protocol.mjs';
+    export async function prepareBrowserMaterial(c, input, channel, h) {
+      const worktreeRoot=join(c.helperRoot,'browser-worktree'),chromiumRoot=join(c.helperRoot,'fixture-chromium'),nssToolsRoot=join(c.helperRoot,'fixture-nss');
+      for(const root of [worktreeRoot,chromiumRoot,nssToolsRoot])await mkdir(root,{mode:0o700});
+      for(const [root,name]of [[worktreeRoot,'fixture.mjs'],[chromiumRoot,'chrome'],[nssToolsRoot,'certutil']])
+        await writeFile(join(root,name),'T178 synthetic external asset',{mode:0o600});
+      const material={worktreeRoot,chromiumRoot,nssToolsRoot,caFile:join(c.root,'tls/ca.crt'),inputFile:join(c.helperRoot,'browser.json'),socketFile:channel.path};
+      await h.writePrivateNew(material.inputFile,canonicalBytes(input));
+      const stamps={worktree:await h.treeStamp(worktreeRoot),chromium:await h.treeStamp(chromiumRoot),nss:await h.treeStamp(nssToolsRoot),
+        ca:await h.fileStamp(material.caFile),input:await h.fileStamp(material.inputFile,true),node:await h.fileStamp(c.nodeBinary)};
+      return {material:Object.freeze(material),stamps};
+    }`};
+}});
+let smoke178;
+try { smoke178 = await import('../ops/local-restore-smoke.mjs'); }
+finally { materialHook178.deregister(); }
+assert.equal(materialLoads178,1,'T178 must replace only the external asset module');
 async function browserAdmissionFixture178(t,fault=null) {
   const f=await browserPhaseFixture(t),uuid=n=>`${n.repeat(8)}-${n.repeat(4)}-4${n.repeat(3)}-8${n.repeat(3)}-${n.repeat(12)}`;
   const fixture={version:1,sourceRunId:runId,adminPrincipalId:uuid('1'),operatorPrincipalId:uuid('2'),oldSessionIds:{admin:uuid('3'),operator:uuid('4')},
@@ -1472,6 +1499,7 @@ async function browserAdmissionFixture178(t,fault=null) {
     }
   };
   await assert.rejects(smoke178.runRestoreSmoke(f.token,{fixture,recoverySecrets:secrets,startupInventorySha256:input.startupInventorySha256},f.deps),{code:fault?.startsWith('cancel')?'INTERRUPTED':'SMOKE_FAILED'});
+  assert.ok(material, 'T178 must reach its mocked lifecycle before exercising the injected fault');
   return {...f,admitted,normalRead,material,boundAtFailure};
 }
 test('T178_created_browser_is_independently_admitted_before_full_topology_inspection',async t=>{

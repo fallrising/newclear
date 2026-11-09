@@ -1,0 +1,47 @@
+[
+  {
+    "check": "typecheck",
+    "command": [
+      "NODE24",
+      "node_modules/typescript/bin/tsc",
+      "--noEmit",
+      "--allowImportingTsExtensions",
+      "--target",
+      "es2022",
+      "--module",
+      "esnext",
+      "--moduleResolution",
+      "bundler",
+      "--esModuleInterop",
+      "--skipLibCheck",
+      "--types",
+      "node",
+      "e2e-pp1-local/recovery.spec.ts",
+      "playwright.pp1-local.config.ts"
+    ],
+    "envSelection": {},
+    "exitCode": 0,
+    "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stdoutBytes": 0,
+    "stderrBytes": 0
+  },
+  {
+    "check": "list",
+    "command": [
+      "NODE24",
+      "node_modules/@playwright/test/cli.js",
+      "test",
+      "--config",
+      "playwright.pp1-local.config.ts",
+      "--list"
+    ],
+    "envSelection": {
+      "CMS_PP1_SUITE": "recovery",
+      "CMS_PP1_TLS_MODE": "trusted"
+    },
+    "exitCode": 0,
+    "logSha256": "c7c148c313275685d51b7fca0e1e770f212aff6c5a125f4f1fe4dbdb7e1246c1",
+    "stdoutBytes": 121,
+    "stderrBytes": 0
+  }
+]

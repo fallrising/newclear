@@ -1,0 +1,124 @@
+{
+  "sourceFreeze": "source-freeze-after-ci-portability.json",
+  "commandRuntime": "Node24.18.0",
+  "noRuntimeOrProbe": true,
+  "DComplete": false,
+  "checks": [
+    {
+      "check": "red",
+      "command": "NODE24 --import ./.team/pp1c-d-20261106/publication-20261109/ci-portability/hide-host-assets.mjs --test --test-reporter=spec --test-name-pattern=T178_ scripts/local/maintenance-workflow.test.mjs",
+      "cwd": "apps/cms-scaffold",
+      "exitCode": 1,
+      "exitProvenance": "Observed root native exec result, not inferred from log alone",
+      "summary": {
+        "tests": 13,
+        "pass": 7,
+        "fail": 6,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 18552.660595
+      },
+      "logSha256": "f86d00ec8bd63691b5914c8ad2a31597cc98c0aca51d3d7f039c152d35c68d26"
+    },
+    {
+      "check": "assertion-red",
+      "command": "same missing-cache command after lifecycle-reached assertion",
+      "cwd": "apps/cms-scaffold",
+      "exitCode": 1,
+      "exitProvenance": "Observed root native exec result, not inferred from log alone",
+      "summary": {
+        "tests": 13,
+        "pass": 2,
+        "fail": 11,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 18624.132829
+      },
+      "logSha256": "8c20e131281c550b0f6218fc28afff90a1a0e61848b31b79bfac759310339490"
+    },
+    {
+      "check": "green",
+      "command": "same missing-cache command after correction",
+      "cwd": "apps/cms-scaffold",
+      "exitCode": 0,
+      "exitProvenance": "Observed root native exec result, not inferred from log alone",
+      "summary": {
+        "tests": 13,
+        "pass": 13,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 15776.736547
+      },
+      "logSha256": "aa54bf4dd273e098e7ce31f0fdd970ddd9350e033eb13c982a37733afd38557e"
+    },
+    {
+      "check": "affected",
+      "command": "NODE24 --test --test-reporter=spec scripts/local/maintenance-workflow.test.mjs scripts/ops/local-restore-smoke.test.mjs",
+      "cwd": "apps/cms-scaffold",
+      "exitCode": 0,
+      "exitProvenance": "Observed root native exec result, not inferred from log alone",
+      "summary": {
+        "tests": 276,
+        "pass": 276,
+        "fail": 0,
+        "cancelled": 0,
+        "skipped": 0,
+        "todo": 0,
+        "duration_ms": 122579.138663
+      },
+      "logSha256": "d18c35d3eeca8a196de682ef673d2920931e52385226ffea1c2fe1e4aae3af49"
+    }
+  ],
+  "typeAndRecoveryList": [
+    {
+      "check": "typecheck",
+      "command": [
+        "NODE24",
+        "node_modules/typescript/bin/tsc",
+        "--noEmit",
+        "--allowImportingTsExtensions",
+        "--target",
+        "es2022",
+        "--module",
+        "esnext",
+        "--moduleResolution",
+        "bundler",
+        "--esModuleInterop",
+        "--skipLibCheck",
+        "--types",
+        "node",
+        "e2e-pp1-local/recovery.spec.ts",
+        "playwright.pp1-local.config.ts"
+      ],
+      "envSelection": {},
+      "exitCode": 0,
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stdoutBytes": 0,
+      "stderrBytes": 0
+    },
+    {
+      "check": "list",
+      "command": [
+        "NODE24",
+        "node_modules/@playwright/test/cli.js",
+        "test",
+        "--config",
+        "playwright.pp1-local.config.ts",
+        "--list"
+      ],
+      "envSelection": {
+        "CMS_PP1_SUITE": "recovery",
+        "CMS_PP1_TLS_MODE": "trusted"
+      },
+      "exitCode": 0,
+      "logSha256": "c7c148c313275685d51b7fca0e1e770f212aff6c5a125f4f1fe4dbdb7e1246c1",
+      "stdoutBytes": 121,
+      "stderrBytes": 0
+    }
+  ],
+  "initialListSelection": "Default suite listed four runtime tests; retained as list-default-runtime.log. Corrected explicit CMS_PP1_SUITE=recovery/CMS_PP1_TLS_MODE=trusted lists exactly one; no input/socket/browser."
+}

@@ -16,6 +16,8 @@ Owner 要求停止本輪實作並提交、合併目前程式。本次交付只�
 
 來源審查與歷史 1413 原生測試僅支持 after-T193 版本；其後三檔診斷修改另有 3 例 Red→Green、53/53 受影響 smoke、TypeScript、單項 Playwright list 及 T196 獨立審查。沒有新增實機成功證據。[交接](.team/pp1c-d-20261106/CHECKPOINT.md)及[證據](.team/pp1c-d-20261106/EVIDENCE.md)保存版本、失敗與剩餘工作；PR 的必要 CI 仍須通過才可合併。
 
+本次 PR 首輪 web CI 發現 T178 測試意外依賴開發機 browser 快取；Java／PG／contracts 通過，六個失敗保留。只做[三檔測試可攜修正](.team/pp1c-d-20261106/CI-PORTABILITY.md)，保留 production pins 與真正 registry／material rechecks，不啟動 D 實機。當前來源由新 261 檔 freeze 固定，原 1413／53 仍只屬歷史版本；新 head 必要 CI 及本次 scoped evidence 另行核對。
+
 ## 主線與範圍
 
 [凍結總綱](docs/sdd/00-overview.md) 定義一個 Java API、三個獨立操作面，

@@ -36,7 +36,7 @@ CMS-R5/PR333 has explicit owner approval; required CI passed on28886f9d and norm
 | CMS-C-A | canonical protocol／readonly inventory／offline dispatch (9cards) | AC-05 / PP1-AC03 FM08/12 | done | 2026-11-01T16:49:21Z | 2026-11-01T17:44:55Z | 2026-11-01T17:44:55Z |
 | CMS-C-B | quiescence registry／owned helpers／capture (12cards) | AC-05 / PP1-AC03 FM08–12 | done | 2026-11-01T17:46:32.816742+00:00 | 2026-11-02T14:14:41Z | 2026-11-02T14:14:41Z |
 | CMS-C-C | blank target／artifact verification／restore (9cards) | AC-05 / PP1-AC03 FM08–12 | done | 2026-11-02T14:25:15.705152+00:00 | 2026-11-06T16:05:33Z | 2026-11-06T16:05:33Z |
-| CMS-C-D | recovery proof／session/browser/restart／real drill (14cards) | AC-04/05 / PP1-AC03 FM08–12 | in_progress | 2026-11-06T16:38:23Z | — | 2026-11-09T18:45:00Z |
+| CMS-C-D | recovery proof／session/browser/restart／real drill (14cards) | AC-04/05 / PP1-AC03 FM08–12 | in_progress | 2026-11-06T16:38:23Z | — | 2026-11-09T19:12:17Z |
 
 B delivered via PR988/05dc0a28 after required CI and complete remote readback. PR956 endpoint/hash and PR975 PG-only read-only mask amendments are approved, merged and remotely verified (1bf6c506 and33a5498f). Current512Node/564Java/212actualPG and prior93mock/native frontend gates pass. Exact helper compatibility regressions are included; full actual capture and T129 independent acceptance now pass; publication is complete. Short-lived-tool and transient-backend refusals remain explicit. C/D are not started. [Evidence and retained failures](../../.team/pp1c-b-20261102/EVIDENCE.md); [bounded plan](../../.team/pp1c-b-20261101/PLAN.md).
 
@@ -46,3 +46,5 @@ C implementation accepted locally after T143/T158:866Node, unchanged575Java/223P
 
 
 2026-11-09 owner 要求保存目前 D 程式並走 PR 合併；這不是 D 驗收或範圍縮減。A/B/C 已交付，D4 仍 `SMOKE_FAILED`，沒有 COMPLETE/full-proof/locator，T172 實際 readback、default readonly CLI、新鎖 default RECOVER 尚未完成。來源與診斷修改已有各自有界測試及獨立審查，必要新 head CI 與遠端交付另以 PR 回執為準。[交接與剩餘四組主線](../../.team/pp1c-d-20261106/CHECKPOINT.md)；[精簡證據](../../.team/pp1c-d-20261106/EVIDENCE.md)。原始失敗、私有資料、locks、volumes 與舊工作區保留；停止新增演練、探針及清理。
+
+本次 checkpoint 首輪 web CI 的六個 T178 失敗已保留，僅做[三來源可攜修正](../../.team/pp1c-d-20261106/CI-PORTABILITY.md)，缺快取 Red→Green13及受影響276項通過；目前261來源freeze。T199及新head必要CI／merge/readback仍為提交門檻；D4實機失敗及剩餘主線不變。

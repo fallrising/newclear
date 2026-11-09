@@ -303,7 +303,9 @@ Owner 要求維持原開發協作方式繼續；本輪不啟動產品付費模�
 
 | ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| T-0026-01 | Claude 指導、Pi 邊界實作與負向測試 | AC-11 子集 | in_progress | 2026-11-07T08:33:39Z | — | 2026-11-09T18:34:05Z |
-| T-0026-02 | 真實 hook 入口／重新連接回歸及清理 | AC-08／11 子集 | in_progress | 2026-11-07T08:33:39Z | — | 2026-11-09T18:34:05Z |
+| T-0026-01 | Claude 指導、Pi 邊界實作與負向測試 | AC-11 子集 | done | 2026-11-07T08:33:39Z | 2026-11-09T18:36:24Z | 2026-11-09T18:38:03Z |
+| T-0026-02 | 真實 hook 入口／重新連接回歸及清理 | AC-08／11 子集 | done | 2026-11-07T08:33:39Z | 2026-11-09T18:36:24Z | 2026-11-09T18:38:03Z |
 
-T-0026 本地實作與驗收完成：[指導／委託](../T26-TECHNICAL-GUIDANCE.md)、[白名單證據](../evidence/pi-hook-boundary-2026-11-07.json)。268 tests、21 repo tests、1680 組真實 parser 比較與四輪原生驗收通過；CI／PR 合併尚待完成，兩列保持 in_progress。來源 runtime 基準 `04a7340f05ade127f550539817f78411bfba9d2d`，整合主線 `64c8ad59620e9068f0beede99365b7d656f00825`；未修改 vendor，零產品模型請求。
+T-0026 本地實作與驗收完成：[指導／委託](../T26-TECHNICAL-GUIDANCE.md)、[白名單證據](../evidence/pi-hook-boundary-2026-11-07.json)。268 tests、21 repo tests、1680 組真實 parser 比較與四輪原生驗收通過；[PR #1041](https://github.com/fallrising/newclear/pull/1041) 的 offline／validate CI 通過並已合併，兩列依實際合併時間結案。來源 runtime 基準 `04a7340f05ade127f550539817f78411bfba9d2d`，整合主線 `64c8ad59620e9068f0beede99365b7d656f00825`；未修改 vendor，零產品模型請求。
+
+T-0026 結案：[PR #1041](https://github.com/fallrising/newclear/pull/1041) 已於 `2026-11-09T18:36:24Z` 合併，commit `39a5e5a8748f934fb623fe0f73b1f88ed0bbe255`。遠端白名單證據已回讀一致：268 項元件測試、21 項 repo 契約測試與四條原生路徑通過；問答／啟動 11 種拒絕、重連舊 token 拒絕且狀態不變，host 重啟／Chrome 刷新及明確恢復正常。四輪 33／24／99／41 個受追蹤程序全退出、鎖釋放，零產品模型／外部請求。實際 Claude 指導與兩個 Pi worker 已完成、臨時憑證副本移除；已知回報開發小計 2.200252 美元，首次 Claude 逾時用量未知，非帳單。AC-08／11 僅子集，其他 provider、有效 token 的同 session 偽造、遠端端到端與完整 MVP 仍 pending；沒有 release／deploy／usable tag。

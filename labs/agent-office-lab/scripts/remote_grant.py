@@ -34,7 +34,7 @@ SOURCE_NAMES = tuple(dict.fromkeys((
     'remote_grant.py', 'office_dispatch.py', 'office_console.py', 'office_console.js', 'office_results.py', 'run_pi_work.py', 'office_pi.mjs', 'office_pi_host.mjs', 'office_pi_restart.mjs', 'office_pi_question.mjs',
     'manual_recovery.mjs', 'deepseek_relay.py', 'pi_retry.py', 'execution_slot.py',
     'process_ownership.py', 'remote_cli.py', 'pi_boundary.mjs', 'pi_office_policy.mjs',
-    'pi_session_evidence.mjs', 'pi_question_check.mjs', 'bin/pi'
+    'pi_hook_guard.mjs', 'pi_hook_probe.mjs', 'pi_hook_evidence.py', 'pi_session_evidence.mjs', 'pi_question_check.mjs', 'bin/pi'
 )))
 
 

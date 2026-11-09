@@ -7,6 +7,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createRequire } from 'node:module';
 import { onePiTask } from './pi_office_policy.mjs';
+import { probePiHooks } from './pi_hook_probe.mjs';
 
 const lab = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const argv = process.argv.slice(2);
@@ -138,6 +139,8 @@ try {
   await until(() => worker?.status === 'idle' && piEvents().some(e => e.type === 'session_start') && report.authenticated_hooks.some(e => e.type === 'session' && e.status === 'starting'),
     30000, 'Native Pi idle session did not start');
   report.session_id = worker.sessionId;
+  assert(Number.isInteger(office.hookPort) && office.hookPort > 0);
+  report.hook_boundary = await probePiHooks({ port: office.hookPort, manager: office.floors()[0].workers, workerId: worker.id, acceptedCount: () => report.authenticated_hooks.length });
   ws.send(JSON.stringify({ t: 'worker.attach', workerId: worker.id }));
   await until(() => attached, 10000, 'Terminal attach missing');
   sendInput('/lab-office-question\r');

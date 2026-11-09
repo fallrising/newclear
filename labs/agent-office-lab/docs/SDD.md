@@ -181,3 +181,12 @@ T-0024 的[一次性遠端操作台授權](REMOTE-GRANT.md)已通過離線、測
 T-0025：Pi 原生問答／確認互動。維持 Claude Opus 5.5 技術指導、Pi agent 實作、主導 agent 審查與交付。以真實 Pi 的測試專用 slash command 與原生確認視窗驗證 needs_input、拒絕及接受後繼續；只執行固定合成動作，沒有模型 prompt、遠端費用或產品 grant。
 
 驗證計畫：固定獨立 check 模式、與遠端／retry／其他模式互斥；原生 authenticated question hooks、同 session、拒絕無產物、接受後固定 marker、零模型請求、完整程序清理與操作台結果分類。此為 AC-05／09／11 子集，不把測試指令當成真實模型工具權限，也不標完整跨 provider AC 通過。
+
+
+## T-0026：Pi hook 邊界
+
+T-0026：Pi 原生 hook 身分與 session 邊界驗收。沿用 Claude Opus 5.5 技術指導、Pi agent 實作與主導 agent 整合交付。核對固定合成任務的 worker／provider route／token／session，拒絕錯配或舊世代事件；保留合法啟動及明確同 session 重新連接。以固定上游的真實 loopback hook 入口及無模型 Pi session 驗證，不修改 vendor，不建立產品付費 grant。
+
+驗證計畫：先由 Claude 對已核對公開來源提出具體設計，再按互不重疊檔案分工；離線負向案例、真實 HTTP 拒絕與狀態不變、合法事件仍通過、零產品模型請求、身分追蹤及完整清理。此為 AC-11／08 子集，不宣稱整棵程序樹隔離或跨 provider 全部通過。
+
+T-0026 實際完成 Pi hook 身分、固定 session、明確世代與舊 token 拒絕子集；[操作及限制](PI-HOOK-BOUNDARY.md)、[證據](evidence/pi-hook-boundary-2026-11-07.json)。268 項元件測試與四條真實原生路徑通過，完整 AC-08／11 仍 pending。

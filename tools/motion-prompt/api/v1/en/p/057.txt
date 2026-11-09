@@ -1,0 +1,19 @@
+Please use "Tabs" from "UI component names".
+Motion Prompt #057 · ui/tabs
+
+Meaning: Click a label to switch which panel is shown
+Example request (adapt to your project): Put three tabs at the top of the pricing page. On click, slide the underline over 0.25 s and cross-fade the content in 0.2 s.
+What this demo shows: Clicking the tabs "Overview, Pricing, Reviews" in turn slides a blue underline across and swaps the content below.
+Demo specification (independent of the example request):
+- 4.5 s cycle on a 542×191 card. Three tabs at x 24, 114, 204, widths 70, 70, 100; a 2 px divider at y 50 and a 4 px blue underline.
+- The cursor clicks the second tab at 1.0 s, the third at 2.2 s and the first at 3.4 s.
+- Underline: position and width move to the new tab over 0.25 s from each click with easeInOutCubic (from the third back to the first it passes through the middle).
+- Labels: selected is blue and bold, others grey; the switch happens at 1.1, 2.3 and 3.5 s.
+- Content: the old panel fades out linearly in 0.2 s; 0.1 s later the new one fades in over 0.2 s while rising 8 px.
+When to use it: Use it to show several related views in the same space and let people switch between them.
+
+Local demo: ./?lang=en#057
+Local specification and code: ./api/v1/en/e/057.txt
+Local helper code: ./api/v1/kit/en/ui.js
+Keep the demo geometry, timing and easing unless I explicitly request changes. Adapt text, colours and assets to my project.
+Upstream source: https://github.com/showheyohtaki/motion-prompt (MIT, Shohei Ohtaki).

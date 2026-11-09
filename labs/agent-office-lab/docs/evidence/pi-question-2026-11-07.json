@@ -1,0 +1,404 @@
+{
+  "schema": 1,
+  "milestone": "T-0025",
+  "date": "2026-11-07",
+  "baseline": "0529e812171c0fb2dbce9b25edcce21d92e984a4",
+  "scope": "Real Pi native synthetic confirm command: deny, allow, timeout and replay rejection. No model-driven tool permission or product inference.",
+  "delegation": {
+    "advisor": {
+      "provider": "firstParty",
+      "model": "claude-opus-5-5",
+      "cli_version": "2.1.316",
+      "cli_invocations": 1,
+      "reported_turns": 2,
+      "tools": 0,
+      "public_source_files": 7,
+      "elapsed_s": 131.31,
+      "reported_list_cost_usd": 0.539519
+    },
+    "parallel_pi_workers": {
+      "runtime": {
+        "provider": "openai",
+        "model": "gpt-5.5",
+        "requests": 24,
+        "tool_calls": 23,
+        "reported_cost_usd": 1.068349,
+        "completion": {
+          "worker": "runtime",
+          "exit_code": 77,
+          "elapsed_s": 198.69
+        },
+        "delivered_files": 6,
+        "stopped_at_request_limit": true,
+        "temporary_credential_copy_removed": true
+      },
+      "integration": {
+        "provider": "openai",
+        "model": "gpt-5.5",
+        "requests": 24,
+        "tool_calls": 35,
+        "reported_cost_usd": 1.373122,
+        "completion": {
+          "worker": "integration",
+          "exit_code": 77,
+          "elapsed_s": 144.02
+        },
+        "delivered_files": 9,
+        "stopped_at_request_limit": true,
+        "temporary_credential_copy_removed": true
+      }
+    },
+    "reported_total_cost_usd": 2.98099,
+    "cost_is_reported_estimate_not_invoice": true,
+    "integrator_review_and_repairs": true
+  },
+  "offline_tests": {
+    "python": 197,
+    "node": 51,
+    "total": 248,
+    "passed": true
+  },
+  "native": [
+    {
+      "attempt": 1,
+      "browser": {
+        "status": "passed",
+        "model_inference": false,
+        "remote_model_calls": 0,
+        "duplicate_execute_blocked": true,
+        "refresh_without_rerun": true,
+        "retry_rejected": true,
+        "cleanup_verified": true,
+        "external_browser_requests": 0,
+        "browser_errors": 0,
+        "result_detail_verified": true,
+        "runs": 66
+      },
+      "outer_cleanup": {
+        "console_exit_code": 0,
+        "browser_exit_code": 0,
+        "owned_processes_seen": 43,
+        "remaining_owned_processes": 0,
+        "owned_background_sigterm": 0,
+        "active_journal_present": false,
+        "elapsed_seconds": 21.3
+      },
+      "runner": {
+        "status": "stopped",
+        "result_kind": "native_question_check",
+        "permission_kind": "synthetic_ui_confirm",
+        "model_driven_permission": false,
+        "question_check_passed": true,
+        "model_inference_verified": false,
+        "client_requests": 0,
+        "external_requests": 0,
+        "requests": [],
+        "remote_usage": {
+          "requests": 0,
+          "output_tokens": 0
+        },
+        "remaining_owned_processes": 0,
+        "owned_processes_seen": 14,
+        "question_background_processes_signalled": 1,
+        "cleanup_errors": [],
+        "elapsed_s": 14.530507249990478
+      },
+      "office": {
+        "provider": "pi",
+        "model": "deepseek/deepseek-flash",
+        "status": "question_verified",
+        "input_path": "office_ws_terminal_input",
+        "question_responses": [
+          {
+            "index": 0,
+            "input": "deny",
+            "ui_result": false
+          },
+          {
+            "index": 1,
+            "input": "allow",
+            "ui_result": true
+          },
+          {
+            "index": 2,
+            "input": "timeout",
+            "ui_result": false
+          }
+        ],
+        "question_prompt_starts": 3,
+        "question_prompt_ends": 3,
+        "marker_written_after_allow": true,
+        "native_question_verified": true,
+        "provider_request_detector_installed": true,
+        "same_session_verified": true,
+        "denial_preserved_workspace": true,
+        "replay_rejected": true,
+        "cleanup_completed": true,
+        "states": [
+          "starting",
+          "idle",
+          "needs_input",
+          "done",
+          "needs_input",
+          "done",
+          "needs_input",
+          "done"
+        ],
+        "question_states": [
+          {
+            "index": 0,
+            "status": "needs_input"
+          },
+          {
+            "index": 1,
+            "status": "needs_input"
+          },
+          {
+            "index": 2,
+            "status": "needs_input"
+          }
+        ]
+      },
+      "authenticated_hook_types_and_statuses": [
+        {
+          "type": "session",
+          "status": "starting"
+        },
+        {
+          "type": "question",
+          "status": "needs_input"
+        },
+        {
+          "type": "session",
+          "status": "done"
+        },
+        {
+          "type": "question",
+          "status": "needs_input"
+        },
+        {
+          "type": "session",
+          "status": "done"
+        },
+        {
+          "type": "question",
+          "status": "needs_input"
+        },
+        {
+          "type": "session",
+          "status": "done"
+        }
+      ],
+      "private_evidence_sha256": {
+        "result.json": "4024d8c180f71c98a3ba18ed6caed3db071f4b3ae607af8c714997ef4c71ca83",
+        "office-result.json": "e080d2fe80bfc87e0cbc391d0c7f432d5b7402cc9fdda80e9bea510c5b54c5df",
+        "question-events.jsonl": "5e4cd070ee417bee71c9a381b013108d88f12abdf2eb52b39264f604b43273cf",
+        "pi-events.jsonl": "f95deb05ccf9dfc44b4d62a665399704c2cea5a8642823a5f437c6f6fe51bb92",
+        "question/allow-marker.json": "054eb46caf9250b46367c68f4868ad659763b46b6802827e2eb3d9ae94862424"
+      }
+    },
+    {
+      "attempt": 2,
+      "browser": {
+        "status": "passed",
+        "model_inference": false,
+        "remote_model_calls": 0,
+        "duplicate_execute_blocked": true,
+        "refresh_without_rerun": true,
+        "retry_rejected": true,
+        "cleanup_verified": true,
+        "external_browser_requests": 0,
+        "browser_errors": 0,
+        "result_detail_verified": true,
+        "runs": 67
+      },
+      "outer_cleanup": {
+        "console_exit_code": 0,
+        "browser_exit_code": 0,
+        "owned_processes_seen": 35,
+        "remaining_owned_processes": 0,
+        "owned_background_sigterm": 0,
+        "active_journal_present": false,
+        "elapsed_seconds": 17.3
+      },
+      "runner": {
+        "status": "stopped",
+        "result_kind": "native_question_check",
+        "permission_kind": "synthetic_ui_confirm",
+        "model_driven_permission": false,
+        "question_check_passed": true,
+        "model_inference_verified": false,
+        "client_requests": 0,
+        "external_requests": 0,
+        "requests": [],
+        "remote_usage": {
+          "requests": 0,
+          "output_tokens": 0
+        },
+        "remaining_owned_processes": 0,
+        "owned_processes_seen": 8,
+        "question_background_processes_signalled": 1,
+        "cleanup_errors": [],
+        "elapsed_s": 14.545679041882977
+      },
+      "office": {
+        "provider": "pi",
+        "model": "deepseek/deepseek-flash",
+        "status": "question_verified",
+        "input_path": "office_ws_terminal_input",
+        "question_responses": [
+          {
+            "index": 0,
+            "input": "deny",
+            "ui_result": false
+          },
+          {
+            "index": 1,
+            "input": "allow",
+            "ui_result": true
+          },
+          {
+            "index": 2,
+            "input": "timeout",
+            "ui_result": false
+          }
+        ],
+        "question_prompt_starts": 3,
+        "question_prompt_ends": 3,
+        "marker_written_after_allow": true,
+        "native_question_verified": true,
+        "provider_request_detector_installed": true,
+        "same_session_verified": true,
+        "denial_preserved_workspace": true,
+        "replay_rejected": true,
+        "cleanup_completed": true,
+        "states": [
+          "starting",
+          "idle",
+          "needs_input",
+          "done",
+          "needs_input",
+          "done",
+          "needs_input",
+          "done"
+        ],
+        "question_states": [
+          {
+            "index": 0,
+            "status": "needs_input"
+          },
+          {
+            "index": 1,
+            "status": "needs_input"
+          },
+          {
+            "index": 2,
+            "status": "needs_input"
+          }
+        ]
+      },
+      "authenticated_hook_types_and_statuses": [
+        {
+          "type": "session",
+          "status": "starting"
+        },
+        {
+          "type": "question",
+          "status": "needs_input"
+        },
+        {
+          "type": "session",
+          "status": "done"
+        },
+        {
+          "type": "question",
+          "status": "needs_input"
+        },
+        {
+          "type": "session",
+          "status": "done"
+        },
+        {
+          "type": "question",
+          "status": "needs_input"
+        },
+        {
+          "type": "session",
+          "status": "done"
+        }
+      ],
+      "private_evidence_sha256": {
+        "result.json": "31987ec762caaf77e0f27795c7faeb9c8d9ab9e912e934d19739acf4e725f043",
+        "office-result.json": "5ac13eb6d9eb9ca8e135c3f3c9bdf98680eaba908b24256a16ac4505ebded941",
+        "question-events.jsonl": "d861e761ca76f14dc3882742bd020a00cbfa1f27410b7abad4e612752f8750db",
+        "pi-events.jsonl": "3e3e531c9ac8161e8f915a81c7d42e8e89df37bd2139e37dd4236fd80f6a7145",
+        "question/allow-marker.json": "81595f26653e454fe051e696e5692318b62f4ed52f7a5969130f5e4186b82ac3"
+      }
+    }
+  ],
+  "results_browser": {
+    "status": "passed",
+    "providers_checked": [
+      "opencode",
+      "grok",
+      "pi",
+      "cursor"
+    ],
+    "runs": 67,
+    "detail_content_and_hash": true,
+    "filters": true,
+    "refresh": true,
+    "external_requests": 0,
+    "browser_errors": 0
+  },
+  "product_remote_model_calls": 0,
+  "product_local_model_inference": false,
+  "production_paid_grant_created": false,
+  "strict_network_isolation_verified": false,
+  "prior_attempts": [
+    {
+      "stage": "offline_unit_test",
+      "status": "failed",
+      "reason": "test compared mutated dictionaries using Python equality, where True equals 1; fixed expectation to use explicit case index",
+      "fixed_and_retested": true
+    }
+  ],
+  "review_repairs": [
+    "Map actual authenticated question/needs_input and session/done hooks instead of nonexistent ui_prompt event names on the wire",
+    "Require real needs_input state before terminal responses; same session and exact hook order",
+    "Descriptor-relative nofollow private artifact reads, regular-file and hardlink checks, bounded nonblocking reads, strict JSON and types",
+    "Verify original Pi event log contains session_start only; reject provider attempts and task artifacts",
+    "Abort immediately on unexpected confirmation or non-boolean response; exclusive private marker and bounded nofollow event writes",
+    "Classify native question before other scenarios; reject mixed metadata, startup, retry receipt, boolean counts and orphan question flags",
+    "Accept actual runtime office schema; retain startup_only=false; never completed",
+    "Replace unexecuted pytest draft with standard unittest coverage used by repository",
+    "Add question semantics to both console and offline results page",
+    "Identity-check and terminate tracked background children before final cleanup succeeds"
+  ],
+  "limitations": [
+    "Synthetic command confirmation only; model-driven permissions and other provider interactions remain pending",
+    "No paid Pi console end-to-end task or remote-stream stop verified",
+    "No local Strata inference this milestone",
+    "Full cross-provider lifecycle and security acceptance remain pending",
+    "No usable tag, release or deployment"
+  ],
+  "source_sha256": {
+    "scripts/bin/pi": "e9a2d85c100f3a0aa8ad0841d8d3b6de5f14526eab0ae1300ca4874f14ed0cdd",
+    "scripts/check_office_results_browser.mjs": "fdbe383ed7b045f0f03cb42094eade772090da884e2bc8310656a98edea5bed2",
+    "scripts/check_pi_question_browser.mjs": "15d5b36ee402936a70f8220c23cb8c9b88dc6db76f3322c339e24c4f34c8f8c2",
+    "scripts/office_console.js": "c788b7ca7c54f94777a37a2418640900edc64bcd9198b18191f965f2411cc322",
+    "scripts/office_console.py": "354cdd0a3c5fc7f482622c8fd27f5c5b05e1a1340867453a6bbefcb805edb851",
+    "scripts/office_dispatch.py": "01a86a9bbc99fde80db7743c2732396e9b461f5557fbe16a1f302653ea4e9d8f",
+    "scripts/office_pi_question.mjs": "3894d4a56e1fb5bee5e2f9b4074f4af61ec8ac67d96033d65400aee1e62de61a",
+    "scripts/office_results.html": "b58fdf278f14736e2b180f85bc05fd8a6aa7a90f4afc83df5dc7ff33abab2c35",
+    "scripts/office_results.py": "3e91ec2da40719dded3339dc43c105bd9fcbf538eb70c1275d46c4d726e18af1",
+    "scripts/pi_question_check.mjs": "58745d014cec4d648203c1f463f372421ead374e3a7343a82e7361a55188d8f8",
+    "scripts/pi_question_check.test.mjs": "0b8142a1969eb4c2b9cc90fbc2cc56c0afbdf52b68548d857e30f57da5a64c69",
+    "scripts/remote_grant.py": "b5afc7430f16a3929c130de8ebc34c78f96721012772b2dc378db17eeca59ed9",
+    "scripts/run_pi_work.py": "860383dcdd1fb346610730db9e639176535a5377ab82acba69668541dd35131b",
+    "scripts/test_office_console.py": "10dcd14f228a415c77b8a2e976b21df38a008399f4214b8d60d736bbb49411f9",
+    "scripts/test_office_dispatch.py": "72390a6c15e6e946112a18751b4c70299473db5706cc3b9b68b57be1031f1123",
+    "scripts/test_office_results.py": "54558067b073c51e0f2e05878a6a450aaab12b4ed19662cd970a0011d763401b",
+    "scripts/test_pi_question.py": "fe7c29d3a2345b0fc7b1102b464cef18345b6e8e1d653b44d27aaab66073b2d0"
+  }
+}

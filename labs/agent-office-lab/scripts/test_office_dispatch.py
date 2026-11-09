@@ -224,6 +224,62 @@ class DispatchTest(unittest.TestCase):
             self.assertEqual(dispatch.plan(provider)['model'].split('/')[-1], native['model'])
             self.assertEqual(dispatch.plan(provider)['limits']['timeout_seconds'], native['timeout_seconds'])
 
+    def test_remote_grant_consumed_only_after_preflight_and_exec_uses_authorization_ref(self):
+        consumed=[]
+        def fake_consume(lab, grant_id, provider, entry):
+            consumed.append((grant_id, provider, entry)); return {'id':grant_id}
+        with patch.object(dispatch, 'detect', return_value={'launch_prerequisites_present': False}), \
+                patch.object(dispatch.grants, 'consume', side_effect=fake_consume), \
+                patch.object(os, 'execve') as execute, contextlib.redirect_stdout(io.StringIO()):
+            self.assertEqual(dispatch.launch('pi', False, self.lab, remote_grant='a'*32), 1)
+            self.assertEqual(consumed, []); execute.assert_not_called()
+        with patch.object(dispatch, 'detect', return_value={'launch_prerequisites_present': True}), \
+                patch.object(dispatch.grants, 'consume', side_effect=fake_consume), \
+                patch.object(os, 'execve', side_effect=OSError('stop')) as execute:
+            with self.assertRaises(OSError):
+                dispatch.launch('pi', False, self.lab, remote_grant='b'*32)
+            self.assertEqual(consumed, [('b'*32, 'pi', 'dispatcher')])
+            self.assertEqual(execute.call_args.args[1][2:], ['--allow-remote','--authorization-ref','b'*32])
+
+    def test_remote_grant_rejects_retry_checks_and_non_pi(self):
+        with patch.object(dispatch, 'detect') as detect, patch.object(os, 'execve') as execute:
+            for provider, options in [('grok', {}), ('pi', {'check_cancel':True}), ('pi', {'check_failure':429}), ('pi', {'check_crash':True}), ('pi', {'check_resume':True}), ('pi', {'retry_parent':'pi-work-x'})]:
+                with self.assertRaises((SlotError, dispatch.grants.GrantError)):
+                    dispatch.launch(provider, False, self.lab, remote_grant='c'*32, **options)
+            detect.assert_not_called(); execute.assert_not_called()
+
+    def test_question_plan_and_launch_are_fixed_local_zero_request(self):
+        plan = dispatch.plan('pi', check_question=True)
+        self.assertFalse(plan['remote'])
+        self.assertTrue(plan['native_question_check'])
+        self.assertEqual(plan['limits']['provider_request_cap'], 0)
+        self.assertEqual(plan['limits']['output_tokens_per_request_cap'], 0)
+        self.assertEqual(plan['command'][2:], ['run','pi','--execute','--check-question'])
+        check = {'launch_prerequisites_present': False, 'cli_compatible': True, 'runtime': {'office_build': True}}
+        with patch.object(dispatch, 'detect', return_value=check), patch.object(os, 'execve', side_effect=OSError('no launch')) as execute:
+            with self.assertRaises(OSError): dispatch.launch('pi', False, self.lab, check_question=True)
+            self.assertEqual(execute.call_args.args[1][2:], ['--check-question'])
+            self.assertNotIn('--allow-remote', execute.call_args.args[1])
+
+    def test_question_rejects_remote_grant_retry_and_other_modes(self):
+        with patch.object(dispatch, 'detect') as detect, patch.object(os, 'execve') as execute:
+            cases = [('grok', False, {}), ('pi', True, {}), ('pi', False, {'check_cancel':True}),
+                     ('pi', False, {'check_failure':429}), ('pi', False, {'check_crash':True}),
+                     ('pi', False, {'check_resume':True}), ('pi', False, {'check_host_restart':True}),
+                     ('pi', False, {'keep_open':True}), ('pi', False, {'remote_grant':'a'*32}),
+                     ('pi', False, {'retry_parent':'pi-work-x'})]
+            for provider, remote, options in cases:
+                with self.assertRaises((SlotError, dispatch.grants.GrantError)):
+                    dispatch.launch(provider, remote, self.lab, check_question=True, **options)
+            detect.assert_not_called(); execute.assert_not_called()
+
+    def test_question_cli_flag_is_plan_only_without_execute(self):
+        with contextlib.redirect_stdout(io.StringIO()) as output:
+            self.assertEqual(dispatch.main(['run','pi','--check-question']), 0)
+        data = json.loads(output.getvalue())
+        self.assertTrue(data['native_question_check'])
+        self.assertEqual(data['command'][2:], ['run','pi','--execute','--check-question'])
+
     def test_all_direct_runner_entrypoints_obey_busy_slot(self):
         scripts = Path(__file__).resolve().parent
         cases = [(spec, spec['args']) for spec in dispatch.SPECS.values()]
@@ -231,7 +287,8 @@ class DispatchTest(unittest.TestCase):
                   (dispatch.SPECS['pi'], ['--check-failure=429']),
                   (dispatch.SPECS['pi'], ['--check-crash']),
                   (dispatch.SPECS['pi'], ['--check-cancel']),
-                  (dispatch.SPECS['pi'], ['--check-resume'])]
+                  (dispatch.SPECS['pi'], ['--check-resume']),
+                  (dispatch.SPECS['pi'], ['--check-question'])]
         for spec, args in cases:
             # Replace probes with a tripwire; even a broken gate cannot issue a model request.
             code = f'''import sys,runpy,types

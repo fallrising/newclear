@@ -1,0 +1,19 @@
+Please use "Sticky header" from "Landing page & web effects".
+Motion Prompt #075 · lp/sticky-header
+
+Meaning: The header stays at the top while the page scrolls
+Example request (adapt to your project): Make the header a sticky header, with a soft shadow once it sticks to the top.
+What this demo shows: The announcement strip scrolls away, but the header below it stops at the top edge and the content scrolls underneath.
+Demo specification (independent of the example request):
+- Scroll: 0→110 px at 0.4–1.3 s, 110→250 px at 1.9–2.8 s, 250→0 at 3.4–4.4 s (cubic ease-in-out).
+- At the very top, a 22 px announcement strip (navy); below it a 34 px header (logo, three menu items, button).
+- Header position = max(22 − scroll, 0): once the strip is gone, it stops at the top edge (position: sticky; top: 0).
+- Over the next 24 px of scroll, a 12 px shadow under the header fades from 0 to 0.16 opacity.
+- The content (photo, heading, three cards) scrolls normally under the header.
+When to use it: Use it to keep the menu and the call-to-action within reach on a long page.
+
+Local demo: ./?lang=en#075
+Local specification and code: ./api/v1/en/e/075.txt
+Local helper code: ./api/v1/kit/en/lp.js
+Keep the demo geometry, timing and easing unless I explicitly request changes. Adapt text, colours and assets to my project.
+Upstream source: https://github.com/showheyohtaki/motion-prompt (MIT, Shohei Ohtaki).

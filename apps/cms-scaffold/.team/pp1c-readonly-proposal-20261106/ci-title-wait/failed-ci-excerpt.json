@@ -1,0 +1,16 @@
+{
+  "run": 42295764575,
+  "job": 128160454436,
+  "head": "d3f359cba6b421329f8993402c1ed176bb8f9920",
+  "url": "https://github.com/fallrising/newclear/actions/runs/42295764575",
+  "failedStep": "npm test",
+  "test": "C-04 an unknown path inside a site renders NotFoundPublic in that site's shell",
+  "line": "apps/web-front/src/site.test.tsx:54:28",
+  "expected": "找不到這個頁面 · 相簿",
+  "actual": "",
+  "frontSuite": {
+    "passed": 146,
+    "failed": 1
+  },
+  "source": "GitHub job logs read via connector; complete original failure retained in Actions"
+}

@@ -1,0 +1,38 @@
+// Motion Prompt #049 · MIT License (c) 2026 Shohei Ohtaki · ./#049
+//
+// 模態對話框（Modal dialog）
+// 分類組: ui (UI 元件) · element 01 · 分類: 展開與浮層
+// 示範內容: 點選開啟後，整頁變暗，小視窗略微放大至中央；點選 × 關閉。
+// 動作／視覺規格:
+//   - 542×191 卡片上每 4.5 s 循環。游標於 0.95 s 到達左下開啟按鈕（120×36），於 1.0 s 點擊。
+//   - 開啟量 a：於 1.0–1.32 s 以 easeOutCubic 從 0→1。全卡片覆蓋 rgba(18,20,28) 遮罩，不透明度為 0.42·a。
+//   - 視窗：白色 280×140、圓角半徑 12，中心在 (271, 97)；陰影模糊 24、y 偏移 8、alpha 0.25。縮放 0.9 + 0.1·a，不透明度 a。
+//   - 內容：粗標題列、兩行文字、右下藍色 88×30 按鈕與右上 ×。
+//   - 關閉：游標於 3.0 s 前移至 ×，3.3 s 點擊；a 乘上 (1 − 3.3–3.58 s 期間的 easeInOutCubic)。
+// 使用情境: 適合需要使用者暫停其他操作，先完成確認或簡短表單的情況。
+// 關鍵字: modal, modal-dialog, dialog, popup, overlay, backdrop, lightbox, confirm
+// 尺寸: 542x191 px · 週期: 4.5 s
+// 需要: kit ui -> ./api/v1/kit/zh-Hant/ui.js
+// 本地示範: ./?lang=zh-Hant#049
+//
+// cells[i](k, w, h, u)：k = CanvasRenderingContext2D，呼叫端先清除畫布並以 save/restore 包覆；w、h 為尺寸，u 為 [0, cycle) 內的秒數。畫面只取決於 u。
+// 下方是元素程式碼；CELLS、常數與輔助函式位於 kit。
+
+// @element 01
+
+CELLS[0] = ui((w, h, t) => {
+  pageLines(24, 18, 494);
+  fillRR(24, 92, 120, 36, 8, C.blue); text("開啟", 84, 110, 16, '#fff', 600, 'center');
+  fillRR(170, 92, 348, 36, 8, C.block); fillRR(24, 142, 494, 38, 8, C.block);
+  const a = eo(seg(t, 1.0, 1.32)) * (1 - eio(seg(t, 3.3, 3.58)));
+  if (a > 0) {
+    X.fillStyle = `rgba(18,20,28,${.42 * a})`; X.fillRect(0, 0, w, h);
+    X.save(); X.globalAlpha = a; X.translate(271, 97); const s = .9 + .1 * a; X.scale(s, s);
+    shadowed(() => fillRR(-140, -70, 280, 140, 12, '#fff'), 24, 8, .25);
+    bar(-116, -48, 120, C.ink, 11); bar(-116, -20, 232); bar(-116, -2, 180);
+    fillRR(28, 26, 88, 30, 7, C.blue);
+    X.strokeStyle = '#9a9896'; X.lineWidth = 2.2; X.lineCap = 'round'; X.beginPath(); X.moveTo(110, -54); X.lineTo(120, -44); X.moveTo(120, -54); X.lineTo(110, -44); X.stroke();
+    X.restore();
+  }
+  pointer([[.3, w + 30, h + 30], [.95, 86, 114], [1.5, 86, 114], [3.0, 389, 50], [3.5, 389, 50], [4.2, w + 30, h + 30]], [1.0, 3.3], t);
+});

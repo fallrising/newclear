@@ -1,0 +1,27 @@
+{
+  "atUtc": "2026-11-06T21:27:05.332439+00:00",
+  "testSha256": "a6ef0440c7b1e159a4b0dfe03ed624cfc37c1c2244e3fce8e2dc3bd9d0125931",
+  "observed": [
+    {
+      "command": "env PATH=/home/ckc/.local/node-v24.18.0/bin:/usr/local/bin:/usr/bin:/bin npm test --workspace @cms/web-front -- --run src/site.test.tsx",
+      "cwd": "/home/ckc/test/codex/wt/newclear/cms-pp1c-d-20261106/apps/cms-scaffold",
+      "exitCode": 0,
+      "testsPassed": 17,
+      "testFailures": 0,
+      "durationSeconds": 4.51,
+      "logPath": "/home/ckc/test/codex/wt/newclear/cms-pp1c-d-20261106/apps/cms-scaffold/.team/pp1c-d-20261106/ci-C04-focused-native.log",
+      "logSha256": "f06cf0162234d61e2a9b3f8d65332f5f05405d52d8251fa9d37f9d9675feb3c9"
+    },
+    {
+      "command": "env PATH=/home/ckc/.local/node-v24.18.0/bin:/usr/local/bin:/usr/bin:/bin npm test --workspace @cms/web-front",
+      "cwd": "/home/ckc/test/codex/wt/newclear/cms-pp1c-d-20261106/apps/cms-scaffold",
+      "exitCode": 0,
+      "testsPassed": 147,
+      "testFailures": 0,
+      "durationSeconds": 27.31,
+      "logPath": "/home/ckc/test/codex/wt/newclear/cms-pp1c-d-20261106/apps/cms-scaffold/.team/pp1c-d-20261106/ci-C04-front-full-native.log",
+      "logSha256": "622d1d6bb1d3f4e7b02216940634279cd65baea814b7364abdebe466791fae9b"
+    }
+  ],
+  "applicationAndBuildAssetsUnchanged": true
+}

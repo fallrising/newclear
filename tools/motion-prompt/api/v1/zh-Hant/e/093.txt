@@ -1,0 +1,47 @@
+// Motion Prompt #093 · MIT License (c) 2026 Shohei Ohtaki · ./#093
+//
+// 平滑捲動（Smooth scroll）
+// 分類組: lp (網頁與登陸頁效果) · element 21 · 分類: 載入、導覽與循環動態
+// 示範內容: 點擊選單中的「方案」後，頁面平順向下移到方案區；右下角向上箭頭則平順捲回頂部。
+// 動作／視覺規格:
+//   - 0.9 s 點擊「方案」選單，於 0.95–2.0 s 從 0→296 px 捲動（1.05 s，cubic ease-in-out）。
+//   - 停止位置 = 方案區頂部（330 px）− 固定頁首高度（34 px）。
+//   - 捲動超過 60 px 後，右下角的回到頂部圓形按鈕（半徑 15）在接下來的 40 px 內淡入。
+//   - 3.1 s 點擊此按鈕，於 3.15–4.2 s 從 296→0 捲動（cubic ease-in-out）。
+//   - 方案區在畫面內時，選單中的「方案」變為橘色。
+// 使用情境: 適合在同一頁內跳轉的選單或目錄，讓讀者看見移動方向。
+// 關鍵字: smooth-scroll, scroll-behavior, anchor-link, in-page-link, back-to-top, navigation
+// 尺寸: 539x208 px · 週期: 4.8 s
+// 需要: kit lp -> ./api/v1/kit/zh-Hant/lp.js
+// 本地示範: ./?lang=zh-Hant#093
+//
+// cells[i](k, w, h, u)：k = CanvasRenderingContext2D，呼叫端先清除畫布並以 save/restore 包覆；w、h 為尺寸，u 為 [0, cycle) 內的秒數。畫面只取決於 u。
+// 下方是元素程式碼；CELLS、常數與輔助函式位於 kit。
+
+// @element 21
+
+CELLS[20] = (k, w, h, u) => {
+  frame(k);
+  const TO = 296;
+  const y = TO * eIO(P(u, 0.95, 2.0)) * (1 - eIO(P(u, 3.15, 4.2)));
+  const [cx, cy] = path([[0, 380, 132], [0.75, 360, 18], [1.0, 360, 18], [2.9, 478, 140], [3.25, 478, 140], [4.8, 380, 132]], u);
+  view(k, () => {
+    k.save(); k.translate(0, -y);
+    pic(k, 24, 46, 222, 110, 0, 8); txt(k, "剛剛好的工具。", 264, 84, `800 19px ${JP}`, C.ink); bars(k, 264, 98, 210, 3);
+    k.fillStyle = C.soft; k.fillRect(0, 170, VW, 160);
+    txt(k, "特色", VW / 2, 206, `800 17px ${JP}`, C.ink, 'center');
+    for (let i = 0; i < 3; i++) { const x = 100 + i * 155; k.fillStyle = C.blueL; k.beginPath(); k.arc(x, 252, 24, 0, 7); k.fill(); bars(k, x - 46, 288, 92, 2); }
+    txt(k, "方案", VW / 2, 370, `800 17px ${JP}`, C.ink, 'center');
+    ['¥0', '¥980', '¥2,980'].forEach((s, i) => {
+      const x = 50 + i * 143, hi = i === 1; k.fillStyle = '#fff'; rr(k, x, 388, 125, 96, 8); k.fill();
+      k.lineWidth = hi ? 2.5 : 1.5; k.strokeStyle = hi ? C.acc : C.faint; k.stroke();
+      txt(k, s, x + 62.5, 428, `800 20px ${EN}`, hi ? C.acc : C.ink, 'center'); bars(k, x + 22, 444, 81, 2);
+    });
+    k.restore();
+    header(k, 0, y > 250 ? 1 : -1);
+    const tb = clamp((y - 60) / 40);
+    if (tb > 0) { k.globalAlpha = tb; k.fillStyle = C.ink; k.beginPath(); k.arc(478, 140, 15, 0, 7); k.fill(); k.strokeStyle = '#fff'; k.lineWidth = 2.4; k.lineCap = 'round'; k.lineJoin = 'round'; k.beginPath(); k.moveTo(472, 143); k.lineTo(478, 136.5); k.lineTo(484, 143); k.stroke(); k.globalAlpha = 1; }
+    sbar(k, y / TO * 0.7, 0.36);
+    click(k, cx, cy, u, [0.9, 3.1]);
+  });
+};

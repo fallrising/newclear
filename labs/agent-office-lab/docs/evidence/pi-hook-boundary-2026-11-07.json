@@ -1,0 +1,437 @@
+{
+  "schema": 1,
+  "milestone": "T-0026",
+  "date": "2026-11-07",
+  "recorded_at": "2026-11-08T02:39:37Z",
+  "runtime_baseline": "04a7340f05ade127f550539817f78411bfba9d2d",
+  "integration_base": "64c8ad59620e9068f0beede99365b7d656f00825",
+  "upstream_commit": "852e2ab28c4f3f31bffdf4b20353bd119c9d3270",
+  "scope": "Bounded Pi worker identity, fixed provider/model, announced token generation and pinned session; actual native HTTP rejection plus normal question/reconnect/host restart regression.",
+  "versions": {
+    "node": "23.11.0",
+    "python": "3.14.4",
+    "pi": "1.4.0",
+    "claude_code": "2.1.316",
+    "platform": "macOS arm64"
+  },
+  "delegation": {
+    "advisor": {
+      "model": "claude-opus-5-5",
+      "cli_invocations": 2,
+      "first_attempt": {
+        "exit_code": 124,
+        "elapsed_s": 240.58,
+        "guidance_received": false,
+        "reported_cost_usd": null
+      },
+      "retry": {
+        "exit_code": 0,
+        "elapsed_s": 119.15,
+        "reported_cost_usd": 0.299861,
+        "public_source_files": 1,
+        "root_verified_native_contract_summary_supplied": true
+      }
+    },
+    "parallel_pi_workers": {
+      "guard": {
+        "provider": "openai",
+        "model": "gpt-5.5",
+        "requests": 15,
+        "tool_calls": 17,
+        "reported_cost_usd": 0.911526,
+        "completion": {
+          "worker": "guard",
+          "exit_code": 0,
+          "elapsed_s": 176.69,
+          "credential_copy_removed": true
+        },
+        "delivered_files": 4
+      },
+      "probe": {
+        "provider": "openai",
+        "model": "gpt-5.5",
+        "requests": 14,
+        "tool_calls": 20,
+        "reported_cost_usd": 0.988865,
+        "completion": {
+          "worker": "probe",
+          "exit_code": 0,
+          "elapsed_s": 133.29,
+          "credential_copy_removed": true
+        },
+        "delivered_files": 6
+      }
+    },
+    "known_reported_subtotal_usd": 2.200252,
+    "timed_out_advisor_cost_unknown": true,
+    "estimates_not_invoice": true,
+    "integrator_review_and_repairs": true
+  },
+  "offline_tests": {
+    "node": 68,
+    "python": 200,
+    "total": 268,
+    "passed": true,
+    "repo_contract_tests": 21
+  },
+  "native_normalizer_comparisons": {
+    "cases": 1680,
+    "passed": true,
+    "source": "actual pinned compiled normalizePiHook"
+  },
+  "native": [
+    {
+      "check": "question",
+      "runner_status": "stopped",
+      "runner_elapsed_s": 15.061,
+      "model_inference_verified": false,
+      "client_requests": 0,
+      "external_requests": 0,
+      "cleanup_errors": [],
+      "remaining_owned_processes": 0,
+      "supervisor": {
+        "mode": "question",
+        "exit_code": 0,
+        "elapsed_s": 50.83,
+        "tracked_processes": 33,
+        "remaining_processes": 0,
+        "outer_cleanup_signals": 0
+      },
+      "hook_boundary_check_passed": true,
+      "question_check_passed": true,
+      "hook_boundary": {
+        "schema": "lab.pi.hook-probe.v1",
+        "cases": [
+          {
+            "name": "missing_token",
+            "status": 401,
+            "unchanged": true
+          },
+          {
+            "name": "wrong_token",
+            "status": 401,
+            "unchanged": true
+          },
+          {
+            "name": "unknown_worker",
+            "status": 401,
+            "unchanged": true
+          },
+          {
+            "name": "wrong_route",
+            "status": 401,
+            "unchanged": true
+          },
+          {
+            "name": "unknown_route",
+            "status": 404,
+            "unchanged": true
+          },
+          {
+            "name": "malformed_json",
+            "status": 400,
+            "unchanged": true
+          },
+          {
+            "name": "malformed_payload",
+            "status": 401,
+            "unchanged": true
+          },
+          {
+            "name": "foreign_session",
+            "status": 401,
+            "unchanged": true
+          },
+          {
+            "name": "foreign_start",
+            "status": 401,
+            "unchanged": true
+          },
+          {
+            "name": "duplicate_start",
+            "status": 401,
+            "unchanged": true
+          },
+          {
+            "name": "unexpected_event",
+            "status": 401,
+            "unchanged": true
+          }
+        ],
+        "verified": true
+      },
+      "native_question_verified": true,
+      "question_responses": [
+        {
+          "index": 0,
+          "input": "deny",
+          "ui_result": false
+        },
+        {
+          "index": 1,
+          "input": "allow",
+          "ui_result": true
+        },
+        {
+          "index": 2,
+          "input": "timeout",
+          "ui_result": false
+        }
+      ],
+      "same_session_verified": true,
+      "cleanup_completed": true
+    },
+    {
+      "check": "resume",
+      "runner_status": "stopped",
+      "runner_elapsed_s": 17.719,
+      "model_inference_verified": false,
+      "client_requests": 1,
+      "external_requests": 0,
+      "cleanup_errors": [],
+      "remaining_owned_processes": 0,
+      "supervisor": {
+        "mode": "resume",
+        "exit_code": 0,
+        "elapsed_s": 53.45,
+        "tracked_processes": 24,
+        "remaining_processes": 0,
+        "outer_cleanup_signals": 0
+      },
+      "hook_boundary_check_passed": true,
+      "resume_check_passed": true,
+      "hook_boundary": {
+        "schema": "lab.pi.hook-probe.v1",
+        "cases": [
+          {
+            "name": "missing_token",
+            "status": 401,
+            "unchanged": true
+          },
+          {
+            "name": "wrong_token",
+            "status": 401,
+            "unchanged": true
+          },
+          {
+            "name": "unknown_worker",
+            "status": 401,
+            "unchanged": true
+          },
+          {
+            "name": "wrong_route",
+            "status": 401,
+            "unchanged": true
+          },
+          {
+            "name": "unknown_route",
+            "status": 404,
+            "unchanged": true
+          },
+          {
+            "name": "malformed_json",
+            "status": 400,
+            "unchanged": true
+          },
+          {
+            "name": "malformed_payload",
+            "status": 401,
+            "unchanged": true
+          },
+          {
+            "name": "foreign_session",
+            "status": 401,
+            "unchanged": true
+          },
+          {
+            "name": "foreign_start",
+            "status": 401,
+            "unchanged": true
+          },
+          {
+            "name": "duplicate_start",
+            "status": 401,
+            "unchanged": true
+          },
+          {
+            "name": "unexpected_event",
+            "status": 401,
+            "unchanged": true
+          },
+          {
+            "name": "old_token",
+            "status": 401,
+            "unchanged": true
+          }
+        ],
+        "verified": true
+      },
+      "native_token_rotated": true,
+      "native_resume_verified": true,
+      "new_process_same_session": true,
+      "session_history_preserved": true,
+      "history_entries_before": 6,
+      "history_entries_after": 6,
+      "cleanup_completed": true
+    },
+    {
+      "check": "host-restart",
+      "runner_status": "stopped",
+      "runner_elapsed_s": 70.669,
+      "model_inference_verified": false,
+      "client_requests": 1,
+      "external_requests": 0,
+      "cleanup_errors": [],
+      "remaining_owned_processes": 0,
+      "supervisor": {
+        "mode": "host-restart",
+        "exit_code": 0,
+        "elapsed_s": 106.38,
+        "tracked_processes": 99,
+        "remaining_processes": 0,
+        "outer_cleanup_signals": 0
+      },
+      "host_restart_check_passed": true,
+      "native_resume_verified": true,
+      "new_process_same_session": true,
+      "session_history_preserved": true,
+      "history_entries_before": 6,
+      "history_entries_after": 6,
+      "host_generations": 3,
+      "crash_recovery_verified": true,
+      "repeated_restart_preserved": true,
+      "browser_interrupted_visible": true,
+      "browser_refresh_without_replay": true,
+      "external_browser_requests": 0,
+      "browser_errors": 0,
+      "cleanup_completed": true
+    },
+    {
+      "check": "startup",
+      "runner_status": "completed",
+      "runner_elapsed_s": 30.621,
+      "model_inference_verified": false,
+      "client_requests": 0,
+      "external_requests": 0,
+      "cleanup_errors": [],
+      "remaining_owned_processes": 0,
+      "supervisor": {
+        "mode": "startup",
+        "exit_code": 0,
+        "elapsed_s": 65.99,
+        "tracked_processes": 41,
+        "remaining_processes": 0,
+        "outer_cleanup_signals": 0
+      },
+      "hook_boundary_check_passed": true,
+      "hook_boundary": {
+        "schema": "lab.pi.hook-probe.v1",
+        "cases": [
+          {
+            "name": "missing_token",
+            "status": 401,
+            "unchanged": true
+          },
+          {
+            "name": "wrong_token",
+            "status": 401,
+            "unchanged": true
+          },
+          {
+            "name": "unknown_worker",
+            "status": 401,
+            "unchanged": true
+          },
+          {
+            "name": "wrong_route",
+            "status": 401,
+            "unchanged": true
+          },
+          {
+            "name": "unknown_route",
+            "status": 404,
+            "unchanged": true
+          },
+          {
+            "name": "malformed_json",
+            "status": 400,
+            "unchanged": true
+          },
+          {
+            "name": "malformed_payload",
+            "status": 401,
+            "unchanged": true
+          },
+          {
+            "name": "foreign_session",
+            "status": 401,
+            "unchanged": true
+          },
+          {
+            "name": "foreign_start",
+            "status": 401,
+            "unchanged": true
+          },
+          {
+            "name": "duplicate_start",
+            "status": 401,
+            "unchanged": true
+          },
+          {
+            "name": "unexpected_event",
+            "status": 401,
+            "unchanged": true
+          }
+        ],
+        "verified": true
+      },
+      "cleanup_completed": true
+    }
+  ],
+  "retained_failures": [
+    {
+      "stage": "advisor",
+      "reason": "240 second timeout; no returned guidance or usage; explicit approved smaller retry succeeded"
+    },
+    {
+      "stage": "targeted unit tests",
+      "reason": "native authentication fixture used wrong signature; corrected and all tests passed"
+    },
+    {
+      "stage": "startup supervisor invocation",
+      "reason": "dispatcher does not accept --check-startup; exit 2 before product process, corrected to existing direct runner"
+    }
+  ],
+  "source_sha256": {
+    "pi_hook_guard.mjs": "99c33e0927414101c99d179e0c3343094a8a19c2b1167837089fe784325f4d4e",
+    "pi_hook_probe.mjs": "68ffd1efeb9d946e01bee63dd0eff9b130ec36d531c994d8d1a9db66ff281681",
+    "pi_hook_evidence.py": "f98d5e67c8bd5bf85cb12da3ceb8de3fff59e1aba3314c1a96490050a374893d",
+    "pi_office_policy.mjs": "063b9f945dc5ece80a1ffa2c2fd082fcf45efb4feeaf2e332526293c9225e69a",
+    "office_pi.mjs": "68cc0a5fe004b123bd5a5a921231deae20a5a3b64b4287aecc0b2654569066a8",
+    "office_pi_question.mjs": "d1ddb14165120b3bf67afc74cdd34f4299859bc3cdb8faf5e761fc136f7eb59c",
+    "run_pi_work.py": "cea48a7cb1fe20a6a4e359dafa21473df8a79a4c2fb52f4be0ea1d35f1ac37cd",
+    "remote_grant.py": "05fed34adddbfbac44810464b6f397ad8cf1592bde235f0099afd181f3af9a36"
+  },
+  "execution_lock_released": true,
+  "product_model_calls": 0,
+  "local_strata_inference": false,
+  "paid_product_grant_created": false,
+  "limitations": [
+    "Current valid token can still authenticate syntactically valid ordinary same-session events; no sequence/nonce protocol.",
+    "Only bounded lab Pi route; other providers and whole process-tree isolation remain pending.",
+    "Host restart regression uses local 429 history; no paid inference or interrupted remote stream continuation.",
+    "Full MVP remains incomplete: 4 of 11 required AC passed, 7 pending with subsets.",
+    "CI and merge are tracked separately in PR and task board."
+  ],
+  "runtime_source_sha256": {
+    "pi_hook_guard.mjs": "99c33e0927414101c99d179e0c3343094a8a19c2b1167837089fe784325f4d4e",
+    "pi_hook_probe.mjs": "825598c9a29ba3fcc8531d96529d4f7a9c45ac59ef943eeba4cae764b071d979",
+    "pi_hook_evidence.py": "f98d5e67c8bd5bf85cb12da3ceb8de3fff59e1aba3314c1a96490050a374893d",
+    "pi_office_policy.mjs": "063b9f945dc5ece80a1ffa2c2fd082fcf45efb4feeaf2e332526293c9225e69a",
+    "office_pi.mjs": "68cc0a5fe004b123bd5a5a921231deae20a5a3b64b4287aecc0b2654569066a8",
+    "office_pi_question.mjs": "d1ddb14165120b3bf67afc74cdd34f4299859bc3cdb8faf5e761fc136f7eb59c",
+    "run_pi_work.py": "cea48a7cb1fe20a6a4e359dafa21473df8a79a4c2fb52f4be0ea1d35f1ac37cd",
+    "remote_grant.py": "05fed34adddbfbac44810464b6f397ad8cf1592bde235f0099afd181f3af9a36"
+  },
+  "post_runtime_format_only": "Removed one trailing blank line from pi_hook_probe.mjs for staged whitespace gate; behavior unchanged."
+}

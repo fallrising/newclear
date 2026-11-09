@@ -69,7 +69,7 @@
 | [`apps/cms-scaffold`](apps/cms-scaffold/) | 可重複使用的 CMS kernel（API + Front/Back/Admin） | Java, React, PostgreSQL | C |
 | [`tools/codex-usage`](tools/codex-usage/) | Agent Usage 統一唯讀總覽：重用 Codex／Claude 來源，分清訂閱額度、本機統計與 API 支出 | Python, Codex App Server | A |
 | [`tools/gameplay-pattern-catalog`](tools/gameplay-pattern-catalog/) | 以 Gameplay Atlas 公開快照為分母的繁中設計模式筆記、來源 manifest 與靜態網站（Draft，未部署） | Python、原生 JavaScript | 未分級 |
-| [`tools/motion-prompt`](tools/motion-prompt/) | 繁中／英文動態術語圖鑑：固定 120 項來源與驗收規格，網站待整合 | 原生 JavaScript, Canvas | 未分級 |
+| [`tools/motion-prompt`](tools/motion-prompt/) | 繁中／英文動態術語圖鑑：120 項動畫、雙語搜尋與提示詞複製（待 owner 驗收） | 原生 JavaScript, Canvas | 未分級 |
 | [`tools/streaming-converter`](tools/streaming-converter/) | FFmpeg HLS conversion 與 web player | Bash, FFmpeg | D |
 
 ### 契約、範例與實驗

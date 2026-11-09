@@ -1,0 +1,31 @@
+// Motion Prompt #032 · MIT License (c) 2026 Shohei Ohtaki · ./#032
+//
+// 推軌變焦（眩暈效果）（Dolly zoom (Vertigo)）
+// 分類組: camera (鏡頭運動與轉場) · element 08 · 分類: 鏡頭運動
+// 示範內容: 攝影機向後退，同時按比例變焦拉近；人物大小保持不變，只有背景逼近。
+// 動作／視覺規格:
+//   - 攝影機：與人物（前方 8 m）的距離 d 從 3.2 m→8 m（後退 4.8 m）；高度 1.3 m。
+//   - 焦距：f = 330 × d/8 px，即 132 px→330 px（標示為 10mm→24mm），維持距離 ÷ 焦距不變。
+//   - 時間：0.5 s 至 3.4 s（2.9 s），三次方 ease-in-out（約 cubic-bezier(0.65,0,0.35,1)）。
+//   - 主體：人物不動，在畫面中的高度固定；頭部（1.8 m）與腳部的 160 px 藍色虛線標示大小不變。
+//   - 背景：建築（48 m 外）放大約 2.2×，山放大約 2.4×，在人物後方逼近；人物前方地面則縮小。
+//   - 回到起點：3.4–4.2 s 停留，最後 0.5 s 交叉淡化回起始畫面（一輪 = 4.7 s）。
+// 使用情境: 適合視覺化呈現領悟、不安或震驚的瞬間。
+// 關鍵字: dolly zoom, vertigo, zolly, push pull, background stretch, unease, camera move
+// 尺寸: 539x208 px · 週期: 9.4 s
+// 需要: kit camera -> ./api/v1/kit/zh-Hant/camera.js
+// 本地示範: ./?lang=zh-Hant#032
+//
+// cells[i](k, w, h, u)：k = CanvasRenderingContext2D，呼叫端先清除畫布並以 save/restore 包覆；w、h 為尺寸，u 為 [0, cycle) 內的秒數。畫面只取決於 u。
+// 下方是元素程式碼；CELLS、常數與輔助函式位於 kit。
+
+// @element 08
+
+CELLS[7] = shot(camCell((k, w, h, p) => {
+  const d = lerp(3.2, 8, p), f = F0 * d / 8 * 1.0;
+  const c = cam({ z: 8 - d, f, y: 1.3 });
+  world(k, w, h, c, {
+    person: { z: 8 }, trees: true,
+    after: (kk, cc) => { const top = proj(cc, 0, 1.8, 8).y, bot = proj(cc, 0, 0, 8).y; kk.strokeStyle = C.blue; kk.lineWidth = 1.6; kk.setLineDash([6, 5]); kk.beginPath(); kk.moveTo(-80, top); kk.lineTo(80, top); kk.moveTo(-80, bot); kk.lineTo(80, bot); kk.stroke(); kk.setLineDash([]); }
+  });
+}, p => mm(F0 * lerp(3.2, 8, p) / 8)));

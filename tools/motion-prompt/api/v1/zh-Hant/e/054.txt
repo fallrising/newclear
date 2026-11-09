@@ -1,0 +1,36 @@
+// Motion Prompt #054 · MIT License (c) 2026 Shohei Ohtaki · ./#054
+//
+// 工具提示（Tooltip）
+// 分類組: ui (UI 元件) · element 06 · 分類: 展開與浮層
+// 示範內容: 游標停在問號圖示上方時，深色氣泡顯示簡短說明；離開後消失。
+// 動作／視覺規格:
+//   - 542×191 卡片上每 4.5 s 循環。標籤旁的問號圖示（藍色環、半徑 13）位於 (196, 121)。
+//   - 游標只停留、不點擊：1.05 s 抵達問號，停至 3.15 s，4.1 s 前離開卡片。
+//   - 顯示量 a：於 1.15–1.35 s 以 easeOutCubic 從 0→1；不透明度 a，向上移動 6 px 定位。
+//   - 氣泡：#26282c、184×36、圓角半徑 8，頂端 y 64；寬 16、高 8 的三角形向下指向圖示，文字為白色 15 px。
+//   - 隱藏：3.25–3.45 s 線性從 1→0。
+// 使用情境: 適合為圖示或縮寫補上一行提示，不額外佔用頁面空間。
+// 關鍵字: tooltip, hint, hover, help, info, title
+// 尺寸: 542x191 px · 週期: 4.5 s
+// 需要: kit ui -> ./api/v1/kit/zh-Hant/ui.js
+// 本地示範: ./?lang=zh-Hant#054
+//
+// cells[i](k, w, h, u)：k = CanvasRenderingContext2D，呼叫端先清除畫布並以 save/restore 包覆；w、h 為尺寸，u 為 [0, cycle) 內的秒數。畫面只取決於 u。
+// 下方是元素程式碼；CELLS、常數與輔助函式位於 kit。
+
+// @element 06
+
+CELLS[5] = ui((w, h, t) => {
+  pageLines(24, 16, 494);
+  bar(24, 116, 150, C.line2, 11); ring(196, 121, 13, C.blue, 2.2); text('?', 196, 122, 16, C.blue, 700, 'center', NUMF);
+  fillRR(24, 146, 494, 34, 8, C.block);
+  const a = eo(seg(t, 1.15, 1.35)) * (1 - seg(t, 3.25, 3.45));
+  if (a > 0) {
+    X.save(); X.globalAlpha = a; const yy = 64 + 6 * (1 - a);
+    fillRR(196 - 92, yy, 184, 36, 8, C.dark);
+    X.beginPath(); X.moveTo(196 - 8, yy + 36); X.lineTo(196, yy + 44); X.lineTo(196 + 8, yy + 36); X.fillStyle = C.dark; X.fill();
+    text("顯示簡短說明", 196, yy + 18, 15, '#fff', 600, 'center'); X.restore();
+  }
+
+  pointer([[.3, w + 30, h + 30], [1.05, 200, 126], [3.15, 200, 126], [4.1, w + 30, h + 30]], [], t);
+});

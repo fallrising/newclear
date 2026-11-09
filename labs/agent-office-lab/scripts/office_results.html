@@ -30,7 +30,7 @@ td{overflow-wrap:anywhere}.table-wrap{overflow-x:auto}small{color:#b5c3d8}#detai
 const data = JSON.parse(document.getElementById('data').textContent);
 const labels = {completed:'完成且產物已核對',failed:'失敗',cancelled:'已取消',stopped:'已停止',startup_only:'僅啟動檢查',incomplete:'未完成紀錄',invalid:'無效紀錄',unverified:'證據不足'};
 const artifactLabels = {verified:'已核對',unavailable:'無產物',unverified:'未通過核對'};
-const scenarioLabels = {native_pi_host_restart:'Pi Office 重啟檢查（沒有模型推論）',native_pi_resume:'Pi 同 session 重新連接檢查（沒有模型推論）',native_pi_cancel:'Pi 原生取消檢查（沒有模型推論）',injected_cli_crash:'本機注入 CLI crash（未呼叫遠端模型）',injected_http_401:'本機注入 HTTP 401（未呼叫遠端模型）',injected_http_429:'本機注入 HTTP 429（未呼叫遠端模型）'};
+const scenarioLabels = {native_pi_question:'Pi 原生問答確認檢查（無模型推論）',native_pi_host_restart:'Pi Office 重啟檢查（沒有模型推論）',native_pi_resume:'Pi 同 session 重新連接檢查（沒有模型推論）',native_pi_cancel:'Pi 原生取消檢查（沒有模型推論）',injected_cli_crash:'本機注入 CLI crash（未呼叫遠端模型）',injected_http_401:'本機注入 HTTP 401（未呼叫遠端模型）',injected_http_429:'本機注入 HTTP 429（未呼叫遠端模型）'};
 const el = (tag,text) => {const node=document.createElement(tag);node.textContent=text;return node;};
 document.getElementById('generated').textContent = `快照時間：${data.generated_at}`;
 for (const provider of data.providers) {
@@ -55,6 +55,7 @@ function show(run) {
   if (run.test_scenario==='native_pi_host_restart') detail.append(el('p',scenarioLabels[run.test_scenario]),el('p',run.host_restart_check_passed?'Office 重啟驗收通過；歷史保留、無自動重跑，原任務未完成。':'Office 重啟驗收未通過。'));
   else if (run.test_scenario==='native_pi_resume') detail.append(el('p',scenarioLabels[run.test_scenario]),el('p',run.resume_check_passed?'重新連接驗收通過；原任務未完成。':'重新連接驗收未通過。'));
   else if (run.test_scenario==='native_pi_cancel') detail.append(el('p',scenarioLabels[run.test_scenario]),el('p',run.cancel_check_passed?'取消驗收通過；任務已取消。':'取消驗收未通過。'));
+  else if (run.test_scenario==='native_pi_question') detail.append(el('p',scenarioLabels[run.test_scenario]),el('p',run.question_check_passed?'原生問答確認檢查通過；沒有模型任務產物。':'原生問答確認檢查未驗證／失敗。'));
   else if (run.test_scenario) detail.append(el('p',scenarioLabels[run.test_scenario]),el('p',run.failure_check_passed?'故障測試通過；任務仍為失敗。':'故障測試未通過。'));
   if (run.task_kind==='local_text') detail.append(el('p','本地文字任務；內容仍需確認。'));
   if (run.task_kind==='local_revision') detail.append(el('p','單檔修改提案；原檔未套用，程式尚未執行或測試。'));

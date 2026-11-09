@@ -1,0 +1,18 @@
+請使用「閱讀進度條（Scroll progress bar）」，分類為「網頁與登陸頁效果」。
+Motion Prompt #079 · lp/scroll-progress-bar
+
+意思：頂部的長條顯示已閱讀的比例
+向 AI 描述的例句（可依專案調整）：在文章頁頂部加入閱讀進度條，厚度 4 px，使用品牌橘色。
+此示範的內容：文章逐段向下閱讀時，頂部線條從左側延伸，到頁尾時填滿整條。
+示範規格（與提問例句分開）：
+- 文章以四次 110 px 的步進，從 0→430 px；每次移動 0.45 s，接著停頓 0.4 s（cubic ease-in-out）。
+- 3.75–4.55 s 從 430→0 返回。
+- 可視區域頂部有 6 px 長條，軌道為淺灰色，填色為橘色。
+- 填滿寬度 = 511 px × scroll / 430，直接對應捲動比例（如 CSS animation-timeline: scroll()）。
+使用情境：適合長篇文章，讓讀者知道還剩多少內容。
+
+本地示範：./?lang=zh-Hant#079
+本地規格與程式碼：./api/v1/zh-Hant/e/079.txt
+本地輔助程式碼：./api/v1/kit/zh-Hant/lp.js
+除非我明確要求調整，請保留示範的幾何形狀、時間與緩動；文字、色彩與素材則依我的專案更換。
+上游來源：https://github.com/showheyohtaki/motion-prompt（MIT，Shohei Ohtaki）。

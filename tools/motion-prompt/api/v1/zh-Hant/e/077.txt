@@ -1,0 +1,42 @@
+// Motion Prompt #077 · MIT License (c) 2026 Shohei Ohtaki · ./#077
+//
+// 橫向捲動（Horizontal scroll）
+// 分類組: lp (網頁與登陸頁效果) · element 05 · 分類: 捲動效果
+// 示範內容: 頁面向下捲動時，區塊保持固定，四張帶編號的作品卡片向左移動。
+// 動作／視覺規格:
+//   - 捲動：0.3–3.0 s 從 0→420 px，3.5–4.5 s 從 420→0（cubic ease-in-out）。
+//   - 「WORKS」標題捲走；區塊在捲動到 40 px 時抵達頂部並停住。
+//   - 四張卡片各 200 × 112，間距 20，兩側留白 34。橫向移動距離 = 34·2 + 200·4 + 20·3 − 511 = 417 px。
+//   - 卡片 x = 起始 x − p × 417，p = (scroll − 40) / 380；與捲動量線性對應，不套用緩動。
+//   - 卡片橫向移動時，捲軸滑塊向下移動。
+// 使用情境: 適合在長篇直向頁面中，橫向展示作品、案例或產品。
+// 關鍵字: horizontal-scroll, sideways, scrolltrigger, pin, gallery, portfolio, scroll
+// 尺寸: 539x208 px · 週期: 4.8 s
+// 需要: kit lp -> ./api/v1/kit/zh-Hant/lp.js
+// 本地示範: ./?lang=zh-Hant#077
+//
+// cells[i](k, w, h, u)：k = CanvasRenderingContext2D，呼叫端先清除畫布並以 save/restore 包覆；w、h 為尺寸，u 為 [0, cycle) 內的秒數。畫面只取決於 u。
+// 下方是元素程式碼；CELLS、常數與輔助函式位於 kit。
+
+// @element 05
+
+CELLS[4] = (k, w, h, u) => {
+  frame(k);
+  const y = steps([[0.3, 0], [3.0, 420], [3.5, 420], [4.5, 0]], u);
+  const PIN0 = 40, PD = 380, N = 4, PWD = 200, GAP = 20;
+  const top = y < PIN0 ? PIN0 - y : 0, p = clamp((y - PIN0) / PD);
+  const travel = 34 * 2 + N * PWD + (N - 1) * GAP - VW;
+  view(k, () => {
+    txt(k, "作品", 34, 30 - y, `800 20px ${EN}`, C.ink, 'left', 'alphabetic', '2px');
+    k.save(); k.translate(0, top);
+    k.fillStyle = C.soft; k.fillRect(0, 0, VW, VH + 40);
+    for (let i = 0; i < N; i++) {
+      const x = 34 + i * (PWD + GAP) - p * travel;
+      pic(k, x, 18, PWD, 112, i % 3, 8);
+      txt(k, '0' + (i + 1), x + 14, 118, `800 22px ${EN}`, '#fff');
+      bars(k, x, 140, 120, 1, '#CBD2DE');
+    }
+    k.restore();
+    sbar(k, y / 420, 0.36);
+  });
+};

@@ -1,0 +1,54 @@
+// Motion Prompt #008 · MIT License (c) 2026 Shohei Ohtaki · ./#008
+//
+// 動態文字編排（Kinetic typography）
+// 分類組: motion (動態圖像與動畫效果) · element 08 · 分類: 登場與文字
+// 示範內容: 文字用動作表達語意：伸展、彈跳、旋轉，最後重重落下。
+// 動作／視覺規格:
+//   - 四組文字，每組 1.175 s（粗體 88 px）。各自在最後 0.2 s 淡出，同時向上移動 46 px（三次方 ease-in）。
+//   - 伸展（藍）：水平縮放 0.3→1，彈簧曲線 1 − e^(−4.2t)·cos(12t)；垂直縮放為 1/√(horizontal)。
+//   - 彈跳（黃）：字元間隔 0.1 s；高度 78 px × |sin(πt/0.4)| × e^(−2.6t)；每次接觸地面時垂直最多壓縮 16%。
+//   - 旋轉（薄荷綠）：字元間隔 0.12 s；在 0.62 s 內以 backOut（s = 1.3）從 −360°→0°；在 0.25 s 內以三次方 ease-out 從縮放 0→1。
+//   - 重擊（珊瑚色、100 px、傾斜）：於 0.02–0.2 s 以三次方 ease-in 從縮放 3.4→1。
+//   - 撞擊後：水平振動 10 px × e^(−9t) × sin(38t)、垂直壓縮 20% × e^(−11t)，並顯示 8 條放射線，持續 0.4 s。
+// 使用情境: 適合透過動作，讓旁白或歌詞的關鍵詞留下印象。
+// 關鍵字: kinetic-typography, text, typography, lyric, word, bounce, spin, slam
+// 尺寸: 539x208 px · 週期: 4.7 s
+// 需要: kit motion -> ./api/v1/kit/zh-Hant/motion.js
+// 本地示範: ./?lang=zh-Hant#008
+//
+// cells[i](k, w, h, u)：k = CanvasRenderingContext2D，呼叫端先清除畫布並以 save/restore 包覆；w、h 為尺寸，u 為 [0, cycle) 內的秒數。畫面只取決於 u。
+// 下方是元素程式碼；CELLS、常數與輔助函式位於 kit。
+
+// @element 08
+
+CELLS[7] = (k, w, h, u) => {
+  stage(k);
+  const T = CYC / 4, n = Math.min(3, Math.floor(u / T)), lu = u - n * T, X = w / 2, Y = h / 2 + 6;
+  const out = P(lu, T - 0.2, T - 0.02), oa = 1 - out, oy = -46 * eIn(out);
+  const f = `800 88px ${JP}`;
+  k.save(); k.translate(X, Y + oy); k.globalAlpha = oa;
+  if (n === 0) {
+    const sp = spring(lu - 0.05, 12, 4.2), sx = 0.3 + 0.7 * sp, sy = 1 / Math.sqrt(Math.max(0.75, sx));
+    k.globalAlpha = oa * P(lu, 0.03, 0.12); k.scale(sx, sy); txt(k, "伸展", 0, 0, f, C.blue, 'center', 'middle', '4px');
+  } else if (n === 1) {
+    chars(k, "彈跳中", f, 6).forEach((c, i) => {
+      const tt = lu - 0.06 - i * 0.1; if (tt < 0) return;
+      const y = -78 * Math.abs(Math.sin(Math.PI * tt / 0.4)) * Math.exp(-2.6 * tt), near = Math.abs(Math.sin(Math.PI * tt / 0.4)) < 0.25 ? 1 : 0;
+      const sq = 1 - 0.16 * near * Math.exp(-2.6 * tt), a = P(tt, 0, 0.08);
+      k.save(); k.globalAlpha = oa * a; k.translate(c.x, y + 44); k.scale(2 - sq, sq); txt(k, c.ch, 0, -44, f, C.yel, 'center', 'middle'); k.restore();
+    });
+  } else if (n === 2) {
+    chars(k, "旋轉中", f, 6).forEach((c, i) => {
+      const tt = lu - 0.05 - i * 0.12; if (tt < 0) return;
+      const q = backOut(P(tt, 0, 0.62), 1.3), sc = eOut(P(tt, 0, 0.25));
+      k.save(); k.translate(c.x, 0); k.rotate((1 - q) * -Math.PI * 2); k.scale(sc, sc); txt(k, c.ch, 0, 0, f, C.mint, 'center', 'middle'); k.restore();
+    });
+  } else {
+    const hit = 0.2, tt = lu - hit, sc = tt < 0 ? lerp(3.4, 1, eIn(P(lu, 0.02, hit))) : 1;
+    const dx = tt > 0 ? 10 * Math.exp(-9 * tt) * Math.sin(38 * tt) : 0, sy = tt > 0 ? 1 - 0.2 * Math.exp(-11 * tt) : 1;
+    k.globalAlpha = oa * P(lu, 0.02, 0.1);
+    if (tt > 0 && tt < 0.4) { const q = eOut(tt / 0.4); k.strokeStyle = C.yel; k.lineWidth = 7 * (1 - q); k.lineCap = 'round'; for (let i = 0; i < 8; i++) { const a = i / 8 * Math.PI * 2 + 0.2, r0 = 120 + 50 * q, r1 = r0 + 26; k.beginPath(); k.moveTo(Math.cos(a) * r0 * 1.35, Math.sin(a) * r0 * 0.5); k.lineTo(Math.cos(a) * r1 * 1.35, Math.sin(a) * r1 * 0.5); if (q < 0.97) k.stroke(); } }
+    k.translate(dx, 44); k.scale(sc * (2 - sy), sc * sy); k.transform(1, 0, -0.14, 1, 0, 0); txt(k, "砰！", 0, -44, `800 100px ${JP}`, C.coral, 'center', 'middle');
+  }
+  k.restore();
+};

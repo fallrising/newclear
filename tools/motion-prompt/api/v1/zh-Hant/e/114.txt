@@ -1,0 +1,28 @@
+// Motion Prompt #114 · MIT License (c) 2026 Shohei Ohtaki · ./#114
+//
+// 低調影像（Low-key）
+// 分類組: photo (攝影效果、打光與風格) · element 18 · 分類: 色調與後製風格
+// 示範內容: 大部分畫面沉入黑暗，太陽消失；只有胸像受側光照亮的右側邊緣保持明亮，直方圖峰值移向左端。
+// 動作／視覺規格:
+//   - 場景 3：左側為胸像，頭部中心 x 140、y 82、半徑 28 px；右側有山丘、房屋、樹木與太陽，太陽位於 x 432、y 54、半徑 15 px。
+//   - 色彩：天空 #FAF9F7 → #2B2D33，山丘 → #313339 與 #36383E，地面 → #24252A，人物 → #25272E；太陽與光圈變成天空色而消失。
+//   - 胸像受光的右側邊緣保留，#FFC75A → #FFB547。
+//   - 直方圖峰值中心 0.56 → 0.14，寬度 0.2 → 0.08。
+//   - 時間：0.4 s 到 1.4 s 漸入，維持至 4.0 s，於 4.8 s 前退去；每輪 = 5 s，採 cubic ease-in-out，約為 cubic-bezier(0.65,0,0.35,1)。
+// 使用情境: 適合奢華、緊張或神祕的影像。
+// 關鍵字: low-key, low key, dark, black background, moody, dramatic, chiaroscuro
+// 尺寸: 539x208 px · 週期: 5 s
+// 需要: kit photo -> ./api/v1/kit/zh-Hant/photo.js
+// 本地示範: ./?lang=zh-Hant#114
+//
+// cells[i](k, w, h, u)：k = CanvasRenderingContext2D，呼叫端先清除畫布並以 save/restore 包覆；w、h 為尺寸，u 為 [0, cycle) 內的秒數。畫面只取決於 u。
+// 下方是元素程式碼；CELLS、常數與輔助函式位於 kit。
+
+// @element 18
+
+CELLS[17] = cell((k, u) => {
+  const a = env(u);
+  const LOW = Object.assign({}, DARK, { sun: DARK.sky, glow: DARK.sky, person: '#25272E', lit: '#FFB547' });
+  stageLand(k, pal(BASE, LOW, a));
+  histo(k, lerp(0.56, 0.14, a), lerp(0.2, 0.08, a));
+});

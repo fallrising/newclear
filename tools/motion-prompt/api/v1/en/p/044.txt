@@ -1,0 +1,20 @@
+Please use "Cross dissolve" from "Camera moves & transitions".
+Motion Prompt #044 · camera/cross-dissolve
+
+Meaning: Blend one shot into the next
+Example request (adapt to your project): Cross dissolve from the room in the morning to the same room at night, 1 second.
+What this demo shows: The next picture is laid over the current one and its opacity rises until it takes over; both show through each other midway.
+Demo specification (independent of the example request):
+- Join: 1.5 s, from 1.5 s to 3.0 s; the incoming picture's opacity goes 0 → 100%
+- Easing: quadratic ease-in-out (about cubic-bezier(0.45,0,0.55,1)); 50% at 2.25 s
+- The outgoing picture stays fully opaque underneath and the incoming one is drawn on top (the outgoing one is not faded out first)
+- Camera: fixed in both pictures (A at height 1.4 m; B at height 1.6 m, pitch +0.1 rad); the subjects do not move either
+- Only the outgoing picture shows for 0–1.5 s, only the incoming one for 3.0–4.7 s
+- Alternates A→B and B→A every 4.7 s (9.4 s for the round trip); top-right readout shows "A → B" / "B → A"
+When to use it: To convey a gentle passage of time or change of place, or to move into a memory.
+
+Local demo: ./?lang=en#044
+Local specification and code: ./api/v1/en/e/044.txt
+Local helper code: ./api/v1/kit/en/camera.js
+Keep the demo geometry, timing and easing unless I explicitly request changes. Adapt text, colours and assets to my project.
+Upstream source: https://github.com/showheyohtaki/motion-prompt (MIT, Shohei Ohtaki).

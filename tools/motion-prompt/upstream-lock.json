@@ -1,0 +1,802 @@
+{
+  "repository": "https://github.com/showheyohtaki/motion-prompt",
+  "commit": "770eefb7091cc725ab0eb6d4ef5cbf28b28e282c",
+  "date": "2026-10-16",
+  "files": {
+    "LICENSE": "b687b1f10c8ea46937216c0e2b999b706572e0430d7a8d2934fc10cb96af4f46",
+    "THIRD-PARTY-NOTICES.md": "e540ab5f741b893ec90d4d8e54a38dba750e959f47a01c7c4f6a5dbccfeaa02f",
+    "assets/runtime.js": "d2e5d3bd1354cfb49df74ef1b29df695dfc420d4220cbcc32c4fc52dbb0bea58",
+    "assets/site.js": "621f297154b7681a11a2641e2bf180bcb0313b7a3fc17ef1b3f0f9cd4a843186",
+    "assets/site.css": "8b63140bd09c646b8e8ee4ef045c0b967e6f47f609ef79b703be7b766e610b5d",
+    "assets/favicon.svg": "6e27cbf3408e1a78b5576f5f09292adbbe0ceb89996b1a7746a2a4e109d10143",
+    "tools/build.mjs": "9cf5efdcd527ffdadbc2a8afa8019d397a41f8d9b76b5dc0434dc0d279d8323e",
+    "tools/check.mjs": "5fbc1a9f403479f6590654963bc84abdf0824d729b89037336aa9353cd53f480",
+    "packs/motion/meta.json": "e6a15e7f02d9e8b9762fe9f32d2e351751a2822597bc29128182f4bc758f807e",
+    "packs/motion/pack.js": "2f84c8cddf9397247842f5f1eadcaec882b10d153fdb6531ffa4b1aed5f090c2",
+    "packs/camera/meta.json": "54dfb0c6d601ee9164d64aa5cc909eac9f29f536fa6a9e209adf4efb1b6d9b1b",
+    "packs/camera/pack.js": "b4c5c8fd5d6b57998a40b938f24b096c9ae5a9bc82b7d6ba3205eda6fc392e9c",
+    "packs/ui/meta.json": "2dbdb24ad2b6058d08f9526f6fd831e5d70f92d1e21befa6dd4518957bc6b18d",
+    "packs/ui/pack.js": "b1eca5916d318de1040bb3075beb5bf54fd7e0e7c56886d13f53088e860024f3",
+    "packs/lp/meta.json": "b1a114df5e49c5e50c0e608146fc9d62bb3a2241974229a6064c18c75a4b8141",
+    "packs/lp/pack.js": "49cc76d59f5f67efe896383f68585e920b74d7adbd4dd6c4d1c4ef435e165f11",
+    "packs/photo/meta.json": "5d7762be10e44e3fe4847d6ebd65317abfa0219808510339061cdb6d99e4eb24",
+    "packs/photo/pack.js": "0e6633d1e0eb8ed4eebaf97d6f429f7a053cecc4532314b70888b32f51cfcf59"
+  },
+  "packs": {
+    "motion": {
+      "order": 1,
+      "categories": [
+        "entrances-text",
+        "motion-polish",
+        "transitions-highlights"
+      ],
+      "elements": [
+        {
+          "no": "01",
+          "slug": "pop-in",
+          "name": "Pop-in",
+          "category": "entrances-text"
+        },
+        {
+          "no": "02",
+          "slug": "stagger",
+          "name": "Stagger",
+          "category": "entrances-text"
+        },
+        {
+          "no": "03",
+          "slug": "burst",
+          "name": "Burst",
+          "category": "entrances-text"
+        },
+        {
+          "no": "04",
+          "slug": "line-draw",
+          "name": "Line draw",
+          "category": "entrances-text"
+        },
+        {
+          "no": "05",
+          "slug": "mask-reveal",
+          "name": "Mask reveal",
+          "category": "entrances-text"
+        },
+        {
+          "no": "06",
+          "slug": "typewriter",
+          "name": "Typewriter",
+          "category": "entrances-text"
+        },
+        {
+          "no": "07",
+          "slug": "count-up",
+          "name": "Count-up",
+          "category": "entrances-text"
+        },
+        {
+          "no": "08",
+          "slug": "kinetic-typography",
+          "name": "Kinetic typography",
+          "category": "entrances-text"
+        },
+        {
+          "no": "09",
+          "slug": "easing",
+          "name": "Easing",
+          "category": "motion-polish"
+        },
+        {
+          "no": "10",
+          "slug": "overshoot",
+          "name": "Overshoot",
+          "category": "motion-polish"
+        },
+        {
+          "no": "11",
+          "slug": "squash-and-stretch",
+          "name": "Squash & stretch",
+          "category": "motion-polish"
+        },
+        {
+          "no": "12",
+          "slug": "shape-morph",
+          "name": "Shape morph",
+          "category": "motion-polish"
+        },
+        {
+          "no": "13",
+          "slug": "liquid-motion",
+          "name": "Liquid motion",
+          "category": "motion-polish"
+        },
+        {
+          "no": "14",
+          "slug": "motion-trail",
+          "name": "Motion trail",
+          "category": "motion-polish"
+        },
+        {
+          "no": "15",
+          "slug": "particles",
+          "name": "Particles",
+          "category": "motion-polish"
+        },
+        {
+          "no": "16",
+          "slug": "parallax",
+          "name": "Parallax",
+          "category": "motion-polish"
+        },
+        {
+          "no": "17",
+          "slug": "mask-transition",
+          "name": "Mask transition",
+          "category": "transitions-highlights"
+        },
+        {
+          "no": "18",
+          "slug": "shape-transition",
+          "name": "Shape transition",
+          "category": "transitions-highlights"
+        },
+        {
+          "no": "19",
+          "slug": "liquid-transition",
+          "name": "Liquid transition",
+          "category": "transitions-highlights"
+        },
+        {
+          "no": "20",
+          "slug": "zoom-through",
+          "name": "Zoom through",
+          "category": "transitions-highlights"
+        },
+        {
+          "no": "21",
+          "slug": "flip",
+          "name": "Flip",
+          "category": "transitions-highlights"
+        },
+        {
+          "no": "22",
+          "slug": "light-sweep",
+          "name": "Light sweep",
+          "category": "transitions-highlights"
+        },
+        {
+          "no": "23",
+          "slug": "glitch",
+          "name": "Glitch",
+          "category": "transitions-highlights"
+        },
+        {
+          "no": "24",
+          "slug": "impact-shake",
+          "name": "Impact shake",
+          "category": "transitions-highlights"
+        }
+      ],
+      "metadataSha256": "183aceab43692d6f9dbdd196b8ee541603f9d559189678024ba1961db2693534"
+    },
+    "camera": {
+      "order": 2,
+      "categories": [
+        "camera-movement",
+        "shooting-style-time",
+        "transitions"
+      ],
+      "elements": [
+        {
+          "no": "01",
+          "slug": "pan",
+          "name": "Pan",
+          "category": "camera-movement"
+        },
+        {
+          "no": "02",
+          "slug": "tilt",
+          "name": "Tilt",
+          "category": "camera-movement"
+        },
+        {
+          "no": "03",
+          "slug": "dolly-in",
+          "name": "Dolly in",
+          "category": "camera-movement"
+        },
+        {
+          "no": "04",
+          "slug": "zoom-in",
+          "name": "Zoom in",
+          "category": "camera-movement"
+        },
+        {
+          "no": "05",
+          "slug": "tracking-shot",
+          "name": "Tracking shot",
+          "category": "camera-movement"
+        },
+        {
+          "no": "06",
+          "slug": "orbit-arc-shot",
+          "name": "Orbit (Arc shot)",
+          "category": "camera-movement"
+        },
+        {
+          "no": "07",
+          "slug": "crane-up",
+          "name": "Crane up",
+          "category": "camera-movement"
+        },
+        {
+          "no": "08",
+          "slug": "dolly-zoom-vertigo",
+          "name": "Dolly zoom (Vertigo)",
+          "category": "camera-movement"
+        },
+        {
+          "no": "09",
+          "slug": "rack-focus",
+          "name": "Rack focus",
+          "category": "shooting-style-time"
+        },
+        {
+          "no": "10",
+          "slug": "handheld",
+          "name": "Handheld",
+          "category": "shooting-style-time"
+        },
+        {
+          "no": "11",
+          "slug": "fpv-drone-shot",
+          "name": "FPV drone shot",
+          "category": "shooting-style-time"
+        },
+        {
+          "no": "12",
+          "slug": "dutch-angle",
+          "name": "Dutch angle",
+          "category": "shooting-style-time"
+        },
+        {
+          "no": "13",
+          "slug": "slow-motion",
+          "name": "Slow motion",
+          "category": "shooting-style-time"
+        },
+        {
+          "no": "14",
+          "slug": "speed-ramp",
+          "name": "Speed ramp",
+          "category": "shooting-style-time"
+        },
+        {
+          "no": "15",
+          "slug": "time-lapse",
+          "name": "Time-lapse",
+          "category": "shooting-style-time"
+        },
+        {
+          "no": "16",
+          "slug": "freeze-frame",
+          "name": "Freeze frame",
+          "category": "shooting-style-time"
+        },
+        {
+          "no": "17",
+          "slug": "jump-cut",
+          "name": "Jump cut",
+          "category": "transitions"
+        },
+        {
+          "no": "18",
+          "slug": "match-cut",
+          "name": "Match cut",
+          "category": "transitions"
+        },
+        {
+          "no": "19",
+          "slug": "whip-pan",
+          "name": "Whip pan",
+          "category": "transitions"
+        },
+        {
+          "no": "20",
+          "slug": "cross-dissolve",
+          "name": "Cross dissolve",
+          "category": "transitions"
+        },
+        {
+          "no": "21",
+          "slug": "wipe",
+          "name": "Wipe",
+          "category": "transitions"
+        },
+        {
+          "no": "22",
+          "slug": "smash-cut",
+          "name": "Smash cut",
+          "category": "transitions"
+        },
+        {
+          "no": "23",
+          "slug": "j-cut",
+          "name": "J-cut",
+          "category": "transitions"
+        },
+        {
+          "no": "24",
+          "slug": "l-cut",
+          "name": "L-cut",
+          "category": "transitions"
+        }
+      ],
+      "metadataSha256": "f9884b74f8dceb36fee68eeacc5538f9c68c76c97b39177cd25acd0d0486c530"
+    },
+    "ui": {
+      "order": 3,
+      "categories": [
+        "open-overlay",
+        "select-switch",
+        "navigate-status"
+      ],
+      "elements": [
+        {
+          "no": "01",
+          "slug": "modal-dialog",
+          "name": "Modal dialog",
+          "category": "open-overlay"
+        },
+        {
+          "no": "02",
+          "slug": "drawer",
+          "name": "Drawer (Off-canvas)",
+          "category": "open-overlay"
+        },
+        {
+          "no": "03",
+          "slug": "bottom-sheet",
+          "name": "Bottom sheet",
+          "category": "open-overlay"
+        },
+        {
+          "no": "04",
+          "slug": "accordion",
+          "name": "Accordion",
+          "category": "open-overlay"
+        },
+        {
+          "no": "05",
+          "slug": "dropdown-menu",
+          "name": "Dropdown (select)",
+          "category": "open-overlay"
+        },
+        {
+          "no": "06",
+          "slug": "tooltip",
+          "name": "Tooltip",
+          "category": "open-overlay"
+        },
+        {
+          "no": "07",
+          "slug": "popover",
+          "name": "Popover",
+          "category": "open-overlay"
+        },
+        {
+          "no": "08",
+          "slug": "toast",
+          "name": "Toast notification",
+          "category": "open-overlay"
+        },
+        {
+          "no": "09",
+          "slug": "tabs",
+          "name": "Tabs",
+          "category": "select-switch"
+        },
+        {
+          "no": "10",
+          "slug": "carousel",
+          "name": "Carousel",
+          "category": "select-switch"
+        },
+        {
+          "no": "11",
+          "slug": "toggle-switch",
+          "name": "Toggle switch",
+          "category": "select-switch"
+        },
+        {
+          "no": "12",
+          "slug": "segmented-control",
+          "name": "Segmented control",
+          "category": "select-switch"
+        },
+        {
+          "no": "13",
+          "slug": "filter-chips",
+          "name": "Filter chips",
+          "category": "select-switch"
+        },
+        {
+          "no": "14",
+          "slug": "range-slider",
+          "name": "Range slider",
+          "category": "select-switch"
+        },
+        {
+          "no": "15",
+          "slug": "stepper",
+          "name": "Stepper (+/−)",
+          "category": "select-switch"
+        },
+        {
+          "no": "16",
+          "slug": "pagination",
+          "name": "Pagination",
+          "category": "select-switch"
+        },
+        {
+          "no": "17",
+          "slug": "hamburger-menu",
+          "name": "Hamburger menu",
+          "category": "navigate-status"
+        },
+        {
+          "no": "18",
+          "slug": "breadcrumbs",
+          "name": "Breadcrumbs",
+          "category": "navigate-status"
+        },
+        {
+          "no": "19",
+          "slug": "mega-menu",
+          "name": "Mega menu",
+          "category": "navigate-status"
+        },
+        {
+          "no": "20",
+          "slug": "step-indicator",
+          "name": "Step indicator",
+          "category": "navigate-status"
+        },
+        {
+          "no": "21",
+          "slug": "skeleton-screen",
+          "name": "Skeleton screen",
+          "category": "navigate-status"
+        },
+        {
+          "no": "22",
+          "slug": "spinner",
+          "name": "Spinner",
+          "category": "navigate-status"
+        },
+        {
+          "no": "23",
+          "slug": "badge",
+          "name": "Badge",
+          "category": "navigate-status"
+        },
+        {
+          "no": "24",
+          "slug": "empty-state",
+          "name": "Empty state",
+          "category": "navigate-status"
+        }
+      ],
+      "metadataSha256": "1ae3ddd733af788b59d049faa412b2a4885690603ec5efa2ff19441750371c39"
+    },
+    "lp": {
+      "order": 4,
+      "categories": [
+        "scroll",
+        "hover-click",
+        "loading-loops"
+      ],
+      "elements": [
+        {
+          "no": "01",
+          "slug": "parallax-scrolling",
+          "name": "Parallax scrolling",
+          "category": "scroll"
+        },
+        {
+          "no": "02",
+          "slug": "fade-in-on-scroll",
+          "name": "Fade-in on scroll",
+          "category": "scroll"
+        },
+        {
+          "no": "03",
+          "slug": "sticky-header",
+          "name": "Sticky header",
+          "category": "scroll"
+        },
+        {
+          "no": "04",
+          "slug": "pinning",
+          "name": "Pinning",
+          "category": "scroll"
+        },
+        {
+          "no": "05",
+          "slug": "horizontal-scroll",
+          "name": "Horizontal scroll",
+          "category": "scroll"
+        },
+        {
+          "no": "06",
+          "slug": "scroll-snap",
+          "name": "Scroll snap",
+          "category": "scroll"
+        },
+        {
+          "no": "07",
+          "slug": "scroll-progress-bar",
+          "name": "Scroll progress bar",
+          "category": "scroll"
+        },
+        {
+          "no": "08",
+          "slug": "highlighter-animation",
+          "name": "Highlighter animation",
+          "category": "scroll"
+        },
+        {
+          "no": "09",
+          "slug": "hover-lift",
+          "name": "Hover lift",
+          "category": "hover-click"
+        },
+        {
+          "no": "10",
+          "slug": "image-zoom-on-hover",
+          "name": "Image zoom on hover",
+          "category": "hover-click"
+        },
+        {
+          "no": "11",
+          "slug": "cursor-follower",
+          "name": "Cursor follower",
+          "category": "hover-click"
+        },
+        {
+          "no": "12",
+          "slug": "magnetic-button",
+          "name": "Magnetic button",
+          "category": "hover-click"
+        },
+        {
+          "no": "13",
+          "slug": "ripple-effect",
+          "name": "Ripple effect",
+          "category": "hover-click"
+        },
+        {
+          "no": "14",
+          "slug": "underline-animation",
+          "name": "Underline animation",
+          "category": "hover-click"
+        },
+        {
+          "no": "15",
+          "slug": "before-after-slider",
+          "name": "Before/after slider",
+          "category": "hover-click"
+        },
+        {
+          "no": "16",
+          "slug": "exit-intent-popup",
+          "name": "Exit-intent popup",
+          "category": "hover-click"
+        },
+        {
+          "no": "17",
+          "slug": "preloader",
+          "name": "Preloader",
+          "category": "loading-loops"
+        },
+        {
+          "no": "18",
+          "slug": "lazy-loading",
+          "name": "Lazy loading",
+          "category": "loading-loops"
+        },
+        {
+          "no": "19",
+          "slug": "infinite-scroll",
+          "name": "Infinite scroll",
+          "category": "loading-loops"
+        },
+        {
+          "no": "20",
+          "slug": "page-transition",
+          "name": "Page transition",
+          "category": "loading-loops"
+        },
+        {
+          "no": "21",
+          "slug": "smooth-scroll",
+          "name": "Smooth scroll",
+          "category": "loading-loops"
+        },
+        {
+          "no": "22",
+          "slug": "marquee",
+          "name": "Marquee",
+          "category": "loading-loops"
+        },
+        {
+          "no": "23",
+          "slug": "animated-gradient",
+          "name": "Animated gradient",
+          "category": "loading-loops"
+        },
+        {
+          "no": "24",
+          "slug": "floating-animation",
+          "name": "Floating animation",
+          "category": "loading-loops"
+        }
+      ],
+      "metadataSha256": "18ad6196dbe72d5523dc54e6668dea351e770a450d53cef3bc654558f1cf3d99"
+    },
+    "photo": {
+      "order": 5,
+      "categories": [
+        "lighting",
+        "lens-camera",
+        "tone-finish"
+      ],
+      "elements": [
+        {
+          "no": "01",
+          "slug": "backlighting",
+          "name": "Backlighting",
+          "category": "lighting"
+        },
+        {
+          "no": "02",
+          "slug": "rim-light",
+          "name": "Rim light",
+          "category": "lighting"
+        },
+        {
+          "no": "03",
+          "slug": "silhouette",
+          "name": "Silhouette",
+          "category": "lighting"
+        },
+        {
+          "no": "04",
+          "slug": "split-lighting",
+          "name": "Split lighting",
+          "category": "lighting"
+        },
+        {
+          "no": "05",
+          "slug": "rembrandt-lighting",
+          "name": "Rembrandt lighting",
+          "category": "lighting"
+        },
+        {
+          "no": "06",
+          "slug": "butterfly-lighting",
+          "name": "Butterfly lighting",
+          "category": "lighting"
+        },
+        {
+          "no": "07",
+          "slug": "golden-hour",
+          "name": "Golden hour",
+          "category": "lighting"
+        },
+        {
+          "no": "08",
+          "slug": "blue-hour",
+          "name": "Blue hour",
+          "category": "lighting"
+        },
+        {
+          "no": "09",
+          "slug": "bokeh",
+          "name": "Bokeh",
+          "category": "lens-camera"
+        },
+        {
+          "no": "10",
+          "slug": "tilt-shift",
+          "name": "Tilt-shift",
+          "category": "lens-camera"
+        },
+        {
+          "no": "11",
+          "slug": "long-exposure",
+          "name": "Long exposure",
+          "category": "lens-camera"
+        },
+        {
+          "no": "12",
+          "slug": "panning-shot",
+          "name": "Panning shot",
+          "category": "lens-camera"
+        },
+        {
+          "no": "13",
+          "slug": "lens-flare",
+          "name": "Lens flare",
+          "category": "lens-camera"
+        },
+        {
+          "no": "14",
+          "slug": "fisheye-lens",
+          "name": "Fisheye lens",
+          "category": "lens-camera"
+        },
+        {
+          "no": "15",
+          "slug": "chromatic-aberration",
+          "name": "Chromatic aberration",
+          "category": "lens-camera"
+        },
+        {
+          "no": "16",
+          "slug": "vignette",
+          "name": "Vignette",
+          "category": "lens-camera"
+        },
+        {
+          "no": "17",
+          "slug": "high-key",
+          "name": "High-key",
+          "category": "tone-finish"
+        },
+        {
+          "no": "18",
+          "slug": "low-key",
+          "name": "Low-key",
+          "category": "tone-finish"
+        },
+        {
+          "no": "19",
+          "slug": "black-and-white",
+          "name": "Black and white",
+          "category": "tone-finish"
+        },
+        {
+          "no": "20",
+          "slug": "duotone",
+          "name": "Duotone",
+          "category": "tone-finish"
+        },
+        {
+          "no": "21",
+          "slug": "teal-and-orange",
+          "name": "Teal and orange",
+          "category": "tone-finish"
+        },
+        {
+          "no": "22",
+          "slug": "film-grain",
+          "name": "Film grain",
+          "category": "tone-finish"
+        },
+        {
+          "no": "23",
+          "slug": "light-leak",
+          "name": "Light leak",
+          "category": "tone-finish"
+        },
+        {
+          "no": "24",
+          "slug": "double-exposure",
+          "name": "Double exposure",
+          "category": "tone-finish"
+        }
+      ],
+      "metadataSha256": "964c015d994dec1acc871ec97c359e470aff59804bce732b7af47c00b97e0069"
+    }
+  }
+}

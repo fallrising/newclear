@@ -273,3 +273,39 @@ Owner 指示繼續開發；真實 Pi、本機 429，零模型呼叫。
 | T-0023-02 | 一次性 gate、結果與瀏覽器、歷史及程序清理驗收 | AC-09／11 子集 | done | 2026-11-06T15:16:20Z | 2026-11-06T15:25:51Z | 2026-11-06T15:26:30Z |
 
 T-0023 結案：[PR #1033](https://github.com/fallrising/newclear/pull/1033) 已合併，commit `03edf45eb3593064ef74a643201389862d1cba9f`，offline／validate 兩項 CI success。已回讀主線證據：195 tests、真實 Pi 1.4.0／三代 Office host／Chrome 首輪驗收，以及 63 筆結果回歸通過。一次本機 429 後對已核對所屬 host 注入 SIGKILL，重啟後保持 interrupted，重複重啟與刷新不重跑；明確一次性無 prompt 重連到相同 session、新 PID，六筆歷史保留。runner 41.06 秒，外層 83 個程序全退出、鎖釋放；正常關閉後兩個已追蹤背景程序經身分核對送 SIGTERM，確認無殘留。零模型推論與外部請求，任務保持 stopped。完成 AC-08／09／11 子集；進行中遠端串流恢復、任務續做、其他 provider 與完整安全／MVP 仍 pending，沒有 release／deploy／usable tag。
+
+## T-0024：委託指導與 Pi 遠端操作台授權
+
+Owner 指示 Claude Opus 5.5 指導、Pi agent 實作，可獨立部分平行開發。
+
+| ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| T-0024-01 | Claude 指導完成；Pi 後端實作授權／派工 | AC-01／11 子集 | done | 2026-11-06T15:39:34Z | 2026-11-06T16:43:13Z | 2026-11-06T16:43:50Z |
+| T-0024-02 | Pi 介面平行實作及整合驗收 | AC-06／09 子集 | done | 2026-11-06T15:39:34Z | 2026-11-06T16:43:13Z | 2026-11-06T16:43:50Z |
+
+T-0024 結案：[PR #1036](https://github.com/fallrising/newclear/pull/1036) 已合併，commit `a7ec5cc7af24288e879f1a0ec726be8b2c9c0784`，offline／validate 兩項 CI success。已回讀主線證據：218 tests、五組 Chrome 授權測試替身、真實 Pi 本機 429／取消及 65 筆結果回歸通過。Claude Opus 5.5 實際提供指導，兩個 Pi CLI（OpenAI GPT-5.5）獨立工作區平行實作；後端到達 24 次請求上限後由主導 agent 完成審查與整合。持久化一次性 grant、CLI 建立與 console opt-in、先鎖及預檢後消耗、崩潰不退還、刷新／重啟不重跑及遠端 retry 隔離通過；實際消耗與未知用量保守顯示。94／46／29 個受追蹤程序全部退出，鎖釋放，取消清理 3.521 秒。開發 API 用量與產品驗收分開：產品零模型推論／遠端請求、未建立真實付費 grant，沒有本地 Strata 推論。新入口到 DeepSeek 產物及遠端串流停止仍待另次明確批准與實測，完整 MVP／安全驗收保持 pending，沒有 release／deploy／usable tag。
+
+## T-0025：Pi 原生問答與確認
+
+Owner 指示維持 Claude 指導、Pi 實作的協作模式，繼續開發；產品驗收不呼叫付費模型。
+
+| ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| T-0025-01 | 原生確認流程、拒絕／接受與零請求 gate | AC-05／11 子集 | done | 2026-11-07T04:05:44Z | 2026-11-07T04:23:21Z | 2026-11-07T04:23:53Z |
+| T-0025-02 | 固定派工、結果／介面與原生驗收 | AC-09 子集 | done | 2026-11-07T04:05:44Z | 2026-11-07T04:23:21Z | 2026-11-07T04:23:53Z |
+
+T-0025 結案：[PR #1039](https://github.com/fallrising/newclear/pull/1039) 已合併，commit `5d6d78c208daa98a6d16a9f3c27ed58ea278f17f`，offline／validate 兩項 CI success。已回讀主線證據：248 tests、兩輪真實 Pi 確認介面與 67 筆結果瀏覽器回歸通過；同 session 拒絕／接受／原生逾時、重複指令拒絕，只有接受寫一次私有 marker。外層 43／35 個程序全部退出、鎖釋放；結果 stopped、零 relay／產品模型請求，沒有 Strata 推論或真實付費 grant。Claude Opus 5.5 實際指導，兩個 Pi CLI（OpenAI GPT-5.5）平行實作，各達 24 次請求上限後由主導 agent 完成審查；開發用量估算合計 2.98099 美元，非帳單，臨時憑證副本已移除。完成 AC-05／09／11 子集；模型驅動權限、其他 provider、遠端端到端及完整 MVP／安全仍 pending，沒有 release／deploy／usable tag。[證據](../evidence/pi-question-2026-11-07.json)。
+
+
+## T-0026：Pi hook 身分與 session 邊界
+
+Owner 要求維持原開發協作方式繼續；本輪不啟動產品付費模型。
+
+| ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| T-0026-01 | Claude 指導、Pi 邊界實作與負向測試 | AC-11 子集 | done | 2026-11-07T08:33:39Z | 2026-11-09T18:36:24Z | 2026-11-09T18:38:03Z |
+| T-0026-02 | 真實 hook 入口／重新連接回歸及清理 | AC-08／11 子集 | done | 2026-11-07T08:33:39Z | 2026-11-09T18:36:24Z | 2026-11-09T18:38:03Z |
+
+T-0026 本地實作與驗收完成：[指導／委託](../T26-TECHNICAL-GUIDANCE.md)、[白名單證據](../evidence/pi-hook-boundary-2026-11-07.json)。268 tests、21 repo tests、1680 組真實 parser 比較與四輪原生驗收通過；[PR #1041](https://github.com/fallrising/newclear/pull/1041) 的 offline／validate CI 通過並已合併，兩列依實際合併時間結案。來源 runtime 基準 `04a7340f05ade127f550539817f78411bfba9d2d`，整合主線 `64c8ad59620e9068f0beede99365b7d656f00825`；未修改 vendor，零產品模型請求。
+
+T-0026 結案：[PR #1041](https://github.com/fallrising/newclear/pull/1041) 已於 `2026-11-09T18:36:24Z` 合併，commit `39a5e5a8748f934fb623fe0f73b1f88ed0bbe255`。遠端白名單證據已回讀一致：268 項元件測試、21 項 repo 契約測試與四條原生路徑通過；問答／啟動 11 種拒絕、重連舊 token 拒絕且狀態不變，host 重啟／Chrome 刷新及明確恢復正常。四輪 33／24／99／41 個受追蹤程序全退出、鎖釋放，零產品模型／外部請求。實際 Claude 指導與兩個 Pi worker 已完成、臨時憑證副本移除；已知回報開發小計 2.200252 美元，首次 Claude 逾時用量未知，非帳單。AC-08／11 僅子集，其他 provider、有效 token 的同 session 偽造、遠端端到端與完整 MVP 仍 pending；沒有 release／deploy／usable tag。

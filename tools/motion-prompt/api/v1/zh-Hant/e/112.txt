@@ -1,0 +1,30 @@
+// Motion Prompt #112 · MIT License (c) 2026 Shohei Ohtaki · ./#112
+//
+// 暗角（Vignette）
+// 分類組: photo (攝影效果、打光與風格) · element 16 · 分類: 鏡頭與相機效果
+// 示範內容: 畫面從四角平順變暗，中央人物與道路保持明亮。
+// 動作／視覺規格:
+//   - 場景 2：街角的建築、樹木與路燈（x 114、292、494）位於 y 132–162 的道路後方；人物站在左前方，腳位於 x 176、y 200，身高 124 px。
+//   - 形狀為畫面中心的橢圓，垂直半徑 = 水平半徑 × 208/539 × 1.35。
+//   - 水平半徑為 334 px，內側 45% 範圍透明；往邊緣以 rgb(32,35,43) 從 0% 增至 70%。
+//   - 時間：0.4 s 到 1.4 s 漸入，維持至 4.0 s，於 4.8 s 前退去；每輪 = 5 s，採 cubic ease-in-out，約為 cubic-bezier(0.65,0,0.35,1)。
+// 使用情境: 適合聚焦主體，或營造老鏡頭的感覺。
+// 關鍵字: vignette, vignetting, dark corners, edge darkening, lens falloff, focus
+// 尺寸: 539x208 px · 週期: 5 s
+// 需要: kit photo -> ./api/v1/kit/zh-Hant/photo.js
+// 本地示範: ./?lang=zh-Hant#112
+//
+// cells[i](k, w, h, u)：k = CanvasRenderingContext2D，呼叫端先清除畫布並以 save/restore 包覆；w、h 為尺寸，u 為 [0, cycle) 內的秒數。畫面只取決於 u。
+// 下方是元素程式碼；CELLS、常數與輔助函式位於 kit。
+
+// @element 16
+
+CELLS[15] = cell((k, u) => {
+  const a = env(u);
+  stageStreet(k, BASE);
+
+  k.save(); k.translate(CW / 2, CH / 2); k.scale(1, CH / CW * 1.35);
+  const g = k.createRadialGradient(0, 0, CW * 0.45 * 0.62, 0, 0, CW * 0.62);
+  g.addColorStop(0, 'rgba(32,35,43,0)'); g.addColorStop(1, `rgba(32,35,43,${(0.7 * a).toFixed(3)})`);
+  k.fillStyle = g; k.fillRect(-CW, -CW, CW * 2, CW * 2); k.restore();
+});

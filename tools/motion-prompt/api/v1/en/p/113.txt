@@ -1,0 +1,18 @@
+Please use "High-key" from "Photo looks, lighting & styles".
+Motion Prompt #113 · photo/high-key
+
+Meaning: A bright, white-toned image with very light shadows
+Example request (adapt to your project): High-key still life of a cup and a bottle on a white table: pure white background, very faint shadows, only light tones.
+What this demo shows: The landscape and the person turn to light, near-white colours with very faint shadows, and the hump of the histogram at the bottom right moves to the right end.
+Demo specification (independent of the example request):
+- Scene 3: a bust on the left (head centre x 140, y 82, radius 28 px) and hills, a house, trees and the sun (x 432, y 54, radius 15 px) on the right.
+- Colour: sky #FAF9F7 → #FFFFFF, hills #EAEDF1 → #F5F6F8, figure #4D5A75 → #B9C0CE, shadow #33405A → #A6AEBF, sun #F5A524 → #FFD889
+- Histogram (96×46 px, 20 bars): peak centre 0.56 → 0.85, width 0.2 → 0.09
+- Timing: the effect comes in from 0.4 s to 1.4 s, holds until 4.0 s and is gone again by 4.8 s (one pass = 5 s, cubic ease-in-out (about cubic-bezier(0.65,0,0.35,1)))
+When to use it: For clean, light, gentle product shots and portraits.
+
+Local demo: ./?lang=en#113
+Local specification and code: ./api/v1/en/e/113.txt
+Local helper code: ./api/v1/kit/en/photo.js
+Keep the demo geometry, timing and easing unless I explicitly request changes. Adapt text, colours and assets to my project.
+Upstream source: https://github.com/showheyohtaki/motion-prompt (MIT, Shohei Ohtaki).

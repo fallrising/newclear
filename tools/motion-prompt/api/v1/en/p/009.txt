@@ -1,0 +1,20 @@
+Please use "Easing" from "Motion graphics moves".
+Motion Prompt #009 · motion/easing
+
+Meaning: Motion speeds up and slows down instead of moving at one speed
+Example request (adapt to your project): Add easing to this move: ease-out, slowing down as it stops.
+What this demo shows: Two squares cover the same distance in the same time: the top one at constant speed, the bottom one eased.
+Demo specification (independent of the example request):
+- One round trip per 4.7 s. Two 62 px squares (radius 16) travel 316 px horizontally: out at 0.2–1.75 s (1.55 s), hold 0.8 s, back at 2.55–4.1 s.
+- Top (constant): linear motion; shape and colour never change.
+- Bottom (eased): cubic-bezier(.86, 0, .14, 1). Slow start, very fast middle, slow stop.
+- The bottom square stretches horizontally up to 1.5× and flattens to 0.8× in proportion to speed (speed ÷ 3.6, clamped to 0–1).
+- Behind it: 3 speed lines (up to 150 px × 0.8–1.25) and 4 ghost copies lagging 0.035 s each.
+- Each rail shows 12 dots marking positions at equal time intervals (evenly spaced on top, bunched at both ends below).
+When to use it: Use it on any move, scale or rotation so the motion accelerates and decelerates instead of looking mechanical.
+
+Local demo: ./?lang=en#009
+Local specification and code: ./api/v1/en/e/009.txt
+Local helper code: ./api/v1/kit/en/motion.js
+Keep the demo geometry, timing and easing unless I explicitly request changes. Adapt text, colours and assets to my project.
+Upstream source: https://github.com/showheyohtaki/motion-prompt (MIT, Shohei Ohtaki).

@@ -29,3 +29,5 @@ T-0007 後續在 owner 明確授權後完成[一次 Pi + DeepSeek 真實驗收](
 Grok 原生登入等待、外部 TCP 拒絕與清理：[2026-11-01 啟動證據](grok-startup-2026-11-01.json)。僅無憑證啟動，未驗 session hook 或推論。
 
 Cursor 第四工位的原生登入等待、workspace hooks 清理與外部 TCP 拒絕：[2026-11-01 啟動證據](cursor-startup-2026-11-01.json)。AC-13 真實任務仍 pending。
+
+T-0025：[Pi 原生問答確認](pi-question-2026-11-07.json)：真實拒絕／接受／逾時／重複拒絕、248 tests、兩輪 Chrome、67 筆結果回歸及完整清理通過。零產品模型請求，僅測試指令 UI 子集；開發 Claude／Pi 用量另記。

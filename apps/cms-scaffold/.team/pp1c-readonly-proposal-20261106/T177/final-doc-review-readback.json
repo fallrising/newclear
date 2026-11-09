@@ -1,0 +1,64 @@
+{
+  "task": "T-177",
+  "atUtc": "2026-11-06T20:01:56.258643+00:00",
+  "files": [
+    {
+      "path": "docs/v2/waves/PP1c.md",
+      "expectedSha256": "759dca80b5199558d58e8183f577d9f4dd752a7126c5709456fc29a8c1725b26",
+      "actualSha256": "759dca80b5199558d58e8183f577d9f4dd752a7126c5709456fc29a8c1725b26",
+      "matches": true
+    },
+    {
+      "path": "docs/v2/contracts/PP1c-local-adapters.md",
+      "expectedSha256": "bd73d178ac5ac7a0ec3ce0c91e1815d232f7a01bfb18f761cbd6e6e9a1c51cab",
+      "actualSha256": "bd73d178ac5ac7a0ec3ce0c91e1815d232f7a01bfb18f761cbd6e6e9a1c51cab",
+      "matches": true
+    },
+    {
+      "path": "docs/v2/decisions/pp1c-readonly-observation-20261106.md",
+      "expectedSha256": "243318c74f5f2481a0e9d46e02880325d555a6ef25c066406c74997f6b7ddfaa",
+      "actualSha256": "243318c74f5f2481a0e9d46e02880325d555a6ef25c066406c74997f6b7ddfaa",
+      "matches": true
+    }
+  ],
+  "proposalDiffVsApproved": {
+    "docs/v2/waves/PP1c.md": {
+      "added": 6,
+      "removed": 0
+    },
+    "docs/v2/contracts/PP1c-local-adapters.md": {
+      "added": 24,
+      "removed": 0
+    },
+    "docs/v2/decisions/pp1c-readonly-observation-20261106.md": {
+      "added": 38,
+      "removed": 0
+    }
+  },
+  "findingCorrectionDiffVsRootOriginalArchive": {
+    "docs/v2/waves/PP1c.md": {
+      "added": 1,
+      "removed": 1
+    },
+    "docs/v2/contracts/PP1c-local-adapters.md": {
+      "added": 12,
+      "removed": 2
+    },
+    "docs/v2/decisions/pp1c-readonly-observation-20261106.md": {
+      "added": 9,
+      "removed": 1
+    }
+  },
+  "newLocalLinkTargetsExist": [
+    "docs/v2/decisions/pp1c-readonly-observation-20261106.md",
+    "docs/v2/contracts/PP1c-local-adapters.md"
+  ],
+  "ownerStatus": "PROPOSED/PENDING\u2014review acceptance is not approval",
+  "findings": {
+    "T177-I1": "closed clarity only",
+    "T177-I2": "closed clarity only",
+    "T177-I3": "closed clarity only"
+  },
+  "snapshotTiming": "Initial T177 evidence snapshot already contained quick root corrections; root before-T177 preserves the genuinely original documents.",
+  "runtimeProbesGitMutations": false
+}

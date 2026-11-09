@@ -1,0 +1,19 @@
+Please use "Accordion" from "UI component names".
+Motion Prompt #052 · ui/accordion
+
+Meaning: Click a heading to show or hide its content
+Example request (adapt to your project): Make the FAQ an accordion: the clicked item opens over 0.35 s and its arrow turns 180°.
+What this demo shows: Clicking the first of three headings opens its content and pushes the rows below down; clicking again closes it.
+Demo specification (independent of the example request):
+- 4.5 s cycle on a 542×191 card. Three headings (494 wide, 34 tall, radius 8, gap 6) with a down chevron at the right.
+- The cursor reaches the first heading at 0.95 s and clicks at 1.0 s and 3.3 s.
+- Open amount ex: 0→1 over 1.0–1.35 s with easeInOutCubic, then 1→0 over 3.3–3.62 s.
+- The first row grows from 34 to 92 tall (+58·ex) and pushes the rows below down; its two content lines are clipped to the row and fade in with opacity ex.
+- While open, the chevron rotates 180°·ex, the border turns light blue and the heading blue.
+When to use it: Use it for FAQs or long details where people scan the headings and open only what they need.
+
+Local demo: ./?lang=en#052
+Local specification and code: ./api/v1/en/e/052.txt
+Local helper code: ./api/v1/kit/en/ui.js
+Keep the demo geometry, timing and easing unless I explicitly request changes. Adapt text, colours and assets to my project.
+Upstream source: https://github.com/showheyohtaki/motion-prompt (MIT, Shohei Ohtaki).

@@ -1,0 +1,38 @@
+// Motion Prompt #035 · MIT License (c) 2026 Shohei Ohtaki · ./#035
+//
+// 第一人稱無人機鏡頭（FPV drone shot）
+// 分類組: camera (鏡頭運動與轉場) · element 11 · 分類: 拍攝方式與時間效果
+// 示範內容: 第一人稱視角低空快速飛過兩排樹木，左右傾斜轉彎。
+// 動作／視覺規格:
+//   - 攝影機：以固定 14 m/s 前飛（標示為 50km/h），無緩動；俯仰角固定 -0.05 rad。
+//   - 穿梭（T = 2π×u/4.7，每 4.7 s 擺動兩次）：水平 0.6·sin(2T-0.4) m、高度 1.4 + 0.5·sin(2T) m。
+//   - 傾斜：翻滾角 0.22·sin(2T+0.6) rad（約 ±12.6°），水平偏角 0.05·sin(2T) rad（約 ±2.9°）。
+//   - 無主體。兩側各距 3.6 m 處有高 4.2 m 的樹，每隔 8 m 一棵，兩排錯開 4 m，快速迎向鏡頭。
+//   - 速度線：10 條約長 32–76 px 的半透明灰色放射筆畫（靠兩側較長），向外流動並循環。
+//   - 無停留與交叉淡化重設；每 4.7 s 重啟時樹列的相位會改變。
+// 使用情境: 適合呈現速度、臨場感，或以連續運鏡穿越整個場地。
+// 關鍵字: fpv, drone, fly through, first person, banking, speed, aerial
+// 尺寸: 539x208 px · 週期: 9.4 s
+// 需要: kit camera -> ./api/v1/kit/zh-Hant/camera.js
+// 本地示範: ./?lang=zh-Hant#035
+//
+// cells[i](k, w, h, u)：k = CanvasRenderingContext2D，呼叫端先清除畫布並以 save/restore 包覆；w、h 為尺寸，u 為 [0, cycle) 內的秒數。畫面只取決於 u。
+// 下方是元素程式碼；CELLS、常數與輔助函式位於 kit。
+
+// @element 11
+// 11 FPV
+CELLS[10] = shot((k, w, h, u) => {
+  const sp = 14, z = u * sp, T = u * 2 * Math.PI / CYC;
+  const c = cam({ z, y: 1.4 + 0.5 * Math.sin(T * 2), roll: 0.22 * Math.sin(T * 2 + 0.6), yaw: 0.05 * Math.sin(T * 2), x: 0.6 * Math.sin(T * 2 - 0.4), pitch: -0.05 });
+  const ex = [];
+  const L = 8, base = Math.floor(z / L) * L;
+  for (let i = 0; i < 12; i++) { const zz = base + i * L; ex.push([-3.6, 0, zz, (kk, s) => tree(kk, s, 4.2)]); ex.push([3.6, 0, zz + L / 2, (kk, s) => tree(kk, s, 4.2, C.blueXL)]); }
+  world(k, w, h, c, {
+    buildings: false, trees: false, extra: ex, gridX: 20,
+    after: (kk) => {
+      kk.strokeStyle = 'rgba(150,150,155,.45)'; kk.lineWidth = 2;
+      for (let i = 0; i < 10; i++) { const a = i / 10 * Math.PI * 2 + 0.3, ph = mod(u * 2.2 + i * 0.37, 1); const r0 = 120 + ph * 160; kk.beginPath(); kk.moveTo(Math.cos(a) * r0 * 1.9, Math.sin(a) * r0 * 0.8); kk.lineTo(Math.cos(a) * (r0 + 40) * 1.9, Math.sin(a) * (r0 + 40) * 0.8); kk.stroke(); }
+    }
+  });
+  return `${Math.round(sp * 3.6)}km/h`;
+});

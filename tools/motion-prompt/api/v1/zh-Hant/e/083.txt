@@ -1,0 +1,35 @@
+// Motion Prompt #083 · MIT License (c) 2026 Shohei Ohtaki · ./#083
+//
+// 游標跟隨效果（Cursor follower）
+// 分類組: lp (網頁與登陸頁效果) · element 11 · 分類: 懸停與點擊互動
+// 示範內容: 游標在頁面上移動時，橘色圓形落後一小段距離跟隨。
+// 動作／視覺規格:
+//   - 游標路徑：x = 255 + 175·sin(2πt/4.8)，y = 86 + 46·sin(4πt/4.8)，形成橫躺的八字形，每 4.8 s 一圈。
+//   - 圓形半徑 17，橘色，不透明度 0.88，畫在游標下方。
+//   - 跟隨規則：每一影格（60 fps）移動剩餘距離的 12%，即 x += (cursor x − x) × 0.12。
+//   - 箭頭游標保持可見。
+// 使用情境: 適合品牌網站與作品集，增加遊戲感與操作回饋。
+// 關鍵字: cursor, custom-cursor, cursor-follower, mouse-follow, lerp, trail, interaction
+// 尺寸: 539x208 px · 週期: 4.8 s
+// 需要: kit lp -> ./api/v1/kit/zh-Hant/lp.js
+// 本地示範: ./?lang=zh-Hant#083
+//
+// cells[i](k, w, h, u)：k = CanvasRenderingContext2D，呼叫端先清除畫布並以 save/restore 包覆；w、h 為尺寸，u 為 [0, cycle) 內的秒數。畫面只取決於 u。
+// 下方是元素程式碼；CELLS、常數與輔助函式位於 kit。
+
+// @element 11
+
+CELLS[10] = (k, w, h, u) => {
+  frame(k);
+  const cur = t => [255 + 175 * Math.sin(2 * Math.PI * t / CYC), 86 + 46 * Math.sin(4 * Math.PI * t / CYC)];
+
+  let t = u - 2, [fx, fy] = cur(t);
+  for (let i = 0; i < 120; i++) { t += 1 / 60; const [tx, ty] = cur(t); fx += (tx - fx) * 0.12; fy += (ty - fy) * 0.12; }
+  view(k, () => {
+    txt(k, 'CREATIVE STUDIO', VW / 2, 74, `800 34px ${EN}`, C.ink, 'center', 'alphabetic', '3px');
+    bars(k, VW / 2 - 120, 96, 240, 2, C.faint, 6, 12, 0.7);
+    btn(k, VW / 2 - 50, 128, 100, 24, "查看作品", C.ink);
+    k.fillStyle = C.acc; k.globalAlpha = 0.88; k.beginPath(); k.arc(fx, fy, 17, 0, 7); k.fill(); k.globalAlpha = 1;
+    const [cx, cy] = cur(u); cursor(k, cx, cy);
+  });
+};

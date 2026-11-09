@@ -1,0 +1,30 @@
+// Motion Prompt #117 · MIT License (c) 2026 Shohei Ohtaki · ./#117
+//
+// 青橘色調（Teal and orange）
+// 分類組: photo (攝影效果、打光與風格) · element 21 · 分類: 色調與後製風格
+// 示範內容: 同一片景色的天空、山丘、地面與陰影中的人物偏向青色，人物受光邊緣與太陽偏橘，形成互補色對比。
+// 動作／視覺規格:
+//   - 場景 3：左側為胸像，頭部中心 x 140、y 82、半徑 28 px；右側有山丘、房屋、樹木與太陽，太陽位於 x 432、y 54、半徑 15 px。
+//   - 青色：天空 #CFE6E3，山丘 #8CC1BE 與 #62A2A1，地面 #3F8083，樹木 #2F6A6E，人物 #1D4E53。
+//   - 橘色：人物亮部 #FF9248、太陽 #FF8236、太陽光圈 #FFC48C。
+//   - 時間：0.4 s 到 1.4 s 漸入，維持至 4.0 s，於 4.8 s 前退去；每輪 = 5 s，採 cubic ease-in-out，約為 cubic-bezier(0.65,0,0.35,1)。
+// 使用情境: 適合強烈色彩對比、如商業大片或預告片的風格。
+// 關鍵字: teal and orange, orange and teal, cinematic, color grading, blockbuster, film look
+// 尺寸: 539x208 px · 週期: 5 s
+// 需要: kit photo -> ./api/v1/kit/zh-Hant/photo.js
+// 本地示範: ./?lang=zh-Hant#117
+//
+// cells[i](k, w, h, u)：k = CanvasRenderingContext2D，呼叫端先清除畫布並以 save/restore 包覆；w、h 為尺寸，u 為 [0, cycle) 內的秒數。畫面只取決於 u。
+// 下方是元素程式碼；CELLS、常數與輔助函式位於 kit。
+
+// @element 21
+
+CELLS[20] = cell((k, u) => {
+  const a = env(u);
+  const TO = {
+    sky: '#CFE6E3', sky2: '#B7DAD6', far: '#8CC1BE', mid: '#62A2A1', ground: '#3F8083', ground2: '#2F6A6E', mark: '#CFE6E3', cast: '#2F6A6E',
+    bld: '#A8D1CE', edge: '#4E8E8F', win: '#62A2A1', winOff: '#62A2A1', tree: '#2F6A6E', trunk: '#1F5357', post: '#1F5357', bulb: '#1F5357',
+    person: '#1D4E53', shade: '#143F43', lit: '#FF9248', car: '#2F6A6E', glass: '#CFE6E3', tire: '#143F43', sun: '#FF8236', glow: '#FFC48C'
+  };
+  stageLand(k, pal(BASE, TO, a));
+});

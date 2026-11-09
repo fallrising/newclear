@@ -1,0 +1,55 @@
+// Motion Prompt #062 · MIT License (c) 2026 Shohei Ohtaki · ./#062
+//
+// 範圍滑桿（Range slider）
+// 分類組: ui (UI 元件) · element 14 · 分類: 選取與切換
+// 示範內容: 價格滑桿左把手往右、右把手往左，縮小範圍後再回復。
+// 動作／視覺規格:
+//   - 542×191 卡片上每 4.5 s 循環。軌道 x 54–488、高 8、位於 y 120；兩把手之間為藍色，範圍 ¥0–¥10,000。
+//   - 把手：白色、半徑 13、3 px 藍框；拖曳時半徑 15，外加半徑 24 的淡藍光暈。
+//   - 低值把手：1.0–1.6 s 由 0.1→0.3（¥1,000→¥3,000），3.55–3.9 s 返回。高值把手：2.1–2.6 s 由 1.0→0.8（¥10,000→¥8,000），2.95–3.3 s 返回。皆為 easeInOutCubic。
+//   - 各把手上方有高 28 的數值氣泡，拖曳時藍底白字；右上以藍色顯示 ¥1,000–¥10,000 範圍，每 ¥100 更新。
+//   - 游標跟隨正在拖曳的把手，於 1.0, 2.1, 2.95, 3.55 s 按下。
+// 使用情境: 適合依價格、日期或尺寸的上下限篩選。
+// 關鍵字: range-slider, slider, dual-thumb, min-max, price-filter, range
+// 尺寸: 542x191 px · 週期: 4.5 s
+// 需要: kit ui -> ./api/v1/kit/zh-Hant/ui.js
+// 本地示範: ./?lang=zh-Hant#062
+//
+// cells[i](k, w, h, u)：k = CanvasRenderingContext2D，呼叫端先清除畫布並以 save/restore 包覆；w、h 為尺寸，u 為 [0, cycle) 內的秒數。畫面只取決於 u。
+// 下方是元素程式碼；CELLS、常數與輔助函式位於 kit。
+
+// @element 14
+
+CELLS[13] = ui((w, h, t) => {
+
+  const LO = tt => .1 + .2 * eio(seg(tt, 1.0, 1.6)) - .2 * eio(seg(tt, 3.55, 3.9));
+  const HI = tt => 1.0 - .2 * eio(seg(tt, 2.1, 2.6)) + .2 * eio(seg(tt, 2.95, 3.3));
+  const x0 = 54, x1 = 488, ty = 120, X_ = v => lerp(x0, x1, v);
+  const lo = LO(t), hi = HI(t), lx = X_(lo), hx = X_(hi);
+  const yen = v => '¥' + (Math.round(v * 100) * 100).toLocaleString('en-US');
+  text("價格", 24, 26, 16, '#555', 700);
+  text(yen(lo) + ' 〜 ' + yen(hi), w - 24, 26, 17, C.blue, 700, 'right', NUMF);
+  fillRR(x0, ty - 4, x1 - x0, 8, 4, '#e3e1df'); fillRR(lx, ty - 4, hx - lx, 8, 4, C.blue);
+  const loAct = (t > 1.0 && t < 1.7) || (t > 3.55 && t < 3.95), hiAct = t > 2.1 && t < 3.3;
+  [[lx, lo, loAct], [hx, hi, hiAct]].forEach(([kx, v, act]) => {
+    if (act) circle(kx, ty, 24, 'rgba(31,90,232,.14)');
+    shadowed(() => circle(kx, ty, act ? 15 : 13, '#fff'), 6, 2, .25); ring(kx, ty, act ? 15 : 13, C.blue, 3);
+    const val = yen(v), bw = tw(val, 15, 700, NUMF) + 18, bx = clamp(kx - bw / 2, 4, w - 4 - bw);
+    fillRR(bx, ty - 60, bw, 28, 7, act ? C.blue : C.lb);
+    X.beginPath(); X.moveTo(kx - 6, ty - 32); X.lineTo(kx, ty - 26); X.lineTo(kx + 6, ty - 32); X.fillStyle = act ? C.blue : C.lb; X.fill();
+    text(val, bx + bw / 2, ty - 46, 15, act ? '#fff' : C.blue, 700, 'center', NUMF);
+  });
+  text('¥0', x0, 154, 14, '#9a9896', 500, 'center', NUMF); text('¥10,000', x1 - 10, 154, 14, '#9a9896', 500, 'center', NUMF);
+  bar(24, 174, 220, C.line, 8);
+  const off = [w + 30, h + 30], L = tt => [X_(LO(tt)), ty + 4], Hh = tt => [X_(HI(tt)), ty + 4];
+  const mv = (a, b, ta, tb) => track([[ta, a[0], a[1]], [tb, b[0], b[1]]], t);
+  let pos;
+  if (t < 1.0) pos = mv(off, L(1.0), .3, .95);
+  else if (t < 1.7) pos = L(t);
+  else if (t < 2.1) pos = mv(L(1.7), Hh(2.1), 1.7, 2.05);
+  else if (t < 3.3) pos = Hh(t);
+  else if (t < 3.55) pos = mv(Hh(3.3), L(3.55), 3.3, 3.52);
+  else if (t < 3.95) pos = L(t);
+  else pos = mv(L(3.95), off, 3.95, 4.3);
+  pointer([[0, pos[0], pos[1]]], [1.0, 2.1, 2.95, 3.55], t);
+});

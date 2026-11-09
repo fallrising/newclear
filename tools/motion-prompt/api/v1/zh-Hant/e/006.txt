@@ -1,0 +1,50 @@
+// Motion Prompt #006 · MIT License (c) 2026 Shohei Ohtaki · ./#006
+//
+// 打字機效果（Typewriter）
+// 分類組: motion (動態圖像與動畫效果) · element 06 · 分類: 登場與文字
+// 示範內容: 輸入欄逐字出現文字，接著送出按鈕亮起並被按下。
+// 動作／視覺規格:
+//   - 每 4.7 s 一輪。白色輸入欄（471 × 92、圓角半徑 30）內出現九個字元，從 0.3 s 起每 0.24 s 一字（2.46 s 輸入完畢）。
+//   - 每個新字元從縮放 1.35 回穩到 1：1 + 0.35·e^(−16t)。
+//   - 游標（珊瑚色、5 × 44）位於最後一字之後：輸入時恆亮，其餘時間以 0.94 s 週期閃爍（亮 0.5 s）。
+//   - 送出按鈕（半徑 30）：起初灰色，從 2.58 s 起以彈簧曲線 1 − e^(−6.5t)·cos(15t) 顯示藍色圓盤。
+//   - 按下：按鈕於 2.96–3.21 s 最多縮小 20%（半個正弦波）；文字於 3.13–3.41 s 向上移動 70 px 並淡出。
+//   - 文字淡出一半時（約 3.27 s）游標回到開頭；藍色於 3.51–3.81 s 淡出。
+// 使用情境: 適合展示提示詞、搜尋字串或聊天訊息的輸入過程。
+// 關鍵字: typewriter, typing, text, cursor, input, prompt, chat, type-on
+// 尺寸: 539x208 px · 週期: 4.7 s
+// 需要: kit motion -> ./api/v1/kit/zh-Hant/motion.js
+// 本地示範: ./?lang=zh-Hant#006
+//
+// cells[i](k, w, h, u)：k = CanvasRenderingContext2D，呼叫端先清除畫布並以 save/restore 包覆；w、h 為尺寸，u 為 [0, cycle) 內的秒數。畫面只取決於 u。
+// 下方是元素程式碼；CELLS、常數與輔助函式位於 kit。
+
+// @element 06
+
+CELLS[5] = (k, w, h, u) => {
+  stage(k);
+  const S = "幫我製作貓咪的影片", N = [...S].length, t0 = 0.3, dt = 0.24, done = t0 + N * dt;
+  const BX = 34, BY = 58, BW = w - 68, BH = 92;
+  const sendT = done + 0.55, clr = P(u, sendT + 0.12, sendT + 0.4);
+  k.fillStyle = '#fff'; rr(k, BX, BY, BW, BH, 30); k.fill();
+  const f = `600 36px ${JP}`; k.font = f;
+  let n = clamp(Math.floor((u - t0) / dt) + 1, 0, N); if (u < t0) n = 0;
+  let x = BX + 32; const y = BY + BH / 2 + 2;
+  k.save(); rr(k, BX, BY, BW - 86, BH, 30); k.clip();
+  [...S].slice(0, n).forEach((ch, i) => {
+    const age = u - (t0 + i * dt), pop = 1 + 0.35 * Math.exp(-age * 16), cw = k.measureText(ch).width;
+    k.save(); k.translate(x + cw / 2, y - clr * 70); k.scale(pop, pop); k.globalAlpha = 1 - clr;
+    txt(k, ch, 0, 0, f, C.navy, 'center', 'middle'); k.restore(); k.font = f; x += cw + 1;
+  });
+  k.restore();
+  if (clr > 0.5) x = BX + 32;
+
+  const typing = u >= t0 - 0.05 && u < done + 0.1, blink = typing ? 1 : (mod(u, 0.94) < 0.5 ? 1 : 0);
+  if (blink) { k.fillStyle = C.coral; rr(k, x + 4, y - 23, 5, 44, 2.5); k.fill(); }
+
+  const on = spring(u - done - 0.12, 15, 6.5) * (1 - P(u, sendT + 0.5, sendT + 0.8)), press = 1 - 0.2 * Math.sin(Math.PI * P(u, sendT - 0.05, sendT + 0.2));
+  const bx = BX + BW - 48, by = BY + BH / 2;
+  k.fillStyle = '#DDE3F3'; k.beginPath(); k.arc(bx, by, 30, 0, 7); k.fill();
+  if (on > 0.01) { k.fillStyle = C.blue; k.beginPath(); k.arc(bx, by, 30 * Math.min(on, 1.25) * press, 0, 7); k.fill(); }
+  k.strokeStyle = '#fff'; k.lineWidth = 6; k.lineCap = 'round'; k.lineJoin = 'round'; k.beginPath(); k.moveTo(bx, by + 12); k.lineTo(bx, by - 12); k.moveTo(bx - 11, by - 2); k.lineTo(bx, by - 13); k.lineTo(bx + 11, by - 2); k.stroke();
+};

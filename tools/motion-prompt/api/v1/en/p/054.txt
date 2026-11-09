@@ -1,0 +1,19 @@
+Please use "Tooltip" from "UI component names".
+Motion Prompt #054 · ui/tooltip
+
+Meaning: Hover over something to show a short label
+Example request (adapt to your project): Add a tooltip to the "?" icon: show the note above it 0.2 s after hover, and hide it when the cursor leaves.
+What this demo shows: Hovering over a "?" icon shows a short note in a dark bubble above it; it disappears when the cursor leaves.
+Demo specification (independent of the example request):
+- 4.5 s cycle on a 542×191 card. A "?" icon (blue ring, radius 13) at (196, 121) next to a label.
+- The cursor only hovers, no click: it arrives on "?" at 1.05 s, stays until 3.15 s and leaves the card by 4.1 s.
+- Show amount a: 0→1 over 1.15–1.35 s with easeOutCubic; opacity a, rising 6 px into place.
+- Bubble: #26282c, 184×36, radius 8, top at y 64, with a 16-wide, 8-tall triangle pointing down at the icon; white 15 px text.
+- Hide: linear 1→0 over 3.25–3.45 s.
+When to use it: Use it to add a one-line hint to an icon or abbreviation without taking space on the page.
+
+Local demo: ./?lang=en#054
+Local specification and code: ./api/v1/en/e/054.txt
+Local helper code: ./api/v1/kit/en/ui.js
+Keep the demo geometry, timing and easing unless I explicitly request changes. Adapt text, colours and assets to my project.
+Upstream source: https://github.com/showheyohtaki/motion-prompt (MIT, Shohei Ohtaki).

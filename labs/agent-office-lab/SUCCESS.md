@@ -5,8 +5,8 @@ purpose: 驗證本地優先的 OpenCode、Grok、Pi、Cursor 四工位 Agent Off
 kind: lab
 mainline: incomplete
 usable_tag: none
-reviewed: 2026-11-06
-source_commit: 716dbd977d4089d6e991256b051d4f25e002d4cc
+reviewed: 2026-11-08
+source_commit: 64c8ad59620e9068f0beede99365b7d656f00825
 ---
 
 # Agent Office Lab 驗收
@@ -14,6 +14,18 @@ source_commit: 716dbd977d4089d6e991256b051d4f25e002d4cc
 四個 provider 的合成任務已實測通過：OpenCode、Grok、Pi + DeepSeek、Cursor。各次獨立付費授權已使用，沒有自動重跑；歷史失敗及修正見 [HANDOFF](HANDOFF.md) 和 [任務板](docs/tasks/BOARD.md)。完整 MVP 保持 incomplete。
 
 ## 主線與範圍
+
+T-0026：Pi 原生 hook 身分與 session 邊界驗收。沿用 Claude Opus 5.5 技術指導、Pi agent 實作與主導 agent 整合交付。核對固定合成任務的 worker／provider route／token／session，拒絕錯配或舊世代事件；保留合法啟動及明確同 session 重新連接。以固定上游的真實 loopback hook 入口及無模型 Pi session 驗證，不修改 vendor，不建立產品付費 grant。
+
+驗證計畫：先由 Claude 對已核對公開來源提出具體設計，再按互不重疊檔案分工；離線負向案例、真實 HTTP 拒絕與狀態不變、合法事件仍通過、零產品模型請求、身分追蹤及完整清理。此為 AC-11／08 子集，不宣稱整棵程序樹隔離或跨 provider 全部通過。
+
+T-0025：Pi 原生問答／確認互動。維持 Claude Opus 5.5 技術指導、Pi agent 實作、主導 agent 審查與交付。以真實 Pi 的測試專用 slash command 與原生確認視窗驗證 needs_input、拒絕及接受後繼續；只執行固定合成動作，沒有模型 prompt、遠端費用或產品 grant。
+
+驗證計畫：固定獨立 check 模式、與遠端／retry／其他模式互斥；原生 authenticated question hooks、同 session、拒絕無產物、接受後固定 marker、零模型請求、完整程序清理與操作台結果分類。此為 AC-05／09／11 子集，不把測試指令當成真實模型工具權限，也不標完整跨 provider AC 通過。
+
+T-0024：[指導與委託契約](docs/T24-TECHNICAL-GUIDANCE.md)。依 owner 指示，由 Claude Opus 5.5 提供技術指導，Pi agent 在獨立工作區平行實作下一步遠端操作台派工。優先範圍為固定 Pi／DeepSeek 任務的一次性操作員授權、頁面明確確認、派工／停止／結果整合；預設仍不允許遠端執行。
+
+驗證計畫：Claude 指導先固定 API 與檔案分工，Pi 後端與介面工作分離；主導 agent 審查整合、離線授權／競態／失敗回歸及瀏覽器驗收。開發委託的模型呼叫與產品遠端實測分開記錄；沒有產品付費任務批准前，只跑本機故障／測試替身，不能宣稱遠端模型端到端驗收。原限制、共用執行鎖及完整清理要求保留。
 
 T-0023：Pi Office host 重啟與明確同 session 重新連接。以本機 429 建立真實 Pi 的未完成歷史，核對所屬 Office 主程序後注入 SIGKILL；新 host 將工位停泊為 interrupted，重複重啟及瀏覽器刷新均不自動派工。明確一次性無 prompt resume 接回相同 session，保留歷史且不追加模型請求。
 
@@ -71,6 +83,8 @@ T-0011：整合四 provider 的唯讀結果入口，列出來源、模型、任�
 
 不包含部署、發布套件、模型權重、私人專案或雲端自動 fallback。`source_commit` 為本輪基準。
 
+本輪結果：T-0026：完成 [Pi hook 身分與 session 邊界](docs/PI-HOOK-BOUNDARY.md)。實際 Claude Opus 5.5 指導、兩個 Pi CLI（OpenAI GPT-5.5）獨立平行實作並正常退出，主導審查與整合。268 tests、真實問答／重連／host 重啟／啟動及 1680 組原生 parser 比較通過；11 種拒絕與重連後舊 token 拒絕均不改狀態。四輪 33／24／99／41 個受追蹤程序全部退出、鎖釋放。零產品模型請求，沒有 Strata 或付費 grant。已知開發用量估算 2.200252 美元，首輪 Claude 逾時用量未知，非帳單；失敗紀錄保留。完成 AC-08／11 子集，持有效 token 的同 session 偽造、其他 provider 與完整 MVP 仍 pending。[證據](docs/evidence/pi-hook-boundary-2026-11-07.json)，CI／合併狀態見[任務板](docs/tasks/BOARD.md)。
+
 ## 驗收條件
 
 | AC ID | Given／When／Then | 狀態 | 證據或缺口 |
@@ -79,17 +93,17 @@ T-0011：整合四 provider 的唯讀結果入口，列出來源、模型、任�
 | AC-02 | Given fixture workspace，When OpenCode 執行指定任務，Then 原生事件、session 與檔案 hash 證明成功。 | passed | [本輪實測](docs/evidence/lifecycle.md) 再驗證原生檔案任務；[原歷史摘要](docs/evidence/2026-10-31.json) 保留。 |
 | AC-03 | Given 確認版 Grok，When 執行同等任務，Then CLI 身分、session 與產物可核對。 | passed | [Grok 原生真實任務](docs/evidence/grok-completed-2026-11-01.json)：同 session／模型、兩讀一改、end_turn、產物 hash 與清理通過。 |
 | AC-04 | Given Pi + DeepSeek，When 執行同等任務，Then provider/model、settled 事件及檔案正確。 | passed | [Pi 原生工位實測](docs/evidence/pi-live-2026-11-01.json)：3 次 DeepSeek 請求、agent_settled、同 session/model、read/write、產物 hash 及清理通過。 |
-| AC-05 | Given 原生權限或使用者問題，When 等待與回覆，Then waiting_input 後繼續。 | pending | [OpenCode edit 權限子集通過](docs/evidence/lifecycle.md)；Grok／Pi／Cursor 與其他互動待驗。 |
+| AC-05 | Given 原生權限或使用者問題，When 等待與回覆，Then waiting_input 後繼續。 | pending | [OpenCode edit 權限子集通過](docs/evidence/lifecycle.md)；[Pi 測試指令原生拒絕／接受／逾時子集通過](docs/evidence/pi-question-2026-11-07.json)，模型驅動權限及 Grok／Cursor 等互動待驗。 |
 | AC-06 | Given 執行中任務，When 取消，Then 10 秒 grace 後所屬程序全部退出。 | pending | [OpenCode 新入口原生取消與 Ctrl+C](docs/evidence/local-dispatch-2026-11-01.json) 通過；[Pi 原生取消](docs/evidence/pi-cancel-2026-11-02.json) 及完整清理通過；Grok／Cursor 與遠端串流待驗。 |
 | AC-07 | Given crash／401／429，When 失敗，Then 不顯示成功且最多兩次顯式重試。 | pending | [Pi 401／429 本機注入＋原生錯誤與清理已通過](docs/FAILURES.md)；[Pi CLI crash／新 session 啟動通過](docs/CRASH.md)；[Pi 明確重試限制](docs/RETRY.md) 已加入；其他 provider 的故障／重試與整合流程仍待驗。 |
 | AC-08 | Given browser refresh 或 host 重啟，When 恢復，Then 不重跑、unfinished 標 interrupted。 | pending | [OpenCode 新程序／同 session 與瀏覽器刷新通過](docs/evidence/lifecycle.md)；[host restart 與手動恢復通過](docs/evidence/restart.md)；[Pi CLI 同 session 重新連接子集](docs/PI-RESUME.md) 通過，[Pi host crash／無 prompt 重連子集](docs/PI-HOST-RESTART.md) 通過；遠端串流續做及 Grok／Cursor 待驗。 |
 | AC-09 | Given 四 provider 真實 run，When 開啟結果，Then 產物、模型與來源可分辨。 | pending | [唯讀結果入口](docs/RESULTS.md) 已回讀四 provider 真實產物；[本地文字派工到下載](docs/LOCAL-TEXT-TASK.md) 及[單檔提案](docs/LOCAL-FILE-PROPOSAL.md) 通過，尚缺遠端工位整合流程。 |
 | AC-10 | Given 本地 Strata，When 執行公開 GitHub tool loop，Then 真實 tool_call、API 結果與後續回答完成。 | pending | 獨立研究未通過，非 MVP 阻塞。 |
-| AC-11 | Given 路徑逃逸、偽造 hook 或金鑰輸出，When 操作，Then 阻擋或遮蔽。 | pending | [OpenCode sandbox probe](docs/evidence/2026-10-31.json) 僅驗證網路／寫入子集；[結果入口讀取／顯示邊界](docs/evidence/results-console-2026-11-01.json) 通過，完整邊界仍待驗。 |
+| AC-11 | Given 路徑逃逸、偽造 hook 或金鑰輸出，When 操作，Then 阻擋或遮蔽。 | pending | [OpenCode sandbox probe](docs/evidence/2026-10-31.json) 僅驗證網路／寫入子集；[結果入口讀取／顯示邊界](docs/evidence/results-console-2026-11-01.json) 通過，[Pi hook 身分／session 子集通過](docs/PI-HOOK-BOUNDARY.md)，完整邊界仍待驗。 |
 | AC-12 | Given 公開匯入來源，When 執行 publication、policy 與 repo gates，Then 無 runtime 私人資料、導航正確且檢查通過。 | passed | [匯入驗證](docs/evidence/publication.md)；CI／交付另見任務板。 |
 | AC-13 | Given 官方 Cursor Agent 與明確登入，When 執行同等合成任務，Then 原生 session、模型來源、完成事件與產物 hash 可核對。 | passed | [Cursor 真實任務](docs/evidence/cursor-completed-2026-11-01.json)：同 session／模型、三次工具、completed stop、用量、產物 hash 與清理全部通過。 |
 
-本輪結果：T-0023：完成 [Pi Office host 重啟驗收](docs/PI-HOST-RESTART.md)。真實 Pi 本機 429／六筆歷史後，對已追蹤 Office 主程序注入 SIGKILL；新 host 停泊工位為 interrupted，再次重啟與 Chrome 刷新不自動派工。明確一次性無 prompt 重新連接使用新 PID／同 session、保留六筆歷史，沒有追加請求或產物。195 tests、操作台及 63 筆結果回歸通過；首輪 runner 41.06 秒、三代 host、外層 83 個程序全退出、鎖釋放。正常關閉後兩個已追蹤背景程序經身分核對送 SIGTERM，再確認全退出。一次本機 429、零模型推論／外部請求。完成 AC-08／09／11 子集；不代表進行中的遠端串流恢復、任務續做或完整 MVP／安全驗收。[證據](docs/evidence/pi-host-restart-2026-11-06.json)，交付見[任務板](docs/tasks/BOARD.md)。
+歷史結果：T-0023：完成 [Pi Office host 重啟驗收](docs/PI-HOST-RESTART.md)。真實 Pi 本機 429／六筆歷史後，對已追蹤 Office 主程序注入 SIGKILL；新 host 停泊工位為 interrupted，再次重啟與 Chrome 刷新不自動派工。明確一次性無 prompt 重新連接使用新 PID／同 session、保留六筆歷史，沒有追加請求或產物。195 tests、操作台及 63 筆結果回歸通過；首輪 runner 41.06 秒、三代 host、外層 83 個程序全退出、鎖釋放。正常關閉後兩個已追蹤背景程序經身分核對送 SIGTERM，再確認全退出。一次本機 429、零模型推論／外部請求。完成 AC-08／09／11 子集；不代表進行中的遠端串流恢復、任務續做或完整 MVP／安全驗收。[證據](docs/evidence/pi-host-restart-2026-11-06.json)，交付見[任務板](docs/tasks/BOARD.md)。
 
 T-0022：完成[本地單檔修改提案](docs/LOCAL-FILE-PROPOSAL.md)。可選擇已登記專案中的檔案、輸入修改需求，先讀取目標後產生完整替代內容；結果重新核對原文／提案 hash、計算差異並以原檔名下載。190 tests、真實 Strata 修正與 Chrome 選檔／差異／下載、62 筆結果回歸通過。測試將 add 的減法修正為加法，獨立 AST 核對通過、未執行生成程式；原目錄及快照保留。runner 42.92 秒、外層 73 個程序全退出、鎖釋放、swap 增量 44.19 MiB，guard 未觸發。離線命名衝突及測試暫存路徑問題於實測前修正，原限制未放寬；零遠端模型呼叫。提案仍需人工審閱，沒有自動套用或一般程式測試；完整 MVP／安全邊界仍 pending。[證據](docs/evidence/local-file-proposal-2026-11-03.json)，交付見[任務板](docs/tasks/BOARD.md)。
 
@@ -116,6 +130,9 @@ T-0015：完成 [Pi CLI crash 與明確重新啟動](docs/CRASH.md)。真實 Pi 
 T-0016：完成 [Pi 有界明確重試](docs/RETRY.md)。統一入口 retry 預設只顯示計畫；執行時重新核對最新失敗、完整清理、固定模式／fixture 與來源，同一任務最多兩次重試。真實 Pi 本機 429 的初次＋兩次重試通過：三個獨立 session 使用相同 input，原報告／事件不變，第三次及舊 parent 的六項請求全部拒絕且不新增 run。三次分別追蹤 41／35／46 個程序，全部退出、鎖釋放；各一次本機請求、零模型推論或外部請求。152 tests 與 46 筆結果瀏覽器關聯／分類／刷新通過。[證據](docs/evidence/pi-retry-2026-11-02.json)，交付狀態見[任務板](docs/tasks/BOARD.md)。其他 provider、原 session 恢復、UI 派工與完整 MVP 仍待驗。
 
 ## 現況與缺口
+
+本輪結果：T-0025：完成 [Pi 原生問答確認檢查](docs/PI-QUESTION.md)。維持 Claude Opus 5.5 技術指導、兩個 Pi CLI（OpenAI GPT-5.5）平行實作；兩者到達 24 次請求上限後，由主導 agent 完成審查與整合。真實 Pi 同 session 的拒絕、接受、原生逾時與重複指令拒絕通過；只在接受後寫一次私有測試 marker，沒有模型產物。248 tests、兩輪 Chrome 原生驗收及 67 筆結果回歸通過；外層分別追蹤 43／35 個程序，全部退出、鎖釋放。結果保持 stopped，模型推論及 relay／遠端請求皆為零，未啟動 Strata 或建立付費 grant。開發委託用量另計，回報估算合計 2.98099 美元，非帳單。完成 AC-05／09／11 子集；模型驅動工具權限、其他 provider、遠端端到端與完整 MVP 仍 pending。[證據](docs/evidence/pi-question-2026-11-07.json)，交付見[任務板](docs/tasks/BOARD.md)。
+T-0024：完成 [Pi 遠端操作台一次性授權](docs/REMOTE-GRANT.md)。實際由 Claude Opus 5.5 指導，兩個 Pi CLI worker（OpenAI GPT-5.5）在獨立工作區平行實作；後端達 24 次請求上限後停止，主導 agent 補齊審查與整合。授權先由 CLI 建立、操作台明示接受，綁定固定任務與來源，消耗後不退還；重啟不重置、遠端重試保持 CLI。218 tests、五組 Chrome 測試替身流程、真實 Pi 本機 429／取消及 65 筆結果回歸通過。取消清理 3.521 秒；測試替身／429／取消分別追蹤 94／46／29 個程序，全部退出、鎖釋放。開發 agent 有遠端 API 用量；產品驗收零模型推論、零遠端請求、未建立真實付費 grant。遠端 UI 到 DeepSeek 產物仍待另次批准驗收，完整 MVP／安全驗收保持 pending。[證據](docs/evidence/remote-grant-2026-11-07.json)，交付見[任務板](docs/tasks/BOARD.md)。
 
 MVP 的 11 項必要 AC（01–09、11、13）中，02／03／04／13 的四 provider 合成任務已有原受測版本成功證據；其餘 7 項仍 pending，已有多項子集通過。這不是工時百分比，也不表示最新版完整流程已驗收。主要剩餘工作為遠端 UI 派工／原生終端／結果整合、跨 provider 權限／取消／session 恢復與重試、遠端新入口端到端實測，以及完整路徑／hooks／憑證／網路邊界。本地文字任務已支援自訂要求與工作目錄快照；單檔修改提案已可審閱／下載，多檔修改、自動測試、安全套用與完整日常工作流程仍待完成。
 

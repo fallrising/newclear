@@ -1,0 +1,38 @@
+// Motion Prompt #058 · MIT License (c) 2026 Shohei Ohtaki · ./#058
+//
+// 輪播（Carousel）
+// 分類組: ui (UI 元件) · element 10 · 分類: 選取與切換
+// 示範內容: 每次點右箭頭，三張圖片的整列向左移一格，下方位置點也切換。
+// 動作／視覺規格:
+//   - 542×191 卡片上每 4.5 s 循環。投影片 330×138、圓角半徑 8，置中且間隔 18 px，兩側露出相鄰圖片。
+//   - 左右有帶箭頭的白色圓鈕（半徑 18、陰影模糊 10）；下方三點，當前為藍色 16×8，其餘 8×8。
+//   - 游標於 1.0, 2.1, 3.2 s 點擊右箭頭 (514, 88)。
+//   - 每次點擊後整列以 easeInOutCubic 在 0.4 s 內左移 348 px，等於一張圖片加間距。
+//   - 三張圖（風景、三個圓、長條圖）重複排列，移動三次便回到第一張。
+// 使用情境: 適合在有限空間逐一呈現多張圖片或精選內容。
+// 關鍵字: carousel, slider, slideshow, gallery, swipe, paging-dots
+// 尺寸: 542x191 px · 週期: 4.5 s
+// 需要: kit ui -> ./api/v1/kit/zh-Hant/ui.js
+// 本地示範: ./?lang=zh-Hant#058
+//
+// cells[i](k, w, h, u)：k = CanvasRenderingContext2D，呼叫端先清除畫布並以 save/restore 包覆；w、h 為尺寸，u 為 [0, cycle) 內的秒數。畫面只取決於 u。
+// 下方是元素程式碼；CELLS、常數與輔助函式位於 kit。
+
+// @element 10
+
+CELLS[9] = ui((w, h, t) => {
+  const p = eio(seg(t, 1.0, 1.4)) + eio(seg(t, 2.1, 2.5)) + eio(seg(t, 3.2, 3.6));
+  const sw = 330, gap = 18, cx = w / 2;
+  X.save(); X.beginPath(); X.rect(0, 0, w, 160); X.clip();
+  for (let j = Math.floor(p) - 2; j <= Math.floor(p) + 2; j++) {
+    const x = cx - sw / 2 + (j - p) * (sw + gap), idx = ((j % 3) + 3) % 3;
+    if (idx === 0) mountains(x, 14, sw, 138);
+    if (idx === 1) { fillRR(x, 14, sw, 138, 8, '#e3ebfd'); circle(x + 90, 83, 34, C.mb); circle(x + 165, 83, 34, C.sb); circle(x + 240, 83, 34, C.mb); }
+    if (idx === 2) { fillRR(x, 14, sw, 138, 8, C.lb); for (let k = 0; k < 5; k++) { const bh = [40, 70, 55, 95, 80][k]; fillRR(x + 60 + k * 46, 132 - bh, 30, bh, 4, k === 3 ? C.blue : C.mb); } }
+  }
+  X.restore();
+  [[30, 83, Math.PI / 2], [w - 30, 83, -Math.PI / 2]].forEach(([x, y, r]) => { shadowed(() => circle(x, y, 18, '#fff'), 10, 3, .2); chevron(x, y, 5, r, '#555'); });
+  const act = Math.round(p) % 3;
+  for (let k = 0; k < 3; k++) { const on = k === act; fillRR(w / 2 - 30 + k * 22 - (on ? 4 : 0), 172, on ? 16 : 8, 8, 4, on ? C.blue : C.line2); }
+  pointer([[.3, w + 30, h + 30], [.95, w - 28, 88], [3.4, w - 28, 88], [4.2, w + 30, h + 30]], [1.0, 2.1, 3.2], t);
+});

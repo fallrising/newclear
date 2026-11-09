@@ -1,0 +1,25 @@
+// Motion Prompt #025 · MIT License (c) 2026 Shohei Ohtaki · ./#025
+//
+// 水平搖鏡（Pan）
+// 分類組: camera (鏡頭運動與轉場) · element 01 · 分類: 鏡頭運動
+// 示範內容: 攝影機留在原地，從左向右轉動；因為是旋轉，遠近圖層在此示範中以相同角度橫移。
+// 動作／視覺規格:
+//   - 攝影機：位置固定（高度 1.5 m），只改變水平偏角，由 -0.32 rad→+0.32 rad（-18°→+18°，合計約 37°）。
+//   - 時間：0.5 s 至 3.4 s 旋轉（2.9 s），採三次方 ease-in-out（約 cubic-bezier(0.65,0,0.35,1)）。
+//   - 主體：人物（約高 1.8 m）靜止站在前方 8 m，在畫面中由右向左滑過。
+//   - 無視差：山、建築、樹與人物都偏移相同角度（539×208 卡片上的焦距為 330 px）。
+//   - 回到起點：3.4–4.2 s 停留，最後 0.5 s 交叉淡化回起始畫面（一輪 = 4.7 s）。
+//   - 右上角以整數角度顯示偏角（-18°→+18°）。
+// 使用情境: 適合揭示寬廣場景，或將注意力從畫面一側引到另一側。
+// 關鍵字: pan, panning, yaw, rotate, horizontal, camera move, reveal
+// 尺寸: 539x208 px · 週期: 9.4 s
+// 需要: kit camera -> ./api/v1/kit/zh-Hant/camera.js
+// 本地示範: ./?lang=zh-Hant#025
+//
+// cells[i](k, w, h, u)：k = CanvasRenderingContext2D，呼叫端先清除畫布並以 save/restore 包覆；w、h 為尺寸，u 為 [0, cycle) 內的秒數。畫面只取決於 u。
+// 下方是元素程式碼；CELLS、常數與輔助函式位於 kit。
+
+// @element 01
+
+CELLS[0] = shot(camCell((k, w, h, p) => world(k, w, h, cam({ yaw: lerp(-0.32, 0.32, p) }), { person: { x: 0, z: 8 } }),
+  p => `${Math.round(lerp(-0.32, 0.32, p) * 57.3)}°`.replace(/^(\d)/, '+$1')));

@@ -1,0 +1,31 @@
+{
+  "task": "T-177",
+  "atUtc": "2026-11-06T20:03:07.703366+00:00",
+  "checks": [
+    {
+      "command": [
+        "python3",
+        "/home/ckc/test/codex/agents/codex-team-superpowers/scripts/teamctl.py",
+        "validate-task",
+        ".team/tasks/T-177.md"
+      ],
+      "exitCode": 0,
+      "output": "validate-task validation passed: .team/tasks/T-177.md\n"
+    },
+    {
+      "command": [
+        "python3",
+        "/home/ckc/test/codex/agents/codex-team-superpowers/scripts/teamctl.py",
+        "validate-report",
+        ".team/reports/T-177.md"
+      ],
+      "exitCode": 0,
+      "output": "validate-report validation passed: .team/reports/T-177.md\n"
+    }
+  ],
+  "allThreeFrozenHashesMatch": true,
+  "allThreeRemainProposed": true,
+  "addedDocumentWhitespaceErrors": [],
+  "ownReportWhitespaceClean": true,
+  "method": "read-only difflib/doc checks, no Git/runtime probes"
+}

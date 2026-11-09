@@ -8,6 +8,7 @@ import { fileURLToPath } from 'node:url';
 import { createRequire } from 'node:module';
 import {readPiSession} from './pi_session_evidence.mjs';
 import { onePiTask } from './pi_office_policy.mjs';
+import { probePiHooks } from './pi_hook_probe.mjs';
 
 const lab = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const [out] = process.argv.slice(2);
@@ -28,6 +29,7 @@ const report = { status: 'starting', provider: 'pi', model: 'deepseek/deepseek-f
 const save = () => fs.writeFileSync(path.join(out, 'office-result.json'), JSON.stringify(report, null, 2) + '\n');
 let office, ws, worker, closing;
 const reconnectGates = [], hookTokens = new Set();
+let lastAcceptedToken;
 const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 const events = () => fs.existsSync(path.join(out, 'pi-events.jsonl')) ? fs.readFileSync(path.join(out, 'pi-events.jsonl'), 'utf8').trim().split('\n').filter(Boolean).map(s => JSON.parse(s)) : [];
 async function until(check, ms, reason, allowExpectedError = false, allowExit = false) {
@@ -75,7 +77,7 @@ try {
     const native = floor.workers.handleProviderHook.bind(floor.workers);
     floor.workers.handleProviderHook = (route, id, token, event, payload) => {
       const accepted = native(route, id, token, event, payload);
-      if (route === 'pi' && accepted) hookTokens.add(token);
+      if (route === 'pi' && accepted) { hookTokens.add(token); lastAcceptedToken = token; }
       if (route === 'pi' && accepted) report.authenticated_hooks.push({ type: payload.type, status: payload.status, session: payload.sessionId });
       return accepted;
     };
@@ -109,6 +111,8 @@ try {
     const before = readPiSession(workspace, workerId, session);
     const owners = office.floors().flatMap(f => f.workers.owners()).filter(o => o.workerId === workerId && o.agent && o.cwd === workspace);
     assert.equal(owners.length, 1);assert(Number.isInteger(owners[0].pid)&&owners[0].pid>1);
+    const oldToken = lastAcceptedToken;
+    assert.equal(typeof oldToken, 'string');
     fs.writeFileSync(path.join(out,'.resume-target.tmp'),JSON.stringify({pid:owners[0].pid,session,status:worker.status}),{flag:'wx',mode:0o600});
     fs.renameSync(path.join(out,'.resume-target.tmp'),path.join(out,'resume-target.json'));
     await until(() => worker.status === 'exited',15000,'Original Pi CLI did not exit',true,true);
@@ -125,6 +129,8 @@ try {
     const resumed = office.floors().flatMap(f=>f.workers.owners()).filter(o=>o.workerId===workerId&&o.agent&&o.cwd===workspace);
     assert.equal(resumed.length,1);assert.notEqual(resumed[0].pid,owners[0].pid);
     assert.equal(hookTokens.size,2);report.native_token_rotated=true;
+    assert(Number.isInteger(office.hookPort) && office.hookPort > 0);
+    report.hook_boundary = await probePiHooks({ port: office.hookPort, manager: office.floors()[0].workers, workerId, acceptedCount: () => report.authenticated_hooks.length, oldToken });
     ws.send(JSON.stringify({t:'worker.resume',workerId})); // Duplicate cannot spawn a third process/session.
     await sleep(3000);
     const recorded=events(),after=readPiSession(workspace,workerId,session);
@@ -207,6 +213,8 @@ try {
     report.status = 'failed';
   } else if (startup) {
     await until(() => worker.status === 'idle', 15000, 'Native Pi did not reach idle');
+    assert(Number.isInteger(office.hookPort) && office.hookPort > 0);
+    report.hook_boundary = await probePiHooks({ port: office.hookPort, manager: office.floors()[0].workers, workerId: worker.id, acceptedCount: () => report.authenticated_hooks.length });
     assert(!report.states.includes('working') && !report.authenticated_hooks.some(e => e.type === 'prompt'));
   } else {
     await until(() => worker.status === 'done' && events().some(e => e.type === 'agent_settled'), 150000, 'Native Pi did not settle');

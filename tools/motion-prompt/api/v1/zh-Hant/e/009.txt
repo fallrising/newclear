@@ -1,0 +1,55 @@
+// Motion Prompt #009 · MIT License (c) 2026 Shohei Ohtaki · ./#009
+//
+// 緩動（Easing）
+// 分類組: motion (動態圖像與動畫效果) · element 09 · 分類: 動態修飾
+// 示範內容: 兩個正方形用相同時間走完相同距離：上方等速，下方使用緩動。
+// 動作／視覺規格:
+//   - 每 4.7 s 往返一次。兩個 62 px 正方形（圓角半徑 16）水平移動 316 px：去程 0.2–1.75 s（1.55 s）、停留 0.8 s、回程 2.55–4.1 s。
+//   - 上方（等速）：線性移動，形狀與顏色不變。
+//   - 下方（緩動）：cubic-bezier(.86, 0, .14, 1)，起步慢、中段很快、停止前減速。
+//   - 下方方塊依速度水平拉伸至多 1.5×、垂直壓扁至 0.8×（speed ÷ 3.6，限制在 0–1）。
+//   - 後方有 3 條速度線（最多 150 px × 0.8–1.25）與 4 個殘影，各延遲 0.035 s。
+//   - 每條軌道顯示 12 個等時間間隔的位置點（上方等距，下方集中於兩端）。
+// 使用情境: 適合移動、縮放或旋轉，以加減速減少機械感。
+// 關鍵字: easing, ease-in-out, cubic-bezier, linear, timing, curve, acceleration
+// 尺寸: 539x208 px · 週期: 4.7 s
+// 需要: kit motion -> ./api/v1/kit/zh-Hant/motion.js
+// 本地示範: ./?lang=zh-Hant#009
+//
+// cells[i](k, w, h, u)：k = CanvasRenderingContext2D，呼叫端先清除畫布並以 save/restore 包覆；w、h 為尺寸，u 為 [0, cycle) 內的秒數。畫面只取決於 u。
+// 下方是元素程式碼；CELLS、常數與輔助函式位於 kit。
+
+// @element 09
+
+const EZ = bez(.86, 0, .14, 1);
+const EZT = [0.2, 1.75, 2.55, 4.1];
+const ezPos = u => { if (u < EZT[0]) return 0; if (u < EZT[1]) return P(u, EZT[0], EZT[1]); if (u < EZT[2]) return 1; if (u < EZT[3]) return 1 - P(u, EZT[2], EZT[3]); return 0; };
+const ezE = u => { if (u < EZT[0]) return 0; if (u < EZT[1]) return EZ(P(u, EZT[0], EZT[1])); if (u < EZT[2]) return 1; if (u < EZT[3]) return 1 - EZ(P(u, EZT[2], EZT[3])); return 0; };
+CELLS[8] = (k, w, h, u) => {
+  stage(k);
+  const x0 = 162, x1 = 478, D = x1 - x0, y1 = 58, y2 = 150, S = 62;
+  const lin = ezPos(u), mv = (u >= EZT[0] && u < EZT[1]) ? 1 : (u >= EZT[2] && u < EZT[3]) ? -1 : 0, pp = mv === 1 ? P(u, EZT[0], EZT[1]) : mv === -1 ? P(u, EZT[2], EZT[3]) : 0;
+  const ez = mv === 1 ? EZ(pp) : mv === -1 ? 1 - EZ(pp) : lin;
+  const vel = mv ? (EZ(Math.min(1, pp + 0.01)) - EZ(Math.max(0, pp - 0.01))) / 0.02 : 0, vn = clamp(vel / 3.6);
+
+  txt(k, "等速", 24, y1 + 1, `700 34px ${JP}`, C.dim, 'left', 'middle');
+  txt(k, "緩動", 24, y2 + 1, `700 34px ${JP}`, C.yel, 'left', 'middle');
+
+  [[y1, x => x, '#34489A'], [y2, EZ, '#34489A']].forEach(([y, f, col]) => {
+    k.strokeStyle = C.navy2; k.lineWidth = 6; k.lineCap = 'round'; k.beginPath(); k.moveTo(x0, y); k.lineTo(x1, y); k.stroke();
+    k.fillStyle = col; for (let i = 0; i <= 11; i++) { k.beginPath(); k.arc(x0 + f(i / 11) * D, y, 5, 0, 7); k.fill(); }
+  });
+
+  k.fillStyle = '#6677AD'; rr(k, x0 + lin * D - S / 2, y1 - S / 2, S, S, 16); k.fill();
+
+  const X = x0 + ez * D;
+  if (vn > 0.05) {
+    k.lineCap = 'round';
+    [[-20, C.yel, 1], [0, C.coral, 1.25], [20, C.yel, 0.8]].forEach(([dy, col, m]) => { k.strokeStyle = col; k.globalAlpha = 0.9 * vn; k.lineWidth = 10; k.beginPath(); k.moveTo(X - mv * (S / 2), y2 + dy); k.lineTo(X - mv * (S / 2 + 150 * vn * m), y2 + dy); k.stroke(); });
+    k.globalAlpha = 1;
+  }
+
+  for (let g = 4; g >= 1; g--) { const gx = x0 + ezE(u - g * 0.035) * D; if (Math.abs(gx - X) > 3) { k.globalAlpha = 0.16 * (5 - g) / 4 + 0.06; k.fillStyle = C.coral; rr(k, gx - S / 2, y2 - S / 2, S, S, 16); k.fill(); } } k.globalAlpha = 1;
+  const sx = 1 + 0.5 * vn, sy = 1 - 0.2 * vn;
+  k.save(); k.translate(X, y2); k.scale(sx, sy); k.fillStyle = C.coral; rr(k, -S / 2, -S / 2, S, S, 16); k.fill(); k.fillStyle = 'rgba(255,255,255,.9)'; k.beginPath(); k.arc(S / 2 - 18, -S / 2 + 18, 6, 0, 7); k.fill(); k.restore();
+};

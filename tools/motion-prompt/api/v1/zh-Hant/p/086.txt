@@ -1,0 +1,18 @@
+請使用「底線動畫（Underline animation）」，分類為「網頁與登陸頁效果」。
+Motion Prompt #086 · lp/underline-animation
+
+意思：懸停時，連結底線從左側延伸
+向 AI 描述的例句（可依專案調整）：選單連結加入底線動畫：懸停時在 0.3 s 內從左側延伸，離開時向右退出。
+此示範的內容：游標所在的連結下方，橘色底線從左側延伸；游標離開時，線條向右收縮消失。
+示範規格（與提問例句分開）：
+- 三個連結使用 20 px 粗體，間距 56；游標由左到右各停留約 1 s，命中區域左右各比文字多 6 px。
+- 橘色底線厚 3，位於基準線下方 8 px。
+- 懸停時，寬度在 0.3 s 內從左端由 0→100%（cubic ease-out）。
+- 離開時，左端在 0.3 s 內向右移動，讓線條向右退出，如以右側為 transform-origin 的 scaleX。
+使用情境：適合選單與文字連結，以低調方式指出游標位置。
+
+本地示範：./?lang=zh-Hant#086
+本地規格與程式碼：./api/v1/zh-Hant/e/086.txt
+本地輔助程式碼：./api/v1/kit/zh-Hant/lp.js
+除非我明確要求調整，請保留示範的幾何形狀、時間與緩動；文字、色彩與素材則依我的專案更換。
+上游來源：https://github.com/showheyohtaki/motion-prompt（MIT，Shohei Ohtaki）。

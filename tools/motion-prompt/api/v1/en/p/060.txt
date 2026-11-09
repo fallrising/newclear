@@ -1,0 +1,18 @@
+Please use "Segmented control" from "UI component names".
+Motion Prompt #060 · ui/segmented-control
+
+Meaning: A row of joined buttons that switches the view
+Example request (adapt to your project): Put a Day / Week / Month segmented control above the chart: the selected background slides over 0.25 s and the chart changes with it.
+What this demo shows: Clicking Day, Week or Month slides a blue highlight across and the bar chart below changes height.
+Demo specification (independent of the example request):
+- 4.5 s cycle on a 542×191 card. A grey 300×40 base (radius 10) at (121, 12), split into three 100-wide segments: Day, Week, Month.
+- Selection: blue 92×32, radius 8, shadow blur 6; the selected label is white.
+- The cursor clicks Week at 1.0 s, Month at 2.1 s and Day at 3.3 s; the selection slides over 0.25 s each with easeInOutCubic.
+- Chart below: seven bars 34 wide, 58 px apart (the sixth is blue). Heights move between three data sets (about 30–85, 40–100, 60–115) together with the selection, eased the same way.
+When to use it: Use it to switch between two to four views of the same content, such as day, week and month.
+
+Local demo: ./?lang=en#060
+Local specification and code: ./api/v1/en/e/060.txt
+Local helper code: ./api/v1/kit/en/ui.js
+Keep the demo geometry, timing and easing unless I explicitly request changes. Adapt text, colours and assets to my project.
+Upstream source: https://github.com/showheyohtaki/motion-prompt (MIT, Shohei Ohtaki).

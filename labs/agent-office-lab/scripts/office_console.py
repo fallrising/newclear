@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Authenticated loopback console for fixed local Office tasks. Never executes paid runs."""
+"""Authenticated loopback console with explicit server-granted Pi remote tasks."""
 import argparse
 import hmac
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -18,6 +18,7 @@ from urllib.parse import urlsplit
 import local_text_task as text_task
 import office_dispatch as dispatch
 import office_results as results
+import remote_grant as grants
 from execution_slot import SlotError, inspect_slot
 from remote_cli import private_directory
 
@@ -44,6 +45,7 @@ def selection_plan(selection, lab=LAB):
     elif mode == 'host_restart' and provider == 'pi': options['check_host_restart'] = True
     elif mode == 'resume' and provider == 'pi': options['check_resume'] = True
     elif mode == 'cancel' and provider == 'pi': options['check_cancel'] = True
+    elif mode == 'question' and provider == 'pi': options['check_question'] = True
     elif mode == 'crash' and provider == 'pi': options['check_crash'] = True
     elif mode != 'task': raise ConsoleError('invalid_selection')
     return dispatch.plan(provider, **options)
@@ -76,7 +78,7 @@ def terminal_link(value):
 
 
 class Console:
-    def __init__(self, lab=LAB, roots=None, projects=None):
+    def __init__(self, lab=LAB, roots=None, projects=None, remote_grant_providers=()):
         self.lab = lab
         self.projects = {}
         for i, path in enumerate(projects or []):
@@ -89,6 +91,8 @@ class Console:
         self.token = secrets.token_urlsafe(32)
         self.lock = threading.RLock()
         self.plans, self.jobs, self.checks = {}, {}, {}
+        self.remote_grant_providers = tuple(dict.fromkeys(remote_grant_providers))
+        if any(provider != 'pi' for provider in self.remote_grant_providers): raise ConsoleError('invalid_remote_grant_provider')
         self.active = None
         self.closing = False
         self.directory = private_directory(lab / 'state/console' / secrets.token_hex(12), root=lab)
@@ -118,14 +122,28 @@ class Console:
         except (OSError,ValueError,UnicodeError): raise ConsoleError('project_text_unavailable') from None
         return {'files':[{'name':name,'sha256':text_task.digest(content.encode()),'bytes':len(content.encode())} for name,content in files.items()]}
 
+    def _authorization(self, preview):
+        if not preview['remote']:
+            return None, True, None, 300
+        if preview.get('retry_of') or preview['provider'] not in self.remote_grant_providers:
+            return {'kind':'cli_required','reason':'remote_grants_not_enabled'}, False, None, 300
+        row = grants.pending(self.lab, preview['provider'])
+        if row is None:
+            return {'kind':'cli_required','reason':'no_valid_grant'}, False, None, 300
+        ttl = max(0.0, min(300.0, row['expires_at'] - time.time()))
+        return {'kind':'server_grant','fingerprint':grants.fingerprint(row['id']),'expires_at':row['expires_at']}, True, row['id'], ttl
+
     def plan(self, selection):
         preview, _ = self.preview(selection)
+        authorization, executable, grant_id, ttl = self._authorization(preview)
+        if authorization is not None:
+            preview = dict(preview, authorization=authorization)
         with self.lock:
             self.plans = {k:v for k,v in self.plans.items() if v['expires'] > time.monotonic()}
             if len(self.plans) >= 32: raise ConsoleError('too_many_plans')
             key = secrets.token_hex(16)
-            self.plans[key] = {'selection':selection, 'expires':time.monotonic()+300, 'preview':preview}
-        return {'plan_id':key, 'plan':preview, 'executable':not preview['remote']}
+            self.plans[key] = {'selection':selection, 'expires':time.monotonic()+ttl, 'preview':preview, 'grant_id':grant_id}
+        return {'plan_id':key, 'plan':preview, 'executable':executable}
 
     def execute(self, key):
         with self.lock:
@@ -134,8 +152,20 @@ class Console:
             chosen = self.plans.pop(key, None) if isinstance(key, str) else None
             if chosen is None or chosen['expires'] <= time.monotonic(): raise ConsoleError('plan_expired_or_used')
             preview, text_data = self.preview(chosen['selection'])  # Recheck source snapshot or stale retry state.
-            if preview != chosen['preview']: raise ConsoleError('plan_changed')
-            if preview['remote']: raise ConsoleError('remote_execution_requires_cli')
+            if preview['remote'] and chosen.get('grant_id'):
+                saved = dict(chosen['preview']); saved.pop('authorization', None)
+                if preview != saved: raise ConsoleError('plan_changed')
+                current = grants.inspect(self.lab, chosen['grant_id'], preview['provider'])
+                grant_id = current['id']
+                preview = dict(preview, authorization={'kind':'server_grant','fingerprint':grants.fingerprint(grant_id),'expires_at':current['expires_at']})
+                if preview != chosen['preview']: raise ConsoleError('plan_changed')
+            else:
+                authorization, executable, grant_id, _ = self._authorization(preview)
+                if authorization is not None:
+                    preview = dict(preview, authorization=authorization)
+                if preview != chosen['preview']: raise ConsoleError('plan_changed')
+                if preview['remote']:
+                    if chosen.get('grant_id') is None or not executable: raise ConsoleError('remote_execution_requires_cli')
             shared = inspect_slot(self.lab)['status']
             if shared != 'available':
                 raise ConsoleError({'busy':'execution_busy','cleanup_unconfirmed':'cleanup_unconfirmed'}.get(shared,'execution_state_unavailable'))
@@ -146,6 +176,8 @@ class Console:
                 with os.fdopen(fd,'wb') as stream: stream.write(text_task.encoded(text_data))
                 command = [sys.executable,str(self.lab/'scripts/office_dispatch.py'),'local-text',
                            '--request',str(request_path),'--sha256',preview['request_sha256'],'--execute']
+            elif preview['remote']:
+                command = [sys.executable, str(self.lab / 'scripts/office_dispatch.py'), 'run', 'pi', '--execute', '--remote-grant', chosen['grant_id']]
             else:
                 command = [sys.executable, str(self.lab / 'scripts/office_dispatch.py'), *preview['command'][2:]]
             if '--allow-remote' in command: raise ConsoleError('remote_execution_requires_cli')
@@ -153,15 +185,20 @@ class Console:
             log = self.directory / (key + '.log')
             fd = os.open(log, os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW, 0o600)
             with os.fdopen(fd, 'w') as stream:
-                process = subprocess.Popen(command, cwd=self.lab, stdin=subprocess.DEVNULL, stdout=stream,
-                                           stderr=subprocess.STDOUT, start_new_session=True)
+                process = self.spawn(command, stream)
             job = {'id':key, 'provider':preview['provider'], 'phase':'running', 'process':process,
-                   'log':log, 'run_id':None, 'exit_code':None, 'keep_open':preview.get('keep_open',False)}
+                   'log':log, 'run_id':None, 'exit_code':None, 'keep_open':preview.get('keep_open',False),
+                   'remote':preview['remote'], 'authorization_fingerprint':grants.fingerprint(chosen['grant_id']) if chosen.get('grant_id') else None,
+                   'grant_id':chosen.get('grant_id')}
             self.jobs[key] = job; self.active = key
             # Keep completed jobs bounded; runs on disk remain untouched.
             while len(self.jobs) > 20: self.jobs.pop(next(iter(self.jobs)))
             threading.Thread(target=self.watch, args=(job,), daemon=True).start()
             return {'job_id':key}
+
+    def spawn(self, command, log):
+        return subprocess.Popen(command, cwd=self.lab, stdin=subprocess.DEVNULL, stdout=log,
+                                stderr=subprocess.STDOUT, start_new_session=True)
 
     def watch(self, job):
         code = job['process'].wait()
@@ -180,6 +217,13 @@ class Console:
 
     def job_view(self, job):
         row = {k:job[k] for k in ('id','provider','phase','exit_code','run_id')}
+        row['remote'] = bool(job.get('remote'))
+        row['authorization_fingerprint'] = job.get('authorization_fingerprint')
+        if job.get('grant_id'):
+            try: row['authorization_consumed'] = grants.consumed(self.lab, job['grant_id'])
+            except (OSError, ValueError): row['authorization_consumed'] = None
+        else:
+            row['authorization_consumed'] = False
         # Bounded private output is used only to locate the run; never returned to the browser.
         with job['log'].open('rb') as stream: raw = stream.read(2*1024*1024+1)
         if len(raw) <= 2*1024*1024:
@@ -208,9 +252,17 @@ class Console:
                 try: jobs.append(self.job_view(job))
                 except (OSError, ValueError):
                     jobs.append({k:job[k] for k in ('id','provider','phase','exit_code','run_id')})
+            pending, grant_errors = [], []
+            for provider in self.remote_grant_providers:
+                try:
+                    row = grants.pending(self.lab, provider)
+                    if row is not None: pending.append(grants.public(row))
+                except grants.GrantError as error:
+                    grant_errors.append({'provider':provider,'error':str(error)})
             return {'active_job':self.active, 'jobs':jobs, 'checks':dict(self.checks),
                     'projects':[{'id':key,'name':path.name} for key,path in self.projects.items()],
                     'shared_execution':inspect_slot(self.lab),
+                    'remote_grants':{'enabled_providers':list(self.remote_grant_providers),'pending':pending,'errors':grant_errors},
                     'results':results.catalog(self.roots)}
 
     def detect(self, provider):
@@ -293,6 +345,7 @@ def serve(console, port=0):
                 elif self.path == '/api/detect' and set(data)=={'provider'}: value = console.detect(data['provider'])
                 else: self.reply(404,{'error':'not_found'}); return
                 self.reply(200,value)
+            except grants.GrantError as error: self.reply(409,{'error':str(error)})
             except (ConsoleError,SlotError) as error: self.reply(409,{'error':str(error)})
             except (OSError,ValueError,TypeError,subprocess.SubprocessError): self.reply(409,{'error':'operation_failed'})
 
@@ -307,8 +360,9 @@ def main():
     parser.add_argument('--port',type=int,default=0)
     parser.add_argument('--runs-root',type=Path,action='append',help='Additional read-only run histories; only this checkout can execute')
     parser.add_argument('--project',type=Path,action='append',help='Register an explicit text source directory; original files remain unchanged')
+    parser.add_argument('--accept-remote-grant',choices=['pi'],action='append',default=[])
     args = parser.parse_args()
-    console = Console(roots=[LAB/'runs',*(args.runs_root or [])],projects=args.project)
+    console = Console(roots=[LAB/'runs',*(args.runs_root or [])],projects=args.project,remote_grant_providers=args.accept_remote_grant)
     server = serve(console,args.port)
     print(f'http://127.0.0.1:{server.server_port}/#token={console.token}',flush=True)
     def stop(*_): raise KeyboardInterrupt()

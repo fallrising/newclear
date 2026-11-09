@@ -171,3 +171,22 @@ T-0022 新增[單檔修改提案](LOCAL-FILE-PROPOSAL.md)：指定快照內既�
 T-0023：Pi Office host 重啟與明確同 session 重新連接。以本機 429 建立真實 Pi 的未完成歷史，核對所屬 Office 主程序後注入 SIGKILL；新 host 將工位停泊為 interrupted，重複重啟及瀏覽器刷新均不自動派工。明確一次性無 prompt resume 接回相同 session，保留歷史且不追加模型請求。
 
 驗證計畫：離線恢復政策／一次性 gate／模式互斥／結果分類，真實 Pi 與三代 Office 主程序、歷史 hash、Chrome 中斷提示／刷新、零外部請求及完整程序清理。完成 AC-08／09／11 子集；不宣稱中斷任務續做、遠端服務或其他 provider 通過。
+
+T-0024：依 owner 指示，由 Claude Opus 5.5 提供技術指導，Pi agent 在獨立工作區平行實作下一步遠端操作台派工。優先範圍為固定 Pi／DeepSeek 任務的一次性操作員授權、頁面明確確認、派工／停止／結果整合；預設仍不允許遠端執行。
+
+驗證計畫：Claude 指導先固定 API 與檔案分工，Pi 後端與介面工作分離；主導 agent 審查整合、離線授權／競態／失敗回歸及瀏覽器驗收。開發委託的模型呼叫與產品遠端實測分開記錄；沒有產品付費任務批准前，只跑本機故障／測試替身，不能宣稱遠端模型端到端驗收。原限制、共用執行鎖及完整清理要求保留。
+
+T-0024 的[一次性遠端操作台授權](REMOTE-GRANT.md)已通過離線、測試替身瀏覽器與真實 Pi 本機 429／取消回歸；[證據](evidence/remote-grant-2026-11-07.json)。這是控制層子集，尚無新入口到 DeepSeek 產物的真實付費驗收，完整 AC 不變。
+
+T-0025：Pi 原生問答／確認互動。維持 Claude Opus 5.5 技術指導、Pi agent 實作、主導 agent 審查與交付。以真實 Pi 的測試專用 slash command 與原生確認視窗驗證 needs_input、拒絕及接受後繼續；只執行固定合成動作，沒有模型 prompt、遠端費用或產品 grant。
+
+驗證計畫：固定獨立 check 模式、與遠端／retry／其他模式互斥；原生 authenticated question hooks、同 session、拒絕無產物、接受後固定 marker、零模型請求、完整程序清理與操作台結果分類。此為 AC-05／09／11 子集，不把測試指令當成真實模型工具權限，也不標完整跨 provider AC 通過。
+
+
+## T-0026：Pi hook 邊界
+
+T-0026：Pi 原生 hook 身分與 session 邊界驗收。沿用 Claude Opus 5.5 技術指導、Pi agent 實作與主導 agent 整合交付。核對固定合成任務的 worker／provider route／token／session，拒絕錯配或舊世代事件；保留合法啟動及明確同 session 重新連接。以固定上游的真實 loopback hook 入口及無模型 Pi session 驗證，不修改 vendor，不建立產品付費 grant。
+
+驗證計畫：先由 Claude 對已核對公開來源提出具體設計，再按互不重疊檔案分工；離線負向案例、真實 HTTP 拒絕與狀態不變、合法事件仍通過、零產品模型請求、身分追蹤及完整清理。此為 AC-11／08 子集，不宣稱整棵程序樹隔離或跨 provider 全部通過。
+
+T-0026 實際完成 Pi hook 身分、固定 session、明確世代與舊 token 拒絕子集；[操作及限制](PI-HOOK-BOUNDARY.md)、[證據](evidence/pi-hook-boundary-2026-11-07.json)。268 項元件測試與四條真實原生路徑通過，完整 AC-08／11 仍 pending。

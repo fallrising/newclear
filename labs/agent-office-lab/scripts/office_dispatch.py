@@ -21,6 +21,7 @@ import time
 import cursor_cli
 from execution_slot import SlotError, acknowledge_stopped, execution_slot, inspect_slot
 import remote_cli
+import remote_grant as grants
 
 LAB = Path(__file__).resolve().parents[1]
 VENDOR_COMMIT = '852e2ab28c4f3f31bffdf4b20353bd119c9d3270'
@@ -207,7 +208,14 @@ def validate_host_restart(provider, check_host_restart, check_resume, check_canc
         raise SlotError('host_restart_requires_pi_no_remote_or_other_checks')
 
 
-def plan(provider, check_cancel=False, check_failure=None, check_crash=False, keep_open=False, check_resume=False, check_host_restart=False):
+def validate_question(provider, check_question, check_cancel=False, check_failure=None, check_crash=False, check_resume=False, check_host_restart=False, keep_open=False, allow_remote=False):
+    if check_question and (provider != 'pi' or check_cancel or check_failure is not None or check_crash
+                           or check_resume or check_host_restart or keep_open or allow_remote):
+        raise SlotError('question_check_requires_pi_no_remote_or_other_checks')
+
+
+def plan(provider, check_cancel=False, check_failure=None, check_crash=False, keep_open=False, check_resume=False, check_host_restart=False, check_question=False):
+    validate_question(provider, check_question, check_cancel, check_failure, check_crash, check_resume, check_host_restart, keep_open)
     validate_host_restart(provider, check_host_restart, check_resume, check_cancel, check_failure, check_crash, keep_open)
     validate_resume(provider, check_resume, check_cancel, check_failure, check_crash, keep_open)
     validate_keep_open(provider, keep_open, check_cancel, check_failure, check_crash)
@@ -226,34 +234,50 @@ def plan(provider, check_cancel=False, check_failure=None, check_crash=False, ke
         limits.update(native_max_turns=6, hook_failure_behavior='fail_open')
     if check_failure is not None or check_resume or check_host_restart:
         limits.update(provider_request_cap=0, output_tokens_per_request_cap=0, injected_error_responses=1)
+    if check_question:
+        limits.update(provider_request_cap=0, output_tokens_per_request_cap=0,
+                      injected_error_responses_on_accidental_request=1)
     if check_crash or (check_cancel and provider == 'pi'):
         limits.update(provider_request_cap=0, output_tokens_per_request_cap=0, held_loopback_requests=1)
     return {'mode': 'plan', 'provider': provider, 'model': spec['model'], 'pinned_version': spec['version'],
-            'task': 'synthetic_file', 'remote': spec['remote'] and check_failure is None and not check_crash and not check_cancel and not check_resume and not check_host_restart, 'limits': limits,
+            'task': 'synthetic_file', 'remote': spec['remote'] and check_failure is None and not check_crash and not check_cancel and not check_resume and not check_host_restart and not check_question, 'limits': limits,
             'command': ['python3', 'scripts/office_dispatch.py', 'run', provider, '--execute']
-                       + (['--allow-remote'] if spec['remote'] and check_failure is None and not check_crash and not check_cancel and not check_resume and not check_host_restart else [])
+                       + (['--allow-remote'] if spec['remote'] and check_failure is None and not check_crash and not check_cancel and not check_resume and not check_host_restart and not check_question else [])
                        + (['--check-failure', str(check_failure)] if check_failure is not None else [])
                        + (['--check-crash'] if check_crash else [])
                        + (['--check-cancel'] if check_cancel else [])
                        + (['--keep-open'] if keep_open else [])
-                       + (['--check-resume'] if check_resume else []) + (['--check-host-restart'] if check_host_restart else []),
+                       + (['--check-resume'] if check_resume else []) + (['--check-host-restart'] if check_host_restart else []) + (['--check-question'] if check_question else []),
             'injected_http_failure': check_failure,
-            'native_host_restart_check':check_host_restart, 'native_resume_check':check_resume, 'keep_open': keep_open, 'native_cancel_check': check_cancel, 'native_crash_check': check_crash,
+            'native_host_restart_check':check_host_restart, 'native_resume_check':check_resume, 'native_question_check':check_question,
+            'keep_open': keep_open, 'native_cancel_check': check_cancel, 'native_crash_check': check_crash,
             'model_task_started': False, 'automatic_fallback': False}
 
 
-def launch(provider, allow_remote, lab=LAB, check_cancel=False, check_failure=None, check_crash=False, retry_parent=None, keep_open=False, check_resume=False, check_host_restart=False):
-    validate_host_restart(provider, check_host_restart, check_resume, check_cancel, check_failure, check_crash, keep_open, allow_remote)
-    validate_resume(provider, check_resume, check_cancel, check_failure, check_crash, keep_open, allow_remote)
+def launch(provider, allow_remote, lab=LAB, check_cancel=False, check_failure=None, check_crash=False, retry_parent=None, keep_open=False, check_resume=False, check_host_restart=False, remote_grant=None, check_question=False):
+    validate_question(provider, check_question, check_cancel, check_failure, check_crash, check_resume, check_host_restart, keep_open, allow_remote or remote_grant is not None)
+    if check_question and retry_parent is not None:
+        raise SlotError('question_check_requires_pi_no_remote_or_other_checks')
+    grant_remote = remote_grant is not None
+    if grant_remote:
+        if allow_remote:
+            raise SlotError('remote_grant_conflicts_with_allow_remote')
+        if provider != 'pi':
+            raise grants.GrantError('remote_grant_provider_not_supported')
+        if retry_parent is not None or check_cancel or check_failure is not None or check_crash or check_resume or check_host_restart or keep_open or check_question:
+            raise SlotError('remote_grant_requires_fresh_task')
+    effective_allow_remote = allow_remote or grant_remote
+    validate_host_restart(provider, check_host_restart, check_resume, check_cancel, check_failure, check_crash, keep_open, effective_allow_remote)
+    validate_resume(provider, check_resume, check_cancel, check_failure, check_crash, keep_open, effective_allow_remote)
     validate_keep_open(provider, keep_open, check_cancel, check_failure, check_crash)
-    validate_crash(provider, check_crash, check_cancel, check_failure, allow_remote)
+    validate_crash(provider, check_crash, check_cancel, check_failure, effective_allow_remote)
     spec = SPECS[provider]
-    validate_failure(provider, check_failure, check_cancel, allow_remote)
+    validate_failure(provider, check_failure, check_cancel, effective_allow_remote)
     if check_cancel and provider not in ('opencode', 'pi'):
         raise SlotError('local_cancel_check_only')
-    if (spec['remote'] and check_failure is None and not check_crash and not check_cancel and not check_resume and not check_host_restart) != allow_remote:
+    if (spec['remote'] and check_failure is None and not check_crash and not check_cancel and not check_resume and not check_host_restart and not check_question) != effective_allow_remote:
         raise SlotError('explicit_remote_authorization_required' if spec['remote'] else 'local_remote_flag_forbidden')
-    # Lock before preflight, then replace this process; the runner adopts the same lock/PID.
+    # Lock before preflight and grant consumption, then replace this process; the runner adopts the same lock/PID.
     with execution_slot(lab) as slot:
         if retry_parent is not None:
             meta, _, _ = pi_retry.inspect(lab, retry_parent)
@@ -261,14 +285,20 @@ def launch(provider, allow_remote, lab=LAB, check_cancel=False, check_failure=No
             if provider != 'pi' or check_cancel or check_resume or check_host_restart or mode != meta['mode']:
                 raise SlotError('retry_mode_mismatch')
         check = detect(provider, lab)
-        ready = (check['cli_compatible'] and all(check['runtime'].values())) if check_failure is not None or check_crash or (check_cancel and provider == 'pi') or check_resume or check_host_restart else check['launch_prerequisites_present']
+        ready = (check['cli_compatible'] and all(check['runtime'].values())) if check_failure is not None or check_crash or (check_cancel and provider == 'pi') or check_resume or check_host_restart or check_question else check['launch_prerequisites_present']
         if not ready:
             print(json.dumps({'status': 'blocked', 'reason': 'preflight_failed', 'check': check}))
             return 1
+        consumed = None
+        if grant_remote:
+            consumed = grants.consume(lab, remote_grant, 'pi', 'dispatcher')
         python = strata_home(lab) / 'source/.venv/bin/python' if provider == 'opencode' else Path(sys.executable)
         runner_args = ['--check-failure', str(check_failure)] if check_failure is not None else spec['args']
+        if grant_remote:
+            runner_args = ['--allow-remote', '--authorization-ref', consumed['id']]
         if check_host_restart: runner_args = ['--check-host-restart']
         if check_resume: runner_args = ['--check-resume']
+        if check_question: runner_args = ['--check-question']
         if check_crash: runner_args = ['--check-crash']
         if check_cancel and provider == 'pi': runner_args = []
         command = [str(python), str(lab / 'scripts' / spec['runner']), *runner_args]
@@ -307,13 +337,18 @@ def main(argv=None):
     commands.add_parser('status', help='Read the shared execution state without launching or acknowledging anything')
     check = commands.add_parser('detect'); check.add_argument('--provider', choices=[*SPECS, 'all'], default='all')
     preview = commands.add_parser('plan'); preview.add_argument('provider', choices=SPECS)
+    grant = commands.add_parser('grant'); grant.add_argument('provider', choices=['pi']); grant.add_argument('--ttl', type=int, default=900); grant.add_argument('--confirm-paid-remote-run', action='store_true', required=True)
+    revoke = commands.add_parser('grant-revoke'); revoke.add_argument('grant_id')
+    commands.add_parser('grants', help='List pending remote grants without exposing IDs')
     run = commands.add_parser('run'); run.add_argument('provider', choices=SPECS)
-    run.add_argument('--execute', action='store_true'); run.add_argument('--allow-remote', action='store_true')
+    run.add_argument('--execute', action='store_true')
+    remote_group = run.add_mutually_exclusive_group(); remote_group.add_argument('--allow-remote', action='store_true'); remote_group.add_argument('--remote-grant')
     run.add_argument('--check-cancel', action='store_true', help='OpenCode: local task cancellation; Pi: cancel a held loopback request without model calls')
     run.add_argument('--check-failure', type=int, choices=(401, 429), help='Pi only: injected loopback HTTP failure; no remote calls')
     run.add_argument('--check-host-restart', action='store_true', help='Pi only: crash/restart Office and reconnect one saved session; no model calls')
     run.add_argument('--check-resume', action='store_true', help='Pi only: reconnect one saved session after an injected local 429 and owned CLI exit; no model calls')
     run.add_argument('--check-crash', action='store_true', help='Pi only: kill the owned native CLI during a held loopback request; no remote calls')
+    run.add_argument('--check-question', action='store_true', help='Pi only: exercise native confirm UI; no model calls')
     run.add_argument('--keep-open', action='store_true', help='OpenCode only: keep the verified native terminal and local model open until stopped')
     text = commands.add_parser('local-text'); text.add_argument('--request',required=True); text.add_argument('--sha256',required=True); text.add_argument('--execute',action='store_true',required=True)
     retry = commands.add_parser('retry'); retry.add_argument('run_id')
@@ -323,6 +358,19 @@ def main(argv=None):
     args = parser.parse_args(argv)
     try:
         if args.action == 'local-text': return launch_text_task(args.request,args.sha256)
+        if args.action == 'grant':
+            value = grants.create(LAB, args.provider, args.ttl)
+            print(json.dumps({'id': value['id'], 'fingerprint': value['fingerprint'], 'expires_at': value['expires_at'],
+                              'limits': value['limits'], 'money_cap': None}, indent=2))
+            return 0
+        if args.action == 'grant-revoke':
+            grants.revoke(LAB, args.grant_id)
+            print(json.dumps({'status':'revoked', 'fingerprint': grants.fingerprint(args.grant_id)}))
+            return 0
+        if args.action == 'grants':
+            row = grants.pending(LAB, 'pi')
+            print(json.dumps({'remote_grants': {'enabled_providers':['pi'], 'pending': [] if row is None else [grants.public(row)]}}, indent=2))
+            return 0
         if args.action == 'status':
             state = inspect_slot(LAB)
             print(json.dumps({'shared_execution':state,'model_task_started':False}))
@@ -342,10 +390,13 @@ def main(argv=None):
                               'processes_stopped_by_this_command': False, 'model_task_started': False}))
             return 0
         if args.action == 'plan' or not args.execute:
-            if args.action == 'run' and args.allow_remote:
-                parser.error('--allow-remote requires --execute')
-            print(json.dumps(plan(args.provider, getattr(args, 'check_cancel', False), getattr(args, 'check_failure', None), getattr(args, 'check_crash', False), getattr(args, 'keep_open', False), getattr(args, 'check_resume', False), getattr(args, 'check_host_restart', False)), indent=2)); return 0
-        return launch(args.provider, args.allow_remote, check_cancel=args.check_cancel, check_failure=args.check_failure, check_crash=args.check_crash, keep_open=args.keep_open, check_resume=args.check_resume, check_host_restart=args.check_host_restart)
+            if args.action == 'run' and (args.allow_remote or args.remote_grant):
+                parser.error('--allow-remote/--remote-grant requires --execute')
+            print(json.dumps(plan(args.provider, getattr(args, 'check_cancel', False), getattr(args, 'check_failure', None), getattr(args, 'check_crash', False), getattr(args, 'keep_open', False), getattr(args, 'check_resume', False), getattr(args, 'check_host_restart', False), getattr(args, 'check_question', False)), indent=2)); return 0
+        return launch(args.provider, args.allow_remote, check_cancel=args.check_cancel, check_failure=args.check_failure, check_crash=args.check_crash, keep_open=args.keep_open, check_resume=args.check_resume, check_host_restart=args.check_host_restart, remote_grant=args.remote_grant, check_question=args.check_question)
+    except grants.GrantError as error:
+        print(json.dumps({'status':'blocked', 'reason':str(error)}), file=sys.stderr)
+        return 1
     except SlotError as error:
         print(json.dumps({'status': 'blocked', 'reason': str(error)}), file=sys.stderr)
         return 1

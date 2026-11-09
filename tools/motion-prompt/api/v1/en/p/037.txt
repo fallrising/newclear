@@ -1,0 +1,20 @@
+Please use "Slow motion" from "Camera moves & transitions".
+Motion Prompt #037 · camera/slow-motion
+
+Meaning: Play the action slower
+Example request (adapt to your project): Show the moment of the splash in slow motion.
+What this demo shows: In front of a fixed camera a person rises and falls slowly through a jump while leaves drift down slowly; the whole action is stretched out.
+Demo specification (independent of the example request):
+- Camera: completely fixed (height 1.3 m); only the subject moves
+- Subject: a person 7 m away takes 3.8 s for one jump (0.5 s to 4.3 s); height = 4q(1-q)×1.1 m, a parabola peaking at 1.1 m, with q linear in time
+- Both arms are raised while airborne; the person stands still for 0.5 s before the jump and 0.4 s after landing
+- Leaves: 9 leaves fall from 3.4 m to the ground over 4.7 s while rotating, each offset by 1/9 of the cycle
+- Top-right readout shows "120fps ×0.25" (playback stretched 4×)
+- No hold and no cross-fade; loops seamlessly every 4.7 s
+When to use it: To let viewers study a brief action or expression, or to emphasise an emotional peak.
+
+Local demo: ./?lang=en#037
+Local specification and code: ./api/v1/en/e/037.txt
+Local helper code: ./api/v1/kit/en/camera.js
+Keep the demo geometry, timing and easing unless I explicitly request changes. Adapt text, colours and assets to my project.
+Upstream source: https://github.com/showheyohtaki/motion-prompt (MIT, Shohei Ohtaki).

@@ -1,0 +1,17 @@
+Please use "Image zoom on hover" from "Landing page & web effects".
+Motion Prompt #082 · lp/image-zoom-on-hover
+
+Meaning: The photo enlarges inside a fixed frame
+Example request (adapt to your project): Add an image zoom on hover to the work photos: fixed frame, content to 1.1× over 0.5 s.
+What this demo shows: The photo under the cursor slowly enlarges while its frame stays the same size, and shrinks back when the cursor leaves.
+Demo specification (independent of the example request):
+- Two photo frames, 222 × 118 (radius 8). The cursor rests on the left one, then the right one, for about 1.5 s each.
+- On hover the content scales 1→1.15 from the centre over 0.5 s (cubic ease-out); on leave it returns over 0.5 s.
+- Anything outside the frame is clipped (overflow: hidden). The frame and the caption do not move.
+When to use it: Use it on photo grids (work, products, articles) to show which item is about to be chosen.
+
+Local demo: ./?lang=en#082
+Local specification and code: ./api/v1/en/e/082.txt
+Local helper code: ./api/v1/kit/en/lp.js
+Keep the demo geometry, timing and easing unless I explicitly request changes. Adapt text, colours and assets to my project.
+Upstream source: https://github.com/showheyohtaki/motion-prompt (MIT, Shohei Ohtaki).

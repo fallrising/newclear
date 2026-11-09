@@ -102,6 +102,21 @@ class OfficeResultsTest(unittest.TestCase):
         self.assertNotIn('PRIVATE', json.dumps(rows))
         self.assertNotIn(str(self.root), json.dumps(rows))
 
+    def test_remote_authorization_and_usage_are_strictly_whitelisted(self):
+        run, report = self.make_run('pi')
+        report['authorization']={'kind':'server_grant','fingerprint':'abcdef123456'}
+        report['remote_usage']={'requests':2,'output_tokens':123}
+        report['secret_authorization_id']='f'*32
+        (run/'result.json').write_text(json.dumps(report))
+        row=self.read()[0]
+        self.assertEqual(row['authorization'], report['authorization'])
+        self.assertEqual(row['remote_usage'], report['remote_usage'])
+        self.assertNotIn('secret_authorization_id', json.dumps(row))
+        report['authorization']['fingerprint']='not-safe'; report['remote_usage']['requests']=9
+        (run/'result.json').write_text(json.dumps(report))
+        row=self.read()[0]
+        self.assertNotIn('authorization', row); self.assertNotIn('remote_usage', row)
+
     def test_failure_stop_startup_and_incomplete_never_complete(self):
         for index, (status, startup, expected) in enumerate([
             ('failed', False, 'failed'), ('stopped', False, 'stopped'), ('cancelled', False, 'cancelled'),
@@ -250,6 +265,53 @@ class OfficeResultsTest(unittest.TestCase):
         report['office'] = []
         (run / 'result.json').write_text(json.dumps(report))
         self.assertEqual(self.read()[0]['status'], 'invalid')
+
+    def test_pi_question_check_is_stopped_only_with_strict_zero_request_fields(self):
+        run, report = self.make_run('pi')
+        (run/'workspace/result.json').unlink()
+        expected = [{'index':0,'input':'deny','ui_result':False},{'index':1,'input':'allow','ui_result':True},{'index':2,'input':'timeout','ui_result':False}]
+        report.update(startup_only=False, status='stopped', reason='native_question_check', result_kind='native_question_check',
+                      permission_kind='synthetic_ui_confirm', model_driven_permission=False,
+                      question_check_passed=True, model_inference_verified=False, requests=[],
+                      client_requests=0, external_requests=0, remote_usage={'requests':0,'output_tokens':0},
+                      remaining_owned_processes=0, cleanup_errors=[])
+        report['office'] = {'provider':'pi','model':'deepseek/deepseek-flash','status':'question_verified',
+                            'model_inference_verified':False,'cleanup_completed':True,
+                            'input_path':'office_ws_terminal_input','question_responses':expected,
+                            'question_prompt_starts':3,'question_prompt_ends':3,
+                            'marker_written_after_allow':True,'native_question_verified':True,
+                            'provider_request_detector_installed':True,'same_session_verified':True,
+                            'denial_preserved_workspace':True,'replay_rejected':True,
+                            'session_id':'PRIVATE_SESSION','marker_sha256':'a'*64}
+        baseline = json.loads(json.dumps(report))
+        for index, mutation in enumerate((lambda r: None, lambda r: r.update(question_check_passed='true'),
+                         lambda r: r.update(model_inference_verified=True), lambda r: r.update(client_requests=1),
+                         lambda r: r.update(requests=[{}]), lambda r: r['office'].update(question_prompt_starts=True),
+                         lambda r: r['office']['question_responses'][1].update(ui_result=1),
+                         lambda r: r['office'].update(provider_request_detector_installed=False),
+                         lambda r: r['office'].update(marker_sha256='bad'),
+                         lambda r: r['remote_usage'].update(requests=False),
+                         lambda r: r.update(status='completed'))):
+            report = json.loads(json.dumps(baseline)); mutation(report); (run/'result.json').write_text(json.dumps(report))
+            row = self.read()[0]
+            self.assertEqual(row['test_scenario'], 'native_pi_question')
+            self.assertEqual(row['question_check_passed'], index == 0)
+            self.assertEqual(row['status'], 'stopped' if index == 0 else 'unverified')
+            self.assertEqual(row['artifact']['status'], 'unavailable')
+            self.assertNotIn('PRIVATE_SESSION', json.dumps(row))
+        for key, value in [('fault_injection',{}), ('task','local_text'), ('startup_only',True), ('authorization',{}), ('retry_of','old')]:
+            report = json.loads(json.dumps(baseline)); report[key]=value
+            (run/'result.json').write_text(json.dumps(report))
+            self.assertEqual(self.read()[0]['status'], 'invalid')
+            self.assertIs(self.read()[0]['question_check_passed'], False)
+        (run/'result.json').write_text(json.dumps(baseline))
+        (run/'workspace/input.json').unlink()
+        (run/'workspace/result.json').write_text('{}')
+        self.assertIs(self.read()[0]['question_check_passed'], False)
+        (run/'workspace/result.json').unlink()
+        (run/'attempt.json').write_text('{}')
+        self.assertEqual(self.read()[0]['status'], 'invalid')
+        self.assertIs(self.read()[0]['question_check_passed'], False)
 
     def test_multiple_roots_have_distinct_ids(self):
         self.make_run()

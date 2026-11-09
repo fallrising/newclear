@@ -1,0 +1,18 @@
+Please use "Ripple effect" from "Landing page & web effects".
+Motion Prompt #085 · lp/ripple-effect
+
+Meaning: A ripple spreads from the point that was pressed
+Example request (adapt to your project): Add a ripple effect to the submit button: a white circle spreads from the click point and fades in 0.6 s.
+What this demo shows: Each click sends a white circle out from the click point to fill the button, then it fades away.
+Demo specification (independent of the example request):
+- Button 280 × 56 (orange, radius 10). Clicks at 0.7 s (left of centre) and 2.9 s (right of centre).
+- The circle is centred on the click point; its radius grows from 0 to the distance to the button's farthest corner over 0.6 s (cubic ease-out).
+- White at 0.4 opacity, fading to 0 between 0.3 and 0.8 s after the click.
+- The circle is clipped to the button (overflow: hidden); the label sits above it.
+When to use it: Use it to confirm a press on a button or list item right where it happened.
+
+Local demo: ./?lang=en#085
+Local specification and code: ./api/v1/en/e/085.txt
+Local helper code: ./api/v1/kit/en/lp.js
+Keep the demo geometry, timing and easing unless I explicitly request changes. Adapt text, colours and assets to my project.
+Upstream source: https://github.com/showheyohtaki/motion-prompt (MIT, Shohei Ohtaki).

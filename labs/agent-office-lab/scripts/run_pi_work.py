@@ -19,6 +19,7 @@ import time
 from deepseek_relay import Relay, MAX_REQUESTS, MAX_OUTPUT, MAX_BODY
 from remote_cli import LAB, isolated_env, private_directory, probe, write_new_private
 import pi_retry
+from pi_hook_evidence import verify_hook_boundary
 from process_ownership import process_table, collect_owned, alive_owned, crash_owned, terminate_owned
 
 
@@ -302,7 +303,7 @@ def main():
     try:
         port = relay.start()
         env = prepare(out, port, token, fixture, args.check_question, question_nonce)
-        for name in ('pi_retry.py', 'execution_slot.py', 'process_ownership.py', 'run_pi_work.py', 'deepseek_relay.py', 'office_pi.mjs', 'office_pi_question.mjs', 'office_pi_host.mjs', 'office_pi_restart.mjs', 'manual_recovery.mjs', 'pi_boundary.mjs', 'pi_question_check.mjs', 'pi_office_policy.mjs', 'pi_session_evidence.mjs', 'remote_cli.py'):
+        for name in ('pi_retry.py', 'execution_slot.py', 'process_ownership.py', 'run_pi_work.py', 'deepseek_relay.py', 'office_pi.mjs', 'office_pi_question.mjs', 'office_pi_host.mjs', 'office_pi_restart.mjs', 'manual_recovery.mjs', 'pi_boundary.mjs', 'pi_question_check.mjs', 'pi_office_policy.mjs', 'pi_hook_guard.mjs', 'pi_hook_probe.mjs', 'pi_hook_evidence.py', 'pi_session_evidence.mjs', 'remote_cli.py'):
             shutil.copy2(LAB / 'scripts' / name, out / name)
         shutil.copy2(LAB / 'scripts/bin/pi', out / 'pi-launcher.py')
         command = [shutil.which('node'), str(LAB / ('scripts/office_pi_question.mjs' if args.check_question else 'scripts/office_pi_restart.mjs' if args.check_host_restart else 'scripts/office_pi.mjs')), str(out)]
@@ -348,6 +349,10 @@ def main():
             code = process.returncode
         office = json.loads((out / 'office-result.json').read_text())
         report['office'] = office
+        if args.check_question or args.check_resume or args.check_startup:
+            if not verify_hook_boundary(office.get('hook_boundary'), resumed=args.check_resume):
+                raise ValueError('Native Pi hook boundary acceptance failed')
+            report['hook_boundary_check_passed'] = True
         if args.check_question:
             relay_summary = {'records': relay.records, 'client_requests': relay.client_requests, 'external_requests': relay.external_requests}
             if code or not verify_question(office, relay_summary, out, question_nonce):

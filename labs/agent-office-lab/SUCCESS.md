@@ -5,8 +5,8 @@ purpose: 驗證本地優先的 OpenCode、Grok、Pi、Cursor 四工位 Agent Off
 kind: lab
 mainline: incomplete
 usable_tag: none
-reviewed: 2026-11-07
-source_commit: 0529e812171c0fb2dbce9b25edcce21d92e984a4
+reviewed: 2026-11-08
+source_commit: 64c8ad59620e9068f0beede99365b7d656f00825
 ---
 
 # Agent Office Lab 驗收
@@ -14,6 +14,10 @@ source_commit: 0529e812171c0fb2dbce9b25edcce21d92e984a4
 四個 provider 的合成任務已實測通過：OpenCode、Grok、Pi + DeepSeek、Cursor。各次獨立付費授權已使用，沒有自動重跑；歷史失敗及修正見 [HANDOFF](HANDOFF.md) 和 [任務板](docs/tasks/BOARD.md)。完整 MVP 保持 incomplete。
 
 ## 主線與範圍
+
+T-0026：Pi 原生 hook 身分與 session 邊界驗收。沿用 Claude Opus 5.5 技術指導、Pi agent 實作與主導 agent 整合交付。核對固定合成任務的 worker／provider route／token／session，拒絕錯配或舊世代事件；保留合法啟動及明確同 session 重新連接。以固定上游的真實 loopback hook 入口及無模型 Pi session 驗證，不修改 vendor，不建立產品付費 grant。
+
+驗證計畫：先由 Claude 對已核對公開來源提出具體設計，再按互不重疊檔案分工；離線負向案例、真實 HTTP 拒絕與狀態不變、合法事件仍通過、零產品模型請求、身分追蹤及完整清理。此為 AC-11／08 子集，不宣稱整棵程序樹隔離或跨 provider 全部通過。
 
 T-0025：Pi 原生問答／確認互動。維持 Claude Opus 5.5 技術指導、Pi agent 實作、主導 agent 審查與交付。以真實 Pi 的測試專用 slash command 與原生確認視窗驗證 needs_input、拒絕及接受後繼續；只執行固定合成動作，沒有模型 prompt、遠端費用或產品 grant。
 
@@ -79,6 +83,8 @@ T-0011：整合四 provider 的唯讀結果入口，列出來源、模型、任�
 
 不包含部署、發布套件、模型權重、私人專案或雲端自動 fallback。`source_commit` 為本輪基準。
 
+本輪結果：T-0026：完成 [Pi hook 身分與 session 邊界](docs/PI-HOOK-BOUNDARY.md)。實際 Claude Opus 5.5 指導、兩個 Pi CLI（OpenAI GPT-5.5）獨立平行實作並正常退出，主導審查與整合。268 tests、真實問答／重連／host 重啟／啟動及 1680 組原生 parser 比較通過；11 種拒絕與重連後舊 token 拒絕均不改狀態。四輪 33／24／99／41 個受追蹤程序全部退出、鎖釋放。零產品模型請求，沒有 Strata 或付費 grant。已知開發用量估算 2.200252 美元，首輪 Claude 逾時用量未知，非帳單；失敗紀錄保留。完成 AC-08／11 子集，持有效 token 的同 session 偽造、其他 provider 與完整 MVP 仍 pending。[證據](docs/evidence/pi-hook-boundary-2026-11-07.json)，CI／合併狀態見[任務板](docs/tasks/BOARD.md)。
+
 ## 驗收條件
 
 | AC ID | Given／When／Then | 狀態 | 證據或缺口 |
@@ -93,7 +99,7 @@ T-0011：整合四 provider 的唯讀結果入口，列出來源、模型、任�
 | AC-08 | Given browser refresh 或 host 重啟，When 恢復，Then 不重跑、unfinished 標 interrupted。 | pending | [OpenCode 新程序／同 session 與瀏覽器刷新通過](docs/evidence/lifecycle.md)；[host restart 與手動恢復通過](docs/evidence/restart.md)；[Pi CLI 同 session 重新連接子集](docs/PI-RESUME.md) 通過，[Pi host crash／無 prompt 重連子集](docs/PI-HOST-RESTART.md) 通過；遠端串流續做及 Grok／Cursor 待驗。 |
 | AC-09 | Given 四 provider 真實 run，When 開啟結果，Then 產物、模型與來源可分辨。 | pending | [唯讀結果入口](docs/RESULTS.md) 已回讀四 provider 真實產物；[本地文字派工到下載](docs/LOCAL-TEXT-TASK.md) 及[單檔提案](docs/LOCAL-FILE-PROPOSAL.md) 通過，尚缺遠端工位整合流程。 |
 | AC-10 | Given 本地 Strata，When 執行公開 GitHub tool loop，Then 真實 tool_call、API 結果與後續回答完成。 | pending | 獨立研究未通過，非 MVP 阻塞。 |
-| AC-11 | Given 路徑逃逸、偽造 hook 或金鑰輸出，When 操作，Then 阻擋或遮蔽。 | pending | [OpenCode sandbox probe](docs/evidence/2026-10-31.json) 僅驗證網路／寫入子集；[結果入口讀取／顯示邊界](docs/evidence/results-console-2026-11-01.json) 通過，完整邊界仍待驗。 |
+| AC-11 | Given 路徑逃逸、偽造 hook 或金鑰輸出，When 操作，Then 阻擋或遮蔽。 | pending | [OpenCode sandbox probe](docs/evidence/2026-10-31.json) 僅驗證網路／寫入子集；[結果入口讀取／顯示邊界](docs/evidence/results-console-2026-11-01.json) 通過，[Pi hook 身分／session 子集通過](docs/PI-HOOK-BOUNDARY.md)，完整邊界仍待驗。 |
 | AC-12 | Given 公開匯入來源，When 執行 publication、policy 與 repo gates，Then 無 runtime 私人資料、導航正確且檢查通過。 | passed | [匯入驗證](docs/evidence/publication.md)；CI／交付另見任務板。 |
 | AC-13 | Given 官方 Cursor Agent 與明確登入，When 執行同等合成任務，Then 原生 session、模型來源、完成事件與產物 hash 可核對。 | passed | [Cursor 真實任務](docs/evidence/cursor-completed-2026-11-01.json)：同 session／模型、三次工具、completed stop、用量、產物 hash 與清理全部通過。 |
 

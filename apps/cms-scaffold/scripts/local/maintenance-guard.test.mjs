@@ -371,3 +371,39 @@ test('PP1C_L05_v1_acquire_accepts_only_released_complete_v2_prior',async t=>{
   assert.equal(lease.version,1);assert.equal(lease.phase,'PRE_CONNECTION');
   assert.equal(await readFile(join(f.root,'maintenance/lease.json'),'utf8'),JSON.stringify(lease)+'\n');
 });
+
+import {canonicalBytes,sha256} from '../ops/recovery-protocol.mjs';
+async function recoverGuardFixture(t) {
+  const f=await owned(t);await f.deps.command('docker',['--host','unix:///var/run/docker.sock','stop','--time','30',f.state.containers[1].Id],{shell:false,timeout:30000});
+  const inspection=await inspectTarget(f.root,f.deps,{apiState:'stopped'});
+  const record=await reserveWorkflow(inspection,{operationId:firstOp,purpose:'RECOVER_ADMIN',completionPolicy:'KEEP_STOPPED',targetRunId:null,incidentStartedAt:null},{...f.deps,originalApiState:'stopped'});
+  for(const phase of ['PRECHECK','SOURCE_QUIESCED']) {await persistWorkflow(record,'BEGIN',phase,{},f.deps);await persistWorkflow(record,'END',phase,{},f.deps);}
+  const proof={backupId:'pp1-20261106T160000000Z-'+'e'.repeat(32),manifestSha256:'1'.repeat(64),bundleSetSha256:'2'.repeat(64),sourceInventorySha256:'3'.repeat(64),
+    sourceIdentitySha256:sha256(canonicalBytes(inspection.target)),restoreOperationId:secondOp,restoreTargetId:'pp1-local:'+'d'.repeat(32),
+    rawComparisonSha256:'4'.repeat(64),sessionCommitSha256:'5'.repeat(64),smokeSha256:'6'.repeat(64)};
+  proof.proofSha256=sha256(canonicalBytes(proof));await persistWorkflow(record,'BEGIN','PROOF_REVALIDATED',{proof},f.deps);await persistWorkflow(record,'END','PROOF_REVALIDATED',{},f.deps);
+  await persistWorkflow(record,'BEGIN','ACCOUNT_PRE_CONNECTION',{account:{operation:'RECOVER_ADMIN',phase:'PRE_CONNECTION',boundBackend:null}},f.deps);
+  f.guardChecks=0;f.deps.revalidateRecoveryGuard=async current=>{f.guardChecks++;assert.deepEqual(current.lease.proof,proof);return true;};
+  return Object.assign(f,{record,proof});
+}
+const guardArgs=(verb,...args)=>[verb,'--run-id',runId,'--operation-id',firstOp,...args];
+test('PP1c_D_R03_Node_bridge_projects_V2_and_pins_actual_backend',async t=>{
+  const f=await recoverGuardFixture(t);
+  const before=await lstat(join(f.root,'maintenance/operation.lock'));
+  const result=await dispatchGuard(guardArgs('assert','--phase','pre-connection'),f.deps);assert.equal(result.phase,'ACCOUNT_PRE_CONNECTION');
+  f.state.backends=[tuple(f)];await dispatchGuard(guardArgs('bind-backend','--pid','101','--backend-start-epoch','1791540000.000001'),f.deps);
+  await dispatchGuard(guardArgs('assert','--phase','bound'),f.deps);
+  const lease=JSON.parse(await readFile(join(f.root,'maintenance/lease.json'))),journal=JSON.parse(await readFile(join(f.root,`maintenance/operations/${firstOp}.json`)));
+  assert.equal(lease.phase,'ACCOUNT_BOUND');assert.equal(lease.account.boundBackend.pid,101);assert.deepEqual(lease.proof,f.proof);
+  assert.deepEqual(journal.records.slice(-3).map(r=>[r.event,r.phase]),[['BEGIN','ACCOUNT_PRE_CONNECTION'],['END','ACCOUNT_PRE_CONNECTION'],['BEGIN','ACCOUNT_BOUND']]);
+  assert.equal(before.ino,(await lstat(join(f.root,'maintenance/operation.lock'))).ino);
+  f.state.backends[0].backend_start_epoch='1791540000.000002';await assert.rejects(dispatchGuard(guardArgs('assert','--phase','bound'),f.deps));
+  assert.ok(f.guardChecks>=4);assert.ok(!f.calls.some(a=>a[2]==='start'));
+});
+for(const fault of ['pid','epoch','extra-backend','wrong-IP','proof-denied','wrong-phase'])test(`PP1c_D_R03_Node_bridge_rejects_${fault}`,async t=>{
+  const f=await recoverGuardFixture(t);f.state.backends=[tuple(f)];let args=guardArgs('bind-backend','--pid','101','--backend-start-epoch','1791540000.000001');
+  if(fault==='pid')args[6]='102';if(fault==='epoch')args[8]='1791540000.000002';
+  if(fault==='extra-backend')f.state.backends.push(tuple(f,{pid:102}));if(fault==='wrong-IP')f.state.backends[0].client_addr='172.31.0.99';
+  if(fault==='proof-denied')f.deps.revalidateRecoveryGuard=async()=>false;if(fault==='wrong-phase')args=guardArgs('assert','--phase','bound');
+  await assert.rejects(dispatchGuard(args,f.deps));assert.equal(JSON.parse(await readFile(join(f.root,'maintenance/lease.json'))).phase,'ACCOUNT_PRE_CONNECTION');
+});

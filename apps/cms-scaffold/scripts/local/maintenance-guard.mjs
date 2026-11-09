@@ -1,10 +1,11 @@
-import { rootFor, directory, read, writeNew, syncDirectory, update, loadRegistry, loadWorkflow, assertPriorReleased } from './maintenance-store.mjs';
+import { rootFor, directory, read, writeNew, syncDirectory, update, loadRegistry, loadWorkflow, assertPriorReleased, persistWorkflow } from './maintenance-store.mjs';
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
 import { mkdir, readdir, rmdir } from 'node:fs/promises';
 import { resolve, join } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { isIPv4 } from 'node:net';
+import {canonicalBytes,sha256} from '../ops/recovery-protocol.mjs';
 import { inspectTarget, mediaProbeCommand } from './maintenance-target.mjs';
 const execute = promisify(execFile), code = name => { throw new Error(name); };
 const requireSafe = value => { if (!value) code('QUIESCENCE_NOT_PROVEN'); };
@@ -237,9 +238,7 @@ export async function dispatchGuard(argv, deps = {}) {
   if (verb === 'inspect') return { operationId: lease.operationId, phase: lease.phase };
   requireSafe(fields['--operation-id'] === lease.operationId);
   if (lease.version === 2) {
-    const { OpsError } = await import('../ops/recovery-protocol.mjs');
-    // R01/R03 own actual account attachment and backend authority, beyond L05.
-    throw new OpsError('ADAPTER_UNSEALED', lease.phase, lease.operationId);
+    return dispatchRecoverGuard(record,verb,fields,deps);
   }
   if (verb === 'assert') { requireSafe(['pre-connection','bound'].includes(fields['--phase']) && lease.phase === { 'pre-connection':'PRE_CONNECTION',bound:'BOUND' }[fields['--phase']]); await assertQuiesced(lease,deps); }
   else { requireSafe(/^[1-9][0-9]*$/.test(fields['--pid'])); await bindBackend(lease, Number(fields['--pid']), fields['--backend-start-epoch'],deps); }
@@ -250,3 +249,30 @@ if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1]
 }
 
 export const loadLegacyRegistry = (input,deps = {}) => storedLease(input,deps);
+
+async function dispatchRecoverGuard(record,verb,fields,deps) {
+  const l=record.lease,last=record.journal.records.at(-1);
+  requireSafe(l.purpose==='RECOVER_ADMIN'&&l.originalApiState==='stopped'&&l.completionPolicy==='KEEP_STOPPED'
+    &&l.target===null&&l.helper===null&&l.proof&&l.account?.operation==='RECOVER_ADMIN'&&record.identity
+    &&['ACCOUNT_PRE_CONNECTION','ACCOUNT_BOUND','ACCOUNT_COMMITTED'].includes(l.phase));
+  requireSafe(last?.event==='BEGIN'&&last.phase===l.phase&&last.leaseSha256===sha256(canonicalBytes(l))
+    &&last.proofSha256===l.proof.proofSha256);
+  const revalidate=deps.revalidateRecoveryGuard??(await import('../ops/local-recovery-verify.mjs')).revalidateRecoveryGuard;
+  requireSafe(typeof revalidate==='function'&&await revalidate(record,deps)===true);
+  const projected={...l.source,connection:l.sourceConnection,operationId:l.operationId,
+    phase:l.account.phase,boundBackend:l.account.boundBackend};
+  if(verb==='assert') {
+    requireSafe(['pre-connection','bound'].includes(fields['--phase']));
+    requireSafe(fields['--phase']==='pre-connection'?l.phase==='ACCOUNT_PRE_CONNECTION':['ACCOUNT_BOUND','ACCOUNT_COMMITTED'].includes(l.phase));
+    await live({...projected,phase:fields['--phase']==='pre-connection'?'PRE_CONNECTION':'BOUND'},deps);
+  } else {
+    requireSafe(l.phase==='ACCOUNT_PRE_CONNECTION'&&l.account.phase==='PRE_CONNECTION'&&l.account.boundBackend===null
+      &&/^[1-9][0-9]*$/.test(fields['--pid']));
+    const backend={pid:Number(fields['--pid']),backendStartEpoch:fields['--backend-start-epoch'],db:'cms',role:'cms_local',
+      clientAddr:l.sourceConnection.dataGateway,applicationName:l.operationId};
+    requireSafe(validBackend(backend,projected));await live({...projected,boundBackend:backend},deps,true);
+    await persistWorkflow(record,'END','ACCOUNT_PRE_CONNECTION',{},deps);
+    await persistWorkflow(record,'BEGIN','ACCOUNT_BOUND',{account:{operation:'RECOVER_ADMIN',phase:'BOUND',boundBackend:backend}},deps);
+  }
+  return{operationId:record.lease.operationId,phase:record.lease.phase};
+}

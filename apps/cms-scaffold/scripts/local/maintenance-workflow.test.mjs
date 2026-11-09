@@ -1,108 +1,21 @@
+import { sourceFixture as fixture, liveSourceFixture as liveFixture } from './maintenance-source.fixture.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtemp, mkdir, writeFile, readFile, rm, rename } from 'node:fs/promises';
+import { mkdtemp, mkdir, writeFile, readFile, rm, rename, lstat } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { createHash } from 'node:crypto';
+import { existsSync } from 'node:fs';
 import { inspectTarget } from './maintenance-target.mjs';
 import * as workflow from './maintenance-workflow.mjs';
 const sha = value => createHash('sha256').update(value).digest('hex');
 const runId = 'a'.repeat(32), project = `cms-pp1-local-${runId}`, commit = 'b'.repeat(40);
 const services = ['postgres', 'cms-api', 'ingress'], kinds = ['postgres', 'api', 'node'];
 const full = n => String(n).repeat(64), image = n => `sha256:${full(n)}`;
-async function fixture(t) {
-  const cwd = await mkdtemp(join(tmpdir(), 'pp1-target-')), root = join(cwd, 'local/pp1', runId);
-  t.after(() => rm(cwd, { recursive: true, force: true }));
-  await mkdir(root, { recursive: true, mode: 0o700 });
-  await mkdir(join(cwd, 'services/cms-api/build/libs'), { recursive: true });
-  await mkdir(join(cwd, 'scripts/local'), { recursive: true });
-  const jar = join(cwd, 'services/cms-api/build/libs/app.jar'), node = join(cwd, 'node');
-  const script = join(cwd, 'scripts/local/ingress.mjs'), probe = join(cwd, 'scripts/local/maintenance-media-probe.mjs');
-  for (const [path, bytes] of [[jar, 'jar'], [node, 'node'], [script, 'ingress'], [probe, 'probe']]) await writeFile(path, bytes);
-  const images = { postgres: image(4), api: image(5), node: image(6) };
-  const apiBuild = { sourceCommit: commit, jarSha256: sha('jar'), baseImage: image(7) };
-  const receipt = { version: 1, environment: 'local-isolated', phase: 'PREPARED', runId, project, sourceCommit: commit,
-    images, imageRefs: Object.fromEntries(kinds.map(k => [k, `${project}-${k}:verified`])), apiBuild, apiOrigin: 'https://api.cms.test:8443' };
-  const artifacts = { version: 1, sourceCommit: commit, apiBuild, apiOrigin: receipt.apiOrigin,
-    ingressScriptSha256: sha('ingress'), nodeBinarySha256: sha('node'), dist: {} };
-  const bind = (Source, Destination) => ({ Type: 'bind', Source, Destination, RW: false });
-  const volume = (name, Destination) => ({ Type: 'volume', Name: `${project}_${name}`, Source: `/var/lib/docker/volumes/${project}_${name}/_data`, Destination, RW: true });
-  const networks = ['web', 'data'].map((name, index) => ({ Id: full(index + 8), Name: `${project}_${name}`, Driver: 'bridge', Internal: true,
-    Labels: { 'com.docker.compose.project': project, 'com.docker.compose.network': name },
-    IPAM: { Config: [{ Subnet: `172.${30 + index}.0.0/16`, Gateway: `172.${30 + index}.0.1` }] }, Containers: {} }));
-  const containers = services.map((service, index) => {
-    const names = service === 'cms-api' ? ['web', 'data'] : [service === 'postgres' ? 'data' : 'web'];
-    const endpoints = Object.fromEntries(names.map(name => {
-      const network = networks.find(n => n.Name === `${project}_${name}`), ip = `${network.IPAM.Config[0].Gateway.slice(0, -1)}${index + 2}`;
-      network.Containers[full(index + 1)] = { IPv4Address: `${ip}/16` };
-      return [network.Name, { NetworkID: network.Id, IPAddress: ip, IPPrefixLen: 16, Gateway: network.IPAM.Config[0].Gateway,
-        Aliases: [`${project}-${service}-1`, service, ...(service === 'ingress' ? ['front.cms.test', 'back.cms.test', 'admin.cms.test', 'api.cms.test'] : [])] }];
-    }));
-    return { Id: full(index + 1), Name: `/${project}-${service}-1`, Image: images[kinds[index]],
-      Config: { Labels: { 'com.docker.compose.project': project, 'com.docker.compose.service': service }, Env: [] },
-      State: { Running: true, Health: { Status: 'healthy' } },
-      HostConfig: { RestartPolicy: { Name: 'no' }, Privileged: false, NetworkMode: `${project}_${names[0]}`, PortBindings: {} },
-      NetworkSettings: { Ports: { '5432/tcp': null }, Networks: endpoints }, Mounts: [] };
-  });
-  const apiEnv = { SPRING_PROFILES_ACTIVE: 'prod', CMS_RUNTIME_PRODUCTION_REQUIRED: 'true', CMS_SITE_DOMAIN: 'cms.test', CMS_API_ORIGIN: receipt.apiOrigin,
-    CMS_CORS_ORIGINS: 'https://front.cms.test:8443,https://back.cms.test:8443,https://admin.cms.test:8443',
-    CMS_SURFACE_ORIGINS: 'https://front.cms.test:8443:front,https://back.cms.test:8443:back,https://admin.cms.test:8443:admin',
-    CMS_IDENTITY_SEED_ENABLED: 'false', CMS_IDENTITY_COOKIE_SECURE: 'true', SPRING_DATASOURCE_URL: 'jdbc:postgresql://postgres:5432/cms',
-    SPRING_DATASOURCE_USERNAME: 'cms_local', SPRING_CONFIG_IMPORT: 'configtree:/run/secrets/', CMS_MEDIA_ROOT: '/data/media', SERVER_PORT: '8080' };
-  containers[0].Config.Env = ['POSTGRES_DB=cms', 'POSTGRES_USER=cms_local', 'POSTGRES_PASSWORD_FILE=/run/secrets/spring.datasource.password'];
-  containers[1].Config.Env = Object.entries(apiEnv).map(([k, v]) => `${k}=${v}`);
-  for (let i = 0; i < 2; i++) containers[i].Mounts = [volume(i ? 'media-data' : 'db-data', i ? '/data/media' : '/var/lib/postgresql/data'),
-    bind(join(root, 'secrets/spring.datasource.password'), '/run/secrets/spring.datasource.password')];
-  containers[2].Mounts = [bind(node, '/opt/pp1-node'), bind(script, '/tool/ingress.mjs'), bind(join(root, 'ingress.json'), '/config/ingress.json'),
-    bind(join(root, 'tls/leaf.crt'), '/tls/leaf.crt'), bind(join(root, 'tls/leaf.key'), '/tls/leaf.key')];
-  for (const surface of ['front', 'back', 'admin']) {
-    const dist = join(cwd, 'apps', `web-${surface}`, 'dist'); await mkdir(dist, { recursive: true });
-    await writeFile(join(dist, 'index.html'), surface); artifacts.dist[surface] = { 'index.html': sha(surface) };
-    containers[2].Mounts.push(bind(dist, `/dist/${surface}`));
-  }
-  const volumes = ['db-data', 'media-data'].map(name => ({ Name: `${project}_${name}`, Mountpoint: `/var/lib/docker/volumes/${project}_${name}/_data`, Driver: 'local',
-    Labels: { 'com.docker.compose.project': project, 'com.docker.compose.volume': name }, Options: {} }));
-  const apiLabels = { 'org.cms.pp1.source-commit': commit, 'org.cms.pp1.jar-sha256': apiBuild.jarSha256, 'org.cms.pp1.base-image': apiBuild.baseImage };
-  const calls = [], state = { containers, networks, volumes, apiLabels, oid: '16384\n' };
-  const save = async () => { for (const [name, data] of [['receipt', receipt], ['artifacts', artifacts]]) await writeFile(join(root, `${name}.json`), JSON.stringify(data), { mode: 0o600 }); }; await save();
-  const command = async (file, args, options) => {
-    assert.equal(file, 'docker'); assert.deepEqual(args.slice(0, 2), ['--host', 'unix:///var/run/docker.sock']);
-    assert.equal(options.shell, false); assert.equal(options.timeout, 30000); calls.push(args);
-    const a = args.slice(2); let result;
-    if (a[0] === 'ps') result = containers.map(c => c.Id).join('\n');
-    else if (a[0] === 'inspect') result = JSON.stringify(containers);
-    else if (a[0] === 'network') result = JSON.stringify(networks);
-    else if (a[0] === 'volume') result = JSON.stringify(volumes);
-    else if (a[0] === 'image') { const kind = kinds.find(k => a.at(-1) === receipt.imageRefs[k]) ?? kinds.find(k => images[k] === a.at(-1)); result = JSON.stringify([{ Id: kind ? images[kind] : apiBuild.baseImage, Os: 'linux', Config: { Labels: kind === 'api' ? state.apiLabels : {} } }]); }
-    else if (a[0] === 'exec') { assert.deepEqual(a, ['exec', full(1), 'psql', '-X', '-q', '-t', '-A', '-U', 'cms_local', '-d', 'cms', '-c', 'SELECT oid FROM pg_database WHERE datname = current_database();']); result = state.oid; }
-    else assert.fail(`unexpected mutation ${a[0]}`);
-    return { stdout: result, stderr: '' };
-  };
-  return { cwd, root, jar, node, script, probe, receipt, artifacts, state, calls, save, deps: { command, environment: {} } };
-}
+
 const operationId='11111111-1111-4111-8111-111111111111';
 const request=()=>({operationId,purpose:'BACKUP_LOCAL',completionPolicy:'RESTORE_ORIGINAL',targetRunId:null,incidentStartedAt:null});
-async function liveFixture(t,apiState='running') {
-  const f=await fixture(t),original=f.deps.command,api=f.state.containers[1];f.deps.cwd=f.cwd;
-  const originalEndpoints=structuredClone(api.NetworkSettings.Networks);
-  const setRunning=running=>{
-    api.State.Running=running;api.NetworkSettings.Networks=structuredClone(originalEndpoints);
-    for(const network of f.state.networks) {
-      const endpoint=api.NetworkSettings.Networks[network.Name];
-      if(running)network.Containers[api.Id]={IPv4Address:`${endpoint.IPAddress}/16`};
-      else {delete network.Containers[api.Id];endpoint.IPAddress='';}
-    }
-  };
-  setRunning(apiState==='running');f.state.backends=[];
-  f.deps.command=async(file,args,options)=>{
-    const a=args.slice(2);
-    if(a[0]==='stop'||a[0]==='start') {f.calls.push(args);assert.equal(a.at(-1),api.Id);setRunning(a[0]==='start');return{stdout:''};}
-    if(a[0]==='inspect'&&a[1]==='--format')return{stdout:'healthy\n'};
-    if(a[0]==='exec'&&a.at(-1).includes('pg_stat_activity'))return{stdout:JSON.stringify(f.state.backends)};
-    return original(file,args,options);
-  };
-  return f;
-}
+
 test('PP1C_L03a_forged_or_serialized_tokens_have_no_authority', async t=>{
   const f=await liveFixture(t),inspection=await inspectTarget(f.root,f.deps,{apiState:'running'});
   await assert.rejects(workflow.beginWorkflow(structuredClone(inspection),request(),f.deps));
@@ -177,8 +90,8 @@ function helperContainer(policy,expected,volumeMountpoints) {
     NetworkSettings:{Ports:{},Networks:policy.networkId?{}:{none:{NetworkID:'',EndpointID:'',IPAddress:''}}},Mounts:policy.mounts.map(m=>({Type:m.type,Name:m.type==='volume'?m.source:undefined,
       Source:m.type==='volume'?volumeMountpoints[m.source]:m.source,Destination:m.destination,RW:!m.readOnly}))};
 }
-async function helperFixture(t,kind='MEDIA_PACK') {
-  const f=await capturePhase(t),original=f.deps.command;
+async function helperFixture(t,kind='MEDIA_PACK',base=null) {
+  const f=base??await capturePhase(t),original=f.deps.command;
   f.deps.command=async(file,args,options)=>{
     const a=args.slice(2);
     if(a[0]==='image') {const result=await original(file,args,options);const rows=JSON.parse(result.stdout);rows.forEach(x=>Object.assign(x.Config,{Env:[],User:'',Volumes:x.Id===f.receipt.images.postgres?{'/var/lib/postgresql/data':{}}:null}));return{stdout:JSON.stringify(rows)};}
@@ -1006,3 +919,593 @@ for(const [side,kind] of [['source','INVENTORY'],['target','INVENTORY'],['target
     assert.equal(JSON.parse(await readFile(join(f.root,'maintenance/lease.json'))).phase,'FAILED_OR_UNKNOWN');
   });
 }
+
+async function lifecycleFixture(t,base=null) {
+  const f=await childRuntimeFixture(t,true,base);await sealChild(f);
+  for(const phase of ['DB_RESTORED','MEDIA_RESTORED','RAW_VERIFIED','SESSIONS_REVOKED']) {
+    await workflow.beginPhase(f.token,phase,{},f.deps);await workflow.endPhase(f.token,{},f.deps);
+  }
+  const previous=f.deps.command;f.lifecycleCalls=[];
+  f.deps.command=async(file,args,options)=>{
+    const a=args.slice(2),container=f.childState.containers.find(c=>c.Id===a.at(-1));
+    if(file==='docker'&&container&&['start','stop'].includes(a[0])) {
+      f.lifecycleCalls.push(a);const running=a[0]==='start';container.State={Status:running?'running':'exited',Running:running,Health:{Status:'healthy'}};
+      for(const [name,endpoint]of Object.entries(container.NetworkSettings.Networks)) {
+        const network=f.childState.networks.find(n=>n.Name===name),index=f.childState.containers.indexOf(container);
+        Object.assign(endpoint,{NetworkID:running?network.Id:'',IPAddress:running?`${network.IPAM.Config[0].Gateway.slice(0,-1)}${index+2}`:'',IPPrefixLen:running?16:0});
+        if(running)network.Containers[container.Id]={IPv4Address:`${endpoint.IPAddress}/16`};else delete network.Containers[container.Id];
+      }
+      if(!running&&container===f.childState.containers[1])f.childState.backends=[];
+      return{stdout:container.Id};
+    }
+    if(a[0]==='inspect'&&a[1]==='--format'&&container)return{stdout:f.health??'healthy'};
+    return previous(file,args,options);
+  };
+  f.gate='SESSIONS_REVOKED';f.deps.restoreLifecycleContext=async()=>({verifiedThrough:f.gate});return f;
+}
+test('PP1c_D_lifecycle_owned_API_start_health_stop_and_unsealed_denial',async t=>{
+  const f=await lifecycleFixture(t);
+  f.gate=null;await assert.rejects(workflow.beginPhase(f.token,'STARTUP_VERIFIED',{},f.deps));
+  assert.equal(f.lifecycleCalls.length,0);f.gate='SESSIONS_REVOKED';
+  await workflow.beginPhase(f.token,'STARTUP_VERIFIED',{},f.deps);
+  await workflow.startTargetApi(f.token,f.deps);
+  const c=await workflow.assertWorkflow(f.token,{side:'target'},f.deps);
+  assert.equal(c.target.runId,f.r.targetRunId);assert.equal(f.state.containers[1].State.Running,false);
+  await assert.rejects(workflow.startTargetIngress(f.token,f.deps));
+  await assert.rejects(inspectTarget(f.child.root,f.deps,{apiState:'running'}));
+  await assert.rejects(workflow.startTargetApi({},f.deps));
+  await workflow.stopTargetApi(f.token,f.deps);await assert.rejects(workflow.endPhase(f.token,{},f.deps));
+  f.gate='STARTUP_VERIFIED';await workflow.endPhase(f.token,{},f.deps);
+  assert.deepEqual(f.lifecycleCalls,[['start',f.childState.containers[1].Id],['stop','--time','30',f.childState.containers[1].Id]]);
+});
+test('PP1c_D_lifecycle_ingress_requires_health_and_pool_exact_owned_address',async t=>{
+  const f=await lifecycleFixture(t);await workflow.beginPhase(f.token,'STARTUP_VERIFIED',{},f.deps);
+  await workflow.startTargetApi(f.token,f.deps);await workflow.stopTargetApi(f.token,f.deps);
+  f.gate='STARTUP_VERIFIED';await workflow.endPhase(f.token,{},f.deps);
+  await workflow.beginPhase(f.token,'API_HEALTHY',{},f.deps);await workflow.startTargetApi(f.token,f.deps);
+  const address=f.childState.containers[1].NetworkSettings.Networks[`${f.child.target.project}_data`].IPAddress;
+  f.childState.backends=[{pid:11,backend_start_epoch:'1770000000.123',usename:'cms_local',datname:'cms',application_name:'PostgreSQL JDBC Driver',client_addr:address,state:'idle'}];
+  await workflow.assertWorkflow(f.token,{side:'target'},f.deps);
+  f.childState.backends[0].client_addr='172.29.0.99';await assert.rejects(workflow.assertWorkflow(f.token,{},f.deps));
+  f.childState.backends[0].client_addr=address;await workflow.endPhase(f.token,{},f.deps);
+  await workflow.beginPhase(f.token,'INGRESS_STARTED',{},f.deps);await workflow.startTargetIngress(f.token,f.deps);
+  await workflow.endPhase(f.token,{},f.deps);await workflow.beginPhase(f.token,'BROWSER_VERIFIED',{},f.deps);
+  await assert.rejects(workflow.endPhase(f.token,{},f.deps));f.gate='BROWSER_VERIFIED';await workflow.endPhase(f.token,{},f.deps);
+  await workflow.beginPhase(f.token,'TARGET_STOPPED',{},f.deps);await workflow.stopTargetIngress(f.token,f.deps);await workflow.stopTargetApi(f.token,f.deps);
+  assert.ok(f.childState.containers.slice(1).every(c=>!c.State.Running));
+});
+
+async function browserPhaseFixture(t) {
+  const f=await lifecycleFixture(t);await workflow.beginPhase(f.token,'STARTUP_VERIFIED',{},f.deps);
+  await workflow.startTargetApi(f.token,f.deps);await workflow.stopTargetApi(f.token,f.deps);f.gate='STARTUP_VERIFIED';
+  await workflow.endPhase(f.token,{},f.deps);await workflow.beginPhase(f.token,'API_HEALTHY',{},f.deps);
+  await workflow.startTargetApi(f.token,f.deps);await workflow.endPhase(f.token,{},f.deps);
+  await workflow.beginPhase(f.token,'INGRESS_STARTED',{},f.deps);await workflow.startTargetIngress(f.token,f.deps);
+  await workflow.endPhase(f.token,{},f.deps);await workflow.beginPhase(f.token,'BROWSER_VERIFIED',{},f.deps);return f;
+}
+test('PP1c_D_browser_reserved_context_binds_child_web_and_ingress',async t=>{
+  const f=await browserPhaseFixture(t);await assert.rejects(workflow.browserHelperContext(f.token,f.deps));
+  const c=await workflow.reserveHelper(f.token,{side:'target',kind:'BROWSER'},f.deps);
+  const bound=await workflow.browserHelperContext(f.token,f.deps);
+  assert.equal(bound.helperRoot,c.helperRoot);assert.equal(bound.target.runId,f.r.targetRunId);
+  assert.equal(bound.webNetworkName,`${f.child.target.project}_web`);assert.equal(bound.ingressWebAddress,'172.28.0.4');
+  await assert.rejects(workflow.browserHelperContext({},f.deps));
+  f.childState.containers[2].State.Running=false;await assert.rejects(workflow.browserHelperContext(f.token,f.deps));
+});
+test('PP1c_D_failed_browser_stops_exact_owned_services_and_retains_lock',async t=>{
+  const f=await browserPhaseFixture(t);await workflow.failWorkflow(f.token,'SMOKE_FAILED',f.deps);
+  assert.ok(f.childState.containers.slice(1).every(c=>!c.State.Running));assert.equal(f.state.containers[1].State.Running,false);
+  const lease=JSON.parse(await readFile(join(f.root,'maintenance/lease.json')));assert.equal(lease.phase,'FAILED_OR_UNKNOWN');
+  assert.ok(await readFile(join(f.root,`maintenance/operations/${operationId}.json`)));
+});
+
+async function recoverWorkflowFixture(t) {
+  const f=await liveFixture(t,'stopped'),inspection=await inspectTarget(f.root,f.deps,{apiState:'stopped'});
+  const proof={backupId:'pp1-20261106T160000000Z-'+'e'.repeat(32),manifestSha256:'1'.repeat(64),bundleSetSha256:'2'.repeat(64),sourceInventorySha256:'3'.repeat(64),
+    sourceIdentitySha256:sha256(canonicalBytes(inspection.target)),restoreOperationId:'22222222-2222-4222-8222-222222222222',restoreTargetId:'pp1-local:'+'d'.repeat(32),
+    rawComparisonSha256:'4'.repeat(64),sessionCommitSha256:'5'.repeat(64),smokeSha256:'6'.repeat(64)};proof.proofSha256=sha256(canonicalBytes(proof));
+  f.candidate=Object.freeze({});f.events=[];f.deps.preflightRecovery=async()=>{f.events.push('preflight');return f.candidate;};
+  f.deps.recoveryCandidateContext=async(candidate,actual)=>{assert.equal(candidate,f.candidate);assert.deepEqual(actual,inspection);return{proof};};
+  f.deps.runOwnedHelper=async(token,options)=>{assert.deepEqual(options,{side:'source',kind:'INVENTORY'});
+    assert.equal((await workflow.assertWorkflow(token,{},f.deps)).lease.phase,'PROOF_REVALIDATED');f.events.push('inventory');return{kind:'INVENTORY'};};
+  f.deps.verifyRecoveryProof=async(token,results)=>{assert.equal(results.candidate,f.candidate);assert.equal(results.inventory.kind,'INVENTORY');f.validated=true;f.events.push('verified');};
+  f.deps.revalidatedRecoveryContext=async()=>{assert.equal(f.validated,true);return{proof};};f.deps.revalidateRecoveryGuard=async()=>f.validated===true;
+  f.inspection=inspection;f.proof=proof;return f;
+}
+test('PP1c_D_recover_one_lock_full_underlock_revalidation_then_account',async t=>{
+  const f=await recoverWorkflowFixture(t),token=await workflow.attachRecovery(f.inspection,{operationId},f.deps);
+  const c=await workflow.assertWorkflow(token,{},f.deps);assert.equal(c.lease.phase,'ACCOUNT_PRE_CONNECTION');assert.deepEqual(c.lease.proof,f.proof);
+  assert.deepEqual(f.events,['preflight','inventory','verified']);assert.equal(c.lease.account.phase,'PRE_CONNECTION');
+  assert.ok(!f.calls.some(a=>['start','stop'].includes(a[2])));await assert.rejects(workflow.beginPhase(token,'ACCOUNT_BOUND',{},f.deps));
+});
+test('PP1c_D_recover_parent_adopts_only_exact_Node_bound_transition_and_Result6',async t=>{
+  const f=await recoverWorkflowFixture(t),token=await workflow.attachRecovery(f.inspection,{operationId},f.deps);
+  const before=await readFile(join(f.root,'maintenance/lease.json'));const {dispatchGuard}=await import('./maintenance-guard.mjs');
+  f.state.backends=[{pid:101,backend_start_epoch:'1791540000.000001',usename:'cms_local',datname:'cms',application_name:operationId,client_addr:f.inspection.dataGateway,state:'idle'}];
+  await dispatchGuard(['bind-backend','--run-id',runId,'--operation-id',operationId,'--pid','101','--backend-start-epoch','1791540000.000001'],f.deps);
+  assert.notDeepEqual(await readFile(join(f.root,'maintenance/lease.json')),before);f.state.backends=[];
+  await writeFile(join(f.root,`maintenance/operations/${operationId}.result.json`),JSON.stringify({operationId,operation:'RECOVER_ADMIN',principalId:'33333333-3333-4333-8333-333333333333',completedAt:new Date().toISOString(),releaseId:`sha256:${sha('jar')}`,targetId:`pp1-local:${runId}`})+'\n',{mode:0o600});
+  const result=await workflow.finishRecoverWorkflow(token,{exitCode:0,spawnFailure:false},f.deps);assert.equal(result.phase,'COMPLETE');
+  assert.equal(result.account.phase,'COMMITTED');await assert.rejects(workflow.assertWorkflow(token,{},f.deps));
+  assert.ok(!f.calls.some(a=>['start','stop'].includes(a[2])));assert.equal(f.state.containers[1].State.Running,false);
+});
+test('PP1c_D_recover_invalid_preflight_and_unconfirmed_result_never_release',async t=>{
+  const f=await recoverWorkflowFixture(t);f.deps.preflightRecovery=async()=>{throw new Error('RECOVERY_BACKUP_REQUIRED');};
+  await assert.rejects(workflow.attachRecovery(f.inspection,{operationId},f.deps));await assert.rejects(readFile(join(f.root,'maintenance/lease.json')),{code:'ENOENT'});
+  const g=await recoverWorkflowFixture(t),token=await workflow.attachRecovery(g.inspection,{operationId},g.deps);
+  await assert.rejects(workflow.finishRecoverWorkflow(token,{exitCode:0,spawnFailure:false},g.deps));
+  assert.equal(JSON.parse(await readFile(join(g.root,'maintenance/lease.json'))).phase,'FAILED_OR_UNKNOWN');
+});
+
+test('PP1c_D_recover_confirmed_commit_nonzero_child_retains_COMMITTED_account',async t=>{
+  const f=await recoverWorkflowFixture(t),token=await workflow.attachRecovery(f.inspection,{operationId},f.deps);
+  const {dispatchGuard}=await import('./maintenance-guard.mjs');
+  f.state.backends=[{pid:101,backend_start_epoch:'1791540000.000001',usename:'cms_local',datname:'cms',application_name:operationId,client_addr:f.inspection.dataGateway,state:'idle'}];
+  await dispatchGuard(['bind-backend','--run-id',runId,'--operation-id',operationId,'--pid','101','--backend-start-epoch','1791540000.000001'],f.deps);f.state.backends=[];
+  await writeFile(join(f.root,`maintenance/operations/${operationId}.result.json`),JSON.stringify({operationId,operation:'RECOVER_ADMIN',principalId:'33333333-3333-4333-8333-333333333333',completedAt:new Date().toISOString(),releaseId:`sha256:${sha('jar')}`,targetId:`pp1-local:${runId}`})+'\n',{mode:0o600});
+  await assert.rejects(workflow.finishRecoverWorkflow(token,{exitCode:5,spawnFailure:false},f.deps),{message:'COMMITTED_HOST_RESTORE_FAILED'});
+  const lease=JSON.parse(await readFile(join(f.root,'maintenance/lease.json')));assert.equal(lease.phase,'FAILED_OR_UNKNOWN');assert.equal(lease.account.phase,'COMMITTED');
+});
+
+test('PP1c_D_lifecycle_healthy_response_after_deadline_is_rejected_and_stopped',async t=>{
+  const f=await lifecycleFixture(t);await workflow.beginPhase(f.token,'STARTUP_VERIFIED',{},f.deps);
+  let now=0;f.deps.clock=()=>now;const previous=f.deps.command;
+  f.deps.command=async(file,args,options)=>{if(args[2]==='inspect'&&args[3]==='--format'){now=120001;return{stdout:'healthy'};}return previous(file,args,options);};
+  await assert.rejects(workflow.startTargetApi(f.token,f.deps),e=>e.code==='LOCAL_VERIFY_FAILED');
+  assert.equal(f.childState.containers[1].State.Running,false);assert.equal(f.state.containers[1].State.Running,false);
+});
+
+for(const service of ['cms-api','ingress'])test(`PP1c_D_lifecycle_ambiguous_${service}_start_stops_exact_owned_ID`,async t=>{
+  const f=await lifecycleFixture(t);await workflow.beginPhase(f.token,'STARTUP_VERIFIED',{},f.deps);
+  if(service==='ingress') {
+    await workflow.startTargetApi(f.token,f.deps);await workflow.stopTargetApi(f.token,f.deps);f.gate='STARTUP_VERIFIED';
+    await workflow.endPhase(f.token,{},f.deps);await workflow.beginPhase(f.token,'API_HEALTHY',{},f.deps);
+    await workflow.startTargetApi(f.token,f.deps);await workflow.endPhase(f.token,{},f.deps);await workflow.beginPhase(f.token,'INGRESS_STARTED',{},f.deps);
+  }
+  const previous=f.deps.command,id=f.childState.containers.find(c=>c.Config.Labels['com.docker.compose.service']===service).Id;
+  f.deps.command=async(file,args,options)=>{const result=await previous(file,args,options);
+    if(args[2]==='start'&&args.at(-1)===id)throw new Error('MODELED_CLIENT_TIMEOUT_AFTER_DAEMON_STARTED');return result;};
+  await assert.rejects((service==='cms-api'?workflow.startTargetApi:workflow.startTargetIngress)(f.token,f.deps),{message:'MODELED_CLIENT_TIMEOUT_AFTER_DAEMON_STARTED'});
+  await workflow.failWorkflow(f.token,'LOCAL_VERIFY_FAILED',f.deps);
+  assert.ok(f.childState.containers.slice(1).every(c=>!c.State.Running));assert.equal(f.state.containers[1].State.Running,false);
+  assert.ok(f.lifecycleCalls.some(a=>a[0]==='stop'&&a.at(-1)===id));
+});
+
+function rtoClocks(start='2026-11-06T12:00:00.000Z') {
+  const state={wall:Date.parse(start),mono:1000000000n};
+  return {state,clock:()=>state.wall,monotonic:()=>{if(state.samples?.length)state.mono=state.samples.shift();return state.readMono?state.readMono(state.mono):state.mono;}};
+}
+function restoreTimingRequest(incidentStartedAt='2026-11-06T11:00:00.000Z') {
+  return {...request(),purpose:'RESTORE_VERIFY_LOCAL',completionPolicy:'KEEP_STOPPED',targetRunId:'d'.repeat(32),incidentStartedAt};
+}
+test('PP1c_RTO_anchor_preserves_command_start_across_long_preflight_and_reservation',async t=>{
+  const f=await liveFixture(t,'stopped'),clocks=rtoClocks();Object.assign(f.deps,clocks);
+  const anchor=workflow.captureWorkflowStart(f.deps);assert.deepEqual(anchor,{});assert.ok(Object.isFrozen(anchor));
+  clocks.state.wall+=600000;clocks.state.mono+=600000000000n;
+  const inspection=await inspectTarget(f.root,f.deps,{apiState:'stopped'});
+  const token=await workflow.beginWorkflow(inspection,restoreTimingRequest(),{...f.deps,workflowStart:anchor});
+  const context=await workflow.assertWorkflow(token,{},f.deps);
+  assert.equal(context.request.startedAt,'2026-11-06T12:00:00.000Z');assert.equal(context.lease.createdAt,context.request.startedAt);
+  const journal=JSON.parse(await readFile(join(f.root,'maintenance/operations',operationId+'.json')));
+  assert.ok(journal.records.every(record=>record.at==='2026-11-06T12:10:00.000Z'));
+});
+test('PP1c_RTO_default_anchor_precedes_fresh_inspection_and_never_rewrites_request_schema',async t=>{
+  const f=await liveFixture(t,'stopped'),clocks=rtoClocks();Object.assign(f.deps,clocks);
+  const inspection=await inspectTarget(f.root,f.deps,{apiState:'stopped'}),original=f.deps.command;let delayed=false;
+  f.deps.command=async(...args)=>{if(!delayed){delayed=true;clocks.state.wall+=120000;clocks.state.mono+=120000000000n;}return original(...args);};
+  const token=await workflow.beginWorkflow(inspection,restoreTimingRequest(),f.deps),context=await workflow.assertWorkflow(token,{},f.deps);
+  assert.equal(context.request.startedAt,'2026-11-06T12:00:00.000Z');
+  assert.deepEqual(Object.keys(context.request).sort(),'version operationId sourceRunId purpose targetRunId incidentStartedAt startedAt environment'.split(' ').sort());
+  assert.equal(context.request.environment,'isolated-drill');
+});
+
+async function timingFixture(t,offsetMs=0,monotonicBase=1000000000n) {
+  const f=await liveFixture(t,'stopped'),clocks=rtoClocks();clocks.state.mono=monotonicBase;Object.assign(f.deps,clocks);
+  const inspection=await inspectTarget(f.root,f.deps,{apiState:'stopped'}),incident=new Date(clocks.state.wall-offsetMs).toISOString();
+  f.token=await workflow.beginWorkflow(inspection,restoreTimingRequest(incident),f.deps);return {...f,clocks};
+}
+test('PP1c_RTO_timing_uses_incident_offset_and_conservative_monotonic_ceiling',async t=>{
+  const f=await timingFixture(t,60000);f.clocks.state.wall+=1234;f.clocks.state.mono+=1234000001n;
+  assert.deepEqual(await workflow.workflowTimingContext(f.token,f.deps),{
+    startedAt:'2026-11-06T12:00:00.000Z',availableAt:'2026-11-06T12:00:01.234Z',elapsedMs:'61235'});
+});
+for(const [elapsed,expected]of [[14400000000000n,'14400000'],[14400000000001n,'14400001']])test(`PP1c_RTO_four_hour_boundary_${expected}_is_not_rounded_down`,async t=>{
+  const f=await timingFixture(t);f.clocks.state.wall+=14400000;f.clocks.state.mono+=elapsed;
+  assert.equal((await workflow.workflowTimingContext(f.token,f.deps)).elapsedMs,expected);
+});
+
+for(const fault of ['clone','reuse','foreignClock','foreignMonotonic','negativeIncident','invalidIncident'])test(`PP1c_RTO_anchor_${fault}_denied_before_reservation`,async t=>{
+  const f=await liveFixture(t,'stopped'),clocks=rtoClocks();Object.assign(f.deps,clocks);
+  const inspection=await inspectTarget(f.root,f.deps,{apiState:'stopped'}),anchor=workflow.captureWorkflowStart(f.deps);
+  const deps={...f.deps,workflowStart:fault==='clone'?structuredClone(anchor):anchor},r=restoreTimingRequest();
+  if(fault==='foreignClock')deps.clock=()=>clocks.state.wall;
+  if(fault==='foreignMonotonic')deps.monotonic=()=>clocks.state.mono;
+  if(fault==='negativeIncident')r.incidentStartedAt='2026-11-06T12:00:00.001Z';
+  if(fault==='invalidIncident')r.incidentStartedAt='unknown';
+  if(fault==='reuse')await workflow.beginWorkflow(inspection,r,deps);
+  const before=f.calls.length;
+  await assert.rejects(workflow.beginWorkflow(inspection,r,deps),e=>e.code==='OBJECTIVE_UNKNOWN');
+  assert.equal(f.calls.length,before);
+});
+for(const fault of ['wallBackward','wallJump','fractionalWall','missingWall','monotonicBackward','monotonicNumber','reversedSample','quantizationBoundary'])test(`PP1c_RTO_timing_${fault}_is_objective_unknown`,async t=>{
+  const f=await timingFixture(t);
+  if(fault==='wallBackward')f.clocks.state.wall-=1;
+  if(fault==='wallJump'){f.clocks.state.wall+=1000;f.clocks.state.mono+=1000000n;}
+  if(fault==='fractionalWall')f.clocks.state.wall+=0.5;
+  if(fault==='missingWall')f.clocks.state.wall=NaN;
+  if(fault==='monotonicBackward')f.clocks.state.mono=0n;
+  if(fault==='monotonicNumber')f.clocks.state.mono=1000000000;
+  if(fault==='reversedSample')f.clocks.state.samples=[1002000000n,1001000000n];
+  if(fault==='quantizationBoundary')f.clocks.state.mono+=1000000n;
+  await assert.rejects(workflow.workflowTimingContext(f.token,f.deps),e=>e.code==='OBJECTIVE_UNKNOWN');
+});
+test('PP1c_RTO_repeated_timing_cannot_hide_a_rollback_above_original_start',async t=>{
+  const f=await timingFixture(t);f.clocks.state.wall+=10000;f.clocks.state.mono+=10000000000n;
+  assert.equal((await workflow.workflowTimingContext(f.token,f.deps)).elapsedMs,'10000');
+  f.clocks.state.wall-=1000;f.clocks.state.mono+=1000000000n;
+  await assert.rejects(workflow.workflowTimingContext(f.token,f.deps),e=>e.code==='OBJECTIVE_UNKNOWN');
+});
+for(const wallDelta of [0,1])test(`PP1c_RTO_millisecond_quantization_overlap_${wallDelta}_is_accepted`,async t=>{
+  const f=await timingFixture(t);f.clocks.state.wall+=wallDelta;f.clocks.state.mono+=999999n;
+  assert.equal((await workflow.workflowTimingContext(f.token,f.deps)).elapsedMs,'1');
+});
+test('PP1c_RTO_bracketed_UTC_sample_interval_has_no_fixed_clock_tolerance',async t=>{
+  const f=await timingFixture(t);f.clocks.state.wall+=2;f.clocks.state.samples=[1000900000n,1001100000n];
+  assert.equal((await workflow.workflowTimingContext(f.token,f.deps)).elapsedMs,'2');
+});
+test('PP1c_RTO_large_monotonic_BigInt_origin_preserves_one_nanosecond_ceiling',async t=>{
+  const f=await timingFixture(t,0,10n**30n);f.clocks.state.wall+=1000;f.clocks.state.mono+=1000000001n;
+  assert.equal((await workflow.workflowTimingContext(f.token,f.deps)).elapsedMs,'1001');
+});
+test('PP1c_RTO_timing_rejects_cloned_tokens_foreign_clocks_and_non_restore_purposes',async t=>{
+  const f=await timingFixture(t);
+  await assert.rejects(workflow.workflowTimingContext(structuredClone(f.token),f.deps),e=>e.code==='OBJECTIVE_UNKNOWN');
+  await assert.rejects(workflow.workflowTimingContext(f.token,{...f.deps,clock:()=>f.clocks.state.wall}),e=>e.code==='OBJECTIVE_UNKNOWN');
+  const b=await liveFixture(t,'stopped'),inspection=await inspectTarget(b.root,b.deps,{apiState:'stopped'});
+  const token=await workflow.beginWorkflow(inspection,request(),b.deps);
+  await assert.rejects(workflow.workflowTimingContext(token,b.deps),e=>e.code==='OBJECTIVE_UNKNOWN');
+});
+for(const fault of ['wall','monotonicType','monotonicNegative','unavailable'])test(`PP1c_RTO_capture_${fault}_has_no_wallclock_fallback`,()=>{
+  const clocks=rtoClocks();
+  if(fault==='wall')clocks.clock=()=>Infinity;
+  if(fault==='monotonicType')clocks.monotonic=()=>1;
+  if(fault==='monotonicNegative')clocks.monotonic=()=>-1n;
+  if(fault==='unavailable')clocks.monotonic=()=>{throw new Error('unavailable');};
+  assert.throws(()=>workflow.captureWorkflowStart(clocks),e=>e.code==='OBJECTIVE_UNKNOWN');
+});
+
+async function finalRestoreFixture(t) {
+  const f=await lifecycleFixture(t);
+  f.deps.restoreLifecycleContext=async()=>({verifiedThrough:f.gate,finalProof:f.finalProof??null});
+  await workflow.beginPhase(f.token,'STARTUP_VERIFIED',{},f.deps);await workflow.startTargetApi(f.token,f.deps);await workflow.stopTargetApi(f.token,f.deps);
+  f.gate='STARTUP_VERIFIED';await workflow.endPhase(f.token,{},f.deps);
+  await workflow.beginPhase(f.token,'API_HEALTHY',{},f.deps);await workflow.startTargetApi(f.token,f.deps);await workflow.endPhase(f.token,{},f.deps);
+  await workflow.beginPhase(f.token,'INGRESS_STARTED',{},f.deps);await workflow.startTargetIngress(f.token,f.deps);await workflow.endPhase(f.token,{},f.deps);
+  await workflow.beginPhase(f.token,'BROWSER_VERIFIED',{},f.deps);f.gate='BROWSER_VERIFIED';await workflow.endPhase(f.token,{},f.deps);
+  await workflow.beginPhase(f.token,'TARGET_STOPPED',{},f.deps);await workflow.stopTargetIngress(f.token,f.deps);await workflow.stopTargetApi(f.token,f.deps);
+  f.gate='TARGET_STOPPED';await workflow.endPhase(f.token,{},f.deps);
+  await workflow.beginPhase(f.token,'RESTART_VERIFIED',{},f.deps);await workflow.startTargetApi(f.token,f.deps);await workflow.stopTargetApi(f.token,f.deps);
+  f.gate='RESTART_VERIFIED';const context=await workflow.assertWorkflow(f.token,{},f.deps);
+  const proof={backupId:'pp1-20261106T120000000Z-'+'c'.repeat(32),restoreOperationId:context.operationId,restoreTargetId:context.lease.target.targetId,
+    sourceIdentitySha256:sha256(canonicalBytes(context.lease.source))};
+  for(const field of ['manifestSha256','bundleSetSha256','sourceInventorySha256','rawComparisonSha256','sessionCommitSha256','smokeSha256'])proof[field]='c'.repeat(64);
+  proof.proofSha256=sha256(canonicalBytes(proof));f.finalProof=proof;return f;
+}
+test('PP1c_D_final_restore_END_pins_private_proof_then_COMPLETE_releases_without_starting',async t=>{
+  const f=await finalRestoreFixture(t),before=structuredClone(f.lifecycleCalls);
+  const ended=await workflow.endPhase(f.token,{},f.deps);assert.deepEqual(ended.proof,f.finalProof);
+  const complete=await workflow.finishWorkflow(f.token,{success:true},f.deps);assert.equal(complete.phase,'COMPLETE');
+  assert.deepEqual(f.lifecycleCalls,before);await assert.rejects(readFile(join(f.root,'maintenance/operation.lock')),e=>e.code==='ENOENT');
+  assert.ok(await readFile(join(f.child.root,'restore-target.json')));
+});
+for(const fault of ['missing','wrongPhase','badHash','foreignTarget'])test(`PP1c_D_final_restore_${fault}_proof_cannot_end_or_release`,async t=>{
+  const f=await finalRestoreFixture(t);
+  if(fault==='missing')f.finalProof=null;
+  if(fault==='wrongPhase')f.gate='TARGET_STOPPED';
+  if(fault==='badHash')f.finalProof.proofSha256='0'.repeat(64);
+  if(fault==='foreignTarget')f.finalProof.restoreTargetId='pp1-local:'+'e'.repeat(32);
+  await assert.rejects(workflow.endPhase(f.token,{},f.deps));assert.ok(await lstat(join(f.root,'maintenance/operation.lock')));
+});
+test('PP1c_D_final_restore_changed_private_proof_after_END_never_completes',async t=>{
+  const f=await finalRestoreFixture(t);await workflow.endPhase(f.token,{},f.deps);
+  f.finalProof={...f.finalProof,smokeSha256:'d'.repeat(64)};
+  const {proofSha256,...preimage}=f.finalProof;f.finalProof.proofSha256=sha256(canonicalBytes(preimage));
+  await assert.rejects(workflow.finishWorkflow(f.token,{success:true},f.deps));assert.ok(await lstat(join(f.root,'maintenance/operation.lock')));
+  await assert.rejects(workflow.finishWorkflow(structuredClone(f.token),{success:true},f.deps));
+});
+
+async function executionFixture(t,restore=true,signal,apiState='stopped') {
+  const f=await liveFixture(t,apiState),clocks=rtoClocks(),timers=[];
+  Object.assign(f.deps,clocks,{setWorkflowTimeout:(callback,delay)=>{const timer={callback,delay,unref(){this.unreferenced=true;}};timers.push(timer);return timer;},
+    clearWorkflowTimeout:timer=>{timer.cleared=true;}});
+  if(signal)f.deps.signal=signal;
+  const inspection=await inspectTarget(f.root,f.deps,{apiState});
+  const token=await workflow.beginWorkflow(inspection,restore?restoreTimingRequest():request(),f.deps);return {...f,clocks,timers,token};
+}
+test('PP1c_D_execution_private_signal_six_hour_bound_is_distinct_from_four_hour_RTO',async t=>{
+  const f=await executionFixture(t),context=await workflow.workflowSignalContext(f.token,f.deps);
+  assert.deepEqual(Object.keys(context),['signal']);assert.ok(context.signal instanceof AbortSignal);assert.equal(context.signal.aborted,false);
+  assert.equal(f.timers[0].delay,21600000);assert.equal(f.timers[0].unreferenced,true);
+  f.clocks.state.wall+=14400001;f.clocks.state.mono+=14400001000000n;
+  await workflow.beginPhase(f.token,'SOURCE_QUIESCED',{},f.deps);assert.equal(context.signal.aborted,false);
+  f.clocks.state.wall+=7199999;f.clocks.state.mono+=7199999000000n;f.timers.at(-1).callback();
+  assert.equal(context.signal.aborted,true);await assert.rejects(workflow.endPhase(f.token,{},f.deps),e=>e.code==='INTERRUPTED');
+  assert.equal((await workflow.assertWorkflow(f.token,{},f.deps)).lease.phase,'SOURCE_QUIESCED');
+  await workflow.failWorkflow(f.token,'INTERRUPTED',f.deps);assert.equal(f.timers.at(-1).cleared,true);
+});
+test('PP1c_D_execution_expired_preflight_anchor_cannot_reserve_lock_or_touch_source',async t=>{
+  const f=await liveFixture(t,'stopped'),clocks=rtoClocks();Object.assign(f.deps,clocks);
+  const anchor=workflow.captureWorkflowStart(f.deps),inspection=await inspectTarget(f.root,f.deps,{apiState:'stopped'});
+  clocks.state.wall+=21600000;clocks.state.mono+=21600000000000n;const before=f.calls.length;
+  await assert.rejects(workflow.beginWorkflow(inspection,restoreTimingRequest(),{...f.deps,workflowStart:anchor}),e=>e.code==='INTERRUPTED');
+  assert.equal(f.calls.length,before);await assert.rejects(lstat(join(f.root,'maintenance/operation.lock')),e=>e.code==='ENOENT');
+});
+test('PP1c_D_execution_mutation_checks_expire_even_if_timer_callback_is_delayed',async t=>{
+  const f=await executionFixture(t),signal=(await workflow.workflowSignalContext(f.token,f.deps)).signal;
+  f.clocks.state.mono+=21600000000000n;
+  await assert.rejects(workflow.beginPhase(f.token,'SOURCE_QUIESCED',{},f.deps),e=>e.code==='INTERRUPTED');
+  assert.equal(signal.aborted,true);await assert.rejects(workflow.workflowSignalContext(structuredClone(f.token),f.deps));
+  assert.equal((await workflow.assertWorkflow(f.token,{},f.deps)).lease.phase,'PRECHECK');
+});
+
+test('PP1c_D_execution_expiry_rejects_new_helper_target_and_completion_with_lock_retained',async t=>{
+  const f=await executionFixture(t),signal=(await workflow.workflowSignalContext(f.token,f.deps)).signal;
+  for(const phase of ['SOURCE_QUIESCED','LOCAL_CAPTURED','LOCAL_VERIFIED']){await workflow.beginPhase(f.token,phase,{},f.deps);await workflow.endPhase(f.token,{},f.deps);}
+  f.clocks.state.mono+=21600000000000n;
+  await assert.rejects(workflow.reserveRestoreTarget(f.token,{runId:'d'.repeat(32)},f.deps),e=>e.code==='INTERRUPTED');
+  await assert.rejects(workflow.reserveHelper(f.token,{side:'source',kind:'INVENTORY'},f.deps),e=>e.code==='INTERRUPTED');
+  await assert.rejects(workflow.finishWorkflow(f.token,{success:true},f.deps),e=>e.code==='INTERRUPTED');
+  assert.equal(signal.aborted,true);assert.ok(await lstat(join(f.root,'maintenance/operation.lock')));
+  await assert.rejects(lstat(join(f.cwd,'local/pp1','d'.repeat(32))),e=>e.code==='ENOENT');
+});
+test('PP1c_D_execution_success_clears_unreferenced_timer',async t=>{
+  const f=await executionFixture(t,false);
+  for(const phase of ['SOURCE_QUIESCED','LOCAL_CAPTURED','LOCAL_VERIFIED']){await workflow.beginPhase(f.token,phase,{},f.deps);await workflow.endPhase(f.token,{},f.deps);}
+  assert.equal((await workflow.finishWorkflow(f.token,{success:true},f.deps)).phase,'COMPLETE');
+  assert.equal(f.timers.at(-1).cleared,true);
+});
+
+test('T169_factory_expiry_after_PG_create_never_starts_or_creates_later_services',async t=>{
+  const base=await executionFixture(t);base.r=restoreTimingRequest();
+  await workflow.beginPhase(base.token,'SOURCE_QUIESCED',{},base.deps);await workflow.endPhase(base.token,{},base.deps);
+  await workflow.beginPhase(base.token,'LOCAL_CAPTURED',{},base.deps);
+  const f=await childRuntimeFixture(t,false,base),original=f.deps.command,created=[],started=[];
+  f.deps.command=async(file,args,options)=>{
+    const a=args.slice(2);if(a.includes('create')&&['postgres','cms-api','ingress'].includes(a.at(-1)))created.push(a.at(-1));if(a[0]==='start')started.push(a.at(-1));
+    const result=await original(file,args,options);
+    if(a.includes('create')&&a.at(-1)==='postgres')base.clocks.state.mono+=21600000000000n;
+    return result;
+  };
+  const {createRestoreTarget}=await import('./restore-target.mjs');
+  await assert.rejects(createRestoreTarget(f.token,f.deps),error=>error.code==='INTERRUPTED');
+  assert.deepEqual(created,['postgres']);assert.deepEqual(started,[]);assert.ok(await lstat(join(f.root,'maintenance/operation.lock')));
+});
+
+test('T169_caller_abort_reaches_private_workflow_and_keeps_readonly_cleanup',async t=>{
+  const controller=new AbortController(),f=await executionFixture(t,true,controller.signal);
+  const own=(await workflow.workflowSignalContext(f.token,f.deps)).signal;controller.abort();assert.equal(own.aborted,true);
+  await assert.rejects(workflow.beginPhase(f.token,'SOURCE_QUIESCED',{},f.deps),e=>e.code==='INTERRUPTED');
+  assert.equal((await workflow.assertWorkflow(f.token,{},f.deps)).lease.phase,'PRECHECK');
+  await workflow.failWorkflow(f.token,'INTERRUPTED',f.deps);
+});
+test('T169_caller_abort_after_owned_API_start_still_stops_and_readbacks_without_signal',async t=>{
+  const controller=new AbortController(),base=await executionFixture(t,true,controller.signal);base.r=restoreTimingRequest();
+  await workflow.beginPhase(base.token,'SOURCE_QUIESCED',{},base.deps);await workflow.endPhase(base.token,{},base.deps);
+  await workflow.beginPhase(base.token,'LOCAL_CAPTURED',{},base.deps);
+  const f=await lifecycleFixture(t,base),original=f.deps.command,id=f.childState.containers[1].Id,cleanups=[];
+  f.deps.command=async(file,args,options)=>{
+    const a=args.slice(2);if(a[0]==='stop'){cleanups.push(a.at(-1));assert.equal(options.signal,undefined);}
+    const result=await original(file,args,options);if(a[0]==='start'&&a.at(-1)===id)controller.abort();return result;
+  };
+  await workflow.beginPhase(f.token,'STARTUP_VERIFIED',{},f.deps);
+  await assert.rejects(workflow.startTargetApi(f.token,f.deps),e=>e.code==='INTERRUPTED');
+  assert.deepEqual(cleanups,[id]);assert.equal(f.childState.containers[1].State.Running,false);
+});
+test('T169_expiry_during_nonatomic_release_reports_no_success_and_never_recreates_lock',async t=>{
+  const f=await executionFixture(t,false);
+  for(const phase of ['SOURCE_QUIESCED','LOCAL_CAPTURED','LOCAL_VERIFIED']){await workflow.beginPhase(f.token,phase,{},f.deps);await workflow.endPhase(f.token,{},f.deps);}
+  const lock=join(f.root,'maintenance/operation.lock');f.clocks.state.readMono=now=>existsSync(lock)?now:now+21600000000000n;
+  await assert.rejects(workflow.finishWorkflow(f.token,{success:true},f.deps),e=>e.code==='INTERRUPTED'&&e.phase==='COMPLETE'&&e.operationId===operationId);
+  await assert.rejects(lstat(lock),e=>e.code==='ENOENT');const journal=JSON.parse(await readFile(join(f.root,'maintenance/operations',operationId+'.json')));
+  assert.equal(journal.records.at(-1).phase,'COMPLETE');assert.equal(journal.records.at(-1).event,'END');
+  assert.ok(!journal.records.some(record=>record.event==='FAIL'));assert.equal(f.timers.at(-1).cleared,true);
+});
+
+test('T169_postrelease_backup_expiry_never_stops_restored_source_without_lock',async t=>{
+  const f=await executionFixture(t,false,undefined,'running');
+  for(const phase of ['SOURCE_QUIESCED','LOCAL_CAPTURED','LOCAL_VERIFIED']){await workflow.beginPhase(f.token,phase,{},f.deps);await workflow.endPhase(f.token,{},f.deps);}
+  const lock=join(f.root,'maintenance/operation.lock'),beforeStops=f.calls.filter(a=>a[2]==='stop').length;
+  f.clocks.state.readMono=now=>existsSync(lock)?now:now+21600000000000n;
+  await assert.rejects(workflow.finishWorkflow(f.token,{success:true},f.deps),e=>e.code==='INTERRUPTED'&&e.phase==='COMPLETE'&&e.operationId===operationId);
+  assert.equal(f.state.containers[1].State.Running,true);
+  assert.equal(f.calls.filter(a=>a[2]==='stop').length,beforeStops);
+  await assert.rejects(lstat(lock),e=>e.code==='ENOENT');
+  const journal=JSON.parse(await readFile(join(f.root,'maintenance/operations',operationId+'.json')));
+  assert.equal(journal.records.at(-1).phase,'COMPLETE');assert.equal(journal.records.at(-1).event,'END');
+  assert.ok(!journal.records.some(record=>record.event==='FAIL'));
+});
+
+for(const replacement of [false,true])test(`PP1c_D_release_sync_failure_${replacement?'replaced':'absent'}_lock_never_stops_source`,async t=>{
+  const f=await executionFixture(t,false,undefined,'running');
+  for(const phase of ['SOURCE_QUIESCED','LOCAL_CAPTURED','LOCAL_VERIFIED']){await workflow.beginPhase(f.token,phase,{},f.deps);await workflow.endPhase(f.token,{},f.deps);}
+  const lock=join(f.root,'maintenance/operation.lock'),beforeStops=f.calls.filter(a=>a[2]==='stop').length;
+  const replacementLock=join(f.root,'maintenance/replacement-lock');if(replacement)await mkdir(replacementLock,{mode:0o700});
+  f.deps.fault=async point=>{if(point==='after-lock-remove'){
+    if(replacement)await rename(replacementLock,lock);
+    throw new Error('injected-release-directory-sync-failure');
+  }};
+  await assert.rejects(workflow.finishWorkflow(f.token,{success:true},f.deps),/injected-release-directory-sync-failure/);
+  assert.equal(f.state.containers[1].State.Running,true);
+  assert.equal(f.calls.filter(a=>a[2]==='stop').length,beforeStops);
+  if(replacement)assert.ok(await lstat(lock));else await assert.rejects(lstat(lock),e=>e.code==='ENOENT');
+  const journal=JSON.parse(await readFile(join(f.root,'maintenance/operations',operationId+'.json')));
+  assert.equal(journal.records.at(-1).phase,'COMPLETE');assert.equal(journal.records.at(-1).event,'END');
+  assert.ok(!journal.records.some(record=>record.event==='FAIL'));
+});
+
+test('T174_real_registry_live_PG_witness_survives_exit_during_slow_source_checks',async t=>{
+  const f=await ownedFixture(t),command=f.deps.command,spawn=f.deps.spawn;let started=false,closedDuringChecks=false;const sampleStarts=[];let active=0,maxActive=0;
+  f.deps.spawn=(...args)=>{const child=spawn(...args);if(f.pendingPg)started=true;return child;};
+  f.deps.command=async(file,args,options)=>{
+    if(started&&args[2]==='ps'&&f.pendingPg){const close=f.pendingPg;delete f.pendingPg;close();closedDuringChecks=true;await new Promise(resolve=>setTimeout(resolve,30));}
+    const observing=started&&args[2]==='exec'&&args.at(-1).includes('pg_stat_activity')&&JSON.parse(readFileSync(join(f.root,'maintenance/lease.json'))).helper?.kind==='PG_DUMP';
+    if(observing){sampleStarts.push(process.hrtime.bigint());active++;maxActive=Math.max(maxActive,active);}
+    try{return await command(file,args,options);}finally{if(observing)active--;}
+  };
+  const result=await runOwnedHelper(f.token,{side:'source',kind:'PG_DUMP'},f.deps);
+  assert.ok(sampleStarts.length>=3);assert.equal(maxActive,1);
+  for(let i=1;i<sampleStarts.length;i++)assert.ok(sampleStarts[i]-sampleStarts[i-1]>=100000000n);
+  assert.equal(closedDuringChecks,true);assert.equal(await readFile(result.path,'utf8'),'PGDMP-synthetic');
+  assert.equal((await workflow.assertWorkflow(f.token,{},f.deps)).lease.helper,null);
+});
+
+test('T174_real_registry_restore_reads_verified_archive_before_opening_backend',async t=>{
+  const f=await targetOwnedFixture(t,'PG_RESTORE'),spawn=f.deps.spawn;let fed=false;
+  f.deps.spawn=(...args)=>{const child=spawn(...args);
+    if(f.pendingTargetPg){const rows=f.childState.backends;f.childState.backends=[];child.stdin.on('data',()=>{fed=true;f.childState.backends=rows;});}
+    return child;
+  };
+  await runOwnedHelper(f.token,{side:'target',kind:'PG_RESTORE'},f.deps);
+  assert.equal(fed,true);assert.deepEqual(f.receivedRestore,await readFile(join(f.material.path,'db.dump')));
+});
+
+for(const fault of ['earlyExit','extra','wrongIP','wrongApp','badEpoch','policy','fullID','cancel','lateSource','extraLater','replaced','reappearing'])test(`T174_real_registry_PG_rejects_${fault}`,async t=>{
+  const f=await ownedFixture(t),command=f.deps.command,spawn=f.deps.spawn,controller=new AbortController();f.deps.signal=controller.signal;
+  let started=false,changed=false,postSamples=0,originalRow;
+  f.deps.spawn=(...args)=>{const child=spawn(...args);if(f.pendingPg){started=true;originalRow=structuredClone(f.state.backends[0]);}return child;};
+  f.deps.command=async(file,args,options)=>{
+    if(started&&args[2]==='top'&&!changed){changed=true;
+      if(fault==='earlyExit'){const close=f.pendingPg;delete f.pendingPg;close();}
+      if(fault==='extra')f.state.backends.push({...originalRow,pid:92});
+      if(fault==='wrongIP')f.state.backends[0].client_addr='172.31.0.8';
+      if(fault==='wrongApp')f.state.backends[0].application_name='foreign';
+      if(fault==='badEpoch')f.state.backends[0].backend_start_epoch='0.1';
+      const helper=f.state.containers.find(c=>c.Id===args[3]);
+      if(fault==='policy')helper.HostConfig.Privileged=true;
+      if(fault==='fullID')helper.Id='e'.repeat(64);
+      if(fault==='cancel'){await Promise.resolve();controller.abort();}
+    }
+    if(started&&args[2]==='ps'&&fault==='lateSource')f.state.apiLabels={...f.state.apiLabels,'org.cms.pp1.jar-sha256':'0'.repeat(64)};
+    if(started&&args[2]==='exec'&&args.at(-1).includes('pg_stat_activity')&&['extraLater','replaced','reappearing'].includes(fault)){
+      const lease=JSON.parse(await readFile(join(f.root,'maintenance/lease.json')));
+      if(lease.helper?.backend){delete f.pendingPg;postSamples++;
+        if(fault==='extraLater')f.state.backends=[originalRow,{...originalRow,pid:92}];
+        else if(fault==='replaced')f.state.backends=[{...originalRow,backend_start_epoch:'1770000000.999'}];
+        else f.state.backends=postSamples===1?[]:[originalRow];
+      }
+    }
+    return command(file,args,options);
+  };
+  await assert.rejects(runOwnedHelper(f.token,{side:'source',kind:'PG_DUMP'},f.deps));
+  if(fault==='extraLater')assert.ok(postSamples>=1);
+  if(fault==='reappearing')assert.ok(postSamples>=2);
+  assert.ok(await lstat(join(f.root,'maintenance/operation.lock')));
+});
+test('T174_JSON_or_cloned_live_witness_cannot_authorize_registry_transition',async t=>{
+  const f=await targetHelperFixture(t,'PG_RESTORE');await workflow.registerOwnedHelper(f.token,f.helper,f.policy,f.expected,f.deps);
+  const fake={token:f.token,sequence:1,id:f.helper.fullContainerId,policy:f.policy,claimed:false};
+  await assert.rejects(workflow.updateOwnedHelper(f.token,{...f.helper,state:'RUNNING'},f.deps,fake));
+  await assert.rejects(workflow.updateOwnedHelper(f.token,{...f.helper,state:'RUNNING'},f.deps,structuredClone(fake)));
+  assert.equal((await workflow.assertWorkflow(f.token,{},f.deps)).lease.helper.state,'CREATED');
+});
+test('T174_real_registry_initial_zero_can_precede_first_genuine_backend',async t=>{
+  const f=await ownedFixture(t),command=f.deps.command,spawn=f.deps.spawn;let started=false,samples=0;
+  f.deps.spawn=(...args)=>{const child=spawn(...args);if(f.pendingPg)started=true;return child;};
+  f.deps.command=async(file,args,options)=>{
+    if(started&&args[2]==='exec'&&args.at(-1).includes('pg_stat_activity')&&++samples===1)return{stdout:'[]'};
+    return command(file,args,options);
+  };
+  const result=await runOwnedHelper(f.token,{side:'source',kind:'PG_DUMP'},f.deps);
+  assert.ok(samples>=3);assert.equal(await readFile(result.path,'utf8'),'PGDMP-synthetic');
+});
+
+import * as smoke178 from '../ops/local-restore-smoke.mjs';
+async function browserAdmissionFixture178(t,fault=null) {
+  const f=await browserPhaseFixture(t),uuid=n=>`${n.repeat(8)}-${n.repeat(4)}-4${n.repeat(3)}-8${n.repeat(3)}-${n.repeat(12)}`;
+  const fixture={version:1,sourceRunId:runId,adminPrincipalId:uuid('1'),operatorPrincipalId:uuid('2'),oldSessionIds:{admin:uuid('3'),operator:uuid('4')},
+    publishedEntryId:uuid('5'),revisionNo:1,refEntryId:uuid('6'),media:Object.fromEntries(['publicImageId','publicPdfId','draftImageId','privateImageId','replacedImageId','deletedImageId'].map((key,i)=>[key,uuid(String(i+1))])),
+    expected:Object.fromEntries('privateEntrySha256 operatorEntrySha256 publicEntrySha256 revisionListSha256 publicOriginalSha256 publicThumbnailSha256 publicWebSha256 publicPdfSha256 draftOriginalSha256 privateOriginalSha256 replacedOriginalSha256'.split(' ').map(key=>[key,full('d')])),sessionAbsoluteSeconds:'43200',sessionMaxSeconds:'604800'};
+  const input={version:1,stage:'RESTORE_SMOKE_READY',operationId,sourceRunId:runId,targetRunId:f.r.targetRunId,releaseId:`sha256:${f.receipt.apiBuild.jarSha256}`,
+    rawComparisonSha256:full('a'),sessionCommitSha256:full('b'),startupInventorySha256:full('c'),fixtureSha256:sha256(canonicalBytes(fixture)),fixture};
+  const secrets=Object.fromEntries(['admin','operator'].map(actor=>[actor,{principalId:fixture[actor+'PrincipalId'],username:actor,password:'synthetic-password-178',oldSessionToken:'old-'+actor}]));
+  const credentialBindings=Object.fromEntries(['admin','operator'].map(actor=>[actor,{principalId:secrets[actor].principalId,username:actor,oldSessionId:fixture.oldSessionIds[actor],oldSessionTokenSha256:sha256(Buffer.from(secrets[actor].oldSessionToken)),oldSessionExpiresAt:'2026-11-07 17:00:00+00'}]));
+  let pending,material,admitted=false,normalRead=false,savedContext,boundAtFailure=false;const extra=[];const previous=f.deps.command;
+  const controller=new AbortController();f.deps.signal=controller.signal;
+  f.deps.workflow={...workflow,browserHelperContext:async(...args)=>{const current={...await workflow.browserHelperContext(...args),cwd:process.cwd()};savedContext??=current;return current;}};
+  f.deps.verifier={restoreSmokeContext:async token=>{assert.equal(token,f.token);return {input,credentialBindings};}};
+  f.deps.command=async(file,args,options)=>{
+    const a=args.slice(2),all=[...f.state.containers,...f.childState.containers,...(pending?[pending]:[]),...extra];
+    if(a[0]==='ps'&&!a.includes('--filter'))return{stdout:all.map(c=>c.Id).join('\n')};
+    if(a[0]==='inspect'&&!a.includes('--format')) {const rows=all.filter(c=>a.includes(c.Id));
+      if(fault==='cancel-created'&&pending&&a.length===2&&a[1]===pending.Id)controller.abort();return rows.length?{stdout:JSON.stringify(rows)}:{code:1,stderr:`Error: No such object: ${a[1]}`};}
+    const result=await previous(file,args,options);
+    if(a[0]==='image'&&a[1]==='inspect'){const values=JSON.parse(result.stdout);for(const image of values)image.Config.Env??=[];return{stdout:JSON.stringify(values)};}
+    return result;
+  };
+  f.deps.lifecycle=async(policy,expected,_consume,callbacks)=>{
+    material=await smoke178.browserPolicyMaterial(f.token,f.deps);const id=full('f');
+    pending={Id:id,Name:'/'+expected.name,Image:policy.imageId,State:{Status:'created',Running:false,ExitCode:0},
+      Config:{Labels:expected.labels,Env:policy.env,User:policy.user,Entrypoint:[policy.entrypoint],Cmd:policy.args,OpenStdin:true,Tty:false},
+      HostConfig:{NetworkMode:policy.networkId,ReadonlyRootfs:true,Privileged:false,CapDrop:['ALL'],CapAdd:null,SecurityOpt:['no-new-privileges'],RestartPolicy:{Name:'no'},LogConfig:{Type:'none'},PortBindings:{},Devices:[],DeviceRequests:null,ExtraHosts:null,PidMode:'',IpcMode:'private',AutoRemove:false,Tmpfs:{'/tmp':'rw,nosuid,nodev,size=536870912'}},
+      Mounts:policy.mounts.map(m=>({Type:m.type,Source:m.source,Destination:m.destination,RW:false})),NetworkSettings:{Ports:{},Networks:{[expected.webNetworkName]:{NetworkID:'',IPAddress:'',EndpointID:''}}}};
+    try {
+      await assert.rejects(workflow.browserHelperContext(f.token,f.deps));
+      await assert.rejects(workflow.browserRegistrationContext(f.token,f.deps));
+      if(fault==='input')await writeFile(material.inputFile,'changed');
+      if(fault==='sequence')savedContext.seq='99';
+      if(fault==='path')savedContext.helperRoot+='/foreign';
+      if(fault==='policy')policy.env.push('UNAPPROVED=true');
+      if(fault==='source')f.state.oid='99999';
+      if(fault==='ingress')f.childState.containers[2].State.Running=false;
+      if(fault==='cancel')controller.abort();
+      if(fault==='extra')extra.push({...structuredClone(pending),Id:full('e')});
+      await callbacks.onCreated(fault==='id'?full('e'):id,pending,{...expected,fullContainerId:id});admitted=true;
+      await smoke178.browserPolicyMaterial(f.token,f.deps);normalRead=true;
+      throw new Error('intentional unit stop after CREATED admission');
+    } catch(error) {
+      boundAtFailure=JSON.parse(await readFile(join(f.root,'maintenance/lease.json'))).helper?.fullContainerId===id;throw error;
+    } finally {
+      pending.State={Status:'exited',Running:false,ExitCode:0};
+      try{await callbacks.onExited(id,pending);}catch{/* Pre-admission failure has no registered helper. */}
+      pending=null;extra.length=0;
+      try{await callbacks.onRemoved(id);}catch{/* Failed admission retains its actual private registry evidence. */}
+    }
+  };
+  await assert.rejects(smoke178.runRestoreSmoke(f.token,{fixture,recoverySecrets:secrets,startupInventorySha256:input.startupInventorySha256},f.deps),{code:fault?.startsWith('cancel')?'INTERRUPTED':'SMOKE_FAILED'});
+  return {...f,admitted,normalRead,material,boundAtFailure};
+}
+test('T178_created_browser_is_independently_admitted_before_full_topology_inspection',async t=>{
+  const f=await browserAdmissionFixture178(t);assert.equal(f.admitted,true);assert.equal(f.normalRead,true);
+});
+
+for(const fault of ['input','sequence','path','policy','id','source','ingress','extra','cancel','cancel-created'])test(`T178_registration_rejects_${fault}_without_start`,async t=>{
+  const f=await browserAdmissionFixture178(t,fault);assert.equal(f.admitted,false);assert.equal(f.normalRead,false);
+  assert.equal(f.boundAtFailure,['source','ingress','extra'].includes(fault));
+  await assert.rejects(workflow.browserRegistrationContext(f.token,f.deps));
+});
+test('T178_registration_context_requires_original_token_and_private_active_interval',async t=>{
+  const f=await browserPhaseFixture(t);await assert.rejects(workflow.browserRegistrationContext(f.token,f.deps));
+  await workflow.reserveHelper(f.token,{side:'target',kind:'BROWSER'},f.deps);
+  for(const token of [f.token,{},structuredClone(f.token)])await assert.rejects(workflow.browserRegistrationContext(token,f.deps));
+});
+
+test('T178_C_nonbrowser_cancel_during_create_retains_full_ID_if_exact_cleanup_fails',async t=>{
+  const controller=new AbortController(),base=await executionFixture(t,false,controller.signal);
+  await workflow.beginPhase(base.token,'SOURCE_QUIESCED',{},base.deps);await workflow.endPhase(base.token,{},base.deps);
+  await workflow.beginPhase(base.token,'LOCAL_CAPTURED',{},base.deps);
+  const f=await helperFixture(t,'MEDIA_PACK',base),command=f.deps.command,removed=[];let starts=0;
+  f.deps.command=async(file,args,options)=>{
+    const a=args.slice(2);
+    if(a[0]==='create'){controller.abort();return{stdout:f.helper.fullContainerId};}
+    if(a[0]==='rm'){removed.push(a[1]);assert.equal(a[1],f.helper.fullContainerId);return{code:1,stderr:'injected exact owned removal failure'};}
+    return command(file,args,options);
+  };
+  f.deps.spawn=()=>{starts++;assert.fail('cancelled helper must never start');};
+  await assert.rejects(helperModule.executeHelperLifecycle(f.policy,f.expected,()=>assert.fail('no consumer before start'),{
+    ...f.deps,onCreated:async(id,_snapshot,expected)=>workflow.registerOwnedHelper(f.token,{...f.helper,fullContainerId:id},f.policy,expected,f.deps),
+    onRemoved:()=>workflow.clearOwnedHelper(f.token,f.deps)}),{code:'INTERRUPTED'});
+  const lease=JSON.parse(await readFile(join(f.root,'maintenance/lease.json')));
+  assert.equal(lease.helper?.fullContainerId,f.helper.fullContainerId);assert.equal(lease.helper?.state,'CREATED');
+  assert.equal((await lstat(join(f.root,'maintenance/operation.lock'))).isDirectory(),true);
+  assert.deepEqual(removed,[f.helper.fullContainerId]);assert.equal(starts,0);assert.equal(f.container.State.Status,'created');
+});

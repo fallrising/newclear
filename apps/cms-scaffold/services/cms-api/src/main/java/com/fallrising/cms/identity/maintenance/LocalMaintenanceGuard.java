@@ -26,7 +26,9 @@ public final class LocalMaintenanceGuard implements MaintenanceGuard, Maintenanc
     private final UUID operationId;
     private final Map<String,String> environment;
     private final HelperRunner runner;
-    private JsonNode pinned, backendPin;
+    private JsonNode pinned, backendPin, recoverPin, recoverJournalPin;
+    private Object recoverLockPin;
+    private Integer versionPin;
     public LocalMaintenanceGuard(Path leaseFile, Path nodeBinary, Path guardScript, String targetId, UUID operationId) {
         this(leaseFile,nodeBinary,guardScript,targetId,operationId,System.getenv(),LocalMaintenanceGuard::execute);
     }
@@ -86,7 +88,10 @@ public final class LocalMaintenanceGuard implements MaintenanceGuard, Maintenanc
     private JsonNode readLease() {
         try {
             directory(leaseFile.getParent().getParent());directory(leaseFile.getParent());directory(leaseFile.getParent().resolve("operations"));directory(leaseFile.getParent().resolve("operation.lock"));
-            var state=JSON.readTree(bytes(leaseFile,true));keys(state,TARGET+","+EXTRA);
+            byte[] raw=bytes(leaseFile,true);var parsed=JSON.readTree(raw);
+            require(parsed!=null&&parsed.path("version").isInt());int version=parsed.path("version").intValue();
+            require(version==1||version==2);if(versionPin==null)versionPin=version;else require(versionPin==version);
+            var state=version==2?recoverProjection(parsed,raw):parsed;keys(state,TARGET+","+EXTRA);
             require(state.get("version").isIntegralNumber()&&state.get("version").canConvertToInt()&&state.get("version").intValue()==1&&text(state,"runId").equals(runId)&&text(state,"targetId").equals(targetId));
             require(text(state,"project").equals("cms-pp1-local-"+runId)&&hex(text(state,"sourceCommit"),40));
             var build=state.get("apiBuild");keys(build,"sourceCommit,jarSha256,baseImage");require(text(build,"sourceCommit").equals(text(state,"sourceCommit"))&&hex(text(build,"jarSha256"),64)&&image(text(build,"baseImage")));
@@ -110,13 +115,100 @@ public final class LocalMaintenanceGuard implements MaintenanceGuard, Maintenanc
                 if(backendPin==null)backendPin=backend.deepCopy();else require(backendPin.equals(backend));
             }
             var target=JSON.readTree(bytes(leaseFile.resolveSibling("target.json"),true));keys(target,TARGET);for(String key:TARGET.split(","))require(target.get(key).equals(state.get(key)));
-            var journal=JSON.readTree(bytes(leaseFile.getParent().resolve("operations/"+operationId+".json"),true));keys(journal,"operationId,operation,targetId,releaseId,phase,at,failureCode");
-            for(String key:List.of("operationId","operation","targetId","releaseId","phase"))require(journal.get(key).equals(state.get(key)));Instant.parse(text(journal,"at"));
-            require(journal.get("failureCode").isNull()||Set.of("QUIESCENCE_NOT_PROVEN","COMMITTED_HOST_RESTORE_FAILED").contains(text(journal,"failureCode")));
+            if(version==2)recoverJournal(parsed);
+            else {
+                var journal=JSON.readTree(bytes(leaseFile.getParent().resolve("operations/"+operationId+".json"),true));keys(journal,"operationId,operation,targetId,releaseId,phase,at,failureCode");
+                for(String key:List.of("operationId","operation","targetId","releaseId","phase"))require(journal.get(key).equals(state.get(key)));Instant.parse(text(journal,"at"));
+                require(journal.get("failureCode").isNull()||Set.of("QUIESCENCE_NOT_PROVEN","COMMITTED_HOST_RESTORE_FAILED").contains(text(journal,"failureCode")));
+            }
             require(runId.equals(environment.get("CMS_MAINTENANCE_RUN_ID"))&&nodeBinary.toString().equals(environment.get("CMS_MAINTENANCE_NODE_BINARY")));
             String nodeSha=digest(nodeBinary);require(nodeSha.equals(text(state,"nodeBinarySha256"))&&nodeSha.equals(environment.get("CMS_MAINTENANCE_NODE_SHA256"))&&digest(guardScript).equals(environment.get("CMS_MAINTENANCE_GUARD_SHA256")));
             var stable=state.deepCopy();((ObjectNode)stable).remove(List.of("phase","boundBackend"));if(pinned==null)pinned=stable;else require(pinned.equals(stable));return state;
         } catch(Throwable failure) { if(failure instanceof Failure known)throw known;throw new Failure(FailureCode.QUIESCENCE_NOT_PROVEN); }
+    }
+    private static JsonNode sorted(JsonNode value) {
+        if(value.isObject()) {
+            var result=JSON.createObjectNode();var names=new ArrayList<String>();value.fieldNames().forEachRemaining(names::add);
+            Collections.sort(names);for(String name:names)result.set(name,sorted(value.get(name)));return result;
+        }
+        if(value.isArray()){var result=JSON.createArrayNode();value.forEach(item->result.add(sorted(item)));return result;}
+        return value;
+    }
+    private static byte[] canonical(JsonNode value) throws Exception {
+        return (JSON.writeValueAsString(sorted(value))+"\n").getBytes(java.nio.charset.StandardCharsets.UTF_8);
+    }
+    private static String sha(byte[] value) throws Exception {
+        return HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256").digest(value));
+    }
+    private static JsonNode canonicalJson(byte[] value) throws Exception {
+        var decoder=java.nio.charset.StandardCharsets.UTF_8.newDecoder();
+        var parsed=JSON.readTree(decoder.decode(java.nio.ByteBuffer.wrap(value)).toString());
+        require(parsed!=null&&Arrays.equals(value,canonical(parsed)));return parsed;
+    }
+    private static void utc(JsonNode value,String field) {
+        String at=text(value,field);require(at.matches("^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$"));
+        require(java.time.format.DateTimeFormatter.ofPattern("uuuu-MM-dd'T'HH:mm:ss.SSS'Z'")
+                .withZone(java.time.ZoneOffset.UTC).format(Instant.parse(at)).equals(at));
+    }
+    private JsonNode recoverProjection(JsonNode value,byte[] raw) throws Exception {
+        keys(value,"version,operationId,purpose,releaseId,phase,createdAt,requestSha256,source,sourceConnection,originalApiState,completionPolicy,target,helper,proof,account");
+        Object lockIdentity=Files.readAttributes(leaseFile.getParent().resolve("operation.lock"),java.nio.file.attribute.BasicFileAttributes.class,NOFOLLOW_LINKS).fileKey();
+        require(lockIdentity!=null);if(recoverLockPin==null)recoverLockPin=lockIdentity;else require(recoverLockPin.equals(lockIdentity));
+        require(canonicalJson(raw).equals(value)&&text(value,"purpose").equals("RECOVER_ADMIN")
+                &&value.get("target").isNull()&&value.get("helper").isNull()
+                &&text(value,"originalApiState").equals("stopped")&&text(value,"completionPolicy").equals("KEEP_STOPPED"));
+        require(text(value,"operationId").equals(operationId.toString()));utc(value,"createdAt");
+        var account=value.get("account");keys(account,"operation,phase,boundBackend");
+        require(text(account,"operation").equals("RECOVER_ADMIN")&&Set.of("PRE_CONNECTION","BOUND","COMMITTED").contains(text(account,"phase"))
+                &&text(value,"phase").equals("ACCOUNT_"+text(account,"phase")));
+        var source=value.get("source");keys(source,TARGET);var proof=value.get("proof");
+        keys(proof,"backupId,manifestSha256,bundleSetSha256,sourceInventorySha256,sourceIdentitySha256,restoreOperationId,restoreTargetId,rawComparisonSha256,sessionCommitSha256,smokeSha256,proofSha256");
+        require(text(proof,"backupId").matches("^pp1-\\d{8}T\\d{9}Z-[a-f0-9]{32}$"));
+        canonicalUuid(text(proof,"restoreOperationId"));require(text(proof,"restoreTargetId").matches("^pp1-local:[a-f0-9]{32}$"));
+        var names=proof.fieldNames();while(names.hasNext()){String name=names.next();if(name.endsWith("Sha256"))require(hex(text(proof,name),64));}
+        var preimage=proof.deepCopy();((ObjectNode)preimage).remove("proofSha256");
+        require(text(proof,"proofSha256").equals(sha(canonical(preimage)))&&text(proof,"sourceIdentitySha256").equals(sha(canonical(source))));
+        var request=canonicalJson(bytes(leaseFile.getParent().resolve("operations/"+operationId+".request.json"),true));
+        keys(request,"version,operationId,sourceRunId,purpose,targetRunId,incidentStartedAt,startedAt,environment");
+        require(request.path("version").isInt()&&request.path("version").intValue()==1
+                &&text(request,"operationId").equals(operationId.toString())&&text(request,"sourceRunId").equals(runId)
+                &&text(request,"purpose").equals("RECOVER_ADMIN")&&text(request,"startedAt").equals(text(value,"createdAt"))
+                &&request.get("targetRunId").isNull()&&request.get("incidentStartedAt").isNull()&&request.get("environment").isNull());
+        require(hex(text(value,"requestSha256"),64)&&text(value,"requestSha256").equals(sha(canonical(request))));
+        var stable=value.deepCopy();((ObjectNode)stable).remove("phase");
+        ((ObjectNode)stable.get("account")).remove(List.of("phase","boundBackend"));
+        if(recoverPin==null)recoverPin=stable;else require(recoverPin.equals(stable));
+        var result=(ObjectNode)source.deepCopy();result.set("connection",value.get("sourceConnection"));
+        for(String field:List.of("operationId","releaseId","createdAt"))result.set(field,value.get(field));
+        result.put("operation","RECOVER_ADMIN");result.set("phase",account.get("phase"));result.set("boundBackend",account.get("boundBackend"));
+        return result;
+    }
+    private void recoverJournal(JsonNode lease) throws Exception {
+        var journal=canonicalJson(bytes(leaseFile.getParent().resolve("operations/"+operationId+".json"),true));
+        keys(journal,"version,operationId,purpose,sourceTargetId,releaseId,records");
+        require(journal.path("version").isInt()&&journal.path("version").intValue()==2
+                &&text(journal,"operationId").equals(operationId.toString())&&text(journal,"purpose").equals("RECOVER_ADMIN")
+                &&text(journal,"sourceTargetId").equals(targetId)&&journal.get("releaseId").equals(lease.get("releaseId")));
+        var phases=List.of("PRECHECK","SOURCE_QUIESCED","PROOF_REVALIDATED","ACCOUNT_PRE_CONNECTION","ACCOUNT_BOUND","ACCOUNT_COMMITTED");
+        var records=journal.get("records");require(records.isArray()&&!records.isEmpty());int phase=0;boolean pending=false;
+        String previous=text(lease,"createdAt");int sequence=0;
+        for(var record:records) {
+            keys(record,"seq,event,phase,at,failureCode,leaseSha256,proofSha256");utc(record,"at");
+            require(text(record,"seq").equals(Integer.toString(++sequence))&&phase<phases.size()
+                    &&text(record,"phase").equals(phases.get(phase))&&text(record,"at").compareTo(previous)>=0
+                    &&record.get("failureCode").isNull()&&hex(text(record,"leaseSha256"),64));previous=text(record,"at");
+            require(phase<2?record.get("proofSha256").isNull():record.get("proofSha256").equals(lease.get("proof").get("proofSha256")));
+            if(text(record,"event").equals("BEGIN")){require(!pending);pending=true;}
+            else {require(text(record,"event").equals("END")&&pending);pending=false;phase++;}
+        }
+        var last=records.get(records.size()-1);
+        require(pending&&text(last,"phase").equals(text(lease,"phase"))&&text(last,"event").equals("BEGIN")
+                &&text(last,"leaseSha256").equals(sha(canonical(lease))));
+        if(recoverJournalPin!=null) {
+            require(records.size()>=recoverJournalPin.size());
+            for(int i=0;i<recoverJournalPin.size();i++)require(records.get(i).equals(recoverJournalPin.get(i)));
+        }
+        recoverJournalPin=records.deepCopy();
     }
     private void helper(String phase,String verb,String...flags) {
         var state=readLease();require(text(state,"phase").equals(phase));var argv=new ArrayList<>(List.of(nodeBinary.toString(),guardScript.toString(),verb,"--run-id",runId,"--operation-id",operationId.toString()));argv.addAll(List.of(flags));
@@ -138,22 +230,35 @@ public final class LocalMaintenanceGuard implements MaintenanceGuard, Maintenanc
         var state=readLease();require(text(state,"phase").equals("PRE_CONNECTION"));assertDataSourceDestination(environment.get("SPRING_DATASOURCE_URL"),environment.get("SPRING_DATASOURCE_USERNAME"));helper("PRE_CONNECTION","assert","--phase","pre-connection");
     }
     @Override public void bindBackend(int pid,String epoch) {
-        require(pid>0&&epoch!=null&&epoch.matches("^[1-9][0-9]*\\.[0-9]+$"));helper("PRE_CONNECTION","bind-backend","--pid",Integer.toString(pid),"--backend-start-epoch",epoch);
+        require(pid>0&&epoch!=null&&epoch.matches("^[1-9][0-9]*\\.[0-9]+$"));var state=readLease();
+        require(text(state,"phase").equals("PRE_CONNECTION"));
+        if(versionPin==2) {
+            require(backendPin==null);
+            backendPin=JSON.valueToTree(Map.of("pid",pid,"backendStartEpoch",epoch,"db","cms","role","cms_local",
+                    "clientAddr",text(state.get("connection"),"dataGateway"),"applicationName",operationId.toString()));
+        }
+        helper("PRE_CONNECTION","bind-backend","--pid",Integer.toString(pid),"--backend-start-epoch",epoch);
+        if(versionPin==2)require(text(readLease(),"phase").equals("BOUND"));
     }
-    @Override public void assertBound() { helper("BOUND","assert","--phase","bound"); }
+    @Override public void assertBound() {
+        var state=readLease();String phase=versionPin==2&&text(state,"phase").equals("COMMITTED")?"COMMITTED":"BOUND";
+        helper(phase,"assert","--phase","bound");
+    }
     void assertDataSourceDestination(String jdbcUrl,String username) {
         var state=readLease();require(text(state,"phase").equals("PRE_CONNECTION")&&text(state.get("connection"),"jdbcUrl").equals(jdbcUrl)&&"cms_local".equals(username));
     }
     @Override public Lease acquire(String target,UUID operation,Operation mode) {
-        if(mode==Operation.RECOVER_ADMIN)throw new Failure(FailureCode.RECOVERY_BACKUP_REQUIRED);
-        var state=readLease();require(targetId.equals(target)&&operationId.equals(operation)&&text(state,"operation").equals(mode.name()));assertBound();return new AttachedLease(text(state,"releaseId"));
+        var state=readLease();
+        if(mode==Operation.RECOVER_ADMIN&&versionPin!=2)throw new Failure(FailureCode.RECOVERY_BACKUP_REQUIRED);
+        require(targetId.equals(target)&&operationId.equals(operation)&&text(state,"operation").equals(mode.name()));assertBound();
+        return new AttachedLease(text(state,"releaseId"),versionPin==2?text(recoverPin.get("proof"),"backupId"):null);
     }
     private final class AttachedLease implements Lease {
-        private final String release;private boolean closed;
-        AttachedLease(String release){this.release=release;}
+        private final String release, backup;private boolean closed;
+        AttachedLease(String release,String backup){this.release=release;this.backup=backup;}
         @Override public String targetId(){return targetId;}
         @Override public String releaseId(){return release;}
-        @Override public String backupId(){return null;}
+        @Override public String backupId(){return backup;}
         @Override public void assertQuiesced(){require(!closed);assertBound();}
         @Override public void recordCommitted(Result result) {
             try {

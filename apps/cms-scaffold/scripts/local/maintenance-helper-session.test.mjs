@@ -2,7 +2,7 @@ import { EventEmitter } from 'node:events';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { PassThrough, Writable, Readable } from 'node:stream';
-import { canonicalBytes,sha256,parseStrictJson } from '../ops/recovery-protocol.mjs';
+import { OpsError,canonicalBytes,sha256,parseStrictJson } from '../ops/recovery-protocol.mjs';
 import { runJdbcHandshake, pgpassBytes, runPgTool } from './maintenance-helper.mjs';
 const op='aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee',hash='a'.repeat(64);
 function fixture(change=()=>{}) {
@@ -129,4 +129,25 @@ test('T152_handshake_Ready_for_image_substituted_release_is_not_jar_request_perm
     x.ready.requestSha256=sha256(canonicalBytes(imageRequest));});
   await assert.rejects(runJdbcHandshake(f.child,f.request,f.deps));assert.equal(f.sent.length,0);
   f.child.stdout.destroy();f.child.stderr.destroy();
+});
+
+test('T175_failed_mandatory_check_is_not_erased_by_concurrent_child_close',async()=>{
+ const f=pgFixture(),observe=f.deps.observe;let checks=0,closed=false;
+ f.deps.observe=async()=>closed?[]:observe();
+ f.deps.assertCurrent=async()=>{
+  if(++checks===2){closed=true;f.child.emit('close',0,null);throw Error('mandatory-observation-failed');}
+ };
+ try{await assert.rejects(runPgTool(f.child,f.deps),e=>e.code==='CAPTURE_FAILED');}
+ finally{f.stop();}
+});
+
+test('T188_final_synchronous_registry_gate_blocks_Permit_bytes',async()=>{
+  const f=fixture();let gates=0;f.deps.assertPermitGate=()=>{gates++;throw new OpsError('LOCK_BUSY');};
+  await assert.rejects(runJdbcHandshake(f.child,f.request,f.deps),{code:'LOCK_BUSY'});
+  assert.equal(gates,1);assert.equal(f.sent.length,0);f.child.stdout.destroy();f.child.stderr.destroy();
+});
+test('T188_final_synchronous_abort_gate_blocks_Permit_bytes',async()=>{
+  const f=fixture(),abort=new AbortController();f.deps.signal=abort.signal;f.deps.assertPermitGate=()=>abort.abort();
+  await assert.rejects(runJdbcHandshake(f.child,f.request,f.deps),{code:'INTERRUPTED'});
+  assert.equal(f.sent.length,0);f.child.stdout.destroy();f.child.stderr.destroy();
 });

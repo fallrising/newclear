@@ -216,12 +216,12 @@ test('PP1C_L05_unknown_version_and_noncanonical_v2_never_fall_back', async t => 
   await writeFile(path,` ${original}`);await assert.rejects(store.loadRegistry(run,f.deps));
 });
 import { dispatchGuard } from './maintenance-guard.mjs';
-test('PP1C_L05_v2_inspect_is_readonly_and_account_bridge_unsealed', async t => {
+test('PP1C_L05_v2_inspect_is_readonly_and_nonrecover_account_bridge_denied', async t => {
   const f=await registry(t),r=await store.reserveWorkflow(f.inspection,f.request,{...f.deps,originalApiState:'stopped'});
   await store.persistWorkflow(r,'BEGIN','PRECHECK',{},f.deps);await store.persistWorkflow(r,'END','PRECHECK',{},f.deps);
   const before=await readFile(join(f.root,'maintenance/lease.json'));
   assert.deepEqual(await dispatchGuard(['inspect','--run-id',run],f.deps),{operationId:op,phase:'PRECHECK'});
-  await assert.rejects(dispatchGuard(['assert','--run-id',run,'--operation-id',op,'--phase','pre-connection'],f.deps),/ADAPTER_UNSEALED/);
+  await assert.rejects(dispatchGuard(['assert','--run-id',run,'--operation-id',op,'--phase','pre-connection'],f.deps),error=>error.message==='QUIESCENCE_NOT_PROVEN');
   assert.deepEqual(await readFile(join(f.root,'maintenance/lease.json')),before);
 });
 test('PP1C_L04_invalid_request_is_rejected_before_registry_mkdir',async t=>{
@@ -241,4 +241,70 @@ test('PP1C_H02b1_endpoint_state_null_matrix',()=>{
     if(state==='CREATED'?!hasEndpoint:state==='EXITED'||hasEndpoint)assert.equal(store.validateLeaseV2(l),l);
     else assert.throws(()=>store.validateLeaseV2(l));
   }
+});
+
+
+function dRestartLease() {
+  const value = restoreLease();
+  value.phase = 'RESTART_VERIFIED';
+  Object.assign(value.target, {creationPhase: 'BLANK_VERIFIED', identity: target(value.target.runId),
+    connection: connection(), preparationSha256: hash, createdResourceSetSha256: hash});
+  value.target.identity.containerIds = {postgres: '6'.repeat(64), 'cms-api': '7'.repeat(64), ingress: '8'.repeat(64)};
+  value.target.identity.networkIds = {web: '9'.repeat(64), data: '0'.repeat(64)};
+  return value;
+}
+function dCompleteProof(value) {
+  const data = {backupId: `pp1-20261101T180000000Z-${run}`, manifestSha256: hash, bundleSetSha256: hash,
+    sourceInventorySha256: hash, sourceIdentitySha256: sha256(canonicalBytes(value.source)),
+    restoreOperationId: op, restoreTargetId: value.target.targetId, rawComparisonSha256: hash,
+    sessionCommitSha256: hash, smokeSha256: hash};
+  return {...data, proofSha256: sha256(canonicalBytes(data))};
+}
+function dRestartJournal(value, end = false, premature = false) {
+  const records = [], phases = store.WORKFLOW_PHASES.RESTORE_VERIFY_LOCAL;
+  for (const phase of phases.slice(0, phases.indexOf('RESTART_VERIFIED') + 1)) {
+    for (const event of phase === 'RESTART_VERIFIED' && !end ? ['BEGIN'] : ['BEGIN', 'END']) {
+      const carriesProof = phase === 'RESTART_VERIFIED' && (event === 'END' || premature);
+      records.push({seq: String(records.length + 1), event, phase, at, failureCode: null,
+        leaseSha256: sha256(canonicalBytes(value)), proofSha256: carriesProof ? value.proof?.proofSha256 ?? null : null});
+    }
+  }
+  return {version: 2, operationId: op, purpose: value.purpose, sourceTargetId: value.source.targetId,
+    releaseId: value.releaseId, records};
+}
+test('PP1C_D_restart_BEGIN_keeps_proof_null_until_actual_checks_complete', () => {
+  const value = dRestartLease();
+  assert.equal(store.validateLeaseV2(value), value);
+  const journal = dRestartJournal(value);
+  assert.equal(store.validateJournalV2(journal, value, {allowPending: true}), journal);
+});
+test('PP1C_D_restart_successful_END_requires_complete_proof', () => {
+  const value = dRestartLease();
+  assert.throws(() => store.validateJournalV2(dRestartJournal(value, true), value), /JOURNAL_INCOMPLETE/);
+  value.proof = dCompleteProof(value);
+  const journal = dRestartJournal(value, true);
+  assert.equal(store.validateJournalV2(journal, value), journal);
+});
+test('PP1C_D_restart_BEGIN_cannot_claim_proof_before_restart_inventory', () => {
+  const value = dRestartLease(); value.proof = dCompleteProof(value);
+  assert.throws(() => store.validateJournalV2(dRestartJournal(value, false, true), value, {allowPending: true}), /JOURNAL_INCOMPLETE/);
+});
+test('PP1C_D_proof_remains_forbidden_early_and_required_at_COMPLETE', () => {
+  const value = dRestartLease(); value.phase = 'TARGET_STOPPED'; value.proof = dCompleteProof(value);
+  assert.throws(() => store.validateLeaseV2(value), /INPUT_INVALID/);
+  value.phase = 'COMPLETE'; value.proof = null;
+  assert.throws(() => store.validateLeaseV2(value), /INPUT_INVALID/);
+});
+
+test('PP1c_RTO_store_anchor_binds_unchanged_request_and_actual_journal_times',async t=>{
+  const f=await registry(t),startedAt=new Date(Date.parse(at)-600000).toISOString();
+  Object.assign(f.request,{purpose:'RESTORE_VERIFY_LOCAL',completionPolicy:'KEEP_STOPPED',targetRunId:'d'.repeat(32),incidentStartedAt:startedAt});
+  const record=await store.reserveWorkflow(f.inspection,f.request,{...f.deps,originalApiState:'stopped',workflowStartedAt:startedAt});
+  assert.equal(record.request.startedAt,startedAt);assert.equal(record.lease.createdAt,startedAt);
+  await store.persistWorkflow(record,'BEGIN','PRECHECK',{},f.deps);assert.equal(record.journal.records[0].at,at);
+  assert.deepEqual(Object.keys(record.request).sort(),'version operationId sourceRunId purpose targetRunId incidentStartedAt startedAt environment'.split(' ').sort());
+});
+for(const anchor of ['invalid',new Date(Date.parse(at)+1).toISOString()])test(`PP1c_RTO_store_rejects_invalid_or_future_anchor_${anchor}`,async t=>{
+  const f=await registry(t);Object.assign(f.request,{purpose:'RESTORE_VERIFY_LOCAL',completionPolicy:'KEEP_STOPPED',targetRunId:'d'.repeat(32),incidentStartedAt:at});
+  await assert.rejects(store.reserveWorkflow(f.inspection,f.request,{...f.deps,originalApiState:'stopped',workflowStartedAt:anchor}),e=>e.code==='OBJECTIVE_UNKNOWN');
 });

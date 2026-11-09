@@ -2,7 +2,7 @@ import { OpsError, canonicalBytes, parseStrictJson, sha256 } from '../ops/recove
 import { isIP } from 'node:net';
 import { execFile, spawn } from 'node:child_process';
 import { promisify } from 'node:util';
-import { Readable, Transform, Writable } from 'node:stream';
+import { Readable, Transform, Writable, PassThrough } from 'node:stream';
 import { pipeline } from 'node:stream/promises';
 import { createHash } from 'node:crypto';
 import { constants } from 'node:fs';
@@ -11,6 +11,14 @@ import { join, dirname } from 'node:path';
 import { directory, syncDirectory } from './maintenance-store.mjs';
 import { validateInventory } from '../ops/local-media.mjs';
 const requirePolicy = value => { if (!value) throw new OpsError('ADAPTER_UNSEALED'); };
+const pgLiveWitnesses=new WeakMap();
+const readonlyCleanupLifecycles=new WeakSet();
+export function claimPgLiveWitness(witness,token,sequence,helper,policy) {
+  const w=pgLiveWitnesses.get(witness);requirePolicy(w&&!w.claimed&&w.token===token&&w.sequence===sequence
+    &&w.id===helper.fullContainerId&&w.policySha256===helper.policySha256&&same(w.policy,policy)
+    &&same(w.backend,helper.backend)&&same(w.endpoint,helper.endpoint)&&helper.state==='RUNNING');
+  w.claimed=true;return {sampleRaw:w.sampleRaw};
+}
 const same = (a,b) => canonicalBytes(a).equals(canonicalBytes(b));
 const empty = value => value == null || Object.keys(value).length === 0;
 const pathSafe = value => typeof value === 'string' && value.startsWith('/')
@@ -18,7 +26,12 @@ const pathSafe = value => typeof value === 'string' && value.startsWith('/')
 const imageId = value => /^sha256:[a-f0-9]{64}$/.test(value);
 const fullId = value => typeof value === 'string' && /^[a-f0-9]{64}$/.test(value);
 const sides = { INVENTORY:['source','target'], REVOKE_SESSIONS:['target'], PG_DUMP:['source'],
-  PG_RESTORE:['target'], MEDIA_PACK:['source'], MEDIA_RESTORE:['target'] };
+  PG_RESTORE:['target'], MEDIA_PACK:['source'], MEDIA_RESTORE:['target'], BROWSER:['target'] };
+const browserEnvironment = {
+  CMS_PP1_SUITE: 'recovery', CMS_PP1_TLS_MODE: 'trusted', CMS_PP1_RECOVERY_INPUT: '/fixture/browser.json',
+  CMS_PP1_CREDENTIAL_SOCKET: '/run/pp1/credential.sock', CMS_PP1_CHROMIUM: '/chromium/chrome',
+  CMS_PP1_RUN_ROOT: '/fixture', HOME: '/tmp/browser-home', XDG_CACHE_HOME: '/tmp/browser-cache'
+};
 
 const pgDataPath='/var/lib/postgresql/data';
 const pgDataOptions='ro,nosuid,nodev,noexec,size=1048576';
@@ -34,7 +47,7 @@ function assertImageVolumes(image,pg,mounts=[]) {
   }
 }
 function helperTmpfs(policy,expected) {
-  const values={'/tmp':'rw,nosuid,nodev,size=67108864'};
+  const values={'/tmp':policy.kind==='BROWSER'?'rw,nosuid,nodev,size=536870912':'rw,nosuid,nodev,size=67108864'};
   const version=Object.hasOwn(pgVersions,policy.kind);
   if(version) {
     requirePolicy(imageId(expected.pgProfileImageId)&&policy.imageId===expected.pgProfileImageId);
@@ -51,8 +64,8 @@ export function buildHelperPolicy(c) {
     requirePolicy(sides[kind]?.includes(side) && [q,runRoot,cwd,nodeBinary].every(pathSafe));
     requirePolicy(Number.isSafeInteger(c.uid) && c.uid >= 0 && Number.isSafeInteger(c.gid) && c.gid >= 0);
     requirePolicy(/^[a-f0-9]{8}(-[a-f0-9]{4}){3}-[a-f0-9]{12}$/.test(c.operationId) && /^[1-9][0-9]*$/.test(c.seq));
-    const pg = kind.startsWith('PG_'), media = kind.startsWith('MEDIA_');
-    const selected = target.images[pg ? 'postgres' : media ? 'node' : 'api'];
+    const pg = kind.startsWith('PG_'), media = kind.startsWith('MEDIA_'), browser = kind === 'BROWSER';
+    const selected = target.images[pg ? 'postgres' : media || browser ? 'node' : 'api'];
     requirePolicy(imageId(selected) && image.Id === selected && image.Os === 'linux');
     requirePolicy(image.Config && Array.isArray(image.Config.Env));
     requirePolicy(!Object.keys(image.Config.Labels ?? {}).some(k => k.startsWith('org.cms.pp1c.')));
@@ -62,10 +75,22 @@ export function buildHelperPolicy(c) {
       const name = pair.slice(0,pair.indexOf('=')); requirePolicy(!variables.has(name)); variables.set(name,pair);
     }
     if (pg) for (const pair of ['PGPASSFILE=/run/pp1/pgpass',`PGAPPNAME=${c.operationId}`,'PGCONNECT_TIMEOUT=15']) variables.set(pair.slice(0,pair.indexOf('=')),pair);
+    if (browser) for (const [name, value] of Object.entries(browserEnvironment)) variables.set(name, `${name}=${value}`);
     let args, entrypoint, user = `${c.uid}:${c.gid}`;
     const mounts = [], bind = (source,destination,readOnly=true) => mounts.push({type:'bind',source,destination,readOnly});
     const volume = readOnly => mounts.push({type:'volume',source:target.volumeNames['media-data'],destination:'/media',readOnly});
-    if (pg) {
+    if (browser) {
+      const material = c.browser;
+      requirePolicy(material && same(Object.keys(material).sort(), 'worktreeRoot chromiumRoot nssToolsRoot caFile inputFile socketFile'.split(' ').sort())
+        && Object.values(material).every(pathSafe));
+      requirePolicy(material.worktreeRoot === `${q}/browser-worktree` && material.inputFile === `${q}/browser.json`
+        && material.caFile === `${runRoot}/tls/ca.crt` && /^\/tmp\/cms-pp1c-[^/]+\/credential\.sock$/.test(material.socketFile)
+        && Buffer.byteLength(material.socketFile) <= 100);
+      entrypoint = '/opt/pp1-node'; args = ['/work/scripts/ops/local-restore-smoke.mjs', 'browser-child'];
+      for (const [source, destination] of [[nodeBinary, '/opt/pp1-node'], [material.worktreeRoot, '/work'],
+        [material.chromiumRoot, '/chromium'], [material.nssToolsRoot, '/nss-tools'], [material.caFile, '/fixture/ca.crt'],
+        [material.inputFile, '/fixture/browser.json'], [material.socketFile, '/run/pp1/credential.sock']]) bind(source, destination);
+    } else if (pg) {
       entrypoint = `/usr/local/bin/${kind === 'PG_DUMP' ? 'pg_dump' : 'pg_restore'}`;
       args = ['--host=postgres','--port=5432','--username=cms_local','--dbname=cms','--format=custom',
         ...(kind === 'PG_RESTORE' ? ['--single-transaction','--exit-on-error'] : []),
@@ -83,10 +108,10 @@ export function buildHelperPolicy(c) {
       if (kind === 'INVENTORY') { volume(true); bind(`${q}/output`,'/run/pp1/output',false); }
     }
     assertImageVolumes(image,pg,mounts);
-    requirePolicy(media || fullId(target.networkIds.data));
+    requirePolicy(media || fullId(target.networkIds[browser?'web':'data']));
     return {version:1,kind,side,imageId:selected,user,entrypoint,args,env:[...variables.values()].sort(),
       mounts:mounts.sort((a,b)=>Buffer.compare(Buffer.from(a.destination),Buffer.from(b.destination))),
-      networkId:media?null:target.networkIds.data,readOnlyRootfs:true,capDrop:['ALL'],noNewPrivileges:true,restart:'no',logDriver:'none'};
+      networkId:media?null:target.networkIds[browser?'web':'data'],readOnlyRootfs:true,capDrop:['ALL'],noNewPrivileges:true,restart:'no',logDriver:'none'};
   } catch { throw new OpsError('ADAPTER_UNSEALED'); }
 }
 
@@ -99,6 +124,7 @@ export function helperCreateArgs(policy, expected) {
   args.push('--interactive');
   for (const m of policy.mounts) args.push('--mount',`type=${m.type},src=${m.source},dst=${m.destination}${m.readOnly?',readonly':''}`);
   if (policy.kind.startsWith('PG_')) for (const pair of policy.env.filter(x=>/^(PGPASSFILE|PGAPPNAME|PGCONNECT_TIMEOUT)=/.test(x))) args.push('--env',pair);
+  if (policy.kind==='BROWSER') for (const pair of policy.env.filter(x=>Object.hasOwn(browserEnvironment,x.slice(0,x.indexOf('='))))) args.push('--env',pair);
   args.push(`--entrypoint=${policy.entrypoint}`,policy.imageId,...policy.args); return args;
 }
 
@@ -123,7 +149,8 @@ export function assertHelperPolicy(container, policy, expected) {
     }
     const networks=Object.entries(n.Networks??{});
     if(policy.networkId) {
-      requirePolicy(typeof expected.dataNetworkName==='string'&&networks.length===1&&networks[0][0]===expected.dataNetworkName);
+      const networkName = policy.kind==='BROWSER'?expected.webNetworkName:expected.dataNetworkName;
+      requirePolicy(typeof networkName==='string'&&networks.length===1&&networks[0][0]===networkName);
       const endpoint=networks[0][1];
       if(expected.state==='running') {
         const [a,b]=String(endpoint.IPAddress).split('.').map(Number);
@@ -175,11 +202,12 @@ async function deadline(promise, milliseconds) {
 export async function executeHelperLifecycle(policy, expected, consume, deps = {}) {
   const env=helperEnvironment(deps.environment), command=deps.command??execute;
   const abort=new AbortController(), prefix=['--host','unix:///var/run/docker.sock'];
-  let id, owned=false, child, exit, interrupted=false, cleaned=false, rejectAbort;
+  let id, owned=false, child, ioChild, exited=false, exit, interrupted=false, cleaned=false, rejectAbort;
   const abortFailure=()=>rejectAbort?.(new OpsError('INTERRUPTED'));
   const aborted=new Promise((_,reject)=>{rejectAbort=reject;});aborted.catch(()=>{});
   abort.signal.addEventListener('abort',abortFailure,{once:true});
   const cancel=()=>{interrupted=true;abort.abort();};
+  deps.signal?.addEventListener('abort',cancel,{once:true});if(deps.signal?.aborted)cancel();
   const docker=async(args,allowMissing=false)=>{
     let value;
     try { value=await command('docker',[...prefix,...args],{env,shell:false,timeout:30000,maxBuffer:16*1024*1024}); }
@@ -203,23 +231,33 @@ export async function executeHelperLifecycle(policy, expected, consume, deps = {
   };
   process.once('SIGINT',cancel);process.once('SIGTERM',cancel);
   try {
-    id=String(await docker(helperCreateArgs(policy,expected))).trim();requirePolicy(fullId(id)&&!interrupted);
+    if(interrupted)throw new OpsError('INTERRUPTED');
+    id=String(await docker(helperCreateArgs(policy,expected))).trim();requirePolicy(fullId(id));
     expected={...expected,fullContainerId:id};const created=await inspect('created');owned=true;
-    await deps.onCreated?.(id,created,expected);
+    await deps.onCreated?.(id,created,expected);if(interrupted)throw new OpsError('INTERRUPTED');
+    deps.beforeStart?.();
     child=(deps.spawn??spawn)('docker',[...prefix,'start','--attach','--interactive',id],
       {env,shell:false,stdio:['pipe','pipe','pipe']});
-    exit=new Promise((resolve,reject)=>{child.once('error',reject);child.once('close',(code,signal)=>resolve({code,signal}));});
+    exit=new Promise((resolve,reject)=>{child.once('error',reject);child.once('close',(code,signal)=>{exited=true;resolve({code,signal});});});
     // Attach an early rejection handler while startup inspection is in flight.
     exit.catch(()=>{});
+    ioChild=child;
+    if(['PG_DUMP','PG_RESTORE'].includes(policy.kind)) {
+      const stdout=new PassThrough({highWaterMark:65536}),stderr=new PassThrough({highWaterMark:65536});
+      for(const [source,destination]of [[child.stdout,stdout],[child.stderr,stderr]]) {
+        destination.on('error',()=>{});pipeline(source,destination).catch(()=>{});
+      }
+      ioChild={stdin:child.stdin,stdout,stderr};
+    }
     const until=Date.now()+30000;let running;
     while(!running) {
-      const snapshot=await inspect();requirePolicy(!interrupted&&Date.now()<until);
+      const snapshot=await inspect();if(interrupted)throw new OpsError('INTERRUPTED');requirePolicy(Date.now()<until);
       if(snapshot.State.Status==='running') running=snapshot;
       else { requirePolicy(snapshot.State.Status==='created');await (deps.pause??pause)(50); }
     }
-    await deps.onRunning?.(id,running);
+    await deps.onRunning?.(id,running,{child:ioChild,exit,isExited:()=>exited,signal:abort.signal});if(interrupted)throw new OpsError('INTERRUPTED');
     const limit=['PG_DUMP','PG_RESTORE','MEDIA_PACK','MEDIA_RESTORE'].includes(policy.kind)?7200000:600000;
-    const result=await deadline(Promise.race([Promise.all([consume(child,{id,container:running,policy,signal:abort.signal}),exit]),aborted]),limit);
+    const result=await deadline(Promise.race([Promise.all([consume(ioChild,{id,container:running,policy,signal:abort.signal}),exit]),aborted]),limit);
     if(interrupted) throw new OpsError('INTERRUPTED');
     if(result[1].code!==0||result[1].signal!==null||String(await docker(['wait',id])).trim()!=='0') throw new OpsError('CAPTURE_FAILED');
     const stopped=await inspect('exited');
@@ -228,6 +266,7 @@ export async function executeHelperLifecycle(policy, expected, consume, deps = {
   } catch(error) {
     if(owned&&!cleaned) {
       try {
+        await deps.onCleanup?.(id);
         let current=await inspect();
         if(current.State.Running) {
           try { await docker(['stop','--time','30',id]); }
@@ -237,14 +276,18 @@ export async function executeHelperLifecycle(policy, expected, consume, deps = {
         if(current.State.Status==='created') {
           await docker(['rm',id]);requirePolicy(await docker(['inspect',id],true)===null);cleaned=true;
           await deps.onRemoved?.(id);
-        } else { await deps.onExited?.(id,current);await remove(); }
+        } else {
+          if(!readonlyCleanupLifecycles.has(deps))await deps.onExited?.(id,current);
+          await remove();
+        }
       } catch { /* Unknown identity/cleanup keeps its durable registration and lock. */ }
     }
     if(error instanceof OpsError) throw error;
     throw new OpsError(interrupted?'INTERRUPTED':'CAPTURE_FAILED');
   } finally {
     if(child) { child.stdin?.destroy();child.stdout?.destroy();child.stderr?.destroy(); }
-    abort.signal.removeEventListener('abort',abortFailure);
+    if(ioChild!==child){ioChild?.stdout.destroy();ioChild?.stderr.destroy();}
+    abort.signal.removeEventListener('abort',abortFailure);deps.signal?.removeEventListener('abort',cancel);
     process.removeListener('SIGINT',cancel);process.removeListener('SIGTERM',cancel);
   }
 }
@@ -300,8 +343,10 @@ export async function runJdbcHandshake(child,request,deps) {
     await deps.onReady(ready.backend);await deps.assertCurrent();
     const permit={version:1,operationId:request.operationId,requestSha256:requestHash,
       backendSha256:sha256(canonicalBytes(ready.backend)),action:request.mode==='INVENTORY'?'READ_INVENTORY':'REVOKE_SESSIONS'};
-    await deps.onPermitted(ready.backend);
-    await pipeline(Readable.from([canonicalBytes(permit)]),child.stdin);
+    await deps.onPermitted(ready.backend);await deps.assertCurrent();
+    if(deps.signal?.aborted)throw new OpsError('INTERRUPTED');
+    deps.assertPermitGate?.();
+    await pipeline(Readable.from([canonicalBytes(permit)]),child.stdin,...(deps.signal?[{signal:deps.signal}]:[]));
     let closed=false;
     const drainRead=async()=>{
       const next=reader.next().then(item=>({item}));
@@ -333,6 +378,7 @@ export async function runJdbcHandshake(child,request,deps) {
     const remaining=await deps.observe();requireHandshake(Array.isArray(remaining)&&remaining.length===0);return result;
   } catch(error) {
     if(error instanceof OpsError&&error.code==='INTERRUPTED') throw error;
+    if(error?.name==='AbortError'&&deps.signal?.aborted)throw new OpsError('INTERRUPTED');
     if(stderr&&child.stdout.readableEnded) {
       const code=await deadline(stderr,30000).catch(()=>null);
       if(typeof code==='string'&&/^[A-Z_]+\n$/.test(code)) {
@@ -361,7 +407,10 @@ export async function runPgTool(child,deps) {
   const safe=()=>new OpsError('CAPTURE_FAILED');
   try {
     requireHandshake(['PG_DUMP','PG_RESTORE'].includes(deps.policy.kind));
-    const exit=new Promise((resolve,reject)=>{child.once('error',reject);child.once('close',(code,signal)=>{processEnded=true;resolve({code,signal});});});exit.catch(()=>{});
+    const witness=deps.liveWitness?pgLiveWitnesses.get(deps.liveWitness):null;
+    if(deps.liveWitness)requireHandshake(witness?.claimed&&!witness.seeded&&witness.child===child&&same(witness.policy,deps.policy));
+    if(witness){witness.seeded=true;pinned=structuredClone(witness.backend);processEnded=witness.isExited();}
+    const exit=witness?witness.exit.then(value=>{processEnded=true;return value;}):new Promise((resolve,reject)=>{child.once('error',reject);child.once('close',(code,signal)=>{processEnded=true;resolve({code,signal});});});exit.catch(()=>{});
     const count=new Transform({transform(chunk,_encoding,callback){bytes+=BigInt(chunk.length);hash.update(chunk);callback(null,chunk);}});
     const diagnostics=new Transform({transform(chunk,_encoding,callback){diagnosticBytes+=chunk.length;
       if(diagnosticBytes>4194304)callback(safe());else callback(null,chunk);}});
@@ -369,14 +418,13 @@ export async function runPgTool(child,deps) {
     if(deps.policy.kind==='PG_DUMP') {
       child.stdin.end();streams.push(pipeline(child.stdout,count,deps.output,{signal:abort.signal}));
     } else {
-      requireHandshake(deps.input);streams.push(pipeline(deps.input,child.stdin,{signal:abort.signal}));
+      requireHandshake(deps.input);streams.push(witness?.inputTransfer??pipeline(deps.input,child.stdin,{signal:abort.signal}));
       streams.push(pipeline(child.stdout,new Writable({write(chunk,_encoding,callback){callback(chunk.length?safe():null);}}),{signal:abort.signal}));
     }
     const completion=Promise.all([...streams,exit]).then(values=>{ended=true;const result=values.at(-1);
       requireHandshake(result.code===0&&result.signal===null);return result;});completion.catch(()=>{});
     while(!ended&&!processEnded) {
-      let current;
-      try { current=await deps.assertCurrent(); } catch(error) { if(processEnded) break;throw error; }
+      const current=await deps.assertCurrent();
       if(processEnded) break;
       if(current?.helperBackendEnded)missing=true;
       if(current?.lease?.helper?.state==='EXITED'){processEnded=true;break;}
@@ -440,16 +488,26 @@ class Profile { public static void main(String[] args) throws Exception {
 }}
 `;
 const nodeProfile=`const f=require('node:fs');if(f.readFileSync('/probe/input','utf8')!=='synthetic')throw Error();const p='/probe/output/node';const d=f.openSync(p,'wx',0o600);f.writeSync(d,'synthetic');f.fsyncSync(d);f.closeSync(d);const q=f.openSync('/probe/output','r');f.fsyncSync(q);f.closeSync(q);console.log(JSON.stringify({node:process.version,uid:process.getuid(),gid:process.getgid(),privateFiles:true,directoryFsync:true}));`;
-export async function probeHelperProfile(c,deps={}) {
+export async function probeHelperProfile(c,deps={}) {return probeProfileCore(c,deps);}
+async function probeProfileCore(c,deps={},observation=null) {
+  const guard=async()=>{if(observation){await observation.owner.assertObservation(observation.token,deps);observation.owner.assertObservationGate(observation.token);}};
   const env=helperEnvironment(deps.environment),command=deps.command??execute,base=join(c.helperRoot,'profile');
-  const docker=async args=>{const result=await command('docker',['--host','unix:///var/run/docker.sock',...args],
-    {env,shell:false,timeout:30000,maxBuffer:16384});requirePolicy(result.code===undefined||result.code===0);return result.stdout;};
+  const docker=async args=>{
+    if(['image','volume','network','exec','create','start'].includes(args[0]))await guard();
+    if(deps.signal?.aborted&&!['inspect','stop','wait','rm','kill'].includes(args[0]))throw new OpsError('INTERRUPTED');
+    if(observation&&['create','start'].includes(args[0]))observation.owner.assertObservationGate(observation.token);
+    const result=await command('docker',['--host','unix:///var/run/docker.sock',...args],
+    {env,shell:false,timeout:30000,maxBuffer:16384,...(args[0]==='start'&&deps.signal?{signal:deps.signal}:{})});requirePolicy(result.code===undefined||result.code===0);
+    if(['image','volume','network','exec','start'].includes(args[0]))await guard();return result.stdout;};
   try {
+    await guard();
     await directory(c.helperRoot);await mkdir(base,{mode:0o700});await mkdir(join(base,'output'),{mode:0o700});
     await privateBytes(join(base,'input'),Buffer.from('synthetic'));await privateBytes(join(base,'Profile.java'),Buffer.from(javaProfile));
     const compiler=env.JAVA_HOME?join(env.JAVA_HOME,'bin/javac'):'javac';
-    const compile=async args=>{const result=await command(compiler,args,{env,shell:false,timeout:30000,maxBuffer:16384});
-      requirePolicy(result.code===undefined||result.code===0);return `${result.stdout??''}${result.stderr??''}`.trim();};
+    const compile=async args=>{await guard();if(deps.signal?.aborted)throw new OpsError('INTERRUPTED');
+      if(observation)observation.owner.assertObservationGate(observation.token);
+      const result=await command(compiler,args,{env,shell:false,timeout:30000,maxBuffer:16384,...(deps.signal?{signal:deps.signal}:{})});
+      requirePolicy(result.code===undefined||result.code===0);await guard();return `${result.stdout??''}${result.stderr??''}`.trim();};
     requirePolicy(/^javac 25(?:[.+]|$)/.test(await compile(['-version'])));
     const classes=join(base,'classes');await mkdir(classes,{mode:0o700});
     await compile(['--release','25','-d',classes,join(base,'Profile.java')]);
@@ -458,12 +516,14 @@ export async function probeHelperProfile(c,deps={}) {
     await chmod(compiled,0o600);const classArtifact=await artifact(compiled),sourceArtifact=await artifact(join(base,'Profile.java'));
     requirePolicy(sourceArtifact.sha256===sha256(Buffer.from(javaProfile)));
     await privateBytes(join(base,'compile.json'),canonicalBytes({sourceSha256:sourceArtifact.sha256,classSha256:classArtifact.sha256,uid:c.uid,gid:c.gid}));
+    await guard();
     const volume=c.target.volumeNames['media-data'],volumes=JSON.parse(await docker(['volume','inspect',volume]));
     requirePolicy(volumes.length===1&&volumes[0].Name===volume);
     const mount=(source,destination,type='bind',readOnly=true)=>({source,destination,type,readOnly});
     const io=[mount(join(base,'input'),'/probe/input'),mount(join(base,'output'),'/probe/output','bind',false)];
     let seq=0;
     const probe=async(kind,executable,args,mounts=[],defaultUser=false)=>{
+      const step=seq+1,reservation=observation?await observation.owner.reserveObservationHelper(observation.token,{step},deps):null;
       const imageId=c.target.images[kind],images=JSON.parse(await docker(['image','inspect',imageId]));
       requirePolicy(images.length===1&&images[0].Id===imageId&&images[0].Os==='linux');const image=images[0];
       assertImageVolumes(image,kind==='postgres',mounts);
@@ -478,22 +538,33 @@ export async function probeHelperProfile(c,deps={}) {
       const expected={name:`cms-pp1c-${c.operationId}-${c.seq}-profile-${++seq}`,labels:{...(image.Config.Labels??{}),
         'org.cms.pp1c.operation':c.operationId,'org.cms.pp1c.seq':c.seq,'org.cms.pp1c.kind':role,'org.cms.pp1c.policy':sha256(canonicalBytes(policy))},
         volumeMountpoints:{[volume]:volumes[0].Mountpoint},pgProfileImageId:c.target.images.postgres,noneNetworkId:await inspectNoneNetwork(docker)};
-      let id,owned=false;
+      if(observation)expected.profileArtifacts={sourceSha256:sourceArtifact.sha256,classSha256:classArtifact.sha256,nodeProfileSha256:sha256(Buffer.from(nodeProfile))};
+      let id,owned=false,registered;
       const inspect=async state=>{const rows=JSON.parse(await docker(['inspect',id]));requirePolicy(rows.length===1);
         assertHelperPolicy(rows[0],policy,{...expected,fullContainerId:id,state});return rows[0];};
       try {
         id=String(await docker(helperCreateArgs(policy,expected))).trim();requirePolicy(fullId(id));await inspect('created');owned=true;
         await privateBytes(join(base,`probe-${seq}.json`),canonicalBytes({fullContainerId:id,policySha256:sha256(canonicalBytes(policy))}));
+        if(observation){
+          const created=readonlyCreation(observation.token,reservation,c,step,id,policy,expected);registered=created.helper;
+          await observation.owner.registerObservationHelper(observation.token,created.ticket,reservation,deps);
+        }
+        if(observation)await observation.owner.beginObservationProfile(observation.token,reservation,deps);
         const output=await docker(['start','--attach','--interactive',id]);const stopped=await inspect('exited');requirePolicy(stopped.State.ExitCode===0);
+        if(observation){registered={...registered,state:'EXITED'};await observation.owner.updateObservationHelper(observation.token,registered,deps);}
         await docker(['rm',id]);owned=false;
         let missing;try{missing=await command('docker',['--host','unix:///var/run/docker.sock','inspect',id],{env,shell:false,timeout:30000,maxBuffer:16384});}catch(error){missing=error;}
         requirePolicy(missing.code===1&&[`Error: No such object: ${id}`,`error: no such object: ${id}`,`Error response from daemon: No such container: ${id}`].includes(String(missing.stderr??'').trim()));
+        if(observation)await observation.owner.clearObservationHelper(observation.token,deps);
         return String(output);
       }catch(error){
-        if(owned)try{const rows=JSON.parse(await docker(['inspect',id]));requirePolicy(rows.length===1);
+        if(owned)try{
+          if(observation){const own=await observation.owner.observationCleanupContext(observation.token,reservation,deps);requirePolicy(own.helper.fullContainerId===id);}
+          const rows=JSON.parse(await docker(['inspect',id]));requirePolicy(rows.length===1);
           const state=rows[0].State.Status;await inspect(state);
           if(state==='running'){await docker(['stop','--time','30',id]);await docker(['wait',id]);await inspect('exited');}
           await docker(['rm',id]);
+          if(observation)await observation.owner.clearObservationHelper(observation.token,deps);
         }catch{/* Retain unknown identity and private probe record. */}
         throw error;
       }
@@ -510,8 +581,8 @@ export async function probeHelperProfile(c,deps={}) {
     const serverNumber=String(await docker(['exec',c.target.containerIds.postgres,'psql','-X','-q','-t','-A','-U','cms_local','-d','cms','-c','SHOW server_version_num;'])).trim();
     requirePolicy(pgDumpVersion&&pgRestoreVersion&&/^[0-9]+$/.test(uid)&&/^[0-9]+$/.test(gid)
       &&/^16[.][0-9]+(?:[.][0-9]+)?(?: [^\r\n]+)?$/.test(postgresServerVersion)&&/^16[0-9]{4}$/.test(serverNumber));
-    return {javaRuntimeVersion:java.javaRuntimeVersion,pgDumpVersion,pgRestoreVersion,postgresServerVersion,mediaUser:`${uid}:${gid}`};
-  }catch{throw new OpsError('ADAPTER_UNSEALED');}
+    await guard();return {javaRuntimeVersion:java.javaRuntimeVersion,pgDumpVersion,pgRestoreVersion,postgresServerVersion,mediaUser:`${uid}:${gid}`};
+  }catch(error){throw new OpsError(error?.code==='INTERRUPTED'||error?.name==='AbortError'&&deps.signal?.aborted?'INTERRUPTED':'ADAPTER_UNSEALED');}
 }
 
 function fileSink(handle) {
@@ -529,6 +600,34 @@ async function mediaScriptHash(c) {
   }finally{await handle.close();}
 }
 const helperRuns=new WeakMap(),inventoryResults=new WeakMap(),sessionCommits=new WeakMap();
+const readonlyCreations=new WeakMap(),readonlyRuns=new WeakMap(),readonlyResults=new WeakMap();
+function immutable(value) {
+  if(value&&typeof value==='object'){for(const child of Object.values(value))immutable(child);Object.freeze(value);}return value;
+}
+function readonlyCreation(token,reservation,c,step,id,policy,expected) {
+  requirePolicy(reservation&&fullId(id)&&Number.isInteger(step)&&step>=1&&step<=7);
+  const helper={kind:policy.kind,side:'source',fullContainerId:id,policySha256:sha256(canonicalBytes(policy)),
+    state:'CREATED',endpoint:null,backend:null,startedAt:new Date().toISOString()};
+  const context=Object.fromEntries(['root','base','runRoot','cwd','target','connection','nodeBinary','uid','gid',
+    'operationId','seq','helperSequence','helperRoot'].map(key=>[key,c[key]]));
+  const ticket=Object.freeze({}),record=immutable(structuredClone({helper,policy,expected,step,context}));
+  readonlyCreations.set(ticket,{token,reservation,record,claimed:false});return{ticket,helper:record.helper};
+}
+export function claimReadonlyCreation(ticket,token,reservation) {
+  const own=readonlyCreations.get(ticket);requirePolicy(own&&own.token===token&&own.reservation===reservation&&!own.claimed);
+  own.claimed=true;return own.record;
+}
+export function verifiedReadonlyInventoryResult(token,result) {
+  const own=readonlyResults.get(result);requirePolicy(own&&own.token===token&&!own.claimed);
+  own.owner.assertObservationGate(token);
+  own.claimed=true;return own.metadata;
+}
+export async function verifiedReadonlyHelperProfile(token,deps={}) {
+  const state=readonlyRuns.get(token);requirePolicy(state?.profile&&state.profileContext);
+  const owner=await import('./maintenance-observation.mjs');await owner.assertObservation(token,deps);
+  requirePolicy(await mediaScriptHash(state.profileContext)===state.scriptHash);owner.assertObservationGate(token);
+  return Object.freeze({...state.profile});
+}
 export function verifiedInventoryResult(token,result) {
   const owned=inventoryResults.get(result);requirePolicy(owned?.token===token);
   return owned.metadata;
@@ -541,20 +640,41 @@ export async function verifiedHelperProfile(token,deps={}) {
   requirePolicy(state.profileContext&&await mediaScriptHash(state.profileContext)===state.scriptHash);
   return Object.freeze({...state.profile});
 }
-export async function runOwnedHelper(token,options,deps={}) {
+const NORMAL_HELPER=Symbol('normal helper'),READONLY_HELPER=Symbol('readonly helper');
+function fixedLifecycleDeps(mode,options) {
+  if(mode===READONLY_HELPER)readonlyCleanupLifecycles.add(options);
+  return options;
+}
+export async function runOwnedHelper(token,options,deps={}) {return runHelperCore(token,options,deps,NORMAL_HELPER);}
+export async function runReadonlyInventory(token,deps={}) {
+  return runHelperCore(token,{side:'source',kind:'INVENTORY'},deps,READONLY_HELPER);
+}
+async function runHelperCore(token,options,deps={},mode=NORMAL_HELPER) {
   requirePolicy(exactKeys(options,'side,kind')&&sides[options.kind]?.includes(options.side));
-  const workflow=await import('./maintenance-workflow.mjs'),{side,kind}=options;
-  const c=await workflow.reserveHelper(token,options,deps),env=helperEnvironment(deps.environment),command=deps.command??execute;
-  const docker=async args=>{const result=await command('docker',['--host','unix:///var/run/docker.sock',...args],
-    {env,shell:false,timeout:30000,maxBuffer:16*1024*1024});requirePolicy(result.code===undefined||result.code===0);return result.stdout;};
-  let registered,removed=false,pgpass=null,outputHandle,diagnosticHandle,primaryFailure,restoreFile;
+  requirePolicy(mode===NORMAL_HELPER||mode===READONLY_HELPER);const readonly=mode===READONLY_HELPER;
+  const workflow=readonly?null:await import('./maintenance-workflow.mjs'),observation=readonly?await import('./maintenance-observation.mjs'):null,{side,kind}=options;
+  const initial=readonly?await observation.observationContext(token,deps):null;
+  const ownedSignal=readonly?initial.signal:(await workflow.workflowSignalContext(token,deps)).signal;
+  const signal=deps.signal?AbortSignal.any([ownedSignal,deps.signal]):ownedSignal;deps={...deps,signal};
+  if(signal.aborted)throw new OpsError('INTERRUPTED');
+  const c=readonly?initial:await workflow.reserveHelper(token,options,deps),env=helperEnvironment(deps.environment),command=deps.command??execute;
+  const assertOwner=()=>readonly?observation.assertObservation(token,deps):workflow.assertWorkflow(token,{},deps);
+  const signalCurrent=()=>readonly?observation.assertObservationGate(token):workflow.workflowSignalContext(token,deps);
+  const failOwner=code=>readonly?observation.failObservation(token,code,deps):workflow.failWorkflow(token,code,deps);
+  const docker=async args=>{
+    if(readonly){await assertOwner();observation.assertObservationGate(token);}
+    const result=await command('docker',['--host','unix:///var/run/docker.sock',...args],
+      {env,shell:false,timeout:30000,maxBuffer:16*1024*1024});requirePolicy(result.code===undefined||result.code===0);
+    if(readonly){await assertOwner();observation.assertObservationGate(token);}return result.stdout;};
+  let registered,removed=false,pgpass=null,outputHandle,diagnosticHandle,primaryFailure,restoreFile,earlyRestore,reservation;
   try {
-    const state=helperRuns.get(token)??{};
+    const runs=readonly?readonlyRuns:helperRuns,state=runs.get(token)??{};if(readonly)requirePolicy(!state.profile);
     if(state.profileContext)requirePolicy(state.profileContext.cwd===c.cwd&&state.profileContext.uid===c.uid);
     else state.profileContext=Object.freeze({cwd:c.cwd,uid:c.uid});
     const scriptHash=await mediaScriptHash(c);if(state.scriptHash)requirePolicy(state.scriptHash===scriptHash);else state.scriptHash=scriptHash;
-    if(!state.profile)state.profile=await probeHelperProfile(c,deps);
-    helperRuns.set(token,state);await workflow.assertWorkflow(token,{},deps);
+    if(!state.profile)state.profile=await probeProfileCore(c,deps,readonly?{owner:observation,token}:null);
+    runs.set(token,state);await assertOwner();
+    if(readonly)reservation=await observation.reserveObservationHelper(token,{step:7},deps);
     const restoring=['PG_RESTORE','MEDIA_RESTORE'].includes(kind);
     const revoking=kind==='REVOKE_SESSIONS';
     const material=restoring||revoking?await(deps.restoreMaterial??(await import('../ops/local-recovery-verify.mjs')).restoreBundleMaterial)(token,deps):null;
@@ -592,27 +712,53 @@ export async function runOwnedHelper(token,options,deps={}) {
         requirePolicy(prior.sha256===state.inventory.sha256);validateInventory(parseStrictJson(prior.bytes));
       }
     }
-    const observe=async()=>{
+    const rawObserve=async()=>{
       const sql="SELECT COALESCE(json_agg(a), '[]'::json)::text FROM (SELECT pid, extract(epoch FROM backend_start)::text AS backend_start_epoch, usename, datname, application_name, host(client_addr) AS client_addr, state FROM pg_stat_activity WHERE datname = current_database() AND backend_type = 'client backend' AND pid <> pg_backend_pid()) a;";
       const rows=JSON.parse(await docker(['exec',c.target.containerIds.postgres,'psql','-X','-q','-t','-A','-U','cms_local','-d','cms','-c',sql]));requireHandshake(Array.isArray(rows));
-      return rows.map(r=>({pid:r.pid,backendStartEpoch:r.backend_start_epoch,db:r.datname,role:r.usename,clientAddr:r.client_addr,applicationName:r.application_name}));
+      return rows;
+    };
+    let sampleQueue=Promise.resolve(),lastSample=null,pgWitness;
+    const sampleRaw=()=>{
+      const next=sampleQueue.then(async()=>{
+        if(['PG_DUMP','PG_RESTORE'].includes(kind)&&lastSample!==null) {
+          while(100000000n-(process.hrtime.bigint()-lastSample)>0n)await pause(Number((100000000n-(process.hrtime.bigint()-lastSample)+999999n)/1000000n));
+        }
+        lastSample=process.hrtime.bigint();return rawObserve();
+      });sampleQueue=next.catch(()=>{});return next;
+    };
+    const observe=async()=>(await sampleRaw()).map(r=>({pid:r.pid,backendStartEpoch:r.backend_start_epoch,db:r.datname,role:r.usename,clientAddr:r.client_addr,applicationName:r.application_name}));
+    const inspectProcess=async id=>{
+      const lines=String(await docker(['top',id,'-eo','pid,args'])).trimEnd().split('\n');
+      requireHandshake(/^[ \t]*PID[ \t]+COMMAND[ \t]*$/.test(lines.shift()??''));
+      return lines.map(line=>{const match=/^\s*([1-9][0-9]*)\s+(.+)$/.exec(line);requireHandshake(match);return{pid:Number(match[1]),args:match[2].split(/\s+/)};});
     };
     const sourceCurrent=async()=>requirePolicy(await mediaScriptHash(c)===state.scriptHash);
-    const assertCurrent=async()=>{await sourceCurrent();return workflow.assertWorkflow(token,{},deps);};
-    const assertDraining=async()=>{await sourceCurrent();const value=await workflow.assertHelperDrain(token,deps);registered=value.lease.helper;return value;};
-    const update=async patch=>{registered={...registered,...patch};await workflow.updateOwnedHelper(token,registered,deps);};
+    const assertCurrent=async()=>{
+      if(signal.aborted)throw new OpsError('INTERRUPTED');await sourceCurrent();const current=await assertOwner();
+      await signalCurrent();if(signal.aborted)throw new OpsError('INTERRUPTED');return current;
+    };
+    const assertDraining=async()=>{await sourceCurrent();const value=readonly?await observation.assertObservationDrain(token,deps):await workflow.assertHelperDrain(token,deps);
+      registered=readonly?value.helper:value.lease.helper;return value;};
+    const restoreInput=(child,inputSignal=signal)=>{
+      const hash=createHash('sha256');let size=0n;
+      const input=restoreFile.handle.createReadStream({autoClose:false});
+      const checkedInput=new Transform({transform(chunk,_encoding,done){size+=BigInt(chunk.length);hash.update(chunk);
+        done(size>BigInt(restoreFile.expected.byteSize)?new OpsError('RESTORE_FAILED'):null,chunk);}});
+      const transfer=child?pipeline(input,checkedInput,child.stdin,{signal:inputSignal}):pipeline(input,checkedInput);
+      transfer.catch(()=>{});return{hash,get size(){return size;},input,checkedInput,transfer};
+    };
+    const update=async(patch,witness)=>{registered={...registered,...patch};
+      if(readonly)await observation.updateObservationHelper(token,registered,deps);else await workflow.updateOwnedHelper(token,registered,deps,witness);};
+    await signalCurrent();if(signal.aborted)throw new OpsError('INTERRUPTED');
     const result=await executeHelperLifecycle(policy,expected,async(child,live)=>{
-      if(kind==='INVENTORY'||revoking)return runJdbcHandshake(child,request,{address:registered.endpoint.address,assertCurrent,assertDraining,observe,
+      if(kind==='INVENTORY'||revoking)return runJdbcHandshake(child,request,{signal:live.signal,address:registered.endpoint.address,assertCurrent,assertDraining,observe,
+        ...(readonly?{assertPermitGate:()=>observation.assertObservationGate(token)}:{}),
         onReady:backend=>update({state:'READY',backend}),onPermitted:()=>update({state:'PERMITTED'})});
       if(restoring) {
-        const hash=createHash('sha256');let size=0n;
-        const input=restoreFile.handle.createReadStream({autoClose:false});
-        const checkedInput=new Transform({transform(chunk,_encoding,done){size+=BigInt(chunk.length);hash.update(chunk);
-          done(size>BigInt(restoreFile.expected.byteSize)?new OpsError('RESTORE_FAILED'):null,chunk);}});
-        const transfer=pipeline(input,checkedInput);transfer.catch(()=>{});
+        const flow=earlyRestore??restoreInput(),{hash,input,checkedInput,transfer}=flow;
         try {
           let receipt;
-          if(kind==='PG_RESTORE')receipt=await runPgTool(child,{policy,input:checkedInput,diagnostic:fileSink(diagnosticHandle),signal:live.signal,
+          if(kind==='PG_RESTORE')receipt=await runPgTool(child,{policy,liveWitness:pgWitness,input:checkedInput,diagnostic:fileSink(diagnosticHandle),signal:live.signal,
             operationId:c.operationId,address:registered.endpoint.address,observe,
             assertCurrent:()=>registered.backend?assertDraining():assertCurrent(),onBackend:backend=>update({backend}),
             inspectProcess:async()=>{
@@ -636,7 +782,7 @@ export async function runOwnedHelper(token,options,deps={}) {
           await transfer;
           const after=await restoreFile.handle.stat(),named=await lstat(restoreFile.path),before=restoreFile.info;
           requireHandshake(['dev','ino','size','mtimeMs','ctimeMs','mode','uid','gid','nlink'].every(key=>before[key]===after[key]&&before[key]===named[key])
-            &&String(size)===restoreFile.expected.byteSize&&hash.digest('hex')===restoreFile.expected.sha256);
+            &&String(flow.size)===restoreFile.expected.byteSize&&hash.digest('hex')===restoreFile.expected.sha256);
           return receipt;
         }catch(error){input.destroy();checkedInput.destroy();await transfer.catch(()=>{});throw error;}
       }
@@ -646,7 +792,7 @@ export async function runOwnedHelper(token,options,deps={}) {
       const output=fileSink(outputHandle),sink=pipeline(bound,output);sink.catch(()=>{});
       try {
         if(kind==='PG_DUMP') {
-          const value=await runPgTool(child,{policy,signal:live.signal,operationId:c.operationId,address:registered.endpoint.address,
+          const value=await runPgTool(child,{policy,liveWitness:pgWitness,signal:live.signal,operationId:c.operationId,address:registered.endpoint.address,
             output:bound,diagnostic:fileSink(diagnosticHandle),observe,
             assertCurrent:()=>registered.backend?assertDraining():assertCurrent(),onBackend:backend=>update({backend}),
             inspectProcess:async()=>{
@@ -665,16 +811,36 @@ export async function runOwnedHelper(token,options,deps={}) {
         await completion;await assertDraining();
         requireHandshake((await errors)==='');return null;
       }catch(error){bound.destroy();output.destroy();await sink.catch(()=>{});throw error;}
-    },{...deps,onCreated:async(id,_created,e)=>{
+    },fixedLifecycleDeps(mode,{...deps,...(readonly?{beforeStart:()=>observation.assertObservationGate(token),onCleanup:async id=>{
+      const own=await observation.observationCleanupContext(token,reservation,deps);requirePolicy(own.helper.fullContainerId===id
+        &&same(own.policy,policy));}}:{}),onCreated:async(id,_created,e)=>{
       registered={kind,side,fullContainerId:id,policySha256,state:'CREATED',endpoint:null,backend:null,startedAt:new Date().toISOString()};
-      await workflow.registerOwnedHelper(token,registered,policy,e,deps);
-    },onRunning:async(_id,running)=>{
+      if(readonly){const created=readonlyCreation(token,reservation,c,7,id,policy,e);registered=created.helper;
+        await privateBytes(join(c.helperRoot,'created.json'),canonicalBytes({fullContainerId:id,policySha256}));
+        await observation.registerObservationHelper(token,created.ticket,reservation,deps);
+      }else await workflow.registerOwnedHelper(token,registered,policy,e,deps);
+    },onRunning:async(id,running,live)=>{
       const endpoint=policy.networkId?Object.values(running.NetworkSettings.Networks)[0]:null;
-      await update({state:'RUNNING',endpoint:endpoint?{networkId:endpoint.NetworkID,address:endpoint.IPAddress}:null});
+      const boundEndpoint=endpoint?{networkId:endpoint.NetworkID,address:endpoint.IPAddress}:null;
+      if(['PG_DUMP','PG_RESTORE'].includes(kind)) {
+        const check=()=>{if(live.signal.aborted||signal.aborted)throw new OpsError('INTERRUPTED');requireHandshake(!live.isExited());};
+        check();if(kind==='PG_RESTORE')earlyRestore=restoreInput(live.child,live.signal);
+        const until=process.hrtime.bigint()+30000000000n;let backend;
+        while(!backend) {
+          check();requireHandshake(process.hrtime.bigint()<until);const processes=await inspectProcess(id);check();
+          requireHandshake(processes.length===1&&Number.isInteger(processes[0].pid)&&processes[0].pid>0&&same(processes[0].args,[policy.entrypoint,...policy.args]));
+          const rows=await observe();check();requireHandshake(rows.length<=1);
+          if(rows.length){requireHandshake(backendValid(rows[0],{operationId:c.operationId},boundEndpoint?.address));backend=rows[0];}
+        }
+        pgWitness=Object.freeze({});pgLiveWitnesses.set(pgWitness,{token,sequence:c.helperSequence,id,policySha256,policy:structuredClone(policy),
+          child:live.child,exit:live.exit,isExited:live.isExited,inputTransfer:earlyRestore?.transfer,backend:structuredClone(backend),endpoint:boundEndpoint,sampleRaw,claimed:false});
+        await update({state:'RUNNING',endpoint:boundEndpoint,backend},pgWitness);
+      }else await update({state:'RUNNING',endpoint:boundEndpoint});
     },onExited:async()=>{
       if(registered.backend&&['PERMITTED','RUNNING'].includes(registered.state))await assertDraining();
       if(registered.state!=='EXITED')await update({state:'EXITED'});else await assertCurrent();
-    },onRemoved:async()=>{await workflow.clearOwnedHelper(token,deps);removed=true;}});
+    },onRemoved:async()=>{if(readonly)await observation.clearObservationHelper(token,deps);else await workflow.clearOwnedHelper(token,deps);removed=true;}}));
+    await signalCurrent();if(signal.aborted)throw new OpsError('INTERRUPTED');
     if(outputHandle){await outputHandle.sync();await outputHandle.close();outputHandle=null;}
     if(diagnosticHandle){await diagnosticHandle.sync();await diagnosticHandle.close();diagnosticHandle=null;}
     if(restoring){await assertCurrent();return Object.freeze({kind,side,receipt:result});}
@@ -695,18 +861,26 @@ export async function runOwnedHelper(token,options,deps={}) {
         &&Object.entries(counts).every(([key,value])=>result[key]===value));
       state.inventory={path,sha256:checked.sha256};const {bytes,...metadata}=checked;
       const finished=Object.freeze({kind,...metadata,inventory,inventorySha256:checked.sha256,receipt:result,profile:Object.fromEntries(['javaRuntimeVersion','pgDumpVersion','pgRestoreVersion','postgresServerVersion'].map(key=>[key,state.profile[key]]))});
-      inventoryResults.set(finished,{token,metadata:Object.freeze({side,kind,seq:c.seq,operationId:c.operationId,targetId:c.target.targetId,
-        releaseId:`sha256:${c.target.apiBuild.jarSha256}`,path,sha256:checked.sha256,byteSize:checked.byteSize,requestSha256:sha256(canonicalBytes(request))})});return finished;
+      const authorityMetadata=Object.freeze({side,kind,seq:c.seq,operationId:c.operationId,targetId:c.target.targetId,
+        releaseId:`sha256:${c.target.apiBuild.jarSha256}`,path,sha256:checked.sha256,byteSize:checked.byteSize,requestSha256:sha256(canonicalBytes(request)),
+        ...(readonly?{source:c.target,helperSequence:c.helperSequence,helperRoot:c.helperRoot,profile:finished.profile,
+          fullContainerId:registered.fullContainerId,policySha256}: {})});
+      if(readonly) {
+        immutable(finished);
+        readonlyResults.set(finished,{token,metadata:immutable(structuredClone(authorityMetadata)),owner:observation,claimed:false});
+      }else inventoryResults.set(finished,{token,metadata:authorityMetadata});
+      return finished;
     }
     if(kind==='PG_DUMP')requireHandshake(result.sha256===checked.sha256&&result.byteSize===checked.byteSize);
     return{kind,...checked};
   }catch(error){
     const code=error instanceof OpsError?error.code:'CAPTURE_FAILED';primaryFailure=new OpsError(code);
-    await workflow.failWorkflow(token,code,deps);throw primaryFailure;
+    await failOwner(code);throw primaryFailure;
   }finally{
+    if(earlyRestore){earlyRestore.input.destroy();earlyRestore.checkedInput.destroy();await earlyRestore.transfer.catch(()=>{});}
     await restoreFile?.handle.close().catch(()=>{});
     await outputHandle?.close().catch(()=>{});await diagnosticHandle?.close().catch(()=>{});
     try{if(pgpass&&removed){const check=await privateHandle(pgpass);await check.handle.close();await unlink(pgpass);await syncDirectory(dirname(pgpass));}}
-    catch{if(!primaryFailure){await workflow.failWorkflow(token,'CAPTURE_FAILED',deps);throw new OpsError('CAPTURE_FAILED');}}
+    catch{if(!primaryFailure){await failOwner('CAPTURE_FAILED');throw new OpsError('CAPTURE_FAILED');}}
   }
 }

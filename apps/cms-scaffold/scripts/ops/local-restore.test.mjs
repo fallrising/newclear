@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { validateRestorePreflight, deriveSmokeFixture, restoreLocal } from './local-restore.mjs';
+import { validateRestorePreflight, deriveSmokeFixture, restoreThroughSessions as restoreLocal } from './local-restore.mjs';
 import { sha256, canonicalBytes, OpsError } from './recovery-protocol.mjs';
 const id=n=>`00000000-0000-4000-8000-${String(n).padStart(12,'0')}`,runId='a'.repeat(32),now=new Date('2026-11-02T16:00:00.000Z');
 function inputs() {
@@ -51,7 +51,7 @@ for(const fault of ['missing-session','duplicate-session','expired','revoked','w
   if(fault==='ambiguous-revision')table('cms_entry_revision').push({...table('cms_entry_revision')[0]});
   assert.throws(()=>deriveSmokeFixture(f.smokeFixtureInput,f.recoverySecrets,f.inventory,now),{code:'INPUT_INVALID'});
 });
-import { mkdtemp, mkdir, readFile, lstat, rm, readdir } from 'node:fs/promises';
+import { mkdtemp, mkdir, readFile, writeFile, lstat, rm, readdir } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 async function orchestration(t,options={}) {
@@ -117,9 +117,9 @@ import { fileURLToPath } from 'node:url';
 const cliPath=fileURLToPath(new URL('./local-restore.mjs',import.meta.url)),execute=promisify(execFile);
 const cliArgs=()=>['--run-id',runId,'--operation-id',id(1),'--target-run-id','b'.repeat(32),'--incident-started-at','2026-11-01T00:00:00.000Z'];
 async function child(args){try{const r=await execute(process.execPath,[cliPath,...args],{timeout:10000});return{...r,code:0};}catch(e){return e;}}
-test('T138_C12_public_restore_cli_is_explicitly_unsealed_without_partial_dispatch',async()=>{
-  const result=await child(cliArgs());assert.equal(result.code,7);assert.equal(result.stderr,'');
-  assert.equal(result.stdout,canonicalBytes({operationId:id(1),backupId:null,phase:null,code:'ADAPTER_UNSEALED',exitCode:7}).toString());
+test('T138_C12_public_restore_cli_requires_trueTTY_before_partial_dispatch',async()=>{
+  const result=await child(cliArgs());assert.equal(result.code,2);assert.equal(result.stderr,'');
+  assert.equal(result.stdout,canonicalBytes({operationId:id(1),backupId:null,phase:null,code:'INPUT_INVALID',exitCode:2}).toString());
 });
 for(const [name,args]of [
   ['missing',[]],['unknown',[...cliArgs(),'--shell','sh']],['duplicate',cliArgs().map((x,i)=>i===6?'--run-id':x)],
@@ -137,7 +137,7 @@ test('T138_C12_native_import_is_side_effect_free',async()=>{
 test('T138_C12_valid_public_cli_never_calls_partial_core_or_reads_credentials',async()=>{
   const module=await import('./local-restore.mjs'),chunks=[];
   const code=await module.run(cliArgs(),{now:()=>now,stdout:{write:bytes=>chunks.push(bytes)},restoreLocal:()=>assert.fail('public core dispatch'),get recoverySecrets(){assert.fail('credential access');}});
-  assert.equal(code,7);assert.equal(JSON.parse(Buffer.concat(chunks)).code,'ADAPTER_UNSEALED');
+  assert.equal(code,2);assert.equal(JSON.parse(Buffer.concat(chunks)).code,'INPUT_INVALID');
 });
 test('T138_C12_wrong_helper_kind_blocks_later_mutations',async t=>{
   const f=await orchestration(t),original=f.deps.runOwnedHelper;
@@ -153,4 +153,116 @@ test('T138_actual_PG_active_text_derives_fixture_with_native_text_columns',()=>{
 for(const status of ['ACTIVE','disabled','locked'])test(`T138_actual_PG_principal_rejects_${status}`,()=>{
   const f=inputs();for(const row of f.inventory.tables.find(t=>t.tableName==='cms_principal').rows)row.status=status;
   assert.throws(()=>deriveSmokeFixture(f.smokeFixtureInput,f.recoverySecrets,f.inventory,now),{code:'INPUT_INVALID'});
+});
+
+import {restoreLocal as restoreComplete} from './local-restore.mjs';
+async function completeOrchestration(t,options={}) {
+  const f=await orchestration(t,options),step=name=>{f.calls.push(name);if(options.fail===name)throw new OpsError('RESTORE_FAILED');};
+  f.deps.captureWorkflowStart=()=>{step('clock-start');return Object.freeze({});};
+  for(const name of ['startTargetApi','stopTargetApi','startTargetIngress','stopTargetIngress'])f.deps.workflow[name]=async(token,deps)=>{
+    assert.equal(token,f.token);assert.ok(!Object.hasOwn(deps,'recoverySecrets'));step(name+':'+f.state.phase);};
+  f.deps.workflow.finishWorkflow=async()=>{step('finish');f.state.phase='COMPLETE';};
+  f.deps.workflow.workflowSignalContext=async(token,deps)=>{assert.equal(token,f.token);return{signal:deps.signal};};
+  f.deps.verifyLifecycleInventory=async()=>{step('zero:'+f.state.phase);return{sha256:'d'.repeat(64)};};
+  f.deps.beginRestoreSmoke=async()=>step('browser-begin');
+  f.browser=Object.freeze({version:1});
+  f.deps.runRestoreSmoke=async(token,options,deps)=>{assert.equal(token,f.token);assert.equal(options.recoverySecrets,f.recoverySecrets);
+    assert.equal(options.startupInventorySha256,'d'.repeat(64));assert.ok(!Object.hasOwn(deps,'recoverySecrets'));step('browser');return f.browser;};
+  f.deps.verifyBrowserResult=async(token,result)=>{assert.equal(result,f.browser);step('browser-verified');};
+  f.deps.verifyAuthInventory=async(token,results)=>{assert.equal(results.browser,f.browser);assert.equal(results.inventory.kind,'INVENTORY');step('auth-exact');};
+  f.deps.completeRestoreVerification=async()=>{step('proof');return{proof:{backupId:'pp1-20261102T160000000Z-'+'1'.repeat(32)},receipt:{withinRto:true},smoke:{}};};
+  f.deps.publishRecoveryCandidate=async()=>{assert.equal(f.state.phase,'COMPLETE');step('locator');};return f;
+}
+test('PP1c_D_full_orchestrator_orders_separate_zero_auth_restart_source_and_release',async t=>{
+  const f=await completeOrchestration(t),result=await restoreComplete(f.inspection,f.request,f.deps);
+  assert.equal(result.phase,'COMPLETE');assert.equal(result.receipt.withinRto,true);assert.equal(result.token,undefined);
+  assert.deepEqual(f.calls.slice(f.calls.indexOf('begin:STARTUP_VERIFIED')),[
+    'begin:STARTUP_VERIFIED','startTargetApi:STARTUP_VERIFIED','stopTargetApi:STARTUP_VERIFIED','target:INVENTORY','zero:STARTUP_VERIFIED','end:STARTUP_VERIFIED',
+    'begin:API_HEALTHY','startTargetApi:API_HEALTHY','end:API_HEALTHY','begin:INGRESS_STARTED','startTargetIngress:INGRESS_STARTED','end:INGRESS_STARTED',
+    'begin:BROWSER_VERIFIED','browser-begin','browser','browser-verified','end:BROWSER_VERIFIED',
+    'begin:TARGET_STOPPED','stopTargetIngress:TARGET_STOPPED','stopTargetApi:TARGET_STOPPED','target:INVENTORY','auth-exact','end:TARGET_STOPPED',
+    'begin:RESTART_VERIFIED','startTargetApi:RESTART_VERIFIED','stopTargetApi:RESTART_VERIFIED','target:INVENTORY','zero:RESTART_VERIFIED','source:INVENTORY','proof','end:RESTART_VERIFIED','finish','locator']);
+  assert.ok(f.calls.indexOf('clock-start')<f.calls.indexOf('begin'));assert.ok(f.calls.indexOf('proof')<f.calls.indexOf('finish'));
+});
+for(const fault of ['startTargetApi:STARTUP_VERIFIED','zero:STARTUP_VERIFIED','startTargetIngress:INGRESS_STARTED','browser','browser-verified','auth-exact','zero:RESTART_VERIFIED','proof','finish'])test(`PP1c_D_full_orchestrator_failure_at_${fault}_never_publishes_locator`,async t=>{
+  const f=await completeOrchestration(t,{fail:fault});await assert.rejects(restoreComplete(f.inspection,f.request,f.deps),e=>e.code==='RESTORE_FAILED'&&e.phase!==null);
+  assert.ok(!f.calls.includes('locator'));assert.equal(f.state.failed,true);
+});
+test('PP1c_D_full_orchestrator_unsealed_dependency_refuses_before_capture',async t=>{
+  const f=await completeOrchestration(t);f.deps.verifyAuthInventory=null;
+  await assert.rejects(restoreComplete(f.inspection,f.request,f.deps),{code:'ADAPTER_UNSEALED'});assert.ok(!f.calls.includes('begin'));
+});
+
+import {PassThrough} from 'node:stream';
+import {run as restoreCli} from './local-restore.mjs';
+async function ttySecrets(t,bytes,{tty=true,eof=false,raw=false,restoreFails=false}={}) {
+  const stdin=new PassThrough();Object.assign(stdin,{isTTY:tty,isRaw:raw});const modes=[],messages=[];
+  stdin.setRawMode=value=>{modes.push(value);if(!value&&restoreFails)throw Error('MODE_RESTORE_FAILED');stdin.isRaw=value;};
+  const deps={stdin,stdout:{isTTY:true},stderr:{isTTY:true,write:value=>messages.push(value)}};
+  t.after(()=>stdin.destroy());const module=await import('./local-restore.mjs');
+  const promise=Promise.resolve().then(()=>module.readRecoverySecrets(deps));
+  queueMicrotask(()=>{if(eof)stdin.end(bytes);else stdin.write(bytes);});
+  return{promise,modes,messages,stdin};
+}
+test('PP1c_D_restore_TTY_reads_one_canonical_private_JSON_line_without_echo',async t=>{
+  const secrets=inputs().recoverySecrets,f=await ttySecrets(t,canonicalBytes(secrets));assert.deepEqual(await f.promise,secrets);
+  assert.deepEqual(f.messages,['Restore drill credentials (private JSON): ']);assert.deepEqual(f.modes,[true,false]);assert.equal(f.stdin.isRaw,false);
+});
+for(const fault of ['notty','EOF','overflow','duplicate','UTF8','extra-line','unknown-key'])test(`PP1c_D_restore_TTY_rejects_${fault}_and_restores_mode`,async t=>{
+  const secrets=inputs().recoverySecrets;let bytes=canonicalBytes(secrets);
+  if(fault==='EOF')bytes=bytes.subarray(0,bytes.length-1);if(fault==='overflow')bytes=Buffer.alloc(16385,120);
+  if(fault==='duplicate')bytes=Buffer.from(`{"admin":${JSON.stringify(secrets.admin)},"admin":${JSON.stringify(secrets.admin)},"operator":${JSON.stringify(secrets.operator)}}\n`);
+  if(fault==='UTF8')bytes=Buffer.from([0xc3,0x28,10]);if(fault==='extra-line')bytes=Buffer.concat([bytes,bytes]);
+  if(fault==='unknown-key')bytes=canonicalBytes({...secrets,extra:true});
+  const f=await ttySecrets(t,bytes,{tty:fault!=='notty',eof:fault==='EOF'});await assert.rejects(f.promise,e=>e.code==='INPUT_INVALID');
+  assert.equal(f.stdin.isRaw,false);assert.ok(f.messages.every(value=>value==='Restore drill credentials (private JSON): '));
+});
+async function cliFixture(t) {
+  const f=inputs(),cwd=await mkdtemp(join(tmpdir(),'pp1c-cli-')),root=join(cwd,'local/pp1',runId),chunks=[],events=[];
+  t.after(()=>rm(cwd,{recursive:true,force:true}));await mkdir(root,{recursive:true,mode:0o700});
+  await writeFile(join(root,'recovery-smoke-input.json'),canonicalBytes(f.smokeFixtureInput),{mode:0o600});
+  const start=Object.freeze({}),backupId='pp1-20261102T160000000Z-'+'1'.repeat(32),inspection={target:{runId,targetId:`pp1-local:${runId}`,nodeBinarySha256:sha256(await readFile(process.execPath))}};
+  const deps={cwd,now:()=>now,stdin:{isTTY:true},stdout:{isTTY:true,write:bytes=>chunks.push(bytes)},stderr:{isTTY:true,write:()=>{}},
+    captureWorkflowStart:()=>{events.push('clock');return start;},readRecoverySecrets:async()=>{events.push('credentials');return f.recoverySecrets;},
+    inspectTarget:async()=>{events.push('inspect');return inspection;},restoreLocal:async(actual,request,options)=>{
+      assert.equal(actual,inspection);assert.equal(options.recoverySecrets,f.recoverySecrets);assert.deepEqual(options.smokeFixtureInput,f.smokeFixtureInput);assert.equal(options.workflowStart,start);
+      assert.equal(request.completionPolicy,'KEEP_STOPPED');events.push('restore');return{backupId,phase:'COMPLETE',receipt:{withinRto:true}};}};
+  return{...f,cwd,root,chunks,events,deps,backupId};
+}
+test('PP1c_D_restore_CLI_fixed_private_input_full_dispatch_and_canonical_receipt',async t=>{
+  const f=await cliFixture(t);assert.equal(await restoreCli(cliArgs(),f.deps),0);
+  assert.deepEqual(f.events,['clock','credentials','inspect','restore']);
+  assert.equal(Buffer.concat(f.chunks).toString(),canonicalBytes({operationId:id(1),backupId:f.backupId,phase:'COMPLETE',code:null,exitCode:0}).toString());
+  for(const a of Object.values(f.recoverySecrets))for(const key of ['password','oldSessionToken','username'])assert.ok(!Buffer.concat(f.chunks).includes(a[key]));
+});
+test('PP1c_D_restore_CLI_known_backup_failure_and_objective_miss_keep_factual_output',async t=>{
+  const f=await cliFixture(t);f.deps.restoreLocal=async(i,r,deps)=>{deps.onProgress({operationId:r.operationId,backupId:f.backupId,phase:'LOCAL_VERIFIED'});throw new OpsError('SMOKE_FAILED','BROWSER_VERIFIED',r.operationId);};
+  assert.equal(await restoreCli(cliArgs(),f.deps),8);assert.deepEqual(JSON.parse(Buffer.concat(f.chunks)),{operationId:id(1),backupId:f.backupId,phase:'BROWSER_VERIFIED',code:'SMOKE_FAILED',exitCode:8});
+  const g=await cliFixture(t);g.deps.restoreLocal=async()=>({backupId:g.backupId,phase:'COMPLETE',receipt:{withinRto:false}});
+  assert.equal(await restoreCli(cliArgs(),g.deps),11);assert.equal(JSON.parse(Buffer.concat(g.chunks)).code,'OBJECTIVE_MISSED');
+});
+
+test('PP1c_D_restore_TTY_does_not_return_credentials_if_mode_restore_fails',async t=>{
+  const f=await ttySecrets(t,canonicalBytes(inputs().recoverySecrets),{restoreFails:true});
+  await assert.rejects(f.promise,e=>e.code==='INPUT_INVALID');assert.deepEqual(f.messages,['Restore drill credentials (private JSON): ']);
+});
+test('PP1c_D_restore_TTY_preserves_prior_raw_mode',async t=>{
+  const secrets=inputs().recoverySecrets,f=await ttySecrets(t,canonicalBytes(secrets),{raw:true});assert.deepEqual(await f.promise,secrets);
+  assert.equal(f.stdin.isRaw,true);assert.deepEqual(f.modes,[true,true]);
+});
+
+test('PP1c_D_restore_cancellation_private_signal_reaches_browser_and_listeners_restore',async t=>{
+  const f=await completeOrchestration(t),before=['SIGINT','SIGTERM'].map(s=>process.listenerCount(s)),original=f.deps.runRestoreSmoke;
+  f.deps.runRestoreSmoke=async(token,options,deps)=>{assert.ok(deps.signal instanceof AbortSignal);assert.equal(deps.signal.aborted,false);return original(token,options,deps);};
+  await restoreComplete(f.inspection,f.request,f.deps);assert.deepEqual(['SIGINT','SIGTERM'].map(s=>process.listenerCount(s)),before);
+});
+test('PP1c_D_restore_cancellation_caller_preabort_never_begins_workflow',async t=>{
+  const f=await completeOrchestration(t);f.deps.signal=AbortSignal.abort();
+  await assert.rejects(restoreComplete(f.inspection,f.request,f.deps),e=>e.code==='INTERRUPTED');assert.ok(!f.calls.includes('begin'));
+});
+test('PP1c_D_restore_cancellation_soft_signal_during_API_health_fails_and_restores_handlers',async t=>{
+  const f=await completeOrchestration(t),before=['SIGINT','SIGTERM'].map(s=>process.listenerCount(s));
+  f.deps.workflow.startTargetApi=async(token,deps)=>{assert.equal(token,f.token);process.emit('SIGTERM');assert.equal(deps.signal.aborted,true);throw new OpsError('INTERRUPTED');};
+  await assert.rejects(restoreComplete(f.inspection,f.request,f.deps),e=>e.code==='INTERRUPTED'&&e.phase==='STARTUP_VERIFIED');
+  assert.equal(f.state.failed,true);assert.ok(!f.calls.includes('browser'));assert.deepEqual(['SIGINT','SIGTERM'].map(s=>process.listenerCount(s)),before);
 });

@@ -3,7 +3,7 @@ import { promisify } from 'node:util';
 import { join, isAbsolute } from 'node:path';
 import { readFile, open } from 'node:fs/promises';
 import { prepareRestore, createPreparedNetworks } from './prepare.mjs';
-import { restoreTargetContext, assertWorkflow, sealRestoreTarget, failWorkflow } from './maintenance-workflow.mjs';
+import { restoreTargetContext, assertWorkflow, sealRestoreTarget, failWorkflow, workflowSignalContext } from './maintenance-workflow.mjs';
 import { inspectTarget } from './maintenance-target.mjs';
 import { read, syncDirectory } from './maintenance-store.mjs';
 import { OpsError, canonicalBytes, sha256 } from '../ops/recovery-protocol.mjs';
@@ -15,13 +15,22 @@ async function evidence(root,name,value) {
 }
 export async function createRestoreTarget(token,deps={}) {
   const context=await restoreTargetContext(token,deps),{root,target,source}=context,cwd=deps.cwd??process.cwd();
+  const ownedSignal=(await workflowSignalContext(token,deps)).signal,signal=deps.signal?AbortSignal.any([ownedSignal,deps.signal]):ownedSignal;
   try {
     const compose=join(cwd,'compose.pp1-local.yaml');ensure(sha256(await readFile(compose))===composeSha256);
     const env={...(deps.environment??process.env)};
     ensure(!env.DOCKER_HOST||env.DOCKER_HOST==='unix:///var/run/docker.sock');ensure(!env.DOCKER_CONTEXT||env.DOCKER_CONTEXT==='default');ensure(!env.DOCKER_TLS_VERIFY);
     for(const k of ['DOCKER_HOST','DOCKER_CONTEXT','DOCKER_TLS_VERIFY','DOCKER_CERT_PATH'])delete env[k];
     const options={env,shell:false,timeout:30000,maxBuffer:16*1024*1024};
-    const command=async(file,args)=>{const r=await(deps.command??execute)(file,args,options);ensure(r.code===undefined||r.code===0);return r.stdout;};
+    const guardedCommand=async(file,args,provided=options)=>{
+      const a=file==='docker'?args.slice(2):[],cleanup=['inspect','ps','wait','stop','kill','rm'].includes(a[0])
+        ||['network','volume','image'].includes(a[0])&&['inspect','ls'].includes(a[1]);
+      if(!cleanup){await workflowSignalContext(token,deps);if(signal.aborted)throw new OpsError('INTERRUPTED');}
+      const guardedOptions={...provided};if(cleanup)delete guardedOptions.signal;else guardedOptions.signal=signal;
+      return (deps.command??execute)(file,args,guardedOptions);
+    };
+    const factoryDeps={...deps,command:guardedCommand};
+    const command=async(file,args)=>{const r=await guardedCommand(file,args);ensure(r.code===undefined||r.code===0);return r.stdout;};
     const docker=args=>command('docker',['--host','unix:///var/run/docker.sock',...args]);
     const list=async args=>{const result=JSON.parse(await docker(args));ensure(Array.isArray(result));return result;};
     const composeBinary=env.CMS_DOCKER_COMPOSE;ensure(!composeBinary||isAbsolute(composeBinary)&&!/[\r\n\0]/.test(composeBinary));
@@ -58,13 +67,13 @@ export async function createRestoreTarget(token,deps={}) {
       await assertCreatedNetworks();
       await assertWorkflow(token,{},deps);
     };
-    const preparedReceipt=await prepareRestore(token,deps);
+    const preparedReceipt=await prepareRestore(token,factoryDeps);
     for(const type of ['ps','network','volume']) {
       const args=type==='ps'?['ps','-a','--filter',`label=com.docker.compose.project=${target.project}`,'--format','{{.ID}}']:
         [type,'ls','--filter',`label=com.docker.compose.project=${target.project}`,'--format',type==='network'?'{{.ID}}':'{{.Name}}'];
       ensure((await docker(args)).trim()==='');
     }
-    const createdNetworks=await createPreparedNetworks(preparedReceipt,deps);
+    const createdNetworks=await createPreparedNetworks(preparedReceipt,factoryDeps);
     await create('postgres');
     const rows=await list(['inspect',`${target.project}-postgres-1`]);ensure(rows.length===1);
     const pg=rows[0],dataName=`${target.project}_data`,volumeName=`${target.project}_db-data`;
@@ -110,5 +119,9 @@ export async function createRestoreTarget(token,deps={}) {
     await evidence(root,'created-resources.json',resources);
     const preparation={receipt:await read(join(root,'receipt.json')),artifacts:await read(join(root,'artifacts.json'))};
     return await sealRestoreTarget(token,inspection,{preparationSha256:sha256(canonicalBytes(preparation)),createdResourceSetSha256:sha256(canonicalBytes(resources))},deps);
-  }catch(error){await failWorkflow(token,error instanceof OpsError?error.code:'TARGET_NOT_BLANK',deps);throw error;}
+  }catch(error){
+    const primary=error?.name==='AbortError'&&signal.aborted?new OpsError('INTERRUPTED'):error;
+    try{await failWorkflow(token,primary instanceof OpsError?primary.code:'TARGET_NOT_BLANK',deps);}catch{}
+    throw primary;
+  }
 }

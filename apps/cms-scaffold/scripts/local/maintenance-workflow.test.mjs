@@ -1347,9 +1347,14 @@ test('T174_real_registry_live_PG_witness_survives_exit_during_slow_source_checks
   const f=await ownedFixture(t),command=f.deps.command,spawn=f.deps.spawn;let started=false,closedDuringChecks=false;const sampleStarts=[];let active=0,maxActive=0;
   f.deps.spawn=(...args)=>{const child=spawn(...args);if(f.pendingPg)started=true;return child;};
   f.deps.command=async(file,args,options)=>{
+    const commandStarted=process.hrtime.bigint();
     if(started&&args[2]==='ps'&&f.pendingPg){const close=f.pendingPg;delete f.pendingPg;close();closedDuringChecks=true;await new Promise(resolve=>setTimeout(resolve,30));}
     const observing=started&&args[2]==='exec'&&args.at(-1).includes('pg_stat_activity')&&JSON.parse(readFileSync(join(f.root,'maintenance/lease.json'))).helper?.kind==='PG_DUMP';
-    if(observing){sampleStarts.push(process.hrtime.bigint());active++;maxActive=Math.max(maxActive,active);}
+    if(observing){
+      // Measure dispatch before instrumentation: diagnostic work must not distort the 100ms interval.
+      sampleStarts.push(commandStarted);active++;maxActive=Math.max(maxActive,active);
+      if(sampleStarts.length===1)await new Promise(resolve=>setTimeout(resolve,30));
+    }
     try{return await command(file,args,options);}finally{if(observing)active--;}
   };
   const result=await runOwnedHelper(f.token,{side:'source',kind:'PG_DUMP'},f.deps);

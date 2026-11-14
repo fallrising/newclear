@@ -1,3 +1,4 @@
+import fixture_inventory
 """Recovery uses fresh plans and actual temporary backups, including lost replies."""
 from copy import deepcopy
 import json
@@ -12,7 +13,7 @@ import test_core_update as core_fixture
 import test_component_reinstall as component_fixture
 from core_update import BINARY
 from labops import atomic_json, digest
-from labctl import ALIASES
+from fixture_inventory import ALIASES
 from recovery import RecoveryOperator, worker_issues
 from worker_reinstall import sha
 
@@ -153,13 +154,13 @@ class WorkerRecoveryTests(unittest.TestCase):
     def setup_flow(self, action='worker-resume', target='worker-4'):
         import tempfile
         temp=tempfile.TemporaryDirectory();self.addCleanup(temp.cleanup)
-        op=Mock();op.project=Path(temp.name);op.core={'ip':'example.invalid'};op.journal={}
+        op=Mock();op.inventory=fixture_inventory.inventory();op.core={'alias':fixture_inventory.CORE_ALIAS,'ip':'example.invalid'};op.project=Path(temp.name);op.core={'alias':fixture_inventory.CORE_ALIAS,'ip':'example.invalid'};op.journal={}
         op.worker_scope.return_value={'blockers':[]}
         before=component_fixture.snapshot(True)
-        alias=f'ckc-disposable-0{target[-1]}'
+        alias=f'lab-host-0{target[-1]}'
         if target != 'worker-4':
             before['nodes'][0]['name']=target
-            before['hosts'][alias]=before['hosts'].pop('ckc-disposable-04')
+            before['hosts'][alias]=before['hosts'].pop('lab-host-04')
         op.cli.return_value=before['nodes']
         plan={'id':'new-recovery','source_run':'failed-source','action':action,
               'source':{'plan':{'id':'failed-source','node':target}},'observed':{'snapshot':before,
@@ -184,7 +185,7 @@ class WorkerRecoveryTests(unittest.TestCase):
         RecoveryOperator.recover_worker(op,plan)
         up=component.command.call_args_list[-1]
         self.assertEqual(up.args[1][-2:], ['up','worker-2'])
-        op.worker_scope.assert_called_with('ckc-disposable-02')
+        op.worker_scope.assert_called_with('lab-host-02')
         self.assertEqual(op.journal['recovered_source'],'failed-source')
 
     def test_peer_lost_resume_reply_refences_selected_worker(self):
@@ -227,7 +228,7 @@ class WorkerRecoveryTests(unittest.TestCase):
 
     def test_only_target_unavailability_is_allowed(self):
         snapshot=component_fixture.snapshot();snapshot['nodes'][0]['available']=False
-        inventory=[{'node':'core','alias':'core'},{'node':'worker-4','alias':'ckc-disposable-04'}]
+        inventory=[{'node':'core','alias':'core'},{'node':'worker-4','alias':'lab-host-04'}]
         self.assertEqual(worker_issues(snapshot,inventory),[])
         snapshot['nodes'][0]['resource_usage']='{"memory":1}'
         self.assertTrue(worker_issues(snapshot,inventory))
@@ -240,15 +241,15 @@ class WorkerRecoveryTests(unittest.TestCase):
         self.assertTrue(any('start' in c.args[1] for c in component.command.call_args_list))
 
     def test_peer_observation_checks_selected_alias_and_guard_target(self):
-        op=Mock()
+        op=Mock();op.inventory=fixture_inventory.inventory();op.core={'alias':fixture_inventory.CORE_ALIAS,'ip':'example.invalid'};
         snapshot=component_fixture.snapshot(True)
         snapshot['nodes'][0]['name']='worker-2'
-        snapshot['hosts']['ckc-disposable-02']=snapshot['hosts'].pop('ckc-disposable-04')
+        snapshot['hosts']['lab-host-02']=snapshot['hosts'].pop('lab-host-04')
         # Keep another host after the target in iteration order: observing it must not retarget recovery.
-        snapshot['hosts']['ckc-disposable-04']=deepcopy(snapshot['hosts']['ckc-disposable-02'])
+        snapshot['hosts']['lab-host-04']=deepcopy(snapshot['hosts']['lab-host-02'])
         op.snapshot.return_value=snapshot
-        op.inventory=[{'alias':'ckc-disposable-01','node':'core'},
-                      {'alias':'ckc-disposable-02','node':'worker-2'}]
+        op.inventory=fixture_inventory.inventory()
+        fixture_inventory.complete_snapshot(snapshot)
         op.worker_readiness.return_value={'blockers':[]}
         op.worker_state.return_value={'exists':True,'stage':'installed','journal_sha256':'journal',
             'snapshot_sha256':'backup','restore_possible':False}
@@ -259,7 +260,7 @@ class WorkerRecoveryTests(unittest.TestCase):
         with patch('recovery.ComponentReinstall'):
             result=RecoveryOperator.observe_worker(op,source,'worker-resume','health','canaries')
         op.worker_readiness.assert_called_with('health','canaries',snapshot,'worker-2')
-        op.worker_scope.assert_called_with('ckc-disposable-02')
+        op.worker_scope.assert_called_with('lab-host-02')
         op.worker_services.assert_called_with(source)
         self.assertEqual(result['recovery']['journal_sha256'],'journal')
 
@@ -276,7 +277,7 @@ class WorkerRecoveryTests(unittest.TestCase):
         self.assertEqual(op.source('peer-source','worker-resume')['plan']['node'],'worker-2')
         with patch.object(op,'observe',return_value={'readiness':{'canaries':[]}}):
             recovery=op.make_recovery_plan('peer-source','worker-resume','health','canaries')['plan']
-        self.assertEqual(recovery['mutation_hosts'],['ckc-disposable-01','ckc-disposable-02'])
+        self.assertEqual(recovery['mutation_hosts'],['lab-host-01','lab-host-02'])
         source['node']='unknown'
         atomic_json(op.root/'plans/peer-source.json',{'plan':source,'sha256':digest(source)})
         journal=json.loads((op.root/'runs/peer-source.json').read_text());journal['plan_hash']=digest(source)
@@ -285,10 +286,12 @@ class WorkerRecoveryTests(unittest.TestCase):
             op.source('peer-source','worker-resume')
 
     def test_worker_plan_preserves_new_state_on_resume_but_blocks_restore(self):
-        op=Mock();snapshot=component_fixture.snapshot(True)
+        op=Mock();op.inventory=fixture_inventory.inventory();op.core={'alias':fixture_inventory.CORE_ALIAS,'ip':'example.invalid'};snapshot=component_fixture.snapshot(True)
         old=deepcopy(snapshot)
         op.snapshot.return_value=snapshot
-        op.inventory=[{'alias':'core','node':'core'},{'alias':'ckc-disposable-04','node':'worker-4'}]
+        op.inventory=fixture_inventory.inventory()
+        fixture_inventory.complete_snapshot(snapshot)
+        fixture_inventory.complete_snapshot(old)
         op.worker_readiness.return_value={'blockers':[]}
         op.worker_state.return_value={'exists':True,'stage':'installed','journal_sha256':'journal',
             'snapshot_sha256':'backup','tree_sha256':'new-tree','restore_possible':False,'conflicts':['new or changed data: cursor']}
@@ -315,7 +318,7 @@ class MetadataCountTests(unittest.TestCase):
             with self.subTest(output=output), self.assertRaises(ValueError): count_field(output)
 
     def test_nonempty_metadata_prevents_offline_rollback(self):
-        op=Mock();op.command.return_value='"Count" : 1\n'
+        op=Mock();op.inventory=fixture_inventory.inventory();op.core={'alias':fixture_inventory.CORE_ALIAS,'ip':'example.invalid'};op.command.return_value='"Count" : 1\n'
         with self.assertRaisesRegex(ValueError,'empty workload'):
             RecoveryOperator.offline_workloads(op)
         self.assertTrue(all(c.args[1][-1]=='fields' for c in op.command.call_args_list))

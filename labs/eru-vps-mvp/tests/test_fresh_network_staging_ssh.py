@@ -12,7 +12,8 @@ import unittest
 from unittest.mock import Mock, patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'scripts'))
-from fresh_observation import ALIASES, public_key
+from fresh_observation import public_key
+from fixture_inventory import ALIASES
 
 
 def key(number):

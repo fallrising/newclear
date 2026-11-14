@@ -16,7 +16,8 @@ import uuid
 
 from app_desired import (OWNER, WORKERS, canonical_bytes, sha256,
                          snapshot_binding, spec_identity)
-from worker_drain import MAX_APPS, MAX_ISSUES, NODE_ALIASES, PLAN_ID
+from operator_inventory import workers, load_inventory
+from worker_drain import MAX_APPS, MAX_ISSUES, PLAN_ID
 
 
 FENCE_METHODS = {'network_isolation', 'provider_power_off'}
@@ -131,8 +132,9 @@ def _node(snapshot, name):
 
 def build_plan(target, snapshot, desired_specs, destinations, detection,
                fence, control_plane_health_ok, healthy_workers_ok,
-               unexpected_consistency_issues=(), plan_id=None):
+               unexpected_consistency_issues=(), plan_id=None, *, inventory=None):
     """Bind exact stale state and external fence evidence for operator review."""
+    NODE_ALIASES = workers(inventory)
     if not isinstance(target, str) or target not in WORKERS:
         raise ValueError('target must be a reviewed worker')
     if (not isinstance(snapshot, dict)
@@ -361,6 +363,7 @@ def _read_json(path):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--project', type=Path, required=True, help='project with explicit private inventory')
     parser.add_argument('--target', required=True, choices=sorted(WORKERS))
     parser.add_argument('--input', required=True, help='offline private worker-loss review input')
     parser.add_argument('--plan-id')
@@ -372,7 +375,7 @@ def main():
         args.target, document['snapshot'], document['apps'], document['destinations'],
         document['detection'], document['fence'], document['control_plane_health_ok'],
         document['healthy_workers_ok'], document['unexpected_consistency_issues'],
-        args.plan_id)
+        args.plan_id, inventory=load_inventory(args.project))
     print(json.dumps(plan, indent=2, sort_keys=True))
 
 

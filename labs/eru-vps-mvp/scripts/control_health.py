@@ -80,9 +80,9 @@ def main():
         path = PROJECT / 'private/diagnostics' / (stamp + '-fdatasync.json')
         with ClusterLock(PROJECT):
             op = Operator()
-            result = {'host': 'ckc-disposable-01', 'started_at': stamp}
+            result = {'host': op.core['alias'], 'started_at': stamp}
             try:
-                result['probe'] = json.loads(op.command('ckc-disposable-01', ['sudo', '-n', 'python3', '-'],
+                result['probe'] = json.loads(op.command(op.core['alias'], ['sudo', '-n', 'python3', '-'],
                     (PROJECT / 'scripts/control_disk_probe.py').read_text()))
             except BaseException as exc:
                 result['error'] = str(exc)
@@ -94,13 +94,14 @@ def main():
         print(json.dumps({k: v for k, v in result['probe'].items() if k != 'seconds'}, indent=2))
         return
     path = PROJECT / 'private/diagnostics' / (stamp + '-control-health.json')
-    report = {'host': 'ckc-disposable-01', 'samples': [], 'status': 'collecting'}
+    report = {'host': None, 'samples': [], 'status': 'collecting'}
     with (nullcontext() if args.concurrent_read_only else ClusterLock(PROJECT)):
         op = Operator()
+        report['host'] = op.core['alias']
         try:
             for index in range(args.samples):
                 start = time.monotonic()
-                sample = json.loads(op.command('ckc-disposable-01', ['sudo', '-n', 'python3', '-'],
+                sample = json.loads(op.command(op.core['alias'], ['sudo', '-n', 'python3', '-'],
                                                (PROJECT / 'scripts/control_probe.py').read_text()))
                 report['samples'].append(sample)
                 report['summary'] = summarize(report['samples'])

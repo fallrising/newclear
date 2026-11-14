@@ -6,11 +6,11 @@ from pathlib import Path
 import uuid
 
 from labops import atomic_json, digest
+from operator_inventory import aliases, workers
 import reimage_worker_install as install
 import reimage_worker_generation as generation
 
 
-WORKER_ALIASES = ("ckc-disposable-02", "ckc-disposable-03", "ckc-disposable-04")
 
 STAGES = (
     ("worker-install", "provider-reimage-worker-install", "installed-awaiting-registration"),
@@ -43,8 +43,7 @@ def _read_json(path, label):
 def _load_bootstrap(operator, plan_id, plan_hash):
     plan = install._bootstrap(operator, plan_id, plan_hash)
     target = plan.get("target")
-    if (not isinstance(target, dict) or target.get("alias") not in
-            WORKER_ALIASES
+    if (not isinstance(target, dict) or target.get("alias") != workers(operator.inventory).get(target.get("node"))
             or target.get("node") not in ("worker-2", "worker-3", "worker-4")):
         raise ValueError("worker recovery is outside the reviewed worker scope")
     return plan
@@ -115,22 +114,22 @@ def _journal_ref(result):
     return {"id": journal["id"], "sha256": hashlib.sha256(raw).hexdigest()}
 
 
-def _worker_scope(target, *, peers=False):
-    hosts = ["ckc-disposable-01", target["alias"]]
+def _worker_scope(target, inventory, *, peers=False):
+    hosts = [aliases(inventory)[0], target["alias"]]
     if peers:
-        hosts.extend(alias for alias in WORKER_ALIASES if alias != target["alias"])
+        hosts.extend(alias for alias in workers(inventory).values() if alias != target["alias"])
     return hosts
 
 
-def _reconcile_action(record, target):
+def _reconcile_action(record, target, inventory):
     journal = record["journal"]
     stage = record["stage"]
     if stage == "worker-generation":
         host_scope = ["B-local-private-files"]
     elif stage == "core-access":
-        host_scope = ["ckc-disposable-01"]
+        host_scope = [aliases(inventory)[0]]
     else:
-        host_scope = _worker_scope(target, peers=stage in ("worker-smoke", "worker-resume"))
+        host_scope = _worker_scope(target, peers=stage in ("worker-smoke", "worker-resume"), inventory=inventory)
     return {
         "kind": "reconcile",
         "stage": record["stage"],
@@ -177,9 +176,9 @@ def _collect(operator, bootstrap_plan_id, bootstrap_hash, canary_run=None):
         command = ("python3 scripts/labctl.py install-reimage-worker --plan " + bootstrap["id"]
                    + " --sha256 " + bootstrap_hash)
         return stop(install_record, _stage_command(
-            "execute", "worker-install", command, ["ckc-disposable-01", target["alias"]]))
+            "execute", "worker-install", command, [aliases(operator.inventory)[0], target["alias"]]))
     if install_journal.get("status") != STAGES[0][2]:
-        return stop(install_record, _reconcile_action(install_record, target))
+        return stop(install_record, _reconcile_action(install_record, target, inventory=operator.inventory))
     records.append(install_record)
 
     access_candidate = _latest_plan(
@@ -191,7 +190,7 @@ def _collect(operator, bootstrap_plan_id, bootstrap_hash, canary_run=None):
             "bootstrap_plan": bootstrap_ref, "target": target, "chain": records,
             "chain_sha256": digest(records), "current_stage": "core-access",
             "next_action": _stage_command("plan", "core-access", command,
-                                           _worker_scope(target)),
+                                           _worker_scope(target, inventory=operator.inventory)),
             "complete": False,
         }
     access_plan, access_hash, _access_raw = access_candidate
@@ -212,9 +211,9 @@ def _collect(operator, bootstrap_plan_id, bootstrap_hash, canary_run=None):
         command = ("python3 scripts/labctl.py prepare-reimage-worker-access --plan " + access_plan["id"]
                    + " --sha256 " + access_hash)
         return stop(access_record, _stage_command(
-            "execute", "core-access", command, ["ckc-disposable-01"]))
+            "execute", "core-access", command, [aliases(operator.inventory)[0]]))
     if access_journal.get("status") != STAGES[1][2]:
-        return stop(access_record, _reconcile_action(access_record, target))
+        return stop(access_record, _reconcile_action(access_record, target, inventory=operator.inventory))
     records.append(access_record)
 
     register_run_id = bootstrap["id"] + "-register"
@@ -234,9 +233,9 @@ def _collect(operator, bootstrap_plan_id, bootstrap_hash, canary_run=None):
                    + " --sha256 " + bootstrap_hash)
         return stop(register_record, _stage_command(
             "execute", "worker-registration", command,
-            ["ckc-disposable-01", target["alias"]]))
+            [aliases(operator.inventory)[0], target["alias"]]))
     if register_journal.get("status") != STAGES[2][2]:
-        return stop(register_record, _reconcile_action(register_record, target))
+        return stop(register_record, _reconcile_action(register_record, target, inventory=operator.inventory))
     records.append(register_record)
 
     smoke_candidate = _latest_plan(
@@ -244,14 +243,14 @@ def _collect(operator, bootstrap_plan_id, bootstrap_hash, canary_run=None):
     if not smoke_candidate:
         if canary_run is None:
             action = _stage_command("input-required", "worker-smoke", None,
-                                    _worker_scope(target, peers=True))
+                                    _worker_scope(target, peers=True, inventory=operator.inventory))
             action["required_input"] = "an existing run-owned peer canary run ID"
         else:
             canary_run = identifier(canary_run)
             command = ("python3 scripts/labctl.py plan-reimage-worker-smoke --plan " + bootstrap["id"]
                        + " --sha256 " + bootstrap_hash + " --canary-run " + canary_run)
             action = _stage_command("plan", "worker-smoke", command,
-                                    _worker_scope(target, peers=True))
+                                    _worker_scope(target, peers=True, inventory=operator.inventory))
         return {
             "bootstrap_plan": bootstrap_ref, "target": target, "chain": records,
             "chain_sha256": digest(records), "current_stage": "worker-smoke",
@@ -276,9 +275,9 @@ def _collect(operator, bootstrap_plan_id, bootstrap_hash, canary_run=None):
         command = "python3 scripts/labctl.py smoke-reimage-worker --plan " + smoke_plan["id"] + " --sha256 " + smoke_hash
         return stop(smoke_record, _stage_command(
             "execute", "worker-smoke", command,
-            _worker_scope(target, peers=True)))
+            _worker_scope(target, peers=True, inventory=operator.inventory)))
     if smoke_journal.get("status") != STAGES[3][2]:
-        return stop(smoke_record, _reconcile_action(smoke_record, target))
+        return stop(smoke_record, _reconcile_action(smoke_record, target, inventory=operator.inventory))
     records.append(smoke_record)
 
     resume_candidate = _latest_plan(
@@ -290,7 +289,7 @@ def _collect(operator, bootstrap_plan_id, bootstrap_hash, canary_run=None):
             "bootstrap_plan": bootstrap_ref, "target": target, "chain": records,
             "chain_sha256": digest(records), "current_stage": "worker-resume",
             "next_action": _stage_command("plan", "worker-resume", command,
-                                           _worker_scope(target, peers=True)),
+                                           _worker_scope(target, peers=True, inventory=operator.inventory)),
             "complete": False,
         }
     resume_plan, resume_hash, _resume_raw = resume_candidate
@@ -313,9 +312,9 @@ def _collect(operator, bootstrap_plan_id, bootstrap_hash, canary_run=None):
         command = "python3 scripts/labctl.py resume-reimage-worker --plan " + resume_plan["id"] + " --sha256 " + resume_hash
         return stop(resume_record, _stage_command(
             "execute", "worker-resume", command,
-            _worker_scope(target, peers=True)))
+            _worker_scope(target, peers=True, inventory=operator.inventory)))
     if resume_journal.get("status") != STAGES[4][2]:
-        return stop(resume_record, _reconcile_action(resume_record, target))
+        return stop(resume_record, _reconcile_action(resume_record, target, inventory=operator.inventory))
     records.append(resume_record)
 
     generation_candidate = _latest_plan(
@@ -327,7 +326,7 @@ def _collect(operator, bootstrap_plan_id, bootstrap_hash, canary_run=None):
             "bootstrap_plan": bootstrap_ref, "target": target, "chain": records,
             "chain_sha256": digest(records), "current_stage": "worker-generation",
             "next_action": _stage_command("plan", "worker-generation", command,
-                                           _worker_scope(target, peers=True)),
+                                           _worker_scope(target, peers=True, inventory=operator.inventory)),
             "complete": False,
         }
     generation_plan, generation_hash, _generation_raw = generation_candidate
@@ -359,7 +358,7 @@ def _collect(operator, bootstrap_plan_id, bootstrap_hash, canary_run=None):
         except (OSError, ValueError, KeyError, TypeError):
             generation_is_complete = False
     if not generation_is_complete:
-        return stop(generation_record, _reconcile_action(generation_record, target))
+        return stop(generation_record, _reconcile_action(generation_record, target, inventory=operator.inventory))
     records.append(generation_record)
     return {
         "bootstrap_plan": bootstrap_ref, "target": target, "chain": records,

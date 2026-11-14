@@ -8,7 +8,7 @@ from fresh_execution import exact, identifier, sha256, timestamp
 from fresh_network_access import MANAGEMENT_PORTS
 from fresh_network_directory import HOST_FIELDS
 import fresh_network_firewall as firewall
-from fresh_observation import ALIASES, public_key
+from fresh_observation import public_key
 from fresh_rebuild import plan_digest
 
 ERROR = 'network readiness probes rejected'

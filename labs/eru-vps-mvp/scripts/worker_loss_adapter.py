@@ -1,4 +1,5 @@
 """Control-plane and healthy-worker adapter for ERU-010 worker loss."""
+from operator_inventory import validate_inventory
 from datetime import datetime, timezone
 import json
 
@@ -32,12 +33,9 @@ class WorkerLossCLIAdapter:
         }
 
     def _inventory(self):
-        rows = self.operator.inventory
-        workers = {row.get('node'): row for row in rows
-                   if isinstance(row, dict) and row.get('role') == 'worker'}
-        if (set(workers) != WORKERS
-                or {row.get('alias') for row in workers.values()} != {
-                    'ckc-disposable-02', 'ckc-disposable-03', 'ckc-disposable-04'}):
+        rows = validate_inventory(self.operator.inventory)
+        workers = {row['node']: row for row in rows if row['role'] == 'worker'}
+        if set(workers) != WORKERS:
             raise ValueError('worker loss adapter requires the reviewed worker inventory')
         return workers
 

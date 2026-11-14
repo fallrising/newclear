@@ -99,7 +99,7 @@ def collect_replacement_facts(project, run_id, execution_sha, input_file, input_
         finally:
             os.close(parent)
         captures = []
-        transport = reader if reader is not None else SSHReader()
+        transport = reader if reader is not None else SSHReader(aliases=[host['alias'] for host in request['hosts']])
         source = script()
         for host, receipt in zip(request['hosts'], receipts):
             _context(*args, _time(now), source_state, pending)

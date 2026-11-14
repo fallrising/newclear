@@ -1,3 +1,4 @@
+import fixture_inventory
 """Offline ERU-010 worker-loss recovery review planning tests."""
 import contextlib
 import copy
@@ -83,7 +84,7 @@ class WorkerLossPlanTests(unittest.TestCase):
             kwargs.pop('control_plane_health_ok', True),
             kwargs.pop('healthy_workers_ok', True),
             kwargs.pop('unexpected_consistency_issues', ()),
-            plan_id='20260927T120300Z-loss1', **kwargs)
+            plan_id='20260927T120300Z-loss1', **kwargs, inventory=fixture_inventory.inventory())
 
     def test_confirmed_fence_exact_stale_state_and_destinations_are_reviewable(self):
         hello = spec()
@@ -204,6 +205,7 @@ class WorkerLossPrivatePlanTests(unittest.TestCase):
         self.addCleanup(self.temp.cleanup)
         self.project = Path(self.temp.name)
         (self.project / 'private').mkdir()
+        (self.project / 'private/deployment-plan.json').write_text(json.dumps(fixture_inventory.inventory()))
         document = spec()
         self.input = self.project / 'private/worker-loss.json'
         self.input.write_text(json.dumps({

@@ -11,7 +11,7 @@ from pathlib import Path
 from app_desired import canonical_bytes
 from fresh_execution import exact, timestamp
 from fresh_observation import public_key
-from fresh_rebuild import TOPOLOGY
+from operator_inventory import topology
 
 PATHS = ('private/deployment-plan.json', 'private/verified-host-public-keys.json',
          'private/operations/cluster.json')
@@ -91,6 +91,9 @@ def derive_after(context, before):
         raise ValueError('generation bootstrap/network render differs')
     old = _decode(before[PATHS[0]])
     cluster = _decode(before[PATHS[2]])
+    TOPOLOGY = topology(old)
+    if topology(review['scope']['hosts']) != TOPOLOGY:
+        raise ValueError('generation inventory differs from reviewed host scope')
     if (type(old) is not list or [(r.get('alias'), r.get('node'), r.get('role')) for r in old] != list(TOPOLOGY)
             or cluster.get('cluster_id') != 'eru-vps-mvp'
             or type(cluster.get('generation')) is not int or cluster['generation'] != review['generation_before']

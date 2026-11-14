@@ -3,6 +3,7 @@
 This module never calls a provider API, deletes host files, installs software or
 resumes scheduling. Every SSH action is addressed by the reviewed ckc alias.
 """
+from operator_inventory import workers
 from datetime import datetime, timezone
 import json
 import re
@@ -203,8 +204,7 @@ def _load_plan(operator, plan_id, expected_hash):
     target = plan.get('node')
     host = next((row for row in plan.get('bindings', {}).get('inventory', [])
                  if row.get('node') == target), None)
-    if host is None or host.get('role') != 'worker' or host.get('alias') not in {
-            'ckc-disposable-02', 'ckc-disposable-03', 'ckc-disposable-04'}:
+    if host is None or host.get('role') != 'worker' or host.get('alias') != workers(operator.inventory).get(target):
         raise ValueError('provider reimage target is outside the reviewed worker aliases')
     if target not in ('worker-2', 'worker-3', 'worker-4'):
         raise ValueError('provider reimage target is outside the reviewed worker names')

@@ -12,13 +12,9 @@ import math
 import re
 
 from app_desired import canonical_bytes, spec_identity
+from operator_inventory import topology as inventory_topology
 
 
-ALIASES = tuple(f'ckc-disposable-{index:02d}' for index in range(1, 5))
-TOPOLOGY = tuple(
-    (alias, f'worker-{index}', 'core' if index == 1 else 'worker')
-    for index, alias in enumerate(ALIASES, 1)
-)
 TOP_FIELDS = {
     'schema_version', 'mode', 'topology_profile', 'series',
     'expected_cluster', 'controller_report', 'inventory', 'host_intents',
@@ -292,6 +288,8 @@ def build_plan(document, *, inventory, cluster, host_intents, controller_report,
     if (not isinstance(inventory, list) or len(inventory) != 4
             or any(not isinstance(row, dict) for row in inventory)):
         raise ValueError('inventory must contain exactly four host objects')
+    TOPOLOGY = inventory_topology(inventory)
+    ALIASES = tuple(row[0] for row in TOPOLOGY)
     actual_topology = tuple((row.get('alias'), row.get('node'), row.get('role')) for row in inventory)
     if actual_topology != TOPOLOGY:
         raise ValueError('inventory differs from the reviewed Profile A topology')

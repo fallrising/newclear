@@ -33,6 +33,26 @@ passed 僅表示本次已核對的靜態條件；historical 表示具日期的�
 
 ## 現況與缺口
 
+### 本次維護範圍：#378 私有 SSH alias 注入
+
+本次只修正 operator inventory 的 alias 邊界：保留四個邏輯 node／role、
+既有 plan/hash/generation 與 destructive authorization 檢查，從既有私有
+deployment-plan 或其已綁定輸入取得 SSH alias；不在 runtime/test code 留下部署專屬預設。
+驗證先用中性 fixture 與缺少／不合法／不一致 inventory 的負向案例，
+再跑必要的 recovery、reimage、fresh 相關本機測試及 repository contracts。
+本次未授權讀取真實 private inventory、SSH、provider 或實機操作，AC-04/05 保持 pending。
+
+T-057 維護只修正 inventory loader 與既有 trusted `private/` root symlink
+政策的相容性；explicit file loader 仍拒絕 symlink，inventory file／record
+及 project ancestor 的負向保護不得放寬。先重現完整測試的一個 error，
+再驗 inventory／fresh rebuild／entrypoint／bundle 本機回歸；是否重跑完整套件由 parent 決定。
+
+| 維護 AC | Given／When／Then | 狀態 | 證據 |
+| --- | --- | --- | --- |
+| MA-378 | Given 明確且合法的私有 inventory，When 建立相關 operator／plan，Then 使用注入 alias 並保留邏輯身分；缺少或不一致設定在操作前失敗 | pending | [任務](tasks/378-private-alias-config/task.md)；待本機回歸與獨立審查 |
+
+### 既有主線缺口
+
 已有真實部署與worker元件重裝證據，不能簡化成全部fake。
 另一方面新fresh/recovery大部分是synthetic transport／temp roots本機證據。
 core v0.1.7兩次build為verified-not-deployed；不可把來源驗證寫成已升級。
@@ -60,3 +80,6 @@ PR CI僅來源／連結／private path檢查，不能代替完整controller或li
 
 後續標記須綁已合併的目標 SHA、必要 CI／審查及該範圍核心流程證據。
 沿用歷史結果前須比較其後程式與設定差異，相關改動要補驗。
+
+
+Owner update 2026-10-24: long Eru verification is deferred to a tracked disposable VPS follow-up. Local broad rerun was explicitly stopped; PR572 remains Draft. Focused correction evidence is retained, with no full-pass or live-acceptance claim.

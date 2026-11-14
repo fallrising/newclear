@@ -109,7 +109,7 @@ class ObservationTests(unittest.TestCase):
         for index, (field, value) in enumerate(cases):
             with self.subTest(field=field):
                 self.outputs = copy.deepcopy(original)
-                self.outputs['ckc-disposable-02'][field] = value
+                self.outputs['lab-host-02'][field] = value
                 self.run = 'run-' + str(index)
                 with self.assertRaises((ValueError, FileExistsError)):
                     self.collect(observation_id='invalid-' + str(index))
@@ -226,10 +226,10 @@ class ObservationTests(unittest.TestCase):
         def fake(argv, limit, timeout, **kwargs):
             captured.append(argv)
             fd = kwargs['pass_fds'][0]
-            self.assertEqual(os.read(fd, 1024), ('ckc-disposable-01 ' + key(1) + '\n').encode())
+            self.assertEqual(os.read(fd, 1024), ('lab-host-01 ' + key(1) + '\n').encode())
             return b'{}'
         with patch.object(fresh_observation_ops, 'capture', side_effect=fake):
-            fresh_observation_ops.SSHReader()(self.fixture.inventory[0], 'fixed', key(1))
+            fresh_observation_ops.SSHReader(aliases=[h['alias'] for h in self.fixture.inventory])(self.fixture.inventory[0], 'fixed', key(1))
         argv = captured[0]
         for flag in ['StrictHostKeyChecking=yes', 'UpdateHostKeys=no', 'ProxyCommand=none',
                      'ControlPath=none', 'PermitLocalCommand=no', 'ClearAllForwardings=yes']:
@@ -259,7 +259,7 @@ class ObservationTests(unittest.TestCase):
 
     def test_host_after_identity_change_rejects(self):
         for field in ('machine', 'boot', 'public_key'):
-            outputs = self.outputs['ckc-disposable-03']
+            outputs = self.outputs['lab-host-03']
             original = outputs[field + '_after']
             outputs[field + '_after'] = 'changed'
             with self.subTest(field=field), self.assertRaises(ValueError):

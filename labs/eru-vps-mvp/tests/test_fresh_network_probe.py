@@ -9,7 +9,8 @@ import unittest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'scripts'))
 from fresh_network_access import _file, _firewall, MANAGEMENT_PORTS
-from fresh_observation import ALIASES, public_key
+from fresh_observation import public_key
+from fixture_inventory import ALIASES
 from fresh_rebuild import plan_digest
 
 NOW = datetime(2026, 10, 4, 12, tzinfo=timezone.utc)

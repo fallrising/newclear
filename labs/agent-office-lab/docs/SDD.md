@@ -190,3 +190,9 @@ T-0026：Pi 原生 hook 身分與 session 邊界驗收。沿用 Claude Opus 5.5 
 驗證計畫：先由 Claude 對已核對公開來源提出具體設計，再按互不重疊檔案分工；離線負向案例、真實 HTTP 拒絕與狀態不變、合法事件仍通過、零產品模型請求、身分追蹤及完整清理。此為 AC-11／08 子集，不宣稱整棵程序樹隔離或跨 provider 全部通過。
 
 T-0026 實際完成 Pi hook 身分、固定 session、明確世代與舊 token 拒絕子集；[操作及限制](PI-HOOK-BOUNDARY.md)、[證據](evidence/pi-hook-boundary-2026-11-07.json)。268 項元件測試與四條真實原生路徑通過，完整 AC-08／11 仍 pending。
+
+## T-0027：結果輸出遮蔽
+
+T-0027：結果輸出的合成秘密遮蔽（僅 AC-11 子集）。沿用實際 Claude Opus 5.5 指導 → 兩個實際 Pi CLI（openai/gpt-5.5）獨立工作區分工 → 主導審查、驗證與 PR 交付。以有限合成秘密測例驗證結果 API 的 jobs[].result／results.runs[]、CLI JSON、離線 HTML 內嵌資料及顯示、操作台原文／差異／替代內容與 Blob 下載。由 Claude 確認有限匹配規則、輸出欄位與 hash 契約後凍結分工。
+
+驗收／驗證計畫：Given 含指定合成秘密及安全 Unicode／換行的既有報告、來源快照與產物，When 讀取結果，Then 先驗原始 hash，再生成遮蔽輸出；涵蓋的出口不含指定秘密，安全內容保留、私有來源 bytes 不變，原始產物 hash 與實際下載 UTF-8 bytes hash 明確區分。篡改原產物／來源仍不能 verified/completed，原失敗狀態不能變成功。執行針對性 Python／Node、實際 loopback HTTP 與瀏覽器 Blob 下載驗證、元件 offline／publication 及 repo gates。產品模型請求為零，不重跑未受影響的 T26 原生／昂貴模型驗收；不宣稱一般秘密偵測、完整憑證隔離或完整 MVP，AC-11 保持 pending。

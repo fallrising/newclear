@@ -127,3 +127,9 @@ private routing plus documented Web readCandidate only. Full FN05 waits for sepa
 approved [AP readonly review dependency](specs/PROPOSAL-M3-readonly-review.md).
 
 T-0449 FN05 readonly review: [contract](specs/SPEC-M3-readonly-review.md), [acceptance](acceptance/M3-readonly-review.md); R01–05 pending actual evidence, ownerapprovedscope.
+
+## FZ-ENTRY-MAP documentation milestone
+
+| Requirement | CU / rustdoc | Specification | Check / evidence | State |
+| --- | --- | --- | --- | --- |
+| EM-01–04: preserve six journeys across three entries without a second authority | N/A — ADR-0001 infrastructure exception | [T046 task](tasks/T046.task.md), [entry equivalence plan](plans/portfolio-entry-equivalence.md) | Fixed source/link/scope inspection, index preflight, fresh-context review and required PR CI; delivery tracked in [BOARD](tasks/BOARD.md) | Verifying; no product AC changed |

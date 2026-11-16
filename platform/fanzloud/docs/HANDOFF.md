@@ -1,3 +1,13 @@
+# FZ-ENTRY-MAP documentation checkpoint — 2026-11-16
+
+[Entry equivalence plan](plans/portfolio-entry-equivalence.md) compares six journeys across
+Fanzloud, Agent Platform and Office. [T046](tasks/T046.task.md) and [BOARD](tasks/BOARD.md)
+track this documentation-only delivery. Preserve AP's execution authority and Office's
+native terminal/session. Static navigation is a proposed next slice, not implemented or
+newly authorized here. FN07 owner confirmation, old Cloud AC04/P1 AC05 and full M3 remain
+pending; later [owner preparation](acceptance/M3-owner-operation.md) governs historical
+service/TLS readiness, not the older handoff text below.
+
 # Current M1 handoff — 2026-10-31
 
 [Real browser/isolated task evidence](acceptance/M1-isolated.md), [operator entry](isolated-operator.md), [PR885](https://github.com/fallrising/newclear/pull/885). One actual subscription coding run succeeded; preserve its source/diff/cleanup evidence. No Cloud retry. M2 second vendor and M3 durable recovery remain open. Final acceptance/CI state is in the M1 report. Historical handoff follows.

@@ -127,4 +127,4 @@ Documentation only; original product AC and M3-U status unchanged.
 
 | ID | Task | AC | Status | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| FZ-ENTRY-MAP | Six-journey Fanzloud/AP/Office capability and authority comparison | E01–E05 | in_progress | 2026-11-16T17:09:10Z | — | 2026-11-16T17:18:00Z |
+| FZ-ENTRY-MAP | Six-journey Fanzloud/AP/Office capability and authority comparison | E01–E05 | in_progress | 2026-11-16T17:09:10Z | — | 2026-11-16T17:15:50Z |

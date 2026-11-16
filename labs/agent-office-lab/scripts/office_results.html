@@ -32,6 +32,9 @@ const labels = {completed:'完成且產物已核對',failed:'失敗',cancelled:'
 const artifactLabels = {verified:'已核對',unavailable:'無產物',unverified:'未通過核對'};
 const scenarioLabels = {native_pi_question:'Pi 原生問答確認檢查（無模型推論）',native_pi_host_restart:'Pi Office 重啟檢查（沒有模型推論）',native_pi_resume:'Pi 同 session 重新連接檢查（沒有模型推論）',native_pi_cancel:'Pi 原生取消檢查（沒有模型推論）',injected_cli_crash:'本機注入 CLI crash（未呼叫遠端模型）',injected_http_401:'本機注入 HTTP 401（未呼叫遠端模型）',injected_http_429:'本機注入 HTTP 429（未呼叫遠端模型）'};
 const el = (tag,text) => {const node=document.createElement(tag);node.textContent=text;return node;};
+async function sha256Hex(text){const bytes=new TextEncoder().encode(text),digest=await crypto.subtle.digest('SHA-256',bytes);return Array.from(new Uint8Array(digest),b=>b.toString(16).padStart(2,'0')).join('');}
+function downloadText(name,text){const url=URL.createObjectURL(new Blob([text],{type:'text/plain;charset=utf-8'})),a=el('a','');a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}
+function addVerifiedDownload(container,name,text,expected){const button=el('button',`下載 ${name}`),note=el('p','正在核對下載內容 SHA-256…');button.disabled=true;note.className='download-status';container.append(button,note);if(!expected){note.textContent='下載內容 SHA-256：未記錄，無法下載。';return;}sha256Hex(text).then(actual=>{if(actual===expected){note.textContent=`下載內容 SHA-256：${expected}`;button.disabled=false;button.onclick=()=>downloadText(name,text);}else{note.textContent=`下載內容 SHA-256：${expected}；integrity mismatch`;button.textContent=`下載 ${name}（integrity mismatch）`;}}).catch(()=>{note.textContent='下載內容 SHA-256：integrity mismatch';});}
 document.getElementById('generated').textContent = `快照時間：${data.generated_at}`;
 for (const provider of data.providers) {
   const card=el('div','');card.className='card';card.append(el('strong',provider));
@@ -44,7 +47,7 @@ for (const [key,label] of Object.entries(labels)) {const option=el('option',labe
 function show(run) {
   const detail=document.getElementById('detail');detail.replaceChildren(el('h2','任務詳細結果'));
   const fields=el('dl','');
-  for (const [label,value] of [['執行紀錄',run.id],['工位',run.provider],['原生紀錄模型',run.model||'未記錄'],['CLI 版本',run.version||'未記錄'],['結果',run.task_kind==='local_revision'&&run.status==='completed'?'修改提案待審閱':run.task_kind==='local_text'&&run.status==='completed'?'已產生文件，待確認':labels[run.status]],['清理證據',run.cleanup_verified?'通過':'不足'],['SHA-256',run.artifact.sha256||'未通過核對']]) {
+  for (const [label,value] of [['執行紀錄',run.id],['工位',run.provider],['原生紀錄模型',run.model||'未記錄'],['CLI 版本',run.version||'未記錄'],['結果',run.task_kind==='local_revision'&&run.status==='completed'?'修改提案待審閱':run.task_kind==='local_text'&&run.status==='completed'?'已產生文件，待確認':labels[run.status]],['清理證據',run.cleanup_verified?'通過':'不足'],['原始產物 SHA-256',run.artifact.sha256||'未通過核對']]) {
     fields.append(el('dt',label),el('dd',value));
   }
   detail.append(fields);
@@ -59,9 +62,9 @@ function show(run) {
   else if (run.test_scenario) detail.append(el('p',scenarioLabels[run.test_scenario]),el('p',run.failure_check_passed?'故障測試通過；任務仍為失敗。':'故障測試未通過。'));
   if (run.task_kind==='local_text') detail.append(el('p','本地文字任務；內容仍需確認。'));
   if (run.task_kind==='local_revision') detail.append(el('p','單檔修改提案；原檔未套用，程式尚未執行或測試。'));
-  if (run.artifact.kind==='revision'&&run.artifact.status==='verified') detail.append(el('h3',run.artifact.target),el('p',`原始 SHA-256：${run.artifact.before_sha256}`),el('h3','修改差異'),el('pre',run.artifact.changed?run.artifact.diff:'無內容變更'),el('h3','原始內容'),el('pre',run.artifact.original),el('h3','替代內容'),el('pre',run.artifact.text));
-  else if (run.artifact.kind==='text' && run.artifact.status==='verified') detail.append(el('h3','output.md'),el('pre',run.artifact.text));
-  else if (run.artifact.content) detail.append(el('h3','result.json'),el('pre',JSON.stringify(run.artifact.content,null,2)));
+  if (run.artifact.kind==='revision'&&run.artifact.status==='verified') {const displayChanged=run.artifact.display_changed!==undefined?run.artifact.display_changed:run.artifact.changed;detail.append(el('h3',run.artifact.target),el('p',`原始檔案 SHA-256：${run.artifact.before_sha256}`));if(run.artifact.changed&&!displayChanged)detail.append(el('p','原始 bytes 有變更；遮蔽後下載內容無變更（secret-only change）。'));detail.append(el('h3','修改差異'),el('pre',displayChanged?run.artifact.diff:'無內容變更'),el('h3','原始內容'),el('pre',run.artifact.original),el('h3','替代內容'),el('pre',run.artifact.text));addVerifiedDownload(detail,run.artifact.name||run.artifact.target,run.artifact.text,run.artifact.display_sha256);}
+  else if (run.artifact.kind==='text' && run.artifact.status==='verified') {detail.append(el('h3',run.artifact.name||'output.md'),el('pre',run.artifact.text));addVerifiedDownload(detail,run.artifact.name||'output.md',run.artifact.text,run.artifact.display_sha256);}
+  else if (run.artifact.content) {detail.append(el('h3','result.json'),el('pre',JSON.stringify(run.artifact.content,null,2)));if(run.artifact.export_canonical)detail.append(el('p','下載為遮蔽後的標準格式 JSON。'));if(run.artifact.export_text)addVerifiedDownload(detail,'result.json',run.artifact.export_text,run.artifact.display_sha256);}
   else detail.append(el('p','沒有可顯示的已核對產物。'));
   const close=el('button','關閉詳細結果');close.onclick=()=>{detail.hidden=true;document.getElementById('provider').focus();};detail.append(close);
   detail.hidden=false;detail.focus();
@@ -72,7 +75,7 @@ function render() {
   const body=document.getElementById('runs');body.replaceChildren();document.getElementById('detail').hidden=true;
   document.getElementById('count').textContent=runs.length?`${runs.length} 筆紀錄`:'沒有符合條件的紀錄。';
   for (const run of runs) {
-    const tr=el('tr',''),agent=el('td',run.provider);agent.append(el('br',''),el('small',run.model||'模型未記錄'));
+    const tr=el('tr',''),agent=el('td',run.provider);if(run.ref)tr.dataset.ref=run.ref;if(run.root!==undefined)tr.dataset.root=String(run.root);agent.append(el('br',''),el('small',run.model||'模型未記錄'));
     const state=el('td',run.task_kind==='local_revision'&&run.status==='completed'?'修改提案待審閱':run.task_kind==='local_text'&&run.status==='completed'?'已產生文件，待確認':labels[run.status]);if(run.status==='completed')state.className='complete';
     const action=el('td',''),button=el('button',`${artifactLabels[run.artifact.status]} · 詳細`);button.onclick=()=>show(run);action.append(button);
     const source=el('td',run.id);if(run.test_scenario)source.append(el('br',''),el('small',scenarioLabels[run.test_scenario]));

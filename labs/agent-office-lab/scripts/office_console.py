@@ -18,6 +18,7 @@ from urllib.parse import urlsplit
 import local_text_task as text_task
 import office_dispatch as dispatch
 import office_results as results
+import result_redaction as redaction
 import remote_grant as grants
 from execution_slot import SlotError, inspect_slot
 from remote_cli import private_directory
@@ -97,6 +98,25 @@ class Console:
         self.closing = False
         self.directory = private_directory(lab / 'state/console' / secrets.token_hex(12), root=lab)
 
+    def resolve_ref(self, ref):
+        """Resolve an opaque result reference only inside this console's own runs."""
+        if not isinstance(ref, str) or not re.fullmatch(r'r1_[a-f0-9]{32}', ref):
+            raise ConsoleError('invalid_retry_reference')
+        own_root = self.lab / 'runs'
+        if not self.roots or os.path.abspath(self.roots[0]) != os.path.abspath(own_root):
+            raise ConsoleError('retry_reference_unavailable')
+        fd = os.open(own_root, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW)
+        try:
+            names = [name for name in os.listdir(fd) if results.RUN_NAME.fullmatch(name)]
+            if len(names) > results.MAX_RUNS:
+                raise ConsoleError('retry_reference_unavailable')
+            matches = [name for name in names if redaction.make_ref(1, name) == ref]
+        finally:
+            os.close(fd)
+        if len(matches) != 1:
+            raise ConsoleError('retry_reference_not_found' if not matches else 'ambiguous_retry_reference')
+        return matches[0]
+
     def preview(self, selection):
         if isinstance(selection,dict) and selection.get('mode') in ('text','revision'):
             revision = selection['mode']=='revision'
@@ -134,6 +154,8 @@ class Console:
         return {'kind':'server_grant','fingerprint':grants.fingerprint(row['id']),'expires_at':row['expires_at']}, True, row['id'], ttl
 
     def plan(self, selection):
+        if isinstance(selection, dict) and set(selection) == {'retry_ref'}:
+            selection = {'retry_id': self.resolve_ref(selection['retry_ref'])}
         preview, _ = self.preview(selection)
         authorization, executable, grant_id, ttl = self._authorization(preview)
         if authorization is not None:
@@ -143,7 +165,7 @@ class Console:
             if len(self.plans) >= 32: raise ConsoleError('too_many_plans')
             key = secrets.token_hex(16)
             self.plans[key] = {'selection':selection, 'expires':time.monotonic()+ttl, 'preview':preview, 'grant_id':grant_id}
-        return {'plan_id':key, 'plan':preview, 'executable':executable}
+        return {'plan_id':key, 'plan':redaction.redact_tree(preview), 'executable':executable}
 
     def execute(self, key):
         with self.lock:
@@ -243,6 +265,7 @@ class Console:
                         except FileNotFoundError: pass
                 finally: os.close(fd)
             finally: os.close(root_fd)
+        row['run_id'] = redaction.redact(row['run_id']) if row.get('run_id') else None
         return row
 
     def snapshot(self):
@@ -251,7 +274,7 @@ class Console:
             for job in reversed(list(self.jobs.values())):
                 try: jobs.append(self.job_view(job))
                 except (OSError, ValueError):
-                    jobs.append({k:job[k] for k in ('id','provider','phase','exit_code','run_id')})
+                    jobs.append(redaction.redact_tree({k:job[k] for k in ('id','provider','phase','exit_code','run_id')}))
             pending, grant_errors = [], []
             for provider in self.remote_grant_providers:
                 try:

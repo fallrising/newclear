@@ -1,5 +1,7 @@
 # 開發交接
 
+T-0027 最新：合成秘密輸出遮蔽、穩定 ref、原始／下載 hash 分離與 UI 下載前核對已實作。兩個 Pi 新單次委託均完成，沒有自動重試；主導整合後以實際 HTTP／CLI 與 Chrome Blob 驗證，原始 bytes／mtime 不變。僅 AC-11 子集；完整安全驗收與 MVP 保持 pending。見[契約](docs/RESULT-REDACTION.md)、[證據](docs/evidence/result-redaction-2026-11-16.json)、[任務板](docs/tasks/BOARD.md)。下方為歷史紀錄。
+
 T-0026：完成 [Pi hook 身分與 session 邊界](docs/PI-HOOK-BOUNDARY.md)。實際 Claude Opus 5.5 指導、兩個 Pi CLI（OpenAI GPT-5.5）獨立平行實作並正常退出，主導審查與整合。268 tests、真實問答／重連／host 重啟／啟動及 1680 組原生 parser 比較通過；11 種拒絕與重連後舊 token 拒絕均不改狀態。四輪 33／24／99／41 個受追蹤程序全部退出、鎖釋放。零產品模型請求，沒有 Strata 或付費 grant。已知開發用量估算 2.200252 美元，首輪 Claude 逾時用量未知，非帳單；失敗紀錄保留。完成 AC-08／11 子集，持有效 token 的同 session 偽造、其他 provider 與完整 MVP 仍 pending。[證據](docs/evidence/pi-hook-boundary-2026-11-07.json)，CI／合併狀態見[任務板](docs/tasks/BOARD.md)。
 
 T-0025：完成 [Pi 原生問答確認檢查](docs/PI-QUESTION.md)。維持 Claude Opus 5.5 技術指導、兩個 Pi CLI（OpenAI GPT-5.5）平行實作；兩者到達 24 次請求上限後，由主導 agent 完成審查與整合。真實 Pi 同 session 的拒絕、接受、原生逾時與重複指令拒絕通過；只在接受後寫一次私有測試 marker，沒有模型產物。248 tests、兩輪 Chrome 原生驗收及 67 筆結果回歸通過；外層分別追蹤 43／35 個程序，全部退出、鎖釋放。結果保持 stopped，模型推論及 relay／遠端請求皆為零，未啟動 Strata 或建立付費 grant。開發委託用量另計，回報估算合計 2.98099 美元，非帳單。完成 AC-05／09／11 子集；模型驅動工具權限、其他 provider、遠端端到端與完整 MVP 仍 pending。[證據](docs/evidence/pi-question-2026-11-07.json)，交付見[任務板](docs/tasks/BOARD.md)。

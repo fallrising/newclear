@@ -15,7 +15,7 @@ source_commit: 64c8ad59620e9068f0beede99365b7d656f00825
 
 ## 主線與範圍
 
-T-0027 進度：首次實際 Claude 指導於 240 秒逾時，未取得指導，尚未開始 Pi／產品實作；依 owner 要求先提交進度。失敗、費用未知與恢復條件見[任務板](docs/tasks/BOARD.md)。
+T-0027 最新：已整合合成秘密輸出遮蔽與下載雜湊核對，實際 loopback HTTP／Chrome Blob 驗證通過；只涵蓋 AC-11 子集，完整 AC-11／MVP 保持 pending。[輸出契約](docs/RESULT-REDACTION.md)、[驗證證據](docs/evidence/result-redaction-2026-11-16.json)與[交付狀態](docs/tasks/BOARD.md)。
 
 T-0027：結果輸出的合成秘密遮蔽（僅 AC-11 子集）。沿用實際 Claude Opus 5.5 指導 → 兩個實際 Pi CLI（openai/gpt-5.5）獨立工作區分工 → 主導審查、驗證與 PR 交付。以有限合成秘密測例驗證結果 API 的 jobs[].result／results.runs[]、CLI JSON、離線 HTML 內嵌資料及顯示、操作台原文／差異／替代內容與 Blob 下載。由 Claude 確認有限匹配規則、輸出欄位與 hash 契約後凍結分工。
 
@@ -155,3 +155,5 @@ Repo 檢查：`python3 scripts/check_indexes.py`。runtime 另需 macOS arm64／
 ## 可用版本
 
 `usable_tag: none`。主線未完成，沒有發布 tag 或部署。
+
+T-0027 接續：已取得完整 Claude Opus 5.5 串流指導，主導核對並凍結[合成秘密輸出契約](docs/RESULT-REDACTION.md)。兩個 Pi 首次請求均因 OpenAI 憑證過期被拒絕，未產生實作；已停止且未自動重試，尚未完成驗收或交付。

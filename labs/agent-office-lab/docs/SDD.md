@@ -196,3 +196,5 @@ T-0026 實際完成 Pi hook 身分、固定 session、明確世代與舊 token �
 T-0027：結果輸出的合成秘密遮蔽（僅 AC-11 子集）。沿用實際 Claude Opus 5.5 指導 → 兩個實際 Pi CLI（openai/gpt-5.5）獨立工作區分工 → 主導審查、驗證與 PR 交付。以有限合成秘密測例驗證結果 API 的 jobs[].result／results.runs[]、CLI JSON、離線 HTML 內嵌資料及顯示、操作台原文／差異／替代內容與 Blob 下載。由 Claude 確認有限匹配規則、輸出欄位與 hash 契約後凍結分工。
 
 驗收／驗證計畫：Given 含指定合成秘密及安全 Unicode／換行的既有報告、來源快照與產物，When 讀取結果，Then 先驗原始 hash，再生成遮蔽輸出；涵蓋的出口不含指定秘密，安全內容保留、私有來源 bytes 不變，原始產物 hash 與實際下載 UTF-8 bytes hash 明確區分。篡改原產物／來源仍不能 verified/completed，原失敗狀態不能變成功。執行針對性 Python／Node、實際 loopback HTTP 與瀏覽器 Blob 下載驗證、元件 offline／publication 及 repo gates。產品模型請求為零，不重跑未受影響的 T26 原生／昂貴模型驗收；不宣稱一般秘密偵測、完整憑證隔離或完整 MVP，AC-11 保持 pending。
+
+T-0027 接續：完整 Claude Opus 5.5 指導與[輸出契約](RESULT-REDACTION.md)固定後，owner 更新憑證並新授權兩個實際 Pi（openai/gpt-5.5）各一次；後端與 UI 實作已由主導整合。先驗原始 bytes／hash，再投影結果字串、重算顯示差異與下載 hash；ref 支援遮蔽後同名查詢／重試，不能繞過既有 eligibility。實際 HTTP、CLI、離線 HTML 與 Chrome 下載驗證通過；[證據](evidence/result-redaction-2026-11-16.json)。先前 401／部分回覆保留，沒有自動重試；完整 AC-11 仍 pending。

@@ -120,12 +120,21 @@ owner submit/review alternative still needs explicit authorization. No new miles
 
 2026-11-02 owner現在可操作；M3-U續作10分鐘／零新CLI/VM只讀確認入口，私人有限gate先離線驗證與獨立審查；等私人連線／TLS就緒再開始，未開窗口、不改完整FN07條款。
 
-## P01 — 入口能力對照（owner 直接指示）
+## Portfolio entry comparison — owner direct request
 
-[任務](P01.task.md)。獨立文件任務，不是原 M1–M3 新增產品前置。
+[Issue #1047](https://github.com/fallrising/newclear/issues/1047), [task](FZ-ENTRY-MAP.task.md).
+Documentation only; original product AC and M3-U status unchanged.
 
 | ID | Task | AC | Status | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| P01-01 | 六項入口、原 AC 與固定證據對照 | P01-01 | in_progress | 2026-11-16T17:11:25Z | | 2026-11-16T17:17:36Z |
-| P01-02 | 單一執行權威與 unknown／session／cancel 語義 | P01-02 | in_progress | 2026-11-16T17:11:25Z | | 2026-11-16T17:17:36Z |
-| P01-03 | 原主線保留、文件驗證與正常交付 | P01-03 | in_progress | 2026-11-16T17:11:25Z | | 2026-11-16T17:17:36Z |
+| FZ-ENTRY-MAP | Six-journey Fanzloud/AP/Office capability and authority comparison | E01–E05 | in_progress | 2026-11-16T17:09:10Z | — | 2026-11-16T17:15:50Z |
+
+## P01 — 既有入口對照補充（owner 直接指示）
+
+[任務](P01.task.md)。沿用 PR1048 的既有文件，補原 AC／M4／精確對帳，不是原 M1–M3 新增產品前置。
+
+| ID | Task | AC | Status | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| P01-01 | 既有六項入口補原 AC 索引與完整 M4 | P01-01 | in_progress | 2026-11-16T17:11:25Z | | 2026-11-16T17:24:48Z |
+| P01-02 | 單一執行權威與 unknown／session／cancel 語義 | P01-02 | in_progress | 2026-11-16T17:11:25Z | | 2026-11-16T17:24:48Z |
+| P01-03 | 原主線保留、文件驗證與正常交付 | P01-03 | in_progress | 2026-11-16T17:11:25Z | | 2026-11-16T17:24:48Z |

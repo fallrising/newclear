@@ -264,8 +264,8 @@ def launch(provider, allow_remote, lab=LAB, check_cancel=False, check_failure=No
             raise SlotError('remote_grant_conflicts_with_allow_remote')
         if provider != 'pi':
             raise grants.GrantError('remote_grant_provider_not_supported')
-        if retry_parent is not None or check_cancel or check_failure is not None or check_crash or check_resume or check_host_restart or keep_open or check_question:
-            raise SlotError('remote_grant_requires_fresh_task')
+        if check_cancel or check_failure is not None or check_crash or check_resume or check_host_restart or keep_open or check_question:
+            raise SlotError('remote_grant_requires_remote_task')
     effective_allow_remote = allow_remote or grant_remote
     validate_host_restart(provider, check_host_restart, check_resume, check_cancel, check_failure, check_crash, keep_open, effective_allow_remote)
     validate_resume(provider, check_resume, check_cancel, check_failure, check_crash, keep_open, effective_allow_remote)
@@ -290,8 +290,9 @@ def launch(provider, allow_remote, lab=LAB, check_cancel=False, check_failure=No
             print(json.dumps({'status': 'blocked', 'reason': 'preflight_failed', 'check': check}))
             return 1
         consumed = None
+        if retry_parent is not None: slot.select_retry(retry_parent)
         if grant_remote:
-            consumed = grants.consume(lab, remote_grant, 'pi', 'dispatcher')
+            consumed = grants.consume(lab, remote_grant, 'pi', 'dispatcher', retry_parent=retry_parent)
         python = strata_home(lab) / 'source/.venv/bin/python' if provider == 'opencode' else Path(sys.executable)
         runner_args = ['--check-failure', str(check_failure)] if check_failure is not None else spec['args']
         if grant_remote:
@@ -305,7 +306,6 @@ def launch(provider, allow_remote, lab=LAB, check_cancel=False, check_failure=No
         if check_cancel:
             command.append('--check-cancel')
         if keep_open: command.append('--keep-open')
-        if retry_parent is not None: slot.select_retry(retry_parent)
         os.execve(str(python), command, slot.exec_env(os.environ))
         raise RuntimeError('exec_returned_without_replacing_process')
 
@@ -338,6 +338,7 @@ def main(argv=None):
     check = commands.add_parser('detect'); check.add_argument('--provider', choices=[*SPECS, 'all'], default='all')
     preview = commands.add_parser('plan'); preview.add_argument('provider', choices=SPECS)
     grant = commands.add_parser('grant'); grant.add_argument('provider', choices=['pi']); grant.add_argument('--ttl', type=int, default=900); grant.add_argument('--confirm-paid-remote-run', action='store_true', required=True)
+    grant.add_argument('--retry-of', help='Bind a new grant to this eligible failed Pi task only')
     revoke = commands.add_parser('grant-revoke'); revoke.add_argument('grant_id')
     commands.add_parser('grants', help='List pending remote grants without exposing IDs')
     run = commands.add_parser('run'); run.add_argument('provider', choices=SPECS)
@@ -352,14 +353,15 @@ def main(argv=None):
     run.add_argument('--keep-open', action='store_true', help='OpenCode only: keep the verified native terminal and local model open until stopped')
     text = commands.add_parser('local-text'); text.add_argument('--request',required=True); text.add_argument('--sha256',required=True); text.add_argument('--execute',action='store_true',required=True)
     retry = commands.add_parser('retry'); retry.add_argument('run_id')
-    retry.add_argument('--execute', action='store_true'); retry.add_argument('--allow-remote', action='store_true')
+    retry.add_argument('--execute', action='store_true')
+    retry_remote = retry.add_mutually_exclusive_group(); retry_remote.add_argument('--allow-remote', action='store_true'); retry_remote.add_argument('--remote-grant')
     ack = commands.add_parser('acknowledge-interruption')
     ack.add_argument('--confirm-all-owned-processes-stopped', action='store_true', required=True)
     args = parser.parse_args(argv)
     try:
         if args.action == 'local-text': return launch_text_task(args.request,args.sha256)
         if args.action == 'grant':
-            value = grants.create(LAB, args.provider, args.ttl)
+            value = grants.create(LAB, args.provider, args.ttl, retry_parent=args.retry_of)
             print(json.dumps({'id': value['id'], 'fingerprint': value['fingerprint'], 'expires_at': value['expires_at'],
                               'limits': value['limits'], 'money_cap': None}, indent=2))
             return 0
@@ -376,11 +378,12 @@ def main(argv=None):
             print(json.dumps({'shared_execution':state,'model_task_started':False}))
             return 1 if state['status'] == 'unavailable' else 0
         if args.action == 'retry':
+            if not args.execute and (args.allow_remote or args.remote_grant):
+                parser.error('--allow-remote/--remote-grant requires --execute')
             preview, options = retry_plan(args.run_id)
             if not args.execute:
-                if args.allow_remote: parser.error('--allow-remote requires --execute')
                 print(json.dumps(preview, indent=2)); return 0
-            return launch('pi', args.allow_remote, retry_parent=args.run_id, **options)
+            return launch('pi', args.allow_remote, retry_parent=args.run_id, remote_grant=args.remote_grant, **options)
         if args.action == 'detect':
             checks = [detect(p) for p in (SPECS if args.provider == 'all' else [args.provider])]
             print(json.dumps({'checks': checks, 'model_task_started': False}, indent=2))

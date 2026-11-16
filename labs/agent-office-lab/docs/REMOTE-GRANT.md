@@ -14,7 +14,7 @@ python3 scripts/office_console.py --accept-remote-grant pi
 
 建立授權只保存一張有限期的執行許可，不會啟動模型。CLI 輸出的完整 id 留在本機；操作台只顯示指紋及到期時間。在頁面選 Pi → 合成檔案任務 → 查看執行計畫，確認模型、請求／輸出／時間限制後啟動。頁面確認不能自行建立新授權。
 
-目前固定限制為最多四個 provider 請求、每請求最多 512 output tokens、180 秒；`money_cap` 為 null，沒有金額硬上限。停止會要求 runner 清理，但已送出的遠端請求仍可能計費。授權不可用於任意 prompt、私人專案、遠端重試或 Grok／Cursor。
+目前固定限制為最多四個 provider 請求、每請求最多 512 output tokens、180 秒；`money_cap` 為 null，沒有金額硬上限。停止會要求 runner 清理，但已送出的遠端請求仍可能計費。首次任務授權與指定重試授權不可互用；兩者都不可用於任意 prompt、私人專案或 Grok／Cursor。
 
 查看及撤銷尚未使用的授權：
 
@@ -42,3 +42,23 @@ Dispatcher 先取得共用執行鎖、完成環境預檢，再原子消耗授權
 真實 Pi／DeepSeek 從操作台派工到產物的付費驗收需要另一個明確批准的一次性任務。完成之前，AC-01／09 與完整 MVP 保持 pending；本輪開發 agent 的 API 呼叫不能當作產品遠端驗收證據。
 
 驗收結果：218 項離線測試、五組 Chrome 授權流程、真實 Pi 本機 429／取消與 65 筆結果回歸通過；[公開證據](evidence/remote-grant-2026-11-07.json) 保留先前失敗及模型使用區別。
+
+## 指定失敗紀錄的遠端重試
+
+T-0028 加入固定 Pi task 的一次性重試 grant。取得這一次重試的付費批准後，使用本 checkout 最新、已失敗且清理完成的原始 run 名稱：
+
+```sh
+python3 scripts/office_dispatch.py retry pi-work-REPLACE_WITH_RUN_ID
+python3 scripts/office_dispatch.py grant pi --retry-of pi-work-REPLACE_WITH_RUN_ID --ttl 900 --confirm-paid-remote-run
+python3 scripts/office_console.py --accept-remote-grant pi
+```
+
+在該紀錄按「重試計畫」，核對來源、次數與授權指紋，再明確確認執行。這張 grant 只允許此 parent 的下一次 attempt；不能啟動首次任務、另一筆失敗紀錄或本機故障檢查。也可使用 CLI `retry RUN_ID --execute --remote-grant GRANT_ID`，與 `--allow-remote` 互斥。每次最多四請求、每請求 512 output tokens、180 秒和整條鏈最多兩次重試不變；沒有自動重試與金額硬上限。
+
+新建 grant 採 version 2，增加私有 `retry` 欄位：首次任務為 null，重試則綁定 parent、root、下一次 attempt、fixture／受測程式摘要、receipt／ledger 的標準格式摘要，以及原失敗報告的原始 bytes SHA-256。原報告即使仍然 failed，只要 bytes 變更也使 grant 失效。version 1 僅代表首次任務，仍須通過全部既有來源與期限檢查；不升級或補寫歷史授權。
+
+計畫、execute 和 dispatcher 消耗時都重查原重試資格。Dispatcher 在共用鎖內綁定 parent，通過環境預檢後才原子消耗，透過既有 exec journal 交給 runner；失敗不會退還已消耗 grant。舊 parent、第三次重試、fixture／歷史／來源變更、成功或清理不全都拒絕。撤銷命令仍能處理已不符合資格的 pending grant。這是單 checkout 合作協定，不防持有本機寫入權者惡意重寫整份紀錄。
+
+HTTP 公開授權摘要只增加 `scope=fresh|retry` 與 `retry={parent_ref,root_ref,attempt}`；不公開原始 grant id、run 名稱、私有摘要或路徑。瀏覽器仍使用 `retry_ref`，沒有建立、延長、修改或消耗 grant 的新端點，消耗只能經既有 dispatcher。
+
+本輪測試使用隔離臨時 lab：真實 HTTP、Chrome、dispatcher、原子消耗、跨 exec 執行鎖與 retry receipt；環境偵測及 provider 是明示測試替身，產生 failed／零請求的結果。沒有建立實際 lab 的付費 grant、讀取憑證或呼叫 DeepSeek；產品付費重試及完整 AC-07／09／11 仍待另次明確驗收。

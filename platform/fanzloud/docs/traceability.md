@@ -132,7 +132,7 @@ T-0449 FN05 readonly review: [contract](specs/SPEC-M3-readonly-review.md), [acce
 
 | Requirement | CU / decision | Inspection / machine evidence | State |
 | --- | --- | --- | --- |
-| P01-01 六項入口、原 AC 與固定證據 | N/A — ADR-0001 infrastructure exception; TD §9.3 | [矩陣](portfolio-entry-crosswalk.md)、[任務](tasks/P01.task.md)、[驗收](acceptance/P01.acceptance.md)逐列對照 | Accepted (documentation) |
+| P01-01 六項入口、原 AC 與固定證據 | N/A — ADR-0001 infrastructure exception; TD §9.3 | [矩陣](plans/portfolio-entry-equivalence.md)、[任務](tasks/P01.task.md)、[驗收](acceptance/P01.acceptance.md)逐列對照 | Accepted (documentation) |
 | P01-02 唯一 writer、unknown／session／cancel 區分 | 同上 | 同矩陣的回執遺失流程與反例審查 | Accepted (documentation) |
 | P01-03 不改 runtime／既有驗收與 route | 同上 | source diff、check_indexes、staged whitespace；required CI | Accepted (documentation); CI/delivery per BOARD |
 

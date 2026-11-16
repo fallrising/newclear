@@ -1,5 +1,7 @@
 # Codebox
 
+[入口與能力比較](docs/plans/portfolio-entry-equivalence.md)：保留 Fanzloud/AP 的隔離 coding 分工與 Office 原生本地入口；文件比較不代表入口已切換或產品驗收完成。
+
 > **2026-11-01 固定審查候選**：同一 Web 可核對並下載既有 writer 的不可變成果包，包含原任務、diff、檢查與固定 hash；兩個真瀏覽器回讀一致。[實測與限制](docs/acceptance/M3-fixed-candidate.md)。實際跨廠商 reviewer 尚待 T-0449 後端契約批准，FN05 尚未完成。
 
 > **2026-11-01 AC05 最小持久化**：提交意圖與唯一 AP run／成果引用已持久保存；真 Rust／AP 重啟及新瀏覽器回讀、unknown 零自動重送通過獨立驗收。[證據與限制](docs/acceptance/M3-durable-intents.md)。unknown 現有明示唯讀對帳入口；[原安裝已恢復並通過自動 journey](docs/acceptance/M3-reconciliation.md)。服務已停止，本人操作確認待辦，完整 M3／FN07 尚未完成。
@@ -9,7 +11,6 @@
 > **2026-10-31 M1**：真 Chromium → Rust → Agent Platform → 隔離 VM → 官方 Claude Code 已完成一次修復，頁面顯示進度、檢查通過並下載精確 diff。[實測證據與限制](docs/acceptance/M1-isolated.md)、[私人操作入口](docs/isolated-operator.md)。目前僅單一已登錄專案／agent，尚非完整廠商中立 MVP。
 
 > 主線、驗收條件、剩餘缺口與可用版本：[SUCCESS.md](SUCCESS.md)。
-> [Fanzloud／AP／Office 入口能力對照](docs/portfolio-entry-crosswalk.md)：固定來源的責任、證據與缺口；僅文件整理。
 
 
 > **Portfolio doc tier: A (active, bounded P0)** — Owner resumed the private single-operator browser-to-Cloud flow on 2026-10-30. [Quickstart and current gates](docs/quickstart.md); [PORTFOLIO](../../PORTFOLIO.md). Persistence and host runtimes remain separate milestones.

@@ -226,7 +226,7 @@ class DispatchTest(unittest.TestCase):
 
     def test_remote_grant_consumed_only_after_preflight_and_exec_uses_authorization_ref(self):
         consumed=[]
-        def fake_consume(lab, grant_id, provider, entry):
+        def fake_consume(lab, grant_id, provider, entry, *, retry_parent=None):
             consumed.append((grant_id, provider, entry)); return {'id':grant_id}
         with patch.object(dispatch, 'detect', return_value={'launch_prerequisites_present': False}), \
                 patch.object(dispatch.grants, 'consume', side_effect=fake_consume), \

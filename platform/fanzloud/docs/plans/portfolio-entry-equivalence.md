@@ -25,6 +25,25 @@
 | Office 操作 | [console][office-console]、[Pi cancel][office-cancel]、[retry][office-retry]、[Pi resume][office-resume]、[host restart][office-restart]、[question][office-question] | 原生終端、明示重試／重連／問答與清理邊界 |
 | Office 成果 | [results][office-results]、[local file proposal][office-file]、[T27 contract][office-redaction]、[T27 evidence][office-redaction-evidence] | 本地成果核對、提案下載、原始／顯示 bytes 差異 |
 
+## 原 AC 索引與維護承諾
+
+下表是既有旅程的原 AC 索引，不建立新驗收權威。證據仍只涵蓋來源報告的受測範圍。
+
+| 行為 | Fanzloud 原 AC／證據 | AP 原 AC／證據 | Office 原 AC／證據 |
+| --- | --- | --- | --- |
+| 建立 | FN01／02：[SDD][fz-sdd]、[M2 真實兩廠商][fz-m2] | AT01：[SDD][ap-sdd]、[已接受切片與缺口][ap-success] | AC01–04／13：[SDD][office-sdd]、[各 provider 受限歷史][office-success] |
+| 身分 | FN06：[SDD][fz-sdd]、[原安裝對帳][fz-reconcile] | AT07：[SDD][ap-sdd]、[M2 隔離／秘密拒絕][fz-m2] | AC11：[SDD][office-sdd]、[hook／session 子集][office-success] |
+| session／恢復 | FN04：[SDD][fz-sdd]、[持久意圖][fz-durable]、[原安裝恢復][fz-reconcile] | AT03–05：[SDD][ap-sdd]、[既有恢復切片][ap-success] | AC08：[SDD][office-sdd]、[Pi 無 prompt 同 session][office-resume]、[host restart][office-restart] |
+| 取消 | FN03／06：[SDD][fz-sdd]、[M2 A 取消／B 完成][fz-m2] | AT08：[SDD][ap-sdd]、[M2 清理與資源不存在][fz-m2] | AC06：[SDD][office-sdd]、[Pi 本機取消][office-cancel]；遠端停止仍非此證據 |
+| 成果 | FN01／05：[SDD][fz-sdd]、[固定成果唯讀審查][fz-review] | AT09／12：[SDD][ap-sdd]、[成果封存][ap-archive]、[export 切片與缺口][ap-success] | AC09／11：[SDD][office-sdd]、[結果入口][office-results]、[T27 合成遮蔽][office-redaction-evidence] |
+| 維護／本人操作 | FN07：[SDD][fz-sdd]、[本人操作仍缺][fz-owner] | M4／AT09／12／13：[SDD][ap-sdd]、[維護／backup／GC 的有限切片][ap-success] | AC05／08／11：[SDD][office-sdd]、[原生問答子集][office-question]、[host restart][office-restart]、[完整邊界仍待驗][office-success] |
+
+完整 AP M4 保留成果封存、explicit GitHub export、backup/GC、單節點操作、
+AT09／12／13、完整 fake E2E＋opt-in live smoke。已有 retention、stale binding
+cleanup、export／backup 組合及 Fanzloud 真 CLI 切片，不代表完整 M4 通過。
+原 [SDD][ap-sdd] 與 [SUCCESS][ap-success] 的承諾／缺口不縮減；真實計費／
+硬金額上限依原決策延後，不重新當成單人 MVP 前置。
+
 ## 六類使用者旅程
 
 ### 1. 建立工作
@@ -84,6 +103,11 @@ Fanzloud unknown intent 零自動重送的契約不被此 Office retry 入口替
 
 Fanzloud 已有持久意圖、唯一 AP run/result 引用、Rust/AP restart 與原安裝可信對帳的受限實測；
 unknown 只有可信證據與原明示流程能解決。這不是完整原 P1 actor/store/runtime 或所有 FN04 情境都已完成。
+明示對帳經認證後，唯讀取得精確 operator／route／key 的 AP command receipt，
+匹配才原子確認原 intent；缺失／不一致／不可達仍為 unknown，並阻擋新 admission。
+refresh／restart 不自動對帳或重送；後續明示操作可重複 GET，不能以同 key 或新 key
+造成第二次 start。確認 cancelled/not_allocated run 只表示提交已知，不是 coding 成功。
+這是 [原安裝對帳][fz-reconcile] 的既有流程，不增加新對帳 writer。
 AP 的 VM/lease/控制恢復仍由 AP 負責；Fanzloud 不寫 AP 狀態或自行接管 VM。
 
 Office host restart 將未完成工作停泊 interrupted；重新整理不自動派工。
@@ -128,6 +152,8 @@ T27 只證指定合成 sentinel 的遮蔽與 loopback HTTP/Chrome Blob 子集，
 驗收負例：刷新／重開／缺資料／跨來源同名／unknown／原 hash 與 display hash 不同時，
 只讀消費者不得發起 create/start/retry/cancel/reconcile、改來源狀態、洩漏私人 locator 或把失敗變成功。
 這些是未來具名 consumer 的條件，不是已跑的產品測試，也不增加原 MVP 的必做前置。
+本次原 route 不變，不要求新 CLI qualification 研究；日後若變更 executable／版本／
+協定／認證或工具邊界，仍依原 SDD 核對相應 receipt，不把歷史證據套用到新 route。
 
 入口退役／切換必須先證明自己的六類等價、原 AC、必要審查與回退，並有明確切換範圍。
 **當前退出結論：沒有入口可以據本文件退役。** AP 維護、Office 原生能力與 Fanzloud FN07 均保留。

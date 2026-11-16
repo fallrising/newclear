@@ -148,3 +148,14 @@ release, deployment, entry removal or authority migration occurred.
 Next: use the comparison when choosing a named read-only navigation consumer; do
 not treat the proposal as an implemented route or automatically start a new product
 milestone. No owner operation is needed to close this documentation task.
+
+
+## P01 — 既有入口對照補充（owner 直接指示）
+
+[任務](P01.task.md)。沿用 PR1048 的既有文件，補原 AC／M4／精確對帳，不是原 M1–M3 新增產品前置。
+
+| ID | Task | AC | Status | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| P01-01 | 既有六項入口補原 AC 索引與完整 M4 | P01-01 | in_progress | 2026-11-16T17:11:25Z | | 2026-11-16T17:27:17Z |
+| P01-02 | 單一執行權威與 unknown／session／cancel 語義 | P01-02 | in_progress | 2026-11-16T17:11:25Z | | 2026-11-16T17:27:17Z |
+| P01-03 | 原主線保留、文件驗證與正常交付 | P01-03 | in_progress | 2026-11-16T17:11:25Z | | 2026-11-16T17:27:17Z |

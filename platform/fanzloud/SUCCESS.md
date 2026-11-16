@@ -571,3 +571,28 @@ whitespace與獨立保存審查；原已綠9supervisor/2policy/TLSfixture不因�
 上次Connection refused是服務未啟，owner本人確認與完整FN07仍未完成；
 原TLS已於2026-11-02到期，重啟後先核對當時來源／原安裝／本人連線與TLS前置，
 不得直接使用舊就緒結果開窗、不重設consumed intent或自動更新認證。
+
+## P01 入口能力對照 — 2026-11-16
+
+Owner 直接要求繼續已建議的 P01。目標：沿用 PR1048 已合併的對照，補齊 Fanzloud Web、
+Agent Platform 執行後端與 Agent Office 本機原生終端的六項入口行為。
+範圍僅對照文件及本元件必要的任務、導航、追溯與驗收紀錄；不改原 SDD、
+原 AC／任務狀態、程式、資料、route、認證或執行權限。
+
+| AC | Given / When / Then | 狀態／驗證計畫 |
+| --- | --- | --- |
+| P01-01 | Given 固定三元件來源，When 比較建立／身分／session／取消／成果／維護，Then 每列指向原 AC 與固定證據，完整 FN07 本人操作缺口及 AP M4 承諾保留 | accepted：補充原 AC 索引與完整 M4，見 P01 驗收 |
+| P01-02 | Given 回執遺失與重連／取消，When 描述入口等價，Then unknown 只對帳、不二次 start，native session 不等於 run，UI 取消不等於 provider 停止 | accepted：精確 GET 與 admission 邊界覆核通過 |
+| P01-03 | Given 原 route 不變，When 完成本文件，Then 不新增 CLI qualification 前置或 runtime，原規格與進度不被改為通過 | accepted（文件）：合併後六檔／26引用與獨立覆核通過；交付 gate 見 BOARD |
+
+[任務／精確驗證命令](docs/tasks/P01.task.md)。來源基底
+`fead565acb877453861b6895471326096b923f0b`；較規劃 pin 新增 Office T27
+有限合成秘密輸出證據，不能外推完整 AC-11。歷史 runtime 不在本次重跑。
+主線 incomplete、usable_tag none、FN07／完整 M3、舊 Cloud AC-04 與 AP M4 不變。
+
+[P01 文件驗收](docs/acceptance/P01.acceptance.md)記錄初稿接受及範圍收斂；必要 CI、PR 與遠端回讀
+依任務板記錄，不將文件接受當成產品完成。
+
+並行 PR1048 已提供同範圍文件。本次撤回重複 crosswalk，改補既有
+`docs/plans/portfolio-entry-equivalence.md` 的原 AC 索引、完整 AP M4 與
+unknown 精確對帳；既有交付與原產品狀態保留。補充前已由獨立 reviewer 核對差距。

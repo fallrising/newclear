@@ -316,7 +316,7 @@ Owner 直接指示；只推進 AC-11 子集。實作與本機驗收完成，PR�
 
 | ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| T-0027-01 | 合成秘密結果投影、ref 與下載核對；本機驗收通過，待 PR／CI／合併 | AC-11 子集 | in_progress | 2026-11-15T14:46:06Z | — | 2026-11-16T16:24:16.982836Z |
+| T-0027-01 | 合成秘密結果投影、ref 與下載核對；PR #1044 已合併 | AC-11 子集 | done | 2026-11-15T14:46:06Z | 2026-11-16T16:26:15Z | 2026-11-16T16:26:56.396632Z |
 
 來源：fallrising/newclear `2aa21f10b53ecaeb079279b6531bbb47a103e937` 的根 AGENTS／README、元件 AGENTS／README／SUCCESS／HANDOFF、docs/SDD.md、docs/tasks/BOARD.md、docs/T26-TECHNICAL-GUIDANCE.md、docs/evidence/pi-hook-boundary-2026-11-07.json、docs/SETUP.md、結果程式及契約；固定 vendor `852e2ab28c4f3f31bffdf4b20353bd119c9d3270`。共用交付規則 fallrising/desk docs/delivery-and-handoff.md，blob `13bf6ff32c6131208ef14e27619160c2906dcb32`（2026-11-15T14:46:06Z 回讀）；私有交接及 T26 runner 同日唯讀查核。
 
@@ -329,3 +329,5 @@ T-0027 進度保存（尚未實作／驗收／交付）：無憑證三站 DNS／
 T-0027 接續保存：新版串流擷取已取得完整 Claude Opus 5.5 六項指導（67.684 秒，估算 US$0.1817778，非帳單）；依 owner 新批准，本次上限為 480 秒／CLI US$3.00。主導核對現有介面後固定[輸出契約](../RESULT-REDACTION.md)。兩個實際 Pi CLI（設定 openai/gpt-5.5）各第一個請求遭 401 expired_secret_key 拒絕，零工具／零程式改動、willRetry=false；CLI exit 0 不當作成功，服務端模型身分未確認。各一個受追蹤程序退出、臨時憑證副本移除，抽樣追蹤不代表完整後代樹稽核。未自動重試／更換模型，產品模型請求零；功能測試／PR／CI 尚未完成。下一步更新本機 Pi OpenAI 憑證並授權新一次有界 worker 委託，沿用完整 Claude 契約，不需再次 Claude 指導。[進度證據](../evidence/result-redaction-progress-2026-11-16.json)。
 
 T-0027 實作驗收：owner 更新憑證後明確批准兩 Pi 各一次；backend 239.825 秒／20 次請求／估算 US$1.023503，UI 159.059 秒／17 次請求／估算 US$0.805637，均回報 gpt-5.5 與正常 stop。原每 worker 720 秒／24 requests／80 tools／6000 output cap／US$3 回報停止門檻保留，無自動重試／模型替換。主導修正 literal 遮蔽名稱身分、矛盾差異 fail closed、CLI 同名歧義，補 Console ref lookup 與實際 HTTP／CLI 測試。兩 Pi 憑證副本已移除，受追蹤程序退出；非完整後代樹保證。產品模型請求零；[本機證據](../evidence/result-redaction-2026-11-16.json)，完整 AC-11／MVP 仍 pending。下方／先前等待授權描述只保存歷史。
+
+T-0027 交付結案：[功能 PR #1044](https://github.com/fallrising/newclear/pull/1044) 已於 2026-11-16T16:26:15Z 正常合併，遠端 main SHA `2a02f146a398dfa89a995196c7c96f805320e8af`；fetch 後與候選 HEAD `42c36a51500b0a6d4180550959d9963a64de5679` 的整個元件內容 diff 為零。必要 CI [Agent Office Lab](https://github.com/fallrising/newclear/actions/runs/43907258865) 與 [Project success contracts](https://github.com/fallrising/newclear/actions/runs/43907258899) 均 success，無衝突；主導完成程式審查，未宣稱獨立外部審查。215 Python／68 Node、實際 HTTP／CLI／Chrome 六次下載、publication／indexes／staged diff check 通過；完整測試命令與替身界線見上述白名單證據。沒有新增付費呼叫、retry execution、provider 原生重驗或 usable tag；完整 AC-11／MVP 仍 pending。本次只將已合併的 T27 子集標 done，後續安全主線另定範圍。

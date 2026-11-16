@@ -126,7 +126,7 @@ owner submit/review alternative still needs explicit authorization. No new miles
 
 | ID | Task | AC | Status | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| EM-01 | Six-journey entry equivalence | EM-01 | in_progress | 2026-11-16T17:13:21Z | | 2026-11-16T17:13:21Z |
-| EM-02 | Preserve authority and pending capabilities | EM-02 | in_progress | 2026-11-16T17:13:21Z | | 2026-11-16T17:13:21Z |
-| EM-03 | Read-only navigation proposal | EM-03 | in_progress | 2026-11-16T17:13:21Z | | 2026-11-16T17:13:21Z |
-| EM-04 | Review, CI and normal PR delivery | EM-04 | in_progress | 2026-11-16T17:13:21Z | | 2026-11-16T17:13:21Z |
+| EM-01 | Six-journey entry equivalence | EM-01 | in_progress | 2026-11-16T17:13:21Z | | 2026-11-16T17:21:07Z |
+| EM-02 | Preserve authority and pending capabilities | EM-02 | in_progress | 2026-11-16T17:13:21Z | | 2026-11-16T17:21:07Z |
+| EM-03 | Read-only navigation proposal | EM-03 | in_progress | 2026-11-16T17:13:21Z | | 2026-11-16T17:21:07Z |
+| EM-04 | Review, CI and normal PR delivery | EM-04 | in_progress | 2026-11-16T17:13:21Z | | 2026-11-16T17:21:07Z |

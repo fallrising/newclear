@@ -95,7 +95,7 @@ Office 原生入口仍可到達。這些是未來條件，不是本次已執行�
 - Fanzloud：FN07 本人操作仍 pending；歷史 automated journey 不代替 owner。
   舊 Cloud AC-04、完整 P1 AC-05、完整 FN04/M3 不因矩陣完成而通過。
   原服務已停、無常駐 URL；11/02 舊 TLS 已過期，不能拿歷史 readiness 直接開窗。
-  現有 read-only gate 只到 pre-live；新窗口需核對當時來源、本人在場及有限授權。[F4]
+  現有 read-only gate 只到 pre-live；新窗口需核對當時來源、本人在場及有限授權。[F4]、[F9]
 - AP：保留原工作台、execution/stop/reconcile/result authority 及 private Connector。
   M3/M4 全體、完整 live gate 與部署仍未完成；本次不重排或接管它們。[A1]
 - Office：保留原生 PTY/hooks/session、local-first、不自動 cloud fallback。

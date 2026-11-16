@@ -132,4 +132,4 @@ T-0449 FN05 readonly review: [contract](specs/SPEC-M3-readonly-review.md), [acce
 
 | Requirement | CU / rustdoc | Specification | Check / evidence | State |
 | --- | --- | --- | --- | --- |
-| EM-01–04: preserve six journeys across three entries without a second authority | N/A — ADR-0001 infrastructure exception | [T046 task](tasks/T046.task.md), [entry equivalence plan](plans/portfolio-entry-equivalence.md) | Fixed source/link/scope inspection, index preflight, fresh-context review and required PR CI; delivery tracked in [BOARD](tasks/BOARD.md) | Verifying; no product AC changed |
+| EM-01–04: preserve six journeys across three entries without a second authority | N/A — ADR-0001 infrastructure exception | [T046 task](tasks/T046.task.md), [entry equivalence plan](plans/portfolio-entry-equivalence.md) | Fixed source/link/scope inspection, index preflight, fresh-context review and required PR CI; delivery tracked in [BOARD](tasks/BOARD.md) | [Accepted documentation](acceptance/T046.acceptance.md); delivery pending in BOARD; no product AC changed |

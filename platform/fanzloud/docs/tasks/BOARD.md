@@ -156,6 +156,21 @@ milestone. No owner operation is needed to close this documentation task.
 
 | ID | Task | AC | Status | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| P01-01 | 既有六項入口補原 AC 索引與完整 M4 | P01-01 | in_progress | 2026-11-16T17:11:25Z | | 2026-11-16T17:27:17Z |
-| P01-02 | 單一執行權威與 unknown／session／cancel 語義 | P01-02 | in_progress | 2026-11-16T17:11:25Z | | 2026-11-16T17:27:17Z |
-| P01-03 | 原主線保留、文件驗證與正常交付 | P01-03 | in_progress | 2026-11-16T17:11:25Z | | 2026-11-16T17:27:17Z |
+| P01-01 | 既有六項入口補原 AC 索引與完整 M4 | P01-01 | done | 2026-11-16T17:11:25Z | 2026-11-16T17:30:33Z | 2026-11-16T17:31:14Z |
+| P01-02 | 單一執行權威與 unknown／session／cancel 語義 | P01-02 | done | 2026-11-16T17:11:25Z | 2026-11-16T17:30:33Z | 2026-11-16T17:31:14Z |
+| P01-03 | 原主線保留、文件驗證與正常交付 | P01-03 | done | 2026-11-16T17:11:25Z | 2026-11-16T17:30:33Z | 2026-11-16T17:31:14Z |
+
+P01 結案：[PR1049](https://github.com/fallrising/newclear/pull/1049) 於
+2026-11-16T17:30:33Z 正常合併為 `90f710cf8421490ab3bba6a323ea85dfe29eed7c`。
+最終 head `413481b5b348f39a343f223249c0938cc0ca2dad` 的
+[Fanzloud CI](https://github.com/fallrising/newclear/actions/runs/43918579084) 與
+[Project success contracts](https://github.com/fallrising/newclear/actions/runs/43918579104)
+均 success。Fetch 後核對 merge 為遠端 main 祖先，整個 Fanzloud 元件與候選 diff 為零。
+本地55 project contracts／9 llms、26固定來源、11新增相對連結、六檔範圍與
+staged whitespace 通過；獨立初審／既有文件比較／補充覆核後接受。
+
+沿用 PR1048 的唯一對照，只補26行原 AC 索引、完整 AP M4 與精確 unknown GET
+對帳；重複 crosswalk 已撤回，PR1051 的原結案紀錄完整保留。
+[任務](P01.task.md)與[驗收](../acceptance/P01.acceptance.md)中 pre-merge
+交付待辦由本紀錄更新；原 FN07／M3-U、Cloud AC04、AP M4、Office MVP 不改狀態。
+沒有新 runtime、provider、VM、release、deploy 或下一里程碑。

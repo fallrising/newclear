@@ -338,10 +338,12 @@ Owner 直接指示繼續開發；T-0028：Pi 遠端重試的一次性授權。CL
 
 | ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| T-0028-01 | 綁定失敗parent的grant、dispatcher與操作台明確重試 | AC-07／09／11 子集 | in_progress | 2026-11-16T17:06:54.252682Z | — | 2026-11-16T17:18:54.819190Z |
+| T-0028-01 | 綁定失敗parent的遠端重試grant；PR #1050已合併 | AC-07／09／11 子集 | done | 2026-11-16T17:06:54.252682Z | 2026-11-16T17:20:19Z | 2026-11-16T17:21:26.909940Z |
 
 驗證計畫：原始失敗、receipt、ledger、fixture 與來源綁定；錯 parent、過期／撤銷、兩次上限、競態與重啟、預檢失敗不消耗、消耗後啟動失敗不退還。實際 loopback HTTP 與 Chrome 使用隔離臨時 lab／測試程序驗證計畫、明確點擊、重複提交與刷新；不以替身宣稱 DeepSeek 推論或完整 AC 通過。元件 Python／Node／publication 與 repo indexes gates，PR／CI／正常合併後結案。
 
 來源：fallrising/newclear `fead565acb877453861b6895471326096b923f0b` 的根與元件 AGENTS／README、SUCCESS／SDD／HANDOFF、T24-TECHNICAL-GUIDANCE、REMOTE-GRANT、RETRY、RESULT-REDACTION 及對應程式／測試。沿用已核對的共用 delivery-and-handoff 政策（blob `13bf6ff32c6131208ef14e27619160c2906dcb32`）。
 
 T-0028 本機驗收完成：224 Python／68 Node、四組實際 HTTP／Chrome 重試情境及五組既有首次授權回歸通過。成功情境確認實際 dispatcher exec、同 PID 繼承執行鎖、grant 消耗與 attempt=1 receipt；舊報告／input／receipt hash 未變，fixture 相同，結果仍 failed／零模型。26 個 PID/create-time 受追蹤程序已退出；抽樣不是完整後代樹保證。首次瀏覽器因斷言把本地化提示當原始 API code 而逾時，已修正並保留；其他測試準備失敗見[白名單證據](../evidence/remote-retry-grant-2026-11-16.json)。主導直接實作，沒有新 Claude／Pi 委託、產品模型呼叫或實際 lab 付費 grant。PR／CI／合併仍待完成，完整 AC 不變。
+
+T-0028 交付結案：[功能 PR #1050](https://github.com/fallrising/newclear/pull/1050) 已於 2026-11-16T17:20:19Z 正常合併，merge SHA `747be27db5453f109ea233c130a37cb66261368f`。遠端 main fetch 後，與候選 `249b9de29efdffde1b8d739a2ff8e0fb9ebf6e20` 的 Agent Office Lab 全元件 diff 為零；同期主線其他變更僅在 fanzloud 文件。必要 CI [Agent Office Lab](https://github.com/fallrising/newclear/actions/runs/43917130599) 與 [Project success contracts](https://github.com/fallrising/newclear/actions/runs/43917130674) 均 success，無衝突；主導審查完成，沒有獨立外部審查聲稱。224 Python／68 Node、四組新重試與五組既有首次授權瀏覽器流程、publication 217files／indexes 55contracts 9llms／staged diff check通過。零新增開發模型委託、產品模型請求與實際lab付費grant；每次真實付費重試仍需另次明確批准，完整 AC-07／09／11／MVP pending，無usable tag。

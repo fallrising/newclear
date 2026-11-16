@@ -16,6 +16,19 @@ source_commit: 391aa1aa72f1dd550d8acc7323f00c7a6229c3d4
 
 # Codebox / Fanzloud 成功契約
 
+## Portfolio entry comparison — 2026-11-16
+
+Owner continuation starts documentation-only [FZ-ENTRY-MAP](docs/tasks/FZ-ENTRY-MAP.task.md),
+tracked in [issue #1047](https://github.com/fallrising/newclear/issues/1047).
+Compare Fanzloud/AP/Office create, identity, session, cancellation, recovery and
+results while retaining native capabilities and unique execution writers.
+Scope: comparison and required documentation/board records; AP/Office code and
+normative SDDs unchanged. E01–E05 require fixed-source evidence, explicit gaps,
+scoped checks, fresh-context independent review and normal CI/PR delivery.
+[Acceptance](docs/acceptance/FZ-ENTRY-MAP.acceptance.md) records actual results.
+No new runtime/live evidence; full M3/FN07, original Cloud AC04/full AC05,
+mainline incomplete and usable_tag none remain unchanged.
+
 > 2026-10-29 desk T-0433 ([issue706](https://github.com/fallrising/newclear/issues/706)) delivered the Fanzloud FE Round2 unit (R2-AC-14): see the [R2 report](fe-review/tasks/round2/report.md). The evidence is a synthetic HTTPS/WSS review harness in a real browser; real backend wiring and live Cloud were not exercised. The product AC table below is unchanged: mainline stays incomplete, usable tag none, AC-04/AC-05 pending. Sections below record each milestone; the earliest ones describe superseded plans.
 
 

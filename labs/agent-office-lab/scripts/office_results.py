@@ -2,6 +2,7 @@
 """Read existing synthetic Office runs. Never launch a provider or load credentials."""
 import argparse
 import local_text_task
+import result_redaction
 import datetime
 import hashlib
 import json
@@ -346,9 +347,9 @@ def normalize(run_fd, run_id):
     try:
         saved, _ = read_json(run_fd, ('attempt.json',), 4096)
     except FileNotFoundError:
-        return row
+        return result_redaction.project_row(row)
     except (OSError, ValueError, UnicodeError, RecursionError):
-        return dict(row, status='invalid', reason='invalid_retry_metadata', **({'question_check_passed':False} if 'question_check_passed' in row else {}))
+        return result_redaction.project_row(dict(row, status='invalid', reason='invalid_retry_metadata', **({'question_check_passed':False} if 'question_check_passed' in row else {})))
     try:
         from pi_retry import receipt
         saved = receipt(saved)
@@ -357,8 +358,8 @@ def normalize(run_fd, run_id):
             raise ValueError('invalid_retry_source')
         row['retry'] = {k:saved[k] for k in ('root','parent','attempt')}
     except (ValueError, TypeError, KeyError):
-        return dict(row, status='invalid', reason='invalid_retry_metadata', **({'question_check_passed':False} if 'question_check_passed' in row else {}))
-    return row
+        return result_redaction.project_row(dict(row, status='invalid', reason='invalid_retry_metadata', **({'question_check_passed':False} if 'question_check_passed' in row else {})))
+    return result_redaction.project_row(row)
 
 
 def catalog(roots):
@@ -377,9 +378,9 @@ def catalog(roots):
                 try:
                     run_fd = os.open(name, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW, dir_fd=root_fd)
                 except OSError:
-                    rows.append({'id': run_id, 'provider': 'unknown', 'model': None, 'version': None,
+                    rows.append(result_redaction.project_row({'id': run_id, 'provider': 'unknown', 'model': None, 'version': None,
                                  'status': 'invalid', 'reason': 'unsafe_run_directory',
-                                 'cleanup_verified': False, 'artifact': {'status': 'unavailable'}})
+                                 'cleanup_verified': False, 'artifact': {'status': 'unavailable'}}))
                     continue
                 try:
                     rows.append(normalize(run_fd, run_id))
@@ -393,7 +394,13 @@ def catalog(roots):
 
 def render_html(data):
     # JSON is data, never HTML; additionally prevent closing the inert script element.
-    payload = json.dumps(data, ensure_ascii=True).replace('<', '\\u003c').replace('>', '\\u003e').replace('&', '\\u0026')
+    try:
+        safe = result_redaction.redact_tree(data)
+    except result_redaction.RedactionError:
+        raise InvalidRun('redaction_failed') from None
+    payload = json.dumps(safe, ensure_ascii=True).replace('<', '\\u003c').replace('>', '\\u003e').replace('&', '\\u0026')
+    if result_redaction.contains_sentinel(payload):
+        raise InvalidRun('redaction_failed')
     template = (Path(__file__).with_name('office_results.html')).read_text()
     return template.replace('__OFFICE_RESULTS_JSON__', payload)
 
@@ -402,7 +409,7 @@ def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--runs-root', action='append', type=Path, help='Explicit runs directory; repeat to combine histories')
     parser.add_argument('--provider', choices=PROVIDERS)
-    parser.add_argument('--show', help='Run ID from the list, e.g. 1:grok-work-…')
+    parser.add_argument('--show', help='Opaque ref from the list, or a unique unredacted display ID')
     parser.add_argument('--html', type=Path, help='Write a NEW private offline HTML snapshot (never overwrite)')
     args = parser.parse_args(argv)
     try:
@@ -410,9 +417,14 @@ def main(argv=None):
         if args.provider:
             data['runs'] = [r for r in data['runs'] if r['provider'] == args.provider]
         if args.show:
-            data['runs'] = [r for r in data['runs'] if r['id'] == args.show]
-            if not data['runs']:
+            matches = [r for r in data['runs'] if r.get('ref') == args.show]
+            if not matches:
+                matches = [r for r in data['runs'] if r['id'] == args.show]
+                if any(r.get('id_redacted') for r in matches):
+                    matches = []
+            if len(matches) != 1:
                 raise InvalidRun('run_not_found')
+            data['runs'] = matches
         if args.html:
             content = render_html(data)
             fd = os.open(args.html, os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW, 0o600)

@@ -309,3 +309,23 @@ Owner 要求維持原開發協作方式繼續；本輪不啟動產品付費模�
 T-0026 本地實作與驗收完成：[指導／委託](../T26-TECHNICAL-GUIDANCE.md)、[白名單證據](../evidence/pi-hook-boundary-2026-11-07.json)。268 tests、21 repo tests、1680 組真實 parser 比較與四輪原生驗收通過；[PR #1041](https://github.com/fallrising/newclear/pull/1041) 的 offline／validate CI 通過並已合併，兩列依實際合併時間結案。來源 runtime 基準 `04a7340f05ade127f550539817f78411bfba9d2d`，整合主線 `64c8ad59620e9068f0beede99365b7d656f00825`；未修改 vendor，零產品模型請求。
 
 T-0026 結案：[PR #1041](https://github.com/fallrising/newclear/pull/1041) 已於 `2026-11-09T18:36:24Z` 合併，commit `39a5e5a8748f934fb623fe0f73b1f88ed0bbe255`。遠端白名單證據已回讀一致：268 項元件測試、21 項 repo 契約測試與四條原生路徑通過；問答／啟動 11 種拒絕、重連舊 token 拒絕且狀態不變，host 重啟／Chrome 刷新及明確恢復正常。四輪 33／24／99／41 個受追蹤程序全退出、鎖釋放，零產品模型／外部請求。實際 Claude 指導與兩個 Pi worker 已完成、臨時憑證副本移除；已知回報開發小計 2.200252 美元，首次 Claude 逾時用量未知，非帳單。AC-08／11 僅子集，其他 provider、有效 token 的同 session 偽造、遠端端到端與完整 MVP 仍 pending；沒有 release／deploy／usable tag。
+
+## T-0027：結果輸出的合成秘密遮蔽
+
+Owner 直接指示；只推進 AC-11 子集。實作與本機驗收完成，PR／CI／合併狀態以本節交付紀錄為準。
+
+| ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| T-0027-01 | 合成秘密結果投影、ref 與下載核對；本機驗收通過，待 PR／CI／合併 | AC-11 子集 | in_progress | 2026-11-15T14:46:06Z | — | 2026-11-16T16:24:16.982836Z |
+
+來源：fallrising/newclear `2aa21f10b53ecaeb079279b6531bbb47a103e937` 的根 AGENTS／README、元件 AGENTS／README／SUCCESS／HANDOFF、docs/SDD.md、docs/tasks/BOARD.md、docs/T26-TECHNICAL-GUIDANCE.md、docs/evidence/pi-hook-boundary-2026-11-07.json、docs/SETUP.md、結果程式及契約；固定 vendor `852e2ab28c4f3f31bffdf4b20353bd119c9d3270`。共用交付規則 fallrising/desk docs/delivery-and-handoff.md，blob `13bf6ff32c6131208ef14e27619160c2906dcb32`（2026-11-15T14:46:06Z 回讀）；私有交接及 T26 runner 同日唯讀查核。
+
+T-0027 進度保存（尚未實作／驗收／交付）：無憑證三站 DNS／HTTPS 可達，fetch 成功，主線差異只在 CMS。已更新目標／驗證計畫並建立獨立 worker 工作區。實際 Claude Opus 5.5 單次指導在 240.006 秒逾時；終止等待另計 0.449 秒，exit 124，stdout／stderr 均空，未取得指導或用量，費用未知。沒有自動重試、Pi 調用、產品模型請求或臨時 auth 副本。退出後按 runner argv／Claude cwd 查無相符程序；沒有持續追蹤整棵後代樹，不能宣稱完整程序樹稽核。
+
+新 T27 私有有界 runner 已準備；實際 boundary extension 的五組離線檢查通過（24 次 request／6000 output cap、模型限制、US$3 回報成本、80 次工具及精確檔案／symlink 邊界），Python supervisor syntax 通過。這些不是產品遮蔽測試；元件功能與瀏覽器／下載驗收未跑，CI／PR／合併未完成。工具執行及終止等待如上；批准等待與總主動工時未可靠量測。Owner 要求先保存並提交進度；下一步需要新的單次 Claude 指導授權，不擴大原單次上限；指導成功才凍結秘密／hash 契約並啟動 Pi。AC-11 保持 pending，沒有 usable tag。
+
+進度提交前檢查：repo 根 `python3 scripts/check_indexes.py` 首次因系統 Python 3.14.4 缺 OpenCC 失敗；依 `.github/workflows/project-success.yml` 在私有 T27 venv 安裝固定 `opencc-python-reimplemented==0.1.7`，使用該 venv Python 執行同一 `scripts/check_indexes.py` 通過（55 project contracts、9 llms、零導航錯誤）。repo 根 `python3 labs/agent-office-lab/scripts/check_publication.py` 通過（205 public source files、syntax、local links）。這次提交只有規格／進度文件；未重跑未受影響的產品測試或歷史原生驗收。
+
+T-0027 接續保存：新版串流擷取已取得完整 Claude Opus 5.5 六項指導（67.684 秒，估算 US$0.1817778，非帳單）；依 owner 新批准，本次上限為 480 秒／CLI US$3.00。主導核對現有介面後固定[輸出契約](../RESULT-REDACTION.md)。兩個實際 Pi CLI（設定 openai/gpt-5.5）各第一個請求遭 401 expired_secret_key 拒絕，零工具／零程式改動、willRetry=false；CLI exit 0 不當作成功，服務端模型身分未確認。各一個受追蹤程序退出、臨時憑證副本移除，抽樣追蹤不代表完整後代樹稽核。未自動重試／更換模型，產品模型請求零；功能測試／PR／CI 尚未完成。下一步更新本機 Pi OpenAI 憑證並授權新一次有界 worker 委託，沿用完整 Claude 契約，不需再次 Claude 指導。[進度證據](../evidence/result-redaction-progress-2026-11-16.json)。
+
+T-0027 實作驗收：owner 更新憑證後明確批准兩 Pi 各一次；backend 239.825 秒／20 次請求／估算 US$1.023503，UI 159.059 秒／17 次請求／估算 US$0.805637，均回報 gpt-5.5 與正常 stop。原每 worker 720 秒／24 requests／80 tools／6000 output cap／US$3 回報停止門檻保留，無自動重試／模型替換。主導修正 literal 遮蔽名稱身分、矛盾差異 fail closed、CLI 同名歧義，補 Console ref lookup 與實際 HTTP／CLI 測試。兩 Pi 憑證副本已移除，受追蹤程序退出；非完整後代樹保證。產品模型請求零；[本機證據](../evidence/result-redaction-2026-11-16.json)，完整 AC-11／MVP 仍 pending。下方／先前等待授權描述只保存歷史。

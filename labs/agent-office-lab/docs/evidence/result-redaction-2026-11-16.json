@@ -1,0 +1,132 @@
+{
+  "task": "T-0027",
+  "scope": "AC-11 synthetic result redaction subset only",
+  "date": "2026-11-16",
+  "status": "local_validation_passed",
+  "contract": "docs/RESULT-REDACTION.md",
+  "base_commit": "2aa21f10b53ecaeb079279b6531bbb47a103e937",
+  "vendor_commit": "852e2ab28c4f3f31bffdf4b20353bd119c9d3270",
+  "delivery_policy": {
+    "repository": "fallrising/desk",
+    "path": "docs/delivery-and-handoff.md",
+    "blob_sha": "13bf6ff32c6131208ef14e27619160c2906dcb32"
+  },
+  "development_workers": [
+    {
+      "worker": "backend",
+      "model": "gpt-5.5",
+      "provider": "openai",
+      "stop_reason": "stop",
+      "requests": 20,
+      "tool_calls": 25,
+      "reported_cost_usd": 1.023503,
+      "exit_code": 0,
+      "elapsed_s": 239.825,
+      "credential_copy_removed": true,
+      "tracked_process_count": 1,
+      "tracked_alive": [],
+      "full_descendant_audit": false
+    },
+    {
+      "worker": "ui",
+      "model": "gpt-5.5",
+      "provider": "openai",
+      "stop_reason": "stop",
+      "requests": 17,
+      "tool_calls": 22,
+      "reported_cost_usd": 0.805637,
+      "exit_code": 0,
+      "elapsed_s": 159.059,
+      "credential_copy_removed": true,
+      "tracked_process_count": 1,
+      "tracked_alive": [],
+      "full_descendant_audit": false
+    }
+  ],
+  "limits_per_worker": {
+    "wall_s": 720,
+    "requests": 24,
+    "output_tokens_per_request": 6000,
+    "tools": 80,
+    "reported_cost_stop_usd": 3,
+    "cost_stop_is_post_response_not_billing_cap": true
+  },
+  "automatic_model_retries": 0,
+  "model_substitutions": 0,
+  "additional_claude_calls_this_attempt": 0,
+  "product_model_requests": 0,
+  "prior_attempts_preserved": true,
+  "earlier_claude_timeout_cost": "unknown",
+  "costs_are_estimates_not_invoices": true,
+  "lead_review": {
+    "independent_external_review": false,
+    "fixes": [
+      "literal replacement name identity and idempotence",
+      "inconsistent changed flag fails closed",
+      "ambiguous CLI display IDs rejected",
+      "surrogate repair before UTF-8 serialization",
+      "retry ref resolved privately with existing eligibility retained"
+    ]
+  },
+  "validation": {
+    "platform": "macOS arm64",
+    "python": {
+      "version": "3.14.4",
+      "cwd": "labs/agent-office-lab",
+      "command": "python3 -m unittest discover -s scripts -p 'test_*.py' -v",
+      "passed": 215,
+      "elapsed_s": 19.466
+    },
+    "node": "23.11.0",
+    "node_tests": {
+      "cwd": "labs/agent-office-lab",
+      "command": "node --test scripts/*.test.mjs",
+      "passed": 68
+    },
+    "browser": {
+      "engine": "Chrome headless via playwright-core",
+      "real_loopback_http": true,
+      "real_file_html": true,
+      "real_blob_downloads": 6,
+      "download_utf8_hash_matches": true,
+      "tampered_display_hash_disabled": true,
+      "same_display_id_distinct_refs": true,
+      "secret_only_changed_true_display_changed_false": true,
+      "safe_unicode_crlf_preserved": true,
+      "lone_surrogate_replaced_boundary_fixture": true,
+      "retry_ref_only_post": "route-injected plan response; real HTTP dispatcher separately tested",
+      "external_requests": 0,
+      "dispatch_jobs": 0,
+      "page_errors": 0,
+      "original_bytes_and_mtimes_unchanged": true,
+      "tracked_process_count": 22,
+      "tracked_alive": [],
+      "server_thread_alive": false,
+      "full_descendant_audit": false
+    },
+    "http_cli": {
+      "jobs_and_catalog_same_artifact_and_ref": true,
+      "unsafe_directory_and_job_fallback_safe": true,
+      "original_source_and_output_tamper_rejected": true,
+      "failed_status_preserved": true,
+      "ref_lookup_across_processes": true,
+      "real_retry_dispatcher_and_ledger": true,
+      "retry_source_fingerprint_substituted_in_temporary_lab": true,
+      "no_retry_execution": true
+    },
+    "initial_test_failure": "macOS /var symlink in temporary fixture paths; tests now resolve fixture root before no-follow file access",
+    "publication": "PASS: 213 public source files, syntax and local links",
+    "indexes": "PASS: 55 project contracts, 9 llms, 0 navigation errors; private Python 3.14 venv with OpenCC 0.1.7",
+    "remote_ci": "not yet run",
+    "staged_diff_check": "passed"
+  },
+  "limitations": [
+    "Finite case-sensitive synthetic sentinel grammar only; not real-secret detection.",
+    "Ref is deterministic and dictionary-guessable, not an authorization token.",
+    "Raw reports, receipts, sources and artifacts remain private and unchanged.",
+    "No new provider lifecycle or product inference run; historical T26 native checks not repeated.",
+    "Browser surrogate case is a projected boundary fixture, not an invalid UTF-8 verified source file.",
+    "Sampled process tracking is not a complete descendant-tree guarantee.",
+    "Full AC-11 and MVP remain pending; no usable tag."
+  ]
+}

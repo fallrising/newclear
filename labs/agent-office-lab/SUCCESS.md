@@ -15,6 +15,12 @@ source_commit: 64c8ad59620e9068f0beede99365b7d656f00825
 
 ## 主線與範圍
 
+T-0027 最新：已整合合成秘密輸出遮蔽與下載雜湊核對，實際 loopback HTTP／Chrome Blob 驗證通過；只涵蓋 AC-11 子集，完整 AC-11／MVP 保持 pending。[輸出契約](docs/RESULT-REDACTION.md)、[驗證證據](docs/evidence/result-redaction-2026-11-16.json)與[交付狀態](docs/tasks/BOARD.md)。
+
+T-0027：結果輸出的合成秘密遮蔽（僅 AC-11 子集）。沿用實際 Claude Opus 5.5 指導 → 兩個實際 Pi CLI（openai/gpt-5.5）獨立工作區分工 → 主導審查、驗證與 PR 交付。以有限合成秘密測例驗證結果 API 的 jobs[].result／results.runs[]、CLI JSON、離線 HTML 內嵌資料及顯示、操作台原文／差異／替代內容與 Blob 下載。由 Claude 確認有限匹配規則、輸出欄位與 hash 契約後凍結分工。
+
+驗收／驗證計畫：Given 含指定合成秘密及安全 Unicode／換行的既有報告、來源快照與產物，When 讀取結果，Then 先驗原始 hash，再生成遮蔽輸出；涵蓋的出口不含指定秘密，安全內容保留、私有來源 bytes 不變，原始產物 hash 與實際下載 UTF-8 bytes hash 明確區分。篡改原產物／來源仍不能 verified/completed，原失敗狀態不能變成功。執行針對性 Python／Node、實際 loopback HTTP 與瀏覽器 Blob 下載驗證、元件 offline／publication 及 repo gates。產品模型請求為零，不重跑未受影響的 T26 原生／昂貴模型驗收；不宣稱一般秘密偵測、完整憑證隔離或完整 MVP，AC-11 保持 pending。
+
 T-0026：Pi 原生 hook 身分與 session 邊界驗收。沿用 Claude Opus 5.5 技術指導、Pi agent 實作與主導 agent 整合交付。核對固定合成任務的 worker／provider route／token／session，拒絕錯配或舊世代事件；保留合法啟動及明確同 session 重新連接。以固定上游的真實 loopback hook 入口及無模型 Pi session 驗證，不修改 vendor，不建立產品付費 grant。
 
 驗證計畫：先由 Claude 對已核對公開來源提出具體設計，再按互不重疊檔案分工；離線負向案例、真實 HTTP 拒絕與狀態不變、合法事件仍通過、零產品模型請求、身分追蹤及完整清理。此為 AC-11／08 子集，不宣稱整棵程序樹隔離或跨 provider 全部通過。
@@ -149,3 +155,5 @@ Repo 檢查：`python3 scripts/check_indexes.py`。runtime 另需 macOS arm64／
 ## 可用版本
 
 `usable_tag: none`。主線未完成，沒有發布 tag 或部署。
+
+T-0027 接續：已取得完整 Claude Opus 5.5 串流指導，主導核對並凍結[合成秘密輸出契約](docs/RESULT-REDACTION.md)。兩個 Pi 首次請求均因 OpenAI 憑證過期被拒絕，未產生實作；已停止且未自動重試，尚未完成驗收或交付。

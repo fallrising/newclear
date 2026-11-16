@@ -1,0 +1,116 @@
+{
+  "task": "T-0028",
+  "scope": "Pi source-bound remote retry authorization; AC-07/09/11 subsets",
+  "status": "local_validation_passed",
+  "date": "2026-11-16",
+  "base_commit": "fead565acb877453861b6895471326096b923f0b",
+  "delivery_policy_blob": "13bf6ff32c6131208ef14e27619160c2906dcb32",
+  "implementation": "primary agent; no additional model delegation",
+  "additional_development_model_calls": 0,
+  "product_model_requests": 0,
+  "automatic_model_retries": 0,
+  "production_grants_created": 0,
+  "prior_cost_limits_unchanged": true,
+  "validation": {
+    "python": {
+      "version": "3.14.4",
+      "cwd": "labs/agent-office-lab",
+      "command": "python3 -m unittest discover -s scripts -p 'test_*.py' -v",
+      "passed": 224,
+      "elapsed_s": 20.112
+    },
+    "node": {
+      "version": "23.11.0",
+      "cwd": "labs/agent-office-lab",
+      "command": "node --test scripts/*.test.mjs",
+      "passed": 68
+    },
+    "retry_browser": {
+      "command": "node scripts/check_console_retry_grant_browser.mjs PRIVATE_OUTPUT_DIRECTORY",
+      "real_http": true,
+      "chrome": true,
+      "actual_dispatcher_and_exec": true,
+      "inherited_execution_slot": true,
+      "actual_retry_receipt_and_ledger": true,
+      "scenarios": [
+        "fresh grant cannot retry",
+        "wrong parent grant cannot retry",
+        "revoked after plan cannot execute",
+        "confirmation cancel does not consume",
+        "matching grant executes once",
+        "same fixture; original report/input/receipt unchanged",
+        "refresh and restart never rerun",
+        "next attempt requires new grant"
+      ],
+      "model_inference": false,
+      "provider_substitute": "synthetic failed process; no network or credentials",
+      "preflight_substituted": true,
+      "external_browser_requests": 0,
+      "page_errors": 0,
+      "exit_code": 0,
+      "elapsed_s": 6.151,
+      "tracked_process_count": 26,
+      "tracked_alive": [],
+      "full_descendant_audit": false
+    },
+    "fresh_browser_regression": {
+      "command": "node scripts/check_console_remote_grant_browser.mjs --local-acceptance --harness-root PRIVATE_TEMP_DIRECTORY",
+      "passed": true,
+      "scenarios": [
+        "no_optin",
+        "no_grant",
+        "grant",
+        "revoke_after_plan",
+        "restart"
+      ],
+      "provider_substitute": "existing failed harness process"
+    },
+    "unit_boundaries": [
+      "version 1 fresh grant cannot retry",
+      "wrong parent/fresh task mismatch cannot consume",
+      "report bytes change invalidates grant",
+      "newer attempt invalidates old grant",
+      "third retry and non-task modes rejected",
+      "strict integer attempt metadata",
+      "fixture/receipt/ledger/source validation",
+      "single successful competing consumption",
+      "preflight/busy do not consume; exec failure does not refund",
+      "HTTP ref plan; revocation; plan replay; CLI flag gates"
+    ],
+    "publication": "PASS: 217 files, syntax and links",
+    "indexes": "PASS: 55 contracts / 9 llms / 0 errors; private Python venv with OpenCC 0.1.7",
+    "remote_ci": "pending PR",
+    "staged_diff_check": "passed"
+  },
+  "review": {
+    "primary_review": true,
+    "independent_external_review": false,
+    "fixes": [
+      "strict retry attempt type rejects bool/float equality",
+      "select parent before irreversible grant consumption",
+      "separate fresh/retry grant scopes at plan, execute and consume",
+      "public lineage uses projected refs only",
+      "include result redaction source in grant binding"
+    ]
+  },
+  "initial_failures_preserved": [
+    "Two existing test mocks updated for explicit parent argument/scope inspection.",
+    "CLI flag test initially reached captured default lab before rejecting missing execute; flag check moved before history read.",
+    "First retry browser expected raw API code in localized UI; now asserts HTTP 409 and visible localized authorization message.",
+    "Initial fresh browser invocation omitted required local-acceptance flag and started no scenario; explicit flag run passed."
+  ],
+  "limits": {
+    "provider_requests": 4,
+    "output_tokens_per_request": 512,
+    "wall_seconds": 180,
+    "max_retries_per_chain": 2,
+    "money_cap": null
+  },
+  "limitations": [
+    "No real Pi/DeepSeek paid retry was executed; provider/preflight substitutions are explicit.",
+    "Local cooperative disk protocol; does not prevent an operator rewriting all private state.",
+    "PID/create-time sampling is not a full descendant-tree isolation guarantee.",
+    "Grant creation still requires a separate explicit approval for each paid task.",
+    "Full AC-07/09/11 and MVP remain pending; no usable tag."
+  ]
+}

@@ -31,6 +31,7 @@ TTL_MAX = 1800
 KEYS = {'version', 'id', 'provider', 'task', 'model', 'pinned_version', 'limits',
         'source_sha256', 'uid', 'lab', 'created_at', 'expires_at', 'max_runs'}
 SOURCE_NAMES = tuple(dict.fromkeys((
+    'result_redaction.py',
     'remote_grant.py', 'office_dispatch.py', 'office_console.py', 'office_console.js', 'office_results.py', 'run_pi_work.py', 'office_pi.mjs', 'office_pi_host.mjs', 'office_pi_restart.mjs', 'office_pi_question.mjs',
     'manual_recovery.mjs', 'deepseek_relay.py', 'pi_retry.py', 'execution_slot.py',
     'process_ownership.py', 'remote_cli.py', 'pi_boundary.mjs', 'pi_office_policy.mjs',
@@ -207,11 +208,39 @@ def expected_binding(lab: Path, provider: str) -> dict:
             'limits': plan['limits'], 'source_sha256': _source_hashes(Path(lab))}
 
 
+def retry_binding(lab: Path, parent: str) -> dict:
+    """Bind one next attempt to the currently eligible failed task and history."""
+    import pi_retry
+    from office_results import read_json
+    try:
+        meta, ledger, _ = pi_retry.inspect(lab, parent)
+        if meta['mode'] != 'task':
+            raise GrantError('remote_grant_requires_remote_task')
+        with pi_retry.run_directory(lab, parent) as fd:
+            _, raw = read_json(fd, ('result.json',), 2 * 1024 * 1024)
+        def digest(value):
+            return hashlib.sha256(json.dumps(value, sort_keys=True, separators=(',', ':')).encode()).hexdigest()
+        return {'parent': parent, 'root': meta['root'], 'attempt': meta['attempt'] + 1,
+                'fixture_sha256': meta['fixture_sha256'], 'source_sha256': meta['source_sha256'],
+                'receipt_sha256': digest(meta), 'ledger_sha256': digest(ledger),
+                'report_sha256': hashlib.sha256(raw).hexdigest()}
+    except GrantError:
+        raise
+    except (OSError, ValueError, TypeError, KeyError):
+        raise GrantError('remote_grant_retry_unavailable') from None
+
+
+def matches(record: dict, retry_parent: str | None) -> bool:
+    retry = record.get('retry')
+    return retry is None if retry_parent is None else isinstance(retry, dict) and retry.get('parent') == retry_parent
+
+
 def _validate(value: dict, lab: Path, provider: str, now: float, check_binding: bool = True) -> dict:
-    if set(value) != KEYS:
+    version = value.get('version')
+    if type(version) is not int or version not in (1, 2) or set(value) != KEYS | ({'retry'} if version == 2 else set()):
         raise GrantError('remote_grant_unavailable')
     grant_id = value['id']
-    if (type(value.get('version')) is not int or value.get('version') != 1 or not isinstance(grant_id, str) or not GRANT_ID.fullmatch(grant_id)
+    if (not isinstance(grant_id, str) or not GRANT_ID.fullmatch(grant_id)
             or value.get('provider') != provider or value.get('task') != TASK
             or type(value.get('uid')) is not int or value.get('uid') != os.getuid() or value.get('lab') != str(Path(lab).resolve())
             or type(value.get('max_runs')) is not int or value.get('max_runs') != 1 or type(value.get('created_at')) not in (int, float)
@@ -229,6 +258,12 @@ def _validate(value: dict, lab: Path, provider: str, now: float, check_binding: 
         if (value.get('model') != expected['model'] or value.get('pinned_version') != expected['pinned_version']
                 or json.dumps(value.get('limits'), sort_keys=True, allow_nan=False) != json.dumps(expected['limits'], sort_keys=True) or value.get('source_sha256') != expected['source_sha256']):
             raise GrantError('remote_grant_source_changed')
+    retry = value.get('retry')
+    if retry is not None:
+        if not isinstance(retry, dict) or not isinstance(retry.get('parent'), str) or type(retry.get('attempt')) is not int:
+            raise GrantError('remote_grant_unavailable')
+        if retry != retry_binding(lab, retry['parent']):
+            raise GrantError('remote_grant_retry_changed')
     return value
 
 
@@ -268,7 +303,7 @@ def pending(lab: Path, provider: str, now: float | None = None) -> dict | None:
     return rows[0] if rows else None
 
 
-def create(lab: Path, provider: str, ttl_s: int, now: float | None = None) -> dict:
+def create(lab: Path, provider: str, ttl_s: int, now: float | None = None, *, retry_parent: str | None = None) -> dict:
     if provider != PROVIDER:
         raise GrantError('remote_grant_provider_not_supported')
     if type(ttl_s) is not int or ttl_s < TTL_MIN or ttl_s > TTL_MAX:
@@ -284,7 +319,8 @@ def create(lab: Path, provider: str, ttl_s: int, now: float | None = None) -> di
             raise GrantError('remote_grant_unavailable')
         grant_id = secrets.token_hex(16)
         binding = expected_binding(lab, provider)
-        value = {'version': 1, 'id': grant_id, 'provider': provider, 'task': TASK,
+        retry = retry_binding(lab, retry_parent) if retry_parent is not None else None
+        value = {'version': 2, 'retry': retry, 'id': grant_id, 'provider': provider, 'task': TASK,
                  'model': binding['model'], 'pinned_version': binding['pinned_version'],
                  'limits': binding['limits'], 'source_sha256': binding['source_sha256'],
                  'uid': os.getuid(), 'lab': str(lab.resolve()), 'created_at': now,
@@ -301,7 +337,7 @@ def create(lab: Path, provider: str, ttl_s: int, now: float | None = None) -> di
         os.close(root_fd)
 
 
-def consume(lab: Path, grant_id: str, provider: str, entry: str, now: float | None = None) -> dict:
+def consume(lab: Path, grant_id: str, provider: str, entry: str, now: float | None = None, *, retry_parent: str | None = None) -> dict:
     if provider != PROVIDER:
         raise GrantError('remote_grant_provider_not_supported')
     if not isinstance(grant_id, str) or not GRANT_ID.fullmatch(grant_id):
@@ -337,6 +373,8 @@ def consume(lab: Path, grant_id: str, provider: str, entry: str, now: float | No
                         raise GrantError('remote_grant_used')
                     finally: os.close(revoked_fd)
             value = _validate(value, lab, provider, now, check_binding=True)
+            if not matches(value, retry_parent):
+                raise GrantError('remote_grant_task_mismatch')
             # A prior tombstone is never overwritten, even if pending was restored.
             for name in ('consumed', 'revoked'):
                 with _directory(_child_dir(root_fd, name)) as target_fd:
@@ -385,9 +423,13 @@ def revoke(lab: Path, grant_id: str):
 
 
 def public(record: dict) -> dict:
+    from result_redaction import make_ref
+    retry = record.get('retry')
     return {'provider': record['provider'], 'fingerprint': fingerprint(record['id']),
             'task': record['task'], 'model': record['model'], 'expires_at': record['expires_at'],
-            'limits': record['limits']}
+            'limits': record['limits'], 'scope': 'retry' if retry else 'fresh',
+            'retry': {'parent_ref': make_ref(1, retry['parent']), 'root_ref': make_ref(1, retry['root']),
+                      'attempt': retry['attempt']} if retry else None}
 
 
 def inspect(lab: Path, grant_id: str, provider: str, now: float | None = None) -> dict:

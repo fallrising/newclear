@@ -15,6 +15,12 @@ source_commit: 64c8ad59620e9068f0beede99365b7d656f00825
 
 ## 主線與範圍
 
+T-0028 最新：指定失敗 parent 的一次性重試 grant 已實作；224 Python／68 Node、四組新重試與五組既有首次授權 Chrome 流程通過。實際 dispatcher／跨 exec 執行鎖／receipt 已驗證，provider 與環境偵測為明示替身，未執行付費模型。見[授權契約](docs/REMOTE-GRANT.md)、[證據](docs/evidence/remote-retry-grant-2026-11-16.json)及[交付狀態](docs/tasks/BOARD.md)。
+
+T-0028：Pi 遠端重試的一次性授權。CLI 明確建立綁定指定失敗 parent／root／下一次 attempt／fixture 與歷史摘要的 grant，操作台透過既有 ref 選取與明確確認執行；首次 grant 與 retry grant 不可互用。保留固定模型／限額、最多兩次重試、單一 pending grant、來源綁定、共用執行鎖與消耗後不退還。主導直接實作，零新增開發模型委託／產品模型請求，不建立實際 lab 的付費授權。
+
+驗證計畫：原始失敗、receipt、ledger、fixture 與來源綁定；錯 parent、過期／撤銷、兩次上限、競態與重啟、預檢失敗不消耗、消耗後啟動失敗不退還。實際 loopback HTTP 與 Chrome 使用隔離臨時 lab／測試程序驗證計畫、明確點擊、重複提交與刷新；不以替身宣稱 DeepSeek 推論或完整 AC 通過。元件 Python／Node／publication 與 repo indexes gates，PR／CI／正常合併後結案。
+
 T-0027 最新：已整合合成秘密輸出遮蔽與下載雜湊核對，實際 loopback HTTP／Chrome Blob 驗證通過；只涵蓋 AC-11 子集，完整 AC-11／MVP 保持 pending。[輸出契約](docs/RESULT-REDACTION.md)、[驗證證據](docs/evidence/result-redaction-2026-11-16.json)與[交付狀態](docs/tasks/BOARD.md)。
 
 T-0027：結果輸出的合成秘密遮蔽（僅 AC-11 子集）。沿用實際 Claude Opus 5.5 指導 → 兩個實際 Pi CLI（openai/gpt-5.5）獨立工作區分工 → 主導審查、驗證與 PR 交付。以有限合成秘密測例驗證結果 API 的 jobs[].result／results.runs[]、CLI JSON、離線 HTML 內嵌資料及顯示、操作台原文／差異／替代內容與 Blob 下載。由 Claude 確認有限匹配規則、輸出欄位與 hash 契約後凍結分工。
@@ -156,4 +162,4 @@ Repo 檢查：`python3 scripts/check_indexes.py`。runtime 另需 macOS arm64／
 
 `usable_tag: none`。主線未完成，沒有發布 tag 或部署。
 
-T-0027 接續：已取得完整 Claude Opus 5.5 串流指導，主導核對並凍結[合成秘密輸出契約](docs/RESULT-REDACTION.md)。兩個 Pi 首次請求均因 OpenAI 憑證過期被拒絕，未產生實作；已停止且未自動重試，尚未完成驗收或交付。
+T-0027 歷史進度（已由上方交付紀錄取代）：已取得完整 Claude Opus 5.5 串流指導，主導核對並凍結[合成秘密輸出契約](docs/RESULT-REDACTION.md)。兩個 Pi 首次請求均因 OpenAI 憑證過期被拒絕，未產生實作；已停止且未自動重試，尚未完成驗收或交付。

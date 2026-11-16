@@ -233,11 +233,12 @@ class ConsoleTests(unittest.TestCase):
     def test_remote_retry_never_uses_pending_fresh_task_grant(self):
         self.app.remote_grant_providers=('pi',)
         preview=dict(dispatch.plan('pi'), retry_of='pi-work-failed', attempt=1)
-        with patch.object(self.app,'preview',return_value=(preview,None)), patch.object(console.grants,'pending') as pending, patch.object(self.app,'spawn') as spawn:
+        with patch.object(self.app,'preview',return_value=(preview,None)), patch.object(console.grants,'pending',return_value={'retry':None}) as pending, patch.object(self.app,'spawn') as spawn:
             result=self.app.plan({'retry_id':'pi-work-failed'})
             self.assertFalse(result['executable'])
             with self.assertRaises(console.ConsoleError): self.app.execute(result['plan_id'])
-            pending.assert_not_called(); spawn.assert_not_called()
+            self.assertEqual(result['plan']['authorization']['reason'], 'grant_for_different_task')
+            spawn.assert_not_called()
 
     def test_http_cannot_create_replace_grant_or_add_execution_arguments(self):
         self.app.remote_grant_providers=('pi',)

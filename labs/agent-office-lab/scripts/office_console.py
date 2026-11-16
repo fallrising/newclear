@@ -145,11 +145,13 @@ class Console:
     def _authorization(self, preview):
         if not preview['remote']:
             return None, True, None, 300
-        if preview.get('retry_of') or preview['provider'] not in self.remote_grant_providers:
+        if preview['provider'] not in self.remote_grant_providers:
             return {'kind':'cli_required','reason':'remote_grants_not_enabled'}, False, None, 300
         row = grants.pending(self.lab, preview['provider'])
         if row is None:
             return {'kind':'cli_required','reason':'no_valid_grant'}, False, None, 300
+        if not grants.matches(row, preview.get('retry_of')):
+            return {'kind':'cli_required','reason':'grant_for_different_task'}, False, None, 300
         ttl = max(0.0, min(300.0, row['expires_at'] - time.time()))
         return {'kind':'server_grant','fingerprint':grants.fingerprint(row['id']),'expires_at':row['expires_at']}, True, row['id'], ttl
 
@@ -178,6 +180,7 @@ class Console:
                 saved = dict(chosen['preview']); saved.pop('authorization', None)
                 if preview != saved: raise ConsoleError('plan_changed')
                 current = grants.inspect(self.lab, chosen['grant_id'], preview['provider'])
+                if not grants.matches(current, preview.get('retry_of')): raise ConsoleError('plan_changed')
                 grant_id = current['id']
                 preview = dict(preview, authorization={'kind':'server_grant','fingerprint':grants.fingerprint(grant_id),'expires_at':current['expires_at']})
                 if preview != chosen['preview']: raise ConsoleError('plan_changed')
@@ -199,7 +202,8 @@ class Console:
                 command = [sys.executable,str(self.lab/'scripts/office_dispatch.py'),'local-text',
                            '--request',str(request_path),'--sha256',preview['request_sha256'],'--execute']
             elif preview['remote']:
-                command = [sys.executable, str(self.lab / 'scripts/office_dispatch.py'), 'run', 'pi', '--execute', '--remote-grant', chosen['grant_id']]
+                action = ['retry', preview['retry_of']] if preview.get('retry_of') else ['run', 'pi']
+                command = [sys.executable, str(self.lab / 'scripts/office_dispatch.py'), *action, '--execute', '--remote-grant', chosen['grant_id']]
             else:
                 command = [sys.executable, str(self.lab / 'scripts/office_dispatch.py'), *preview['command'][2:]]
             if '--allow-remote' in command: raise ConsoleError('remote_execution_requires_cli')

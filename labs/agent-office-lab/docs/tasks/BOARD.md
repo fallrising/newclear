@@ -331,3 +331,17 @@ T-0027 接續保存：新版串流擷取已取得完整 Claude Opus 5.5 六項�
 T-0027 實作驗收：owner 更新憑證後明確批准兩 Pi 各一次；backend 239.825 秒／20 次請求／估算 US$1.023503，UI 159.059 秒／17 次請求／估算 US$0.805637，均回報 gpt-5.5 與正常 stop。原每 worker 720 秒／24 requests／80 tools／6000 output cap／US$3 回報停止門檻保留，無自動重試／模型替換。主導修正 literal 遮蔽名稱身分、矛盾差異 fail closed、CLI 同名歧義，補 Console ref lookup 與實際 HTTP／CLI 測試。兩 Pi 憑證副本已移除，受追蹤程序退出；非完整後代樹保證。產品模型請求零；[本機證據](../evidence/result-redaction-2026-11-16.json)，完整 AC-11／MVP 仍 pending。下方／先前等待授權描述只保存歷史。
 
 T-0027 交付結案：[功能 PR #1044](https://github.com/fallrising/newclear/pull/1044) 已於 2026-11-16T16:26:15Z 正常合併，遠端 main SHA `2a02f146a398dfa89a995196c7c96f805320e8af`；fetch 後與候選 HEAD `42c36a51500b0a6d4180550959d9963a64de5679` 的整個元件內容 diff 為零。必要 CI [Agent Office Lab](https://github.com/fallrising/newclear/actions/runs/43907258865) 與 [Project success contracts](https://github.com/fallrising/newclear/actions/runs/43907258899) 均 success，無衝突；主導完成程式審查，未宣稱獨立外部審查。215 Python／68 Node、實際 HTTP／CLI／Chrome 六次下載、publication／indexes／staged diff check 通過；完整測試命令與替身界線見上述白名單證據。沒有新增付費呼叫、retry execution、provider 原生重驗或 usable tag；完整 AC-11／MVP 仍 pending。本次只將已合併的 T27 子集標 done，後續安全主線另定範圍。
+
+## T-0028：Pi 遠端重試一次性授權
+
+Owner 直接指示繼續開發；T-0028：Pi 遠端重試的一次性授權。CLI 明確建立綁定指定失敗 parent／root／下一次 attempt／fixture 與歷史摘要的 grant，操作台透過既有 ref 選取與明確確認執行；首次 grant 與 retry grant 不可互用。保留固定模型／限額、最多兩次重試、單一 pending grant、來源綁定、共用執行鎖與消耗後不退還。主導直接實作，零新增開發模型委託／產品模型請求，不建立實際 lab 的付費授權。
+
+| ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| T-0028-01 | 綁定失敗parent的grant、dispatcher與操作台明確重試 | AC-07／09／11 子集 | in_progress | 2026-11-16T17:06:54.252682Z | — | 2026-11-16T17:18:54.819190Z |
+
+驗證計畫：原始失敗、receipt、ledger、fixture 與來源綁定；錯 parent、過期／撤銷、兩次上限、競態與重啟、預檢失敗不消耗、消耗後啟動失敗不退還。實際 loopback HTTP 與 Chrome 使用隔離臨時 lab／測試程序驗證計畫、明確點擊、重複提交與刷新；不以替身宣稱 DeepSeek 推論或完整 AC 通過。元件 Python／Node／publication 與 repo indexes gates，PR／CI／正常合併後結案。
+
+來源：fallrising/newclear `fead565acb877453861b6895471326096b923f0b` 的根與元件 AGENTS／README、SUCCESS／SDD／HANDOFF、T24-TECHNICAL-GUIDANCE、REMOTE-GRANT、RETRY、RESULT-REDACTION 及對應程式／測試。沿用已核對的共用 delivery-and-handoff 政策（blob `13bf6ff32c6131208ef14e27619160c2906dcb32`）。
+
+T-0028 本機驗收完成：224 Python／68 Node、四組實際 HTTP／Chrome 重試情境及五組既有首次授權回歸通過。成功情境確認實際 dispatcher exec、同 PID 繼承執行鎖、grant 消耗與 attempt=1 receipt；舊報告／input／receipt hash 未變，fixture 相同，結果仍 failed／零模型。26 個 PID/create-time 受追蹤程序已退出；抽樣不是完整後代樹保證。首次瀏覽器因斷言把本地化提示當原始 API code 而逾時，已修正並保留；其他測試準備失敗見[白名單證據](../evidence/remote-retry-grant-2026-11-16.json)。主導直接實作，沒有新 Claude／Pi 委託、產品模型呼叫或實際 lab 付費 grant。PR／CI／合併仍待完成，完整 AC 不變。

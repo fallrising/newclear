@@ -127,4 +127,24 @@ Documentation only; original product AC and M3-U status unchanged.
 
 | ID | Task | AC | Status | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| FZ-ENTRY-MAP | Six-journey Fanzloud/AP/Office capability and authority comparison | E01–E05 | in_progress | 2026-11-16T17:09:10Z | — | 2026-11-16T17:15:50Z |
+| FZ-ENTRY-MAP | Six-journey Fanzloud/AP/Office capability and authority comparison | E01–E05 | done | 2026-11-16T17:09:10Z | 2026-11-16T17:19:02Z | 2026-11-16T17:19:55Z |
+
+FZ-ENTRY-MAP delivery: [PR #1048](https://github.com/fallrising/newclear/pull/1048)
+merged at `2026-11-16T17:19:02Z` as
+`4d0c37593cf0c187331b7c21ddb65df8fdd84839`. Final reviewed head
+`d1410c5396d1191f6042a69c032e5a7803281184` passed
+[Fanzloud CI](https://github.com/fallrising/newclear/actions/runs/43916601688) and
+[Project success contracts](https://github.com/fallrising/newclear/actions/runs/43916601795).
+All six changed files were read back from the merged SHA through GitHub and their
+Git blob hashes matched the reviewed local files. Independent fresh-context review:
+ACCEPT_DOCUMENT, no blockers; E01–E04 and local scoped contracts/links/whitespace
+passed. This delivery record closes the E05 CI/merge/readback gates and supersedes
+the pre-merge pending delivery/status snapshots in the task and acceptance files.
+The required board-only closure PR preserves those snapshots rather than rewriting
+review history. Only this document slice is done; original M3-U/FN07, Cloud AC04/full
+AC05 and Office MVP/AC11 remain incomplete. No runtime, live window, new model call,
+release, deployment, entry removal or authority migration occurred.
+
+Next: use the comparison when choosing a named read-only navigation consumer; do
+not treat the proposal as an implemented route or automatically start a new product
+milestone. No owner operation is needed to close this documentation task.

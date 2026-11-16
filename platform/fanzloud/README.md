@@ -9,6 +9,7 @@
 > **2026-10-31 M1**：真 Chromium → Rust → Agent Platform → 隔離 VM → 官方 Claude Code 已完成一次修復，頁面顯示進度、檢查通過並下載精確 diff。[實測證據與限制](docs/acceptance/M1-isolated.md)、[私人操作入口](docs/isolated-operator.md)。目前僅單一已登錄專案／agent，尚非完整廠商中立 MVP。
 
 > 主線、驗收條件、剩餘缺口與可用版本：[SUCCESS.md](SUCCESS.md)。
+> [Fanzloud／AP／Office 入口能力對照](docs/portfolio-entry-crosswalk.md)：固定來源的責任、證據與缺口；僅文件整理。
 
 
 > **Portfolio doc tier: A (active, bounded P0)** — Owner resumed the private single-operator browser-to-Cloud flow on 2026-10-30. [Quickstart and current gates](docs/quickstart.md); [PORTFOLIO](../../PORTFOLIO.md). Persistence and host runtimes remain separate milestones.

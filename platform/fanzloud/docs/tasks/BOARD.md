@@ -119,3 +119,13 @@ proposed10min read-only access is partial human confirmation only; proposed15min
 owner submit/review alternative still needs explicit authorization. No new milestone.
 
 2026-11-02 owner現在可操作；M3-U續作10分鐘／零新CLI/VM只讀確認入口，私人有限gate先離線驗證與獨立審查；等私人連線／TLS就緒再開始，未開窗口、不改完整FN07條款。
+
+## P01 — 入口能力對照（owner 直接指示）
+
+[任務](P01.task.md)。獨立文件任務，不是原 M1–M3 新增產品前置。
+
+| ID | Task | AC | Status | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| P01-01 | 六項入口、原 AC 與固定證據對照 | P01-01 | in_progress | 2026-11-16T17:11:25Z | | 2026-11-16T17:17:36Z |
+| P01-02 | 單一執行權威與 unknown／session／cancel 語義 | P01-02 | in_progress | 2026-11-16T17:11:25Z | | 2026-11-16T17:17:36Z |
+| P01-03 | 原主線保留、文件驗證與正常交付 | P01-03 | in_progress | 2026-11-16T17:11:25Z | | 2026-11-16T17:17:36Z |

@@ -19,7 +19,8 @@ import fresh_generation as contract
 import fresh_generation_ops as ops
 from fresh_bootstrap_render import build_render
 from fresh_execution_ops import PrivateFiles
-from fresh_rebuild import ACCEPTANCE_CHECKS, TOPOLOGY, plan_digest
+from fresh_rebuild import ACCEPTANCE_CHECKS, plan_digest
+from fixture_inventory import TOPOLOGY
 from fresh_run_lock import FreshRunLock
 import pending_generation as pending
 from test_fresh_bootstrap_render import fixture
@@ -52,7 +53,7 @@ class GenerationStorageTests(unittest.TestCase):
             'bootstrap_sha256':'8'*64,'replay_sha256':self.replay_sha,'receipt_sha256':'7'*64,
             'private_identity':self.pending['reservation']['private_identity'],
             'context':{'review':envelope('plan',{'id':'review','generation_before':1,'generation_after':2,
-                'series':{'id':'campaign','iteration':1},'scope':{'scope_sha256':'a'*64}}),
+                'series':{'id':'campaign','iteration':1},'scope':{'scope_sha256':'a'*64,'hosts':inventory}}),
                 'execution':envelope('execution',{'evidence':{'writer_fence':fence}}),
                 'bootstrap':envelope('plan',{'render':rendered}),
                 'network':envelope('plan',{'id':'network','render':access}), 'replay':envelope('plan',{'id':'replay'})},

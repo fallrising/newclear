@@ -14,7 +14,7 @@ import re
 import subprocess
 import tempfile
 
-HOSTS = tuple(f"disposable-{i:02d}" for i in range(1, 5))
+from operator_inventory import load_inventory_file, evidence_name
 BINARIES = {
     "projecteru2/core": {"eru-core": ["--version"]},
     "projecteru2/cli": {"eru-cli": ["--version"]},
@@ -56,8 +56,12 @@ print(json.dumps({"results":results,"temporary_directory_removed":not root.exist
 def main():
     ap=argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--output-dir",required=True,type=Path)
-    ap.add_argument("--host",action="append",choices=HOSTS)
+    ap.add_argument("--inventory",required=True,type=Path)
+    ap.add_argument("--host",action="append")
     args=ap.parse_args()
+    hosts=tuple(row['alias'] for row in load_inventory_file(args.inventory))
+    if args.host and (len(set(args.host))!=len(args.host) or any(host not in hosts for host in args.host)):
+        ap.error('--host must select distinct configured aliases')
     project=Path(__file__).resolve().parent.parent
     lock=json.loads((project/"artifacts.amd64.lock.json").read_text())
     artifacts=[]
@@ -74,7 +78,7 @@ def main():
     os.umask(0o077)
     args.output_dir.mkdir(mode=0o700,parents=True,exist_ok=True)
     failed=False
-    for host in args.host or HOSTS:
+    for host in args.host or hosts:
         print(f"[{host}] SSH python3 -: SHA256 verification; eru-core/cli/agent --version; etcd --version; etcdctl/etcdutl version; temporary cleanup",flush=True)
         result={"host":host,"collected_at":datetime.now(timezone.utc).isoformat()}
         try:
@@ -87,7 +91,7 @@ def main():
         except (OSError,ValueError,subprocess.TimeoutExpired) as e:result["error"]=str(e)
         result["pass"]=result.get("exit_code")==0 and result.get("temporary_directory_removed") is True and len(result.get("results",[]))==6 and all(x["exit_code"]==0 for x in result.get("results",[]))
         failed |= not result["pass"]
-        with tempfile.NamedTemporaryFile(mode="w",prefix=f"{host}-",suffix=".json",dir=args.output_dir,delete=False) as f:
+        with tempfile.NamedTemporaryFile(mode="w",prefix=f"{evidence_name(host)}-",suffix=".json",dir=args.output_dir,delete=False) as f:
             json.dump(result,f,ensure_ascii=False,indent=2);f.write("\n")
         print(json.dumps(result,ensure_ascii=False),flush=True)
     return int(failed)

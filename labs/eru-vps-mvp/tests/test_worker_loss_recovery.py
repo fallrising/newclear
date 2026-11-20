@@ -1,3 +1,4 @@
+import fixture_inventory
 """ERU-010 fresh partial cleanup and replacement recovery tests."""
 import contextlib
 import copy
@@ -83,6 +84,7 @@ class WorkerLossRecoveryTests(unittest.TestCase):
         self.addCleanup(self.temp.cleanup)
         self.project = Path(self.temp.name)
         (self.project / 'private').mkdir()
+        (self.project / 'private/deployment-plan.json').write_text(json.dumps(fixture_inventory.inventory()))
         self.apps = [spec(), spec('metrics-api')]
         self.document = review_input(self.apps)
         self.input_path = self.project / 'private/loss.json'
@@ -173,7 +175,7 @@ class WorkerLossRecoveryTests(unittest.TestCase):
                 'replacement': {'node': normalized['node'], 'appname': appname,
                                 'spec_sha256': digest},
                 'replacement_workload_ids': [rows[0]['id']]}
-        executor = WorkerDrainExecutor(self.project / 'drain', api)
+        executor = WorkerDrainExecutor(self.project / 'drain', api, inventory=fixture_inventory.inventory())
         ready, _ = executor._all_replacements_ready(
             {'moves': [move]}, {document['name']: source})
         self.assertTrue(ready)
@@ -206,11 +208,11 @@ class WorkerLossRecoveryTests(unittest.TestCase):
         state = make_snapshot(rows_for(document))
         api = NamedDrainAPI(state)
         review = build_plan('worker-4', state, [document],
-                            {document['name']: 'worker-2'}, True, (), 'named-drain')
-        plan = execution_plan(review, [document], api)
+                            {document['name']: 'worker-2'}, True, (), 'named-drain', inventory=fixture_inventory.inventory())
+        plan = execution_plan(review, [document], api, inventory=fixture_inventory.inventory())
         executor = WorkerDrainExecutor(
             self.project / 'private/operations/worker-drain', api,
-            self.project / 'private/operations/apps')
+            self.project / 'private/operations/apps', inventory=fixture_inventory.inventory())
         result = executor.execute(plan, plan['plan_sha256'], [document])
         self.assertEqual(result['status'], 'complete')
         staged = result['staged_revisions']

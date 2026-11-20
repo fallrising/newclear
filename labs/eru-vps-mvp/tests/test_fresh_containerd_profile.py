@@ -77,11 +77,11 @@ class ContainerdProfileTests(unittest.TestCase):
         result = adapter.probe(operator.rows[0], self.h.plan['desired_apps'][0])
         self.assertEqual(result, {'status': 200, 'body_match': True})
         probe = operator.commands[-1]
-        self.assertEqual(probe['host'], 'ckc-disposable-02')
+        self.assertEqual(probe['host'], 'lab-host-02')
         self.assertIn(row['id'], probe['stdin'])
         adapter.remove_exact(row['id'])
         self.assertEqual(operator.commands[-1]['argv'][-4:], ['workload', 'remove', '--force', row['id']])
-        self.assertEqual(operator.commands[-1]['host'], 'ckc-disposable-01')
+        self.assertEqual(operator.commands[-1]['host'], 'lab-host-01')
         # FakeOperator records commands; no SSH, ctr, or HTTP is executed.
 
     def test_ordinary_probe_rejects_foreign_node_labels_and_spec_before_command(self):

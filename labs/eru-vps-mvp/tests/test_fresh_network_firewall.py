@@ -13,7 +13,7 @@ import fresh_network_firewall as policy
 
 
 def fixture(index=0):
-    hosts = [{'alias': 'ckc-disposable-%02d' % (i + 1), 'node': 'worker-' + str(i + 1),
+    hosts = [{'alias': 'lab-host-%02d' % (i + 1), 'node': 'worker-' + str(i + 1),
               'ip': '100.100.1.' + str(i + 1), 'machine_id': 'machine-' + str(i),
               'boot_id': '00000000-0000-0000-0000-%012d' % i,
               'host_key_sha256': str(i + 1) * 64} for i in range(4)]
@@ -89,7 +89,7 @@ class FirewallContractTests(unittest.TestCase):
             self.assertTrue(all(row['rule']['expr'][0]['match']['right'] == 'wg0' for row in rows[3:-1]))
 
     def test_action_validates_every_host_payload_not_only_selected_host(self):
-        mutations = [lambda p: p['render']['hosts'][3].update(alias='wrong'),
+        mutations = [lambda p: p['render']['hosts'][3].update(alias='-oProxyCommand=bad'),
             lambda p: p['render']['hosts'][2].update(boot_id='invalid'),
             lambda p: p['render']['hosts'][2]['files'][0].update(content='flush ruleset\n'),
             lambda p: p['render']['hosts'][1]['files'][1].update(mode='0644'),

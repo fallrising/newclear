@@ -37,7 +37,7 @@ class SSHStagingIndependentReview(unittest.TestCase):
         self.temp = tempfile.TemporaryDirectory()
         self.addCleanup(self.temp.cleanup)
         self.root = Path(self.temp.name)
-        self.keys = {'ckc-disposable-%02d' % (i + 1): public_key(i) for i in range(4)}
+        self.keys = {'lab-host-%02d' % (i + 1): public_key(i) for i in range(4)}
         self.now = datetime(2026, 10, 4, 9, tzinfo=timezone.utc)
         self.intent = '9' * 64
         for name in ('etc/eru', 'etc/ssh', 'proc/sys/kernel/random'):
@@ -60,7 +60,7 @@ class SSHStagingIndependentReview(unittest.TestCase):
         return {'schema_version': 1, 'operation': 'fresh-network-file-staging',
             'plan_id': 'independent-plan', 'plan_sha256': '1' * 64, 'run_id': 'independent-run',
             'execution_sha256': '2' * 64, 'pending_sha256': '3' * 64, 'host_index': index,
-            'host': {'alias': 'ckc-disposable-%02d' % (index + 1), 'node': 'worker-' + str(index + 1),
+            'host': {'alias': 'lab-host-%02d' % (index + 1), 'node': 'worker-' + str(index + 1),
                 'ip': '10.31.0.' + str(index + 1), 'machine_id': 'a' * 32,
                 'boot_id': '11111111-2222-4333-8444-555555555555',
                 'host_key_sha256': digest(base64.b64decode(key)), 'files': files}}

@@ -218,7 +218,7 @@ class HostTests(unittest.TestCase):
         harness = BootstrapHarness(self.render, self.archives, now=self.now)
         self.addCleanup(harness.close)
         import fresh_bootstrap_ssh as ssh
-        keys = {'ckc-disposable-%02d' % i: 'ssh-ed25519 ' + base64.b64encode(
+        keys = {'lab-host-%02d' % i: 'ssh-ed25519 ' + base64.b64encode(
             b'\x00\x00\x00\x0bssh-ed25519\x00\x00\x00\x20' + bytes([i]) * 32).decode() for i in range(1, 5)}
         adapter = ssh.SSHBootstrapAdapter(keys, transport=harness.transport)
         for i in range(len(host.STEPS)):
@@ -235,7 +235,7 @@ class HostTests(unittest.TestCase):
         self.assertEqual(len(harness.nodes), 3)
         self.assertTrue(all(n['available'] and not n['bypass'] for n in harness.nodes))
         self.assertEqual([n['resource_capacity'] for n in harness.nodes], [w['resource_capacity'] for w in self.render['workers']])
-        adds = [a for a in harness.runners['ckc-disposable-01'].writes if 'add' in a and '--nodename' in a]
+        adds = [a for a in harness.runners['lab-host-01'].writes if 'add' in a and '--nodename' in a]
         self.assertEqual(len(adds), 3)
         self.assertTrue(all('--extra-resources' in a and '--cpu' not in a for a in adds))
         for i in (9, 14, 19):

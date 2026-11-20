@@ -7,11 +7,11 @@ import re
 
 from fresh_execution import context, exact, timestamp
 from fresh_rebuild import plan_digest
+from operator_inventory import key_aliases, aliases
 
 PROBE_LIMIT = 512 * 1024
 HOST_LIMIT = 4 * 1024 * 1024
 MAX_KEYS = 4096
-ALIASES = tuple('ckc-disposable-%02d' % i for i in range(1, 5))
 
 
 def decode(raw):
@@ -38,7 +38,10 @@ def public_key(value):
 
 def trust_keys(raw):
     manifest = decode(raw)
-    if type(manifest) is not dict or set(manifest) != set(ALIASES):
+    if type(manifest) is not dict:
+        raise ValueError('observation requires four reviewed host public keys')
+    key_aliases(manifest)
+    if len(manifest) != 4:
         raise ValueError('observation requires four reviewed host public keys')
     result = {}
     for alias, entries in manifest.items():
@@ -223,6 +226,9 @@ def _validate_observation(envelope, plan, binding, now):
     if type(raw) is not str or hashlib.sha256(raw.encode()).hexdigest() != plan['bindings']['code_inputs']['private/verified-host-public-keys.json']:
         raise ValueError('observation trust differs from review')
     trusted = trust_keys(raw)
+    ALIASES = aliases(plan['scope']['hosts'])
+    if set(trusted) != set(ALIASES):
+        raise ValueError('observation trust aliases differ from review')
     captures = row['captures']
     if type(captures) is not list or len(captures) != 4:
         raise ValueError('observation requires four complete captures')

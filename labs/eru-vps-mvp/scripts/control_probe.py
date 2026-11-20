@@ -1,4 +1,4 @@
-"""Read-only probe run over the ckc-disposable-01 admin alias; never installs tools."""
+"""Read-only probe run over the configured control-plane host admin alias; never installs tools."""
 import json
 from pathlib import Path
 import subprocess

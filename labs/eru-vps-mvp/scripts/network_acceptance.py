@@ -14,13 +14,17 @@ import sys
 import time
 import uuid
 
-from labctl import ALIASES, OWNER, Operator, code_inputs, consistency_issues, load_inventory, membership, read
+from labctl import OWNER, Operator, code_inputs, consistency_issues, load_inventory, membership, read
 from labops import ClusterLock, atomic_json, digest
 
 PROJECT = Path(__file__).resolve().parent.parent
 NETWORK = 'private/operations/network'
 TARGET_NODE = 'worker-4'
-TARGET_ALIAS = 'ckc-disposable-04'
+def _target_alias(op):
+    from operator_inventory import workers
+    return workers(op.inventory)[TARGET_NODE]
+
+
 SOURCE_APP_PREFIX = 'erumvp'
 EGRESS_HOST = 'ipv4.icanhazip.com'
 FORWARD_CHAIN = 'ufw-before-forward'
@@ -29,7 +33,7 @@ DNS_UPSTREAM_DROP_CHAIN = 'ONEVPS-INGRESS'
 EGRESS_RULE_MARKER = 'eru006-'
 PLAN_ID = re.compile(r'\d{8}T\d{6}Z-[0-9a-f]{8}\Z')
 
-# Runs only on an explicitly supplied ckc-disposable alias. Output includes
+# Runs only on an explicitly supplied operator-host- alias. Output includes
 # private addresses for a private plan, but never emits raw firewall rules.
 REMOTE_FACTS = r'''import hashlib,ipaddress,json,pathlib,re,socket,subprocess,sys
 IMAGE = IMAGE_VALUE
@@ -684,24 +688,24 @@ def build_network_plan(op, run_id, snapshot):
     core = inventory[0]
     image = json.loads((op.project / 'artifacts.amd64.lock.json').read_text())['nginx']['image']
     table = table_name(run_id)
-    worker_facts = _remote_facts(op, TARGET_ALIAS, 'worker', image, table, include_egress=True)
+    worker_facts = _remote_facts(op, _target_alias(op), 'worker', image, table, include_egress=True)
     bridge_egress = worker_facts.pop('bridge_egress', None)
     core_facts = _remote_facts(op, core['alias'], 'core', image, table)
     source4 = _tailscale_addresses(4)
     source6 = _tailscale_addresses(6)
     target_tail6 = worker_facts['tailscale_ipv6']
     public = {
-        'worker4_v4': [x for x in _ssh_public_addresses(TARGET_ALIAS) if ipaddress.ip_address(x).version == 4],
+        'worker4_v4': [x for x in _ssh_public_addresses(_target_alias(op)) if ipaddress.ip_address(x).version == 4],
         'worker4_v6': worker_facts['global_ipv6'],
         'core_v4': [x for x in _ssh_public_addresses(core['alias']) if ipaddress.ip_address(x).version == 4],
         'core_v6': core_facts['global_ipv6'],
     }
     paths = _port22_paths(public)
-    network = {'target': {'node': TARGET_NODE, 'alias': TARGET_ALIAS, 'tailnet_ipv4': target['ip'],
+    network = {'target': {'node': TARGET_NODE, 'alias': _target_alias(op), 'tailnet_ipv4': target['ip'],
                           'tailnet_ipv6': target_tail6},
                'sources': {'ipv4': source4, 'ipv6': source6}, 'public': public,
                'public_path_controls': paths,
-               'remote_baseline': {TARGET_ALIAS: worker_facts, core['alias']: core_facts},
+               'remote_baseline': {_target_alias(op): worker_facts, core['alias']: core_facts},
                'bridge_egress': bridge_egress,
                'nft_guard_table': table, 'locked_image': image, 'blockers': []}
     blockers = network['blockers']
@@ -784,7 +788,7 @@ def build_network_plan(op, run_id, snapshot):
     network['forward_rule_syntax'] = forward_syntax
     if not forward_syntax.get('syntax_ok') or forward_syntax.get('tag_present'):
         blockers.append('worker-4 rejected the read-only bridge forward-rule syntax check')
-    syntax = _remote_guard_test(op, TARGET_ALIAS, table)
+    syntax = _remote_guard_test(op, _target_alias(op), table)
     network['nft_dry_run'] = syntax
     if syntax.get('exit_code') != 0:
         blockers.append('worker-4 rejected the temporary nftables rule batch in --check mode')
@@ -839,7 +843,7 @@ def _save_report(op, run_id, report):
 
 
 def _remote_table_list(op):
-    output = op.command(TARGET_ALIAS, ['sudo','-n','/usr/sbin/nft','-j','list','tables'])
+    output = op.command(_target_alias(op), ['sudo','-n','/usr/sbin/nft','-j','list','tables'])
     return {(x.get('family'),x.get('name')) for row in json.loads(output).get('nftables',[])
             for key,x in row.items() if key=='table'}
 
@@ -852,9 +856,9 @@ def _apply_guard(op, network):
     batch = guard_lines(run_id, network['sources'])
     op.journal['guard_apply_started'] = True
     op.stage('installing-tcp80-guard')
-    op.command(TARGET_ALIAS, ['sudo','-n','/usr/sbin/nft','-f','-'], batch, timeout=20)
+    op.command(_target_alias(op), ['sudo','-n','/usr/sbin/nft','-f','-'], batch, timeout=20)
     op.journal['guard_installed'] = True
-    text = op.command(TARGET_ALIAS, ['sudo','-n','/usr/sbin/nft','list','table','inet',table])
+    text = op.command(_target_alias(op), ['sudo','-n','/usr/sbin/nft','list','table','inet',table])
     if not verify_guard_text(text, run_id, network['sources']):
         raise RuntimeError('installed nftables guard differs from the exact run plan')
     op.stage('tcp80-guard-verified')
@@ -864,7 +868,7 @@ def _guard_present_exact(op, run_id, network):
     table = network['nft_guard_table']
     if ('inet', table) not in _remote_table_list(op):
         return False
-    text = op.command(TARGET_ALIAS, ['sudo','-n','/usr/sbin/nft','list','table','inet',table])
+    text = op.command(_target_alias(op), ['sudo','-n','/usr/sbin/nft','list','table','inet',table])
     if not verify_guard_text(text, run_id, network['sources']):
         raise ValueError('run-specific table exists but does not match its reviewed guard; refusing deletion')
     return True
@@ -876,7 +880,7 @@ def _remove_guard(op, run_id, network):
     if not _guard_present_exact(op, run_id, network):
         return True
     op.stage('removing-tcp80-guard')
-    op.command(TARGET_ALIAS, ['sudo','-n','/usr/sbin/nft','delete','table','inet',network['nft_guard_table']], timeout=20)
+    op.command(_target_alias(op), ['sudo','-n','/usr/sbin/nft','delete','table','inet',network['nft_guard_table']], timeout=20)
     return not _guard_present_exact(op, run_id, network)
 
 
@@ -925,25 +929,25 @@ def _deploy(op, run_id, network, mode, report):
 
 
 def _container_network(op, identifier):
-    return json.loads(op.command(TARGET_ALIAS,['sudo','-n','python3','-',identifier],CONTAINER_NETWORK))
+    return json.loads(op.command(_target_alias(op),['sudo','-n','python3','-',identifier],CONTAINER_NETWORK))
 
 
 def _listener_ownership(op, identifier):
-    return json.loads(op.command(TARGET_ALIAS,['sudo','-n','python3','-',identifier],LISTENER_OWNERSHIP))
+    return json.loads(op.command(_target_alias(op),['sudo','-n','python3','-',identifier],LISTENER_OWNERSHIP))
 
 
 def _remote_cni_rules(op):
-    return json.loads(op.command(TARGET_ALIAS, ['sudo','-n','python3','-'], CNI_RULES))
+    return json.loads(op.command(_target_alias(op), ['sudo','-n','python3','-'], CNI_RULES))
 
 
 def _remote_forward_rules(op, run_id):
     run_id = valid_run_id(run_id)
-    output = op.command(TARGET_ALIAS, ['sudo','-n','python3','-',run_id], FORWARD_RULES)
+    output = op.command(_target_alias(op), ['sudo','-n','python3','-',run_id], FORWARD_RULES)
     return json.loads(output)
 
 
 def _remote_forward_rule_test(op):
-    output = op.command(TARGET_ALIAS, ['sudo','-n','python3','-'], FORWARD_RULE_TEST)
+    output = op.command(_target_alias(op), ['sudo','-n','python3','-'], FORWARD_RULE_TEST)
     return json.loads(output)
 
 
@@ -961,7 +965,7 @@ def _install_egress_forward_rules(op, run_id, network, cni_ip, report):
         raise ValueError('run-specific bridge egress rules already exist before installation')
     for rule in rules:
         op.stage('installing-bridge-egress-forward-rule')
-        op.command(TARGET_ALIAS, _forward_rule_command(rule, 'insert'), timeout=20)
+        op.command(_target_alias(op), _forward_rule_command(rule, 'insert'), timeout=20)
         report['egress_forward_rules_installed'].append(rule['comment'])
         _save_report(op, run_id, report)
     if _forward_run_targets(op, report, run_id) != sorted(rules, key=lambda item:item['comment']):
@@ -976,7 +980,7 @@ def _remove_egress_forward_rules(op, run_id, report, expected_targets=None):
         raise ValueError('run-owned bridge egress forward rule set changed after cleanup plan')
     for rule in live:
         op.stage('removing-bridge-egress-forward-rule')
-        op.command(TARGET_ALIAS, _forward_rule_command(rule, 'delete'), timeout=20)
+        op.command(_target_alias(op), _forward_rule_command(rule, 'delete'), timeout=20)
     remaining = _forward_run_targets(op, report, run_id)
     if remaining:
         raise RuntimeError('run-owned bridge egress forward rule remains after exact cleanup')
@@ -1097,7 +1101,7 @@ def _remove_cni_run_rules(op, run_id, report, expected_targets=None):
             raise ValueError('CNI NAT rule changed after it was bound to the run')
     for target in live:
         op.stage('removing-run-owned-cni-nat-rule')
-        op.command(TARGET_ALIAS, ['sudo','-n','/usr/sbin/nft','delete','rule','inet',
+        op.command(_target_alias(op), ['sudo','-n','/usr/sbin/nft','delete','rule','inet',
             target['table'],target['chain'],'handle',str(target['handle'])], timeout=20)
     remaining = _cni_run_targets(op, report, run_id)
     if remaining:
@@ -1289,7 +1293,7 @@ def _cleanup_workloads(op,run_id,report):
         if op.cli('workload','list',app):
             raise RuntimeError(mode+' workload remains after exact cleanup')
     image=json.loads((op.project/'artifacts.amd64.lock.json').read_text())['nginx']['image']
-    facts=_remote_facts(op,TARGET_ALIAS,'worker',image,table_name(run_id))
+    facts=_remote_facts(op,_target_alias(op),'worker',image,table_name(run_id))
     if facts['eru_container_ids'] or facts['eru_task_ids']:
         raise RuntimeError('worker-4 ERU runtime still has a container/task; ingress guard retained')
     if facts['listeners']['80']:
@@ -1306,7 +1310,7 @@ def _restore_baseline(op,plan,report):
     if current['hosts']!=plan['snapshot']['hosts']:
         raise RuntimeError('worker/core runtime or host identity differs from the pre-run baseline')
     facts={}
-    for alias,role in ((TARGET_ALIAS,'worker'),(op.core['alias'],'core')):
+    for alias,role in ((_target_alias(op),'worker'),(op.core['alias'],'core')):
         facts[alias]=_remote_facts(op,alias,role,plan['network']['locked_image'],plan['network']['nft_guard_table'])
         if facts[alias]!=plan['network']['remote_baseline'][alias]:
             raise RuntimeError(alias+' firewall/listener/service baseline did not restore exactly')
@@ -1401,7 +1405,7 @@ def _plan(op):
     plan={'schema':1,'id':run_id,'created_at':now(),'operation':'network-acceptance',
           'target':TARGET_NODE,'bindings':bindings,'snapshot':snap,'etcd_health':health,
           'network':network,'executable':not blockers,'blockers':sorted(set(blockers)),
-          'mutation_hosts':[op.core['alias'],TARGET_ALIAS],
+          'mutation_hosts':[op.core['alias'],_target_alias(op)],
           'steps':['Install one run-owned nftables input chain at priority -10 for TCP/80 only',
                    'Deploy one locked host-network nginx on worker-4 and verify process/task ownership',
                    'Probe management-private HTTP, public IPv4/IPv6 ingress, and public management ports',
@@ -1469,16 +1473,16 @@ def _cleanup_plan(op,source_run):
     cni_targets=_cni_run_targets(op,report,source_run)
     forward_targets=_forward_run_targets(op,report,source_run)
     remote={}
-    for alias,role in ((TARGET_ALIAS,'worker'),(op.core['alias'],'core')):
+    for alias,role in ((_target_alias(op),'worker'),(op.core['alias'],'core')):
         remote[alias]=_remote_facts(op,alias,role,source_plan['network']['locked_image'],
                                     source_plan['network']['nft_guard_table'])
     blockers=[]
     if {w['id'] for w in snap['workloads'] if w.get('nodename')==TARGET_NODE}!={x['id'] for x in targets}:
         blockers.append('worker-4 contains a workload outside this cleanup plan')
     target_ids = {x['id'] for x in targets}
-    if not set(remote[TARGET_ALIAS]['eru_container_ids']) <= target_ids:
+    if not set(remote[_target_alias(op)]['eru_container_ids']) <= target_ids:
         blockers.append('worker-4 runtime contains a container outside the run-owned workload set')
-    if not set(remote[TARGET_ALIAS]['eru_task_ids']) <= target_ids:
+    if not set(remote[_target_alias(op)]['eru_task_ids']) <= target_ids:
         blockers.append('worker-4 runtime contains a task outside the run-owned workload set')
     try:guard_present=_guard_present_exact(op,source_run,source_plan['network'])
     except (RuntimeError,ValueError) as exc:
@@ -1487,7 +1491,7 @@ def _cleanup_plan(op,source_run):
         blockers.append('run journal does not prove this plan attempted to create the present guard')
     if not targets and not guard_present and not cni_targets and not forward_targets:
         blockers.append('no run-owned workload, CNI NAT rule, forward exception or temporary guard needs cleanup')
-    if snap['hosts'][TARGET_ALIAS]['containers'] and set(snap['hosts'][TARGET_ALIAS]['containers'].splitlines())!={x['id'] for x in targets}:
+    if snap['hosts'][_target_alias(op)]['containers'] and set(snap['hosts'][_target_alias(op)]['containers'].splitlines())!={x['id'] for x in targets}:
         blockers.append('worker-4 runtime contains a container outside this cleanup scope')
     run_id=datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%SZ')+'-'+uuid.uuid4().hex[:8]
     bindings={'inventory':op.inventory,'inputs':code_inputs(op.project),'cluster':op.cluster()}
@@ -1498,7 +1502,7 @@ def _cleanup_plan(op,source_run):
           'forward_targets':forward_targets,'guard_present':guard_present,
           'guard_table':source_plan['network']['nft_guard_table'],'source_network':source_plan['network'],
           'executable':not blockers,'blockers':sorted(set(blockers)),
-          'mutation_hosts':[op.core['alias'],TARGET_ALIAS],
+          'mutation_hosts':[op.core['alias'],_target_alias(op)],
           'steps':['Revalidate exact run-owned workload IDs, labels, CNI NAT fingerprints and tagged forward rules',
                    'Delete only this run’s exact DNS/HTTPS forward exceptions, workloads and CNI NAT rule',
                    'Verify worker-4 TCP/80 has no listener, then delete only the exact run table',
@@ -1549,7 +1553,7 @@ def _cleanup_plan_execute(op,run_id,expected_hash):
         if health['exit_code']:raise ValueError('etcd health failed; cleanup plan is stale')
         if before['hosts']!=plan['snapshot']['hosts'] or membership(before)!=membership(plan['snapshot']):
             raise ValueError('cluster state changed since cleanup plan; create a new plan')
-        for alias,role in ((TARGET_ALIAS,'worker'),(op.core['alias'],'core')):
+        for alias,role in ((_target_alias(op),'worker'),(op.core['alias'],'core')):
             current=_remote_facts(op,alias,role,plan['source_network']['locked_image'],plan['guard_table'])
             if current!=plan['remote_baseline'][alias]:
                 raise ValueError(alias+' changed since cleanup plan; create a new plan')
@@ -1567,7 +1571,7 @@ def _cleanup_plan_execute(op,run_id,expected_hash):
                         'workload','remove','--force',target['id']],timeout=120)
         if _owned_workloads(op,source_run,report):
             raise RuntimeError('run-owned workload remains after cleanup')
-        facts=_remote_facts(op,TARGET_ALIAS,'worker',plan['source_network']['locked_image'],plan['guard_table'])
+        facts=_remote_facts(op,_target_alias(op),'worker',plan['source_network']['locked_image'],plan['guard_table'])
         if (facts['eru_container_ids'] or facts['eru_task_ids'] or facts['listeners']['80']):
             raise RuntimeError('worker-4 still has a container, task or TCP/80 listener; ingress guard retained')
         _remove_cni_plan_targets(op,source_run,report,plan.get('cni_targets',[]))
@@ -1578,7 +1582,7 @@ def _cleanup_plan_execute(op,run_id,expected_hash):
         if plan['guard_present']:
             if not _guard_present_exact(op,source_run,plan['source_network']):
                 raise RuntimeError('run-specific guard disappeared or changed before cleanup')
-            op.command(TARGET_ALIAS,['sudo','-n','/usr/sbin/nft','delete','table','inet',plan['guard_table']],timeout=20)
+            op.command(_target_alias(op),['sudo','-n','/usr/sbin/nft','delete','table','inet',plan['guard_table']],timeout=20)
         if _guard_present_exact(op,source_run,plan['source_network']):
             raise RuntimeError('run-specific nftables table remains after cleanup')
         final=op.snapshot()
@@ -1599,7 +1603,7 @@ def _cleanup_plan_execute(op,run_id,expected_hash):
             elif old!=new:raise RuntimeError('cleanup changed another worker')
         for alias,old in before['hosts'].items():
             new=final['hosts'][alias]
-            if alias!=TARGET_ALIAS:
+            if alias!=_target_alias(op):
                 if old!=new:raise RuntimeError('cleanup changed a host outside worker-4')
                 continue
             for key in ('machine_id','boot_id','tailscale','docker'):
@@ -1610,7 +1614,7 @@ def _cleanup_plan_execute(op,run_id,expected_hash):
             new_task_ids={line.split()[0] for line in new['tasks'].splitlines()[1:] if line.split()}
             if old_task_ids-new_task_ids!=(old_task_ids & removed) or new_task_ids-old_task_ids:
                 raise RuntimeError('cleanup changed an unrelated runtime task')
-        for alias,role in ((TARGET_ALIAS,'worker'),(op.core['alias'],'core')):
+        for alias,role in ((_target_alias(op),'worker'),(op.core['alias'],'core')):
             after_facts=_remote_facts(op,alias,role,plan['source_network']['locked_image'],plan['guard_table'])
             baseline=plan['source_network']['remote_baseline'][alias]
             if after_facts!=baseline:raise RuntimeError(alias+' firewall/service/listener baseline did not restore')
@@ -1664,7 +1668,7 @@ def _reconcile(op, run_id):
         snapshot = op.snapshot()
         observation['snapshot'] = snapshot
         facts = {}
-        for alias, role in ((TARGET_ALIAS, 'worker'), (op.core['alias'], 'core')):
+        for alias, role in ((_target_alias(op), 'worker'), (op.core['alias'], 'core')):
             facts[alias] = _remote_facts(op, alias, role, network['locked_image'],
                                          network['nft_guard_table'])
         observation['network_facts'] = facts

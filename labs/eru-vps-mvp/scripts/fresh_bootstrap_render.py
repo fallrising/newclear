@@ -3,6 +3,7 @@ import base64
 import copy
 import hashlib
 import ipaddress
+from operator_inventory import valid_alias, topology
 import json
 import re
 
@@ -93,9 +94,11 @@ def build_render(access_render, artifact_lock, token_bytes, *, run_id,
     hosts = access_render.get('hosts') if type(access_render) is dict else None
     if type(hosts) is not list or len(hosts) != 4:
         raise ValueError('requires four reviewed hosts')
+    worker_inventory = [{**host, 'role': 'core' if index == 0 else 'worker'} for index, host in enumerate(hosts)]
+    topology(worker_inventory)
     addresses, identities, keys = set(), set(), set()
     for i, host in enumerate(hosts):
-        if (type(host) is not dict or host.get('alias') != 'ckc-disposable-%02d' % (i + 1)
+        if (type(host) is not dict or not valid_alias(host.get('alias'))
                 or host.get('node') != 'worker-%d' % (i + 1)):
             raise ValueError('host identity mismatch')
         ip = ipaddress.IPv4Address(host['ip'])
@@ -164,7 +167,7 @@ def build_render(access_render, artifact_lock, token_bytes, *, run_id,
         else:
             # Reuse established worker units/CNI, while accepting reviewed RFC1918 endpoints.
             old = build_worker_payload({'alias': host['alias'], 'node': host['node'], 'index': i + 1,
-                                        'ip': '100.64.0.' + str(i + 1)}, '100.64.0.1', artifact_lock)
+                                        'ip': '100.64.0.' + str(i + 1)}, '100.64.0.1', artifact_lock, inventory=worker_inventory)
             files = [_file(f['path'], f['content'].replace('100.64.0.1:5001', hosts[0]['ip'] + ':5001'),
                            '%04o' % f['mode']) for f in old['files']
                      if f['path'] != '/usr/local/libexec/eru-ssh-command']

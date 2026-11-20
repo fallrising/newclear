@@ -29,8 +29,8 @@ class Harness:
         for i in range(4):
             raw=b'\x00\x00\x00\x0bssh-ed25519\x00\x00\x00\x20'+bytes([i+1])*32
             key='ssh-ed25519 '+base64.b64encode(raw).decode()
-            self.keys['ckc-disposable-%02d'%(i+1)]=key
-            h={'alias':'ckc-disposable-%02d'%(i+1),'node':'worker-'+str(i+1),'ip':'100.64.0.'+str(i+1),
+            self.keys['lab-host-%02d'%(i+1)]=key
+            h={'alias':'lab-host-%02d'%(i+1),'node':'worker-'+str(i+1),'ip':'100.64.0.'+str(i+1),
                'machine_id':'fresh-machine-'+str(i),'boot_id':'00000000-0000-0000-0000-%012d'%(i+1),
                'host_key_sha256':hashlib.sha256(raw).hexdigest(),'files':[]}
             hosts.append(h)

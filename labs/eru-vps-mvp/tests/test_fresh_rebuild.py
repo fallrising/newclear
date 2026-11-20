@@ -43,7 +43,7 @@ class FreshRebuildPlanTests(unittest.TestCase):
 
         self.inventory = [
             {
-                'alias': f'ckc-disposable-{index:02d}',
+                'alias': f'lab-host-{index:02d}',
                 'node': f'worker-{index}',
                 'role': 'core' if index == 1 else 'worker',
                 'ip': f'192.0.2.{index}',
@@ -523,7 +523,7 @@ class FreshRebuildPlanTests(unittest.TestCase):
             labctl.main()
         output = stdout.getvalue() + stderr.getvalue()
         for private in [
-                self.sentinel, 'ckc-disposable-01', '192.0.2.1',
+                self.sentinel, 'lab-host-01', '192.0.2.1',
                 str(self.project), 'debian-12-pinned-image', 'cache-a']:
             self.assertNotIn(private, output)
         summary = json.loads(stdout.getvalue())

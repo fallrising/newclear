@@ -1,3 +1,4 @@
+import fixture_inventory
 """Independent read-only transport and saved-evidence adversarial checks."""
 import contextlib
 import copy
@@ -53,7 +54,7 @@ class ObservationTransportReviewTests(unittest.TestCase):
                 protocol.capture([sys.executable, '-c', source], 1024, .1)
 
     def test_ssh_reader_fixed_options_and_memfd_survive_real_child(self):
-        host = {'alias': 'ckc-disposable-01', 'ip': '192.0.2.1'}
+        host = {'alias': 'lab-host-01', 'ip': '192.0.2.1'}
         def capture(argv, limit, timeout, *, input_bytes, pass_fds):
             self.assertEqual(argv[:4], ['ssh', '-F', '/dev/null', '-T'])
             self.assertEqual(argv[-3:], ['--', host['ip'], 'sudo -n python3 -'])
@@ -64,11 +65,11 @@ class ObservationTransportReviewTests(unittest.TestCase):
             fd = pass_fds[0]
             source = ('import os,sys; assert os.read(%d,4096)==%r; '
                       'sys.stdout.buffer.write(sys.stdin.buffer.read())') % (
-                          fd, ('ckc-disposable-01 ' + observation_fixtures.key(1) + '\n').encode())
+                          fd, ('lab-host-01 ' + observation_fixtures.key(1) + '\n').encode())
             return protocol.capture([sys.executable, '-c', source], limit, timeout,
                                     input_bytes=input_bytes, pass_fds=pass_fds)
         with patch.object(ops, 'capture', side_effect=capture):
-            self.assertEqual(ops.SSHReader()(host, 'fixed-script', observation_fixtures.key(1)), b'fixed-script')
+            self.assertEqual(ops.SSHReader(aliases=fixture_inventory.ALIASES)(host, 'fixed-script', observation_fixtures.key(1)), b'fixed-script')
 
     def test_fixed_remote_projection_discards_credentials(self):
         calls = []

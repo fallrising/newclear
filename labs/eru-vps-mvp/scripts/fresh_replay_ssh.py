@@ -1,3 +1,4 @@
+from operator_inventory import key_aliases
 """Pinned four-host copied-source replay transport; observation cannot dispatch."""
 import base64
 import copy
@@ -6,12 +7,12 @@ from pathlib import Path
 import fresh_replay as contract
 import fresh_replay_host as helper
 from fresh_bootstrap_render import canonical
-from fresh_observation import ALIASES, public_key
+from fresh_observation import public_key
 from fresh_observation_ops import SSHReader
 from fresh_rebuild import plan_digest
 
 ERROR = 'fresh replay adapter rejected'
-_BUNDLE = ('app_desired','fresh_rebuild','fresh_execution','fresh_observation',
+_BUNDLE = ('operator_inventory', 'app_desired','fresh_rebuild','fresh_execution','fresh_observation',
            'fresh_network_access','fresh_network_staging_host','fresh_network_staging',
            'fresh_network_firewall','fresh_network_firewall_host','worker_payload',
            'fresh_bootstrap_render','fresh_bootstrap_host','labops','app_executor','fresh_replay')
@@ -38,9 +39,9 @@ def build_program(request):
 
 class SSHReplayAdapter:
     def __init__(self,host_keys,*,transport=None):
-        if type(host_keys) is not dict or set(host_keys)!=set(ALIASES) or len({public_key(host_keys[a]) for a in ALIASES})!=4:
+        if type(host_keys) is not dict or set(host_keys)!=set(key_aliases(host_keys)) or len({public_key(host_keys[a]) for a in key_aliases(host_keys)})!=4:
             raise ValueError(ERROR)
-        self.keys=copy.deepcopy(host_keys); self.transport=SSHReader() if transport is None else transport
+        self.keys=copy.deepcopy(host_keys); self.transport=SSHReader(aliases=host_keys) if transport is None else transport
 
     def _send(self,action,operation,index=0,intent=None):
         contract.validate_action(action)

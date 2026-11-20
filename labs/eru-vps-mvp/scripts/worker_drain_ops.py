@@ -8,6 +8,7 @@ import uuid
 from app_cleanup import AppRevisionCleanup
 from app_desired import canonical_bytes, sha256, snapshot_binding
 from labops import ClusterLock, atomic_json
+from operator_inventory import load_inventory
 from worker_drain import PLAN_ID, build_plan as build_drain_plan
 from worker_drain import plan_digest as review_plan_digest
 from worker_drain_executor import (WorkerDrainExecutor,
@@ -118,7 +119,7 @@ def save_review_plan(project, target, input_path, plan_id=None):
         raise ValueError('input must contain exactly: ' + ', '.join(sorted(allowed)))
     plan = build_drain_plan(
         target, document['snapshot'], document['apps'], document['destinations'],
-        document['health_ok'], document['consistency_issues'], plan_id)
+        document['health_ok'], document['consistency_issues'], plan_id, inventory=load_inventory(project))
     path = _write_plan(project, 'review-plans', plan)
     return plan, path
 
@@ -131,7 +132,7 @@ def prepare_execution_plan(project, plan_id, expected_sha256, apps_path, api):
     desired_specs = _read_private_json(project, apps_path)
     if not isinstance(desired_specs, list):
         raise ValueError('private desired specs input must be a JSON array')
-    plan = build_execution_plan(review, desired_specs, api)
+    plan = build_execution_plan(review, desired_specs, api, inventory=load_inventory(project))
     path = _write_plan(project, 'execution-plans', plan)
     return plan, path
 
@@ -145,7 +146,7 @@ def execute_saved_plan(project, plan_id, expected_sha256, apps_path, api_factory
         if not isinstance(desired_specs, list):
             raise ValueError('private desired specs input must be a JSON array')
         root = Path(project).absolute() / AREA
-        executor = WorkerDrainExecutor(root, api_factory())
+        executor = WorkerDrainExecutor(root, api_factory(), inventory=load_inventory(project))
         return executor._execute_locked(plan, expected_sha256, desired_specs)
 
 
@@ -154,7 +155,7 @@ def recover_run(project, run_id, api_factory):
     with ClusterLock(project):
         _ensure_operation_directories(project, create=False)
         root = Path(project).absolute() / AREA
-        executor = WorkerDrainExecutor(root, api_factory())
+        executor = WorkerDrainExecutor(root, api_factory(), inventory=load_inventory(project))
         return executor._reconcile_locked(run_id)
 
 
@@ -170,7 +171,7 @@ def prepare_fresh_cleanup(project, run_id, api_factory):
     with ClusterLock(project):
         _ensure_operation_directories(project, create=True)
         root = Path(project).absolute() / AREA
-        executor = WorkerDrainExecutor(root, api_factory())
+        executor = WorkerDrainExecutor(root, api_factory(), inventory=load_inventory(project))
         journal = executor._reconcile_locked(run_id)
         observation = journal.get('reconciliation')
         if (journal.get('status') == 'complete'
@@ -292,7 +293,7 @@ def execute_fresh_cleanup(project, recovery_plan_id, expected_sha256,
                 or sorted(item['id'] for item in targets)
                    != plan.get('source_workload_ids')):
             raise ValueError('fresh cleanup plan is not bound to the recovered app IDs')
-        executor = WorkerDrainExecutor(root, api_factory())
+        executor = WorkerDrainExecutor(root, api_factory(), inventory=load_inventory(project))
         return AppRevisionCleanup(executor.app_root, executor.api)._execute_locked(
             child_plan, expected_cleanup_sha256)
 

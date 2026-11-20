@@ -38,7 +38,7 @@ class HostTests(unittest.TestCase):
         self.action = {'schema_version': 1, 'operation': 'fresh-network-file-staging',
             'plan_id': 'plan-1', 'run_id': 'run-1', 'plan_sha256': 'a' * 64,
             'execution_sha256': 'b' * 64, 'pending_sha256': 'c' * 64, 'host_index': 0,
-            'host': {'alias': 'ckc-disposable-01', 'node': 'worker-1', 'ip': '100.91.0.1',
+            'host': {'alias': 'lab-host-01', 'node': 'worker-1', 'ip': '100.91.0.1',
                      'machine_id': self.machine, 'boot_id': self.boot,
                      'host_key_sha256': hashlib.sha256(base64.b64decode(self.key.split()[1])).hexdigest(),
                      'files': self.files}}
@@ -87,7 +87,7 @@ class HostTests(unittest.TestCase):
         for modifier in (lambda r: r.update(schema_version=True),
                          lambda r: r['action'].update(host_index=True),
                          lambda r: r['action']['host'].update(ip='203.0.113.1'),
-                         lambda r: r['action']['host'].update(alias='unknown'),
+                         lambda r: r['action']['host'].update(alias='-oProxyCommand=bad'),
                          lambda r: r['action']['host']['files'][0].update(path='/evil'),
                          lambda r: r['action']['host']['files'][0].update(sha256='e' * 64),
                          lambda r: r['action']['host']['files'][0].update(content='x' * 65537)):

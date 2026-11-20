@@ -1,6 +1,6 @@
 """Explicit same-artifact reapply: verify and preserve the installed core patch."""
 from labctl import read, identifier
-from core_patch import artifact, readiness, PatchOperator, ALIAS
+from core_patch import artifact, readiness, PatchOperator
 from labops import digest
 
 
@@ -23,7 +23,7 @@ def gate(op, build, health_file, snapshot):
     probe = PatchOperator(op.project)
     try:
         runtime = probe.core_runtime()
-        footprint = probe.remote({'action': 'inspect', 'machine_id': snapshot['hosts'][ALIAS]['machine_id']})
+        footprint = probe.remote({'action': 'inspect', 'machine_id': snapshot['hosts'][op.core['alias']]['machine_id']})
     finally:
         op.events.extend(probe.events)
         op.save_journal()

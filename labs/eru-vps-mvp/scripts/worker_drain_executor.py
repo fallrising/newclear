@@ -124,7 +124,7 @@ def _validated_specs(review_plan, desired_specs):
     return by_name
 
 
-def _validate_review_plan(review_plan, desired_specs):
+def _validate_review_plan(review_plan, desired_specs, inventory):
     if (not isinstance(review_plan, dict)
             or review_plan.get('plan_sha256') != drain_plan_digest(review_plan)):
         raise ValueError('worker drain review plan hash mismatch')
@@ -143,15 +143,15 @@ def _validate_review_plan(review_plan, desired_specs):
         raise ValueError('offline worker drain assertions are not clean')
     rebuilt = build_drain_plan(
         review_plan['target']['node'], review_plan['snapshot'],
-        desired_specs, destinations, True, (), review_plan['id'])
+        desired_specs, destinations, True, (), review_plan['id'], inventory=inventory)
     if drain_plan_digest(rebuilt) != review_plan['plan_sha256']:
         raise ValueError('worker drain review payload differs from its plan hash')
     return specs
 
 
-def execution_plan(review_plan, desired_specs, api):
+def execution_plan(review_plan, desired_specs, api, *, inventory=None):
     """Bind a review-only plan to current, read-only health and state checks."""
-    specs = _validate_review_plan(review_plan, desired_specs)
+    specs = _validate_review_plan(review_plan, desired_specs, inventory)
     snapshot = api.snapshot()
     clean, preflight_summary = _preflight(api, snapshot)
     if not clean:
@@ -234,9 +234,10 @@ class WorkerDrainExecutor:
     deploy, remove_exact, and fence_node are the only mutation methods.
     """
 
-    def __init__(self, root, api, app_root=None):
+    def __init__(self, root, api, app_root=None, *, inventory=None):
         self.root = Path(root)
         self.api = api
+        self.inventory = inventory
         self.app_root = Path(app_root) if app_root else self.root.parent / 'apps'
 
     def run_path(self, run_id):
@@ -262,7 +263,7 @@ class WorkerDrainExecutor:
                 or plan.get('execution_implemented') is not True or plan.get('blockers')):
             raise ValueError('worker drain execution plan is blocked or review-only')
         review = plan.get('review_plan')
-        specs = _validate_review_plan(review, desired_specs)
+        specs = _validate_review_plan(review, desired_specs, self.inventory)
         if (plan.get('review_plan_sha256') != review.get('plan_sha256')
                 or plan.get('target') != review.get('target')
                 or plan.get('moves') != review.get('moves')

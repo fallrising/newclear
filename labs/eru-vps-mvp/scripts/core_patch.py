@@ -16,7 +16,6 @@ from labctl import Operator, PROJECT, code_inputs, consistency_issues, identifie
 from labops import ClusterLock, atomic_json, digest
 from core_release import classify_transition, runtime_release, validation_record
 
-ALIAS = 'ckc-disposable-01'
 PROTECTED_UNITS = ['eru-etcd', 'docker', 'containerd', 'ssh', 'tailscaled', 'eru-mvp-firewall']
 
 
@@ -68,7 +67,7 @@ class PatchOperator(Operator):
         # Read the reviewed small program first; parse the large payload as JSON,
         # avoiding compilation of a binary-sized Python string literal on the VPS.
         stdin = repr(source) + '\n' + json.dumps(config)
-        return json.loads(self.command(ALIAS, ['sudo', '-n', 'python3', '-c', 'import ast;exec(ast.literal_eval(input()))'], stdin, timeout=300 if 'payload' in config else 90))
+        return json.loads(self.command(self.core['alias'], ['sudo', '-n', 'python3', '-c', 'import ast;exec(ast.literal_eval(input()))'], stdin, timeout=300 if 'payload' in config else 90))
 
     def protected_services(self):
         result = {}
@@ -87,7 +86,7 @@ r=dict(line.split('=',1) for line in p.stdout.splitlines())
 r['sha256']=hashlib.sha256(Path('/proc',r['MainPID'],'exe').read_bytes()).hexdigest() if int(r['MainPID'])>0 else None
 print(json.dumps(r))
 '''
-        result = json.loads(self.command(ALIAS, ['sudo', '-n', 'python3', '-'], source))
+        result = json.loads(self.command(self.core['alias'], ['sudo', '-n', 'python3', '-'], source))
         if not allow_inactive and (result['ActiveState'] != 'active' or not result['sha256']):
             raise ValueError('core is not active')
         return result
@@ -101,7 +100,7 @@ print(json.dumps(r))
             issues.append('etcd health failed')
         gate = readiness(read(self.project / health_file))
         issues += gate['blockers']
-        machine = snapshot['hosts'][ALIAS]['machine_id']
+        machine = snapshot['hosts'][self.core['alias']]['machine_id']
         footprint = self.remote({'action': 'inspect', 'machine_id': machine})
         current_runtime = self.core_runtime()
         revision_path = self.root / 'core-revision.json'
@@ -110,7 +109,7 @@ print(json.dumps(r))
         rollback_release = None
         if rollback_run:
             source = read(self.root / 'plans' / (identifier(rollback_run) + '.json'))['plan']
-            if source['operation'] != 'core-patch' or source['snapshot']['hosts'][ALIAS]['machine_id'] != machine:
+            if source['operation'] != 'core-patch' or source['snapshot']['hosts'][self.core['alias']]['machine_id'] != machine:
                 raise ValueError('rollback must reference a core patch on this same host')
             checksum = source['footprint']['binary']['sha256']
             rollback_release = source.get('current_release')
@@ -137,7 +136,7 @@ print(json.dumps(r))
                 'readiness': gate, 'snapshot': snapshot, 'footprint': footprint,
                 'bindings': {'inputs': code_inputs(self.project), 'inventory': self.inventory, 'cluster': self.cluster()},
                 'protected_services': self.protected_services(), 'core_runtime': current_runtime,
-                'mutation_hosts': [ALIAS], 'steps': ['Verify fresh health, empty workloads and hashes',
+                'mutation_hosts': [self.core['alias']], 'steps': ['Verify fresh health, empty workloads and hashes',
                     'Back up the owned core binary and manifest; atomically replace only that binary',
                     'Restart only eru-core; verify running binary, API and preserved services'],
                 'executable': not issues, 'blockers': issues}
@@ -173,7 +172,7 @@ print(json.dumps(r))
             current_runtime = self.core_runtime()
             if self.protected_services() != plan['protected_services'] or current_runtime != plan['core_runtime']:
                 raise ValueError('service identity changed')
-            config = {'action': 'inspect', 'machine_id': before['hosts'][ALIAS]['machine_id']}
+            config = {'action': 'inspect', 'machine_id': before['hosts'][self.core['alias']]['machine_id']}
             if self.remote(config) != plan['footprint']:
                 raise ValueError('remote core files changed')
             config.update(id=plan_id)
@@ -199,7 +198,7 @@ print(json.dumps(r))
             self.journal['remote_update'] = self.remote(config)
             self.save_journal()
             self.stage('restarting-core-only')
-            self.command(ALIAS, ['sudo', '-n', 'systemctl', 'restart', 'eru-core.service'])
+            self.command(self.core['alias'], ['sudo', '-n', 'systemctl', 'restart', 'eru-core.service'])
             self.stage('verifying-core')
             # Readiness queries may repeat; mutation commands never repeat.
             last_error = None

@@ -303,7 +303,7 @@ class CollectorTests(unittest.TestCase):
         with patch.object(ssh, 'SSHReader', return_value=self.env.transport) as reader:
             value = probe.collect_network_evidence(self.env.render, self.env.keys, setup=self.env.setup,
                                                   runner=self.env.runner, now=NOW)
-        reader.assert_called_once_with()
+        reader.assert_called_once_with(aliases=self.env.keys)
         self.assertEqual(len(value['controller_private_ssh']), 4)
 
 

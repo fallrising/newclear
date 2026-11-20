@@ -3,6 +3,7 @@
 All remote access goes through the existing reviewed Operator and its SSH
 aliases. This module does not run against a cluster during import or tests.
 """
+from operator_inventory import aliases, workers
 import json
 import re
 
@@ -57,7 +58,7 @@ class EruCLIAdapter:
     def _core_alias(self):
         core = self.operator.core
         if (not isinstance(core, dict) or core.get('role') != 'core'
-                or core.get('alias') != 'ckc-disposable-01'
+                or core.get('alias') != aliases(self.operator.inventory)[0]
                 or not isinstance(core.get('ip'), str)):
             raise ValueError('Eru CLI adapter requires the reviewed control-plane alias')
         return core['alias']
@@ -70,8 +71,7 @@ class EruCLIAdapter:
     def _worker_alias(self, node):
         matches = [item for item in self.operator.inventory
                    if item.get('role') == 'worker' and item.get('node') == node]
-        if len(matches) != 1 or matches[0].get('alias') not in {
-                'ckc-disposable-02', 'ckc-disposable-03', 'ckc-disposable-04'}:
+        if len(matches) != 1 or matches[0].get('alias') != workers(self.operator.inventory)[node]:
             raise ValueError('workload probe target is not a reviewed worker alias')
         return matches[0]['alias']
 

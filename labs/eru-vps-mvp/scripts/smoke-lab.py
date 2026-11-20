@@ -13,9 +13,19 @@ import tempfile
 import uuid
 
 from labops import ClusterLock, lock_fds
+from operator_inventory import load_inventory
 
 PROJECT = Path(__file__).resolve().parent.parent
-CORE_ALIAS = 'ckc-disposable-01'
+
+
+def reapply_command(project, captured_inventory, core_artifact=None):
+    if load_inventory(project) != captured_inventory:
+        raise ValueError('private inventory changed since smoke capture')
+    command = [sys.executable, str(project / 'scripts/deploy-lab.py'), '--inventory',
+               str(project / 'private/deployment-plan.json'), '--apply']
+    if core_artifact:
+        command += ['--core-artifact', core_artifact]
+    return command
 
 
 def main():
@@ -27,7 +37,8 @@ def main():
     if args.core_artifact and not args.verify_reapply:
         ap.error('--core-artifact requires --verify-reapply')
     os.umask(0o077)
-    plan = json.loads((PROJECT / 'private/deployment-plan.json').read_text())
+    plan = load_inventory(PROJECT)
+    CORE_ALIAS = plan[0]['alias']
     core_ip = plan[0]['ip']
     image = json.loads((PROJECT / 'artifacts.amd64.lock.json').read_text())['nginx']['image']
     run_id = datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%SZ') + '-' + uuid.uuid4().hex[:6]
@@ -145,9 +156,7 @@ labels:
                 state['tasks_before_reapply'] = run(host, ['sudo', '-n', 'ctr', '--namespace', 'eru', 'tasks', 'list']).stdout
                 save()
                 print('[controller B] Reapply deployment with live nginx canary', flush=True)
-                deploy = [sys.executable, str(PROJECT / 'scripts/deploy-lab.py'), '--apply']
-                if args.core_artifact:
-                    deploy += ['--core-artifact', args.core_artifact]
+                deploy = reapply_command(PROJECT, plan, args.core_artifact)
                 result = subprocess.run(deploy,
                                         capture_output=True, text=True, timeout=1500, pass_fds=lock_fds())
                 report['events'].append({'host': 'controller B', 'operation': 'deploy-lab --apply',

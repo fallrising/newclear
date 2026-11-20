@@ -1,3 +1,4 @@
+import fixture_inventory
 """ERU-010 live preparation, exact dissociation, and read-only recovery tests."""
 import contextlib
 import copy
@@ -139,7 +140,7 @@ class WorkerLossExecutionTests(unittest.TestCase):
             'worker-4', self.document['snapshot'], self.apps,
             self.document['destinations'], self.document['detection'],
             self.document['fence'], True, True, (),
-            plan_id='20260927T120300Z-loss-exec')
+            plan_id='20260927T120300Z-loss-exec', inventory=fixture_inventory.inventory())
 
     def prepared(self, api):
         return execution_plan(self.review, api)
@@ -257,12 +258,12 @@ class WorkerLossExecutionTests(unittest.TestCase):
 class FakeOperator:
     def __init__(self, state):
         self.inventory = [
-            {'role': 'core', 'alias': 'ckc-disposable-01', 'ip': '192.0.2.1'},
-            {'role': 'worker', 'alias': 'ckc-disposable-02', 'ip': '192.0.2.2',
+            {'node': 'worker-1', 'role': 'core', 'alias': 'lab-host-01', 'ip': '192.0.2.1'},
+            {'role': 'worker', 'alias': 'lab-host-02', 'ip': '192.0.2.2',
              'node': 'worker-2'},
-            {'role': 'worker', 'alias': 'ckc-disposable-03', 'ip': '192.0.2.3',
+            {'role': 'worker', 'alias': 'lab-host-03', 'ip': '192.0.2.3',
              'node': 'worker-3'},
-            {'role': 'worker', 'alias': 'ckc-disposable-04', 'ip': '192.0.2.4',
+            {'role': 'worker', 'alias': 'lab-host-04', 'ip': '192.0.2.4',
              'node': 'worker-4'},
         ]
         self.core = self.inventory[0]
@@ -314,12 +315,12 @@ class WorkerLossAdapterAndOpsTests(unittest.TestCase):
         result = adapter.preflight(state, 'worker-4', {'worker-2'})
         self.assertTrue(result['health_ok'])
         self.assertEqual(result['consistency_issues'], [])
-        self.assertNotIn('ckc-disposable-04',
+        self.assertNotIn('lab-host-04',
                          [command['host'] for command in operator.commands])
         workload_id = state['workloads'][0]['id']
         adapter.dissociate_exact(workload_id)
         command = operator.commands[-1]
-        self.assertEqual(command['host'], 'ckc-disposable-01')
+        self.assertEqual(command['host'], 'lab-host-01')
         self.assertEqual(command['argv'][-3:], ['workload', 'dissociate', workload_id])
         before = len(operator.commands)
         with self.assertRaisesRegex(ValueError, 'workload ID'):
@@ -330,6 +331,7 @@ class WorkerLossAdapterAndOpsTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             project = Path(directory)
             private = project / 'private'; private.mkdir()
+            (private / 'deployment-plan.json').write_text(json.dumps(fixture_inventory.inventory()))
             document = review_input([spec()])
             input_path = private / 'loss.json'
             input_path.write_text(json.dumps(document))
@@ -351,6 +353,7 @@ class WorkerLossAdapterAndOpsTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             project = Path(directory)
             private = project / 'private'; private.mkdir()
+            (private / 'deployment-plan.json').write_text(json.dumps(fixture_inventory.inventory()))
             document = review_input([spec()])
             input_path = private / 'loss.json'
             input_path.write_text(json.dumps(document))

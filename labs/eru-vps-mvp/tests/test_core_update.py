@@ -159,7 +159,7 @@ class FakePatch(PatchOperator):
         if self.lose_install_response: raise TimeoutError('install reply lost')
         return {'stage': 'installed'}
     def command(self, host, argv, stdin=None):
-        assert host == 'ckc-disposable-01' and argv[-2:] == ['restart', 'eru-core.service']
+        assert host == 'lab-host-01' and argv[-2:] == ['restart', 'eru-core.service']
         self.restarts += 1
         return ''
 

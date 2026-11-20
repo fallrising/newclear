@@ -1,3 +1,5 @@
+import fixture_inventory
+from fixture_inventory import ALIASES as FIXTURE_ALIASES
 """Safety regressions: concurrency, drift, exact ownership and uncertain results."""
 import base64
 import copy
@@ -220,7 +222,7 @@ class OperatorTests(unittest.TestCase):
         self.project = Path(self.temp.name)
         self.inventory = [{'alias': alias, 'ip': f'192.0.2.{i}', 'node': f'worker-{i}',
                            'role': 'core' if i == 1 else 'worker'}
-                          for i, alias in enumerate(labctl.ALIASES, 1)]
+                          for i, alias in enumerate(FIXTURE_ALIASES, 1)]
         atomic_json(self.project / 'private/deployment-plan.json', self.inventory)
         for file in ['artifacts.amd64.lock.json', 'upstream.lock.json', 'private/verified-host-public-keys.json']:
             atomic_json(self.project / file, {})
@@ -238,7 +240,7 @@ class OperatorTests(unittest.TestCase):
                              {'name': x['node'], 'endpoint': x['ip'], 'podname': 'eru', 'available': True,
                               'labels': {'owner': labctl.OWNER}, 'resource_capacity': '{}', 'resource_usage': '{}'}
                              for x in self.inventory[1:]], 'workloads': [self.own, self.foreign]}
-        self.snapshot['hosts'][labctl.ALIASES[3]]['containers'] = self.own['id'] + '\n' + self.foreign['id']
+        self.snapshot['hosts'][FIXTURE_ALIASES[3]]['containers'] = self.own['id'] + '\n' + self.foreign['id']
         self.op = FakeOperator(self.project, self.snapshot)
         self.render_reimage_deployment = False
 
@@ -272,15 +274,15 @@ class OperatorTests(unittest.TestCase):
 
     def empty_reimage_target(self):
         self.op.live['workloads'] = []
-        self.op.live['hosts'][labctl.ALIASES[3]]['containers'] = ''
+        self.op.live['hosts'][FIXTURE_ALIASES[3]]['containers'] = ''
 
     def write_reimage_receipt(self, plan, changes=None):
         intent = plan['provider_reimage_intent']
         key_blob = b'\x00\x00\x00\x0bssh-ed25519\x00\x00\x00 ' + b'\x01' * 32
         key_text = base64.b64encode(key_blob).decode()
         fingerprint = 'SHA256:' + base64.b64encode(hashlib.sha256(key_blob).digest()).decode().rstrip('=')
-        trusted = self.op.trusted_hostkeys_dir / 'disposable-04'
-        trusted.write_text('ckc-disposable-04 ssh-ed25519 ' + key_text + '\n')
+        trusted = self.op.trusted_hostkeys_dir / 'lab-host-04'
+        trusted.write_text('lab-host-04 ssh-ed25519 ' + key_text + '\n')
         data = {
             'schema_version': 1,
             'provider_api_used': False,
@@ -349,7 +351,7 @@ class OperatorTests(unittest.TestCase):
 
     def test_host_replacement_fails_before_mutation(self):
         plan = self.plan_cleanup()
-        self.op.live['hosts'][labctl.ALIASES[3]]['machine_id'] = 'replacement'
+        self.op.live['hosts'][FIXTURE_ALIASES[3]]['machine_id'] = 'replacement'
         with self.assertRaisesRegex(ValueError, 'host identity'):
             self.execute(plan)
         self.assertEqual(self.op.removed, [])
@@ -359,7 +361,7 @@ class OperatorTests(unittest.TestCase):
         extra = copy.deepcopy(self.own)
         extra['id'] += '_extra'
         self.op.live['workloads'].append(extra)
-        self.op.live['hosts'][labctl.ALIASES[3]]['containers'] += '\n' + extra['id']
+        self.op.live['hosts'][FIXTURE_ALIASES[3]]['containers'] += '\n' + extra['id']
         with self.assertRaisesRegex(ValueError, 'cluster state changed'):
             self.execute(plan)
         self.assertEqual(self.op.removed, [])
@@ -420,7 +422,7 @@ class OperatorTests(unittest.TestCase):
 
     def test_empty_metadata_with_leaked_usage_blocks_execution(self):
         self.op.live['workloads'] = []
-        self.op.live['hosts'][labctl.ALIASES[3]]['containers'] = ''
+        self.op.live['hosts'][FIXTURE_ALIASES[3]]['containers'] = ''
         self.op.live['nodes'][2]['resource_usage'] = '{"cpumem":{"cpu":1}}'
         plan = self.plan_cleanup()
         self.assertFalse(plan['plan']['executable'])
@@ -430,7 +432,7 @@ class OperatorTests(unittest.TestCase):
         self.assertEqual(self.op.removed, [])
 
     def test_orphan_runtime_blocks_plan(self):
-        self.op.live['hosts'][labctl.ALIASES[3]]['containers'] += '\norphan_web_x'
+        self.op.live['hosts'][FIXTURE_ALIASES[3]]['containers'] += '\norphan_web_x'
         plan = self.plan_cleanup()
         self.assertFalse(plan['plan']['executable'])
         self.assertTrue(any('runtime and metadata' in x for x in plan['plan']['blockers']))
@@ -466,9 +468,9 @@ class OperatorTests(unittest.TestCase):
     def test_peer_worker_plan_audits_selected_target_but_cannot_execute(self):
         for index in (2, 3):
             node = f'worker-{index}'
-            alias = labctl.ALIASES[index - 1]
+            alias = FIXTURE_ALIASES[index - 1]
             plan = self.op.plan('rebuild-node', node=node)['plan']
-            self.assertEqual(plan['mutation_hosts'], [labctl.ALIASES[0], alias])
+            self.assertEqual(plan['mutation_hosts'], [FIXTURE_ALIASES[0], alias])
             self.assertFalse(plan['executable'])
             self.assertTrue(any('requires --health and --canary-run' in x for x in plan['blockers']))
             self.assertFalse(any(node + ' must have empty' in x for x in plan['blockers']))
@@ -479,7 +481,7 @@ class OperatorTests(unittest.TestCase):
 
     def test_canary_plan_guards_other_two_workers_and_keeps_target_empty(self):
         self.op.live['workloads'] = []
-        self.op.live['hosts'][labctl.ALIASES[3]]['containers'] = ''
+        self.op.live['hosts'][FIXTURE_ALIASES[3]]['containers'] = ''
         for excluded, expected in [('worker-2', ['worker-3', 'worker-4']),
                                    ('worker-3', ['worker-2', 'worker-4']),
                                    ('worker-4', ['worker-2', 'worker-3'])]:
@@ -487,8 +489,8 @@ class OperatorTests(unittest.TestCase):
             self.assertTrue(plan['executable'], plan['blockers'])
             self.assertEqual(plan['guard_exclude'], excluded)
             self.assertEqual(plan['guard_nodes'], expected)
-            self.assertEqual(plan['mutation_hosts'], [labctl.ALIASES[0]] +
-                             [labctl.ALIASES[int(node[-1]) - 1] for node in expected])
+            self.assertEqual(plan['mutation_hosts'], [FIXTURE_ALIASES[0]] +
+                             [FIXTURE_ALIASES[int(node[-1]) - 1] for node in expected])
             self.assertNotIn(excluded, plan['guard_nodes'])
         with self.assertRaisesRegex(ValueError, 'only to canary-start'):
             self.op.plan('smoke', guard_exclude='worker-2')
@@ -497,7 +499,7 @@ class OperatorTests(unittest.TestCase):
 
     def test_empty_peer_plan_can_execute_only_with_bound_health_and_guards(self):
         self.op.live['workloads'] = []
-        self.op.live['hosts'][labctl.ALIASES[3]]['containers'] = ''
+        self.op.live['hosts'][FIXTURE_ALIASES[3]]['containers'] = ''
         self.op.worker_scope = lambda alias: {'blockers': [], 'manifest_sha256': alias}
         self.op.worker_readiness = lambda health, canaries, snapshot, target='worker-4': {
             'blockers': [], 'health_file': health, 'canary_run': canaries, 'guard_target': target}
@@ -505,7 +507,7 @@ class OperatorTests(unittest.TestCase):
             plan = self.op.plan('rebuild-node', node=node, health_file='health', canary_run='owned-guards')['plan']
             self.assertTrue(plan['executable'], plan['blockers'])
             self.assertEqual(plan['worker_readiness']['guard_target'], node)
-            self.assertEqual(plan['mutation_hosts'], [labctl.ALIASES[0], labctl.ALIASES[int(node[-1]) - 1]])
+            self.assertEqual(plan['mutation_hosts'], [FIXTURE_ALIASES[0], FIXTURE_ALIASES[int(node[-1]) - 1]])
         self.op.worker_readiness = lambda health, canaries, snapshot, target='worker-4': {
             'blockers': ['guard pair includes selected worker'], 'health_file': health, 'canary_run': canaries}
         blocked = self.op.plan('rebuild-node', node='worker-2', health_file='health', canary_run='wrong-guards')['plan']
@@ -514,7 +516,7 @@ class OperatorTests(unittest.TestCase):
 
     def test_peer_execute_binds_component_to_plan_target(self):
         self.op.live['workloads'] = []
-        self.op.live['hosts'][labctl.ALIASES[3]]['containers'] = ''
+        self.op.live['hosts'][FIXTURE_ALIASES[3]]['containers'] = ''
         self.op.worker_scope = lambda alias: {'blockers': [], 'manifest_sha256': alias}
         self.op.worker_readiness = lambda health, canaries, snapshot, target='worker-4': {
             'blockers': [], 'health_file': health, 'canary_run': canaries, 'guard_target': target}
@@ -540,8 +542,8 @@ class OperatorTests(unittest.TestCase):
         plan = self.op.plan('rebuild-node', node='worker-4', rebuild_mode='provider-reimage',
                             reimage_intent=str(intent_path))['plan']
         intent = plan['provider_reimage_intent']
-        self.assertEqual(intent['target'], {'alias': labctl.ALIASES[3], 'node': 'worker-4',
-                                            'machine_id': 'id-' + labctl.ALIASES[3]})
+        self.assertEqual(intent['target'], {'alias': FIXTURE_ALIASES[3], 'node': 'worker-4',
+                                            'machine_id': 'id-' + FIXTURE_ALIASES[3]})
         self.assertEqual(intent['provider_resource_ref'], 'provider-instance-test-4')
         self.assertEqual(intent['os_image_ref'], 'debian-image-test-12')
         self.assertEqual(intent['erase_scope'], {'boot_volume_ref': 'boot-volume-test-4',
@@ -561,7 +563,7 @@ class OperatorTests(unittest.TestCase):
             workload_id = app + '_web_one'
             rows.append({'id': workload_id, 'nodename': node, 'podname': 'eru', 'image': 'nginx:pinned',
                          'labels': {'owner': labctl.OWNER, 'run': run_id}})
-            alias = labctl.ALIASES[index - 1]
+            alias = FIXTURE_ALIASES[index - 1]
             self.op.live['hosts'][alias]['containers'] = workload_id
             nodes[node] = {'app': app, 'worker_alias': alias, 'workload_ids': [workload_id]}
         self.op.live['workloads'].extend(rows)
@@ -622,7 +624,7 @@ class OperatorTests(unittest.TestCase):
                                 'mode': 0o600},
                            ], 'start_units': [], 'verify_units': []}
                 else:
-                    row = build_worker_payload(indexed, core_ip, lock)
+                    row = build_worker_payload(indexed, core_ip, lock, inventory=fixture_inventory.inventory())
                 rows.append(row)
             atomic_json(self.project / 'private/deployment-plan.json', rows)
         else:
@@ -708,7 +710,7 @@ class OperatorTests(unittest.TestCase):
         blob = bytes.fromhex('0000000b7373682d6564323535313900000020' + '07' * 32)
         approved = 'ssh-ed25519 ' + base64.b64encode(blob).decode()
         atomic_json(self.project / 'private/verified-host-public-keys.json',
-                    {labctl.ALIASES[0]: [approved]})
+                    {FIXTURE_ALIASES[0]: [approved]})
         self.configure_reimage_bootstrap_inputs()
         source = self.observed_reimage_source_plan(peer_canaries=peer_canaries,
                                                    replacement_ip=replacement_ip)
@@ -752,7 +754,7 @@ class OperatorTests(unittest.TestCase):
         target_events = [event for event in result['events'] if event['host'] == plan['target']['alias']]
         self.assertTrue(target_events)
         self.assertTrue(all(event.get('ssh_options') == [
-            'UserKnownHostsFile=' + str(self.op.trusted_hostkeys_dir / 'disposable-04'),
+            'UserKnownHostsFile=' + str(self.op.trusted_hostkeys_dir / 'lab-host-04'),
             'GlobalKnownHostsFile=/dev/null', 'UpdateHostKeys=no'] for event in target_events
             if event['argv'] != ['sudo', '-n', 'systemctl', 'stop', 'eru-agent.service']))
         self.assertFalse(any('node' in argv and any(op in argv for op in ('add', 'up'))
@@ -825,7 +827,7 @@ class OperatorTests(unittest.TestCase):
         self.assertEqual(self.op.core_access_files, before_files)
         self.assertEqual(self.op.core_nft_table, before_nft)
         self.assertEqual(self.op.core_access_apply_calls, 0)
-        trusted_lines = (self.op.trusted_hostkeys_dir / 'disposable-04').read_text().splitlines()
+        trusted_lines = (self.op.trusted_hostkeys_dir / 'lab-host-04').read_text().splitlines()
         trusted_key = ' '.join(trusted_lines[0].split()[1:3])
         self.assertNotIn(trusted_key, json.dumps(access_plan))
 
@@ -1107,7 +1109,7 @@ class OperatorTests(unittest.TestCase):
         self.assertEqual(result['smoke_evidence']['workloads_empty'], True)
         self.assertEqual(len(guard_instances), 1)
         self.assertEqual(set(guard_instances[0].summary['hosts']),
-                         {'ckc-disposable-02', 'ckc-disposable-03'})
+                         {'lab-host-02', 'lab-host-03'})
         self.assertEqual(self.op.cluster()['generation'], generation_before)
         self.assertEqual([row['nodename'] for row in self.op.live['workloads']],
                          ['worker-2', 'worker-3'])
@@ -1176,7 +1178,7 @@ class OperatorTests(unittest.TestCase):
         self.assertEqual(plan['current_stage'], 'worker-install')
         self.assertEqual(plan['next_action']['kind'], 'execute')
         self.assertIn('install-reimage-worker', plan['next_action']['command'])
-        self.assertEqual(plan['next_action']['host_scope'], ['ckc-disposable-01', 'ckc-disposable-04'])
+        self.assertEqual(plan['next_action']['host_scope'], ['lab-host-01', 'lab-host-04'])
         self.assertFalse(plan['executable'])
         self.assertEqual(len(self.op.remote_commands), before)
 
@@ -1198,7 +1200,7 @@ class OperatorTests(unittest.TestCase):
         self.assertEqual(plan['next_action']['kind'], 'reconcile')
         self.assertEqual(plan['next_action']['run_id'], bootstrap_plan['id'])
         self.assertEqual(plan['next_action']['host_scope'],
-                         ['ckc-disposable-01', bootstrap_plan['target']['alias']])
+                         ['lab-host-01', bootstrap_plan['target']['alias']])
 
         tampered = labctl.read(run_path)
         tampered['stage'] = 'different-stage'
@@ -1242,8 +1244,8 @@ class OperatorTests(unittest.TestCase):
         self.assertEqual(recovery_plan['current_stage'], 'worker-resume')
         self.assertEqual(recovery_plan['next_action']['kind'], 'reconcile')
         self.assertEqual(recovery_plan['next_action']['host_scope'],
-                         ['ckc-disposable-01', 'ckc-disposable-04',
-                          'ckc-disposable-02', 'ckc-disposable-03'])
+                         ['lab-host-01', 'lab-host-04',
+                          'lab-host-02', 'lab-host-03'])
         historical_result = {
             'id': resume_plan['id'], 'status': 'failed',
             # Existing node up belongs to the old resume attempt; reconcile never repeats it.
@@ -1270,8 +1272,8 @@ class OperatorTests(unittest.TestCase):
         self.assertEqual(action['kind'], 'plan')
         self.assertIn('plan-reimage-worker-generation', action['command'])
         self.assertEqual(action['host_scope'], [
-            'ckc-disposable-01', 'ckc-disposable-04',
-            'ckc-disposable-02', 'ckc-disposable-03'])
+            'lab-host-01', 'lab-host-04',
+            'lab-host-02', 'lab-host-03'])
         self.assertEqual(len(self.op.remote_commands), before)
 
     def smoked_worker_resume_plan(self, replacement_ip='100.64.0.44'):
@@ -1314,7 +1316,7 @@ class OperatorTests(unittest.TestCase):
         self.assertEqual(plan['cluster_after']['generation'], 2)
         self.assertEqual((self.project / 'private/deployment-plan.json').read_bytes(), deployment_before)
         serialized_plan = json.dumps(plan)
-        trusted_key = ' '.join((self.op.trusted_hostkeys_dir / 'disposable-04').read_text().split()[1:3])
+        trusted_key = ' '.join((self.op.trusted_hostkeys_dir / 'lab-host-04').read_text().split()[1:3])
         self.assertNotIn(trusted_key, serialized_plan)
         with patch('reimage_worker_install.inspect_replacement_host', return_value=observation):
             result = self.op.commit_reimage_worker_generation(plan['id'], generation['sha256'])
@@ -1366,7 +1368,7 @@ class OperatorTests(unittest.TestCase):
         self.assertEqual(updated[3]['ip'], '100.64.0.4')
         known = [line for line in updated[0]['files'][0]['content'].splitlines()
                  if line.startswith('100.64.0.4 ')]
-        trusted_key = ' '.join((self.op.trusted_hostkeys_dir / 'disposable-04').read_text().split()[1:3])
+        trusted_key = ' '.join((self.op.trusted_hostkeys_dir / 'lab-host-04').read_text().split()[1:3])
         self.assertEqual([' '.join(line.split()[1:3]) for line in known], [trusted_key])
 
     def test_worker_generation_commit_reconciles_exact_local_partial_without_remote_replay(self):
@@ -1463,8 +1465,8 @@ class OperatorTests(unittest.TestCase):
         up_events = [(host, argv) for host, argv in self.op.remote_commands
                      if argv[-3:-1] == ['node', 'up']]
         self.assertEqual(len(up_events), 1)
-        self.assertEqual(up_events[0][0], 'ckc-disposable-01')
-        self.assertEqual(set(guards[0].summary['hosts']), {'ckc-disposable-02', 'ckc-disposable-03'})
+        self.assertEqual(up_events[0][0], 'lab-host-01')
+        self.assertEqual(set(guards[0].summary['hosts']), {'lab-host-02', 'lab-host-03'})
         target = next(row for row in self.op.live['nodes'] if row['name'] == 'worker-4')
         self.assertTrue(target['available'])
         self.assertFalse(target['bypass'])
@@ -1571,8 +1573,8 @@ class OperatorTests(unittest.TestCase):
         self.assertFalse(self.op.agent_active)
         self.assertEqual([node['name'] for node in self.op.live['nodes']], ['worker-2', 'worker-3'])
         self.assertEqual(set(host for host, _ in self.op.remote_commands),
-                         {labctl.ALIASES[0], labctl.ALIASES[3]})
-        self.assertTrue(all(host in labctl.ALIASES for host, _ in self.op.remote_commands))
+                         {FIXTURE_ALIASES[0], FIXTURE_ALIASES[3]})
+        self.assertTrue(all(host in FIXTURE_ALIASES for host, _ in self.op.remote_commands))
         self.assertTrue(any('node' in argv and 'down' in argv for _, argv in self.op.remote_commands))
         self.assertTrue(any('systemctl' in argv and 'stop' in argv and 'eru-agent.service' in argv
                             for _, argv in self.op.remote_commands))
@@ -1623,7 +1625,7 @@ class OperatorTests(unittest.TestCase):
     def test_prepare_reimage_refuses_plan_or_live_state_drift_before_mutation(self):
         envelope = self.reimage_preparation_plan()
         changed = copy.deepcopy(envelope['plan'])
-        changed['snapshot']['hosts'][labctl.ALIASES[3]]['machine_id'] = 'different'
+        changed['snapshot']['hosts'][FIXTURE_ALIASES[3]]['machine_id'] = 'different'
         atomic_json(self.op.root / 'plans' / (changed['id'] + '.json'),
                     {'plan': changed, 'sha256': envelope['sha256']})
         with self.assertRaisesRegex(ValueError, 'hash mismatch'):
@@ -1645,7 +1647,7 @@ class OperatorTests(unittest.TestCase):
         for field, value, message in cases:
             with self.subTest(field=field):
                 self.empty_reimage_target()
-                self.op.live['hosts'][labctl.ALIASES[3]][field] = value
+                self.op.live['hosts'][FIXTURE_ALIASES[3]][field] = value
                 intent_path = self.write_reimage_intent()
                 plan = self.op.plan('rebuild-node', node='worker-4', rebuild_mode='provider-reimage',
                                     reimage_intent=str(intent_path))['plan']
@@ -1663,7 +1665,7 @@ class OperatorTests(unittest.TestCase):
     def test_manual_reimage_rejects_wrong_identity_api_and_unsafe_scope(self):
         invalid = [
             {'provider_api_used': True},
-            {'target': {'alias': labctl.ALIASES[3], 'node': 'worker-4', 'machine_id': 'other-id'}},
+            {'target': {'alias': FIXTURE_ALIASES[3], 'node': 'worker-4', 'machine_id': 'other-id'}},
             {'erase_scope': {'boot_volume_ref': '*', 'additional_volume_refs': []}},
             {'erase_scope': {'boot_volume_ref': 'boot-4', 'additional_volume_refs': ['disk-4', 'disk-4']}},
             {'reviewed_at': '2020-01-01T00:00:00Z'},
@@ -1684,7 +1686,7 @@ class OperatorTests(unittest.TestCase):
         (linked_project / 'private').symlink_to(self.project / 'private', target_is_directory=True)
         loaded = reimage_review.load_intent(
             linked_project, 'private/reimage-intents/worker-4.json', node='worker-4',
-            alias=labctl.ALIASES[3], machine_id='id-' + labctl.ALIASES[3])
+            alias=FIXTURE_ALIASES[3], machine_id='id-' + FIXTURE_ALIASES[3])
         self.assertEqual(loaded['path'], str(path))
         self.assertEqual(loaded['sha256'], hashlib.sha256((self.project / path).read_bytes()).hexdigest())
 
@@ -1702,11 +1704,11 @@ class OperatorTests(unittest.TestCase):
         recorded = labctl.read(recorded_path)
         self.assertEqual(recorded['receipt']['replacement']['machine_id'], 'replacement-machine-id-4')
         self.assertEqual(recorded['receipt']['host_key_verified_via'], 'provider-console')
-        self.assertEqual(recorded['trusted_host_key_file_check']['path'], 'disposable-04')
+        self.assertEqual(recorded['trusted_host_key_file_check']['path'], 'lab-host-04')
         self.assertEqual(recorded['trusted_host_key_file_check']['host_key_fingerprints'],
                          recorded['receipt']['host_key_fingerprints'])
         self.assertEqual(recorded['trusted_host_key_file_check']['file_sha256'],
-                         hashlib.sha256((self.op.trusted_hostkeys_dir / 'disposable-04').read_bytes()).hexdigest())
+                         hashlib.sha256((self.op.trusted_hostkeys_dir / 'lab-host-04').read_bytes()).hexdigest())
         self.assertFalse(plan['executable'])
         self.assertEqual(self.op.live, before)
         self.assertEqual(self.op.removed, [])
@@ -1717,11 +1719,11 @@ class OperatorTests(unittest.TestCase):
         envelope = self.prepared_reimage_plan()
         plan = envelope['plan']
         intent = plan['provider_reimage_intent']
-        host = plan['snapshot']['hosts'][labctl.ALIASES[3]]
+        host = plan['snapshot']['hosts'][FIXTURE_ALIASES[3]]
         invalid = [
             {'provider_resource_ref': 'another-instance'},
             {'erase_scope': {'boot_volume_ref': 'other-boot', 'additional_volume_refs': []}},
-            {'target': {'alias': labctl.ALIASES[3], 'node': 'worker-4', 'machine_id': 'other-id'}},
+            {'target': {'alias': FIXTURE_ALIASES[3], 'node': 'worker-4', 'machine_id': 'other-id'}},
             {'replacement': {'machine_id': host['machine_id'], 'boot_id': '11111111-1111-1111-1111-111111111111',
                              'os_release': 'Debian GNU/Linux 13'}},
             {'replacement': {'machine_id': 'replacement-machine-id-4', 'boot_id': host['boot_id'],
@@ -1766,7 +1768,7 @@ class OperatorTests(unittest.TestCase):
             result = self.op.verify_reimage_host(envelope['plan']['id'], envelope['sha256'])
         self.assertEqual(result['status'], 'replacement-host-readonly-verified')
         self.assertFalse(result['remote_mutation_performed'])
-        self.assertEqual(result['alias'], labctl.ALIASES[3])
+        self.assertEqual(result['alias'], FIXTURE_ALIASES[3])
         recorded_path = self.op.root / 'reimage-observations' / (envelope['plan']['id'] + '.json')
         recorded = labctl.read(recorded_path)
         self.assertEqual(recorded['observation']['machine_id'], observation['machine_id'])
@@ -1782,7 +1784,7 @@ class OperatorTests(unittest.TestCase):
         envelope = self.prepared_reimage_plan()
         receipt_path = self.write_reimage_receipt(envelope['plan'])
         self.op.record_reimage_receipt(envelope['plan']['id'], envelope['sha256'], str(receipt_path))
-        trust_file = self.op.trusted_hostkeys_dir / 'disposable-04'
+        trust_file = self.op.trusted_hostkeys_dir / 'lab-host-04'
         trust_file.write_text(trust_file.read_text() + '# changed after receipt recording\n')
         with patch('reimage_host.inspect_replacement_host') as inspect:
             with self.assertRaisesRegex(ValueError, 'trusted worker host-key file changed'):
@@ -1794,9 +1796,9 @@ class OperatorTests(unittest.TestCase):
         envelope = self.prepared_reimage_plan()
         plan = envelope['plan']
         receipt_path = self.write_reimage_receipt(plan)
-        trust_file = self.op.trusted_hostkeys_dir / 'disposable-04'
+        trust_file = self.op.trusted_hostkeys_dir / 'lab-host-04'
         changed_blob = b'\x00\x00\x00\x0bssh-ed25519\x00\x00\x00 ' + b'\x02' * 32
-        trust_file.write_text('ckc-disposable-04 ssh-ed25519 ' +
+        trust_file.write_text('lab-host-04 ssh-ed25519 ' +
                               base64.b64encode(changed_blob).decode() + '\n')
         with self.assertRaisesRegex(ValueError, 'fingerprints differ'):
             self.op.record_reimage_receipt(plan['id'], envelope['sha256'], str(receipt_path))
@@ -1804,7 +1806,7 @@ class OperatorTests(unittest.TestCase):
 
         trust_file.unlink()
         outside = self.project / 'trusted-key-outside'
-        outside.write_text('ckc-disposable-04 ssh-ed25519 ' +
+        outside.write_text('lab-host-04 ssh-ed25519 ' +
                            base64.b64encode(changed_blob).decode() + '\n')
         trust_file.symlink_to(outside)
         with self.assertRaisesRegex(ValueError, 'missing or unsafe'):
@@ -1887,18 +1889,18 @@ class OperatorTests(unittest.TestCase):
         outside = self.project / 'outside.json'
         outside.write_text((self.project / path).read_text())
         with self.assertRaisesRegex(ValueError, 'under private/reimage-intents'):
-            reimage_review.load_intent(self.project, outside, node='worker-4', alias=labctl.ALIASES[3],
-                                       machine_id='id-' + labctl.ALIASES[3])
+            reimage_review.load_intent(self.project, outside, node='worker-4', alias=FIXTURE_ALIASES[3],
+                                       machine_id='id-' + FIXTURE_ALIASES[3])
         linked = self.project / 'private/reimage-intents/linked.json'
         linked.symlink_to(self.project / path)
         with self.assertRaisesRegex(ValueError, 'under private/reimage-intents'):
-            reimage_review.load_intent(self.project, linked, node='worker-4', alias=labctl.ALIASES[3],
-                                       machine_id='id-' + labctl.ALIASES[3])
+            reimage_review.load_intent(self.project, linked, node='worker-4', alias=FIXTURE_ALIASES[3],
+                                       machine_id='id-' + FIXTURE_ALIASES[3])
         duplicate = self.project / 'private/reimage-intents/duplicate.json'
         duplicate.write_text('{"schema_version":1,"schema_version":1}')
         with self.assertRaisesRegex(ValueError, 'duplicate field'):
-            reimage_review.load_intent(self.project, duplicate, node='worker-4', alias=labctl.ALIASES[3],
-                                       machine_id='id-' + labctl.ALIASES[3])
+            reimage_review.load_intent(self.project, duplicate, node='worker-4', alias=FIXTURE_ALIASES[3],
+                                       machine_id='id-' + FIXTURE_ALIASES[3])
         with self.assertRaisesRegex(ValueError, 'only to provider-reimage'):
             self.op.plan('rebuild-node', node='worker-4', reimage_intent=str(path))
 

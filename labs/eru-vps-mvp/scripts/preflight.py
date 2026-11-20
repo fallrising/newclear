@@ -13,7 +13,7 @@ from pathlib import Path
 import subprocess
 import tempfile
 
-HOSTS = tuple(f"disposable-{i:02d}" for i in range(1, 5))
+from operator_inventory import load_inventory_file, evidence_name
 REMOTE = r'''
 import json, os, shutil, subprocess
 from pathlib import Path
@@ -87,18 +87,22 @@ def collect(host):
 def main():
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--output-dir", required=True, type=Path, help="Private evidence directory")
-    ap.add_argument("--host", action="append", choices=HOSTS, help="Default: all four, sequentially")
+    ap.add_argument("--inventory", required=True, type=Path, help="Private operator inventory JSON")
+    ap.add_argument("--host", action="append", help="Configured alias subset; default: all four, sequentially")
     args = ap.parse_args()
+    hosts = tuple(row['alias'] for row in load_inventory_file(args.inventory))
+    if args.host and (len(set(args.host)) != len(args.host) or any(host not in hosts for host in args.host)):
+        ap.error('--host must select distinct configured aliases')
     os.umask(0o077)
     args.output_dir.mkdir(parents=True, exist_ok=True, mode=0o700)
     stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S.%fZ")
     failed = False
-    for host in args.host or HOSTS:
+    for host in args.host or hosts:
         print(f"[{host}] SSH python3 -: runtime/network facts, sudo -n -l, hostctl access-status, hostctl baseline-preflight", flush=True)
         result = collect(host)
         result["collected_at"] = datetime.now(timezone.utc).isoformat()
         # Exclusive creation avoids overwriting an earlier evidence record.
-        with tempfile.NamedTemporaryFile(mode="w", prefix=f"{stamp}-{host}-", suffix=".json",
+        with tempfile.NamedTemporaryFile(mode="w", prefix=f"{stamp}-{evidence_name(host)}-", suffix=".json",
                                          dir=args.output_dir, delete=False) as f:
             json.dump(result, f, indent=2, ensure_ascii=False)
             f.write("\n")

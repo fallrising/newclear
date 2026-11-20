@@ -13,13 +13,13 @@ from core_patch import PatchOperator
 from labctl import PROJECT, consistency_issues, identifier
 from labops import ClusterLock, atomic_json
 from soak_remote import config_hash
+from operator_inventory import aliases, load_inventory
 from soak_runner import MAX_BYTES, iso
 
-ALIASES = ('ckc-disposable-01', 'ckc-disposable-02', 'ckc-disposable-03')
 
 
 def remote(op, alias, request):
-    if alias not in ALIASES:
+    if alias not in aliases(op.inventory)[:3]:
         raise ValueError('observer host outside allowed scope')
     source = (op.project / 'scripts/soak_remote.py').read_text()
     source += '\nprint(json.dumps(dispatch(' + repr(request) + ')))\n'
@@ -83,7 +83,7 @@ def start(op, canary_run, duration, interval, lead, acceptance=None):
         'remote_directory': '/var/lib/eru-mvp/soak/' + run_id,
         'core_runtime': runtime, 'snapshot': snapshot, 'hosts': {}, 'acceptance': acceptance,
         'source_sha256': {name: hashlib.sha256(value.encode()).hexdigest() for name, value in files.items()}}
-    for alias in ALIASES:
+    for alias in aliases(op.inventory)[:3]:
         target = next((t for t in targets if t['alias'] == alias), None)
         config = {'run_id': run_id, 'role': 'http' if target else 'control', 'start_epoch': begin,
                   'deadline_epoch': begin + duration, 'interval': interval, 'max_bytes': MAX_BYTES}
@@ -156,7 +156,7 @@ def main():
         from soak_evidence import collect, collection_path
         from soak_report import report
         directory = collect(PatchOperator(), args.run) if args.action == 'collect' else collection_path(PROJECT, args.run, args.collection)
-        result = report(directory)
+        result = report(directory, inventory=load_inventory(PROJECT))
         print('Private collection:', directory)
     elif args.action == 'stop':
         with ClusterLock(PROJECT):

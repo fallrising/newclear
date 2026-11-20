@@ -1,3 +1,4 @@
+from operator_inventory import key_aliases
 """Fixed pinned SSH file staging; authorization remains with the coordinator."""
 import base64
 import copy
@@ -6,7 +7,7 @@ from pathlib import Path
 
 from fresh_execution import sha256, timestamp
 from fresh_network_staging import HOST_FIELDS, observation
-from fresh_observation import ALIASES, decode, public_key
+from fresh_observation import decode, public_key
 from fresh_observation_ops import SSHReader
 
 WIRE_LIMIT = 256 * 1024
@@ -58,16 +59,16 @@ class SSHNetworkStagingAdapter:
     """One transport call per operation; no retry, trust mutation or adoption."""
     def __init__(self, host_keys, *, transport=None):
         try:
-            if type(host_keys) is not dict or set(host_keys) != set(ALIASES):
+            if type(host_keys) is not dict or set(host_keys) != set(key_aliases(host_keys)):
                 raise ValueError(ERROR)
             keys = copy.deepcopy(host_keys)
-            digests = [public_key(keys[alias]) for alias in ALIASES]
+            digests = [public_key(keys[alias]) for alias in key_aliases(host_keys)]
             if len(set(digests)) != 4:
                 raise ValueError(ERROR)
             if transport is not None and not callable(transport):
                 raise ValueError(ERROR)
             self._keys = keys
-            self._transport = SSHReader() if transport is None else transport
+            self._transport = SSHReader(aliases=host_keys) if transport is None else transport
         except Exception:
             raise ValueError(ERROR) from None
 

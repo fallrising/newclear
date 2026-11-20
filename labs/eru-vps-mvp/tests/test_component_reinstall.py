@@ -1,3 +1,4 @@
+import fixture_inventory
 """Failure boundaries for the scoped worker state machine."""
 import copy
 import json
@@ -8,7 +9,8 @@ import tempfile
 import unittest
 from unittest.mock import Mock
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'scripts'))
-from component_reinstall import ComponentReinstall, empty_target, protected_membership, ALIAS, TARGET
+from component_reinstall import ComponentReinstall, empty_target, protected_membership, TARGET
+from fixture_inventory import WORKER_ALIAS as ALIAS
 
 
 def snapshot(bypass=False):
@@ -31,7 +33,7 @@ class FakeGuards:
 class ComponentTests(unittest.TestCase):
     def setup_executor(self):
         temp = tempfile.TemporaryDirectory(); self.addCleanup(temp.cleanup)
-        op = Mock(); op.root = Path(temp.name); op.core = {'alias': 'ckc-disposable-01', 'ip': 'example.invalid'}
+        op = Mock(); op.inventory = fixture_inventory.inventory(); op.root = Path(temp.name); op.core = {'alias': 'lab-host-01', 'ip': 'example.invalid'}
         op.journal = {}; stages = []; op.stage.side_effect = stages.append
         op.worker_scope.return_value = {'blockers': [], 'manifest_sha256': 'manifest'}
         op.snapshot.return_value = snapshot(True)
@@ -72,7 +74,7 @@ class ComponentTests(unittest.TestCase):
 
     def test_selected_peer_executor_targets_only_its_worker_and_revision(self):
         op, _, plan, stages = self.setup_executor()
-        target, alias = 'worker-2', 'ckc-disposable-02'
+        target, alias = 'worker-2', 'lab-host-02'
         before = snapshot();before['nodes'][0]['name'] = target
         before['hosts'][alias] = before['hosts'].pop(ALIAS)
         fenced = copy.deepcopy(before);fenced['nodes'][0]['bypass'] = True
@@ -110,15 +112,15 @@ class ComponentTests(unittest.TestCase):
     def test_empty_target_checks_selected_worker_runtime_and_usage(self):
         selected = snapshot()
         selected['nodes'].append({**selected['nodes'][0], 'name': 'worker-2'})
-        selected['hosts']['ckc-disposable-02'] = {**selected['hosts'][ALIAS], 'machine_id': 'machine-2'}
-        self.assertEqual(empty_target(selected, 'worker-2', 'ckc-disposable-02')['name'], 'worker-2')
-        selected['hosts']['ckc-disposable-02']['tasks'] = 'TASK PID STATUS\nforeign 1 RUNNING\n'
+        selected['hosts']['lab-host-02'] = {**selected['hosts'][ALIAS], 'machine_id': 'machine-2'}
+        self.assertEqual(empty_target(selected, 'worker-2', 'lab-host-02')['name'], 'worker-2')
+        selected['hosts']['lab-host-02']['tasks'] = 'TASK PID STATUS\nforeign 1 RUNNING\n'
         with self.assertRaisesRegex(ValueError, 'worker-2 must have empty'):
-            empty_target(selected, 'worker-2', 'ckc-disposable-02')
-        selected['hosts']['ckc-disposable-02']['tasks'] = 'TASK PID STATUS\n'
+            empty_target(selected, 'worker-2', 'lab-host-02')
+        selected['hosts']['lab-host-02']['tasks'] = 'TASK PID STATUS\n'
         selected['nodes'][1]['resource_usage'] = '{"cpu":1}'
         with self.assertRaisesRegex(ValueError, 'worker-2 must have empty'):
-            empty_target(selected, 'worker-2', 'ckc-disposable-02')
+            empty_target(selected, 'worker-2', 'lab-host-02')
 
     def test_review_only_plan_cannot_use_prototype(self):
         op, executor, plan, stages = self.setup_executor();plan['executable'] = False
@@ -155,23 +157,23 @@ class ComponentTests(unittest.TestCase):
             before['workloads'].append({'id': name + '-fixture', 'nodename': name, 'labels': {'owner': 'fixture'}})
         after = copy.deepcopy(before)
         after['nodes'].reverse();after['workloads'].reverse()
-        self.assertEqual(protected_membership(before), protected_membership(after))
+        self.assertEqual(protected_membership(before, alias=fixture_inventory.WORKER_ALIAS), protected_membership(after, alias=fixture_inventory.WORKER_ALIAS))
         after['nodes'][0]['available'] = False
-        self.assertNotEqual(protected_membership(before), protected_membership(after))
+        self.assertNotEqual(protected_membership(before, alias=fixture_inventory.WORKER_ALIAS), protected_membership(after, alias=fixture_inventory.WORKER_ALIAS))
 
     def test_selected_target_is_excluded_but_other_workers_remain_protected(self):
         before = snapshot()
         before['nodes'][0]['name'] = 'worker-2'
-        before['hosts']['ckc-disposable-02'] = before['hosts'].pop(ALIAS)
+        before['hosts']['lab-host-02'] = before['hosts'].pop(ALIAS)
         before['nodes'].append({**before['nodes'][0], 'name': 'worker-4'})
-        before['hosts'][ALIAS] = {**before['hosts']['ckc-disposable-02'], 'machine_id': 'peer'}
+        before['hosts'][ALIAS] = {**before['hosts']['lab-host-02'], 'machine_id': 'peer'}
         after = copy.deepcopy(before)
         after['nodes'][0]['available'] = False
-        self.assertEqual(protected_membership(before, 'worker-2', 'ckc-disposable-02'),
-                         protected_membership(after, 'worker-2', 'ckc-disposable-02'))
+        self.assertEqual(protected_membership(before, 'worker-2', 'lab-host-02'),
+                         protected_membership(after, 'worker-2', 'lab-host-02'))
         after['hosts'][ALIAS]['machine_id'] = 'changed-peer'
-        self.assertNotEqual(protected_membership(before, 'worker-2', 'ckc-disposable-02'),
-                            protected_membership(after, 'worker-2', 'ckc-disposable-02'))
+        self.assertNotEqual(protected_membership(before, 'worker-2', 'lab-host-02'),
+                            protected_membership(after, 'worker-2', 'lab-host-02'))
 
     def test_reviewed_fault_boundary_leaves_quarantine_fenced_without_install(self):
         op, executor, plan, stages = self.setup_executor()

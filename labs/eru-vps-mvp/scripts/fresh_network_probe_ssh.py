@@ -307,7 +307,7 @@ def collect(render, host_keys, *, setup=None, transport=None, runner=None, now=N
         for host in render['hosts']:
             if public_key(host_keys[host['alias']]) != host['host_key_sha256']:
                 raise ValueError(ERROR)
-        transport = SSHReader() if transport is None else transport
+        transport = SSHReader(aliases=host_keys) if transport is None else transport
         runner = capture if runner is None else runner
         started = now or datetime.now(timezone.utc)
         hosts, auth, private = [], [], []

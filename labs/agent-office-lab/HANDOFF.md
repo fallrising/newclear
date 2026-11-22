@@ -1,5 +1,7 @@
 # 開發交接
 
+T-0033 真實驗收通過。操作台一次授權啟動 Cursor／Composer 2.5，完成兩次讀取及一次寫入。原生 stop、同 session、產物及實際 Blob 下載 SHA-256 均核對成功；刷新與操作台重啟保留結果且未重跑。30.17 秒，43424 input／476 output tokens，受追蹤的 98 個程序全部退出。剩餘主線包含跨工位權限、取消、恢復與完整安全驗收。 [驗收證據](docs/evidence/cursor-console-live-2026-11-23.json)。
+
 T-0032：已修正 Pi runner 接受任意格式正確授權參照的歸屬問題；首次與retry一律驗證dispatcher同PID／繼承鎖／來源／provider／收據並領取一次，retry還核對parent。245Python／74Node與Pi首次五組／retry四組／Cursor五組Chrome通過，失敗歷史與fixture保留；零產品模型請求。原生預檢及provider是明示替身，完整MVP仍pending。單次GLM開發審查使用owner指定1M上限，HTTP400 invalid_request未指明參數，未取得審查且未重試；主導獨立重現與審查。詳[證據](docs/evidence/pi-grant-handoff-2026-11-23.json)，交付狀態以任務板為準。
 
 T-0031 本機結果：主導重現已消耗 Cursor grant id 可被新程序再次帶入的授權指紋歸屬問題，加入 dispatcher 同 PID／繼承鎖／私有消耗收據與排他 runner 領取檢查；失敗不退還。單次 Pi／GLM 5.3 開發審查 HTTP401 Invalid credential，未取得審查，沒有重試／fallback；不是產品模型驗收。詳[證據](docs/evidence/cursor-grant-handoff-2026-11-23.json)。完整 MVP／Cursor 真實新入口仍 pending。

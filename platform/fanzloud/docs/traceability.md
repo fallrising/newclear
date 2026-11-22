@@ -170,3 +170,13 @@ No Rust signature/error/rustdoc change. Original FN07/M3 and other product gaps 
 | O04 required review/delivery | Same | Native fresh-context review, root gates and [BOARD](tasks/BOARD.md) | Required source review accepted; delivery pending; optional Claude auth_failed |
 
 No Rust signature/error/rustdoc change; no full FN07/M3 or adjacent-product acceptance.
+
+## M3-U owner preflight refresh — 2026-11-22
+
+Existing FN04/FN07 and CU-M3-U01–04 remain the product contract.
+[PRE01–03](acceptance/M3-owner-operation.md#m3-u-離線重新核對--2026-11-22) map to
+[sanitized current observations and document acceptance](acceptance/M3-owner-preflight-20261122.acceptance.md).
+This is offline preparation, not a new runtime contract or FN07 pass. No production,
+Rust signature, rustdoc, schema, credential or launcher change. Missing original DB
+container, unidentified original volume, expired TLS, embedded-UI source drift and
+unimplemented full-operation gate remain explicit; original M3-U stays open.

@@ -355,3 +355,18 @@ operation were not verified. Original product AC/MVP/usable tags remain unchange
 No paid product calls, migration, deployment, credential change or next milestone.
 Optional Claude advice was not executed: automatic approval review rejected its
 possible cost before launch; no output or success from Claude is claimed.
+
+## M3-U offline continuation — 2026-11-22
+
+Owner direct continuation; [scope and AC](../acceptance/M3-owner-operation.md#m3-u-離線重新核對--2026-11-22).
+This is preparation within existing M3-U; the original owner-operation row remains open.
+
+| ID | Task | AC | Status | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| M3-PRE01 | Original saved installation and current prerequisites | PRE01 | in_progress | 2026-11-22T15:44:51Z | | 2026-11-22T15:50:42Z |
+| M3-PRE02 | Source drift and concrete owner-operation recovery order | PRE02 | in_progress | 2026-11-22T15:44:51Z | | 2026-11-22T15:50:42Z |
+| M3-PRE03 | Independent document review and normal delivery | PRE03 | in_progress | 2026-11-22T15:44:51Z | | 2026-11-22T15:50:42Z |
+
+Offline document source review ACCEPT;55project/9llms indexes,156relative links, six template
+hashes, scope/privacy/whitespace/alignment passed. Final CI/merge/readback pending; live
+readiness remains not_ready and original M3-U/FN07 stays open. No services or credentials changed.

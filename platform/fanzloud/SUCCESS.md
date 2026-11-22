@@ -651,3 +651,16 @@ O01 現行讀取，O02 錯誤／404／timer，O03 RED→GREEN 與 Chromium fixtu
 O04 Claude 設計意見、獨立實作審查與完整交付。狀態：57項 Web 測試與 Chromium 合成情境通過，獨立審查接受，CI／交付待辦。
 [證據](docs/acceptance/T049.acceptance.md)；Claude 呼叫因 OAuth 到期失敗，未取得設計意見。
 原 FN07／完整 M3、Cloud/P1、AP M4、Office MVP 缺口與 usable_tag none 保持。
+
+## M3-U 離線續接 — 2026-11-22
+
+Owner 同意先完成[當下前置核對與操作方案](docs/acceptance/M3-owner-operation.md#m3-u-離線重新核對--2026-11-22)。
+PRE01 原保存資料／TLS／停機狀態；PRE02 來源差異及只讀／完整操作邊界；PRE03 文件
+審查、索引、CI與正常交付。先核對再記結果；本輪不啟動服務或產品 CLI／VM、不改
+登入／憑證、不消耗窗口。原 M3-U／FN07、完整 M3 與 usable_tag none 保持未完成。
+
+本輪離線結果：[receipt與限制](docs/acceptance/M3-owner-preflight-20261122.acceptance.md)。
+保存226/226、runtime118/118、binary與gate六檔相符；SQLite4confirmed/0unknown。
+實際開窗not_ready：原DB容器在目前本機Docker context缺失、原volume未定位；維護dump
+存在且符合manifest，但未證明等價最後U07；TLS過期、舊binary未含近期UI修正、完整
+提交／交接gate仍未實作。先定位原AP資料，再定來源與完整gate；不直接重開舊窗口。

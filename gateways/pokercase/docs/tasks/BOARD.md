@@ -811,4 +811,6 @@ CR01–04 are merged and verified. CR05 remains in_progress at this product-merg
 
 | ID | Task | AC | Status | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| P09 | 相容性矩陣、原 AC、比較端及停止條件 | P09-1～4 | in_progress | 2026-11-22T17:01:55Z | — | 2026-11-22T17:01:55Z |
+| P09 | 相容性矩陣、原 AC、比較端及停止條件 | P09-1～4 | done | 2026-11-22T17:01:55Z | 2026-11-22T17:10:31Z | 2026-11-22T17:10:31Z |
+
+[P09 文件與驗收回執](https://github.com/fallrising/newclear/pull/1086)。採用決定為保留 Thinrouter。

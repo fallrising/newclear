@@ -6,9 +6,17 @@ const labels={completed:'完成且產物已核對',failed:'失敗',stopped:'已�
 const modes={revision:'單檔修改提案',text:'本地文字任務',task:'合成檔案任務',terminal:'合成任務＋保留原生終端',http_401:'本機 401 故障檢查',http_429:'本機 429 故障檢查',crash:'本機 CLI 崩潰檢查',cancel:'本機原生取消檢查',question:'原生問答確認檢查',host_restart:'Office 重啟檢查',resume:'原生 session 重新連接檢查'};
 const errors={remote_grant_retry_changed:'失敗紀錄或重試歷史已變更，舊授權不可再用。請核對最新紀錄後重新授權。',remote_grant_retry_unavailable:'此失敗紀錄已不符合重試條件。請核對最新紀錄及清理狀態。',remote_grant_task_mismatch:'這份授權不適用於所選任務，請核對授權範圍。',project_text_unavailable:'來源目錄無法讀取，或超出文字檔限制。請查看登記目錄及操作說明。',unknown_project:'請先選擇已登記的工作目錄。',plan_changed:'來源檔案已變更，請重新查看計畫。',cleanup_unconfirmed:'上次執行的清理尚未確認。請先核對所屬程序，再依 CLI 流程確認；重啟頁面不會解除阻擋。',execution_state_unavailable:'無法確認共用執行狀態，暫停派工。請檢查本機狀態檔與權限。',forbidden:'連線未授權。請使用啟動時顯示的登入網址。',execution_busy:'已有工作執行中。請等候清理完成。',plan_expired_or_used:'計畫已使用或逾時，請重新查看計畫。',remote_execution_requires_cli:'遠端付費執行需使用已授權的 CLI 流程。',remote_grants_not_enabled:'此操作台未以 --accept-remote-grant pi 啟動；請回到 CLI 建立並接受一次性授權。',remote_grant_unavailable:'找不到可用的一次性遠端授權；請由 operator 重新以 CLI 建立。',remote_grant_used:'這個一次性授權已被使用或撤銷；請重新查看計畫並由 CLI 建立新授權。',remote_grant_expired:'一次性授權已逾時；請由 operator 重新以 CLI 建立。',remote_grant_source_changed:'執行程式或限制已變更；舊授權不可再用，請重新建立。',remote_grant_provider_not_supported:'此工位不支援一次性遠端授權。',remote_grant_invalid:'一次性授權格式或安全檢查未通過；請重新建立。',retry_limit_reached:'此任務已用完兩次重試。',retry_requires_latest_attempt:'請選擇這個任務最新的失敗紀錄。',retry_source_changed:'執行程式已更新，此舊紀錄不能直接重試。',retry_history_unavailable_or_invalid:'這筆紀錄沒有可驗證的重試歷史。',retry_requires_clean_failed_run:'只有已失敗且清理完成的任務可以重試。'};
 const fragment=new URLSearchParams(location.hash.slice(1));
-if(fragment.get('token')){sessionStorage.setItem('office-token',fragment.get('token'));history.replaceState(null,'',location.pathname);}
-let token=sessionStorage.getItem('office-token')||'',provider='opencode',currentPlan=null,state=null,fetching=false,planGeneration=0,jobsSignature='',runsSignature='';
+let resultsOnly=fragment.get('view')==='results',viewStorageFailed=false,token='';
+try{
+ resultsOnly=resultsOnly||sessionStorage.getItem('office-view')==='results';
+ if(resultsOnly)sessionStorage.setItem('office-view','results');
+ // Original source-local login mechanism; no token is accepted from Fanzloud.
+ if(fragment.get('token')){sessionStorage.setItem('office-token',fragment.get('token'));history.replaceState(null,'',location.pathname);}
+ token=sessionStorage.getItem('office-token')||'';
+}catch{resultsOnly=true;viewStorageFailed=true;}
+let provider='opencode',currentPlan=null,state=null,fetching=false,planGeneration=0,jobsSignature='',runsSignature='';
 async function api(path,data){
+ if(resultsOnly&&data!==undefined)throw new Error('唯讀成果介面不提供此操作。');
  const response=await fetch(path,{method:data===undefined?'GET':'POST',headers:{Authorization:`Bearer ${token}`,...(data===undefined?{}:{'Content-Type':'application/json'})},...(data===undefined?{}:{body:JSON.stringify(data)}),cache:'no-store'});
  const value=await response.json();if(!response.ok)throw new Error(errors[value.error]||'目前無法執行此操作。請檢查環境或紀錄後再試。');return value;
 }
@@ -60,7 +68,7 @@ async function makePlan(selection){
   $('execute').textContent=p.remote?'使用一次性授權啟動遠端任務':'確認並啟動';$('execute').disabled=!currentPlan.executable||executionBlocked();$('plan-card').hidden=false;
  }catch(e){message(e.message);}
 }
-const resultLabel=run=>run.task_kind==='local_revision'&&run.status==='completed'?(run.artifact.changed?'修改提案待審閱':'提案無內容變更'):run.task_kind==='local_text'&&run.status==='completed'?'已產生文件，待確認':labels[run.status];
+const resultLabel=run=>run.task_kind==='local_revision'&&run.status==='completed'?(run.artifact.changed?'修改提案待審閱':'提案無內容變更'):run.task_kind==='local_text'&&run.status==='completed'?'已產生文件，待確認':(labels[run.status]||run.status||'unknown');
 async function sha256Hex(text){const bytes=new TextEncoder().encode(text),digest=await crypto.subtle.digest('SHA-256',bytes);return Array.from(new Uint8Array(digest),b=>b.toString(16).padStart(2,'0')).join('');}
 function downloadText(name,text){const url=URL.createObjectURL(new Blob([text],{type:'text/plain;charset=utf-8'})),a=el('a','');a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}
 function addVerifiedDownload(container,name,text,expected){const button=el('button',`下載 ${name}`),note=el('p','正在核對下載內容 SHA-256…');button.className='download';button.disabled=true;note.className='download-status';container.append(button,note);if(!expected){note.textContent='下載內容 SHA-256：未記錄，無法下載。';return;}sha256Hex(text).then(actual=>{if(actual===expected){note.textContent=`下載內容 SHA-256：${expected}`;button.disabled=false;button.onclick=()=>downloadText(name,text);}else{note.textContent=`下載內容 SHA-256：${expected}；integrity mismatch`;button.textContent=`下載 ${name}（integrity mismatch）`;}}).catch(()=>{note.textContent='下載內容 SHA-256：integrity mismatch';});}
@@ -84,7 +92,7 @@ d.append(el('h3',run.artifact.name),el('pre',run.artifact.text),el('p',`原始�
 function renderRuns(){if(!state)return;const signature=JSON.stringify([state.results.runs,$('filter').value]);if(signature===runsSignature)return;runsSignature=signature;const rows=state.results.runs.filter(r=>$('filter').value==='all'||r.provider===$('filter').value);$('count').textContent=`${rows.length} 筆紀錄 · 更新頁面不會重跑任務`;$('runs').replaceChildren();
  for(const run of rows){const tr=el('tr',''),agent=el('td',titles[run.provider]||run.provider);if(run.ref)tr.dataset.ref=run.ref;if(run.root!==undefined)tr.dataset.root=String(run.root);agent.append(el('small',run.model||'未記錄模型'));const id=el('td',run.id);if(run.retry)id.append(el('small',run.retry.attempt?`明確重試 ${run.retry.attempt} / 2`:'首次執行'));
  const status=el('td',resultLabel(run));if(run.status==='completed')status.className='success';const actions=el('td',''),detail=el('button','查看結果');detail.className='quiet';detail.onclick=()=>showDetail(run);actions.append(detail);
- if(run.provider==='pi'&&run.status==='failed'&&run.retry&&run.root===1&&run.ref){const retry=el('button',run.remote||run.authorization?'重試計畫（需新授權）':'重試計畫');retry.className='quiet';retry.onclick=()=>{selectProvider('pi');message(run.remote||run.authorization?'遠端重試需由 CLI 建立綁定此紀錄的一次性授權，查看計畫後再明確確認執行。':'');makePlan({retry_ref:run.ref});$('plan-card').scrollIntoView({block:'nearest'});};actions.append(retry);}
+ if(!resultsOnly&&run.provider==='pi'&&run.status==='failed'&&run.retry&&run.root===1&&run.ref){const retry=el('button',run.remote||run.authorization?'重試計畫（需新授權）':'重試計畫');retry.className='quiet';retry.onclick=()=>{selectProvider('pi');message(run.remote||run.authorization?'遠端重試需由 CLI 建立綁定此紀錄的一次性授權，查看計畫後再明確確認執行。':'');makePlan({retry_ref:run.ref});$('plan-card').scrollIntoView({block:'nearest'});};actions.append(retry);}
  tr.append(agent,id,status,actions);$('runs').append(tr);}
 }
 function renderJobs(){const signature=JSON.stringify(state.jobs);if(signature===jobsSignature)return;jobsSignature=signature;const jobs=$('jobs');jobs.replaceChildren();if(!state.jobs.length){const empty=el('p','目前沒有從此操作台啟動的工作。');empty.className='empty';jobs.append(empty);}
@@ -96,6 +104,39 @@ function renderJobs(){const signature=JSON.stringify(state.jobs);if(signature===
  if(job.result&&job.phase==='finished'){const button=el('button','查看本次結果');button.className='quiet';button.onclick=()=>showDetail(job.result);box.append(button);}jobs.append(box);}
 }
 async function refresh(){if(fetching)return;fetching=true;try{state=await api('/api/state');const projects=state.projects||[],signature=JSON.stringify(projects);if($('project').dataset.signature!==signature){const selected=$('project').value;$('project').replaceChildren();for(const p of projects){const option=el('option',p.name);option.value=p.id;$('project').append(option);}if(projects.some(p=>p.id===selected))$('project').value=selected;$('project').dataset.signature=signature;refreshTargets();} $('project-help').textContent=projects.length?'只讀取已登記目錄的支援文字檔。':'尚未登記來源目錄。啟動操作台時使用 --project 指定文字檔目錄。';showExecution();showCheck();if(provider==='pi'&&$('mode').value==='task')updateNote(true);renderJobs();renderRuns();if(currentPlan)$('execute').disabled=!currentPlan.executable||executionBlocked();}catch(e){state=null;showExecution();$('execute').disabled=true;message(e.message);}finally{fetching=false;}}
+function clearResultView(){
+ state=null;runsSignature='';$('runs').replaceChildren();$('count').textContent='尚無可讀取的結果。';
+ $('detail').replaceChildren();$('detail').hidden=true;
+}
+async function refreshResults(){
+ if(fetching)return;
+ clearResultView();
+ if(viewStorageFailed){message('此分頁無法使用登入所需的儲存空間；請恢復分頁儲存後，從原 Office 入口重新開啟。');return;}
+ if(!token){message('尚未登入。請在此 Office 分頁開啟原終端顯示的私人登入網址，再查看成果。');return;}
+ fetching=true;$('readonly-refresh').disabled=true;message('正在讀取既有成果…');
+ try{
+  const value=await api('/api/state');
+  if(!Array.isArray(value?.results?.runs))throw new Error('invalid result state');
+  state=value;renderRuns();message('已讀取 Office 既有成果；來源狀態與產物核對結果如下。');
+ }catch{clearResultView();message('無法讀取成果：連線不可用或登入已失效。請核對原 Office 入口，必要時在此分頁重新開啟原私人登入網址；不會重跑工作。');}
+ finally{fetching=false;$('readonly-refresh').disabled=false;}
+}
+if(resultsOnly){
+ // Pasting the original launch URL in this same tab may be a hash-only navigation.
+ addEventListener('hashchange',()=>{if(new URLSearchParams(location.hash.slice(1)).get('token'))location.reload();});
+ $('office-operations').hidden=true;$('readonly-info').hidden=false;
+ $('office-title').textContent='Office 既有成果';document.title='Agent Office · 唯讀成果';
+ $('office-intro').textContent='從原來源查看結果；不啟動或修改工作。';
+ $('office-footer').textContent='原生終端、session 與本地操作保留於完整 Office。此介面不授予新權限，也不改變工作狀態。';
+ $('filter').onchange=renderRuns;$('readonly-refresh').onclick=refreshResults;
+ $('return-console').disabled=viewStorageFailed;
+ $('return-console').onclick=()=>{
+  try{sessionStorage.removeItem('office-view');history.replaceState(null,'',location.pathname);location.reload();}
+  catch{message('無法變更此分頁的模式；請回原 Office 入口。');}
+ };
+ refreshResults();
+}else{
+ $('office-operations').hidden=false;
 for(const [id,title]of Object.entries(titles)){const b=el('button','');b.className='provider';b.dataset.provider=id;b.append(el('strong',title),el('small',id==='opencode'?'本地模型':id==='pi'?'遠端模型 / 本機故障驗收':'遠端模型'));b.onclick=()=>selectProvider(id);$('providers').append(b);}
 $('mode').onchange=updateNote;$('filter').onchange=renderRuns;$('refresh').onclick=refresh;
 $('project').onchange=refreshTargets;$('target').onchange=invalidate;$('prompt').oninput=invalidate;
@@ -103,3 +144,5 @@ $('plan').onclick=()=>makePlan({provider,mode:$('mode').value,...(['text','revis
 $('detect').onclick=async()=>{const target=provider;$('detect').disabled=true;try{message('正在檢查 CLI 與執行環境…');await api('/api/detect',{provider:target});message('環境檢查完成。');await refresh();}catch(e){message(e.message);}finally{$('detect').disabled=false;}};
 $('execute').onclick=async()=>{if(!currentPlan)return;const chosen=currentPlan;if(chosen.plan.remote&&!confirm('使用伺服器端既有的一次性授權啟動遠端任務？停止不保證已送出的請求不計費；此確認只是防誤觸，不是授權來源。'))return;invalidate();$('execute').disabled=true;try{await api('/api/execute',{plan_id:chosen.plan_id});message('已啟動。重新整理或關閉分頁都不會重送任務。');await refresh();}catch(e){message(e.message);}};
 selectProvider('opencode');refresh();setInterval(refresh,2000);
+
+}

@@ -227,3 +227,5 @@ h1 {
 .result-entry-nav[open] summary {
   margin-bottom: 1rem;
 }
+.result-entry-nav #office-port { display: block; max-width: 10rem; margin-top: .4rem; }
+.result-entry-nav a[aria-disabled="true"] { color: var(--muted); cursor: default; text-decoration: none; }

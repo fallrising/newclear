@@ -171,3 +171,19 @@ Repo 檢查：`python3 scripts/check_indexes.py`。runtime 另需 macOS arm64／
 `usable_tag: none`。主線未完成，沒有發布 tag 或部署。
 
 T-0027 歷史進度（已由上方交付紀錄取代）：已取得完整 Claude Opus 5.5 串流指導，主導核對並凍結[合成秘密輸出契約](docs/RESULT-REDACTION.md)。兩個 Pi 首次請求均因 OpenAI 憑證過期被拒絕，未產生實作；已停止且未自動重試，尚未完成驗收或交付。
+
+## FZ-OFFICE-NAV source UI continuation — 2026-11-22
+
+Owner authorized continued development of private read-only navigation. The
+[shared Fanzloud task](../../platform/fanzloud/docs/tasks/FZ-OFFICE-NAV.task.md) and
+[normative contract](../../platform/fanzloud/docs/specs/SPEC-FZ-OFFICE-NAV.md) bound
+Office changes to existing console HTML/JS/CSS plus focused tests/docs. Reuse the
+existing root and authenticated GET/state; no new endpoint/token/server policy,
+provider work, grant change or deployment. Results-only UI must preserve native
+status/provenance, raw/display hashes and existing terminal/session/full console.
+Verify actual HTTP/Chromium with isolated synthetic records, zero mutation/spawn
+and unchanged source bytes/mtime, plus existing offline/publication/index checks.
+N01–N04 locally verified with actual HTTP/Chromium and synthetic records; 224 Python /
+74 Node tests and publication checks pass. N05 independent review/CI/delivery
+remain pending; no Office MVP or original AC is promoted by this slice.
+[Shared evidence](../../platform/fanzloud/docs/acceptance/FZ-OFFICE-NAV.acceptance.md).

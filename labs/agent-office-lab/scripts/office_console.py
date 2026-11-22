@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Authenticated loopback console with explicit server-granted Pi remote tasks."""
+"""Authenticated loopback console with explicit server-granted remote tasks."""
 import argparse
 import hmac
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -93,7 +93,7 @@ class Console:
         self.lock = threading.RLock()
         self.plans, self.jobs, self.checks = {}, {}, {}
         self.remote_grant_providers = tuple(dict.fromkeys(remote_grant_providers))
-        if any(provider != 'pi' for provider in self.remote_grant_providers): raise ConsoleError('invalid_remote_grant_provider')
+        if any(provider not in grants.PROVIDERS for provider in self.remote_grant_providers): raise ConsoleError('invalid_remote_grant_provider')
         self.active = None
         self.closing = False
         self.directory = private_directory(lab / 'state/console' / secrets.token_hex(12), root=lab)
@@ -145,6 +145,8 @@ class Console:
     def _authorization(self, preview):
         if not preview['remote']:
             return None, True, None, 300
+        if preview['provider'] not in grants.PROVIDERS:
+            return {'kind':'cli_required','reason':'remote_grant_provider_not_supported'}, False, None, 300
         if preview['provider'] not in self.remote_grant_providers:
             return {'kind':'cli_required','reason':'remote_grants_not_enabled'}, False, None, 300
         row = grants.pending(self.lab, preview['provider'])
@@ -202,7 +204,7 @@ class Console:
                 command = [sys.executable,str(self.lab/'scripts/office_dispatch.py'),'local-text',
                            '--request',str(request_path),'--sha256',preview['request_sha256'],'--execute']
             elif preview['remote']:
-                action = ['retry', preview['retry_of']] if preview.get('retry_of') else ['run', 'pi']
+                action = ['retry', preview['retry_of']] if preview.get('retry_of') else ['run', preview['provider']]
                 command = [sys.executable, str(self.lab / 'scripts/office_dispatch.py'), *action, '--execute', '--remote-grant', chosen['grant_id']]
             else:
                 command = [sys.executable, str(self.lab / 'scripts/office_dispatch.py'), *preview['command'][2:]]
@@ -387,7 +389,7 @@ def main():
     parser.add_argument('--port',type=int,default=0)
     parser.add_argument('--runs-root',type=Path,action='append',help='Additional read-only run histories; only this checkout can execute')
     parser.add_argument('--project',type=Path,action='append',help='Register an explicit text source directory; original files remain unchanged')
-    parser.add_argument('--accept-remote-grant',choices=['pi'],action='append',default=[])
+    parser.add_argument('--accept-remote-grant',choices=grants.PROVIDERS,action='append',default=[])
     args = parser.parse_args()
     console = Console(roots=[LAB/'runs',*(args.runs_root or [])],projects=args.project,remote_grant_providers=args.accept_remote_grant)
     server = serve(console,args.port)

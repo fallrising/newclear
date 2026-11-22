@@ -208,3 +208,7 @@ T-0028：Pi 遠端重試的一次性授權。CLI 明確建立綁定指定失敗 
 ## T-0029：Pi 操作台真實遠端流程
 
 新單次批准的指定parent重試已通過：Chrome確認→dispatcher／一次性grant→Pi／DeepSeek原生工具任務→已核對結果→Blob下載。原HTTP402失敗保留，沒有自動重跑；刷新與操作台重啟不派工。此為AC-01／04／08／09／11的Pi子集，其他provider及完整安全／MVP條件不變；[證據](evidence/pi-console-completed-2026-11-22.json)。
+
+## T-0030：Cursor 操作台授權
+
+T-0030：將既有一次性授權延伸到固定 Cursor／Composer 2.5 首次合成任務。保持預設120秒、四工具、4096bytes，request／token／金額硬上限未知；不接受 Cursor retry、不改固定 CLI 或全域設定。單一 pending grant（跨 provider）、來源／版本／限制綁定、預檢及執行鎖內消耗、失敗不退款、頁面明確確認與重啟不重跑。驗證用隔離臨時 lab、真實 HTTP／dispatcher／exec lock、Chrome，環境偵測與 provider 為明示替身；不以其宣稱 Cursor 模型或原生取消通過。保留 Pi fresh／retry 回歸及全部歷史證據。

@@ -8,6 +8,7 @@ import json
 import os
 from pathlib import Path
 import secrets
+import remote_grant
 import shlex
 import shutil
 import signal
@@ -86,7 +87,15 @@ def main():
     group.add_argument('--allow-remote', action='store_true', help='Explicitly authorize one quota-consuming fixture')
     group.add_argument('--check-account', action='store_true', help='Read-only native login status; no model prompt')
     parser.add_argument('--timeout-seconds', type=int, choices=[120, 240], default=120, help='Approved task deadline; default 120 seconds')
+    parser.add_argument('--authorization-ref', help='Consumed server-side grant reference; dispatcher only')
     args = parser.parse_args()
+    authorization = None
+    if args.authorization_ref is not None:
+        if not args.allow_remote or args.timeout_seconds != 120:
+            raise ValueError('invalid_authorization_mode')
+        authorization = remote_grant.fingerprint(args.authorization_ref)
+        if not remote_grant.consumed(LAB, args.authorization_ref, 'cursor'):
+            raise ValueError('authorization_not_consumed')
     if args.check_account:
         verified = account_status(); print(json.dumps({'authentication_verified': verified, 'model_inference_verified': False})); return 0 if verified else 1
     if not args.check_startup and not args.allow_remote:
@@ -101,6 +110,8 @@ def main():
     report = {'status': 'starting', 'provider': 'cursor', 'version': PIN['version'], 'model': MODEL,
               'startup_only': args.check_startup, 'timeout_seconds': args.timeout_seconds, 'model_inference_verified': False,
               'provider_request_cap': None, 'token_cap': None, 'money_cap': None, 'cleanup_errors': []}
+    if authorization:
+        report['authorization'] = {'kind':'server_grant', 'fingerprint':authorization}
     process = None; owned = {}; started = time.monotonic()
     def interrupted(*_): raise InterruptedError('interrupted')
     signal.signal(signal.SIGINT, interrupted); signal.signal(signal.SIGTERM, interrupted)

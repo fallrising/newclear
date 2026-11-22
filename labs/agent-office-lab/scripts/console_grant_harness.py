@@ -34,14 +34,18 @@ def safe_directory(value):
     return path
 
 
-def copy_sources(lab):
+def copy_sources(lab, provider='pi'):
     scripts = lab / 'scripts'
     scripts.mkdir(parents=True, mode=0o700, exist_ok=True)
-    for name in SOURCES:
+    for name in SOURCES if provider == 'pi' else remote_grant.CURSOR_SOURCE_NAMES:
         source = PRODUCTION_LAB / 'scripts' / name
         target = scripts / name
         target.parent.mkdir(parents=True, mode=0o700, exist_ok=True)
         shutil.copy2(source, target)
+    if provider == 'cursor':
+        lock = lab / 'tools/cursor/cli-lock.json'
+        lock.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(PRODUCTION_LAB / 'tools/cursor/cli-lock.json', lock)
     (lab / 'runs').mkdir(mode=0o700, exist_ok=True)
 
 

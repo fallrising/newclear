@@ -19,7 +19,7 @@ python3 scripts/office_console.py
 - Pi [同 session 重新連接檢查](PI-RESUME.md)、[原生取消檢查](CANCEL.md)、本機 401／429／CLI crash 檢查，以及已有有效 lineage 的本機故障重試。
 - 執行狀態、四 provider 歷史結果、已核對產物與 SHA-256。
 
-Grok、Cursor 及 Pi 遠端重試仍使用 [DISPATCH](DISPATCH.md) 的 CLI 與當次授權流程。Pi 固定新任務可依[一次性遠端授權](REMOTE-GRANT.md)先由 CLI 建立 grant，再以 `--accept-remote-grant pi` 啟動操作台；預設啟動仍拒絕遠端執行。本地文字模式接受自訂要求與已登記來源；不支援直接修改任意專案。
+Pi 固定新任務與指定失敗來源重試、Cursor 固定首次任務可依[一次性遠端授權](REMOTE-GRANT.md)先由 CLI 建立 grant，再以對應的 `--accept-remote-grant pi` 或 `--accept-remote-grant cursor` 啟動操作台。Grok 仍使用 [DISPATCH](DISPATCH.md) 的 CLI 與當次授權流程；預設啟動拒絕遠端執行。Cursor 控制層使用測試替身通過，真實新入口及原生取消仍待驗。本地文字模式接受自訂要求與已登記來源；不支援直接修改任意專案。
 
 「合成任務＋保留原生終端」會持續載入本地模型，直到按「停止執行」。原生終端沿用固定 Office 的 lite 頁面與本地 provider 限制；首次開啟需填顯示名稱。操作台不代理終端 keystroke 或原始日誌；互動交由既有原生 Office。終端可繼續操作合成 workspace，仍不能據此宣稱任意檔案／網路邊界已完整驗收。
 

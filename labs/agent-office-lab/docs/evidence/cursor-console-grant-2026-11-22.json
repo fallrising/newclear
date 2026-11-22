@@ -1,0 +1,130 @@
+{
+  "milestone": "T-0030",
+  "date": "2026-11-22",
+  "base_commit": "1c0483e86a825d764aed6356312cee1ff26ac3a4",
+  "scope": "Cursor one-shot console grant control flow",
+  "status": "control_layer_passed",
+  "ac_subsets": [
+    "AC-01",
+    "AC-06",
+    "AC-08",
+    "AC-09",
+    "AC-11"
+  ],
+  "mvp_complete": false,
+  "usable_tag": null,
+  "provider": "cursor",
+  "model": "composer-2.5",
+  "pinned_version": "2026.10.22-27dcf5f",
+  "limits": {
+    "timeout_seconds": 120,
+    "max_prompts": 1,
+    "tool_hook_gate": 4,
+    "artifact_bytes_cap": 4096,
+    "provider_request_cap": null,
+    "output_tokens_per_request_cap": null,
+    "money_cap": null,
+    "host_retries": 0
+  },
+  "validation": {
+    "python": {
+      "command": "python3 -m unittest discover -s labs/agent-office-lab/scripts -p 'test_*.py' -v",
+      "cwd": "repo root",
+      "version": "3.14.4",
+      "passed": 232
+    },
+    "node": {
+      "command": "node --test labs/agent-office-lab/scripts/*.test.mjs",
+      "cwd": "repo root",
+      "version": "23.11.0",
+      "passed": 74
+    },
+    "cursor_browser_scenarios": 5,
+    "pi_fresh_browser_scenarios": 5,
+    "pi_retry_browser_scenarios": 4,
+    "external_browser_requests": 0,
+    "real_components": [
+      "loopback HTTP",
+      "Chrome DOM and confirmation flow",
+      "dispatcher",
+      "atomic grant consumption",
+      "exec-inherited execution slot",
+      "failed result projection"
+    ],
+    "substitutes": [
+      "provider prerequisite detection",
+      "local failed provider process instead of Cursor CLI"
+    ],
+    "confirmed": [
+      "wrong-provider grant rejected",
+      "single pending grant across Pi and Cursor",
+      "Cursor retry rejected",
+      "all Cursor sources and CLI lock mutation invalidate grant",
+      "preflight and busy preserve grant",
+      "exec failure spends grant",
+      "no grant ID in HTTP or DOM",
+      "dismissed confirmation does not spawn",
+      "duplicate plan rejected",
+      "stop exits local stub",
+      "failed stub not labelled completed",
+      "pending grant survives restart",
+      "spent grant not re-created",
+      "refresh and restart do not re-run",
+      "results-only UI retains no POST controls and explicit return to full console",
+      "finished job and available execution slot both visible after stop"
+    ],
+    "model_inference_verified": false,
+    "native_cursor_cancel_verified": false,
+    "full_descendant_audit": false,
+    "publication_files": 223,
+    "repo_indexes": {
+      "contracts": 55,
+      "llms_files": 9,
+      "errors": 0
+    }
+  },
+  "product_model_requests": 0,
+  "actual_lab_grants_created": 0,
+  "actual_lab_pending_grants": 0,
+  "development_review": {
+    "provider": "opencode-go",
+    "model": "glm-5.3",
+    "requests": 1,
+    "http_status": 403,
+    "reason": "active_subscription_required",
+    "review_completed": false,
+    "automatic_retries": 0,
+    "fallback": false,
+    "cli_exit_code": 0,
+    "reported_tokens": 0,
+    "reported_cost_usd": 0,
+    "billing_verified": false,
+    "credential_copy_removed": true,
+    "tracked_processes": 1,
+    "tracked_alive": 0
+  },
+  "review": "primary agent review; independent model review unavailable",
+  "preserved_failures": [
+    "Initial browser harness rejected nonphysical temporary directory alias",
+    "Browser integration exposed hardcoded Pi dispatch target; corrected to selected provider",
+    "Test passed execute body instead of plan ID; assertion corrected",
+    "Retry browser dependency missing in new checkout; reused pinned vendor and preserved evidence under private state",
+    "Merged readonly navigation test initially used hash-only navigation without reload; corrected test setup"
+  ],
+  "remaining": [
+    "Actual Cursor console task to verified artifact and download",
+    "Cursor native cancellation, permissions and resume",
+    "Grok console integration",
+    "Full cross-provider and security acceptance"
+  ],
+  "source_sha256": {
+    "remote_grant.py": "bc143b0b4dcfb569039de567a42884f543b52cd0ec82cd07c1d4e3b64991fad2",
+    "office_console.py": "f166c8c3c727aec697aab8cd1112220463ff33da86f60c686e7f7df5b76d1b99",
+    "office_console.js": "d5f4a16b7ce95e6d43b95026c570b0fb5529b535a7b404cdefd1ae0a0ccbaefc",
+    "office_dispatch.py": "4a66c2c65ccb78c331baaef48efacbe7fe5f363fa1f8b77e5df60a3bcdc6bc29",
+    "run_cursor_work.py": "94670d3135453637af9e3b760681c2e768cba6acada90c8205d88dd76b55bc76",
+    "console_cursor_grant_harness.py": "e6d95568346a17c7e46e8e32bcaf66a011e42801d764ba84fb1c5ddef56ae622",
+    "test_cursor_console_grant.py": "48dabcf42a40f42f630728492bcaebd3687ac40abf8607e9f60adad57e826fdd"
+  },
+  "integrated_main_commit": "6c9cbd0ba596cd5f1ddd6c5466b99ce294dea1d3"
+}

@@ -35,3 +35,5 @@ Wrapper 先核對固定 runtime hash，再以其封裝內的純 schema validator
 3. [第三次任務](evidence/cursor-completed-2026-11-01.json)：新的單次批准後，Read(input) → Read(result) → Write(result) 全部通過；15.57 秒，原生 stop 回報 37723 input／424 output tokens，artifact hash 與清理一致。請求數與費用未知。此輪確實讀取了輸出檔，但不能反推第二次未保存的目標。
 
 原受測來源 hash 全部保留。成功後僅修正 Office 子報告未更新的 model_inference_verified 欄位；父 runner 在原實測中已獨立驗證並回傳 true，沒有因這個報告欄位修正重跑模型。AC-13 通過不代表 Cursor 取消、權限互動、refresh、restart/resume 或四工位 MVP 已完成。
+
+T-0030 已接入[一次性操作台授權](REMOTE-GRANT.md)：固定首次任務、120秒及來源綁定。控制層透過本機替身驗證，沒有重跑本頁的歷史模型任務；操作台到真實 Cursor 產物與原生取消仍待驗。

@@ -15,6 +15,10 @@ source_commit: 64c8ad59620e9068f0beede99365b7d656f00825
 
 ## 主線與範圍
 
+T-0030：Cursor 固定首次合成任務已接入一次性 grant 與操作台。授權綁定模型、固定 runtime 版本、120 秒／四工具／4096 bytes 與來源（含 CLI lock），跨 provider 仍只有一張 pending grant。明確確認、正確工位派工、原子消耗、停止、失敗結果、撤銷及重啟不重跑以真實 HTTP／dispatcher／跨 exec 鎖及 Chrome 通過；provider 與環境偵測為明示本機替身，沒有 Cursor 模型或原生取消驗收。Pi fresh／retry 回歸通過，原費用／時間上限與不自動重試不變。一次 Pi／GLM 開發審查因 HTTP403 未完成，沒有重試／fallback；主導完成審查。完整 MVP 保持 pending；[證據](docs/evidence/cursor-console-grant-2026-11-22.json)，交付見[任務板](docs/tasks/BOARD.md)。
+
+T-0030：將既有一次性授權延伸到固定 Cursor／Composer 2.5 首次合成任務。保持預設120秒、四工具、4096bytes，request／token／金額硬上限未知；不接受 Cursor retry、不改固定 CLI 或全域設定。單一 pending grant（跨 provider）、來源／版本／限制綁定、預檢及執行鎖內消耗、失敗不退款、頁面明確確認與重啟不重跑。驗證用隔離臨時 lab、真實 HTTP／dispatcher／exec lock、Chrome，環境偵測與 provider 為明示替身；不以其宣稱 Cursor 模型或原生取消通過。保留 Pi fresh／retry 回歸及全部歷史證據。
+
 T-0029 最新：owner 補足餘額並新批一次指定來源重試後，Pi／DeepSeek 從操作台到產物與 Blob 下載的真實流程通過。3 次 HTTP200、2142 input／185 output tokens、30.51 秒，原生同 session、read→write、agent_settled、marker／total 與原始／下載 hash 均核對。新 grant 消耗一次；原 HTTP402 失敗、receipt 與 input bytes 保留不變、沿用相同 fixture；重複計畫拒絕、刷新／操作台重啟不重跑。外層32個受追蹤程序全部退出、鎖釋放，非完整後代樹稽核；沒有自動重試或開發模型委託。見[成功證據](docs/evidence/pi-console-completed-2026-11-22.json)，先前[402 證據](docs/evidence/pi-console-live-2026-11-22.json)保留。僅完成 Pi 子集；其他 provider、完整安全／MVP 仍 pending，無 usable tag；交付見[任務板](docs/tasks/BOARD.md)。
 
 T-0029 歷史首輪：一次已批准的 Pi／DeepSeek 操作台真實任務在首個外部請求收到 HTTP 402（[官方說明：餘額不足](https://api-docs.deepseek.com/quick_start/error_codes/)），30.36 秒後結束，任務 failed、無產物、用量未知。一次性授權已消耗，沒有自動重試或新授權。外層 29 個受追蹤程序全部退出、鎖釋放；非完整後代樹稽核。Chrome 唯讀回讀確認失敗不顯示成功、沒有下載、刷新／操作台重啟不重跑、重試沒有新 grant 不能執行。224 Python／68 Node 通過，無開發模型委託；成功產物／下載與完整 AC／MVP 仍 pending。等 owner 處理 provider 餘額及另批一次有界重試；[白名單證據](docs/evidence/pi-console-live-2026-11-22.json)，交付狀態見[任務板](docs/tasks/BOARD.md)。

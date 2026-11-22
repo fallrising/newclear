@@ -230,6 +230,8 @@ def plan(provider, check_cancel=False, check_failure=None, check_crash=False, ke
               'money_cap': None}
     if provider in ('grok', 'cursor'):
         limits['tool_hook_gate'] = 4
+    if provider == 'cursor':
+        limits.update(max_prompts=1, artifact_bytes_cap=4096)
     if provider == 'grok':
         limits.update(native_max_turns=6, hook_failure_behavior='fail_open')
     if check_failure is not None or check_resume or check_host_restart:
@@ -262,7 +264,7 @@ def launch(provider, allow_remote, lab=LAB, check_cancel=False, check_failure=No
     if grant_remote:
         if allow_remote:
             raise SlotError('remote_grant_conflicts_with_allow_remote')
-        if provider != 'pi':
+        if provider not in grants.PROVIDERS:
             raise grants.GrantError('remote_grant_provider_not_supported')
         if check_cancel or check_failure is not None or check_crash or check_resume or check_host_restart or keep_open or check_question:
             raise SlotError('remote_grant_requires_remote_task')
@@ -292,7 +294,7 @@ def launch(provider, allow_remote, lab=LAB, check_cancel=False, check_failure=No
         consumed = None
         if retry_parent is not None: slot.select_retry(retry_parent)
         if grant_remote:
-            consumed = grants.consume(lab, remote_grant, 'pi', 'dispatcher', retry_parent=retry_parent)
+            consumed = grants.consume(lab, remote_grant, provider, 'dispatcher', retry_parent=retry_parent)
         python = strata_home(lab) / 'source/.venv/bin/python' if provider == 'opencode' else Path(sys.executable)
         runner_args = ['--check-failure', str(check_failure)] if check_failure is not None else spec['args']
         if grant_remote:
@@ -337,7 +339,7 @@ def main(argv=None):
     commands.add_parser('status', help='Read the shared execution state without launching or acknowledging anything')
     check = commands.add_parser('detect'); check.add_argument('--provider', choices=[*SPECS, 'all'], default='all')
     preview = commands.add_parser('plan'); preview.add_argument('provider', choices=SPECS)
-    grant = commands.add_parser('grant'); grant.add_argument('provider', choices=['pi']); grant.add_argument('--ttl', type=int, default=900); grant.add_argument('--confirm-paid-remote-run', action='store_true', required=True)
+    grant = commands.add_parser('grant'); grant.add_argument('provider', choices=grants.PROVIDERS); grant.add_argument('--ttl', type=int, default=900); grant.add_argument('--confirm-paid-remote-run', action='store_true', required=True)
     grant.add_argument('--retry-of', help='Bind a new grant to this eligible failed Pi task only')
     revoke = commands.add_parser('grant-revoke'); revoke.add_argument('grant_id')
     commands.add_parser('grants', help='List pending remote grants without exposing IDs')
@@ -370,8 +372,8 @@ def main(argv=None):
             print(json.dumps({'status':'revoked', 'fingerprint': grants.fingerprint(args.grant_id)}))
             return 0
         if args.action == 'grants':
-            row = grants.pending(LAB, 'pi')
-            print(json.dumps({'remote_grants': {'enabled_providers':['pi'], 'pending': [] if row is None else [grants.public(row)]}}, indent=2))
+            rows = [grants.public(row) for provider in grants.PROVIDERS if (row := grants.pending(LAB, provider))]
+            print(json.dumps({'remote_grants': {'enabled_providers':list(grants.PROVIDERS), 'pending':rows}}, indent=2))
             return 0
         if args.action == 'status':
             state = inspect_slot(LAB)

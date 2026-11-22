@@ -22,7 +22,7 @@ from office_results import reject_duplicates
 from contextlib import contextmanager
 
 GRANT_ID = re.compile(r'[0-9a-f]{32}\Z')
-PROVIDER = 'pi'
+PROVIDERS = ('pi', 'cursor')
 TASK = 'synthetic_file'
 MAX_SIZE = 4096
 MAX_ENTRIES = 128
@@ -37,6 +37,14 @@ SOURCE_NAMES = tuple(dict.fromkeys((
     'process_ownership.py', 'remote_cli.py', 'pi_boundary.mjs', 'pi_office_policy.mjs',
     'pi_hook_guard.mjs', 'pi_hook_probe.mjs', 'pi_hook_evidence.py', 'pi_session_evidence.mjs', 'pi_question_check.mjs', 'bin/pi'
 )))
+
+CURSOR_SOURCE_NAMES = (
+    'result_redaction.py', 'remote_grant.py', 'office_dispatch.py', 'office_console.py',
+    'office_console.js', 'office_results.py', 'execution_slot.py', 'process_ownership.py',
+    'run_cursor_work.py', 'cursor_cli.py', 'cursor_task_hook.py', 'cursor_work_policy.mjs',
+    'office_cursor_work.mjs', 'cursor_hook_preflight.mjs', 'cursor-task/cursor-agent',
+    'remote_cli.py', 'run_grok_startup.py', 'grok_startup.py', 'pi_retry.py', 'local_text_task.py',
+)
 
 
 class GrantError(ValueError):
@@ -164,21 +172,20 @@ def _write_json_at(fd: int, name: str, value: dict):
         except FileNotFoundError: pass
 
 
-def _source_hashes(lab: Path) -> dict:
+def _source_hashes(lab: Path, provider: str = 'pi') -> dict:
+    names = SOURCE_NAMES if provider == 'pi' else CURSOR_SOURCE_NAMES
+    paths = {name: ('scripts/' + name).split('/') for name in names}
+    if provider == 'cursor':
+        paths['tools/cursor/cli-lock.json'] = ['tools', 'cursor', 'cli-lock.json']
     result = {}
     with _directory(_lab_fd(lab)) as lab_fd:
-        root_fd = os.open('scripts', os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW, dir_fd=lab_fd)
-    try:
-        if os.fstat(root_fd).st_uid != os.getuid() or os.fstat(root_fd).st_mode & 0o022:
-            raise GrantError('remote_grant_source_changed')
-        for name in SOURCE_NAMES:
-            fd = root_fd
-            close_fd = None
-            parts = name.split('/')
+        for name, parts in paths.items():
+            fd = lab_fd
+            opened = []
             try:
                 for part in parts[:-1]:
-                    close_fd = os.open(part, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW, dir_fd=fd)
-                    fd = close_fd
+                    fd = os.open(part, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW, dir_fd=fd)
+                    opened.append(fd)
                     info = os.fstat(fd)
                     if info.st_uid != os.getuid() or info.st_mode & 0o022:
                         raise GrantError('remote_grant_source_changed')
@@ -192,20 +199,17 @@ def _source_hashes(lab: Path) -> dict:
                     if len(raw) > 1024 * 1024: raise GrantError('remote_grant_source_changed')
                     result[name] = hashlib.sha256(raw).hexdigest()
             finally:
-                if close_fd is not None:
-                    os.close(close_fd)
-    finally:
-        os.close(root_fd)
+                for fd in reversed(opened): os.close(fd)
     return result
 
 
 def expected_binding(lab: Path, provider: str) -> dict:
-    if provider != PROVIDER:
+    if provider not in PROVIDERS:
         raise GrantError('remote_grant_provider_not_supported')
     import office_dispatch as dispatch
     plan = dispatch.plan(provider)
     return {'model': plan['model'], 'pinned_version': plan['pinned_version'],
-            'limits': plan['limits'], 'source_sha256': _source_hashes(Path(lab))}
+            'limits': plan['limits'], 'source_sha256': _source_hashes(Path(lab), provider)}
 
 
 def retry_binding(lab: Path, parent: str) -> dict:
@@ -239,6 +243,8 @@ def _validate(value: dict, lab: Path, provider: str, now: float, check_binding: 
     version = value.get('version')
     if type(version) is not int or version not in (1, 2) or set(value) != KEYS | ({'retry'} if version == 2 else set()):
         raise GrantError('remote_grant_unavailable')
+    if version == 1 and provider != 'pi':
+        raise GrantError('remote_grant_unavailable')
     grant_id = value['id']
     if (not isinstance(grant_id, str) or not GRANT_ID.fullmatch(grant_id)
             or value.get('provider') != provider or value.get('task') != TASK
@@ -260,6 +266,8 @@ def _validate(value: dict, lab: Path, provider: str, now: float, check_binding: 
             raise GrantError('remote_grant_source_changed')
     retry = value.get('retry')
     if retry is not None:
+        if provider != 'pi':
+            raise GrantError('remote_grant_retry_not_supported')
         if not isinstance(retry, dict) or not isinstance(retry.get('parent'), str) or type(retry.get('attempt')) is not int:
             raise GrantError('remote_grant_unavailable')
         if retry != retry_binding(lab, retry['parent']):
@@ -281,7 +289,12 @@ def _pending_records(lab: Path, provider: str, now: float, check_binding: bool =
                 if not name.endswith('.json') or not GRANT_ID.fullmatch(name[:-5]):
                     continue
                 try:
-                    rows.append(_validate(_read_json_at(pending_fd, name), lab, provider, now, check_binding))
+                    value = _read_json_at(pending_fd, name)
+                    actual_provider = value.get('provider')
+                    if actual_provider not in PROVIDERS:
+                        raise GrantError('remote_grant_unavailable')
+                    valid = _validate(value, lab, actual_provider, now, check_binding)
+                    rows.append(valid)
                 except FileNotFoundError:
                     continue  # Concurrent consumption can remove a listed pending record.
                 except GrantError as error:
@@ -295,17 +308,19 @@ def _pending_records(lab: Path, provider: str, now: float, check_binding: bool =
 
 
 def pending(lab: Path, provider: str, now: float | None = None) -> dict | None:
-    if provider != PROVIDER:
+    if provider not in PROVIDERS:
         raise GrantError('remote_grant_provider_not_supported')
     rows = _pending_records(Path(lab), provider, time.time() if now is None else now, check_binding=True)
     if len(rows) > 1:
         raise GrantError('remote_grant_unavailable')
-    return rows[0] if rows else None
+    return rows[0] if rows and rows[0]['provider'] == provider else None
 
 
 def create(lab: Path, provider: str, ttl_s: int, now: float | None = None, *, retry_parent: str | None = None) -> dict:
-    if provider != PROVIDER:
+    if provider not in PROVIDERS:
         raise GrantError('remote_grant_provider_not_supported')
+    if retry_parent is not None and provider != 'pi':
+        raise GrantError('remote_grant_retry_not_supported')
     if type(ttl_s) is not int or ttl_s < TTL_MIN or ttl_s > TTL_MAX:
         raise GrantError('invalid_remote_grant_ttl')
     lab = Path(lab)
@@ -315,7 +330,7 @@ def create(lab: Path, provider: str, ttl_s: int, now: float | None = None, *, re
     lock_fd = None
     try:
         lock_fd = _lock(root_fd)
-        if pending(lab, provider, now) is not None:
+        if _pending_records(lab, provider, now):
             raise GrantError('remote_grant_unavailable')
         grant_id = secrets.token_hex(16)
         binding = expected_binding(lab, provider)
@@ -338,7 +353,7 @@ def create(lab: Path, provider: str, ttl_s: int, now: float | None = None, *, re
 
 
 def consume(lab: Path, grant_id: str, provider: str, entry: str, now: float | None = None, *, retry_parent: str | None = None) -> dict:
-    if provider != PROVIDER:
+    if provider not in PROVIDERS:
         raise GrantError('remote_grant_provider_not_supported')
     if not isinstance(grant_id, str) or not GRANT_ID.fullmatch(grant_id):
         raise GrantError('invalid_remote_grant_id')
@@ -433,7 +448,7 @@ def public(record: dict) -> dict:
 
 
 def inspect(lab: Path, grant_id: str, provider: str, now: float | None = None) -> dict:
-    if provider != PROVIDER:
+    if provider not in PROVIDERS:
         raise GrantError('remote_grant_provider_not_supported')
     if not isinstance(grant_id, str) or not GRANT_ID.fullmatch(grant_id):
         raise GrantError('invalid_remote_grant_id')
@@ -459,7 +474,7 @@ def inspect(lab: Path, grant_id: str, provider: str, now: float | None = None) -
         os.close(root_fd)
 
 
-def consumed(lab: Path, grant_id: str) -> bool:
+def consumed(lab: Path, grant_id: str, provider: str | None = None) -> bool:
     if not isinstance(grant_id, str) or not GRANT_ID.fullmatch(grant_id):
         raise GrantError('invalid_remote_grant_id')
     root_fd = _read_dir(Path(lab))
@@ -467,7 +482,9 @@ def consumed(lab: Path, grant_id: str) -> bool:
         consumed_fd = _child_dir(root_fd, 'consumed')
         try:
             # The atomic rename is authoritative; a crash may precede the use receipt.
-            _read_json_at(consumed_fd, grant_id + '.json')
+            value = _read_json_at(consumed_fd, grant_id + '.json')
+            if provider is not None:
+                _validate(value, Path(lab), provider, time.time())
             return True
         except FileNotFoundError:
             try: _read_json_at(consumed_fd, grant_id + '.use.json')

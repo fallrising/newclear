@@ -20,7 +20,9 @@ for (let i = 2; i < process.argv.length; i += 1) {
 const harnessRoot = path.resolve(String(args.get('--harness-root') || mkdtempSync(path.join(tmpdir(), 'office-remote-grant-browser-'))));
 const harnessPython = String(args.get('--harness-python') || process.env.PYTHON || 'python3');
 const scriptDir = path.dirname(fileURLToPath(import.meta.url));
-const harnessScript = path.join(scriptDir, 'console_grant_harness.py');
+const provider = String(args.get('--provider') || 'pi');
+if (!['pi','cursor'].includes(provider)) throw new Error('unsupported harness provider');
+const harnessScript = path.join(scriptDir, provider==='cursor'?'console_cursor_grant_harness.py':'console_grant_harness.py');
 const totalDeadline = Date.now() + 180_000;
 const report = {ok: false, harness_root: harnessRoot, scenarios: {}, external_requests: [], failures: []};
 await mkdir(harnessRoot, {recursive: true});
@@ -192,8 +194,8 @@ async function startBrowser() {
   return {child, cdp, requests, requestBodies, errors, responses, bodies, evaluate, navigate};
 }
 
-async function selectPiTask(browser) {
-  await browser.evaluate(`document.querySelector('[data-provider="pi"]').click(); document.getElementById('mode').value='task'; document.getElementById('mode').dispatchEvent(new Event('change')); true`);
+async function selectTask(browser) {
+  await browser.evaluate(`document.querySelector('[data-provider="${provider}"]').click(); document.getElementById('mode').value='task'; document.getElementById('mode').dispatchEvent(new Event('change')); true`);
 }
 async function plan(browser) {
   const before = browser.responses.length;
@@ -275,7 +277,7 @@ async function runNoExecutionScenario(scenario) {
   const browser = await startBrowser();
   try {
     await browser.navigate(harness.url);
-    await selectPiTask(browser);
+    await selectTask(browser);
     await waitFor(async () => (await pageText(browser)).includes('CLI') || (await pageText(browser)).includes('授權'), `${scenario} cli guidance`);
     await plan(browser);
     const text = await pageText(browser);
@@ -286,7 +288,18 @@ async function runNoExecutionScenario(scenario) {
     const secrets = await collectGrantSecrets(directory);
     await assertDomNoLeaks(browser, harness.url, secrets);
     assertNoLeaks(browser, harness.url, secrets);
-    report.scenarios[scenario] = {ok: true};
+    if(scenario==='no_optin'){
+      const posts=browser.requestBodies.length;
+      await browser.cdp.send('Page.navigate',{url:new URL('/#view=results',harness.url).href});
+      await browser.cdp.send('Page.reload');
+      await waitFor(()=>browser.evaluate('typeof resultsOnly!=="undefined" && resultsOnly && !document.getElementById("readonly-info").hidden'), 'readonly mode');
+      assert(await browser.evaluate('document.getElementById("office-operations").hidden && !document.getElementById("execute").onclick'), 'readonly exposes write controls');
+      assert(await browser.evaluate("api('/api/execute',{}).then(()=>false,()=>true)"), 'readonly API wrapper accepted mutation');
+      assert(browser.requestBodies.length===posts, 'readonly sent a POST');
+      await browser.evaluate('document.getElementById("return-console").click(); true');
+      await waitFor(()=>browser.evaluate('typeof resultsOnly!=="undefined" && !resultsOnly && !document.getElementById("office-operations").hidden'), 'return to console');
+    }
+    report.scenarios[scenario] = {ok: true, ...(scenario==='no_optin'?{readonly_no_post_and_explicit_return:true}:{})};
   } finally {
     browser.cdp.close(); await closeProcess(browser.child); await closeProcess(harness.child);
   }
@@ -299,14 +312,19 @@ async function runGrantScenario() {
   const browser = await startBrowser();
   try {
     await browser.navigate(harness.url);
-    await selectPiTask(browser);
+    await selectTask(browser);
     await waitFor(async () => (await pageText(browser)).includes('一次性授權'), 'grant guidance');
     await plan(browser);
     const planned = await pageText(browser);
     assert(planned.includes('請求上限') && planned.includes('輸出 token') && !planned.includes('未記錄') && planned.includes('無金額上限'), 'grant plan limits are incomplete');
+    if(provider==='cursor') assert(planned.includes('120 秒') && planned.includes('工具操作上限') && planned.includes('4096') && planned.includes('無硬上限'), 'Cursor limits missing');
     const planId = await waitFor(() => latestPlanId(browser), 'plan id');
+    await browser.evaluate('window.confirm=()=>false; document.getElementById("execute").click(); true');
+    await sleep(300);
+    assert((await readHarnessJson(directory)).spawn_count===0, 'dismissed confirmation spawned a task');
+    await browser.evaluate('window.confirm=()=>true');
     await browser.evaluate('document.getElementById("execute").click(); true');
-    await waitFor(async () => (await readHarnessJson(directory)).spawn_count === 1, 'spawn once', 20_000);
+    await waitFor(async () => (await readHarnessJson(directory)).spawn_count === 1 && (await readHarnessJson(directory)).consumed_count === 1, 'spawn once', 20_000);
     const duplicate = await executePlanAgain(browser, planId);
     assert(duplicate.status===409 && ['execution_busy','plan_expired_or_used'].includes(duplicate.body.error), 'duplicate execute did not reach the one-shot guard');
     for (let i=0;i<2;i++) {
@@ -328,7 +346,10 @@ async function runGrantScenario() {
     const secrets = await collectGrantSecrets(directory);
     await assertDomNoLeaks(browser, harness.url, secrets);
     assertNoLeaks(browser, harness.url, secrets);
-    report.scenarios[scenario] = {ok: true, spawn_count: counts.spawn_count, consumed_count: counts.consumed_count};
+    await waitFor(()=>browser.evaluate("state?.jobs?.length===1 && state.jobs[0].phase==='finished' && !state.active_job && state.shared_execution.status==='available'"), 'finished job and released slot visible');
+    const metrics=await browser.cdp.send('Page.getLayoutMetrics');
+    await browser.cdp.send('Page.captureScreenshot',{captureBeyondViewport:true,clip:{x:0,y:0,width:metrics.cssContentSize.width,height:metrics.cssContentSize.height,scale:1}}).then(async image=>writeFile(path.join(harnessRoot,provider+'-stopped.png'),Buffer.from(image.data,'base64')));
+    report.scenarios[scenario] = {ok: true, confirmation_dismissed_without_spawn:true, spawn_count: counts.spawn_count, consumed_count: counts.consumed_count};
   } finally {
     browser.cdp.close(); await closeProcess(browser.child); await closeProcess(harness.child);
   }
@@ -341,7 +362,7 @@ async function runRevokeAfterPlan() {
   const browser = await startBrowser();
   try {
     await browser.navigate(harness.url);
-    await selectPiTask(browser);
+    await selectTask(browser);
     await plan(browser);
     const beforeExecute=browser.responses.length;
     await browser.evaluate('document.getElementById("execute").click(); true');
@@ -364,7 +385,7 @@ async function runRestartScenario() {
   let browser = await startBrowser();
   try {
     await browser.navigate(harness.url);
-    await selectPiTask(browser);
+    await selectTask(browser);
     await waitFor(async () => (await pageText(browser)).includes('一次性授權'), 'initial restart grant');
     browser.cdp.close(); await closeProcess(browser.child);
     await closeProcess(harness.child);
@@ -373,7 +394,7 @@ async function runRestartScenario() {
     children.add(harness.child);
     browser = await startBrowser();
     await browser.navigate(harness.url);
-    await selectPiTask(browser);
+    await selectTask(browser);
     await waitFor(async () => (await pageText(browser)).includes('一次性授權'), 'restarted grant visible');
     const harnessState = await readHarnessJson(directory);
     assert(harnessState.spawn_count === 0 && harnessState.consumed_count === 0, 'restart auto-started or consumed grant');
@@ -385,7 +406,7 @@ async function runRestartScenario() {
     await waitFor(async () => (await readHarnessJson(directory)).consumed_count===1, 'restart grant consumed');
     browser.cdp.close(); await closeProcess(browser.child); await closeProcess(harness.child);
     harness=await startHarness('grant',directory); browser=await startBrowser();
-    await browser.navigate(harness.url); await selectPiTask(browser); await plan(browser);
+    await browser.navigate(harness.url); await selectTask(browser); await plan(browser);
     assert(await browser.evaluate('document.getElementById("execute").disabled'), 'spent grant was recreated after restart');
     assert((await readHarnessJson(directory)).consumed_count===1, 'consumed tombstone was not preserved');
     assert((await readHarnessJson(directory)).spawn_count===1, 'restart caused an extra spawn');

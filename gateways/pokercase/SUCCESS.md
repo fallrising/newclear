@@ -664,3 +664,7 @@ Owner authorized the bounded continuation after T0434 isolation. [Fixed AS-1–A
 Owner authorized this bounded #699 slice; claimPR292 merged before implementation. [MT-1–MT-5, source matrix, API contract and reproduction](docs/tasks/T-0435-measurement-coverage.md) distinguish no data, unknown, partial, explicit zero and complete saved fields, independently from whole usage status. Owner approved opt-in `schema=2`; defaultv1 retains numeric compatibility with an explicit notice. Web uses canonical subtotals/coverage and separate known-only timing means; TUI missing legacy latency is unknown. Existing raw eventJSON/CSV and cost-only doctor/footer semantics remain.
 
 Actual native and adminHTTP RED preceded corrections. Local378Rust/22groups,96Python,20repository-validator tests,47contracts/8indexes,fmt/Clippy/lockedbuild passed; seven-scenario adminHTTP/SQLite/HTML/CSV/doctor reconciliation and unchanged-history reopen passed, with0inference/refresh/discovery. Four prior9stage journeys and Antigravity6proof+7HTTP settlement regression passed. Independent review and requiredCI/normalmerge/readback/ledger/backup/cleanup remain delivery gates. T0428/T0429, original17AC, T1102 and previous deliveries remain unchanged; mainline incomplete, usable_tag none. This does not close #699 or #698–702, resolve AC04/AC17, or establish realclient/version/provider acceptance.
+
+## P09 文件驗收
+
+以固定版本的 client、CLI、protocol 與原 AC-01～17 核對相容性。交付條件是矩陣標明 text/tools、stream/buffer、取消、timeout、重啟、用量、失敗與未知的證據層級，並給出是否採用的決定。本次驗證採來源核對、文件檢查與獨立審查。

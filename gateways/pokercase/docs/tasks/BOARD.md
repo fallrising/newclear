@@ -806,3 +806,9 @@ Local verification passed9storage-process/3actualbufferedcases,407Rust/199Python
 Product [PR843](https://github.com/fallrising/newclear/pull/843), source `0afc82dbd40437bbbb47fc616f6e35c8180e4fc8`, normal merge `6f40c937d3c600dd60a050cc44e230b74f8140b8` at 2026-10-31T11:44:46Z. Required [Pokercase CI](https://github.com/fallrising/newclear/actions/runs/41197770638) and [Project success contracts](https://github.com/fallrising/newclear/actions/runs/41197770623) passed. All12 changed files matched source/merge/origin; ancestry and source/merge Desk-Task trailers passed. Three retained ordinary/native/integration artifacts match54 committed inputs each.
 
 CR01–04 are merged and verified. CR05 remains in_progress at this product-merge phase snapshot because its unchanged CR5 acceptance includes subsequent management publication, full verified backup and owned cleanup. The final private handoff records those later facts only after they happen. This adds evidence to already-correct runtime; no production correction or live acceptance is claimed. Mainline incomplete, usable_tag none, desk in_progress and #698–702 open; original17AC and AC04/17 decision remain. No next milestone.
+
+## P09 — 具名客戶端相容性文件
+
+| ID | Task | AC | Status | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| P09 | 相容性矩陣、原 AC、比較端及停止條件 | P09-1～4 | in_progress | 2026-11-22T17:01:55Z | — | 2026-11-22T17:01:55Z |

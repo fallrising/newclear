@@ -277,7 +277,40 @@ CI/merge/readback remain the last delivery gates.
 
 | ID | Task | AC | Status | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| OBS-01 | Current observation and login | O01 | in_progress | 2026-11-22T13:45:15Z | | 2026-11-22T13:54:16Z |
-| OBS-02 | Stale errors, fallback and timers | O02 | in_progress | 2026-11-22T13:45:15Z | | 2026-11-22T13:54:16Z |
-| OBS-03 | Regression and browser evidence | O03 | in_progress | 2026-11-22T13:45:15Z | | 2026-11-22T13:54:16Z |
-| OBS-04 | Design review and delivery | O04 | in_progress | 2026-11-22T13:45:15Z | | 2026-11-22T13:54:16Z |
+| OBS-01 | Current observation and login | O01 | done | 2026-11-22T13:45:15Z | 2026-11-22T13:57:35Z | 2026-11-22T13:59:43Z |
+| OBS-02 | Stale errors, fallback and timers | O02 | done | 2026-11-22T13:45:15Z | 2026-11-22T13:57:35Z | 2026-11-22T13:59:43Z |
+| OBS-03 | Regression and browser evidence | O03 | done | 2026-11-22T13:45:15Z | 2026-11-22T13:57:35Z | 2026-11-22T13:59:43Z |
+| OBS-04 | Design review and delivery | O04 | done | 2026-11-22T13:45:15Z | 2026-11-22T13:57:35Z | 2026-11-22T13:59:43Z |
+
+T049 delivered: [PR1068](https://github.com/fallrising/newclear/pull/1068) merged normally
+at 2026-11-22T13:57:35Z as `1c0483e86a825d764aed6356312cee1ff26ac3a4`.
+Final head `52707d5fe5b14f231c0ce900c947d591d7dfcf2d` passed
+[Fanzloud CI](https://github.com/fallrising/newclear/actions/runs/45029941570) and
+[Project success contracts](https://github.com/fallrising/newclear/actions/runs/45029941484).
+Hosted Fanzloud includes57 Web tests,offline parser,Rust fmt/clippy/workspace tests and
+application build. Fresh-context implementation review ACCEPT; independent57/57 Web,
+55project/9llms indexes,inspector syntax,whitespace/alignment and receipt hashes passed.
+[Acceptance](../acceptance/T049.acceptance.md) retains corrected-fixture RED50/7 →
+GREEN57/0/0,eight actual Chromium synthetic scenarios and synchronization history.
+
+Remote readback passed in newclear: fetch main,merge ancestry and
+`git diff --exit-code 52707d5fe5b14f231c0ce900c947d591d7dfcf2d origin/main -- platform/fanzloud`
+returned zero at the merge above. Local scope/link/hash checks passed14allowed paths,
+181relative Markdown links and five asset/inspector hashes. Intervening Office/cloud-lab
+updates did not change Fanzloud; all parallel content and previous BOARD rows remain.
+
+Optional Claude Code consultation was attempted once and remains **auth_failed**:
+expired OAuth could not refresh; no design answer or model identity observed. It is not
+counted as Claude approval. Required native source acceptance was separate and passed;
+no authentication/settings change,retry or substituted provider call occurred.
+
+This post-merge record supersedes T049's pre-merge CI/delivery-pending notes. Required
+O01–04 are delivered; optional Claude confirmation remains unavailable. Shared API401,
+other asynchronous page lifecycles and backend consistency remain outside this repair.
+Synthetic sessions/results do not establish live Rust/AP/provider/owner acceptance.
+Full FN07/M3,Cloud/P1,AP M4,Office MVP and Office-navigation gap remain as tracked in their
+own contracts; usable_tag none unchanged. No deployment,service window or next milestone.
+
+Focused board-only review ACCEPT: previous rows retained,merge ancestry/component bytes
+verified,55/9indexes and whitespace/alignment passed. Optional Claude failure remains
+explicit. Final closure PR CI/merge/readback are the last delivery gates.

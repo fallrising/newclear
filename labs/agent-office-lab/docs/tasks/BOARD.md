@@ -435,8 +435,10 @@ T-0031：owner 重新訂閱 OpenCode 並要求繼續；新單次 Pi／GLM 5.3 �
 
 | ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| T-0031-01 | Cursor 授權交接修正；GLM 審查嘗試已記錄 | AC-01／09／11 子集 | in_progress | 2026-11-22T16:00:56.182651+00:00 | — | 2026-11-22T16:09:07.409284+00:00 |
+| T-0031-01 | Cursor 授權交接修正；GLM 審查嘗試已記錄 | AC-01／09／11 子集 | done | 2026-11-22T16:00:56.182651+00:00 | 2026-11-22T16:10:38Z | 2026-11-22T16:11:12.045009+00:00 |
 
 T-0031 本機結果：主導重現已消耗 Cursor grant id 可被新程序再次帶入的授權指紋歸屬問題，加入 dispatcher 同 PID／繼承鎖／私有消耗收據與排他 runner 領取檢查；失敗不退還。單次 Pi／GLM 5.3 開發審查 HTTP401 Invalid credential，未取得審查，沒有重試／fallback；不是產品模型驗收。詳[證據](../evidence/cursor-grant-handoff-2026-11-23.json)。完整 MVP／Cursor 真實新入口仍 pending。
 
 T31 本機驗收：236 Python／74 Node，Cursor 五組、Pi 首次五組／指定重試四組 Chrome 通過。首輪唯讀導航與 reload 競態保留，測試改為先等待目標 URL；產品 UI 未改。真實 runner 授權檢查／dispatcher／exec／檔案鎖與明示原生邊界替身；零產品模型呼叫。主導審查，PR／CI／合併待完成。
+
+T31 交付結案：[功能 PR #1079](https://github.com/fallrising/newclear/pull/1079) 於2026-11-22T16:10:38Z正常合併，merge SHA `f6363a39a6cfc4ec592880eadbc0d8b3312277f1`。遠端main已fetch，與候選 `fd4ba448179368bb55fe464cfebfc3f3b30663a9` 的全元件diff零；[Agent Office Lab](https://github.com/fallrising/newclear/actions/runs/45042254292)與[Project success contracts](https://github.com/fallrising/newclear/actions/runs/45042254384)均success，無衝突／繞過保護。236Python／74Node，Cursor五組及Pi首次五組／重試四組Chrome、publication225、indexes55contracts9llms及staged diff check通過。主導重現與審查完成；單次GLM401，沒有取得獨立模型審查、沒有自動重試。零產品模型請求／實際lab授權；既有時間與費用限制不變。Cursor真實新入口與跨provider生命週期、完整安全／MVP仍pending，無usable tag或部署。

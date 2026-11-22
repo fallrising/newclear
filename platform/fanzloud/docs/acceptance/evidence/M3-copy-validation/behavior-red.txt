@@ -1,0 +1,58 @@
+test_positive_and_each_identity_hash_state_lineage_mismatch (test_copy_validation.CompareTests.test_positive_and_each_identity_hash_state_lineage_mismatch) ... ERROR
+test_cleanup_unknown_cannot_be_success (test_copy_validation.RuntimeTests.test_cleanup_unknown_cannot_be_success) ... ok
+test_launch_boundary_and_parent_independent_deadline (test_copy_validation.RuntimeTests.test_launch_boundary_and_parent_independent_deadline) ... ERROR
+test_bad_digest_path_signal_symlink_and_wal_rejected (test_copy_validation.StageTests.test_bad_digest_path_signal_symlink_and_wal_rejected) ... ok
+test_references_fail_closed_and_no_private_exception (test_copy_validation.StageTests.test_references_fail_closed_and_no_private_exception) ... ERROR
+test_stage_private_exact_copy_source_unchanged_and_no_reuse (test_copy_validation.StageTests.test_stage_private_exact_copy_source_unchanged_and_no_reuse) ... ERROR
+
+======================================================================
+ERROR: test_positive_and_each_identity_hash_state_lineage_mismatch (test_copy_validation.CompareTests.test_positive_and_each_identity_hash_state_lineage_mismatch)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "$REPO/platform/fanzloud/acceptance/owner-data-recovery/test_copy_validation.py", line 112, in test_positive_and_each_identity_hash_state_lineage_mismatch
+    refs,observed,expected=self.fixture()
+                           ^^^^^^^^^^^^^^
+  File "$REPO/platform/fanzloud/acceptance/owner-data-recovery/test_copy_validation.py", line 90, in fixture
+    refs=cv.validate_references(references())
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "$REPO/platform/fanzloud/acceptance/owner-data-recovery/copy_validation.py", line 39, in validate_references
+    raise Rejected('not_implemented')
+copy_validation.Rejected: not_implemented
+
+======================================================================
+ERROR: test_launch_boundary_and_parent_independent_deadline (test_copy_validation.RuntimeTests.test_launch_boundary_and_parent_independent_deadline)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "$REPO/platform/fanzloud/acceptance/owner-data-recovery/test_copy_validation.py", line 126, in test_launch_boundary_and_parent_independent_deadline
+    command=cv.container_command(Path('/tmp/private'), 'fixture', 1000, 1000)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "$REPO/platform/fanzloud/acceptance/owner-data-recovery/copy_validation.py", line 47, in container_command
+    raise Rejected('not_implemented')
+copy_validation.Rejected: not_implemented
+
+======================================================================
+ERROR: test_references_fail_closed_and_no_private_exception (test_copy_validation.StageTests.test_references_fail_closed_and_no_private_exception)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "$REPO/platform/fanzloud/acceptance/owner-data-recovery/test_copy_validation.py", line 82, in test_references_fail_closed_and_no_private_exception
+    self.assertEqual(len(cv.validate_references(rows)),4)
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "$REPO/platform/fanzloud/acceptance/owner-data-recovery/copy_validation.py", line 39, in validate_references
+    raise Rejected('not_implemented')
+copy_validation.Rejected: not_implemented
+
+======================================================================
+ERROR: test_stage_private_exact_copy_source_unchanged_and_no_reuse (test_copy_validation.StageTests.test_stage_private_exact_copy_source_unchanged_and_no_reuse)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "$REPO/platform/fanzloud/acceptance/owner-data-recovery/test_copy_validation.py", line 58, in test_stage_private_exact_copy_source_unchanged_and_no_reuse
+    result=cv.stage(self.archive,digest,self.db,packet)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "$REPO/platform/fanzloud/acceptance/owner-data-recovery/copy_validation.py", line 35, in stage
+    raise Rejected('not_implemented')
+copy_validation.Rejected: not_implemented
+
+----------------------------------------------------------------------
+Ran 6 tests in 0.011s
+
+FAILED (errors=4)

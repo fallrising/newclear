@@ -1,0 +1,33 @@
+test_cleanup_only_stopped_owned_exact_id_and_failures (test_copy_validation.BoundaryRegressionTests.test_cleanup_only_stopped_owned_exact_id_and_failures) ... ok
+test_cli_errors_do_not_expose_input (test_copy_validation.BoundaryRegressionTests.test_cli_errors_do_not_expose_input) ... ok
+test_launch_profile_rejects_any_writable_source_or_weaker_limits (test_copy_validation.BoundaryRegressionTests.test_launch_profile_rejects_any_writable_source_or_weaker_limits) ... ok
+test_missing_duplicate_receipt_request_and_review_bytes_not_verified (test_copy_validation.BoundaryRegressionTests.test_missing_duplicate_receipt_request_and_review_bytes_not_verified) ... ok
+test_sqlite_reference_route_receipt_and_duplicate_rejected (test_copy_validation.BoundaryRegressionTests.test_sqlite_reference_route_receipt_and_duplicate_rejected) ... ok
+test_positive_and_each_identity_hash_state_lineage_mismatch (test_copy_validation.CompareTests.test_positive_and_each_identity_hash_state_lineage_mismatch) ... ok
+test_cleanup_unknown_cannot_be_success (test_copy_validation.RuntimeTests.test_cleanup_unknown_cannot_be_success) ... ok
+test_launch_boundary_and_parent_independent_deadline (test_copy_validation.RuntimeTests.test_launch_boundary_and_parent_independent_deadline) ... ok
+test_bad_digest_path_signal_symlink_and_wal_rejected (test_copy_validation.StageTests.test_bad_digest_path_signal_symlink_and_wal_rejected) ... ok
+test_references_fail_closed_and_no_private_exception (test_copy_validation.StageTests.test_references_fail_closed_and_no_private_exception) ... ok
+test_stage_private_exact_copy_source_unchanged_and_no_reuse (test_copy_validation.StageTests.test_stage_private_exact_copy_source_unchanged_and_no_reuse) ... ok
+test_archive_limit (test_verify_snapshot.SnapshotTests.test_archive_limit) ... ok
+test_both_markers_only_nominate_candidate_and_never_extract (test_verify_snapshot.SnapshotTests.test_both_markers_only_nominate_candidate_and_never_extract) ... ok
+test_chunk_boundary_marker_is_detected (test_verify_snapshot.SnapshotTests.test_chunk_boundary_marker_is_detected) ... ok
+test_cli_fixed_error_without_private_path_or_raw_data (test_verify_snapshot.SnapshotTests.test_cli_fixed_error_without_private_path_or_raw_data) ... ok
+test_declared_oversize_is_rejected_before_payload_read (test_verify_snapshot.SnapshotTests.test_declared_oversize_is_rejected_before_payload_read) ... ok
+test_duplicate_names (test_verify_snapshot.SnapshotTests.test_duplicate_names) ... ok
+test_hidden_extended_metadata_is_rejected_before_processing (test_verify_snapshot.SnapshotTests.test_hidden_extended_metadata_is_rejected_before_processing) ... ok
+test_links_and_specials (test_verify_snapshot.SnapshotTests.test_links_and_specials) ... ok
+test_malformed_and_truncated (test_verify_snapshot.SnapshotTests.test_malformed_and_truncated) ... ok
+test_markers_outside_relations_do_not_count (test_verify_snapshot.SnapshotTests.test_markers_outside_relations_do_not_count) ... ok
+test_member_count_size_and_relation_budgets (test_verify_snapshot.SnapshotTests.test_member_count_size_and_relation_budgets) ... ok
+test_nonzero_trailing_archive_content_rejected (test_verify_snapshot.SnapshotTests.test_nonzero_trailing_archive_content_rejected) ... ok
+test_single_marker_is_not_matching_identity (test_verify_snapshot.SnapshotTests.test_single_marker_is_not_matching_identity) ... ok
+test_symlink_input_rejected (test_verify_snapshot.SnapshotTests.test_symlink_input_rejected) ... ok
+test_unsafe_paths (test_verify_snapshot.SnapshotTests.test_unsafe_paths) ... ok
+test_version_required (test_verify_snapshot.SnapshotTests.test_version_required) ... ok
+test_wrong_digest (test_verify_snapshot.SnapshotTests.test_wrong_digest) ... ok
+
+----------------------------------------------------------------------
+Ran 28 tests in 0.120s
+
+OK

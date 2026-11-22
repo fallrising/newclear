@@ -16,6 +16,17 @@ source_commit: 391aa1aa72f1dd550d8acc7323f00c7a6229c3d4
 
 # Codebox / Fanzloud 成功契約
 
+## Isolated data-copy validator — 2026-11-22 continuation
+
+Owner continued after PR1081/1083. [COPY01–04 specification](docs/specs/SPEC-M3-copy-validation.md)
+binds private safe staging, a bounded PostgreSQL18 copy, exact logical comparisons and
+synthetic verification. [Tool acceptance](docs/acceptance/M3-copy-validation.acceptance.md)
+records29tests, actual synthetic PostgreSQL and independent ACCEPT; normal delivery
+is tracked in BOARD. Original source
+volumes/config/SQLite/credentials and product services stay untouched. This develops
+and tests the tool; actual private-copy execution remains separately reviewed/authorized.
+Original FN07/fullM3/mainline incomplete and usable_tag none remain unchanged.
+
 ## Private Office navigation implementation — 2026-11-22 continuation
 
 Owner resumed FZ-OFFICE-NAV after PR1061. [Normative technical contract](docs/specs/SPEC-FZ-OFFICE-NAV.md)

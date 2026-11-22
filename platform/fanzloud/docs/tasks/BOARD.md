@@ -448,3 +448,27 @@ Next: prepare and independently review bounded isolated-copy PostgreSQL18 logica
 verification of task/run/command/archive lineage and cleanup before authorizing its run.
 Runtime not_ready, current-source UI selection, full operation gate, TLS/trust and actual
 owner FN07 remain open. Hosted CI validates this tool/branch, not a restored installation.
+
+## M3-U isolated-copy validator — 2026-11-22
+
+[Scope/design/AC](../specs/SPEC-M3-copy-validation.md); one Ready task, owner continuation.
+
+| ID | Task | AC | Status | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| M3-COPY01 | Safe private staging | COPY01 | in_progress | 2026-11-22T16:56:56Z | — | 2026-11-22T17:17:25Z |
+| M3-COPY02 | Bounded copy lifecycle | COPY02 | in_progress | 2026-11-22T16:56:56Z | — | 2026-11-22T17:17:25Z |
+| M3-COPY03 | Exact logical comparison | COPY03 | in_progress | 2026-11-22T16:56:56Z | — | 2026-11-22T17:17:25Z |
+| M3-COPY04 | Independent review and delivery | COPY04 | in_progress | 2026-11-22T16:56:56Z | — | 2026-11-22T17:17:25Z |
+
+Private-copy execution NOT_RUN; original FN07 remains open.
+
+COPY01–03 source/synthetic acceptance complete; fresh-context review ACCEPT after one
+P2 unknown-outcome persistence correction.29tests, real PostgreSQL18.6 synthetic
+logical/readonly checks,120.48s autonomous deadline and cleanup pass;112original volume
+names unchanged, zero owned containers remain. Source hashes and failure history are
+in [acceptance](../acceptance/M3-copy-validation.acceptance.md). Required CI/merge/readback
+pending; rows stay in_progress through source merge. Original private-copy NOT_RUN.
+
+Final source precommit:55project/9llms indexes,177relative links, source hashes,
+Ruff,29tests and staged/worktree whitespace/alignment pass. Sanitized historical
+RED-log trailing whitespace was removed; original private failure output retained.

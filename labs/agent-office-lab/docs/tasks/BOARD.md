@@ -456,3 +456,13 @@ Owner直接指示繼續開發；來源newclear `462f392ffb8299ff10aedde05f6c16e6
 T-0032：已修正 Pi runner 接受任意格式正確授權參照的歸屬問題；首次與retry一律驗證dispatcher同PID／繼承鎖／來源／provider／收據並領取一次，retry還核對parent。245Python／74Node與Pi首次五組／retry四組／Cursor五組Chrome通過，失敗歷史與fixture保留；零產品模型請求。原生預檢及provider是明示替身，完整MVP仍pending。單次GLM開發審查使用owner指定1M上限，HTTP400 invalid_request未指明參數，未取得審查且未重試；主導獨立重現與審查。詳[證據](../evidence/pi-grant-handoff-2026-11-23.json)，交付狀態以任務板為準。
 
 T32 交付結案：[功能 PR #1084](https://github.com/fallrising/newclear/pull/1084) 於2026-11-22T17:01:18Z正常合併，merge SHA `fadc191378bc34185b23ece08b1070b8ac459a51`。已fetch遠端main，與候選 `70e8ada029bf6f88d3061bc27977608a05467e31` 的全元件diff零；[Agent Office Lab](https://github.com/fallrising/newclear/actions/runs/45046934979)與[Project success contracts](https://github.com/fallrising/newclear/actions/runs/45046935063)均success，無衝突／繞過保護。245Python／74Node，Pi首次五組／指定retry四組及Cursor五組Chrome，publication227、indexes55contracts9llms、staged diff check通過。原生預檢／provider為明示替身，產品模型請求與實際lab grant皆零；主導重現與審查，單次GLM400未取得獨立審查、沒有重試／fallback。完整跨provider原生生命週期、安全與MVP仍pending，無usable tag或部署。
+
+## T-0033 Cursor 操作台真實驗收
+
+T-0033 驗證從操作台明確派發一次 Cursor／Composer 2.5 固定合成任務，核對授權、原生結果、工具事件、下載及重新開啟結果。範圍涵蓋 AC-01／09／13 的入口整合。限制為一次 prompt、120 秒、四次工具及 4096 bytes 產物，模型請求數、token 與金額沒有硬上限。
+
+| ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| T-0033-01 | 原生任務、下載與重啟讀回 | AC-01／09／13 子集 | in_progress | 2026-11-22T17:06:19.409991+00:00 | — | 2026-11-22T17:06:19.409991+00:00 |
+
+T-0033 真實驗收通過。操作台一次授權啟動 Cursor／Composer 2.5，完成兩次讀取及一次寫入。原生 stop、同 session、產物及實際 Blob 下載 SHA-256 均核對成功；刷新與操作台重啟保留結果且未重跑。30.17 秒，43424 input／476 output tokens，受追蹤的 98 個程序全部退出。剩餘主線包含跨工位權限、取消、恢復與完整安全驗收。 [驗收證據](../evidence/cursor-console-live-2026-11-23.json)。

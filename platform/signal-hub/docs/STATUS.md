@@ -107,3 +107,7 @@ M3產品版本 `e44afd8e595af46a1867b48aaef89a9f3db5032e` 的[CI38293396899](htt
 上述首次browser失敗已由CI38293396899的完整6/6通過結案；sandbox保持啟用。最後提交僅同步驗收紀錄，執行檔內容與已驗證產品版本相同。
 
 M4首次CI38377908329：native gates全部通過，Chromium7/8（AC-37與原有6例通過）。投遞案例因implicit label locator超時；快照存在正確combobox無障礙名稱。兩處改為精確role/name，保留原斷言與timeout，經T-405獨立複審後由CI38379149575完整8/8通過結案。
+
+## P05 單一事件來源提案（2026-11-22）
+
+Owner 指示繼續已選文件里程碑；[提案](portfolio-source-proposal.md)選擇既有 inventory observation。原轉換／單次 sender 及新合成恢復證據可重用，但本次不投遞、不部署或補做真來源驗收。P05-01～04 的計畫見[PLAN](../.team/PLAN.md)，任務見[BOARD](tasks/BOARD.md)。P05-01～04 文件候選已通過24份固定來源／19個公開 pins、合成 JSON／既有 event schema、55 contracts／9 llms及獨立 ACCEPT；詳見[本輪審查](../.team/reports/T-901.md)。必要 CI／Git 交付仍待實際回執，最終結果見 PR 與任務板；AC-04／M6 真實資格不變。

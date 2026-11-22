@@ -13,6 +13,8 @@ M5 提供驗證後封存清除、可重複匯回、一致 SQLite 備份與隔離
 
 ## 閱讀入口
 
+- [單一盤點事件來源提案](docs/portfolio-source-proposal.md)：沿用既有報告與傳送工具，固定 M6 的來源、重送與恢復旅程；文件提案，尚未實際接入。
+
 - [快速開始](docs/quickstart.md)：建置、啟動及本機端到端範例
 - [個人 Docker 啟動包](deployment/docker/README.md)：Linux 非 root 執行、私人設定、持久資料與備份還原
 - [runtime 契約](docs/runtime.md)：啟動限制、HTTP 邊界與已實作範圍

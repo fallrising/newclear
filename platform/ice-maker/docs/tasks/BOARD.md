@@ -19,3 +19,11 @@ Approved [task](../../fe-review/tasks/round2/task.md), R2-AC-6/E.
 | ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
 | ICE-FE2-1 | M1–M4 syntheticfixture andinlineUI (PR590 merged) | R2-AC-6/E | done | 2026-10-24T09:17:52Z | 2026-10-24T09:49:41Z | 2026-10-24T09:51:27Z |
+
+## P03 — Portfolio OCR comparison
+
+Owner continuation 2026-11-22；[任務](P03.md)。僅文件對照，無 parser／服務遷移。
+
+| ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| P03 | 比較既有OCR與HTTP服務，保存原證據／缺口 | P03-01–04 | in_progress | 2026-11-22T13:04:51Z | | 2026-11-22T13:04:51Z |

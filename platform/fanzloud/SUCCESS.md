@@ -16,6 +16,19 @@ source_commit: 391aa1aa72f1dd550d8acc7323f00c7a6229c3d4
 
 # Codebox / Fanzloud 成功契約
 
+## Private Office navigation continuation — 2026-11-22
+
+[FZ-OFFICE-NAV task](docs/tasks/FZ-OFFICE-NAV.task.md) records the owner's requested
+private read-only result navigation and explicit insufficient-contract fallback.
+PR1057/1058 already delivered public instruction links; they do not prove direct
+private result access. [Current gap/proposal](docs/plans/office-private-navigation-gap.md)
+binds source inspection to current main and preserves N01–N05 as NOT_RUN.
+This round only delivers the bounded gap report if the destination/access contract
+remains unavailable: five documentation paths, independent review, indexes/links/
+whitespace, CI and normal PR delivery. [Evidence](docs/acceptance/FZ-OFFICE-NAV.acceptance.md).
+No production change, new result service, deployment or original AC change;
+mainline incomplete, usable_tag none and original FN07 owner operation stay pending.
+
 ## Portfolio entry comparison — 2026-11-16
 
 Owner continuation starts documentation-only [FZ-ENTRY-MAP](docs/tasks/FZ-ENTRY-MAP.task.md),

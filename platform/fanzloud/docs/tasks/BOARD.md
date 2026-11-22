@@ -216,13 +216,30 @@ Focused independent board-only review: ACCEPT; prior rows, exact merge metadata,
 component source identity, scope and original gaps preserved. Reviewer reran indexes
 and whitespace; final closeout PR CI/merge/readback remain delivery gates.
 
+## FZ-OFFICE-NAV — owner private-navigation continuation
+
+[Task/lead](FZ-OFFICE-NAV.task.md), [verified gap and proposal](../plans/office-private-navigation-gap.md),
+[evidence](../acceptance/FZ-OFFICE-NAV.acceptance.md).
+
+| ID | Task | AC | Status | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| FZ-OFFICE-NAV | Private Office result navigation; blocked on existing destination/access contract, not instruction links | N01–N05 NOT_RUN; G01–03 gap report | in_progress | 2026-11-22T13:04:13Z | | 2026-11-22T13:09:21Z |
+
+PR1057/1058 already completed instruction navigation. This task does not repeat it
+or mark direct private access passed. Office local snapshot/loopback console exist;
+a usable private result-page locator and fresh-tab access contract are unverified.
+Dependent implementation stops under the owner's explicit insufficient-contract
+fallback. No deployment, credential change or Office T29 work is started. The
+feature remains open after gap-report delivery; only resume from the linked task
+when the concrete destination contract is available. Original rows/AC stay unchanged.
+
 ## T-1059 T048 diff download lifecycle
 
 [Task T048](T048.task.md), [issue1059](https://github.com/fallrising/newclear/issues/1059).
 
 | ID | Task | AC | Status | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| DIFF-01 | Auth and selection invalidation | D01 | in_progress | 2026-11-22T13:03:55Z | | 2026-11-22T13:11:19Z |
-| DIFF-02 | Current bytes and stale errors | D02 | in_progress | 2026-11-22T13:03:55Z | | 2026-11-22T13:11:19Z |
-| DIFF-03 | Regression and browser evidence | D03 | in_progress | 2026-11-22T13:03:55Z | | 2026-11-22T13:11:19Z |
-| DIFF-04 | Review and normal delivery | D04 | in_progress | 2026-11-22T13:03:55Z | | 2026-11-22T13:11:19Z |
+| DIFF-01 | Auth and selection invalidation | D01 | in_progress | 2026-11-22T13:03:55Z | | 2026-11-22T13:15:04Z |
+| DIFF-02 | Current bytes and stale errors | D02 | in_progress | 2026-11-22T13:03:55Z | | 2026-11-22T13:15:04Z |
+| DIFF-03 | Regression and browser evidence | D03 | in_progress | 2026-11-22T13:03:55Z | | 2026-11-22T13:15:04Z |
+| DIFF-04 | Review and normal delivery | D04 | in_progress | 2026-11-22T13:03:55Z | | 2026-11-22T13:15:04Z |

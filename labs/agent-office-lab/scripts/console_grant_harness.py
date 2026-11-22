@@ -2,7 +2,7 @@
 """Private offline harness for browser remote-grant console tests.
 
 It creates a synthetic lab under the system temp directory, never reads real
-credentials, and replaces the paid dispatcher launch with a local Python stub.
+credentials, and uses real dispatcher/exec/claims with a local Python provider stub.
 """
 import argparse
 import json
@@ -58,26 +58,37 @@ def write_status(root, spawn_count, consumed_count, active):
 
 
 def stub_code(lab):
-    return r'''
-import datetime,json,os,signal,sys,time
+    return r'''# Synthetic failed provider; no network or credentials.
+import argparse,datetime,json,signal,sys,time
 from pathlib import Path
+sys.path.insert(0, PRODUCTION_SCRIPTS)
+import execution_slot as slots
+import remote_grant as grants
+p=argparse.ArgumentParser()
+p.add_argument('--allow-remote',action='store_true',required=True)
+p.add_argument('--authorization-ref',required=True)
+a=p.parse_args()
+lab=Path(__file__).resolve().parents[1]
 stop=False
 def handler(*_):
     global stop; stop=True
 signal.signal(signal.SIGINT,handler);signal.signal(signal.SIGTERM,handler)
-lab=Path(sys.argv[1])
-run=lab/'runs'/('pi-work-harness-'+datetime.datetime.now(datetime.timezone.utc).strftime('%Y%m%dT%H%M%S%fZ'))
-(run/'workspace').mkdir(parents=True,exist_ok=False)
-started=time.monotonic()
-while not stop and time.monotonic()-started<20:
-    time.sleep(0.1)
-report={'status':'failed','reason':'harness_stub','provider':'pi','model':'deepseek-flash','model_inference_verified':False,
-        'cleanup_errors':[],'startup_only':False,'office':{'provider':'pi','status':'failed','model':'deepseek/deepseek-flash','cleanup_completed':True},
-        'remote_usage':{'requests':0,'output_tokens':0}}
-(run/'result.json').write_text(json.dumps(report)+'\n')
-print(json.dumps({'status':'failed','reason':'harness_stub','model_inference_verified':False,'artifacts':str(run)}),flush=True)
+with slots.execution_slot(lab):
+    authorization=grants.claim_runner(lab,a.authorization_ref,'pi')
+    slots.mark_started()
+    run=lab/'runs'/('pi-work-harness-'+datetime.datetime.now(datetime.timezone.utc).strftime('%Y%m%dT%H%M%S%fZ'))
+    (run/'workspace').mkdir(parents=True,exist_ok=False)
+    started=time.monotonic()
+    while not stop and time.monotonic()-started<20:
+        time.sleep(0.1)
+    report={'status':'failed','reason':'harness_stub','provider':'pi','model':'deepseek-flash','model_inference_verified':False,
+            'cleanup_errors':[],'startup_only':False,'office':{'provider':'pi','status':'failed','model':'deepseek/deepseek-flash','cleanup_completed':True},
+            'remote_usage':{'requests':0,'output_tokens':0},'authorization':{'kind':'server_grant','fingerprint':authorization}}
+    (run/'result.json').write_text(json.dumps(report)+'\n')
+    slots.mark_clean()
+    print(json.dumps({'status':'failed','reason':'harness_stub','model_inference_verified':False,'artifacts':str(run)}),flush=True)
 sys.exit(1)
-'''
+'''.replace('PRODUCTION_SCRIPTS', repr(str(Path(__file__).resolve().parent)))
 
 
 class HarnessConsole(office_console.Console):
@@ -103,21 +114,28 @@ class HarnessConsole(office_console.Console):
             raise office_console.ConsoleError('unsafe_harness_command')
         if command[2:6] != ['run', 'pi', '--execute', '--remote-grant']:
             raise office_console.ConsoleError('unexpected_harness_command')
-        grant_id = command[6]
-        remote_grant.consume(self.lab, grant_id, 'pi', 'console')
-        self.consumed_count += 1
+        code = """import sys
+from pathlib import Path
+import office_dispatch as dispatch
+dispatch.detect=lambda *a,**k: {'launch_prerequisites_present':True}
+raise SystemExit(dispatch.launch('pi',False,Path(sys.argv[1]),remote_grant=sys.argv[2]))
+"""
         self.spawn_count += 1
-        process = subprocess.Popen([sys.executable, '-c', stub_code(self.lab), str(self.lab)], cwd=self.lab,
-                                   env={}, stdin=subprocess.DEVNULL, stdout=log, stderr=subprocess.STDOUT,
+        process = subprocess.Popen([sys.executable, '-c', code, str(self.lab), command[6]], cwd=self.lab,
+                                   env={'PATH':os.defpath,'PYTHONPATH':str(Path(__file__).resolve().parent)},
+                                   stdin=subprocess.DEVNULL, stdout=log, stderr=subprocess.STDOUT,
                                    start_new_session=True)
         self.processes.append(process)
         write_status(self.harness_root, self.spawn_count, self.consumed_count, True)
         return process
 
-    def watch(self, job):
-        super().watch(job)
+    def snapshot(self):
+        result = super().snapshot()
+        count = sum(row.get('authorization_consumed') is True for row in result['jobs'])
+        self.consumed_count = max(self.consumed_count, count)
         write_status(self.harness_root, self.spawn_count, self.consumed_count,
                      any(p.poll() is None for p in self.processes))
+        return result
 
 
 def main(argv=None):
@@ -133,7 +151,9 @@ def main(argv=None):
     (root / '.office-grant-harness').touch(mode=0o600)
     lab = root / 'lab'
     lab.mkdir(mode=0o700, exist_ok=True)
-    copy_sources(lab)
+    if initial:
+        copy_sources(lab)
+        (lab/'scripts/run_pi_work.py').write_text(stub_code(lab))
     if args.scenario in ('no_optin', 'grant', 'revoke_after_plan') and initial:
         try:
             if remote_grant.pending(lab, 'pi') is None:
@@ -157,8 +177,11 @@ def main(argv=None):
         pass
     finally:
         console.close(); server.shutdown(); server.server_close(); thread.join(5)
-        write_status(root, console.spawn_count, console.consumed_count,
-                     any(p.poll() is None for p in console.processes))
+        console.snapshot()
+        (root/'harness-final.json').write_text(json.dumps({
+            'all_direct_children_exited':all(p.poll() is not None for p in console.processes),
+            'server_thread_alive':thread.is_alive(), 'model_requests':0,
+            'provider':'synthetic_failed_stub'})+'\n')
 
 
 if __name__ == '__main__':

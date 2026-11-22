@@ -19,6 +19,7 @@ import time
 from deepseek_relay import Relay, MAX_REQUESTS, MAX_OUTPUT, MAX_BODY
 from remote_cli import LAB, isolated_env, private_directory, probe, write_new_private
 import pi_retry
+import remote_grant
 from pi_hook_evidence import verify_hook_boundary
 from process_ownership import process_table, collect_owned, alive_owned, crash_owned, terminate_owned
 
@@ -243,11 +244,13 @@ def main():
     group.add_argument('--check-resume', action='store_true', help='Reconnect the same persisted Pi session after a local error and owned CLI exit; no model calls')
     group.add_argument('--check-host-restart', action='store_true', help='Crash and restart the native Office host; reconnect Pi without a prompt or model calls')
     group.add_argument('--check-question', action='store_true', help='Exercise native Pi confirm UI with deny, allow and timeout; no model calls')
-    parser.add_argument('--authorization-ref', help='Server-side remote grant reference; only valid with --allow-remote')
+    parser.add_argument('--authorization-ref', help='Consumed server-side grant reference; dispatcher only')
     args = parser.parse_args()
-    if args.authorization_ref is not None and (not args.allow_remote or not re.fullmatch(r'[0-9a-f]{32}', args.authorization_ref)):
-        raise ValueError('Invalid authorization reference')
-    authorization_fingerprint = hashlib.sha256(args.authorization_ref.encode()).hexdigest()[:12] if args.authorization_ref else None
+    authorization_fingerprint = None
+    if args.authorization_ref is not None:
+        if not args.allow_remote:
+            raise ValueError('Invalid authorization reference')
+        authorization_fingerprint = remote_grant.claim_runner(LAB, args.authorization_ref, 'pi')
     if not args.allow_remote and not args.check_startup and args.check_failure is None and not args.check_crash and not args.check_cancel and not args.check_resume and not args.check_host_restart and not args.check_question:
         print(json.dumps({'mode': 'plan', 'command': 'python3 scripts/run_pi_work.py --allow-remote',
                           'provider': 'pi', 'model': 'deepseek-flash', 'max_requests': MAX_REQUESTS,

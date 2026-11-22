@@ -96,3 +96,13 @@ python3 scripts/office_console.py --accept-remote-grant cursor
 這修正了舊 id 可以被新 runner 帶入、沿用相同授權指紋的紀錄問題；不是瀏覽器自動重試的證據。直接 `--allow-remote` 仍代表操作員另次明確授權，不以舊 grant 作為其依據。這仍是單 checkout 的合作協定，不防擁有本機寫入權者修改程式或收據。既有已消耗紀錄不遷移、不回復為 pending。
 
 [本輪證據](evidence/cursor-grant-handoff-2026-11-23.json)使用實際 Python runner／dispatcher／exec／檔案鎖，原生預檢與 provider 為明示替身；零產品模型請求。單次開發 GLM 審查回覆 401 Invalid credential，沒有取得審查內容、沒有重試或 fallback；修正由主導獨立重現與審查。Cursor 真實新入口與完整 MVP 仍 pending。
+
+## T-0032：Pi 首次與指定重試的 runner 交接
+
+Pi 的 `--authorization-ref` 現在與 Cursor 一樣，只接受 dispatcher 同 PID／繼承 guarded 鎖的已消耗授權，並在原生預檢、讀取 DeepSeek key、建立 run 或改寫重試 ledger 前以排他收據領取一次。原生預檢失敗也不退還；任意編號、其他 provider、來源變更、錯誤／缺失消耗收據與新程序重用均拒絕。
+
+Pi 還須比對 grant 的 fresh／retry 範圍與繼承 journal 中的 parent；首次任務不能轉為重試，指定重試也不能遺失或更換 parent。領取時重查原 parent 的原始報告、fixture、來源、receipt／ledger 與下一次 attempt；既有成功／清理／兩次重試條件不變。舊 run 不遷移，程式變更後舊來源綁定不能繼續使用。
+
+這修正的是授權參照歸屬，不表示先前瀏覽器會自動重跑；直接 `--allow-remote` 仍須另次明確操作員批准，並且不會沿用 server grant 指紋。合作協定與完整安全驗收界線不變。
+
+[證據](evidence/pi-grant-handoff-2026-11-23.json)：實際 runner 授權入口、dispatcher／exec／執行鎖及 Chrome，原生預檢與 provider 為明示替身。Pi 首次瀏覽器 harness 已改走真實 dispatcher／領取流程；指定重試保留原始歷史與同 fixture。零產品模型請求，沒有重跑歷史真實模型驗收；完整 MVP 仍 pending。

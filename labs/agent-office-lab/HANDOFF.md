@@ -1,5 +1,7 @@
 # 開發交接
 
+T-0032：已修正 Pi runner 接受任意格式正確授權參照的歸屬問題；首次與retry一律驗證dispatcher同PID／繼承鎖／來源／provider／收據並領取一次，retry還核對parent。245Python／74Node與Pi首次五組／retry四組／Cursor五組Chrome通過，失敗歷史與fixture保留；零產品模型請求。原生預檢及provider是明示替身，完整MVP仍pending。單次GLM開發審查使用owner指定1M上限，HTTP400 invalid_request未指明參數，未取得審查且未重試；主導獨立重現與審查。詳[證據](docs/evidence/pi-grant-handoff-2026-11-23.json)，交付狀態以任務板為準。
+
 T-0031 本機結果：主導重現已消耗 Cursor grant id 可被新程序再次帶入的授權指紋歸屬問題，加入 dispatcher 同 PID／繼承鎖／私有消耗收據與排他 runner 領取檢查；失敗不退還。單次 Pi／GLM 5.3 開發審查 HTTP401 Invalid credential，未取得審查，沒有重試／fallback；不是產品模型驗收。詳[證據](docs/evidence/cursor-grant-handoff-2026-11-23.json)。完整 MVP／Cursor 真實新入口仍 pending。
 
 T-0030：Cursor 固定首次合成任務已接入一次性 grant 與操作台。授權綁定模型、固定 runtime 版本、120 秒／四工具／4096 bytes 與來源（含 CLI lock），跨 provider 仍只有一張 pending grant。明確確認、正確工位派工、原子消耗、停止、失敗結果、撤銷及重啟不重跑以真實 HTTP／dispatcher／跨 exec 鎖及 Chrome 通過；provider 與環境偵測為明示本機替身，沒有 Cursor 模型或原生取消驗收。Pi fresh／retry 回歸通過，原費用／時間上限與不自動重試不變。一次 Pi／GLM 開發審查因 HTTP403 未完成，沒有重試／fallback；主導完成審查。完整 MVP 保持 pending；[證據](docs/evidence/cursor-console-grant-2026-11-22.json)，交付見[任務板](docs/tasks/BOARD.md)。

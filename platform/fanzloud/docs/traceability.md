@@ -188,3 +188,11 @@ Existing FN04/FN07 and CU-M3-U01/02/04 → [DATA01–03](acceptance/M3-owner-dat
 `acceptance/owner-data-recovery/verify_snapshot.py` / `test_verify_snapshot.py` →
 [bounded evidence](acceptance/M3-owner-data-recovery.acceptance.md).
 Physical candidate evidence only; no product API/Rust/rustdoc/schema change or FN07 pass.
+
+## M3-U isolated-copy validator — 2026-11-22
+
+Existing FN04/FN07 and CU-M3-U01/02/04 → [COPY01–04](specs/SPEC-M3-copy-validation.md)
+→ `acceptance/owner-data-recovery/copy_validation.py`, focused unit tests and synthetic
+`smoke_copy.py` → [acceptance](acceptance/M3-copy-validation.acceptance.md).
+AP schema/quiescence guards reused unchanged; no product API/Rust/rustdoc/schema change.
+This is diagnostic-tool delivery only. Private-copy execution and original FN07 remain open.

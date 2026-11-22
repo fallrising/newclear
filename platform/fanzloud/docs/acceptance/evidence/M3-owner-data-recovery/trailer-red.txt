@@ -1,0 +1,49 @@
+test_archive_limit (test_verify_snapshot.SnapshotTests.test_archive_limit) ... ok
+test_both_markers_only_nominate_candidate_and_never_extract (test_verify_snapshot.SnapshotTests.test_both_markers_only_nominate_candidate_and_never_extract) ... ok
+test_chunk_boundary_marker_is_detected (test_verify_snapshot.SnapshotTests.test_chunk_boundary_marker_is_detected) ... ok
+test_cli_fixed_error_without_private_path_or_raw_data (test_verify_snapshot.SnapshotTests.test_cli_fixed_error_without_private_path_or_raw_data) ... ok
+test_declared_oversize_is_rejected_before_payload_read (test_verify_snapshot.SnapshotTests.test_declared_oversize_is_rejected_before_payload_read) ... ok
+test_duplicate_names (test_verify_snapshot.SnapshotTests.test_duplicate_names) ... ok
+test_hidden_extended_metadata_is_rejected_before_processing (test_verify_snapshot.SnapshotTests.test_hidden_extended_metadata_is_rejected_before_processing) ... ok
+test_links_and_specials (test_verify_snapshot.SnapshotTests.test_links_and_specials) ... ok
+test_malformed_and_truncated (test_verify_snapshot.SnapshotTests.test_malformed_and_truncated) ... ok
+test_markers_outside_relations_do_not_count (test_verify_snapshot.SnapshotTests.test_markers_outside_relations_do_not_count) ... ok
+test_member_count_size_and_relation_budgets (test_verify_snapshot.SnapshotTests.test_member_count_size_and_relation_budgets) ... ok
+test_nonzero_trailing_archive_content_rejected (test_verify_snapshot.SnapshotTests.test_nonzero_trailing_archive_content_rejected) ...
+  test_nonzero_trailing_archive_content_rejected (test_verify_snapshot.SnapshotTests.test_nonzero_trailing_archive_content_rejected) (bytes=11776) ... FAIL
+  test_nonzero_trailing_archive_content_rejected (test_verify_snapshot.SnapshotTests.test_nonzero_trailing_archive_content_rejected) (bytes=11776) ... FAIL
+  test_nonzero_trailing_archive_content_rejected (test_verify_snapshot.SnapshotTests.test_nonzero_trailing_archive_content_rejected) (bytes=4608) ... FAIL
+test_single_marker_is_not_matching_identity (test_verify_snapshot.SnapshotTests.test_single_marker_is_not_matching_identity) ... ok
+test_symlink_input_rejected (test_verify_snapshot.SnapshotTests.test_symlink_input_rejected) ... ok
+test_unsafe_paths (test_verify_snapshot.SnapshotTests.test_unsafe_paths) ... ok
+test_version_required (test_verify_snapshot.SnapshotTests.test_version_required) ... ok
+test_wrong_digest (test_verify_snapshot.SnapshotTests.test_wrong_digest) ... ok
+
+======================================================================
+FAIL: test_nonzero_trailing_archive_content_rejected (test_verify_snapshot.SnapshotTests.test_nonzero_trailing_archive_content_rejected) (bytes=11776)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "[worktree]/platform/fanzloud/acceptance/owner-data-recovery/test_verify_snapshot.py", line 141, in test_nonzero_trailing_archive_content_rejected
+    with self.assertRaisesRegex(probe.InvalidSnapshot, '^archive_structure$'):
+AssertionError: InvalidSnapshot not raised
+
+======================================================================
+FAIL: test_nonzero_trailing_archive_content_rejected (test_verify_snapshot.SnapshotTests.test_nonzero_trailing_archive_content_rejected) (bytes=11776)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "[worktree]/platform/fanzloud/acceptance/owner-data-recovery/test_verify_snapshot.py", line 141, in test_nonzero_trailing_archive_content_rejected
+    with self.assertRaisesRegex(probe.InvalidSnapshot, '^archive_structure$'):
+AssertionError: InvalidSnapshot not raised
+
+======================================================================
+FAIL: test_nonzero_trailing_archive_content_rejected (test_verify_snapshot.SnapshotTests.test_nonzero_trailing_archive_content_rejected) (bytes=4608)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "[worktree]/platform/fanzloud/acceptance/owner-data-recovery/test_verify_snapshot.py", line 141, in test_nonzero_trailing_archive_content_rejected
+    with self.assertRaisesRegex(probe.InvalidSnapshot, '^archive_structure$'):
+AssertionError: InvalidSnapshot not raised
+
+----------------------------------------------------------------------
+Ran 17 tests in 0.049s
+
+FAILED (failures=3)

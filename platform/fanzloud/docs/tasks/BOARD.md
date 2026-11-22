@@ -399,3 +399,17 @@ Next dependency: locate original AP data and establish an evidence-backed recove
 plan before any restore/source replacement/TLS change/window. No original services,
 product CLI, VM, credential changes, intent consumption or DB restore occurred.
 The retained private audit/handoff is backed up separately; no private values published.
+
+## M3-U original-data investigation — 2026-11-22
+
+[Scope and AC](../acceptance/M3-owner-data-recovery.md); owner direct continuation.
+
+| ID | Task | AC | Status | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| M3-DATA01 | Locate saved original PostgreSQL candidates | DATA01 | in_progress | 2026-11-22T16:05:21Z | | 2026-11-22T16:22:45Z |
+| M3-DATA02 | Bounded offline identity and recovery decision | DATA02 | in_progress | 2026-11-22T16:05:21Z | | 2026-11-22T16:22:45Z |
+| M3-DATA03 | Review, CI and normal delivery | DATA03 | in_progress | 2026-11-22T16:05:21Z | | 2026-11-22T16:22:45Z |
+
+Source/diagnostic review ACCEPT after correcting one tar-termination finding;17tests,
+actual private snapshot verifier,55/9indexes,165links,hashes/privacy/whitespace pass.
+Hosted CI/merge/readback pending; candidate_only/not_ready and original FN07 remain.

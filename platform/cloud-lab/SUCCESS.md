@@ -72,3 +72,7 @@ Owner已明確「批准上線」：ML-01核對已審候選與原部署、保留b
 ## 本輪工具目錄與多VPS agent設計（CA）
 
 Owner要求繼續把已盤點CF資源對應用途／入口／觸發／來源，並查核active repo中可沿用的主機agent設計。CA-01保存部署資源與來源對照及未確認項，私人細節不進公開Git；CA-02以連線可見未封存repo為active候選，核對真實runner存活與候選實作／設計成熟度；CA-03提出多VPS最小接入方案、權責與可驗收切片。CA-01完成[部署用途對照](docs/service-catalog.md)與私人精確入口清單；CA-02確認原runner運行並查核11個active候選及具名agent程式；CA-03交付[多VPS設計](docs/host-agent-design.md)。此輪只有來源查核與文件設計，不批量安裝、改權限／live schema、開付費服務或搬遷／封存；獨立審查修正時鐘邊界後ACCEPT、文件檢查通過，證據見[T871](../../.team/reports/T-871.md)，Git交付見任務板。
+
+## P04 既有能力與期限對帳（2026-11-22）
+
+目標是區分 IR／MC／ML 已交付範圍、CA 多VPS未實作與授權歷史，避免重建盤點功能。P04-01～03、可寫範圍、設計、驗證與停止條件見[本輪任務](docs/tasks/portfolio-p04.md)。本輪為文件對帳，原 AC 與主線資格不變；檢查與審查完成後在本輪證據記錄，不將文件通過當作當前 live 可用。

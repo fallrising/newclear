@@ -181,7 +181,37 @@ staged whitespace 通過；獨立初審／既有文件比較／補充覆核後�
 
 | ID | Task | AC | Status | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| NAV-01 | Find original result instructions | N01 | in_progress | 2026-11-22T11:50:22Z | | 2026-11-22T12:03:33Z |
-| NAV-02 | Private-safe read-only links | N02 | in_progress | 2026-11-22T11:50:22Z | | 2026-11-22T12:03:33Z |
-| NAV-03 | Browser and existing regression checks | N03 | in_progress | 2026-11-22T11:50:22Z | | 2026-11-22T12:03:33Z |
-| NAV-04 | Review and normal PR delivery | N04 | in_progress | 2026-11-22T11:50:22Z | | 2026-11-22T12:03:33Z |
+| NAV-01 | Find original result instructions | N01 | done | 2026-11-22T11:50:22Z | 2026-11-22T12:06:36Z | 2026-11-22T12:08:29Z |
+| NAV-02 | Private-safe read-only links | N02 | done | 2026-11-22T11:50:22Z | 2026-11-22T12:06:36Z | 2026-11-22T12:08:29Z |
+| NAV-03 | Browser and existing regression checks | N03 | done | 2026-11-22T11:50:22Z | 2026-11-22T12:06:36Z | 2026-11-22T12:08:29Z |
+| NAV-04 | Review and normal PR delivery | N04 | done | 2026-11-22T11:50:22Z | 2026-11-22T12:06:36Z | 2026-11-22T12:08:29Z |
+
+FZ-NAV-01 source delivered: [PR1057](https://github.com/fallrising/newclear/pull/1057)
+merged normally at 2026-11-22T12:06:36Z as
+`5e5ed8aa05f3eea32c5aea2367776aa7e463744b`.
+Final head `4da7fc459c3f43e2d2af772f913390aab1be5952` passed
+[Fanzloud CI](https://github.com/fallrising/newclear/actions/runs/45020372774)
+and [Project success contracts](https://github.com/fallrising/newclear/actions/runs/45020372730).
+Fanzloud steps include the 43 Web tests, offline parser tests, pinned Rust fmt/clippy,
+workspace tests and application build. Independent fresh-context source review ACCEPT;
+[acceptance and limitations](../acceptance/T047.acceptance.md) retain actual browser
+receipt, source hashes, screenshots, commands and earlier harness/environment failures.
+
+Remote readback in the target repository passed: fetch main, merge ancestry, and
+`git diff --exit-code 4da7fc459c3f43e2d2af772f913390aab1be5952 origin/main -- platform/fanzloud`
+returned zero at the merge above. An initial readback was accidentally invoked from the
+outer workspace repository and rejected the unknown commit; it changed no working files.
+The corrected target-repository check supplies the evidence, not that failed attempt.
+Local checks passed: 55 project contracts / 9 llms, staged whitespace and aligned index,
+15-file scope, 158 relative links, baseline target paths and all five receipt hashes.
+
+This post-merge board-only record supersedes the task/README/SUCCESS/acceptance's
+pre-merge CI/delivery-pending notes. N01–04 are delivered; the minimal optional navigation
+opens only public instructions. Browser evidence uses synthetic session/503 responses and
+intercepted document responses; no live Rust/AP/provider or owner acceptance is inferred.
+FN07/full M3, Cloud AC04/P1 AC05, AP M4, Office MVP, mainline incomplete and usable_tag none
+remain unchanged. No release, deployment, service window or next milestone is started.
+
+Focused independent board-only review: ACCEPT; prior rows, exact merge metadata,
+component source identity, scope and original gaps preserved. Reviewer reran indexes
+and whitespace; final closeout PR CI/merge/readback remain delivery gates.

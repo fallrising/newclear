@@ -154,3 +154,64 @@ Owner雖已表示在場，**原私人SSH/tunnel、operator登入資料與TLS tru
 第480秒停止互動、最後120秒清理，實測前後AP執行表與SQLite引用／下載hash／owned
 process/listeners/DB狀態；未確認停止明列unknown。不重用maintenance/U06/U07。
 完整FN07仍缺本人新提交／進度／交接；只讀成功也不改成完整M3/FN07/platform通過。
+
+## M3-U 離線重新核對 — 2026-11-22
+
+Owner 同意先核對離線前置並更新操作方案，再確認實際操作窗口。本次只承接既有
+M3-U／FN07；原驗收條款不變。目標是產出可供決策的當下證據與最短恢復順序。
+範圍：讀取原來源／備份／SQLite／憑證中繼資料與本機服務狀態；核對現行 main
+與舊已驗 binary/runtime 的差異；更新本文件、證據與進度。不得啟動原服務、消耗
+intent、改憑證／登入／信任設定、重設資料、執行產品 CLI／VM 或新建完整操作 gate。
+
+| 準備 AC | 驗收條件 | 驗證方式 |
+| --- | --- | --- |
+| PRE01 | 保存的 binary/runtime、六份 gate 與公開模板可對應；原 SQLite 狀態、憑證有效期、必要執行檔、磁碟及本機停機狀態逐項記錄；失敗不能被舊綠紀錄取代 | 只讀 hash、immutable SQLite 查詢、憑證 metadata、listener inventory、精確 DB inspect；不印秘密 |
+| PRE02 | 讀既有成果與完整本人提交／交接清楚區分；來源 drift、TLS／連線及完整 gate 缺口有可執行的恢復順序 | 固定 SHA diff、現行 SDD FN07、原 launcher/policy source 核對 |
+| PRE03 | 獨立文件審查、必要索引／公開邊界／CI、正常 PR 合併與遠端回讀完成；M3-U/FN07 仍未驗收 | 本次驗收紀錄與 BOARD；完整產品狀態不因準備交付而關閉 |
+
+安全與恢復：本次只讀核對不產生新的執行意圖，不重試任何未知外部副作用；原
+store、登入權威、AP 執行／取消權威不變。缺少或過期的材料記為 not_ready，
+修復憑證、選擇新 binary/runtime 或開服務都不包含在本次離線核對中。
+實際檢查與恢復決策待本輪觀測後記入下方；既有2026-11-02/06紀錄保留為歷史。
+
+### 本輪觀測與下一步
+
+**目前 not_ready，不能直接開窗。** [本次驗收紀錄](M3-owner-preflight-20261122.acceptance.md)
+與[去私人資訊 receipt](evidence/M3-owner-preflight-20261122/preflight.json)記錄當下結果。
+
+| 前置 | 2026-11-22 觀測 | 對操作的影響 |
+| --- | --- | --- |
+| 保存來源 | 226/226備份、118/118 runtime來源、原binary及六份gate／公開模板還原相符 | 可繼續分析原安裝；檔案完整不證明資料庫可啟動 |
+| 原SQLite／設定 | 4confirmed／0unknown；無非空WAL，immutable唯讀查詢；設定與SQLite均0600，核對前後檔案內容／mtime未變 | 不改原意圖，不從SQLite推斷AP資料庫已恢復 |
+| 本機服務／AP資料庫 | 四個既有port在目前network namespace無LISTEN；精確原DB容器在本機default Docker context不存在 | 原「DB stopped」只代表歷史，不是現在可start；原volume身分未定位，不能宣稱資料已遺失或可重建 |
+| AP備份候選 | 原維護階段database.dump存在，bytes與manifest SHA相符 | 未還原；尚未證明包含最後U07 writer/reviewer與全部成果，不能當作等價原store |
+| TLS | 原憑證於2026-11-02 19:16:18 UTC到期，不覆蓋600秒 | 必須處理憑證與owner信任；本次未更新key/cert或信任設定 |
+| 版本 | 已驗86350871與本次e2479f4d的產品差異是isolated.html／isolated.js／p0.css；Rust程式與AP src無diff | Web資產由Rust include_bytes!嵌入；原binary不含近期下載／觀察順序／導航修正，不能把舊binary當現行UI |
+| 執行前置 | 原Python與固定Node存在；磁碟可用量大於15GiB | 存在不等於完整runtime probe通過；未啟動它們測試原服務 |
+| 人工與遠端 | 本輪尚無owner tunnel／登入／TLS trust實測；未重新查遠端VM／claim／cgroup／reservation | 舊零資源與本人在場敘述不當作當下證據 |
+
+依序恢復，前一項的必要證據未齊就不啟動依賴項：
+
+1. **先定位原AP資料。** 從可信本機保留／清理交接找原volume或具完整來源鏈的備份。
+   容器名缺失本身不能證明volume已刪；本輪只確認沒有Fanz具名volume，未辨識匿名volume。
+   原維護dump只列為候選；若需restore，先提出獨立隔離還原與逐run／command／archive
+   比對方案，待授權再執行。不得建空DB、導入SQLite引用或手工補成果假裝恢復原安裝。
+2. **固定要驗的來源。** 原binary可用於歷史成果讀回，但仍須原資料、有效TLS與重新前置。
+   建議完整FN07改用現行經審查來源；需先在離線驗證新版binary、資料相容與candidate／review
+   精確綁定，保留原binary及store回復點，再取得該來源的同來源旅程證據。不能只換Web檔
+   或重寫舊source pin而沿用舊live證據。本輪只分析差異，未build／切換來源。
+3. **完成完整操作gate的離線設計／實作／測試。** 保存gate是600秒既有成果只讀，明確
+   拒絕task/review/rework/action/reconcile；不能用它執行完整FN07。原15分鐘、最後3分鐘
+   清理、單VM、最多一次writer＋一次reviewer各180秒的提案仍保留。完整gate必須固定
+   repo/base/profile、單次intent與candidate lineage，拒絕多次／返工與其他mutation；
+   超時／unknown不重送，AP負責取消與資源清理，停止未確認就記unknown。先離線測試
+   單次消耗、併發、綁定替換、失聯與獨立deadline，再獨立審查；本次沒有新增此gate。
+4. **修復TLS並核對本人連線。** 在可信端提出既有localhost入口的憑證／信任更新方式，
+   由owner批准後處理；不繞過瀏覽器驗證，不要求在對話或Git貼登入／私鑰。新憑證需覆蓋
+   所選窗口。此前「Claude Code已登入」只證明諮詢CLI認證，不能代替產品operator登入。
+5. **所有前置齊備後才確認單一操作窗口。** 說明來源、資料、限制、本人短步驟與停止條件，
+   owner確認在場及當次窗口後再建立新的單次intent。本人走原完整FN07流程；只讀既有成果
+   只能補部分人工確認。保留操作與下載hash證據，核對AP資源／listeners／DB停止結果後收束。
+
+目前可交付的是離線核對與這份恢復順序，不是可直接操作的網址。原M3-U/FN07保持
+in_progress；不增加新的產品驗收條款，也不因文件合併或Claude技術諮詢成功而關閉。

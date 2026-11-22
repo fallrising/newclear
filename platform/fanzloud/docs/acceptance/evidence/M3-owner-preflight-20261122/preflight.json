@@ -1,0 +1,138 @@
+{
+  "observed_at": "2026-11-22T15:45:38.391640+00:00",
+  "kind": "offline-owner-preflight",
+  "source_sha": "e2479f4dc0e8596f59dfc34fc124726cee57b389",
+  "actual_product_source": "86350871766bbfbe9d29325b49aae659c2d74c92",
+  "effects": {
+    "original_services_started": 0,
+    "product_cli_starts": 0,
+    "vm_starts": 0,
+    "intents_consumed": 0,
+    "credential_changes": 0
+  },
+  "checks": {
+    "saved_backup": {
+      "total": 226,
+      "matched": 226
+    },
+    "saved_runtime": {
+      "total": 118,
+      "matched": 118
+    },
+    "binary": {
+      "matches": true,
+      "sha256": "13f2b192ed219566721a313779ed364b9a83ea45f1e88b8d6371bec8bf226085"
+    },
+    "gate_sources": {
+      "window.py.in": {
+        "template_matches": true,
+        "original_matches": true,
+        "inverse_substitution_equal": true
+      },
+      "policy.mjs.in": {
+        "template_matches": true,
+        "original_matches": true,
+        "inverse_substitution_equal": true
+      },
+      "proxy.mjs.in": {
+        "template_matches": true,
+        "original_matches": true,
+        "inverse_substitution_equal": true
+      },
+      "test_window.py.in": {
+        "template_matches": true,
+        "original_matches": true,
+        "inverse_substitution_equal": true
+      },
+      "policy.test.mjs.in": {
+        "template_matches": true,
+        "original_matches": true,
+        "inverse_substitution_equal": true
+      },
+      "proxy.integration.mjs.in": {
+        "template_matches": true,
+        "original_matches": true,
+        "inverse_substitution_equal": true
+      }
+    },
+    "private_config": {
+      "mode_0600": true,
+      "expected_container_binding": true,
+      "expected_origin_binding": true
+    },
+    "sqlite": {
+      "mode_0600": true,
+      "wal_nonempty": false,
+      "states": {
+        "confirmed": 4
+      },
+      "immutable_sha256": "288aff077845bb9db4b9cecce8e4b07db8d6b72a2c5ac1a1faca419752ab40d7"
+    },
+    "tls": {
+      "not_after": "Nov  2 19:16:18 2026 GMT",
+      "expired": true,
+      "covers_600_seconds": false,
+      "localhost_san": true
+    },
+    "executables": {
+      "saved_python_exists": true,
+      "pinned_node_exists": true
+    },
+    "disk": {
+      "free_bytes": 63340232704,
+      "minimum_bytes": 16106127360
+    },
+    "local_listeners": {
+      "checked_count": 4,
+      "listening_count": 0,
+      "method": "current network namespace proc TCP/TCP6 listen table; no connection attempt"
+    },
+    "original_database": {
+      "attempts": [
+        {
+          "exit_code": 1,
+          "result": "sandbox_permission_denied"
+        },
+        {
+          "exit_code": 1,
+          "result": "no_such_object"
+        }
+      ],
+      "container_list_exit": 0,
+      "exact_original_present": false,
+      "matching_container_count": 0,
+      "context_is_default": true,
+      "endpoint_is_local_unix": true,
+      "fanz_named_volumes_count": 0,
+      "volume_identity": "unknown; anonymous/unrelated-named volumes not identified",
+      "running": "not_applicable_missing_container",
+      "data_loss": "not_established"
+    },
+    "original_files_unchanged": true,
+    "source_drift": {
+      "paths": [
+        "platform/fanzloud/apps/control-plane/web/isolated.html",
+        "platform/fanzloud/apps/control-plane/web/isolated.js",
+        "platform/fanzloud/apps/control-plane/web/p0.css"
+      ],
+      "embedded_assets": true,
+      "old_binary_contains_latest_ui_fixes": false
+    },
+    "maintenance_backup": {
+      "present": true,
+      "bytes_match_manifest": true,
+      "sha256_matches_manifest": true,
+      "restore_tested_this_round": false,
+      "equivalent_to_final_owner_records": "not_established"
+    }
+  },
+  "readiness": "not_ready",
+  "remaining": [
+    "Original database container absent in current local default Docker context; original data volume identity/recovery not established",
+    "TLS expired",
+    "Owner tunnel/login/trust readiness not observed",
+    "Full submit/review gate not implemented in saved read-only launcher",
+    "Saved binary predates current embedded UI; choose and verify intended source before live operation",
+    "Remote VM/claims/cgroups/reservations not freshly inspected"
+  ]
+}

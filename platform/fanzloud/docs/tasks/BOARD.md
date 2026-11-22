@@ -223,7 +223,7 @@ and whitespace; final closeout PR CI/merge/readback remain delivery gates.
 
 | ID | Task | AC | Status | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| FZ-OFFICE-NAV | Private Office result navigation; owner resumed source UI integration, see normative spec | N01–N04 local verified; N05 delivery pending | in_progress | 2026-11-22T13:04:13Z | | 2026-11-22T14:01:37Z |
+| FZ-OFFICE-NAV | Private Office result navigation; owner resumed source UI integration, see normative spec | N01–N05 bounded source feature | done | 2026-11-22T13:04:13Z | 2026-11-22T14:06:45Z | 2026-11-22T14:07:44Z |
 
 PR1057/1058 already completed instruction navigation. This task does not repeat it
 or mark direct private access passed. Office local snapshot/loopback console exist;
@@ -320,3 +320,38 @@ own contracts; usable_tag none unchanged. No deployment,service window or next m
 Focused board-only review ACCEPT: previous rows retained,merge ancestry/component bytes
 verified,55/9indexes and whitespace/alignment passed. Optional Claude failure remains
 explicit. Final closure PR CI/merge/readback are the last delivery gates.
+
+## FZ-OFFICE-NAV delivery closeout
+
+[PR #1071](https://github.com/fallrising/newclear/pull/1071) merged normally at
+`2026-11-22T14:06:45Z`, merge SHA `4dce076bde64549190b87ac836573b2c24bfad3f`.
+Candidate `770418428f15d2ae56159e22e6c93ef30e3fc90a`; all required CI passed:
+[Fanzloud](https://github.com/fallrising/newclear/actions/runs/45030754158),
+[Office](https://github.com/fallrising/newclear/actions/runs/45030754209),
+[contracts](https://github.com/fallrising/newclear/actions/runs/45030754188).
+Fetched remote main and verified that the merge SHA is its ancestor. All 26
+changed files other than Fanzloud BOARD are byte-identical to the tested candidate;
+Fanzloud BOARD additionally preserves
+upstream T049/PR1070 closure. No conflict or protection bypass.
+
+Lead evidence gate: **ACCEPTED for N01–N05 bounded source feature**. Local 224 Office
+Python / 74 Office Node, integrated 65 Node (59 Fanzloud +6 Office navigation),
+publication218, indexes55/9, staged whitespace and local links passed. Actual
+Chromium153 with real Office HTTP/auth and synthetic records passed navigation,
+source-only login, reload/refresh, invalid/offline/denied states, unchanged source
+bytes/mtime, zero POST/spawn, hash/download/tamper and explicit return to full Office.
+Fresh-context independent source review ACCEPT; focused integration review ACCEPT
+independently reran65 tests, verified hashes and preserved T049 code/tests and T29
+records. Detailed acceptance and browser receipt remain in the linked task.
+
+This post-merge record supersedes pre-merge pending notes in SUCCESS/task/evidence;
+only this bounded feature is closed. Existing Office must run on the browser's
+machine with compatible source UI; user enters only its port in Fanzloud and uses
+the original private launch URL in the Office tab. Results-only is a UI restriction,
+not a new readonly credential. Existing grant source binding remains enforced;
+installing changed source may invalidate unused older grants, with no auto renewal.
+Live private installation/deployment, live Rust/AP authentication and owner FN07
+operation were not verified. Original product AC/MVP/usable tags remain unchanged.
+No paid product calls, migration, deployment, credential change or next milestone.
+Optional Claude advice was not executed: automatic approval review rejected its
+possible cost before launch; no output or success from Claude is claimed.

@@ -355,7 +355,7 @@ T-0028 交付結案：[功能 PR #1050](https://github.com/fallrising/newclear/p
 
 | ID | Task | AC | Status | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| FZ-OFFICE-NAV | Existing console results-only UI, original source login and no mutation | N01–N05 | in_progress | 2026-11-22T13:47:50Z | | 2026-11-22T14:01:37Z |
+| FZ-OFFICE-NAV | Existing console results-only UI, original source login and no mutation | N01–N05 bounded source feature | done | 2026-11-22T13:47:50Z | 2026-11-22T14:06:45Z | 2026-11-22T14:07:44Z |
 
 Same owner-directed navigation slice; no T29/grant/provider work, auth policy or
 backend changes. Original Office AC/MVP and native terminal/session stay intact.
@@ -379,3 +379,38 @@ T29 接續：owner 已更新 Pi 廠商登入並補足 DeepSeek 餘額，要求�
 T29 接續驗收通過：3次HTTP200、2142input／185output tokens、30.51秒；相同原fixture、read→write、agent_settled、marker／total、原始與實際Blob下載hash通過。原HTTP402失敗/report/receipt/input未變，兩次獨立grant各用一次、不自動重試。刷新／操作台重啟不重跑，32個外層受追蹤程序全部退出，未額外送終止訊號。產品程式未改，沿用已通過224Python／68Node的同一受測來源；publication／indexes及本PR CI另核對。主導審查與真實Chrome畫面核對，未宣稱獨立外部審查。新增全域Pi廠商及Cursor只盤點登入／catalog，零開發模型委託。[成功證據](../evidence/pi-console-completed-2026-11-22.json)，交付PR #1056將轉ready，尚未結案。
 
 T29 交付結案：[PR #1056](https://github.com/fallrising/newclear/pull/1056) 於2026-11-22T13:47:48Z正常合併，merge SHA `68e1b74f3138ba0cfef6d7dc024b7bbb0ad7a160`。已fetch遠端main，與候選 `b01b2b272f5cf0357ebbe1feb4dfa6d351ae195b` 的全元件diff為零；[Agent Office Lab CI](https://github.com/fallrising/newclear/actions/runs/45029249158)及[Project success contracts](https://github.com/fallrising/newclear/actions/runs/45029249247)皆success。真實指定重試／Blob下載通過，先前402失敗及兩次已消耗授權保留；沒有自動重試、額外模型委託或待執行產品任務。主導審查完成，沒有獨立外部審查聲稱；完整跨provider AC與MVP仍pending，無usabletag。
+
+## FZ-OFFICE-NAV delivery closeout
+
+[PR #1071](https://github.com/fallrising/newclear/pull/1071) merged normally at
+`2026-11-22T14:06:45Z`, merge SHA `4dce076bde64549190b87ac836573b2c24bfad3f`.
+Candidate `770418428f15d2ae56159e22e6c93ef30e3fc90a`; all required CI passed:
+[Fanzloud](https://github.com/fallrising/newclear/actions/runs/45030754158),
+[Office](https://github.com/fallrising/newclear/actions/runs/45030754209),
+[contracts](https://github.com/fallrising/newclear/actions/runs/45030754188).
+Fetched remote main and verified that the merge SHA is its ancestor. All 26
+changed files other than Fanzloud BOARD are byte-identical to the tested candidate;
+Fanzloud BOARD additionally preserves
+upstream T049/PR1070 closure. No conflict or protection bypass.
+
+Lead evidence gate: **ACCEPTED for N01–N05 bounded source feature**. Local 224 Office
+Python / 74 Office Node, integrated 65 Node (59 Fanzloud +6 Office navigation),
+publication218, indexes55/9, staged whitespace and local links passed. Actual
+Chromium153 with real Office HTTP/auth and synthetic records passed navigation,
+source-only login, reload/refresh, invalid/offline/denied states, unchanged source
+bytes/mtime, zero POST/spawn, hash/download/tamper and explicit return to full Office.
+Fresh-context independent source review ACCEPT; focused integration review ACCEPT
+independently reran65 tests, verified hashes and preserved T049 code/tests and T29
+records. Detailed acceptance and browser receipt remain in the linked task.
+
+This post-merge record supersedes pre-merge pending notes in SUCCESS/task/evidence;
+only this bounded feature is closed. Existing Office must run on the browser's
+machine with compatible source UI; user enters only its port in Fanzloud and uses
+the original private launch URL in the Office tab. Results-only is a UI restriction,
+not a new readonly credential. Existing grant source binding remains enforced;
+installing changed source may invalidate unused older grants, with no auto renewal.
+Live private installation/deployment, live Rust/AP authentication and owner FN07
+operation were not verified. Original product AC/MVP/usable tags remain unchanged.
+No paid product calls, migration, deployment, credential change or next milestone.
+Optional Claude advice was not executed: automatic approval review rejected its
+possible cost before launch; no output or success from Claude is claimed.

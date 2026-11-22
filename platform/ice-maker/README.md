@@ -130,6 +130,9 @@ quality thresholds, and rootless/network-disabled sandbox behavior. No parsing
 command invokes a provider or publishes externally, and the system is
 `DEVELOPMENT_COMPLETE`, not `PRODUCTION_READY`.
 
+The [portfolio OCR comparison](docs/portfolio-ocr-comparison.md) preserves the local
+pipeline and compares HTTP provenance, coordinates, confidence and remaining qualification.
+
 ## Local verification
 
 Run the repository policy, schema, secret-pattern, source-integrity, and full

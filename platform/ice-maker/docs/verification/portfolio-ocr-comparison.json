@@ -1,0 +1,65 @@
+{
+  "task_id": "P03-ocr-comparison",
+  "base_sha": "1c642259957aed8f65c31dc45f77740a121d9aa4",
+  "status": "completed",
+  "summary": "P03 document content and offline verification complete; independent native semantic review ACCEPT. This is a pre-merge component evidence snapshot, not an orchestrator adapter receipt or final Git delivery. Required final CI/merge/readback remain on PR1060. Usage describes only offline verification subprocesses with no provider/model; interactive agent requests/tokens/cost are unknown. Initial missing-OpenCC check was resolved with an existing CI-pinned checker, without installation.",
+  "changed_files": [
+    "README.md",
+    "SUCCESS.md",
+    "docs/portfolio-ocr-comparison.md",
+    "docs/tasks/BOARD.md",
+    "docs/tasks/P03.md",
+    "docs/verification/portfolio-ocr-comparison.json"
+  ],
+  "commands_run": [
+    {
+      "command": "python3 scripts/check_indexes.py",
+      "exit_code": 0,
+      "output": "CHECK: project success / inventory / PROJECTS\nPASS: 55 project success contracts and navigation/index\nCHECK: llms.txt navigation\n9 llms.txt file(s); 0 error(s)\nPASS: index preflight (working-tree content; llms.txt paths from Git index)"
+    },
+    {
+      "command": "PYTHONPATH=src python3 scripts/check_repo.py",
+      "exit_code": 0,
+      "output": "Phase 0 check passed"
+    }
+  ],
+  "acceptance": [
+    {
+      "criterion": "P03-01",
+      "status": "pass",
+      "evidence": "Pinned source comparison and author-independent semantic ACCEPT; docs/portfolio-ocr-comparison.md SHA2565fd70daa53e594a02c86a7f91a2054b339041a7a90a9c57b7fb39e3df5895f92. Details in docs/tasks/P03.md."
+    },
+    {
+      "criterion": "P03-02",
+      "status": "pass",
+      "evidence": "Pinned source comparison and author-independent semantic ACCEPT; docs/portfolio-ocr-comparison.md SHA2565fd70daa53e594a02c86a7f91a2054b339041a7a90a9c57b7fb39e3df5895f92. Details in docs/tasks/P03.md."
+    },
+    {
+      "criterion": "P03-03",
+      "status": "pass",
+      "evidence": "Pinned source comparison and author-independent semantic ACCEPT; docs/portfolio-ocr-comparison.md SHA2565fd70daa53e594a02c86a7f91a2054b339041a7a90a9c57b7fb39e3df5895f92. Details in docs/tasks/P03.md."
+    },
+    {
+      "criterion": "P03-04",
+      "status": "pass",
+      "evidence": "Pinned source comparison and author-independent semantic ACCEPT; docs/portfolio-ocr-comparison.md SHA2565fd70daa53e594a02c86a7f91a2054b339041a7a90a9c57b7fb39e3df5895f92. Details in docs/tasks/P03.md."
+    }
+  ],
+  "tests": {
+    "passed": 0,
+    "failed": 0
+  },
+  "risks": [
+    "No local product/live/benchmark run; historical pilots and original external gates remain scoped.",
+    "Final-head CI/merge/readback are separate PR1060 delivery receipts; this snapshot does not claim them passed.",
+    "Resolved check failures: initial system Python lacked OpenCC; reviewer initially compared whole SUCCESS rather than its preserved original prefix.",
+    "Native same-family document review does not satisfy original product cross-provider runtime acceptance."
+  ],
+  "open_questions": [],
+  "usage": {
+    "provider": "none",
+    "model": "none",
+    "estimated_cost_usd": 0,
+    "elapsed_seconds": 1
+  }
+}

@@ -86,3 +86,17 @@ Goal/scope: clarify the existing AC-04 external gate and actual Grok review invo
 結果記入 [本次報告](fe-review/tasks/round2/report.md) 與 result.json。完整產品 AC-04、usable_tag 與第3輪仍未驗收。
 
 實際證據：18 shared captures／18 axe scans 通過；原 runtime race FAIL保留，focused flow及completed-only補證通過。原生320 tests有1環境FAIL→原test focused PASS；不冒稱單次全綠，exact-head CI仍必要。
+
+## P03 — 既有 OCR 與 HTTP 服務差異對照
+
+本輪依 owner 延續 portfolio consolidation 的指示，先保存本機 native／Tesseract
+及歷史 pilot，再比較 HTTP OCR 的具名品質／容量收益；不替換 parser 或降低原 gate。
+
+| 本輪 AC | 驗收條件 | 驗證計畫 |
+| --- | --- | --- |
+| P03-01 | 原件／raster hash、1-based頁碼、EXIF後尺寸／座標、engine/version、nullable confidence逐項比較 | 固定來源與實作核對；明列不相容／尚未映射 |
+| P03-02 | native／掃描／混合／錯誤文字層／空頁／超限／取消語義可辨，CPU worker結束前不釋放HTTP推論slot | 規格與現有程式對照，獨立唯讀審查 |
+| P03-03 | 保留9頁掃描／37頁native；81頁native不冒充OCR，原100真文件／rootless／正文表格gate保持 | 歷史證據、原AC／SDD差異及本機文件檢查 |
+| P03-04 | 無具名收益即維持本機pipeline，無必做adapter或私人語料外送 | 比較決策、提案／未知、回退與scope核對 |
+
+[任務與驗證](docs/tasks/P03.md)記錄本輪輸入、範圍與結果；原AC-01–04保持。

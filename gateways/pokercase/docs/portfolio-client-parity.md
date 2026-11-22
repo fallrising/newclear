@@ -17,7 +17,7 @@
 | 下游客戶端 | 已有證據 | 待驗範圍 |
 | --- | --- | --- |
 | curl | OpenAI 與 Anthropic Messages 請求範例 | 實測版本及完整旅程未知 |
-| Cursor Agent CLI | 配置說明，角色為 gateway 客戶端 | 下游版本與端到端工具、取消、用量未知 |
+| Cursor | 文件列出上游 cursor-agent；下游 Cursor 客戶端缺驗收證據 | 下游版本與端到端工具、取消、用量未知 |
 | Claude Code | OpenAI-compatible 配置範例 | 下游版本與端到端旅程未知；上述 2.1.312 是上游 CLI，發請求的是限定 HTTP Messages 測試客戶端 |
 | Continue.dev、Cline、Roo | 各自的配置說明 | 版本與端到端 text/tools、stream/buffer、取消、timeout、重啟、usage 均未知 |
 

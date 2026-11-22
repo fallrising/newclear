@@ -1,12 +1,12 @@
 # Agent Office Lab
 
-本地優先的 Agent Office 實驗：OpenCode + Strata、Grok、Pi + DeepSeek、Cursor 的原生合成任務均已實測通過。提供四 provider 的唯讀結果查詢與離線頁面；統一 CLI 的本地 OpenCode 端到端任務與取消已實測，遠端新入口及跨 provider 生命週期仍待完成。先讀 [SUCCESS](SUCCESS.md)；目前沒有 usable tag。
+本地優先的 Agent Office 實驗：OpenCode + Strata、Grok、Pi + DeepSeek、Cursor 的原生合成任務均已實測通過。提供四 provider 的唯讀結果查詢與離線頁面；統一 CLI 的本地 OpenCode 端到端任務與取消已實測，Pi／DeepSeek 的操作台指定重試、真實產物與下載也已通過；Grok／Cursor 新入口及跨 provider 生命週期仍待完成。先讀 [SUCCESS](SUCCESS.md)；目前沒有 usable tag。
 
 - [本地單檔修改提案：選檔、審閱差異與下載](docs/LOCAL-FILE-PROPOSAL.md)
 - [本地文字任務：選目錄、輸入要求與下載文件](docs/LOCAL-TEXT-TASK.md)
 - [Pi hook 身分與 session 邊界](docs/PI-HOOK-BOUNDARY.md)：真實 HTTP 拒絕、狀態不變與合法重連。
 - [Pi 原生問答確認檢查](docs/PI-QUESTION.md)：拒絕、接受與逾時，零模型請求。
-- [Pi 遠端操作台一次性授權](docs/REMOTE-GRANT.md)：CLI 建立、持久化消耗與頁面明確執行；真實遠端驗收待完成。
+- [Pi 遠端操作台一次性授權](docs/REMOTE-GRANT.md)：CLI 建立、持久化消耗與頁面明確執行；Pi／DeepSeek 真實指定重試與下載已驗收。
 - [本機操作台：派工、原生終端與結果](docs/CONSOLE.md)
 - [Pi 明確重試與次數限制](docs/RETRY.md)
 - [Pi CLI crash 與明確重新啟動](docs/CRASH.md)

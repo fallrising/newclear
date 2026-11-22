@@ -288,7 +288,18 @@ async function runNoExecutionScenario(scenario) {
     const secrets = await collectGrantSecrets(directory);
     await assertDomNoLeaks(browser, harness.url, secrets);
     assertNoLeaks(browser, harness.url, secrets);
-    report.scenarios[scenario] = {ok: true};
+    if(scenario==='no_optin'){
+      const posts=browser.requestBodies.length;
+      await browser.cdp.send('Page.navigate',{url:new URL('/#view=results',harness.url).href});
+      await browser.cdp.send('Page.reload');
+      await waitFor(()=>browser.evaluate('typeof resultsOnly!=="undefined" && resultsOnly && !document.getElementById("readonly-info").hidden'), 'readonly mode');
+      assert(await browser.evaluate('document.getElementById("office-operations").hidden && !document.getElementById("execute").onclick'), 'readonly exposes write controls');
+      assert(await browser.evaluate("api('/api/execute',{}).then(()=>false,()=>true)"), 'readonly API wrapper accepted mutation');
+      assert(browser.requestBodies.length===posts, 'readonly sent a POST');
+      await browser.evaluate('document.getElementById("return-console").click(); true');
+      await waitFor(()=>browser.evaluate('typeof resultsOnly!=="undefined" && !resultsOnly && !document.getElementById("office-operations").hidden'), 'return to console');
+    }
+    report.scenarios[scenario] = {ok: true, ...(scenario==='no_optin'?{readonly_no_post_and_explicit_return:true}:{})};
   } finally {
     browser.cdp.close(); await closeProcess(browser.child); await closeProcess(harness.child);
   }

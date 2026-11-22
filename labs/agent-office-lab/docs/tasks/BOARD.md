@@ -348,6 +348,18 @@ T-0028 本機驗收完成：224 Python／68 Node、四組實際 HTTP／Chrome �
 
 T-0028 交付結案：[功能 PR #1050](https://github.com/fallrising/newclear/pull/1050) 已於 2026-11-16T17:20:19Z 正常合併，merge SHA `747be27db5453f109ea233c130a37cb66261368f`。遠端 main fetch 後，與候選 `249b9de29efdffde1b8d739a2ff8e0fb9ebf6e20` 的 Agent Office Lab 全元件 diff 為零；同期主線其他變更僅在 fanzloud 文件。必要 CI [Agent Office Lab](https://github.com/fallrising/newclear/actions/runs/43917130599) 與 [Project success contracts](https://github.com/fallrising/newclear/actions/runs/43917130674) 均 success，無衝突；主導審查完成，沒有獨立外部審查聲稱。224 Python／68 Node、四組新重試與五組既有首次授權瀏覽器流程、publication 217files／indexes 55contracts 9llms／staged diff check通過。零新增開發模型委託、產品模型請求與實際lab付費grant；每次真實付費重試仍需另次明確批准，完整 AC-07／09／11／MVP pending，無usable tag。
 
+## FZ-OFFICE-NAV — bounded result-view dependency
+
+[Task/lead](../../../../platform/fanzloud/docs/tasks/FZ-OFFICE-NAV.task.md),
+[contract](../../../../platform/fanzloud/docs/specs/SPEC-FZ-OFFICE-NAV.md).
+
+| ID | Task | AC | Status | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| FZ-OFFICE-NAV | Existing console results-only UI, original source login and no mutation | N01–N05 bounded source feature | done | 2026-11-22T13:47:50Z | 2026-11-22T14:06:45Z | 2026-11-22T14:07:44Z |
+
+Same owner-directed navigation slice; no T29/grant/provider work, auth policy or
+backend changes. Original Office AC/MVP and native terminal/session stay intact.
+
 ## T-0029：Pi／DeepSeek 操作台真實端到端驗收
 
 T-0029：依 owner 指示，驗證一次 Pi／DeepSeek 從操作台到產物的真實有界任務。先做零模型預檢；固定 Pi 1.4.0、deepseek-flash、最多四請求、每請求 512 output tokens、180 秒、無金額硬上限，不自動重試、不新增開發模型委託。真實 CLI grant、Chrome 明確確認、dispatcher／relay／原生 Office Pi、同 session／model／read-write／agent_settled、結果與 Blob 下載 hash、刷新及操作台重啟不重跑、授權只消耗一次與所屬程序清理。範圍僅涵蓋 AC-01／04／08／09／11 的 Pi 子集；不擴大到遠端重試、原生終端自由互動或其他 provider。
@@ -368,10 +380,47 @@ T29 接續驗收通過：3次HTTP200、2142input／185output tokens、30.51秒�
 
 T29 交付結案：[PR #1056](https://github.com/fallrising/newclear/pull/1056) 於2026-11-22T13:47:48Z正常合併，merge SHA `68e1b74f3138ba0cfef6d7dc024b7bbb0ad7a160`。已fetch遠端main，與候選 `b01b2b272f5cf0357ebbe1feb4dfa6d351ae195b` 的全元件diff為零；[Agent Office Lab CI](https://github.com/fallrising/newclear/actions/runs/45029249158)及[Project success contracts](https://github.com/fallrising/newclear/actions/runs/45029249247)皆success。真實指定重試／Blob下載通過，先前402失敗及兩次已消耗授權保留；沒有自動重試、額外模型委託或待執行產品任務。主導審查完成，沒有獨立外部審查聲稱；完整跨provider AC與MVP仍pending，無usabletag。
 
+## FZ-OFFICE-NAV delivery closeout
+
+[PR #1071](https://github.com/fallrising/newclear/pull/1071) merged normally at
+`2026-11-22T14:06:45Z`, merge SHA `4dce076bde64549190b87ac836573b2c24bfad3f`.
+Candidate `770418428f15d2ae56159e22e6c93ef30e3fc90a`; all required CI passed:
+[Fanzloud](https://github.com/fallrising/newclear/actions/runs/45030754158),
+[Office](https://github.com/fallrising/newclear/actions/runs/45030754209),
+[contracts](https://github.com/fallrising/newclear/actions/runs/45030754188).
+Fetched remote main and verified that the merge SHA is its ancestor. All 26
+changed files other than Fanzloud BOARD are byte-identical to the tested candidate;
+Fanzloud BOARD additionally preserves
+upstream T049/PR1070 closure. No conflict or protection bypass.
+
+Lead evidence gate: **ACCEPTED for N01–N05 bounded source feature**. Local 224 Office
+Python / 74 Office Node, integrated 65 Node (59 Fanzloud +6 Office navigation),
+publication218, indexes55/9, staged whitespace and local links passed. Actual
+Chromium153 with real Office HTTP/auth and synthetic records passed navigation,
+source-only login, reload/refresh, invalid/offline/denied states, unchanged source
+bytes/mtime, zero POST/spawn, hash/download/tamper and explicit return to full Office.
+Fresh-context independent source review ACCEPT; focused integration review ACCEPT
+independently reran65 tests, verified hashes and preserved T049 code/tests and T29
+records. Detailed acceptance and browser receipt remain in the linked task.
+
+This post-merge record supersedes pre-merge pending notes in SUCCESS/task/evidence;
+only this bounded feature is closed. Existing Office must run on the browser's
+machine with compatible source UI; user enters only its port in Fanzloud and uses
+the original private launch URL in the Office tab. Results-only is a UI restriction,
+not a new readonly credential. Existing grant source binding remains enforced;
+installing changed source may invalidate unused older grants, with no auto renewal.
+Live private installation/deployment, live Rust/AP authentication and owner FN07
+operation were not verified. Original product AC/MVP/usable tags remain unchanged.
+No paid product calls, migration, deployment, credential change or next milestone.
+Optional Claude advice was not executed: automatic approval review rejected its
+possible cost before launch; no output or success from Claude is claimed.
+
 ## T-0030：Cursor 操作台一次性授權
 
 Owner 直接指示繼續開發。基準來源 `fallrising/newclear@1c0483e86a825d764aed6356312cee1ff26ac3a4`，共用交付契約 blob `13bf6ff32c6131208ef14e27619160c2906dcb32`。
 
 | ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| T-0030-01 | 固定 Cursor 首次任務 grant、操作台派工／停止與重啟控制層；真實模型及完整 AC 另驗 | AC-01／06／08／09／11 子集 | in_progress | 2026-11-22T14:03:31.768915+00:00 | — | 2026-11-22T14:03:31.768915+00:00 |
+| T-0030-01 | 固定 Cursor 首次任務 grant、操作台派工／停止與重啟控制層；真實模型及完整 AC 另驗 | AC-01／06／08／09／11 子集 | in_progress | 2026-11-22T14:03:31.768915+00:00 | — | 2026-11-22T14:15:49.178675+00:00 |
+
+T30 本機驗收：232 Python／74 Node、Cursor五組Chrome流程（含唯讀模式零POST及明確返回）、Pi首次五組與重試四組回歸通過。實際dispatcher／atomic consume／跨exec鎖；provider與環境偵測明示替身，零產品模型請求／實際lab授權。已保留並整合主線 `6c9cbd0ba596cd5f1ddd6c5466b99ce294dea1d3` 的FZ-OFFICE-NAV，未改其產品範圍。publication223／indexes55contracts9llms／staged diff check通過。單次Pi GLM審查403，未取得審查、無重試；主導審查，不宣稱獨立模型審查。PR／CI／合併尚待完成。

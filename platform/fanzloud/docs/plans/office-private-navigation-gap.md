@@ -1,5 +1,10 @@
 # Private Office result navigation: verified gap and minimum proposal
 
+Continuation: owner subsequently authorized development. The existing root plus
+source-owned result-view/authentication flow is now specified in
+[SPEC-FZ-OFFICE-NAV](../specs/SPEC-FZ-OFFICE-NAV.md). Below is the preserved PR1061
+gap report, not a claim that the current continuation is still stopped.
+
 2026-11-22; [task and ownership](../tasks/FZ-OFFICE-NAV.task.md).
 This is a technical proposal under the owner's explicit insufficient-contract
 fallback. It neither changes product AC nor declares a private feature available.

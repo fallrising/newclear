@@ -77,3 +77,30 @@ python3 scripts/office_dispatch.py acknowledge-interruption --confirm-all-owned-
 完整四 provider UI 派工、跨 provider 權限／取消／恢復、一般程式修改及完整安全驗收仍待完成；本輪不建立 usable tag 或部署。
 
 [Pi Office host 重啟驗收](PI-HOST-RESTART.md)：中斷工位保留、明確同 session 重連與零模型請求檢查。
+
+## 從 Fanzloud 查看既有成果
+
+Fanzloud 的「Office 本機 port」僅開啟這台瀏覽器機器上的既有操作台根頁，
+帶固定 `#view=results` 介面選擇；不是新 API。操作台須已由原流程執行，
+不得把另一台機器的 loopback port 當成此機器的入口。
+
+成果模式只提供篩選、詳細內容、核對後下載及明確「更新成果」；不自動輪詢，
+不提供派工、重試、停止、環境偵測或終端操作。初次新分頁不繼承其他分頁
+登入，請在**此 Office 分頁**開啟原終端顯示的私人登入網址。只改 token
+fragment 的導向會重新載入本頁，由原登入機制處理並移除 fragment。
+模式隨本分頁保留；關閉分頁後新分頁仍需原登入。請勿把 token 傳給 Fanzloud。
+
+登入失效、網路或結果讀取失敗會清除舊結果／詳細下載；更新不重新執行工作。
+「返回 Office 完整操作台」明確清除模式並回原入口，保留原登入、terminal、
+session 與本地能力。這是**唯讀介面**，不是新權限：原 bearer token 的
+伺服器權限、Host／Origin 檢查完全不變，不能將此模式當作獨立唯讀憑證。
+
+[共同契約](../../../platform/fanzloud/docs/specs/SPEC-FZ-OFFICE-NAV.md)／
+[同來源瀏覽器證據](../../../platform/fanzloud/docs/acceptance/FZ-OFFICE-NAV.acceptance.md)
+使用隔離合成紀錄與真 Office HTTP，未驗收私人部署、付費推論或完整 MVP。
+
+Compatibility note: `office_console.js` is already included in the existing remote
+grant source binding. Installing changed source may make an old unused grant fail
+`remote_grant_source_changed`, as designed. This change neither migrates/recreates
+grants nor retries them; T29 and all consumed authorizations remain untouched.
+No private installation or grant was changed during this test.

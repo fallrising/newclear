@@ -451,6 +451,8 @@ Owner直接指示繼續開發；來源newclear `462f392ffb8299ff10aedde05f6c16e6
 
 | ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| T-0032-01 | Pi首次及指定重試的一次性runner交接 | AC-01／07／09／11子集 | in_progress | 2026-11-22T16:55:18.808583+00:00 | — | 2026-11-22T16:59:35.111890+00:00 |
+| T-0032-01 | Pi首次及指定重試的一次性runner交接 | AC-01／07／09／11子集 | done | 2026-11-22T16:55:18.808583+00:00 | 2026-11-22T17:01:18Z | 2026-11-22T17:01:50.107858+00:00 |
 
 T-0032：已修正 Pi runner 接受任意格式正確授權參照的歸屬問題；首次與retry一律驗證dispatcher同PID／繼承鎖／來源／provider／收據並領取一次，retry還核對parent。245Python／74Node與Pi首次五組／retry四組／Cursor五組Chrome通過，失敗歷史與fixture保留；零產品模型請求。原生預檢及provider是明示替身，完整MVP仍pending。單次GLM開發審查使用owner指定1M上限，HTTP400 invalid_request未指明參數，未取得審查且未重試；主導獨立重現與審查。詳[證據](../evidence/pi-grant-handoff-2026-11-23.json)，交付狀態以任務板為準。
+
+T32 交付結案：[功能 PR #1084](https://github.com/fallrising/newclear/pull/1084) 於2026-11-22T17:01:18Z正常合併，merge SHA `fadc191378bc34185b23ece08b1070b8ac459a51`。已fetch遠端main，與候選 `70e8ada029bf6f88d3061bc27977608a05467e31` 的全元件diff零；[Agent Office Lab](https://github.com/fallrising/newclear/actions/runs/45046934979)與[Project success contracts](https://github.com/fallrising/newclear/actions/runs/45046935063)均success，無衝突／繞過保護。245Python／74Node，Pi首次五組／指定retry四組及Cursor五組Chrome，publication227、indexes55contracts9llms、staged diff check通過。原生預檢／provider為明示替身，產品模型請求與實際lab grant皆零；主導重現與審查，單次GLM400未取得獨立審查、沒有重試／fallback。完整跨provider原生生命週期、安全與MVP仍pending，無usable tag或部署。

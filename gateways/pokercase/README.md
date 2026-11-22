@@ -250,3 +250,5 @@ MIT. Inspired by upstream MIT projects; not affiliated with 9Router.
 Legacy Cursor Agent CLI runtime settings (migration pending; not the current product requirement): `--cursor-image` / `THINROUTER_CURSOR_IMAGE` (pinned local digest), `--cursor-profile-volume` / `THINROUTER_CURSOR_PROFILE_VOLUME` (dedicated `thinrouter-cursor-*` named volume), and `--cursor-runtime-bin` / `THINROUTER_CURSOR_RUNTIME_BIN` (Docker executable, default `docker`). Missing settings return 503; there is no host CLI fallback.
 
 Bounded fixture reliability checks: [fixture startup ownership and safe diagnostics](docs/tasks/T-0445-fixture-startup.md). Historical startup/auth causes remain unknown; test-only ownership evidence does not establish real-provider acceptance.
+
+[具名客戶端相容性與採用決定](docs/portfolio-client-parity.md)

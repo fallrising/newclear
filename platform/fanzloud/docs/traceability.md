@@ -159,3 +159,14 @@ original FN07/M3, Cloud, AP M4 and Office MVP gaps remain unchanged.
 | D04 bounded delivery | Same | Fresh-context review/root gates accepted; [BOARD](tasks/BOARD.md) CI/merge/readback | Delivery pending |
 
 No Rust signature/error/rustdoc change. Original FN07/M3 and other product gaps retained.
+
+## T049 — current run observation
+
+| Requirement | CU / specification | Evidence | State |
+| --- | --- | --- | --- |
+| O01 current observation / login | CU-WEB-OBS-01 / M1-WEB-04/06 / [SPEC-T049](specs/SPEC-T049-observation-order.md) | Same-run/ABA/relogin regressions, Chromium current-view projection | Verified locally |
+| O02 stale errors/fallback/timers | Same | Old failure/404/timer/list rejection; current behavior positive cases | Verified locally |
+| O03 regression / browser | Same | [Acceptance](acceptance/T049.acceptance.md): RED50/7 → GREEN57/0; eight Chromium scenarios | Verified locally; CI pending |
+| O04 required review/delivery | Same | Native fresh-context review, root gates and [BOARD](tasks/BOARD.md) | Required source review accepted; delivery pending; optional Claude auth_failed |
+
+No Rust signature/error/rustdoc change; no full FN07/M3 or adjacent-product acceptance.

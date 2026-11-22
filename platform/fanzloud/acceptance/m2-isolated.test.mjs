@@ -40,9 +40,10 @@ async function page({stored, submit, action, getRun, tasks, submissions, artifac
       return {ok: !data?.__status, status: data?.__status || 200, json: async () => data, text: async () => data};
     }});
   await vm.runInContext(`(async () => {${source}\n})()`, context);
-  const flush = async () => {for(let n = 0; n < 10; n++) await Promise.resolve();};
+  // Drain the promise chain to a host event-loop boundary; held responses stay pending.
+  const flush = async () => {await new Promise(resolve => setImmediate(resolve));};
   const submitForm = async () => {await node('task-form').listeners.submit({preventDefault(){}}); await flush();};
-  return {node, storage, requests, submitForm, flush, downloads, links: () => [...elements.values()].filter(x => x.clicked && x.download)};
+  return {node, storage, requests, timers, submitForm, flush, downloads, links: () => [...elements.values()].filter(x => x.clicked && x.download)};
 }
 test('M2-01: same catalog offers both real subscription vendors only', async () => {
   const p = await page();
@@ -451,4 +452,91 @@ test('D01: disabled or logged-out diff action cannot initiate a read', async () 
     await p.node('download-diff').listeners.click();
     assert.equal(p.requests.length, before); assert.equal(p.downloads.length, 0);
   }
+});
+
+
+const runReads = p => p.requests.filter(x => /\/runs\/[^/]+$/.test(x.url));
+const assertFinished = (p, id = 'A') => {
+  assert.equal(p.node('run-id').textContent, id);
+  assert.equal(p.node('run-status').textContent, '完成');
+  assert.equal(p.node('diff-output').textContent, finishedDiff);
+  assert.equal(p.node('verification').textContent, '檢查通過');
+  assert.equal(p.node('cancel-run').disabled, true);
+};
+test('O01: newer same-run observation survives an older running response', async () => {
+  let reads = 0, release;
+  const p = await page({stored: [['fanz-current-run', 'A']], getRun: id => ++reads === 2 ? new Promise(resolve => {release = resolve;}) : reads === 1 ? run(id) : finishedRun(id)});
+  p.node('refresh').listeners.click(); await p.flush();
+  p.node('refresh').listeners.click(); await p.flush(); assertFinished(p);
+  release({...run('A'), reason: 'operator_cancelled'}); await p.flush();
+  assertFinished(p); assert.equal(p.node('run-reason').textContent, '');
+  assert.equal(p.requests.filter(x => x.method !== 'GET').length, 0);
+});
+test('O01: A-B-A selection cannot revive an old A observation', async () => {
+  let aReads = 0, release;
+  const p = await page({stored: [['fanz-current-run', 'A']], getRun: id => id === 'A' && ++aReads === 2 ? new Promise(resolve => {release = resolve;}) : finishedRun(id)});
+  p.node('refresh').listeners.click(); await p.flush();
+  for (const index of [1, 0]) {p.node('recent-tasks').children[index].children[0].listeners.click(); await p.flush();}
+  assertFinished(p); release(run('A')); await p.flush(); assertFinished(p);
+});
+test('O01: relogin cannot revive a previous login observation', async () => {
+  let reads = 0, release;
+  const p = await page({stored: [['fanz-current-run', 'A']], getRun: id => ++reads === 2 ? new Promise(resolve => {release = resolve;}) : finishedRun(id)});
+  p.node('refresh').listeners.click(); await p.flush(); await p.node('logout').listeners.click();
+  await p.node('login-form').listeners.submit({preventDefault() {}}); assertFinished(p);
+  release(run('A')); await p.flush(); assertFinished(p);
+  assert.equal(p.requests.filter(x => x.method !== 'GET' && !x.url.endsWith('/session')).length, 0);
+});
+test('O02: stale run failures preserve the current error', async () => {
+  let reads = 0, reject;
+  const p = await page({stored: [['fanz-current-run', 'A']], getRun: id => ++reads === 2 ? new Promise((_, no) => {reject = no;}) : finishedRun(id)});
+  p.node('refresh').listeners.click(); await p.flush(); p.node('refresh').listeners.click(); await p.flush();
+  p.node('error-message').textContent = 'current view error';
+  reject(new Error('stale run failure')); await p.flush();
+  assert.equal(p.node('error-message').textContent, 'current view error'); assertFinished(p);
+});
+test('O02: stale404 cannot switch to the durable fallback', async () => {
+  let reads = 0, release;
+  const p = await page({stored: [['fanz-current-run', 'A']], submissions: () => ({blocked: false, items: [{key: 'saved', state: 'confirmed', receipt: {run: {id: 'B'}}}]}),
+    getRun: id => ++reads === 2 ? new Promise(resolve => {release = resolve;}) : finishedRun(id)});
+  p.node('refresh').listeners.click(); await p.flush(); p.node('refresh').listeners.click(); await p.flush();
+  const before = runReads(p).length; release({__status: 404}); await p.flush();
+  assertFinished(p); assert.equal(runReads(p).length, before);
+  assert.equal(p.storage.get('fanz-current-run'), 'A');
+});
+test('O02: already-queued stale poll callback cannot issue a new run GET', async () => {
+  for (const transition of ['select-B', 'logout-login']) {
+    let reads = 0;
+    const p = await page({stored: [['fanz-current-run', 'A']], getRun: id => ++reads === 1 ? run(id) : finishedRun(id)});
+    const oldCallback = p.timers[0]; assert.equal(typeof oldCallback, 'function');
+    if (transition === 'select-B') {p.node('recent-tasks').children[1].children[0].listeners.click(); await p.flush();}
+    else {await p.node('logout').listeners.click(); await p.node('login-form').listeners.submit({preventDefault() {}});}
+    const before = runReads(p).length; oldCallback(); await p.flush();
+    assert.equal(runReads(p).length, before);
+    assertFinished(p, transition === 'select-B' ? 'B' : 'A');
+  }
+});
+test('O02: current polling and current errors remain observable without writes', async () => {
+  for (const failed of [false, true]) {
+    let reads = 0;
+    const p = await page({stored: [['fanz-current-run', 'A']], getRun: id => {
+      if (++reads === 1) return run(id);
+      if (failed) throw new Error('current run unavailable');
+      return finishedRun(id);
+    }});
+    p.timers[0](); await p.flush(); assert.equal(runReads(p).length, 2);
+    if (failed) assert.match(p.node('error-message').textContent, /current run unavailable/); else assertFinished(p);
+    assert.equal(p.requests.filter(x => x.method !== 'GET').length, 0);
+  }
+});
+test('O02: old terminal recent-list failure cannot overwrite a newer observation', async () => {
+  let reads = 0, lists = 0, reject;
+  const items = [{title: 'A', run_id: 'A', state: 'succeeded'}];
+  const p = await page({stored: [['fanz-current-run', 'A']], getRun: id => ++reads === 1 ? run(id) : finishedRun(id),
+    tasks: () => ++lists === 2 ? new Promise((_, no) => {reject = no;}) : items});
+  p.node('refresh').listeners.click(); await p.flush(); assert.equal(typeof reject, 'function');
+  p.node('refresh').listeners.click(); await p.flush(); assertFinished(p);
+  p.node('error-message').textContent = 'new observation error';
+  reject(new Error('old task-list failure')); await p.flush();
+  assert.equal(p.node('error-message').textContent, 'new observation error');
 });

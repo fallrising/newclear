@@ -1,0 +1,119 @@
+{
+  "milestone": "T-0031",
+  "date": "2026-11-23",
+  "base_commit": "b9109be632046d1da7c98db12c77214a11bdbc4e",
+  "status": "control_layer_passed",
+  "scope": "Cursor consumed grant attribution and once-only dispatcher-to-runner handoff",
+  "ac_subsets": [
+    "AC-01",
+    "AC-09",
+    "AC-11"
+  ],
+  "mvp_complete": false,
+  "usable_tag": null,
+  "before": {
+    "fresh_processes_accepting_same_consumed_reference": 2,
+    "native_or_model_calls": 0,
+    "credentials_read": false
+  },
+  "after": {
+    "new_runner_reuse_rejected_before_preflight": true,
+    "same_pid_exec_handoff_claims_once": true,
+    "failed_preflight_does_not_refund": true,
+    "wrong_pid_entry_time_missing_receipt_source_change_rejected": true,
+    "separate_explicit_operator_authorization_preserved": true
+  },
+  "validation": {
+    "python": {
+      "command": "python3 -m unittest discover -s labs/agent-office-lab/scripts -p 'test_*.py' -v",
+      "cwd": "repo root",
+      "version": "3.14.4",
+      "passed": 236
+    },
+    "node": {
+      "command": "node --test labs/agent-office-lab/scripts/*.test.mjs",
+      "cwd": "repo root",
+      "version": "23.11.0",
+      "passed": 74
+    },
+    "cursor_browser_scenarios": 5,
+    "pi_fresh_browser_scenarios": 5,
+    "pi_retry_browser_scenarios": 4,
+    "external_browser_requests": 0,
+    "real_components": [
+      "runner authorization path",
+      "dispatcher",
+      "same PID exec",
+      "execution slot",
+      "private grant files",
+      "loopback HTTP",
+      "Chrome UI"
+    ],
+    "substitutes": [
+      "provider prerequisite detection",
+      "native preflight stopped before credentials",
+      "local failed provider process"
+    ],
+    "native_cursor_verified": false,
+    "full_descendant_audit": false,
+    "publication_files": 225,
+    "repo_indexes": {
+      "contracts": 55,
+      "llms_files": 9,
+      "errors": 0
+    },
+    "browser_commands": [
+      "node labs/agent-office-lab/scripts/check_console_remote_grant_browser.mjs --local-acceptance --provider cursor --harness-root PHYSICAL_TEMP_DIR",
+      "node labs/agent-office-lab/scripts/check_console_remote_grant_browser.mjs --local-acceptance --harness-root PHYSICAL_TEMP_DIR",
+      "node labs/agent-office-lab/scripts/check_console_retry_grant_browser.mjs PRIVATE_OUTPUT_DIR"
+    ]
+  },
+  "product_model_requests": 0,
+  "actual_lab_grants_created": 0,
+  "development_review": {
+    "provider": "opencode-go",
+    "model": "glm-5.3",
+    "requests": 1,
+    "http_status": 401,
+    "reason": "Invalid credential",
+    "review_completed": false,
+    "automatic_retries": 0,
+    "fallback": false,
+    "limits": {
+      "requests": 1,
+      "tools": 0,
+      "output_tokens": 6000,
+      "timeout_seconds": 180,
+      "reported_cost_stop_usd": 3,
+      "money_hard_cap": null
+    },
+    "cli_exit_code": 0,
+    "reported_input_tokens": 0,
+    "reported_output_tokens": 0,
+    "reported_cost_usd": 0,
+    "billing_verified": false,
+    "elapsed_seconds": 1.133,
+    "credential_copy_removed": true,
+    "tracked_processes": 1,
+    "tracked_alive": 0,
+    "full_descendant_audit": false
+  },
+  "review": "Primary agent reproduction and review; no independent model review obtained",
+  "preserved_failures": [
+    "Initial Cursor browser readonly navigation raced Page.reload; test now waits for the requested URL before reload",
+    "Publication check before new evidence file was written reported missing links; final complete candidate checked separately"
+  ],
+  "remaining": [
+    "Actual Cursor console task to verified artifact and download",
+    "Cross-provider permissions, cancellation and resume",
+    "Full security acceptance and MVP"
+  ],
+  "source_sha256": {
+    "remote_grant.py": "ef6244cbff8259d26dc54bddd0baada22304a4f9152de1c07e2cd854eb8adf4f",
+    "execution_slot.py": "c15f6ea90d4e1f37070aec684f5e6d4bdc10b2961d4087bab401a12e3fbf990f",
+    "run_cursor_work.py": "73028f353aba49db281369030759c90b87c7b351fedce9df0509370fd34f7545",
+    "console_cursor_grant_harness.py": "a7db99dd9bf836e6da48b583acae4fc525697acc1025dce279bf960b1f8aff3a",
+    "test_cursor_grant_handoff.py": "a58a79bb688307899434558429d7c9fa3d2967e382d8889b130e4668576e754b",
+    "check_console_remote_grant_browser.mjs": "6c05e74e59fe45748ea4a6d3114bf2a8e39c0f8eb76661bf31d637779931d280"
+  }
+}

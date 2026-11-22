@@ -37,3 +37,5 @@ Wrapper 先核對固定 runtime hash，再以其封裝內的純 schema validator
 原受測來源 hash 全部保留。成功後僅修正 Office 子報告未更新的 model_inference_verified 欄位；父 runner 在原實測中已獨立驗證並回傳 true，沒有因這個報告欄位修正重跑模型。AC-13 通過不代表 Cursor 取消、權限互動、refresh、restart/resume 或四工位 MVP 已完成。
 
 T-0030 已接入[一次性操作台授權](REMOTE-GRANT.md)：固定首次任務、120秒及來源綁定。控制層透過本機替身驗證，沒有重跑本頁的歷史模型任務；操作台到真實 Cursor 產物與原生取消仍待驗。
+
+T-0031：帶 `--authorization-ref` 的執行只接受 dispatcher 同程序 exec 的一次性交接，並在原生預檢前建立不可重用的領取收據；直接 `--allow-remote` 仍需另次操作員授權。見[授權契約](REMOTE-GRANT.md)。

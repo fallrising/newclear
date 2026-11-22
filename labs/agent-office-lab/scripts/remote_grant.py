@@ -496,6 +496,41 @@ def consumed(lab: Path, grant_id: str, provider: str | None = None) -> bool:
         os.close(root_fd)
 
 
+def claim_runner(lab: Path, grant_id: str, provider: str) -> str:
+    """Claim a consumed grant once, in the same dispatcher process across exec.
+
+    This validates attribution of the server grant; direct --allow-remote remains
+    a separate operator authorization. A failed runner never refunds this claim.
+    """
+    from execution_slot import inherited_slot
+    if provider != 'cursor':
+        raise GrantError('remote_grant_provider_not_supported')
+    fingerprint(grant_id)
+    lab = Path(lab)
+    if not inherited_slot(lab):
+        raise GrantError('remote_grant_requires_dispatch_handoff')
+    with _directory(_read_dir(lab)) as root_fd:
+        with _directory(_lock(root_fd)):
+            with _directory(_child_dir(root_fd, 'consumed')) as consumed_fd:
+                now = time.time()
+                record = _read_json_at(consumed_fd, grant_id + '.json')
+                _validate(record, lab, provider, now)
+                use = _read_json_at(consumed_fd, grant_id + '.use.json')
+                if (set(use) != {'consumed_at', 'entry', 'pid'}
+                        or use['entry'] != 'dispatcher' or type(use['pid']) is not int
+                        or use['pid'] != os.getpid()
+                        or type(use['consumed_at']) not in (float, int)
+                        or not math.isfinite(use['consumed_at'])
+                        or not record['created_at'] <= use['consumed_at'] <= now):
+                    raise GrantError('remote_grant_requires_dispatch_handoff')
+                try:
+                    _write_json_at(consumed_fd, grant_id + '.runner.json',
+                                   {'claimed_at': now, 'pid': os.getpid()})
+                except FileExistsError:
+                    raise GrantError('remote_grant_used') from None
+    return fingerprint(grant_id)
+
+
 def _sanitized(function):
     from functools import wraps
     @wraps(function)
@@ -506,5 +541,5 @@ def _sanitized(function):
             raise GrantError('remote_grant_unavailable') from None
     return call
 
-for _name in ('create', 'pending', 'consume', 'revoke', 'inspect', 'consumed'):
+for _name in ('create', 'pending', 'consume', 'revoke', 'inspect', 'consumed', 'claim_runner'):
     globals()[_name] = _sanitized(globals()[_name])

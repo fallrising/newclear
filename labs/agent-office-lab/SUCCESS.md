@@ -15,6 +15,8 @@ source_commit: 64c8ad59620e9068f0beede99365b7d656f00825
 
 ## 主線與範圍
 
+T-0031：owner 重新訂閱 OpenCode 並要求繼續；新單次 Pi／GLM 5.3 唯讀審查已合併的 Cursor grant 控制流程，主導重現可驗證問題、修正必要邊界並交付。固定一請求、零工具、6000 output tokens、180秒、回報成本US$3後停止（非金額硬上限）；不自動重試／fallback。與產品模型驗收分開，沒有 Cursor 產品付費授權。驗證 AC-01／09／11 子集的來源綁定、一次性執行與保守結果；必要 Python／Node／HTTP／瀏覽器回歸及 repo gates。完整MVP／Cursor真實新入口狀態不變。
+
 T-0030：Cursor 固定首次合成任務已接入一次性 grant 與操作台。授權綁定模型、固定 runtime 版本、120 秒／四工具／4096 bytes 與來源（含 CLI lock），跨 provider 仍只有一張 pending grant。明確確認、正確工位派工、原子消耗、停止、失敗結果、撤銷及重啟不重跑以真實 HTTP／dispatcher／跨 exec 鎖及 Chrome 通過；provider 與環境偵測為明示本機替身，沒有 Cursor 模型或原生取消驗收。Pi fresh／retry 回歸通過，原費用／時間上限與不自動重試不變。一次 Pi／GLM 開發審查因 HTTP403 未完成，沒有重試／fallback；主導完成審查。完整 MVP 保持 pending；[證據](docs/evidence/cursor-console-grant-2026-11-22.json)，交付見[任務板](docs/tasks/BOARD.md)。
 
 T-0030：將既有一次性授權延伸到固定 Cursor／Composer 2.5 首次合成任務。保持預設120秒、四工具、4096bytes，request／token／金額硬上限未知；不接受 Cursor retry、不改固定 CLI 或全域設定。單一 pending grant（跨 provider）、來源／版本／限制綁定、預檢及執行鎖內消耗、失敗不退款、頁面明確確認與重啟不重跑。驗證用隔離臨時 lab、真實 HTTP／dispatcher／exec lock、Chrome，環境偵測與 provider 為明示替身；不以其宣稱 Cursor 模型或原生取消通過。保留 Pi fresh／retry 回歸及全部歷史證據。
@@ -191,3 +193,5 @@ N01–N04 locally verified with actual HTTP/Chromium and synthetic records; 224 
 74 Node tests and publication checks pass. N05 independent review/CI/delivery
 remain pending; no Office MVP or original AC is promoted by this slice.
 [Shared evidence](../../platform/fanzloud/docs/acceptance/FZ-OFFICE-NAV.acceptance.md).
+
+T-0031 本機結果：主導重現已消耗 Cursor grant id 可被新程序再次帶入的授權指紋歸屬問題，加入 dispatcher 同 PID／繼承鎖／私有消耗收據與排他 runner 領取檢查；失敗不退還。單次 Pi／GLM 5.3 開發審查 HTTP401 Invalid credential，未取得審查，沒有重試／fallback；不是產品模型驗收。詳[證據](docs/evidence/cursor-grant-handoff-2026-11-23.json)。完整 MVP／Cursor 真實新入口仍 pending。

@@ -93,9 +93,7 @@ def main():
     if args.authorization_ref is not None:
         if not args.allow_remote or args.timeout_seconds != 120:
             raise ValueError('invalid_authorization_mode')
-        authorization = remote_grant.fingerprint(args.authorization_ref)
-        if not remote_grant.consumed(LAB, args.authorization_ref, 'cursor'):
-            raise ValueError('authorization_not_consumed')
+        authorization = remote_grant.claim_runner(LAB, args.authorization_ref, 'cursor')
     if args.check_account:
         verified = account_status(); print(json.dumps({'authentication_verified': verified, 'model_inference_verified': False})); return 0 if verified else 1
     if not args.check_startup and not args.allow_remote:

@@ -426,3 +426,17 @@ Owner 直接指示繼續開發。基準來源 `fallrising/newclear@1c0483e86a825
 T30 本機驗收：232 Python／74 Node、Cursor五組Chrome流程（含唯讀模式零POST及明確返回）、Pi首次五組與重試四組回歸通過。實際dispatcher／atomic consume／跨exec鎖；provider與環境偵測明示替身，零產品模型請求／實際lab授權。已保留並整合主線 `6c9cbd0ba596cd5f1ddd6c5466b99ce294dea1d3` 的FZ-OFFICE-NAV，未改其產品範圍。publication223／indexes55contracts9llms／staged diff check通過。單次Pi GLM審查403，未取得審查、無重試；主導審查，不宣稱獨立模型審查。PR／CI／合併尚待完成。
 
 T30 交付結案：[功能 PR #1073](https://github.com/fallrising/newclear/pull/1073) 於 `2026-11-22T14:19:10Z` 正常合併，merge SHA `e0e6a3488ad4fdabaf99a65be004ada76230c830`。遠端main已fetch，與候選 `bcd6cbeb6762ed638c98684cafca8d8fb5f18215` 的全元件diff零；[Agent Office Lab CI](https://github.com/fallrising/newclear/actions/runs/45032075411)與[Project success contracts](https://github.com/fallrising/newclear/actions/runs/45032075486)均success，無衝突／繞過保護。232Python／74Node、Cursor五組及Pi首次五組／重試四組Chrome、唯讀成果零POST／明確返回、publication223／indexes55與9／staged check通過。最終畫面確認工作finished、執行鎖available。只有控制層使用實際HTTP／dispatcher／exec與明示provider替身；無產品模型請求／實際lab grant。一次Pi GLM開發審查403，未取得獨立審查、沒有自動重試；主導審查完成。Cursor真實新入口、原生取消／恢復及完整MVP仍pending，沒有usable tag或部署。
+
+## T-0031：重新訂閱後的 GLM 審查與必要修正
+
+T-0031：owner 重新訂閱 OpenCode 並要求繼續；新單次 Pi／GLM 5.3 唯讀審查已合併的 Cursor grant 控制流程，主導重現可驗證問題、修正必要邊界並交付。固定一請求、零工具、6000 output tokens、180秒、回報成本US$3後停止（非金額硬上限）；不自動重試／fallback。與產品模型驗收分開，沒有 Cursor 產品付費授權。驗證 AC-01／09／11 子集的來源綁定、一次性執行與保守結果；必要 Python／Node／HTTP／瀏覽器回歸及 repo gates。完整MVP／Cursor真實新入口狀態不變。
+
+基準 `fallrising/newclear@b9109be632046d1da7c98db12c77214a11bdbc4e`；產品元件與 T30 結案來源一致。
+
+| ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| T-0031-01 | Cursor 授權交接修正；GLM 審查嘗試已記錄 | AC-01／09／11 子集 | in_progress | 2026-11-22T16:00:56.182651+00:00 | — | 2026-11-22T16:09:07.409284+00:00 |
+
+T-0031 本機結果：主導重現已消耗 Cursor grant id 可被新程序再次帶入的授權指紋歸屬問題，加入 dispatcher 同 PID／繼承鎖／私有消耗收據與排他 runner 領取檢查；失敗不退還。單次 Pi／GLM 5.3 開發審查 HTTP401 Invalid credential，未取得審查，沒有重試／fallback；不是產品模型驗收。詳[證據](../evidence/cursor-grant-handoff-2026-11-23.json)。完整 MVP／Cursor 真實新入口仍 pending。
+
+T31 本機驗收：236 Python／74 Node，Cursor 五組、Pi 首次五組／指定重試四組 Chrome 通過。首輪唯讀導航與 reload 競態保留，測試改為先等待目標 URL；產品 UI 未改。真實 runner 授權檢查／dispatcher／exec／檔案鎖與明示原生邊界替身；零產品模型呼叫。主導審查，PR／CI／合併待完成。

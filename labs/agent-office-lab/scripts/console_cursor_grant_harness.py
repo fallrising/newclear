@@ -30,7 +30,6 @@ p.add_argument('--allow-remote',action='store_true',required=True)
 p.add_argument('--authorization-ref',required=True)
 a=p.parse_args()
 lab=Path(__file__).resolve().parents[1]
-assert grants.consumed(lab,a.authorization_ref,'cursor')
 stop=False
 def interrupt(*_):
     global stop
@@ -38,6 +37,7 @@ def interrupt(*_):
 signal.signal(signal.SIGINT,interrupt)
 signal.signal(signal.SIGTERM,interrupt)
 with slots.execution_slot(lab):
+    authorization=grants.claim_runner(lab,a.authorization_ref,'cursor')
     slots.mark_started()
     run=lab/'runs/cursor-work-harness'
     run.mkdir(mode=0o700)
@@ -48,7 +48,7 @@ with slots.execution_slot(lab):
         'reason':'synthetic_provider_stub','startup_only':False,
         'model_inference_verified':False,'cleanup_errors':[],
         'office':{'provider':'cursor','model':'composer-2.5','status':'failed','cleanup_completed':True},
-        'authorization':{'kind':'server_grant','fingerprint':grants.fingerprint(a.authorization_ref)}}
+        'authorization':{'kind':'server_grant','fingerprint':authorization}}
     (run/'result.json').write_text(json.dumps(report))
     slots.mark_clean()
     print(json.dumps({'artifacts':str(run),'status':'failed','model_inference_verified':False}),flush=True)

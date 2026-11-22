@@ -606,3 +606,14 @@ Owner 要求接續最小導航。在 isolated Web 加入 Fanzloud／AP／Office 
 狀態：本地導航與43項既有 Web 測試通過，獨立審查接受，CI／交付待辦；
 [瀏覽器證據與限制](docs/acceptance/T047.acceptance.md)。不查跨產品資料、不啟服務或 provider。FN07、完整 M3、舊 Cloud AC04/P1 AC05、
 AP M4 與 Office MVP 保持原缺口，mainline incomplete／usable_tag none 不變。
+
+## T048：diff 下載生命週期修正 — 2026-11-22
+
+Owner 要求繼續開發。原 diff handler 在 GET 回來後只比對 run ID／內容，
+未像 candidate／review 一樣阻擋登出或同任務重新選取前的舊回應。
+本輪只修正既有 FN01／04／06 的成果讀取邊界；不新增產品里程碑。
+[任務](docs/tasks/T048.task.md)／[契約](docs/specs/SPEC-T048-diff-lifecycle.md)：
+D01 登入／選取世代檢查，D02 舊錯誤隔離及精確下載，D03 RED→GREEN 與真瀏覽器 fixture，
+D04 獨立審查、必要 CI 與正常交付。狀態：49項 Web 測試與實際 Chromium 合成情境通過；獨立審查接受，CI／交付待辦。
+[證據與限制](docs/acceptance/T048.acceptance.md)。
+不啟服務或 provider；原完整 FN07／M3、Cloud/P1、AP M4、Office MVP 缺口不變。

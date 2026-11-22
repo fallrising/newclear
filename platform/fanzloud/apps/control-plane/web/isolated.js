@@ -246,15 +246,18 @@ element('task-form').addEventListener('submit', async (event) => {
   }
 });
 element('download-diff').addEventListener('click', async () => {
-  if (!runId || finalDiff === null) return;
-  const requested = runId;
+  if (!authenticated || !runId || finalDiff === null || element('download-diff').disabled) return;
+  const requested = runId, expectedDiff = finalDiff, generation = candidateGeneration;
   try {
     const diff = await api(`/runs/${requested}/result.diff`, {text: true});
-    if (requested !== runId || diff !== finalDiff) throw new Error('diff 與目前任務不符，請重新讀取。');
+    if (!authenticated || generation !== candidateGeneration || requested !== runId) return;
+    if (diff !== expectedDiff || diff !== finalDiff) throw new Error('diff 與目前任務不符，請重新讀取。');
     const url = URL.createObjectURL(new Blob([diff], {type: 'text/plain;charset=utf-8'}));
     const link = document.createElement('a'); link.href = url; link.download = `run-${requested}.diff`; link.click();
     setTimeout(() => URL.revokeObjectURL(url), 1000);
-  } catch (error) { fail(error); }
+  } catch (error) {
+    if (authenticated && generation === candidateGeneration && requested === runId) fail(error);
+  }
 });
 element('load-candidate').addEventListener('click', async () => {
   if (!authenticated || !currentRun || element('load-candidate').disabled) return;

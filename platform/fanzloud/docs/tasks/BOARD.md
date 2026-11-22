@@ -215,3 +215,14 @@ remain unchanged. No release, deployment, service window or next milestone is st
 Focused independent board-only review: ACCEPT; prior rows, exact merge metadata,
 component source identity, scope and original gaps preserved. Reviewer reran indexes
 and whitespace; final closeout PR CI/merge/readback remain delivery gates.
+
+## T-1059 T048 diff download lifecycle
+
+[Task T048](T048.task.md), [issue1059](https://github.com/fallrising/newclear/issues/1059).
+
+| ID | Task | AC | Status | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| DIFF-01 | Auth and selection invalidation | D01 | in_progress | 2026-11-22T13:03:55Z | | 2026-11-22T13:11:19Z |
+| DIFF-02 | Current bytes and stale errors | D02 | in_progress | 2026-11-22T13:03:55Z | | 2026-11-22T13:11:19Z |
+| DIFF-03 | Regression and browser evidence | D03 | in_progress | 2026-11-22T13:03:55Z | | 2026-11-22T13:11:19Z |
+| DIFF-04 | Review and normal delivery | D04 | in_progress | 2026-11-22T13:03:55Z | | 2026-11-22T13:11:19Z |

@@ -136,3 +136,24 @@ The private read-only gate now has pre-live independent acceptance: see the late
 [checkpoint](acceptance/M3-owner-operation.md). Original services are still stopped
 and the600s window has not started; owner private tunnel, original login and TLS trust
 readiness must be confirmed first. This is readback only, not new coding/review.
+
+## Office 本機既有成果
+
+在「查看既有成果」的 Office 區塊，填入已在**瀏覽器這台電腦**執行之
+Office 操作台的 port（1024–65535），再開啟唯讀成果介面。只填數字，
+不要貼私人登入網址或 token；Fanzloud 不聯絡 Office API、不保存設定。
+空白／無效 port 不提供連結，重新載入會清除設定。若新頁沒有「唯讀成果介面」
+標示，代表入口／版本未核對，請回原 Office，不在該頁輸入登入資訊。
+
+首次進入新分頁尚未登入時，依 Office 指引，在**該 Office 分頁**開啟
+原終端提供的私人登入網址。原 token 只留在 Office 分頁；Fanzloud 不接收。
+關閉分頁後重新開啟需重新走原來源登入。結果頁僅讀取既有紀錄、顯示原狀態
+與 hash、下載核對過的內容；更新成果不派工、不重試、不對帳。
+
+連線失敗時保留 Fanzloud 原頁，回原終端核對服務與 port，不自動啟動服務。
+若 Office 登入失效或結果無法讀取，來源頁清除舊結果並提示原入口登入。
+需要原生終端／本地操作時，明確選「返回 Office 完整操作台」。這是 UI 模式，
+不是新的唯讀 token 或服務權限。原離線 HTML 與 CLI 入口仍保留。
+
+本功能未部署私人服務；本版 [契約](specs/SPEC-FZ-OFFICE-NAV.md)／
+[驗證與限制](acceptance/FZ-OFFICE-NAV.acceptance.md) 不代表 FN07 owner 操作通過。

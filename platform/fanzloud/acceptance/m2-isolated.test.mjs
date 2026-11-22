@@ -11,6 +11,7 @@ async function page({stored, submit, action, getRun, tasks, submissions, artifac
   const node = id => {
     if (!elements.has(id)) elements.set(id, {value: '0', textContent: '', disabled: false, options: [], listeners: {}, children: [],
       addEventListener(type, fn) {this.listeners[type] = fn;},
+      setAttribute(name, value) {this[name] = value;}, removeAttribute(name) {delete this[name];},
       replaceChildren(...children) {this.children = children; this.options = children;}, append(child) {this.children.push(child);}, click() {this.clicked = true;}});
     return elements.get(id);
   };
@@ -451,4 +452,28 @@ test('D01: disabled or logged-out diff action cannot initiate a read', async () 
     await p.node('download-diff').listeners.click();
     assert.equal(p.requests.length, before); assert.equal(p.downloads.length, 0);
   }
+});
+
+// CU-WEB-OFFICE-NAV-01: no source credentials, network or persistent settings.
+test('Office nav starts unset, accepts only canonical local ports, invalidates old href', async () => {
+  const p = await page();
+  const port=p.node('office-port'), link=p.node('office-open');
+  assert.equal(port.value, ''); assert.equal(link.href, undefined);
+  assert.match(p.node('office-nav-status').textContent, /尚未設定/);
+  const before=p.requests.length, saved=[...p.storage];
+  for(const value of ['1024','40000','65535']){
+    port.value=value; port.listeners.input();
+    assert.equal(link.href, `http://127.0.0.1:${value}/#view=results`);
+  }
+  for(const value of ['', '0','1023','65536','04000','4000 ',' 4000','1e4','https://example.invalid','#token=SYNTHETIC','4000/?ref=private']){
+    port.value=value; port.listeners.input();
+    assert.equal(link.href, undefined); assert.equal(link['aria-disabled'],'true');
+  }
+  assert.equal(p.requests.length,before); assert.deepEqual([...p.storage],saved);
+});
+test('Office nav reload resets configuration without writes or restored href', async () => {
+  const p=await page();p.node('office-port').value='40000';p.node('office-port').listeners.input();
+  const reopened=await page({stored:[...p.storage]});
+  assert.equal(reopened.node('office-port').value,'');assert.equal(reopened.node('office-open').href,undefined);
+  assert.equal(reopened.requests.filter(r=>r.method!=='GET').length,0);
 });

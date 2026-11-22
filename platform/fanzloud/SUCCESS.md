@@ -16,6 +16,16 @@ source_commit: 391aa1aa72f1dd550d8acc7323f00c7a6229c3d4
 
 # Codebox / Fanzloud 成功契約
 
+## Private Office navigation implementation — 2026-11-22 continuation
+
+Owner resumed FZ-OFFICE-NAV after PR1061. [Normative technical contract](docs/specs/SPEC-FZ-OFFICE-NAV.md)
+selects a port-only local-browser link to the existing Office root and a source-owned
+results-only UI with original same-tab launch authentication. No backend/auth changes,
+new service or deployment. N01–N05 require focused tests and actual Chromium → Office
+HTTP with isolated synthetic records, followed by independent review and native CI.
+[Task](docs/tasks/FZ-OFFICE-NAV.task.md) records exact scope and optional Claude
+cost-approval block. Original FN07/live deployment and other product AC stay pending.
+
 ## Private Office navigation continuation — 2026-11-22
 
 [FZ-OFFICE-NAV task](docs/tasks/FZ-OFFICE-NAV.task.md) records the owner's requested

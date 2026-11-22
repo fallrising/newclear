@@ -1,0 +1,202 @@
+{
+  "status": "passed",
+  "date": "2026-11-22T13:56:25.525Z",
+  "scope": "Shipped Fanzloud UI with synthetic session; actual Office HTTP/auth/result reader with isolated synthetic records. No live private deployment/provider/owner acceptance.",
+  "browser": {
+    "protocolVersion": "1.3",
+    "product": "Chrome/153.0.8010.12",
+    "revision": "@971a7443b0c9b0a9b2860529b33331b76077ec62",
+    "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.0.0 Safari/537.36",
+    "jsVersion": "15.3.76.4"
+  },
+  "scenarios": [
+    "unset/invalid/change/reload",
+    "keyboard popup/no opener/no referrer",
+    "source-only original launch auth/reload/fresh-tab denial",
+    "failed/incomplete preserved",
+    "secret-only raw/display and native verified download",
+    "expired auth clears rows/detail",
+    "source artifact tamper suppresses download",
+    "explicit original-console return",
+    "offline original-tab preservation",
+    "Fanzloud session503"
+  ],
+  "download": {
+    "bytes": 39,
+    "sha256": "4a99c59635834f1b7184baef340ce03926048b9a4b36cbaf8071b4958f9577a9"
+  },
+  "office": {
+    "done": true,
+    "requests": [
+      {
+        "method": "GET",
+        "path": "/",
+        "has_referrer": false
+      },
+      {
+        "method": "GET",
+        "path": "/console.css",
+        "has_referrer": false
+      },
+      {
+        "method": "GET",
+        "path": "/console.js",
+        "has_referrer": false
+      },
+      {
+        "method": "GET",
+        "path": "/",
+        "has_referrer": false
+      },
+      {
+        "method": "GET",
+        "path": "/console.css",
+        "has_referrer": false
+      },
+      {
+        "method": "GET",
+        "path": "/console.js",
+        "has_referrer": false
+      },
+      {
+        "method": "GET",
+        "path": "/api/state",
+        "has_referrer": false
+      },
+      {
+        "method": "GET",
+        "path": "/api/state",
+        "has_referrer": false
+      },
+      {
+        "method": "GET",
+        "path": "/",
+        "has_referrer": false
+      },
+      {
+        "method": "GET",
+        "path": "/console.js",
+        "has_referrer": false
+      },
+      {
+        "method": "GET",
+        "path": "/console.css",
+        "has_referrer": false
+      },
+      {
+        "method": "GET",
+        "path": "/api/state",
+        "has_referrer": false
+      },
+      {
+        "method": "GET",
+        "path": "/api/state",
+        "has_referrer": false
+      },
+      {
+        "method": "GET",
+        "path": "/api/state",
+        "has_referrer": false
+      },
+      {
+        "method": "GET",
+        "path": "/api/state",
+        "has_referrer": false
+      },
+      {
+        "method": "GET",
+        "path": "/",
+        "has_referrer": false
+      },
+      {
+        "method": "GET",
+        "path": "/console.css",
+        "has_referrer": false
+      },
+      {
+        "method": "GET",
+        "path": "/console.js",
+        "has_referrer": false
+      },
+      {
+        "method": "GET",
+        "path": "/api/state",
+        "has_referrer": false
+      },
+      {
+        "method": "GET",
+        "path": "/",
+        "has_referrer": false
+      },
+      {
+        "method": "GET",
+        "path": "/console.css",
+        "has_referrer": false
+      },
+      {
+        "method": "GET",
+        "path": "/console.js",
+        "has_referrer": false
+      }
+    ],
+    "source_unchanged": true,
+    "spawn_count": 0
+  },
+  "fanzloud": [
+    {
+      "method": "GET",
+      "path": "/"
+    },
+    {
+      "method": "GET",
+      "path": "/assets/p0.css"
+    },
+    {
+      "method": "GET",
+      "path": "/assets/isolated.js"
+    },
+    {
+      "method": "GET",
+      "path": "/assets/candidate.js"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/session"
+    },
+    {
+      "method": "GET",
+      "path": "/favicon.ico"
+    },
+    {
+      "method": "GET",
+      "path": "/"
+    },
+    {
+      "method": "GET",
+      "path": "/assets/p0.css"
+    },
+    {
+      "method": "GET",
+      "path": "/assets/isolated.js"
+    },
+    {
+      "method": "GET",
+      "path": "/assets/candidate.js"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/session"
+    }
+  ],
+  "page_errors": [],
+  "source_hashes": {
+    "platform/fanzloud/apps/control-plane/web/isolated.html": "38c7dc1f625653d009c7fa3012120021e23121d3c4dd6219b63f73c818ff8639",
+    "platform/fanzloud/apps/control-plane/web/isolated.js": "53bcb7afaa23326c1193438afed47bbac899c4abf1e24c68edcc9b595b68a8ac",
+    "platform/fanzloud/apps/control-plane/web/p0.css": "53d44b9b13eb5493bb43ecfece1a46e4ce5c51b8ac99ab2232fa7ae6be90b297",
+    "labs/agent-office-lab/scripts/office_console.html": "3a3d9c364556a44ea57ac12c7a3d986aaa4440cad91a568c2a2f2da47aad4337",
+    "labs/agent-office-lab/scripts/office_console.js": "d262f296caa60600f30726207f54e4cf81975bff00c72a37570c550574e3e92e",
+    "labs/agent-office-lab/scripts/office_console.css": "9d5c1246207dfdb50bab2d9bfb8d598fc113432c32aa95e15484c77ffa6cb9c2",
+    "labs/agent-office-lab/scripts/office_console.py": "01c0094992e77f467c1d8988c79a6b88f55e6715e46dade4f0b508120bfc209d"
+  },
+  "inspector_sha256": "8199e960dede611f39ce09df16e0f9f4156436c9a6b69d91880843040519a265"
+}

@@ -347,3 +347,15 @@ Owner 直接指示繼續開發；T-0028：Pi 遠端重試的一次性授權。CL
 T-0028 本機驗收完成：224 Python／68 Node、四組實際 HTTP／Chrome 重試情境及五組既有首次授權回歸通過。成功情境確認實際 dispatcher exec、同 PID 繼承執行鎖、grant 消耗與 attempt=1 receipt；舊報告／input／receipt hash 未變，fixture 相同，結果仍 failed／零模型。26 個 PID/create-time 受追蹤程序已退出；抽樣不是完整後代樹保證。首次瀏覽器因斷言把本地化提示當原始 API code 而逾時，已修正並保留；其他測試準備失敗見[白名單證據](../evidence/remote-retry-grant-2026-11-16.json)。主導直接實作，沒有新 Claude／Pi 委託、產品模型呼叫或實際 lab 付費 grant。PR／CI／合併仍待完成，完整 AC 不變。
 
 T-0028 交付結案：[功能 PR #1050](https://github.com/fallrising/newclear/pull/1050) 已於 2026-11-16T17:20:19Z 正常合併，merge SHA `747be27db5453f109ea233c130a37cb66261368f`。遠端 main fetch 後，與候選 `249b9de29efdffde1b8d739a2ff8e0fb9ebf6e20` 的 Agent Office Lab 全元件 diff 為零；同期主線其他變更僅在 fanzloud 文件。必要 CI [Agent Office Lab](https://github.com/fallrising/newclear/actions/runs/43917130599) 與 [Project success contracts](https://github.com/fallrising/newclear/actions/runs/43917130674) 均 success，無衝突；主導審查完成，沒有獨立外部審查聲稱。224 Python／68 Node、四組新重試與五組既有首次授權瀏覽器流程、publication 217files／indexes 55contracts 9llms／staged diff check通過。零新增開發模型委託、產品模型請求與實際lab付費grant；每次真實付費重試仍需另次明確批准，完整 AC-07／09／11／MVP pending，無usable tag。
+
+## FZ-OFFICE-NAV — bounded result-view dependency
+
+[Task/lead](../../../../platform/fanzloud/docs/tasks/FZ-OFFICE-NAV.task.md),
+[contract](../../../../platform/fanzloud/docs/specs/SPEC-FZ-OFFICE-NAV.md).
+
+| ID | Task | AC | Status | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| FZ-OFFICE-NAV | Existing console results-only UI, original source login and no mutation | N01–N05 | in_progress | 2026-11-22T13:47:50Z | | 2026-11-22T14:01:37Z |
+
+Same owner-directed navigation slice; no T29/grant/provider work, auth policy or
+backend changes. Original Office AC/MVP and native terminal/session stay intact.

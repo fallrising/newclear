@@ -1,5 +1,24 @@
 import {readCandidate, readReview, reviewResult} from './candidate.js';
 const element = (id) => document.getElementById(id);
+// Navigation only: never store a private locator or contact Office from Fanzloud.
+function updateOfficeNavigation() {
+  const port = element('office-port').value;
+  const link = element('office-open');
+  link.removeAttribute('href');
+  link.setAttribute('aria-disabled', 'true');
+  if (!port) {
+    element('office-nav-status').textContent = 'Office 私人成果入口尚未設定。';
+  } else if (!/^[1-9][0-9]{3,4}$/.test(port) || Number(port) < 1024 || Number(port) > 65535) {
+    element('office-nav-status').textContent = '請只填 1024–65535 的本機 port，不含空白、網址或登入資訊。';
+  } else {
+    link.href = `http://127.0.0.1:${port}/#view=results`;
+    link.removeAttribute('aria-disabled');
+    element('office-nav-status').textContent = '可開啟本機 Office 成果介面；連線與權限仍由 Office 確認。';
+  }
+}
+element('office-port').value = '';
+element('office-port').addEventListener('input', updateOfficeNavigation);
+updateOfficeNavigation();
 const states = {queued: '排隊中', provisioning: '建立隔離工作區', running: 'Agent 執行中', finalizing: '收集 diff 與執行檢查', succeeded: '完成', failed: '失敗', interrupted: '結果不確定，已停止自動執行', cancelling: '取消中', cancelled: '已取消'};
 let csrf = '';
 let runId = sessionStorage.getItem('fanz-current-run') || '';

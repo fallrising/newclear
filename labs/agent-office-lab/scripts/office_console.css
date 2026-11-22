@@ -6,3 +6,6 @@
 #project,textarea{display:block;width:100%;margin:8px 0 14px}textarea{font:inherit;resize:vertical;min-height:120px;padding:12px;color:inherit;background:#101924;border:1px solid #52647c;border-radius:7px}textarea:focus-visible{outline:2px solid white;outline-offset:3px}.download{display:inline-block;margin-bottom:12px}
 
 #target{display:block;width:100%;margin:8px 0 14px}.revision-diff{padding:14px;border-left:3px solid var(--accent);background:#18212d}details summary{cursor:pointer;color:var(--muted)}
+
+[hidden]{display:none!important}
+#office-results{min-width:0;overflow-wrap:anywhere}#readonly-info .actions{flex-wrap:wrap}

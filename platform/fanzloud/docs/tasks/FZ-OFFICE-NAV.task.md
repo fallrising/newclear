@@ -1,5 +1,9 @@
 # FZ-OFFICE-NAV — private Office result navigation
 
+Current: owner resumed implementation after PR1061; see **Authorized continuation**
+and [current specification](../specs/SPEC-FZ-OFFICE-NAV.md). The original gap-report
+sections below are historical and superseded only by the scoped continuation.
+
 Owner direct continuation, 2026-11-22. Lead: this Codex session, branch
 `work/fz-office-nav-contract-20261122`. Formal entry for the requested private,
 read-only navigation; [BOARD](BOARD.md) is the progress authority.
@@ -87,3 +91,58 @@ Governance re-read from desk main: governance-contract blob
 `86d9f4f063238a05ff1e7b34637e2f8dbed7138e`, delivery-and-handoff blob
 `13bf6ff32c6131208ef14e27619160c2906dcb32`, operating-method blob
 `f6f4347574a5ee70a69f574b8604d9a9c820dd52`. Stage two remains disabled.
+
+## Authorized continuation — 2026-11-22
+
+Owner now says “繼續開發” and permits Claude Code technical support focused on
+requirements. Lead resumes this same task on main
+`1f855489328736a2578bb0c9e7d76e688b4f5bf8`, branch
+`work/fz-office-nav-impl-20261122`. PR1062/1064 changed only the separate diff
+lifecycle; no overlapping open navigation PR. Office T29/PR1056 remains untouched.
+Previous gap findings remain historical evidence, not a permanent ban on the
+small source-UI integration needed to close them. Deployment/credential changes,
+new services, product model calls and original AC changes remain excluded.
+
+Candidate for technical review: an explicitly selected local-browser Office port
+(no host/URL/secret input or persistence) builds only the existing loopback root
+with a fixed result-view fragment. The existing Office frontend honors a
+results-only view; authentication still uses its original private launch URL in
+the same source tab, never Fanzloud. Reuse original GET/state, result rendering
+and hash checks. No new endpoint, server, data projection or token mechanism.
+The readonly view is a UI restriction, not a new credential permission.
+
+First obtain a no-tools Claude Code design critique before production code.
+One call, model `claude-opus-5-5`, effort high, 300s host timeout, API-equivalent
+CLI budget USD3 (subscription quota/billing unknown), no tools/MCP/hooks/skills,
+no persistence, no children or edits; one focused correction allowed only for an
+actual design finding. User explicitly permits this development consultation;
+there are zero product/provider test calls. Review exact response/exit/model.
+
+Provisional writable scope: existing Fanzloud task/plan/acceptance/BOARD/SUCCESS,
+new normative navigation spec, isolated.html/isolated.js/p0.css and focused
+acceptance tests; Office existing console HTML/JS/CSS, focused frontend tests,
+CONSOLE/RESULTS/SUCCESS/BOARD and this feature's shared browser receipt. No
+Office backend, AP, SDD, grant/auth policy, native terminal/session or T29 edits.
+Finalize scope and machine-executable AC in the spec before implementation.
+Estimate 60–90min active work, 20min progress checkpoints, max two reasoned
+attempts per failure; CI wait max10min. Final independent source review is
+required, with one bounded reviewer and no implementation team.
+
+Claude advisory execution was rejected by automatic approval review before launch
+because possible USD3 usage lacked explicit spending approval. Owner has been
+asked once; no retry or alternate external model call. This optional consultation
+is not a required gate in the user request. Lead continues authorized design and
+tests independently; final fresh-context source review remains required.
+[Current normative contract](../specs/SPEC-FZ-OFFICE-NAV.md) fixes the minimal
+same-browser/source-owned login path. It supersedes the candidate's request to
+wait for optional Claude advice before production; no credential/service scope
+is enlarged. Native source review will judge actual implementation/evidence.
+
+Final scope also includes existing Fanzloud README/isolated-operator guide and
+Office CONSOLE/RESULTS guides, the local browser harness/fixture under Fanzloud
+acceptance, four screenshots and browser receipt. No other product changes.
+Browser/Office checks passed locally; final independent acceptance and hosted CI
+remain gates. Parallel T049/issue1065 owns observation-order correction in separate
+worktree; our isolated.js changes are limited to the opening navigation block and
+our tests to appended navigation cases/helper DOM methods. Preserve its work on
+normal main integration; do not take over T049.

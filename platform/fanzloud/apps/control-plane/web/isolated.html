@@ -29,6 +29,12 @@
       <li>
         <h3>Office 本機工作</h3>
         <p>使用本機結果頁或 CLI 查看產物；需要終端互動時，回到原生 Office。</p>
+        <label for="office-port">Office 本機 port（選填）</label>
+        <input id="office-port" type="text" inputmode="numeric" autocomplete="off" spellcheck="false" maxlength="5" aria-describedby="office-nav-help office-nav-status">
+        <p id="office-nav-help">Office 必須已在這個瀏覽器所在的電腦執行。只填啟動網址的 port（1024–65535），不要貼網址或登入 token。新分頁須顯示「唯讀成果介面」才依其指引登入；若沒有此標示，請回原 Office 入口。若無法連線，請回原終端核對 port 與服務，這裡不會啟動或重試工作。</p>
+        <p id="office-nav-status" role="status" aria-live="polite">Office 私人成果入口尚未設定。</p>
+        <a id="office-open" target="_blank" rel="noopener noreferrer" referrerpolicy="no-referrer" aria-disabled="true">開啟 Office 唯讀成果介面（新分頁）</a>
+        <p>此設定只留在目前頁面；重新載入後清除。無法由此頁確認 Office 是否可連線。</p>
         <a href="https://github.com/fallrising/newclear/blob/main/labs/agent-office-lab/docs/RESULTS.md" target="_blank" rel="noopener noreferrer" referrerpolicy="no-referrer">Office 操作說明（新分頁）</a>
       </li>
     </ul>

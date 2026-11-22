@@ -223,7 +223,7 @@ and whitespace; final closeout PR CI/merge/readback remain delivery gates.
 
 | ID | Task | AC | Status | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| FZ-OFFICE-NAV | Private Office result navigation; blocked on existing destination/access contract, not instruction links | N01–N05 NOT_RUN; G01–03 gap report | in_progress | 2026-11-22T13:04:13Z | | 2026-11-22T13:09:21Z |
+| FZ-OFFICE-NAV | Private Office result navigation; owner resumed source UI integration, see normative spec | N01–N04 local verified; N05 delivery pending | in_progress | 2026-11-22T13:04:13Z | | 2026-11-22T14:01:37Z |
 
 PR1057/1058 already completed instruction navigation. This task does not repeat it
 or mark direct private access passed. Office local snapshot/loopback console exist;
@@ -270,3 +270,9 @@ No release, deployment, service window or further product milestone is started.
 Focused board-only review ACCEPT: prior rows preserved, exact merge ancestry/component
 bytes checked, 55/9 indexes and staged whitespace/alignment passed. Final closure PR
 CI/merge/readback remain the last delivery gates.
+
+FZ-OFFICE-NAV continuation: owner explicitly resumed development after PR1061.
+[Current contract](../specs/SPEC-FZ-OFFICE-NAV.md) adds no endpoint/service; the
+prior gap-report record remains historical. Feature stays in_progress pending
+independent review and delivery; actual browser/source checks passed locally. Office T29 and
+T048 are separate; no provider run, deployment or original AC change.

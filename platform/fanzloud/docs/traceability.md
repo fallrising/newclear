@@ -180,3 +180,11 @@ This is offline preparation, not a new runtime contract or FN07 pass. No product
 Rust signature, rustdoc, schema, credential or launcher change. Missing original DB
 container, unidentified original volume, expired TLS, embedded-UI source drift and
 unimplemented full-operation gate remain explicit; original M3-U stays open.
+
+## M3-U original-data candidate — 2026-11-22
+
+Existing FN04/FN07 and CU-M3-U01/02/04 → [DATA01–03](acceptance/M3-owner-data-recovery.md)
+→ [offline verifier contract](specs/SPEC-M3-data-probe.md) →
+`acceptance/owner-data-recovery/verify_snapshot.py` / `test_verify_snapshot.py` →
+[bounded evidence](acceptance/M3-owner-data-recovery.acceptance.md).
+Physical candidate evidence only; no product API/Rust/rustdoc/schema change or FN07 pass.

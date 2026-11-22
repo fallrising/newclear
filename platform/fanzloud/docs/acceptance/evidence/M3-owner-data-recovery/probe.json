@@ -1,0 +1,98 @@
+{
+  "observed_at": "2026-11-22T16:17:40.085974+00:00",
+  "kind": "offline_physical_candidate",
+  "base_sha": "b9109be632046d1da7c98db12c77214a11bdbc4e",
+  "inventory": {
+    "volumes": 112,
+    "original_containers": 0,
+    "preexisting_images": 0,
+    "pg_directories": 30,
+    "major18": 2,
+    "major16": 28
+  },
+  "failures_retained": [
+    "host volume reads denied112",
+    "sudo unavailable without password",
+    "initial UID999 version pass found none;28 inaccessible; metadata measured UID70 before selected-owner pass",
+    "initial test import missing implementation; scaffolding failure only",
+    "initial special-member fixtures incorrectly used byte payloads; corrected fixture types without weakening assertions",
+    "extended-header behavior RED15pass1fail before early header rejection; GREEN16pass",
+    "independent review P1: trailing content after first tar terminator accepted; RED17tests/3subcase failures, fixed full zero-padding verification, finalGREEN17/0"
+  ],
+  "profile": {
+    "network": "none",
+    "root_and_source_binds_readonly": true,
+    "cap_drop": [
+      "ALL"
+    ],
+    "privileged": false,
+    "no_new_privileges": true,
+    "selected_owner_uid": 70,
+    "selected_owner_gid": 70,
+    "memory_bytes": 67108864,
+    "pids": 16,
+    "cpu": 0.25,
+    "external_image_downloads": 0,
+    "source_service_starts": 0
+  },
+  "identity_scan": {
+    "candidates_checked": 2,
+    "matching_both_runs": 1,
+    "candidate_a": {
+      "files": 1074,
+      "bytes": 28696576,
+      "writer_text": true,
+      "reviewer_text": true,
+      "published_candidate_sha_text": false,
+      "published_review_sha_text": false
+    },
+    "candidate_b": {
+      "files": 1466,
+      "bytes": 37085184,
+      "writer_text": false,
+      "reviewer_text": false
+    },
+    "limits": {
+      "files_per_candidate": 4096,
+      "bytes_per_candidate": 134217728,
+      "bytes_per_file": 8388608,
+      "host_seconds": 60
+    },
+    "absence_interpretation": "inconclusive; binary UUID/compression/TOAST not logically decoded"
+  },
+  "snapshot": {
+    "source_reads": 2,
+    "identical_archive_bytes": true,
+    "archive_bytes": 69191168,
+    "logical_restore_verified": false,
+    "markers": {
+      "reviewer": true,
+      "writer": true
+    },
+    "member_bytes": 68419767,
+    "members": 1488,
+    "postgres_major": 18,
+    "relation_bytes": 28696576,
+    "relation_files": 1074,
+    "sha256": "9b72f117cf9ded9d09b9632bb86975ac48027186a297dc9b2445b58050b845c6",
+    "status": "candidate_only"
+  },
+  "verifier_sha256": "6c42888f67000d431af0fb351e8cdb9b7655825e0ce63c2320db4e2fedf20b0e",
+  "tests_sha256": "61cf22fb733750f6ef43d60fe477c030286745a906a7c302f427da821a083345",
+  "tests": {
+    "passed": 17,
+    "failed": 0
+  },
+  "readiness": "not_ready",
+  "next": "isolated-copy PostgreSQL18 logical verification; original volume remains untouched",
+  "logical_restore_verified": false,
+  "whole_fn07_accepted": false,
+  "diagnostic_cleanup": {
+    "owned_stopped_diagnostic_containers_removed": 6,
+    "generated_local_image_removed": true,
+    "volume_inventory_unchanged": true,
+    "volume_count": 112,
+    "private_snapshot_retained": true,
+    "source_service_starts": 0
+  }
+}

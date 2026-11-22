@@ -664,3 +664,20 @@ PRE01 原保存資料／TLS／停機狀態；PRE02 來源差異及只讀／完�
 實際開窗not_ready：原DB容器在目前本機Docker context缺失、原volume未定位；維護dump
 存在且符合manifest，但未證明等價最後U07；TLS過期、舊binary未含近期UI修正、完整
 提交／交接gate仍未實作。先定位原AP資料，再定來源與完整gate；不直接重開舊窗口。
+
+## M3-U original-data investigation — 2026-11-22
+
+Owner continued from PR1077/1078. [DATA01–03 scope](docs/acceptance/M3-owner-data-recovery.md)
+locates original AP data with read-only metadata and bounded offline identity evidence,
+then defines recovery from observed results. No DB/service/credential/intent mutation or
+restore; no full FN07 acceptance. Documentation and any necessary diagnostic helper are
+reviewed and verified before normal delivery. Runtime remains not_ready until established.
+
+Actual checkpoint:30PostgreSQL directories found among112volumes; two major18 candidates,
+one matches both U07 run UUID texts. Private69,191,168-byte snapshot matches two independent
+source captures; shipped offline verifier returns candidate_only,16tests pass. No logical
+restore/server test or FN07 pass. [Evidence/remaining recovery steps](docs/acceptance/M3-owner-data-recovery.acceptance.md).
+
+Independent review found trailing-tar-content validation incomplete. Added three negative
+subcases and full zero-padding verification; final17tests and the actual retained snapshot
+pass. Review correction and original16-test checkpoint remain in the acceptance history.

@@ -23,6 +23,7 @@ const states = {queued: '排隊中', provisioning: '建立隔離工作區', runn
 let csrf = '';
 let runId = sessionStorage.getItem('fanz-current-run') || '';
 let timer;
+let observationRequest = 0;
 let selected = [];
 let agents = [];
 let lastState = '';
@@ -82,7 +83,7 @@ async function api(path, {method = 'GET', body, key, text = false} = {}) {
 }
 function fail(error) { element('error-message').textContent = error.message || '連線失敗'; }
 function showLogin() {
-  if (!authenticated) clearCandidate();
+  if (!authenticated) { observationRequest++; clearCandidate(); }
   element('login-panel').hidden = authenticated;
   element('task-panel').hidden = !authenticated;
   element('connection-status').textContent = authenticated ? '已登入私人工作區' : '請登入私人工作區';
@@ -174,7 +175,7 @@ async function recent() {
   }));
 }
 function observe(id) {
-  clearTimeout(timer); runId = id; sessionStorage.setItem('fanz-current-run', id);
+  clearTimeout(timer); observationRequest++; runId = id; sessionStorage.setItem('fanz-current-run', id);
   element('run-id').textContent = id; element('run-status').textContent = '讀取中';
   element('run-reason').textContent = ''; element('error-message').textContent = '';
   clearCandidate();
@@ -182,53 +183,59 @@ function observe(id) {
   lastState = ''; finalDiff = null; element('activity').textContent = '';
   element('diff-output').textContent = '尚無 diff'; element('download-diff').disabled = true;
   element('verification').textContent = '尚無檢查結果'; element('cleanup').textContent = '';
-  void refresh().catch(error => { if (runId === id && authenticated) fail(error); });
+  void refresh();
 }
 async function refresh() {
   clearTimeout(timer);
   if (!authenticated || !runId) return;
-  const requested = runId;
-  let run;
-  try { run = await api(`/runs/${requested}`); }
-  catch (error) {
-    if (error.status === 404 && requested === runId && authenticated && fallbackRunId && fallbackRunId !== requested) {
-      const recovered = fallbackRunId; fallbackRunId = ''; observe(recovered); return;
+  const requested = runId, generation = ++observationRequest;
+  const isCurrent = () => authenticated && requested === runId && generation === observationRequest;
+  try {
+    let run;
+    try { run = await api(`/runs/${requested}`); }
+    catch (error) {
+      if (!isCurrent()) return;
+      if (error.status === 404 && fallbackRunId && fallbackRunId !== requested) {
+        const recovered = fallbackRunId; fallbackRunId = ''; observe(recovered); return;
+      }
+      throw error;
     }
-    throw error;
-  }
-  if (requested !== runId || !authenticated) return;
-  element('run-id').textContent = run.id;
-  currentRun = run;
-  element('load-candidate').disabled = candidateLoading || run.state !== 'succeeded' || typeof run.result?.diff !== 'string';
-  element('run-status').textContent = states[run.state] || run.state;
-  element('run-reason').textContent = reasonText(run.reason);
-  const terminal = ['succeeded', 'failed', 'cancelled'].includes(run.state);
-  element('cancel-run').disabled = terminal || run.state === 'cancelling' || sessionStorage.getItem(`fanz-cancel-${run.id}`) !== null;
-  if (run.fanz_history && Array.isArray(run.fanz_history.events)) {
-    element('activity').textContent = (run.fanz_history.history_truncated ? '僅顯示最近保留的狀態紀錄\n' : '') + run.fanz_history.events.map(item => `#${item.cursor} · ${states[item.state] || item.state}`).join('\n');
-  } else if (lastState !== `${run.state}:${run.state_version}`) {
-    element('activity').textContent += `${new Date().toLocaleTimeString()} · ${states[run.state] || run.state}\n`;
-    lastState = `${run.state}:${run.state_version}`;
-  }
-  const neverAllocated = run.state === 'cancelled' && run.cleanup_state === 'not_allocated';
-  const cleanupComplete = run.cleanup_state === 'confirmed' || neverAllocated;
-  element('cleanup').textContent = neverAllocated ? '任務已取消，未建立工作區' : run.cleanup_state === 'confirmed' ? '隔離工作區已停止並清理' : '隔離工作區清理尚未確認';
-  if (run.result) {
-    const checks = run.result.verification;
-    element('verification').textContent = checks.status === 'passed' ? '檢查通過' : checks.status === 'failed' ? '檢查失敗' : '檢查結果不確定';
-    finalDiff = typeof run.result.diff === 'string' ? run.result.diff : null;
-    element('diff-output').textContent = finalDiff ?? '此任務為唯讀審查；未產生程式 diff。';
-    element('download-diff').disabled = finalDiff === null;
-  }
-  renderReview(); updateHandoff();
-  if (!['succeeded', 'failed', 'cancelled'].includes(run.state) || !cleanupComplete) {
-    timer = setTimeout(() => { void refresh().catch(fail); }, 500);
-  } else {
-    if (pendingSubmission?.runId === run.id) {
-      pendingSubmission = null; lockedSubmission = false; sessionStorage.removeItem('fanz-submission');
-      updateSubmitLock();
+    if (!isCurrent()) return;
+    element('run-id').textContent = run.id;
+    currentRun = run;
+    element('load-candidate').disabled = candidateLoading || run.state !== 'succeeded' || typeof run.result?.diff !== 'string';
+    element('run-status').textContent = states[run.state] || run.state;
+    element('run-reason').textContent = reasonText(run.reason);
+    const terminal = ['succeeded', 'failed', 'cancelled'].includes(run.state);
+    element('cancel-run').disabled = terminal || run.state === 'cancelling' || sessionStorage.getItem(`fanz-cancel-${run.id}`) !== null;
+    if (run.fanz_history && Array.isArray(run.fanz_history.events)) {
+      element('activity').textContent = (run.fanz_history.history_truncated ? '僅顯示最近保留的狀態紀錄\n' : '') + run.fanz_history.events.map(item => `#${item.cursor} · ${states[item.state] || item.state}`).join('\n');
+    } else if (lastState !== `${run.state}:${run.state_version}`) {
+      element('activity').textContent += `${new Date().toLocaleTimeString()} · ${states[run.state] || run.state}\n`;
+      lastState = `${run.state}:${run.state_version}`;
     }
-    await recent();
+    const neverAllocated = run.state === 'cancelled' && run.cleanup_state === 'not_allocated';
+    const cleanupComplete = run.cleanup_state === 'confirmed' || neverAllocated;
+    element('cleanup').textContent = neverAllocated ? '任務已取消，未建立工作區' : run.cleanup_state === 'confirmed' ? '隔離工作區已停止並清理' : '隔離工作區清理尚未確認';
+    if (run.result) {
+      const checks = run.result.verification;
+      element('verification').textContent = checks.status === 'passed' ? '檢查通過' : checks.status === 'failed' ? '檢查失敗' : '檢查結果不確定';
+      finalDiff = typeof run.result.diff === 'string' ? run.result.diff : null;
+      element('diff-output').textContent = finalDiff ?? '此任務為唯讀審查；未產生程式 diff。';
+      element('download-diff').disabled = finalDiff === null;
+    }
+    renderReview(); updateHandoff();
+    if (!['succeeded', 'failed', 'cancelled'].includes(run.state) || !cleanupComplete) {
+      timer = setTimeout(() => { if (isCurrent()) void refresh(); }, 500);
+    } else {
+      if (pendingSubmission?.runId === run.id) {
+        pendingSubmission = null; lockedSubmission = false; sessionStorage.removeItem('fanz-submission');
+        updateSubmitLock();
+      }
+      await recent();
+    }
+  } catch (error) {
+    if (isCurrent()) fail(error);
   }
 }
 element('login-form').addEventListener('submit', async (event) => {

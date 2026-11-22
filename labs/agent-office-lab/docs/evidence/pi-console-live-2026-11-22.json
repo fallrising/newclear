@@ -1,0 +1,136 @@
+{
+  "schema": "agent-office.pi-console-live.v1",
+  "date": "2026-11-22",
+  "status": "blocked_provider_http_402",
+  "acceptance_passed": false,
+  "source_commit": "30a5bc3c212cd912b8c507200ca041c50fc5744b",
+  "vendor_commit": "852e2ab28c4f3f31bffdf4b20353bd119c9d3270",
+  "provider": "pi",
+  "cli_version": "1.4.0",
+  "model": "deepseek/deepseek-flash",
+  "limits": {
+    "host_retries": 0,
+    "money_cap": null,
+    "output_tokens_per_request_cap": 512,
+    "provider_request_cap": 4,
+    "timeout_seconds": 180
+  },
+  "authorization": {
+    "new_owner_approval": true,
+    "max_runs": 1,
+    "grants_created": 1,
+    "grants_consumed": 1,
+    "pending_grants": 0,
+    "automatic_retries": 0,
+    "paid_retry_attempts": 0
+  },
+  "preflight": {
+    "cli_version_help_network_denied": true,
+    "native_startup": true,
+    "startup_requests": 0,
+    "startup_tracked_processes": 15,
+    "startup_tracked_remaining": 0,
+    "startup_elapsed_seconds": 30.625742,
+    "browser_without_grant_blocked": true
+  },
+  "live": {
+    "task_status": "failed",
+    "model_inference_verified": false,
+    "requests": [
+      {
+        "request": 1,
+        "model": "deepseek-flash",
+        "max_output_tokens": 512,
+        "status": "failed",
+        "input_bytes": 1803,
+        "http_status": 402
+      }
+    ],
+    "remote_usage": {
+      "requests": 1,
+      "output_tokens": null
+    },
+    "runner_elapsed_seconds": 30.35896933299955,
+    "native_states": [
+      "starting",
+      "idle",
+      "working",
+      "needs_input"
+    ],
+    "artifact_present": false,
+    "agent_settled_verified": false,
+    "native_cleanup_completed": true,
+    "cleanup_errors": [],
+    "runner_tracked_processes": 5,
+    "runner_tracked_remaining": 0,
+    "cost_usd": null,
+    "cost_note": "No token usage returned; no billing estimate asserted."
+  },
+  "browser": {
+    "paid_ui_execute_requests": 1,
+    "confirmation_dismissal_did_not_execute": true,
+    "failure_not_success": true,
+    "no_artifact_or_download": true,
+    "restart_refresh_no_rerun": true,
+    "retry_blocked_without_new_grant": true,
+    "originals_unchanged": true,
+    "external_page_requests": 0,
+    "page_errors": 0,
+    "successful_artifact_download_verified": false
+  },
+  "outer_process_observation": {
+    "elapsed_s": 32.742,
+    "tracked_process_count": 29,
+    "tracked_alive": [],
+    "post_exit_signalled": [],
+    "timed_out": false,
+    "full_descendant_audit": false
+  },
+  "checks": {
+    "python_tests": 224,
+    "node_tests": 68,
+    "development_model_delegations": 0,
+    "publication_files": 218,
+    "index_contracts": 55,
+    "llms_files": 9,
+    "index_errors": 0,
+    "python_version": "3.14.4",
+    "node_version": "23.11.0",
+    "python_elapsed_seconds": 20.134
+  },
+  "source_sha256": {
+    "bin/pi": "e9a2d85c100f3a0aa8ad0841d8d3b6de5f14526eab0ae1300ca4874f14ed0cdd",
+    "deepseek_relay.py": "2818c617139b50c58aff74fce808ad8120a329969d057faf02b93c4ef3b8cd62",
+    "execution_slot.py": "63e33470175c4be38257a633d000dc472f5d15d674a62d40d1fc6c6dc083d0c2",
+    "manual_recovery.mjs": "01112cd89031188edb10d90e80c2af0c3b54b4676c633a232656446609b259bb",
+    "office_console.js": "bc1a12ca0111185dc64377bc96062d8793490f58ded85a50ffba91ff0af2aeea",
+    "office_console.py": "01c0094992e77f467c1d8988c79a6b88f55e6715e46dade4f0b508120bfc209d",
+    "office_dispatch.py": "f162460b4d8ce5b2969a24cb984c4d0043a65c221c492b8c650a6e76b22eb1b2",
+    "office_pi.mjs": "68cc0a5fe004b123bd5a5a921231deae20a5a3b64b4287aecc0b2654569066a8",
+    "office_pi_host.mjs": "4ab7ada64bdb4cd7932408e594bc51373f79c113dc6c20861c87343f7b6c7664",
+    "office_pi_question.mjs": "d1ddb14165120b3bf67afc74cdd34f4299859bc3cdb8faf5e761fc136f7eb59c",
+    "office_pi_restart.mjs": "34f7542c129fea762c9c7abef775f4887c06f8a72b5f3110bfd4d5ad476ac566",
+    "office_results.py": "284170c01a42b551b317cf0d08f170e48d1c22ff41cfa20faa9e95a8ab39ba8e",
+    "pi_boundary.mjs": "9abe611f1d8d8752b0bd83aafc0d3fbca0403fcb39028d84a3ba251fcf70dbd7",
+    "pi_hook_evidence.py": "f98d5e67c8bd5bf85cb12da3ceb8de3fff59e1aba3314c1a96490050a374893d",
+    "pi_hook_guard.mjs": "99c33e0927414101c99d179e0c3343094a8a19c2b1167837089fe784325f4d4e",
+    "pi_hook_probe.mjs": "68ffd1efeb9d946e01bee63dd0eff9b130ec36d531c994d8d1a9db66ff281681",
+    "pi_office_policy.mjs": "063b9f945dc5ece80a1ffa2c2fd082fcf45efb4feeaf2e332526293c9225e69a",
+    "pi_question_check.mjs": "58745d014cec4d648203c1f463f372421ead374e3a7343a82e7361a55188d8f8",
+    "pi_retry.py": "193a4c4ead2dba0dcff7238444d9432c341a21680ca79c19b07751f41cd7330e",
+    "pi_session_evidence.mjs": "4e1354990c3c2cab224f8c04bfcde00460f68b20998717da11f7f50ae43ac2ce",
+    "process_ownership.py": "98b3ac4087f578549387f659efe883bb181f089b226215c984cb4825301579e8",
+    "remote_cli.py": "9a0ee26503ef76b003b9d8d387f6381acd1a043723374f62793a7f75bf97bb89",
+    "remote_grant.py": "c8aa846c25bfbb4940c20a4eaae6c5e15507766a1467bbf9a02c3a7382ff413a",
+    "result_redaction.py": "41567abc0b1c04a3d11216f12b3800ccc7777f654e15f7e4496afe350fbd9689",
+    "run_pi_work.py": "cea48a7cb1fe20a6a4e359dafa21473df8a79a4c2fb52f4be0ea1d35f1ac37cd"
+  },
+  "private_driver_sha256": "d75201f59b3dbe492a5bf49865e693cb7936a746d3614c834aac280ea7d492c4",
+  "provider_error_reference": "https://api-docs.deepseek.com/quick_start/error_codes/",
+  "remaining": [
+    "Restore sufficient provider balance before any new paid attempt.",
+    "A source-bound retry requires new explicit approval; no retry grant created.",
+    "Successful end-to-end artifact/download acceptance remains pending.",
+    "Full AC-01/08/09/11 and MVP remain pending."
+  ]
+}

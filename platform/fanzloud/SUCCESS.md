@@ -640,3 +640,14 @@ D01 登入／選取世代檢查，D02 舊錯誤隔離及精確下載，D03 RED�
 D04 獨立審查、必要 CI 與正常交付。狀態：49項 Web 測試與實際 Chromium 合成情境通過；獨立審查接受，CI／交付待辦。
 [證據與限制](docs/acceptance/T048.acceptance.md)。
 不啟服務或 provider；原完整 FN07／M3、Cloud/P1、AP M4、Office MVP 缺口不變。
+
+## T049：任務狀態讀取順序修正 — 2026-11-22
+
+Owner 要求繼續開發並可諮詢 Claude Code 確認設計不發散。
+同任務重疊 GET 或重登入後的舊回應可能覆蓋新狀態；本次只修 FN01／04／06
+的觀察順序與舊錯誤／poll callback，不改後端執行權威或擴張產品。
+[任務](docs/tasks/T049.task.md)／[契約](docs/specs/SPEC-T049-observation-order.md)：
+O01 現行讀取，O02 錯誤／404／timer，O03 RED→GREEN 與 Chromium fixture，
+O04 Claude 設計意見、獨立實作審查與完整交付。狀態：57項 Web 測試與 Chromium 合成情境通過，獨立審查接受，CI／交付待辦。
+[證據](docs/acceptance/T049.acceptance.md)；Claude 呼叫因 OAuth 到期失敗，未取得設計意見。
+原 FN07／完整 M3、Cloud/P1、AP M4、Office MVP 缺口與 usable_tag none 保持。

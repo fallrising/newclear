@@ -63,6 +63,12 @@ independently ran 57 Node tests and verified seven production plus inspector has
 Board/SUCCESS stale pending text corrected. Reviewer did not rerun full Office
 suites, Chromium or hosted CI; these remain separately recorded lead/CI evidence.
 
+Integration with main `1c0483e8` preserves T049 observation-order code/tests and
+Office T29 completed evidence. Combined Node tests now **65 passed** (59 Fanzloud
+and 6 Office navigation); actual Chromium harness rerun passed and refreshed the
+receipt/screenshots against this integrated source. No Office production changes
+arrived from main; its 224 Python / 74 Node full-suite evidence remains applicable.
+
 ## Historical PR1061 gap report
 
 

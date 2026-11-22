@@ -204,3 +204,7 @@ T-0027 接續：完整 Claude Opus 5.5 指導與[輸出契約](RESULT-REDACTION.
 T-0028：Pi 遠端重試的一次性授權。CLI 明確建立綁定指定失敗 parent／root／下一次 attempt／fixture 與歷史摘要的 grant，操作台透過既有 ref 選取與明確確認執行；首次 grant 與 retry grant 不可互用。保留固定模型／限額、最多兩次重試、單一 pending grant、來源綁定、共用執行鎖與消耗後不退還。主導直接實作，零新增開發模型委託／產品模型請求，不建立實際 lab 的付費授權。
 
 驗證計畫：原始失敗、receipt、ledger、fixture 與來源綁定；錯 parent、過期／撤銷、兩次上限、競態與重啟、預檢失敗不消耗、消耗後啟動失敗不退還。實際 loopback HTTP 與 Chrome 使用隔離臨時 lab／測試程序驗證計畫、明確點擊、重複提交與刷新；不以替身宣稱 DeepSeek 推論或完整 AC 通過。元件 Python／Node／publication 與 repo indexes gates，PR／CI／正常合併後結案。
+
+## T-0029：Pi 操作台真實遠端流程
+
+新單次批准的指定parent重試已通過：Chrome確認→dispatcher／一次性grant→Pi／DeepSeek原生工具任務→已核對結果→Blob下載。原HTTP402失敗保留，沒有自動重跑；刷新與操作台重啟不派工。此為AC-01／04／08／09／11的Pi子集，其他provider及完整安全／MVP條件不變；[證據](evidence/pi-console-completed-2026-11-22.json)。

@@ -1,5 +1,13 @@
 # 開發交接
 
+T-0029 最新：owner 補足餘額並新批一次指定來源重試後，Pi／DeepSeek 從操作台到產物與 Blob 下載的真實流程通過。3 次 HTTP200、2142 input／185 output tokens、30.51 秒，原生同 session、read→write、agent_settled、marker／total 與原始／下載 hash 均核對。新 grant 消耗一次；原 HTTP402 失敗、receipt 與 input bytes 保留不變、沿用相同 fixture；重複計畫拒絕、刷新／操作台重啟不重跑。外層32個受追蹤程序全部退出、鎖釋放，非完整後代樹稽核；沒有自動重試或開發模型委託。見[成功證據](docs/evidence/pi-console-completed-2026-11-22.json)，先前[402 證據](docs/evidence/pi-console-live-2026-11-22.json)保留。僅完成 Pi 子集；其他 provider、完整安全／MVP 仍 pending，無 usable tag；交付見[任務板](docs/tasks/BOARD.md)。
+
+T29 成功後沒有待執行的付費任務；兩次歷史批准均已使用，不重跑。全域新增廠商與 Cursor 的登入／模型盤點保存在私有交接，不等於產品 adapter 或開發委託已驗收。下方 T29 HTTP402 等待記錄是已解除的歷史。
+
+T-0029 歷史首輪：一次已批准的 Pi／DeepSeek 操作台真實任務在首個外部請求收到 HTTP 402（[官方說明：餘額不足](https://api-docs.deepseek.com/quick_start/error_codes/)），30.36 秒後結束，任務 failed、無產物、用量未知。一次性授權已消耗，沒有自動重試或新授權。外層 29 個受追蹤程序全部退出、鎖釋放；非完整後代樹稽核。Chrome 唯讀回讀確認失敗不顯示成功、沒有下載、刷新／操作台重啟不重跑、重試沒有新 grant 不能執行。224 Python／68 Node 通過，無開發模型委託；成功產物／下載與完整 AC／MVP 仍 pending。等 owner 處理 provider 餘額及另批一次有界重試；[白名單證據](docs/evidence/pi-console-live-2026-11-22.json)，交付狀態見[任務板](docs/tasks/BOARD.md)。
+
+下次先核對實際 HEAD、最新任務板與已消耗授權；只讀預檢／重試計畫可執行。不得重用本次 grant 或重新發 fresh 任務。補足餘額且另有單次重試批准後，按 REMOTE-GRANT 的指定 parent 流程執行；原失敗與 fixture 必須保留。現階段功能驗收未通過，PR 保持 draft，不結案。
+
 T-0028 最新：已加入綁定失敗 parent／下一次 attempt／fixture／歷史／報告的一次性遠端重試授權，首次 grant 不可互用。224 Python／68 Node、新重試與既有首次授權瀏覽器流程通過；dispatcher、跨 exec 執行鎖及 receipt 為真實程式，provider／環境偵測是明示替身。零額外開發模型委託、零產品模型請求／實際 lab grant；原額度與不自動重試政策保留。完整 AC-07／09／11／MVP 仍 pending。見[證據](docs/evidence/remote-retry-grant-2026-11-16.json)、[操作](docs/REMOTE-GRANT.md)與[交付狀態](docs/tasks/BOARD.md)。
 
 T-0027 最新：合成秘密輸出遮蔽、穩定 ref、原始／下載 hash 分離與 UI 下載前核對已實作。兩個 Pi 新單次委託均完成，沒有自動重試；主導整合後以實際 HTTP／CLI 與 Chrome Blob 驗證，原始 bytes／mtime 不變。僅 AC-11 子集；完整安全驗收與 MVP 保持 pending。見[契約](docs/RESULT-REDACTION.md)、[證據](docs/evidence/result-redaction-2026-11-16.json)、[任務板](docs/tasks/BOARD.md)。下方為歷史紀錄。

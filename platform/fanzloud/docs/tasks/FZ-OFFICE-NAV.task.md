@@ -146,3 +146,9 @@ remain gates. Parallel T049/issue1065 owns observation-order correction in separ
 worktree; our isolated.js changes are limited to the opening navigation block and
 our tests to appended navigation cases/helper DOM methods. Preserve its work on
 normal main integration; do not take over T049.
+
+Integration checkpoint: main `1c0483e8` now includes T049/PR1068 and Office
+T29/PR1056 plus its closeout PR1066. Their owners completed those independently;
+this task did not execute them. Normal merge preserves both appended boards and
+all T049 tests; earlier draft/block status is historical. Rerun navigation browser
+and combined Fanzloud tests on the integrated source before publication.

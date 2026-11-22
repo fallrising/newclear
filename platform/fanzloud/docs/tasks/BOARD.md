@@ -276,3 +276,14 @@ FZ-OFFICE-NAV continuation: owner explicitly resumed development after PR1061.
 prior gap-report record remains historical. Feature stays in_progress pending
 independent review and delivery; actual browser/source checks passed locally. Office T29 and
 T048 are separate; no provider run, deployment or original AC change.
+
+## T-1065 T049 run observation ordering
+
+[Task T049](T049.task.md), [issue1065](https://github.com/fallrising/newclear/issues/1065).
+
+| ID | Task | AC | Status | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| OBS-01 | Current observation and login | O01 | in_progress | 2026-11-22T13:45:15Z | | 2026-11-22T13:54:16Z |
+| OBS-02 | Stale errors, fallback and timers | O02 | in_progress | 2026-11-22T13:45:15Z | | 2026-11-22T13:54:16Z |
+| OBS-03 | Regression and browser evidence | O03 | in_progress | 2026-11-22T13:45:15Z | | 2026-11-22T13:54:16Z |
+| OBS-04 | Design review and delivery | O04 | in_progress | 2026-11-22T13:45:15Z | | 2026-11-22T13:54:16Z |

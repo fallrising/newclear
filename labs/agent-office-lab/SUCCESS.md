@@ -15,6 +15,14 @@ source_commit: 64c8ad59620e9068f0beede99365b7d656f00825
 
 ## 主線與範圍
 
+T-0029 最新：owner 補足餘額並新批一次指定來源重試後，Pi／DeepSeek 從操作台到產物與 Blob 下載的真實流程通過。3 次 HTTP200、2142 input／185 output tokens、30.51 秒，原生同 session、read→write、agent_settled、marker／total 與原始／下載 hash 均核對。新 grant 消耗一次；原 HTTP402 失敗、receipt 與 input bytes 保留不變、沿用相同 fixture；重複計畫拒絕、刷新／操作台重啟不重跑。外層32個受追蹤程序全部退出、鎖釋放，非完整後代樹稽核；沒有自動重試或開發模型委託。見[成功證據](docs/evidence/pi-console-completed-2026-11-22.json)，先前[402 證據](docs/evidence/pi-console-live-2026-11-22.json)保留。僅完成 Pi 子集；其他 provider、完整安全／MVP 仍 pending，無 usable tag；交付見[任務板](docs/tasks/BOARD.md)。
+
+T-0029 歷史首輪：一次已批准的 Pi／DeepSeek 操作台真實任務在首個外部請求收到 HTTP 402（[官方說明：餘額不足](https://api-docs.deepseek.com/quick_start/error_codes/)），30.36 秒後結束，任務 failed、無產物、用量未知。一次性授權已消耗，沒有自動重試或新授權。外層 29 個受追蹤程序全部退出、鎖釋放；非完整後代樹稽核。Chrome 唯讀回讀確認失敗不顯示成功、沒有下載、刷新／操作台重啟不重跑、重試沒有新 grant 不能執行。224 Python／68 Node 通過，無開發模型委託；成功產物／下載與完整 AC／MVP 仍 pending。等 owner 處理 provider 餘額及另批一次有界重試；[白名單證據](docs/evidence/pi-console-live-2026-11-22.json)，交付狀態見[任務板](docs/tasks/BOARD.md)。
+
+T-0029：依 owner 指示，驗證一次 Pi／DeepSeek 從操作台到產物的真實有界任務。先做零模型預檢；固定 Pi 1.4.0、deepseek-flash、最多四請求、每請求 512 output tokens、180 秒、無金額硬上限，不自動重試、不新增開發模型委託。真實 CLI grant、Chrome 明確確認、dispatcher／relay／原生 Office Pi、同 session／model／read-write／agent_settled、結果與 Blob 下載 hash、刷新及操作台重啟不重跑、授權只消耗一次與所屬程序清理。範圍僅涵蓋 AC-01／04／08／09／11 的 Pi 子集；不擴大到遠端重試、原生終端自由互動或其他 provider。
+
+驗證計畫：先完成環境與瀏覽器無模型準備，再執行已批准的一次付費固定任務；一旦 consume／execute 即不再派工。模型或瀏覽器失敗保留證據，後續只讀回既有結果。必要元件／repo gates、PR／CI／合併／讀回。完整 MVP 與 usable tag 不變。
+
 T-0028 最新：指定失敗 parent 的一次性重試 grant 已實作；224 Python／68 Node、四組新重試與五組既有首次授權 Chrome 流程通過。實際 dispatcher／跨 exec 執行鎖／receipt 已驗證，provider 與環境偵測為明示替身，未執行付費模型。見[授權契約](docs/REMOTE-GRANT.md)、[證據](docs/evidence/remote-retry-grant-2026-11-16.json)及[交付狀態](docs/tasks/BOARD.md)。
 
 T-0028：Pi 遠端重試的一次性授權。CLI 明確建立綁定指定失敗 parent／root／下一次 attempt／fixture 與歷史摘要的 grant，操作台透過既有 ref 選取與明確確認執行；首次 grant 與 retry grant 不可互用。保留固定模型／限額、最多兩次重試、單一 pending grant、來源綁定、共用執行鎖與消耗後不退還。主導直接實作，零新增開發模型委託／產品模型請求，不建立實際 lab 的付費授權。
@@ -101,7 +109,7 @@ T-0011：整合四 provider 的唯讀結果入口，列出來源、模型、任�
 
 | AC ID | Given／When／Then | 狀態 | 證據或缺口 |
 | --- | --- | --- | --- |
-| AC-01 | Given 四種 CLI，When detect，Then 正確識別版本／能力，缺失或不相容不啟動。 | pending | [Grok／Pi 固定套件與實際 version/help 已通過](docs/evidence/remote-preflight-2026-11-01.json)；[統一 CLI 偵測與 launch gate](docs/DISPATCH.md) 及四 CLI 真實斷網預檢通過；[本地新入口任務／取消已通過](docs/evidence/local-dispatch-2026-11-01.json)，遠端新入口任務仍待驗。 |
+| AC-01 | Given 四種 CLI，When detect，Then 正確識別版本／能力，缺失或不相容不啟動。 | pending | [Grok／Pi 固定套件與實際 version/help 已通過](docs/evidence/remote-preflight-2026-11-01.json)；[統一 CLI 偵測與 launch gate](docs/DISPATCH.md) 及四 CLI 真實斷網預檢通過；[本地新入口任務／取消已通過](docs/evidence/local-dispatch-2026-11-01.json)，[Pi 操作台真實任務與指定重試通過](docs/evidence/pi-console-completed-2026-11-22.json)，Grok／Cursor 新入口仍待驗。 |
 | AC-02 | Given fixture workspace，When OpenCode 執行指定任務，Then 原生事件、session 與檔案 hash 證明成功。 | passed | [本輪實測](docs/evidence/lifecycle.md) 再驗證原生檔案任務；[原歷史摘要](docs/evidence/2026-10-31.json) 保留。 |
 | AC-03 | Given 確認版 Grok，When 執行同等任務，Then CLI 身分、session 與產物可核對。 | passed | [Grok 原生真實任務](docs/evidence/grok-completed-2026-11-01.json)：同 session／模型、兩讀一改、end_turn、產物 hash 與清理通過。 |
 | AC-04 | Given Pi + DeepSeek，When 執行同等任務，Then provider/model、settled 事件及檔案正確。 | passed | [Pi 原生工位實測](docs/evidence/pi-live-2026-11-01.json)：3 次 DeepSeek 請求、agent_settled、同 session/model、read/write、產物 hash 及清理通過。 |
@@ -109,7 +117,7 @@ T-0011：整合四 provider 的唯讀結果入口，列出來源、模型、任�
 | AC-06 | Given 執行中任務，When 取消，Then 10 秒 grace 後所屬程序全部退出。 | pending | [OpenCode 新入口原生取消與 Ctrl+C](docs/evidence/local-dispatch-2026-11-01.json) 通過；[Pi 原生取消](docs/evidence/pi-cancel-2026-11-02.json) 及完整清理通過；Grok／Cursor 與遠端串流待驗。 |
 | AC-07 | Given crash／401／429，When 失敗，Then 不顯示成功且最多兩次顯式重試。 | pending | [Pi 401／429 本機注入＋原生錯誤與清理已通過](docs/FAILURES.md)；[Pi CLI crash／新 session 啟動通過](docs/CRASH.md)；[Pi 明確重試限制](docs/RETRY.md) 已加入；其他 provider 的故障／重試與整合流程仍待驗。 |
 | AC-08 | Given browser refresh 或 host 重啟，When 恢復，Then 不重跑、unfinished 標 interrupted。 | pending | [OpenCode 新程序／同 session 與瀏覽器刷新通過](docs/evidence/lifecycle.md)；[host restart 與手動恢復通過](docs/evidence/restart.md)；[Pi CLI 同 session 重新連接子集](docs/PI-RESUME.md) 通過，[Pi host crash／無 prompt 重連子集](docs/PI-HOST-RESTART.md) 通過；遠端串流續做及 Grok／Cursor 待驗。 |
-| AC-09 | Given 四 provider 真實 run，When 開啟結果，Then 產物、模型與來源可分辨。 | pending | [唯讀結果入口](docs/RESULTS.md) 已回讀四 provider 真實產物；[本地文字派工到下載](docs/LOCAL-TEXT-TASK.md) 及[單檔提案](docs/LOCAL-FILE-PROPOSAL.md) 通過，尚缺遠端工位整合流程。 |
+| AC-09 | Given 四 provider 真實 run，When 開啟結果，Then 產物、模型與來源可分辨。 | pending | [唯讀結果入口](docs/RESULTS.md) 已回讀四 provider 真實產物；[本地文字派工到下載](docs/LOCAL-TEXT-TASK.md) 及[單檔提案](docs/LOCAL-FILE-PROPOSAL.md) 通過，[Pi 遠端操作台到下載通過](docs/evidence/pi-console-completed-2026-11-22.json)，尚缺 Grok／Cursor 整合流程。 |
 | AC-10 | Given 本地 Strata，When 執行公開 GitHub tool loop，Then 真實 tool_call、API 結果與後續回答完成。 | pending | 獨立研究未通過，非 MVP 阻塞。 |
 | AC-11 | Given 路徑逃逸、偽造 hook 或金鑰輸出，When 操作，Then 阻擋或遮蔽。 | pending | [OpenCode sandbox probe](docs/evidence/2026-10-31.json) 僅驗證網路／寫入子集；[結果入口讀取／顯示邊界](docs/evidence/results-console-2026-11-01.json) 通過，[Pi hook 身分／session 子集通過](docs/PI-HOOK-BOUNDARY.md)，完整邊界仍待驗。 |
 | AC-12 | Given 公開匯入來源，When 執行 publication、policy 與 repo gates，Then 無 runtime 私人資料、導航正確且檢查通過。 | passed | [匯入驗證](docs/evidence/publication.md)；CI／交付另見任務板。 |

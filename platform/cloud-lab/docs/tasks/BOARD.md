@@ -783,3 +783,19 @@ CA-01～03來源查核及文件完成：4Worker實際映射／私人用途目錄
 PR[1006](https://github.com/fallrising/newclear/pull/1006)於2026-11-02T16:27:28Z合併，head `d59da7c13bbdcd34c94036272fd896688dd64810`、merge `86e330de4cc71344b06bc8058ee21afb5d6bcad6`。必要CI CloudLab41481371003／project41481371184／llms41481370945全過；lead回讀fulltree相同、clean、featurehead為main祖先，並行變更保留。
 
 本輪完成來源查核與設計交付，沒有修改runtime、host服務、授權、方案或CF資源。私人目錄保存精確入口／來源，公開文件只列角色；4個登記主機仍是候選範圍，沒有推定全部VPS或安裝批准。下一個程式切片為兩節點隔離的唯讀telemetry與看板；不是本輪已完成的能力。本PR只改任務板。
+
+## P04 — 既有能力與期限對帳
+
+Owner 直接指示；[任務與驗收](portfolio-p04.md)。Lead 唯一 writer；Claude Code 一次呼叫因 OAuth 失效未取得審查，Codex reviewer 執行必要獨立審查，不委派。
+
+| ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| P04-1 | 已交付／提案與來源比較 | P04-01 | done | 2026-11-22T13:46:50Z | 2026-11-22T13:53:54Z | 2026-11-22T13:54:34Z |
+| P04-2 | 期限與當前未知對帳 | P04-02 | done | 2026-11-22T13:46:50Z | 2026-11-22T13:53:54Z | 2026-11-22T13:54:34Z |
+| P04-3 | 權責、驗證、審查與交付 | P04-03 | done | 2026-11-22T13:46:50Z | 2026-11-22T13:53:54Z | 2026-11-22T13:54:34Z |
+
+P04-01～03 由 [PR #1067](https://github.com/fallrising/newclear/pull/1067) 於 2026-11-22T13:53:54Z 正常合併；head `5f35879a78ff9ffedb4c644d4209149bc5f68f4a`、merge `c2a81c8a98a788649db70f07710cce012f119e3a`。必要 CI [Cloud Lab](https://github.com/fallrising/newclear/actions/runs/45029768119)、[project-success](https://github.com/fallrising/newclear/actions/runs/45029768196)、[llms](https://github.com/fallrising/newclear/actions/runs/45029768170) 全過。
+
+12 固定來源／8 公開 pins／193 相對連結、55 contracts／9 llms、原 AC／SDD／runtime 保留及 staged diff 通過；一名 Codex reviewer 兩輪 ACCEPT，lead 接受。遠端回讀證明 feature head 為 main 祖先、Cloud Lab 與根 README 內容一致、工作樹乾淨，並行其他元件變更保留。文件對帳完成，不提升完整主線或 owner 整體驗收。
+
+Claude Code／Opus 5.5 的一次可選技術支持因 OAuth 過期未取得技術意見，沒有重試／登入設定變更；不能稱為 Claude 審查通過。Pages／Tunnels 歷史403仍 unknown，當前 live／真人登入未知，CA 多VPS仍未實作。沒有部署、續權、安裝或新平台；本 PR 只結案任務板。

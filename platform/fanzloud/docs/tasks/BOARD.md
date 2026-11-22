@@ -406,10 +406,45 @@ The retained private audit/handoff is backed up separately; no private values pu
 
 | ID | Task | AC | Status | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| M3-DATA01 | Locate saved original PostgreSQL candidates | DATA01 | in_progress | 2026-11-22T16:05:21Z | | 2026-11-22T16:22:45Z |
-| M3-DATA02 | Bounded offline identity and recovery decision | DATA02 | in_progress | 2026-11-22T16:05:21Z | | 2026-11-22T16:22:45Z |
-| M3-DATA03 | Review, CI and normal delivery | DATA03 | in_progress | 2026-11-22T16:05:21Z | | 2026-11-22T16:22:45Z |
+| M3-DATA01 | Locate saved original PostgreSQL candidates | DATA01 | done | 2026-11-22T16:05:21Z | 2026-11-22T16:26:27Z | 2026-11-22T16:27:18Z |
+| M3-DATA02 | Bounded offline identity and recovery decision | DATA02 | done | 2026-11-22T16:05:21Z | 2026-11-22T16:26:27Z | 2026-11-22T16:27:18Z |
+| M3-DATA03 | Review, CI and normal delivery | DATA03 | done | 2026-11-22T16:05:21Z | 2026-11-22T16:26:27Z | 2026-11-22T16:27:18Z |
 
 Source/diagnostic review ACCEPT after correcting one tar-termination finding;17tests,
 actual private snapshot verifier,55/9indexes,165links,hashes/privacy/whitespace pass.
 Hosted CI/merge/readback pending; candidate_only/not_ready and original FN07 remain.
+
+### M3-U data-candidate delivery
+
+[PR1081](https://github.com/fallrising/newclear/pull/1081) merged normally at
+2026-11-22T16:26:27Z as `73ea922efd70d6180d120e37f18286f4726ed0a6`.
+Final head `49d0d09e15b64191a0bd903e4043f115ba4754a2` passed all three required workflows:
+[Fanzloud CI](https://github.com/fallrising/newclear/actions/runs/45043560116),
+[Project success contracts](https://github.com/fallrising/newclear/actions/runs/45043560149),
+and [Workflow static validation](https://github.com/fallrising/newclear/actions/runs/45043560124).
+Hosted Fanzloud includes the17offline-verifier tests, existing Web/parser checks and
+Rust fmt/lint/test/build. Fresh-context review initially requested one P1 correction;
+full tar-trailer validation and3regression subcases fixed it, focused re-review ACCEPT.
+Independent17tests, actual private archive verifier,55project/9llms indexes,165links,
+source/test hashes, privacy/scope and whitespace/alignment passed. Failure history and
+[acceptance limits](../acceptance/M3-owner-data-recovery.acceptance.md) remain visible.
+
+Fetched remote main; merge ancestry and full Fanzloud plus workflow comparison with
+the final source head returned zero diff. Parallel upstream changes were outside those
+paths and preserved. This delivery record supersedes pre-merge pending notes; only
+DATA01–03 close. Original M3-U/FN07/fullM3/mainline and usable_tag none stay unchanged.
+
+The source inspection found112volumes/30PGdirectories/two major18candidates; one contains
+both expected U07 run UUID texts. Two readonly captures of its private69,191,168-byte
+snapshot match exactly, and the verifier returns candidate_only. This advances the
+previous unknown-location checkpoint, but does not prove current committed rows or
+complete result archives. No data-loss or logical-restore success is claimed. The private
+snapshot/evidence is preserved under restrictive local backup permissions, never in Git.
+
+All six diagnostic containers stopped normally and their exact owned containers/image
+were removed; the112original volumes remain unchanged in inventory. No PostgreSQL/AP,
+provider/VM startup, original writable mount, credential change or intent replay occurred.
+Next: prepare and independently review bounded isolated-copy PostgreSQL18 logical
+verification of task/run/command/archive lineage and cleanup before authorizing its run.
+Runtime not_ready, current-source UI selection, full operation gate, TLS/trust and actual
+owner FN07 remain open. Hosted CI validates this tool/branch, not a restored installation.

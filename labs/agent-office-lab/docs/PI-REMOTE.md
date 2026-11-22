@@ -37,3 +37,5 @@ python3 scripts/run_pi_work.py --allow-remote
 2026-11-01，owner 確認後執行一次，22.62 秒完成。DeepSeek 共三次 HTTP 200 請求，2147 input／204 output tokens；原生 read → write → 最終回覆，Office starting → idle → working → done，Pi agent_settled 與一致的 session／模型通過。result.json 的 marker／sum 正確、hash 已保存，cleanup_errors=[]。沒有自動重跑，沒有追加付費請求。見[欄位白名單證據](evidence/pi-live-2026-11-01.json)。
 
 AC-04 因此通過；Grok、三工位 UI、Pi 完整權限／取消／恢復與 AC-11 仍未驗收。這次單次授權已使用，後續付費測試需另有授權。歷史[零請求啟動證據](evidence/pi-startup-2026-11-01.json)保留當時 pending 狀態，不覆寫為推論成功。
+
+T-0032：帶 `--authorization-ref` 的 runner 只接受 dispatcher 同程序 exec 的一次性交接，於原生預檢及 key 讀取前驗證來源、provider、消耗收據與 fresh／retry parent。直接 `--allow-remote` 的另次批准流程不變。見[授權契約](REMOTE-GRANT.md)。

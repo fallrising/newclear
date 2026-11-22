@@ -1,0 +1,112 @@
+{
+  "milestone": "T-0032",
+  "date": "2026-11-23",
+  "base_commit": "462f392ffb8299ff10aedde05f6c16e62095a7d9",
+  "status": "control_layer_passed",
+  "ac_subsets": [
+    "AC-01",
+    "AC-07",
+    "AC-09",
+    "AC-11"
+  ],
+  "mvp_complete": false,
+  "usable_tag": null,
+  "before": {
+    "random_nonexistent_reference_reached_preflight": true,
+    "reason": "stop_before_native_credentials",
+    "model_calls": 0,
+    "credentials_read": false
+  },
+  "after": {
+    "same_pid_inherited_guarded_slot_required": true,
+    "provider_source_use_receipt_checked": true,
+    "claim_exclusive_and_not_refunded": true,
+    "fresh_retry_parent_matched_before_preflight_credentials_and_ledger": true,
+    "direct_explicit_operator_authorization_preserved": true
+  },
+  "validation": {
+    "python": {
+      "command": "python3 -m unittest discover -s labs/agent-office-lab/scripts -p 'test_*.py' -v",
+      "cwd": "repo root",
+      "version": "3.14.4",
+      "passed": 245
+    },
+    "node": {
+      "command": "node --test labs/agent-office-lab/scripts/*.test.mjs",
+      "cwd": "repo root",
+      "version": "23.11.0",
+      "passed": 74
+    },
+    "new_process_tests": 9,
+    "pi_fresh_browser_scenarios": 5,
+    "pi_retry_browser_scenarios": 4,
+    "cursor_browser_scenarios": 5,
+    "external_browser_requests": 0,
+    "real_components": [
+      "Pi runner authorization path",
+      "dispatcher",
+      "same PID exec",
+      "execution slot",
+      "atomic consumption and exclusive runner receipt",
+      "retry parent history and ledger",
+      "loopback HTTP",
+      "Chrome confirmation, readonly mode, stop, refresh and restart"
+    ],
+    "substitutes": [
+      "provider prerequisite detection",
+      "native probe stopped before credentials in process tests",
+      "local failed provider process in browser harnesses"
+    ],
+    "all_browser_harness_direct_children_exited": true,
+    "full_descendant_audit": false,
+    "native_model_verified": false,
+    "publication_files": 227,
+    "repo_indexes": {
+      "contracts": 55,
+      "llms_files": 9,
+      "errors": 0
+    },
+    "browser_commands": [
+      "node labs/agent-office-lab/scripts/check_console_remote_grant_browser.mjs --local-acceptance --harness-root PHYSICAL_TEMP_DIR",
+      "node labs/agent-office-lab/scripts/check_console_remote_grant_browser.mjs --local-acceptance --provider cursor --harness-root PHYSICAL_TEMP_DIR",
+      "node labs/agent-office-lab/scripts/check_console_retry_grant_browser.mjs PRIVATE_OUTPUT_DIR"
+    ]
+  },
+  "development_review": {
+    "provider": "opencode-go",
+    "model": "glm-5.3",
+    "requested_output_cap": 1000000,
+    "requests": 1,
+    "http_status": 400,
+    "reason": "upstream invalid_request; parameter unspecified",
+    "review_completed": false,
+    "elapsed_seconds": 1.299,
+    "reported_tokens": 0,
+    "reported_cost_usd": 0,
+    "billing_verified": false,
+    "automatic_retries": 0,
+    "fallback": false,
+    "credential_copy_removed": true,
+    "tracked_processes": 1,
+    "tracked_alive": 0
+  },
+  "product_model_requests": 0,
+  "actual_lab_grants_created": 0,
+  "review": "Primary agent reproduction and review; independent model review unavailable",
+  "preserved_failures": [
+    "Initial test scaffold used missing __file__ and a wrong fixture source filename; fixed before acceptance",
+    "Single 1M-output review request returned HTTP400; not retried"
+  ],
+  "remaining": [
+    "Actual Cursor console task to artifact",
+    "Cross-provider native permission, cancellation, fault and recovery flows",
+    "Full security acceptance and MVP"
+  ],
+  "source_sha256": {
+    "remote_grant.py": "92d24306a294b5f4ffe06c2ffecf627ceaec73f0acd448dc9863898c542c147a",
+    "run_pi_work.py": "b02783c28af1bbba14871839e75a918864c3ce2ef2d2856db06baaa69d214045",
+    "console_grant_harness.py": "301a28055b2ea461ada884d7d31010ff26f4dbe250fee80e36514952a3332849",
+    "console_retry_grant_harness.py": "22f370cc53396fb1c5f0e8e3ee458fcd874b418419c50f0f3d4750f6082dfde4",
+    "test_pi_grant_handoff.py": "510c559cc8817adb60032b2351edbc2032fa04c22f68e9f6bdf7a7a43b29fc98"
+  }
+}

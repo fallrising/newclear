@@ -502,8 +502,8 @@ def claim_runner(lab: Path, grant_id: str, provider: str) -> str:
     This validates attribution of the server grant; direct --allow-remote remains
     a separate operator authorization. A failed runner never refunds this claim.
     """
-    from execution_slot import inherited_slot
-    if provider != 'cursor':
+    from execution_slot import inherited_slot, retry_parent
+    if provider not in PROVIDERS:
         raise GrantError('remote_grant_provider_not_supported')
     fingerprint(grant_id)
     lab = Path(lab)
@@ -515,6 +515,8 @@ def claim_runner(lab: Path, grant_id: str, provider: str) -> str:
                 now = time.time()
                 record = _read_json_at(consumed_fd, grant_id + '.json')
                 _validate(record, lab, provider, now)
+                if not matches(record, retry_parent(lab)):
+                    raise GrantError('remote_grant_task_mismatch')
                 use = _read_json_at(consumed_fd, grant_id + '.use.json')
                 if (set(use) != {'consumed_at', 'entry', 'pid'}
                         or use['entry'] != 'dispatcher' or type(use['pid']) is not int

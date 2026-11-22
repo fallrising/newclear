@@ -32,3 +32,5 @@ python3 scripts/office_dispatch.py retry pi-work-REPLACE_WITH_RUN_ID --execute
 Pi task／401／crash 的重試模式選擇與授權限制已離線覆蓋；本輪真實重試鏈只驗證 429。跨 provider、同 session 恢復、UI 派工及完整 AC-07 仍待驗。
 
 T-0028 操作台重試沿用本頁的同一套 eligibility／ledger 與次數限制。先由 CLI 建立指定 parent 的新 grant，再從結果列明確查看／確認；首次任務 grant 不可轉為重試。驗證範圍及測試替身界線見[一次性授權](REMOTE-GRANT.md)。
+
+T-0032：Pi server grant 交接時，在預檢及重試 ledger 寫入前核對授權 parent 與繼承 journal 一致並領取一次。錯配及已使用參照拒絕，失敗不退還。見[授權契約](REMOTE-GRANT.md#t-0032pi-首次與指定重試的-runner-交接)。

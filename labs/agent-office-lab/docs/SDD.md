@@ -218,3 +218,9 @@ T-0030：將既有一次性授權延伸到固定 Cursor／Composer 2.5 首次合
 T-0031：owner 重新訂閱 OpenCode 並要求繼續；新單次 Pi／GLM 5.3 唯讀審查已合併的 Cursor grant 控制流程，主導重現可驗證問題、修正必要邊界並交付。固定一請求、零工具、6000 output tokens、180秒、回報成本US$3後停止（非金額硬上限）；不自動重試／fallback。與產品模型驗收分開，沒有 Cursor 產品付費授權。驗證 AC-01／09／11 子集的來源綁定、一次性執行與保守結果；必要 Python／Node／HTTP／瀏覽器回歸及 repo gates。完整MVP／Cursor真實新入口狀態不變。
 
 T-0031 本機結果：主導重現已消耗 Cursor grant id 可被新程序再次帶入的授權指紋歸屬問題，加入 dispatcher 同 PID／繼承鎖／私有消耗收據與排他 runner 領取檢查；失敗不退還。單次 Pi／GLM 5.3 開發審查 HTTP401 Invalid credential，未取得審查，沒有重試／fallback；不是產品模型驗收。詳[證據](evidence/cursor-grant-handoff-2026-11-23.json)。完整 MVP／Cursor 真實新入口仍 pending。
+
+## T-0032：Pi 授權參照交接
+
+T-0032：Pi runner 的 server grant 參照必須經 dispatcher 同 PID／繼承鎖的一次性交接；驗證 provider、來源、消耗收據與 fresh／retry parent 對應，並於預檢／憑證讀取／retry ledger 寫入前領取一次。修正任意32位參照可被當成授權指紋的歸屬問題；直接 --allow-remote 仍代表另次明確操作員批准，不宣稱此為瀏覽器自動重跑或惡意owner防護。沿用產品固定4請求／512output／180秒與最多兩次顯式重試，零產品模型請求。AC-01／07／09／11子集；真實runner入口、dispatcher／exec／收據及HTTP／Chrome使用原生邊界替身驗證。完整MVP仍pending。
+
+T-0032：已修正 Pi runner 接受任意格式正確授權參照的歸屬問題；首次與retry一律驗證dispatcher同PID／繼承鎖／來源／provider／收據並領取一次，retry還核對parent。245Python／74Node與Pi首次五組／retry四組／Cursor五組Chrome通過，失敗歷史與fixture保留；零產品模型請求。原生預檢及provider是明示替身，完整MVP仍pending。單次GLM開發審查使用owner指定1M上限，HTTP400 invalid_request未指明參數，未取得審查且未重試；主導獨立重現與審查。詳[證據](evidence/pi-grant-handoff-2026-11-23.json)，交付狀態以任務板為準。

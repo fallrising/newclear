@@ -442,3 +442,15 @@ T-0031 本機結果：主導重現已消耗 Cursor grant id 可被新程序再�
 T31 本機驗收：236 Python／74 Node，Cursor 五組、Pi 首次五組／指定重試四組 Chrome 通過。首輪唯讀導航與 reload 競態保留，測試改為先等待目標 URL；產品 UI 未改。真實 runner 授權檢查／dispatcher／exec／檔案鎖與明示原生邊界替身；零產品模型呼叫。主導審查，PR／CI／合併待完成。
 
 T31 交付結案：[功能 PR #1079](https://github.com/fallrising/newclear/pull/1079) 於2026-11-22T16:10:38Z正常合併，merge SHA `f6363a39a6cfc4ec592880eadbc0d8b3312277f1`。遠端main已fetch，與候選 `fd4ba448179368bb55fe464cfebfc3f3b30663a9` 的全元件diff零；[Agent Office Lab](https://github.com/fallrising/newclear/actions/runs/45042254292)與[Project success contracts](https://github.com/fallrising/newclear/actions/runs/45042254384)均success，無衝突／繞過保護。236Python／74Node，Cursor五組及Pi首次五組／重試四組Chrome、publication225、indexes55contracts9llms及staged diff check通過。主導重現與審查完成；單次GLM401，沒有取得獨立模型審查、沒有自動重試。零產品模型請求／實際lab授權；既有時間與費用限制不變。Cursor真實新入口與跨provider生命週期、完整安全／MVP仍pending，無usable tag或部署。
+
+## T-0032：Pi 授權參照交接
+
+T-0032：Pi runner 的 server grant 參照必須經 dispatcher 同 PID／繼承鎖的一次性交接；驗證 provider、來源、消耗收據與 fresh／retry parent 對應，並於預檢／憑證讀取／retry ledger 寫入前領取一次。修正任意32位參照可被當成授權指紋的歸屬問題；直接 --allow-remote 仍代表另次明確操作員批准，不宣稱此為瀏覽器自動重跑或惡意owner防護。沿用產品固定4請求／512output／180秒與最多兩次顯式重試，零產品模型請求。AC-01／07／09／11子集；真實runner入口、dispatcher／exec／收據及HTTP／Chrome使用原生邊界替身驗證。完整MVP仍pending。
+
+Owner直接指示繼續開發；來源newclear `462f392ffb8299ff10aedde05f6c16e62095a7d9`，根／元件AGENTS、README、SUCCESS、SDD、HANDOFF、REMOTE-GRANT／RETRY／PI-REMOTE與對應程式。沿用已核對共用交付政策blob `13bf6ff32c6131208ef14e27619160c2906dcb32`。單次GLM開發審查上限由owner改為1M後，HTTP400 invalid_request未指明參數，未取得審查、不重試；主導獨立重現與實作。
+
+| ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| T-0032-01 | Pi首次及指定重試的一次性runner交接 | AC-01／07／09／11子集 | in_progress | 2026-11-22T16:55:18.808583+00:00 | — | 2026-11-22T16:59:35.111890+00:00 |
+
+T-0032：已修正 Pi runner 接受任意格式正確授權參照的歸屬問題；首次與retry一律驗證dispatcher同PID／繼承鎖／來源／provider／收據並領取一次，retry還核對parent。245Python／74Node與Pi首次五組／retry四組／Cursor五組Chrome通過，失敗歷史與fixture保留；零產品模型請求。原生預檢及provider是明示替身，完整MVP仍pending。單次GLM開發審查使用owner指定1M上限，HTTP400 invalid_request未指明參數，未取得審查且未重試；主導獨立重現與審查。詳[證據](../evidence/pi-grant-handoff-2026-11-23.json)，交付狀態以任務板為準。

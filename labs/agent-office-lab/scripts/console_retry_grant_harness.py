@@ -55,8 +55,8 @@ p.add_argument('--allow-remote',action='store_true',required=True)
 p.add_argument('--authorization-ref',required=True)
 a=p.parse_args()
 lab=Path(__file__).resolve().parents[1]
-assert grants.consumed(lab,a.authorization_ref)
 with slots.execution_slot(lab):
+    authorization=grants.claim_runner(lab,a.authorization_ref,'pi')
     assert slots.retry_parent(lab) is not None
     run=lab/'runs/pi-work-harness-child'
     run.mkdir(mode=0o700)
@@ -64,7 +64,7 @@ with slots.execution_slot(lab):
     (run/'workspace').mkdir(mode=0o700)
     (run/'workspace/input.json').write_text(json.dumps(fixture))
     report=failed_report()
-    report['authorization']={'kind':'server_grant','fingerprint':grants.fingerprint(a.authorization_ref)}
+    report['authorization']={'kind':'server_grant','fingerprint':authorization}
     (run/'result.json').write_text(json.dumps(report))
     print(json.dumps({'artifacts':str(run),'status':'failed','model_inference_verified':False}),flush=True)
 raise SystemExit(1)

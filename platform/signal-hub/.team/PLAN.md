@@ -89,3 +89,28 @@ Objective: a small persistent Linux Docker/Compose package for the existing bina
 Gates: native initializer regression; actual non-root image/Compose admission, auth/dedup, container recreation persistence, backup/manifest and network-isolated fresh restore; relevant contracts and existing required CI; independent review; normal merge and exact remote/postmerge readback. Prior tests and unmet expanded operations remain explicit. Scope stops at the package; real instance/source backup is still separate.
 
 Independent candidate review found a P2 in smoke cleanup: failed daemon discovery/inspection was treated as absence. Root reproduced a failing behavioral test, then distinguishes confirmed absence from unavailable/error, preserves diagnostics, refuses foreign ownership, and returns failure on timeout. Eleven native setup/cleanup tests pass. The original real Compose lifecycle passed in CI; corrected exact candidate needs fresh review and CI before acceptance.
+
+## P05 — 單一有用事件來源提案（2026-11-22）
+
+Owner 直接指示繼續下一里程碑；本輪固定於 newclear `6c9cbd0ba596cd5f1ddd6c5466b99ce294dea1d3`。原規劃基準 `2aa21f10b53ecaeb079279b6531bbb47a103e937` 至此，Signal Hub／Prism／Wotar 與根 AGENTS 無變動；Cloud Lab 新增 P04 文件對帳，runtime 不變。私人來源有新增事件投影、單次 sender 與隔離重啟／備份還原合成證據，完整 pin／差異留私人帳本，公開僅角色。
+
+目標：在原 M6 個人使用範圍選一個 inventory observation 來源，對照已交付機制，寫明 ingest→查詢→restart→備份還原旅程及負例；不實際投遞。
+
+| AC | 文件驗收 |
+| --- | --- |
+| P05-01 | source+id、provenance、observed／received、privacy allowlist、去重／衝突／不確定重送明確 |
+| P05-02 | 選定一個現有有用來源、說明替代與不採用理由；Prism daemon eval 不是前置 |
+| P05-03 | 原 M6／AC-04 不減、不新增三來源七天或手機門檻；Hub 事件不是 MQTT E2EE 或告警決策 |
+| P05-04 | 合成輸入／期望與負例可審；真來源、具名實例、重啟／備份還原另有正式入口 |
+
+可寫：新 `docs/portfolio-source-proposal.md`、SUCCESS 附加範圍、README 導航、docs/STATUS.md、既有 .team/PLAN.md、本輪 reviewer task/report；依根規則建立元件 docs/tasks/BOARD.md（本元件原無此板）。根索引入口與資格不變，check_indexes 查核即可，無須機械修改。
+
+Lead 唯一文件 writer；沿用 codex-team-delivery 與 evidence-gate 方法，一名 native Codex 唯讀 reviewer（工具預設模型／effort繼承；不另啟外部 CLI），最多8分鐘及一次<=3分鐘結案核對，不委派。歷史模型 routing 不當作本輪新呼叫授權；本輪不再呼叫 Claude 或任何產品模型。
+
+驗證：所有固定來源／相對連結與公開邊界、合成 JSON 及原 event schema、原 AC／SDD／runtime 未變，native task/report validator、`python3 scripts/check_indexes.py`、staged diff，獨立審查；必要 Signal Hub／project CI 原樣執行。文件本地不跑產品、live、benchmark、sender 或隔離還原。CI 既有測試不提升真來源資格。
+
+不變量：原 producer 與 desired writer 保留；Hub SQLite 為事件權威，不接管 Cloud Lab D1、host/catalog、告警或外部執行／Done。回退只撤文件提案／導航，不清除事件或外部副作用。部署、secret、真來源／原報告、停機、還原、付費、schema／程式變更均停止在可審方案，不擴張本輪。
+
+交付：必要檢查／審查後 commit→push→PR→CI→正常合併→回讀，按根規則再以 board-only PR 記合併時間；只完成 P05，不自行啟動下個里程碑。原失敗／限制如實保留。
+
+P05 候選檢查點：本地24份來源／19個公開pins、兩段合成 JSON／原 event schema、55contracts／9llms及staged diff通過。T-901 獨立核對來源hash、projection、scope與原文保留後 ACCEPT，主檔 SHA256 `6390f431a21fc43c9e96bbeec9cea60b6fc8f42142e5e1c6066d89bb028981a3`；lead 接受。最終文件／審查回執、必要 CI／合併／遠端回讀依實際結果補入 PR／BOARD，原 M6不提升。

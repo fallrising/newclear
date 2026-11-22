@@ -137,3 +137,14 @@ T-0449 FN05 readonly review: [contract](specs/SPEC-M3-readonly-review.md), [acce
 | P01-03 不改 runtime／既有驗收與 route | 同上 | source diff、check_indexes、staged whitespace；required CI | Accepted (documentation); CI/delivery per BOARD |
 
 沒有 Rust／production interface 變更；rustdoc projection 不適用。原驗收狀態保持。
+
+## FZ-NAV-01 — existing-result instructions
+
+| Requirement | CU / specification | Evidence | State |
+| --- | --- | --- | --- |
+| N01 semantic native disclosure, keyboard and layouts | CU-WEB-NAV-01 / [SPEC-T047](specs/SPEC-T047-readonly-navigation.md) | [Browser receipt, screenshots and acceptance](acceptance/T047.acceptance.md) | Accepted source; delivery pending |
+| N02 fixed URLs, no opener/referrer or control writes | Same | Actual browser navigation into intercepted public documents, source hashes and diff | Verified locally |
+| N03 regression and N04 delivery | Same | 43 existing Web tests; required CI, independent review and delivery per [BOARD](tasks/BOARD.md) | Delivery pending |
+
+No Rust public interface or rustdoc projection changes. This is optional navigation;
+original FN07/M3, Cloud, AP M4 and Office MVP gaps remain unchanged.

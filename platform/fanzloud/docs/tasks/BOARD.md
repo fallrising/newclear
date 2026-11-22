@@ -174,3 +174,14 @@ staged whitespace 通過；獨立初審／既有文件比較／補充覆核後�
 [任務](P01.task.md)與[驗收](../acceptance/P01.acceptance.md)中 pre-merge
 交付待辦由本紀錄更新；原 FN07／M3-U、Cloud AC04、AP M4、Office MVP 不改狀態。
 沒有新 runtime、provider、VM、release、deploy 或下一里程碑。
+
+## T-1055 FZ-NAV-01
+
+[Task T047](T047.task.md), [issue1055](https://github.com/fallrising/newclear/issues/1055).
+
+| ID | Task | AC | Status | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| NAV-01 | Find original result instructions | N01 | in_progress | 2026-11-22T11:50:22Z | | 2026-11-22T12:03:33Z |
+| NAV-02 | Private-safe read-only links | N02 | in_progress | 2026-11-22T11:50:22Z | | 2026-11-22T12:03:33Z |
+| NAV-03 | Browser and existing regression checks | N03 | in_progress | 2026-11-22T11:50:22Z | | 2026-11-22T12:03:33Z |
+| NAV-04 | Review and normal PR delivery | N04 | in_progress | 2026-11-22T11:50:22Z | | 2026-11-22T12:03:33Z |

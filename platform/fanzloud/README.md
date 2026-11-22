@@ -2,6 +2,9 @@
 
 [入口與能力比較](docs/plans/portfolio-entry-equivalence.md)：保留 Fanzloud/AP 的隔離 coding 分工與 Office 原生本地入口；文件比較不代表入口已切換或產品驗收完成。
 
+「查看既有成果」提供 Fanzloud／AP／Office 的公開操作說明，新分頁保留原任務頁；
+不查詢跨產品資料，也不表示服務已啟動。[導航驗證](docs/acceptance/T047.acceptance.md)。
+
 > **2026-11-01 固定審查候選**：同一 Web 可核對並下載既有 writer 的不可變成果包，包含原任務、diff、檢查與固定 hash；兩個真瀏覽器回讀一致。[實測與限制](docs/acceptance/M3-fixed-candidate.md)。實際跨廠商 reviewer 尚待 T-0449 後端契約批准，FN05 尚未完成。
 
 > **2026-11-01 AC05 最小持久化**：提交意圖與唯一 AP run／成果引用已持久保存；真 Rust／AP 重啟及新瀏覽器回讀、unknown 零自動重送通過獨立驗收。[證據與限制](docs/acceptance/M3-durable-intents.md)。unknown 現有明示唯讀對帳入口；[原安裝已恢復並通過自動 journey](docs/acceptance/M3-reconciliation.md)。服務已停止，本人操作確認待辦，完整 M3／FN07 尚未完成。

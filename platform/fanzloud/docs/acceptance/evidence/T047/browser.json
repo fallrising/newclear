@@ -1,0 +1,166 @@
+{
+  "status": "passed",
+  "date": "2026-11-22T12:00:28.646Z",
+  "scope": "Actual shipped HTML/CSS/JS; synthetic logged-out/503 HTTP session; external document responses intercepted. No Rust/AP/provider/live acceptance.",
+  "browser": {
+    "protocolVersion": "1.3",
+    "product": "Chrome/153.0.8010.12",
+    "revision": "@971a7443b0c9b0a9b2860529b33331b76077ec62",
+    "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.0.0 Safari/537.36",
+    "jsVersion": "15.3.76.4"
+  },
+  "links": [
+    {
+      "text": "Fanzloud 操作說明（新分頁）",
+      "href": "https://github.com/fallrising/newclear/blob/main/platform/fanzloud/docs/isolated-operator.md",
+      "target": "_blank",
+      "rel": "noopener noreferrer",
+      "policy": "no-referrer"
+    },
+    {
+      "text": "AP 操作說明（新分頁）",
+      "href": "https://github.com/fallrising/newclear/blob/main/platform/agent-platform/docs/RESULT-ARCHIVE.md",
+      "target": "_blank",
+      "rel": "noopener noreferrer",
+      "policy": "no-referrer"
+    },
+    {
+      "text": "Office 操作說明（新分頁）",
+      "href": "https://github.com/fallrising/newclear/blob/main/labs/agent-office-lab/docs/RESULTS.md",
+      "target": "_blank",
+      "rel": "noopener noreferrer",
+      "policy": "no-referrer"
+    }
+  ],
+  "external": [
+    {
+      "url": "https://github.com/fallrising/newclear/blob/main/platform/fanzloud/docs/isolated-operator.md",
+      "method": "GET",
+      "referrer": null
+    },
+    {
+      "url": "https://github.com/fallrising/newclear/blob/main/platform/agent-platform/docs/RESULT-ARCHIVE.md",
+      "method": "GET",
+      "referrer": null
+    },
+    {
+      "url": "https://github.com/fallrising/newclear/blob/main/labs/agent-office-lab/docs/RESULTS.md",
+      "method": "GET",
+      "referrer": null
+    }
+  ],
+  "layouts": [
+    {
+      "width": 1280,
+      "scroll": 1265,
+      "links": [
+        {
+          "x": 121.5,
+          "width": 219.703125,
+          "height": 40
+        },
+        {
+          "x": 470.15625,
+          "width": 169.6875,
+          "height": 40
+        },
+        {
+          "x": 818.828125,
+          "width": 195.796875,
+          "height": 40
+        }
+      ]
+    },
+    {
+      "width": 390,
+      "scroll": 375,
+      "links": [
+        {
+          "x": 33,
+          "width": 219.703125,
+          "height": 40
+        },
+        {
+          "x": 33,
+          "width": 169.6875,
+          "height": 40
+        },
+        {
+          "x": 33,
+          "width": 195.796875,
+          "height": 40
+        }
+      ]
+    }
+  ],
+  "requests": [
+    {
+      "method": "GET",
+      "path": "/"
+    },
+    {
+      "method": "GET",
+      "path": "/assets/p0.css"
+    },
+    {
+      "method": "GET",
+      "path": "/assets/isolated.js"
+    },
+    {
+      "method": "GET",
+      "path": "/assets/candidate.js"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/session"
+    },
+    {
+      "method": "GET",
+      "path": "/favicon.ico"
+    },
+    {
+      "method": "GET",
+      "path": "/"
+    },
+    {
+      "method": "GET",
+      "path": "/assets/p0.css"
+    },
+    {
+      "method": "GET",
+      "path": "/assets/isolated.js"
+    },
+    {
+      "method": "GET",
+      "path": "/assets/candidate.js"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/session"
+    },
+    {
+      "method": "GET",
+      "path": "/"
+    },
+    {
+      "method": "GET",
+      "path": "/assets/p0.css"
+    }
+  ],
+  "page_errors": [],
+  "keyboard_activation": true,
+  "native_disclosure": true,
+  "default_collapsed": true,
+  "opener_null": true,
+  "source_page_preserved": true,
+  "no_js_links_present": true,
+  "no_js_disclosure_activated": true,
+  "unavailable_links_present": true,
+  "inspection_sha256": "fc5afdbe21b73291077ea426ade428ebf479ed75a44bb270c4bb6d35d0bd6d72",
+  "source_hashes": {
+    "isolated.html": "26d91fa3cbf7091911aa24d1f458befec418957f63d4d7c3a28041956b5c5592",
+    "p0.css": "d5440b8b3126e692bf5a40b0e6d1b34c2cf2d50a4b034f9af9642798784254ab",
+    "isolated.js": "f346a55384e8f64b3ac2ab8c0b8973fe8ca894eb90c2b05303f34696e34fef53",
+    "candidate.js": "c263c675705172de06e878606a89671d3d153353538ebf26446b2d44a2040649"
+  }
+}

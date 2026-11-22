@@ -189,3 +189,41 @@ h1 {
 [hidden] {
   display: none;
 }
+
+.result-entry-nav ul {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(16rem, 100%), 1fr));
+  gap: 1.5rem;
+  padding: 0;
+  margin: 1.5rem 0 0;
+  list-style: none;
+}
+
+.result-entry-nav li {
+  min-width: 0;
+}
+
+.result-entry-nav a {
+  display: inline-block;
+  padding: 0.5rem 0;
+  color: #82edbb;
+  text-underline-offset: 0.2em;
+  overflow-wrap: anywhere;
+}
+
+.result-entry-nav summary:focus-visible,
+.result-entry-nav a:focus-visible {
+  outline: 2px solid #82edbb;
+  outline-offset: 4px;
+  border-radius: 0.2rem;
+}
+
+.result-entry-nav summary {
+  cursor: pointer;
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.result-entry-nav[open] summary {
+  margin-bottom: 1rem;
+}

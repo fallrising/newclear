@@ -32,6 +32,8 @@
 
 ## 文件入口
 
+- [能力與期限對帳](docs/portfolio-capability-audit.md)：2026-11-22 的 IR／MC／ML 與 CA 比較、原授權截止及當前未知；不代表重新驗證 live。
+
 - [知識樹](docs/knowledge-tree.md)／[成功契約](SUCCESS.md)：能力與證據狀態。
 - [SDD](SDD.md)／[M1實作契約](docs/m1-implementation.md)／[API](contracts/m1.openapi.json)：設計與現行固定profile。
 - [CF工具目錄](docs/tool-catalog.md)／[M0來源](docs/sources.md)／[遷移計畫](docs/migration.md)：當前處置建議、原元件與唯一維護責任。

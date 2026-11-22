@@ -363,10 +363,39 @@ This is preparation within existing M3-U; the original owner-operation row remai
 
 | ID | Task | AC | Status | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| M3-PRE01 | Original saved installation and current prerequisites | PRE01 | in_progress | 2026-11-22T15:44:51Z | | 2026-11-22T15:50:42Z |
-| M3-PRE02 | Source drift and concrete owner-operation recovery order | PRE02 | in_progress | 2026-11-22T15:44:51Z | | 2026-11-22T15:50:42Z |
-| M3-PRE03 | Independent document review and normal delivery | PRE03 | in_progress | 2026-11-22T15:44:51Z | | 2026-11-22T15:50:42Z |
+| M3-PRE01 | Original saved installation and current prerequisites | PRE01 | done | 2026-11-22T15:44:51Z | 2026-11-22T15:54:06Z | 2026-11-22T15:55:01Z |
+| M3-PRE02 | Source drift and concrete owner-operation recovery order | PRE02 | done | 2026-11-22T15:44:51Z | 2026-11-22T15:54:06Z | 2026-11-22T15:55:01Z |
+| M3-PRE03 | Independent document review and normal delivery | PRE03 | done | 2026-11-22T15:44:51Z | 2026-11-22T15:54:06Z | 2026-11-22T15:55:01Z |
 
 Offline document source review ACCEPT;55project/9llms indexes,156relative links, six template
 hashes, scope/privacy/whitespace/alignment passed. Final CI/merge/readback pending; live
 readiness remains not_ready and original M3-U/FN07 stays open. No services or credentials changed.
+
+### M3-U offline preflight delivery
+
+[PR1077](https://github.com/fallrising/newclear/pull/1077) merged normally at
+2026-11-22T15:54:06Z as `6896929d93f2c053ede8d93a392a09fb621fe887`.
+Final head `1579c88179bcdadedfb0e1f606f677a34eb164d7` passed both required workflows:
+[Fanzloud CI](https://github.com/fallrising/newclear/actions/runs/45040569303) and
+[Project success contracts](https://github.com/fallrising/newclear/actions/runs/45040569301).
+Hosted Fanzloud includes operator Web/parser, Rust fmt/lint/test/build and whitespace.
+Required fresh-context document review ACCEPT;55project/9llms indexes,156relative
+links,6public-template hashes, fixed-source diff/embedding and scope/privacy checks
+passed. Private host/SQLite/Docker observations remain lead observations, not an
+independent runtime review. [Acceptance](../acceptance/M3-owner-preflight-20261122.acceptance.md)
+retains actual failures, current not_ready and all unverified boundaries.
+
+Fetched remote main, verified merge ancestry, and compared the entire Fanzloud
+component to the final source head: zero diff. This post-merge record supersedes
+pre-merge CI/delivery-pending notes in the source documents. Only PRE01–03 offline
+preparation is delivered; original M3-U/FN07/fullM3/mainline and usable_tag none remain
+open. Historical DB-stopped/readiness statements do not describe today's installation.
+
+Original container is absent in the inspected local default Docker context; original
+volume identity remains unknown, data loss is not established. The maintenance dump
+is only a verified-file recovery candidate. TLS expired; old binary excludes current
+embedded UI fixes; full submit/review gate and owner connection readiness remain open.
+Next dependency: locate original AP data and establish an evidence-backed recovery
+plan before any restore/source replacement/TLS change/window. No original services,
+product CLI, VM, credential changes, intent consumption or DB restore occurred.
+The retained private audit/handoff is backed up separately; no private values published.

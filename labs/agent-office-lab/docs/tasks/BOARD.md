@@ -421,6 +421,8 @@ Owner 直接指示繼續開發。基準來源 `fallrising/newclear@1c0483e86a825
 
 | ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| T-0030-01 | 固定 Cursor 首次任務 grant、操作台派工／停止與重啟控制層；真實模型及完整 AC 另驗 | AC-01／06／08／09／11 子集 | in_progress | 2026-11-22T14:03:31.768915+00:00 | — | 2026-11-22T14:18:03.374779+00:00 |
+| T-0030-01 | 固定 Cursor 首次任務 grant、操作台派工／停止與重啟控制層；真實模型及完整 AC 另驗 | AC-01／06／08／09／11 子集 | done | 2026-11-22T14:03:31.768915+00:00 | 2026-11-22T14:19:10Z | 2026-11-22T14:19:42.524068+00:00 |
 
 T30 本機驗收：232 Python／74 Node、Cursor五組Chrome流程（含唯讀模式零POST及明確返回）、Pi首次五組與重試四組回歸通過。實際dispatcher／atomic consume／跨exec鎖；provider與環境偵測明示替身，零產品模型請求／實際lab授權。已保留並整合主線 `6c9cbd0ba596cd5f1ddd6c5466b99ce294dea1d3` 的FZ-OFFICE-NAV，未改其產品範圍。publication223／indexes55contracts9llms／staged diff check通過。單次Pi GLM審查403，未取得審查、無重試；主導審查，不宣稱獨立模型審查。PR／CI／合併尚待完成。
+
+T30 交付結案：[功能 PR #1073](https://github.com/fallrising/newclear/pull/1073) 於 `2026-11-22T14:19:10Z` 正常合併，merge SHA `e0e6a3488ad4fdabaf99a65be004ada76230c830`。遠端main已fetch，與候選 `bcd6cbeb6762ed638c98684cafca8d8fb5f18215` 的全元件diff零；[Agent Office Lab CI](https://github.com/fallrising/newclear/actions/runs/45032075411)與[Project success contracts](https://github.com/fallrising/newclear/actions/runs/45032075486)均success，無衝突／繞過保護。232Python／74Node、Cursor五組及Pi首次五組／重試四組Chrome、唯讀成果零POST／明確返回、publication223／indexes55與9／staged check通過。最終畫面確認工作finished、執行鎖available。只有控制層使用實際HTTP／dispatcher／exec與明示provider替身；無產品模型請求／實際lab grant。一次Pi GLM開發審查403，未取得獨立審查、沒有自動重試；主導審查完成。Cursor真實新入口、原生取消／恢復及完整MVP仍pending，沒有usable tag或部署。

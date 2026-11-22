@@ -455,10 +455,10 @@ owner FN07 remain open. Hosted CI validates this tool/branch, not a restored ins
 
 | ID | Task | AC | Status | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| M3-COPY01 | Safe private staging | COPY01 | in_progress | 2026-11-22T16:56:56Z | — | 2026-11-22T17:17:25Z |
-| M3-COPY02 | Bounded copy lifecycle | COPY02 | in_progress | 2026-11-22T16:56:56Z | — | 2026-11-22T17:17:25Z |
-| M3-COPY03 | Exact logical comparison | COPY03 | in_progress | 2026-11-22T16:56:56Z | — | 2026-11-22T17:17:25Z |
-| M3-COPY04 | Independent review and delivery | COPY04 | in_progress | 2026-11-22T16:56:56Z | — | 2026-11-22T17:17:25Z |
+| M3-COPY01 | Safe private staging | COPY01 | done | 2026-11-22T16:56:56Z | 2026-11-22T17:20:54Z | 2026-11-22T17:22:57Z |
+| M3-COPY02 | Bounded copy lifecycle | COPY02 | done | 2026-11-22T16:56:56Z | 2026-11-22T17:20:54Z | 2026-11-22T17:22:57Z |
+| M3-COPY03 | Exact logical comparison | COPY03 | done | 2026-11-22T16:56:56Z | 2026-11-22T17:20:54Z | 2026-11-22T17:22:57Z |
+| M3-COPY04 | Independent review and delivery | COPY04 | done | 2026-11-22T16:56:56Z | 2026-11-22T17:20:54Z | 2026-11-22T17:22:57Z |
 
 Private-copy execution NOT_RUN; original FN07 remains open.
 
@@ -472,3 +472,40 @@ pending; rows stay in_progress through source merge. Original private-copy NOT_R
 Final source precommit:55project/9llms indexes,177relative links, source hashes,
 Ruff,29tests and staged/worktree whitespace/alignment pass. Sanitized historical
 RED-log trailing whitespace was removed; original private failure output retained.
+
+### M3-U isolated-copy tool delivery
+
+[PR1090](https://github.com/fallrising/newclear/pull/1090) merged normally at
+2026-11-22T17:20:54Z as `cb58117ce8c0edd603ad67ff23dfc6c622ded752`.
+Reviewed head `1bd205814e5be02432383593eef46b22ad95a77d` passed both required workflows:
+[Fanzloud CI](https://github.com/fallrising/newclear/actions/runs/45048659503) and
+[Project success contracts](https://github.com/fallrising/newclear/actions/runs/45048659571).
+Hosted Fanzloud includes29diagnostic tests, existing Web/parser tests and Rust
+format/lint/test/build. Fresh-context review ACCEPT after correcting the P2 private
+receipt-write failure that could hide an unknown cleanup state. Reviewer independently
+ran29tests, the three-case CLI fault matrix and source-hash/whitespace checks, and
+inspected the completed final-source synthetic smoke. Original finding and resolution
+remain in the protected review packet; sanitized failures/receipts are in
+[acceptance](../acceptance/M3-copy-validation.acceptance.md).
+
+Real synthetic PostgreSQL18.6 passed all seven logical comparisons, read-only write
+rejection, persisted outcome, strict launch inspection, autonomous120.48s/exit137 and
+confirmed exact-container cleanup. Original112volume names unchanged; no original
+volume was mounted and no owned containers remain. The fixed image is retained for
+the proposed next diagnostic. Root's broad publication scan failed on unrelated
+untracked worktrees/runtime files; the clean tracked-root export passed18studies/
+712Markdown. Fanzloud55project/9llms indexes,177relative links, Ruff and staged alignment
+passed. These scopes and failure history remain explicit.
+
+Fetched remote main, confirmed source merge ancestry, and compared full Fanzloud,
+unchanged AP and Fanzloud workflow bytes with the reviewed head: zero diff. Parallel
+upstream changes were outside these paths and preserved. This delivery record
+supersedes earlier hosted-CI/merge pending notes and closes COPY01–04 only.
+
+Original private-copy execution remains NOT_RUN. The [concrete one-launch proposal](../specs/SPEC-M3-copy-validation.md#concrete-private-copy-execution-proposal-not-executed)
+binds the original9b72f1…snapshot, four saved references, fixed image,120-second
+runtime and isolated bounded copy. It awaits the separate execution authorization
+required by the existing recovery proposal. No original service/credential/intent
+change, worker/provider/VM, release or deployment occurred. Original M3-U/FN07/fullM3,
+mainline incomplete and usable_tag none remain unchanged; logical data recovery and
+current UI/TLS/owner-operation readiness are not claimed by tool delivery.

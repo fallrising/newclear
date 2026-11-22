@@ -356,7 +356,7 @@ T-0029：依 owner 指示，驗證一次 Pi／DeepSeek 從操作台到產物的�
 
 | ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| T-0029-01 | Pi／DeepSeek 來源綁定重試及操作台產物／下載驗收通過；待 PR／CI 交付 | AC-01／04／08／09／11（Pi 子集） | in_progress | 2026-11-22T11:47:18Z | — | 2026-11-22T13:46:01Z |
+| T-0029-01 | Pi／DeepSeek 來源綁定重試、操作台產物／下載與交付完成 | AC-01／04／08／09／11（Pi 子集） | done | 2026-11-22T11:47:18Z | 2026-11-22T13:47:48Z | 2026-11-22T13:48:27Z |
 
 T-0029 單次嘗試：實際 Chrome 確認與 grant 消耗成功，首個 DeepSeek 請求 HTTP 402；無推論成果、無產物，授權已使用、不自動重試。原生與外層受追蹤程序已退出、共用鎖 available；唯讀 Chrome 驗證刷新／操作台重啟與新 grant gate。224 Python／68 Node 通過；[證據](../evidence/pi-console-live-2026-11-22.json)。此任務仍 in_progress（等 owner），不以失敗記錄當作驗收完成，PR 保持 draft。
 
@@ -365,3 +365,5 @@ T-0029 單次嘗試：實際 Chrome 確認與 grant 消耗成功，首個 DeepSe
 T29 接續：owner 已更新 Pi 廠商登入並補足 DeepSeek 餘額，要求繼續開發。唯讀 balance API 回 available；新一次指定既有失敗 parent 的重試已獲授權，仍限四請求／每請求512output／180秒，不自動重試，不改固定產品Pi版本或模型。新增廠商及Cursor先作零推論環境盤點，不把已登入當模型成功。
 
 T29 接續驗收通過：3次HTTP200、2142input／185output tokens、30.51秒；相同原fixture、read→write、agent_settled、marker／total、原始與實際Blob下載hash通過。原HTTP402失敗/report/receipt/input未變，兩次獨立grant各用一次、不自動重試。刷新／操作台重啟不重跑，32個外層受追蹤程序全部退出，未額外送終止訊號。產品程式未改，沿用已通過224Python／68Node的同一受測來源；publication／indexes及本PR CI另核對。主導審查與真實Chrome畫面核對，未宣稱獨立外部審查。新增全域Pi廠商及Cursor只盤點登入／catalog，零開發模型委託。[成功證據](../evidence/pi-console-completed-2026-11-22.json)，交付PR #1056將轉ready，尚未結案。
+
+T29 交付結案：[PR #1056](https://github.com/fallrising/newclear/pull/1056) 於2026-11-22T13:47:48Z正常合併，merge SHA `68e1b74f3138ba0cfef6d7dc024b7bbb0ad7a160`。已fetch遠端main，與候選 `b01b2b272f5cf0357ebbe1feb4dfa6d351ae195b` 的全元件diff為零；[Agent Office Lab CI](https://github.com/fallrising/newclear/actions/runs/45029249158)及[Project success contracts](https://github.com/fallrising/newclear/actions/runs/45029249247)皆success。真實指定重試／Blob下載通過，先前402失敗及兩次已消耗授權保留；沒有自動重試、額外模型委託或待執行產品任務。主導審查完成，沒有獨立外部審查聲稱；完整跨provider AC與MVP仍pending，無usabletag。

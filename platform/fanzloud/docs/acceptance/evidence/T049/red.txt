@@ -1,0 +1,194 @@
+✔ M2-01: same catalog offers both real subscription vendors only (4.522259ms)
+✔ M2-04: accepted running A allows explicit B with distinct submit keys (13.998758ms)
+✔ M2-04: newly accepted active tasks can be selected without reload or completion (1.759372ms)
+✔ M2-04: list read failure preserves confirmed admission and never resends (1.376355ms)
+✔ M2-04: an older task list cannot hide a more recently accepted task (1.539923ms)
+✔ M2-04: reload of a confirmed receipt allows a distinct task (0.989545ms)
+✔ M2-04: unknown or malformed receipt locks across reload; never automatically posts (2.976486ms)
+✔ M2-04: uncertain submission does not retry and locks another explicit submit (0.911415ms)
+✔ M2-04: late cancel reply for A cannot overwrite selected B status (1.100455ms)
+✔ M2-04: pending or failed B fetch never leaves A identity/status/reason (1.048396ms)
+✔ M3-06: fresh browser recovers server unknown and cannot submit (1.104374ms)
+✔ M3-06: fresh browser opens persisted confirmed run without submit (0.751357ms)
+✔ M3-06: durable list failure fails closed instead of enabling submit (0.861907ms)
+✔ M3-04: observation history replaces browser wall-clock reconstruction (0.859666ms)
+✔ M3-06: late A response cannot replace B uncertainty after durable A recovery (2.129761ms)
+✔ M3-06: confirmed 404 of stale selection falls back to durable run without POST (0.998975ms)
+✔ C02: fixed candidate has an explicit authenticated read action (0.686707ms)
+✔ C02: candidate verifies exact UTF8 archive, diff and identities without a mutation (2.40308ms)
+✔ C03: tampered metadata, missing/pruned archive and nonterminal writer fail closed (2.111821ms)
+✔ C03: rehashed foreign content cannot pass candidate identity and result binding (2.32303ms)
+✔ C04: load exposes hash as text; reread and download never dispatch (2.191321ms)
+✔ C04: late candidate after selection or logout cannot restore download (2.694248ms)
+✔ C04: expiry during download clears candidate without cached bypass (1.489124ms)
+✔ R03: fixed candidate explicitly hands off to opposite vendor once and unknown locks (1.865111ms)
+✔ R04: persisted unknown prevents review even after a new browser loads candidate (1.417204ms)
+✔ R03: typed review is hash/identity bound and downloads the exact immutable archive (4.150912ms)
+✔ R04: only first request_changes exposes explicit rework, never an automatic loop (2.005261ms)
+✔ R03: late review download cannot survive selection or logout; expiry denies download (3.142546ms)
+✔ U05: original unknown reconciles only on explicit click and fresh durable confirmation (1.021995ms)
+✔ U05: failed or expired reconciliation never clears lock or retries (2.560978ms)
+✔ U05: lost durable readback after confirmation remains locked with explicit failure (0.848136ms)
+✔ U05: pending reconciliation is single-flight and late reply after logout cannot unlock (0.889047ms)
+✔ U05: remaining unknown and refresh during reconcile retain a usable explicit action (1.742883ms)
+✔ D01: late diff after logout or logout/login never downloads (3.485936ms)
+✔ D01: A-B-A selection invalidates pending diff even with identical bytes (0.927716ms)
+✔ D01: observed401 invalidates pending diff and unauthenticated clicks do not read (0.923965ms)
+✔ D02: stale diff failures preserve the new view error (3.371575ms)
+✔ D02: current exact diff downloads once while mismatch/error does not (3.505385ms)
+✔ D01: disabled or logged-out diff action cannot initiate a read (1.724972ms)
+✖ O01: newer same-run observation survives an older running response (3.974692ms)
+✖ O01: A-B-A selection cannot revive an old A observation (1.111914ms)
+✖ O01: relogin cannot revive a previous login observation (1.086626ms)
+✖ O02: stale run failures preserve the current error (1.146324ms)
+✖ O02: stale404 cannot switch to the durable fallback (1.164736ms)
+✖ O02: already-queued stale poll callback cannot issue a new run GET (0.828255ms)
+✔ O02: current polling and current errors remain observable without writes (1.188636ms)
+✖ O02: old terminal recent-list failure cannot overwrite a newer observation (0.894006ms)
+✔ p0_web_bootstrap_token_is_ephemeral_and_never_persisted (16.445267ms)
+✔ p0_web_login_status_and_device_actions_use_exact_api_contract (2.462728ms)
+✔ p0_web_prompt_submission_requires_one_explicit_operator_action (2.632658ms)
+✔ p0_web_stream_replays_and_reconnects_from_validated_cursor (17.803051ms)
+✔ p0_web_cancel_is_explicit_and_disconnect_never_cancels (4.104972ms)
+✔ p0_web_diff_is_bounded_text_and_never_html (14.531035ms)
+✔ p0_web_refresh_rehydrates_identity_without_replaying_mutations (1.020946ms)
+✔ p0_web_errors_and_diagnostics_exclude_sensitive_canaries (37.861383ms)
+✔ p0_web_exposes_no_execution_provider_or_arbitrary_route_authority (3.890542ms)
+✔ p0_web_controller_model_preserves_generation_sequence_and_e0_boundaries (12.383476ms)
+ℹ tests 57
+ℹ suites 0
+ℹ pass 50
+ℹ fail 7
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 235.543951
+
+✖ failing tests:
+
+test at acceptance/m2-isolated.test.mjs:466:1
+✖ O01: newer same-run observation survives an older running response (3.974692ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+
+  'Agent 執行中' !== '完成'
+
+      at assertFinished (file://<repo>/platform/fanzloud/acceptance/m2-isolated.test.mjs:461:10)
+      at TestContext.<anonymous> (file://<repo>/platform/fanzloud/acceptance/m2-isolated.test.mjs:472:3)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 'Agent 執行中',
+    expected: '完成',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at acceptance/m2-isolated.test.mjs:475:1
+✖ O01: A-B-A selection cannot revive an old A observation (1.111914ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+
+  'Agent 執行中' !== '完成'
+
+      at assertFinished (file://<repo>/platform/fanzloud/acceptance/m2-isolated.test.mjs:461:10)
+      at TestContext.<anonymous> (file://<repo>/platform/fanzloud/acceptance/m2-isolated.test.mjs:480:58)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 'Agent 執行中',
+    expected: '完成',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at acceptance/m2-isolated.test.mjs:482:1
+✖ O01: relogin cannot revive a previous login observation (1.086626ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+
+  'Agent 執行中' !== '完成'
+
+      at assertFinished (file://<repo>/platform/fanzloud/acceptance/m2-isolated.test.mjs:461:10)
+      at TestContext.<anonymous> (file://<repo>/platform/fanzloud/acceptance/m2-isolated.test.mjs:487:39)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 'Agent 執行中',
+    expected: '完成',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at acceptance/m2-isolated.test.mjs:490:1
+✖ O02: stale run failures preserve the current error (1.146324ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+
+  + 'stale run failure'
+  - 'current view error'
+
+      at TestContext.<anonymous> (file://<repo>/platform/fanzloud/acceptance/m2-isolated.test.mjs:496:10)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 'stale run failure',
+    expected: 'current view error',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at acceptance/m2-isolated.test.mjs:498:1
+✖ O02: stale404 cannot switch to the durable fallback (1.164736ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+
+  'B' !== 'A'
+
+      at assertFinished (file://<repo>/platform/fanzloud/acceptance/m2-isolated.test.mjs:460:10)
+      at TestContext.<anonymous> (file://<repo>/platform/fanzloud/acceptance/m2-isolated.test.mjs:504:3)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 'B',
+    expected: 'A',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at acceptance/m2-isolated.test.mjs:507:1
+✖ O02: already-queued stale poll callback cannot issue a new run GET (0.828255ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+
+  3 !== 2
+
+      at TestContext.<anonymous> (file://<repo>/platform/fanzloud/acceptance/m2-isolated.test.mjs:515:12)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 3,
+    expected: 2,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at acceptance/m2-isolated.test.mjs:532:1
+✖ O02: old terminal recent-list failure cannot overwrite a newer observation (0.894006ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+
+  + 'old task-list failure'
+  - 'new observation error'
+
+      at TestContext.<anonymous> (file://<repo>/platform/fanzloud/acceptance/m2-isolated.test.mjs:541:10)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 'old task-list failure',
+    expected: 'new observation error',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }

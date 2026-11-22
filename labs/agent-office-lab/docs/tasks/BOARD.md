@@ -347,3 +347,17 @@ Owner 直接指示繼續開發；T-0028：Pi 遠端重試的一次性授權。CL
 T-0028 本機驗收完成：224 Python／68 Node、四組實際 HTTP／Chrome 重試情境及五組既有首次授權回歸通過。成功情境確認實際 dispatcher exec、同 PID 繼承執行鎖、grant 消耗與 attempt=1 receipt；舊報告／input／receipt hash 未變，fixture 相同，結果仍 failed／零模型。26 個 PID/create-time 受追蹤程序已退出；抽樣不是完整後代樹保證。首次瀏覽器因斷言把本地化提示當原始 API code 而逾時，已修正並保留；其他測試準備失敗見[白名單證據](../evidence/remote-retry-grant-2026-11-16.json)。主導直接實作，沒有新 Claude／Pi 委託、產品模型呼叫或實際 lab 付費 grant。PR／CI／合併仍待完成，完整 AC 不變。
 
 T-0028 交付結案：[功能 PR #1050](https://github.com/fallrising/newclear/pull/1050) 已於 2026-11-16T17:20:19Z 正常合併，merge SHA `747be27db5453f109ea233c130a37cb66261368f`。遠端 main fetch 後，與候選 `249b9de29efdffde1b8d739a2ff8e0fb9ebf6e20` 的 Agent Office Lab 全元件 diff 為零；同期主線其他變更僅在 fanzloud 文件。必要 CI [Agent Office Lab](https://github.com/fallrising/newclear/actions/runs/43917130599) 與 [Project success contracts](https://github.com/fallrising/newclear/actions/runs/43917130674) 均 success，無衝突；主導審查完成，沒有獨立外部審查聲稱。224 Python／68 Node、四組新重試與五組既有首次授權瀏覽器流程、publication 217files／indexes 55contracts 9llms／staged diff check通過。零新增開發模型委託、產品模型請求與實際lab付費grant；每次真實付費重試仍需另次明確批准，完整 AC-07／09／11／MVP pending，無usable tag。
+
+## T-0029：Pi／DeepSeek 操作台真實端到端驗收
+
+T-0029：依 owner 指示，驗證一次 Pi／DeepSeek 從操作台到產物的真實有界任務。先做零模型預檢；固定 Pi 1.4.0、deepseek-flash、最多四請求、每請求 512 output tokens、180 秒、無金額硬上限，不自動重試、不新增開發模型委託。真實 CLI grant、Chrome 明確確認、dispatcher／relay／原生 Office Pi、同 session／model／read-write／agent_settled、結果與 Blob 下載 hash、刷新及操作台重啟不重跑、授權只消耗一次與所屬程序清理。範圍僅涵蓋 AC-01／04／08／09／11 的 Pi 子集；不擴大到遠端重試、原生終端自由互動或其他 provider。
+
+驗證計畫：先完成環境與瀏覽器無模型準備，再執行已批准的一次付費固定任務；一旦 consume／execute 即不再派工。模型或瀏覽器失敗保留證據，後續只讀回既有結果。必要元件／repo gates、PR／CI／合併／讀回。完整 MVP 與 usable tag 不變。
+
+| ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
+| --- | --- | --- | --- | --- | --- | --- |
+| T-0029-01 | 等 owner 處理 DeepSeek HTTP 402 並新批一次重試；成功產物／下載尚未驗收 | AC-01／04／08／09／11（Pi 子集） | in_progress | 2026-11-22T11:47:18Z | — | 2026-11-22T11:54:17Z |
+
+T-0029 單次嘗試：實際 Chrome 確認與 grant 消耗成功，首個 DeepSeek 請求 HTTP 402；無推論成果、無產物，授權已使用、不自動重試。原生與外層受追蹤程序已退出、共用鎖 available；唯讀 Chrome 驗證刷新／操作台重啟與新 grant gate。224 Python／68 Node 通過；[證據](../evidence/pi-console-live-2026-11-22.json)。此任務仍 in_progress（等 owner），不以失敗記錄當作驗收完成，PR 保持 draft。
+
+來源核對：newclear `30a5bc3c212cd912b8c507200ca041c50fc5744b` 的根／元件 AGENTS、README、SUCCESS、SDD、HANDOFF、REMOTE-GRANT、CONSOLE、SETUP、PI-REMOTE、REMOTE-SETUP 及受測程式；與 T28 merge 的元件內容一致。共用交付政策讀回 blob `13bf6ff32c6131208ef14e27619160c2906dcb32`；DeepSeek 官方錯誤碼於 2026-11-22 查核。

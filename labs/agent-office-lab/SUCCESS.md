@@ -15,6 +15,12 @@ source_commit: 64c8ad59620e9068f0beede99365b7d656f00825
 
 ## 主線與範圍
 
+T-0029 最新：一次已批准的 Pi／DeepSeek 操作台真實任務在首個外部請求收到 HTTP 402（[官方說明：餘額不足](https://api-docs.deepseek.com/quick_start/error_codes/)），30.36 秒後結束，任務 failed、無產物、用量未知。一次性授權已消耗，沒有自動重試或新授權。外層 29 個受追蹤程序全部退出、鎖釋放；非完整後代樹稽核。Chrome 唯讀回讀確認失敗不顯示成功、沒有下載、刷新／操作台重啟不重跑、重試沒有新 grant 不能執行。224 Python／68 Node 通過，無開發模型委託；成功產物／下載與完整 AC／MVP 仍 pending。等 owner 處理 provider 餘額及另批一次有界重試；[白名單證據](docs/evidence/pi-console-live-2026-11-22.json)，交付狀態見[任務板](docs/tasks/BOARD.md)。
+
+T-0029：依 owner 指示，驗證一次 Pi／DeepSeek 從操作台到產物的真實有界任務。先做零模型預檢；固定 Pi 1.4.0、deepseek-flash、最多四請求、每請求 512 output tokens、180 秒、無金額硬上限，不自動重試、不新增開發模型委託。真實 CLI grant、Chrome 明確確認、dispatcher／relay／原生 Office Pi、同 session／model／read-write／agent_settled、結果與 Blob 下載 hash、刷新及操作台重啟不重跑、授權只消耗一次與所屬程序清理。範圍僅涵蓋 AC-01／04／08／09／11 的 Pi 子集；不擴大到遠端重試、原生終端自由互動或其他 provider。
+
+驗證計畫：先完成環境與瀏覽器無模型準備，再執行已批准的一次付費固定任務；一旦 consume／execute 即不再派工。模型或瀏覽器失敗保留證據，後續只讀回既有結果。必要元件／repo gates、PR／CI／合併／讀回。完整 MVP 與 usable tag 不變。
+
 T-0028 最新：指定失敗 parent 的一次性重試 grant 已實作；224 Python／68 Node、四組新重試與五組既有首次授權 Chrome 流程通過。實際 dispatcher／跨 exec 執行鎖／receipt 已驗證，provider 與環境偵測為明示替身，未執行付費模型。見[授權契約](docs/REMOTE-GRANT.md)、[證據](docs/evidence/remote-retry-grant-2026-11-16.json)及[交付狀態](docs/tasks/BOARD.md)。
 
 T-0028：Pi 遠端重試的一次性授權。CLI 明確建立綁定指定失敗 parent／root／下一次 attempt／fixture 與歷史摘要的 grant，操作台透過既有 ref 選取與明確確認執行；首次 grant 與 retry grant 不可互用。保留固定模型／限額、最多兩次重試、單一 pending grant、來源綁定、共用執行鎖與消耗後不退還。主導直接實作，零新增開發模型委託／產品模型請求，不建立實際 lab 的付費授權。

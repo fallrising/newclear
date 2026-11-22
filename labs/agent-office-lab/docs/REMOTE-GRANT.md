@@ -62,3 +62,9 @@ python3 scripts/office_console.py --accept-remote-grant pi
 HTTP 公開授權摘要只增加 `scope=fresh|retry` 與 `retry={parent_ref,root_ref,attempt}`；不公開原始 grant id、run 名稱、私有摘要或路徑。瀏覽器仍使用 `retry_ref`，沒有建立、延長、修改或消耗 grant 的新端點，消耗只能經既有 dispatcher。
 
 本輪測試使用隔離臨時 lab：真實 HTTP、Chrome、dispatcher、原子消耗、跨 exec 執行鎖與 retry receipt；環境偵測及 provider 是明示測試替身，產生 failed／零請求的結果。沒有建立實際 lab 的付費 grant、讀取憑證或呼叫 DeepSeek；產品付費重試及完整 AC-07／09／11 仍待另次明確驗收。
+
+## T-0029：操作台真實驗收嘗試
+
+2026-11-22 以新單次批准，經實際 CLI grant → Chrome 明確確認 → dispatcher → Pi／DeepSeek 發出一次固定合成任務。第一個外部請求收到 HTTP 402；依[官方錯誤碼](https://api-docs.deepseek.com/quick_start/error_codes/)為餘額不足。任務保持 failed，沒有產物或可核對的 output token 用量；沒有自動重跑。原生清理、外層受追蹤程序退出、授權消耗及操作台重啟／刷新不重跑已核對。
+
+成功產物／Blob 下載仍未通過；測試替身及既有歷史成功不替代此次端到端驗收。下一步先由 owner 處理 provider 餘額，再對既有失敗 parent 新批一次指定重試；未建立下一張 grant。限額與失敗歷史不變，詳[白名單證據](evidence/pi-console-live-2026-11-22.json)。

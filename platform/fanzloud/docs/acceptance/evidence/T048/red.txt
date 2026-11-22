@@ -1,0 +1,146 @@
+✔ M2-01: same catalog offers both real subscription vendors only (4.221392ms)
+✔ M2-04: accepted running A allows explicit B with distinct submit keys (14.394897ms)
+✔ M2-04: newly accepted active tasks can be selected without reload or completion (1.674612ms)
+✔ M2-04: list read failure preserves confirmed admission and never resends (1.222595ms)
+✔ M2-04: an older task list cannot hide a more recently accepted task (2.03487ms)
+✔ M2-04: reload of a confirmed receipt allows a distinct task (0.847387ms)
+✔ M2-04: unknown or malformed receipt locks across reload; never automatically posts (3.016086ms)
+✔ M2-04: uncertain submission does not retry and locks another explicit submit (1.080775ms)
+✔ M2-04: late cancel reply for A cannot overwrite selected B status (1.840672ms)
+✔ M2-04: pending or failed B fetch never leaves A identity/status/reason (1.014536ms)
+✔ M3-06: fresh browser recovers server unknown and cannot submit (1.093075ms)
+✔ M3-06: fresh browser opens persisted confirmed run without submit (0.777986ms)
+✔ M3-06: durable list failure fails closed instead of enabling submit (0.765976ms)
+✔ M3-04: observation history replaces browser wall-clock reconstruction (0.791597ms)
+✔ M3-06: late A response cannot replace B uncertainty after durable A recovery (1.131155ms)
+✔ M3-06: confirmed 404 of stale selection falls back to durable run without POST (0.874127ms)
+✔ C02: fixed candidate has an explicit authenticated read action (0.719928ms)
+✔ C02: candidate verifies exact UTF8 archive, diff and identities without a mutation (3.403735ms)
+✔ C03: tampered metadata, missing/pruned archive and nonterminal writer fail closed (2.092622ms)
+✔ C03: rehashed foreign content cannot pass candidate identity and result binding (1.936321ms)
+✔ C04: load exposes hash as text; reread and download never dispatch (2.066442ms)
+✔ C04: late candidate after selection or logout cannot restore download (2.556098ms)
+✔ C04: expiry during download clears candidate without cached bypass (1.434824ms)
+✔ R03: fixed candidate explicitly hands off to opposite vendor once and unknown locks (1.704522ms)
+✔ R04: persisted unknown prevents review even after a new browser loads candidate (1.338674ms)
+✔ R03: typed review is hash/identity bound and downloads the exact immutable archive (3.065326ms)
+✔ R04: only first request_changes exposes explicit rework, never an automatic loop (2.976387ms)
+✔ R03: late review download cannot survive selection or logout; expiry denies download (4.50376ms)
+✔ U05: original unknown reconciles only on explicit click and fresh durable confirmation (0.973556ms)
+✔ U05: failed or expired reconciliation never clears lock or retries (2.19319ms)
+✔ U05: lost durable readback after confirmation remains locked with explicit failure (1.024185ms)
+✔ U05: pending reconciliation is single-flight and late reply after logout cannot unlock (1.039465ms)
+✔ U05: remaining unknown and refresh during reconcile retain a usable explicit action (2.05575ms)
+✖ D01: late diff after logout or logout/login never downloads (1.770622ms)
+✖ D01: A-B-A selection invalidates pending diff even with identical bytes (1.198805ms)
+✖ D01: observed401 invalidates pending diff and unauthenticated clicks do not read (1.124075ms)
+✖ D02: stale diff failures preserve the new view error (1.737732ms)
+✔ D02: current exact diff downloads once while mismatch/error does not (2.727989ms)
+✖ D01: disabled or logged-out diff action cannot initiate a read (1.055747ms)
+✔ p0_web_bootstrap_token_is_ephemeral_and_never_persisted (18.10993ms)
+✔ p0_web_login_status_and_device_actions_use_exact_api_contract (2.430829ms)
+✔ p0_web_prompt_submission_requires_one_explicit_operator_action (2.629478ms)
+✔ p0_web_stream_replays_and_reconnects_from_validated_cursor (19.161256ms)
+✔ p0_web_cancel_is_explicit_and_disconnect_never_cancels (2.773008ms)
+✔ p0_web_diff_is_bounded_text_and_never_html (15.232333ms)
+✔ p0_web_refresh_rehydrates_identity_without_replaying_mutations (0.989525ms)
+✔ p0_web_errors_and_diagnostics_exclude_sensitive_canaries (41.965125ms)
+✔ p0_web_exposes_no_execution_provider_or_arbitrary_route_authority (5.869444ms)
+✔ p0_web_controller_model_preserves_generation_sequence_and_e0_boundaries (9.647357ms)
+ℹ tests 49
+ℹ suites 0
+ℹ pass 44
+ℹ fail 5
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 232.902985
+
+✖ failing tests:
+
+test at acceptance/m2-isolated.test.mjs:375:1
+✖ D01: late diff after logout or logout/login never downloads (1.770622ms)
+  AssertionError [ERR_ASSERTION]: old login must not create a Blob
+
+  1 !== 0
+
+      at TestContext.<anonymous> (file://<repo>/platform/fanzloud/acceptance/m2-isolated.test.mjs:383:12)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    generatedMessage: false,
+    code: 'ERR_ASSERTION',
+    actual: 1,
+    expected: 0,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at acceptance/m2-isolated.test.mjs:389:1
+✖ D01: A-B-A selection invalidates pending diff even with identical bytes (1.198805ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+
+  1 !== 0
+
+      at TestContext.<anonymous> (file://<repo>/platform/fanzloud/acceptance/m2-isolated.test.mjs:396:10)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 1,
+    expected: 0,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at acceptance/m2-isolated.test.mjs:399:1
+✖ D01: observed401 invalidates pending diff and unauthenticated clicks do not read (1.124075ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+
+  1 !== 0
+
+      at TestContext.<anonymous> (file://<repo>/platform/fanzloud/acceptance/m2-isolated.test.mjs:408:10)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 1,
+    expected: 0,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at acceptance/m2-isolated.test.mjs:413:1
+✖ D02: stale diff failures preserve the new view error (1.737732ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+
+  + 'old diff failure'
+  - 'current view error'
+
+      at TestContext.<anonymous> (file://<repo>/platform/fanzloud/acceptance/m2-isolated.test.mjs:423:12)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 'old diff failure',
+    expected: 'current view error',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at acceptance/m2-isolated.test.mjs:446:1
+✖ D01: disabled or logged-out diff action cannot initiate a read (1.055747ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+
+  9 !== 8
+
+      at TestContext.<anonymous> (file://<repo>/platform/fanzloud/acceptance/m2-isolated.test.mjs:452:12)
+      at async Test.run (node:internal/test_runner/test:1332:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:911:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 9,
+    expected: 8,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }

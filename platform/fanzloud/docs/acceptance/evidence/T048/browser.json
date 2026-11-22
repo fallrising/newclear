@@ -1,0 +1,202 @@
+{
+  "status": "passed",
+  "date": "2026-11-22T13:07:59.775Z",
+  "scope": "Actual shipped HTML/CSS/JS, synthetic local session/catalog/results. Native input and download; completion-only click instrumentation. No Rust/AP/provider/live acceptance.",
+  "browser": {
+    "protocolVersion": "1.3",
+    "product": "Chrome/153.0.8010.12",
+    "revision": "@971a7443b0c9b0a9b2860529b33331b76077ec62",
+    "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.0.0 Safari/537.36",
+    "jsVersion": "15.3.76.4"
+  },
+  "scenarios": [
+    "logout stale success suppressed",
+    "A-B-A stale success suppressed",
+    "logout/login stale success suppressed",
+    "stale HTTP500 preserves current error",
+    "current exact UTF8 diff downloads once"
+  ],
+  "download": {
+    "filename": "run-B.diff",
+    "bytes": 61,
+    "sha256": "bc5e15a2ddeb4055b4e052a254c9f05f97a3a9e6bb1266d55c41dd33a6a09544"
+  },
+  "requests": [
+    {
+      "method": "GET",
+      "path": "/"
+    },
+    {
+      "method": "GET",
+      "path": "/assets/p0.css"
+    },
+    {
+      "method": "GET",
+      "path": "/assets/isolated.js"
+    },
+    {
+      "method": "GET",
+      "path": "/assets/candidate.js"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/session"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/agent-profiles"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/runtime"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/submissions"
+    },
+    {
+      "method": "GET",
+      "path": "/favicon.ico"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/tasks"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/runs/A"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/tasks"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/runs/A/result.diff"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/v1/session"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/session"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/agent-profiles"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/runtime"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/submissions"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/tasks"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/runs/A"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/tasks"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/runs/A/result.diff"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/runs/B"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/tasks"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/runs/A"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/tasks"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/runs/A/result.diff"
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/v1/session"
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/session"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/projects"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/agent-profiles"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/runtime"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/submissions"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/tasks"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/runs/A"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/tasks"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/runs/A/result.diff"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/runs/B"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/tasks"
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/runs/B/result.diff"
+    }
+  ],
+  "page_errors": [],
+  "source_hashes": {
+    "isolated.html": "26d91fa3cbf7091911aa24d1f458befec418957f63d4d7c3a28041956b5c5592",
+    "p0.css": "d5440b8b3126e692bf5a40b0e6d1b34c2cf2d50a4b034f9af9642798784254ab",
+    "isolated.js": "ecd61f873c3ec4903c2df0ee7669bb4d711340878f64fdf3c26d63de1f8f0d89",
+    "candidate.js": "c263c675705172de06e878606a89671d3d153353538ebf26446b2d44a2040649"
+  },
+  "inspection_sha256": "5b46ee9965df67c290d1628cfa29a4971e9ba73102923dce24bb8da0b5d3b2c8"
+}

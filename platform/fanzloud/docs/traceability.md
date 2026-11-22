@@ -148,3 +148,14 @@ T-0449 FN05 readonly review: [contract](specs/SPEC-M3-readonly-review.md), [acce
 
 No Rust public interface or rustdoc projection changes. This is optional navigation;
 original FN07/M3, Cloud, AP M4 and Office MVP gaps remain unchanged.
+
+## T048 — diff download lifecycle
+
+| Requirement | CU / specification | Evidence | State |
+| --- | --- | --- | --- |
+| D01 authenticated current-view action | CU-WEB-DIFF-01 / M1-WEB-04–05 / [SPEC-T048](specs/SPEC-T048-diff-lifecycle.md) | Logout/relogin, A→B→A,401 and disabled handler regressions | Verified locally |
+| D02 exact bytes / stale errors | Same | Current UTF8 Blob vs mismatch/failure; old error sentinel retained | Verified locally |
+| D03 RED→GREEN and browser | Same | [Acceptance and exact receipts](acceptance/T048.acceptance.md): 49 Web tests and actual-source Chromium fixture | Verified locally; CI pending |
+| D04 bounded delivery | Same | Fresh-context review/root gates accepted; [BOARD](tasks/BOARD.md) CI/merge/readback | Delivery pending |
+
+No Rust signature/error/rustdoc change. Original FN07/M3 and other product gaps retained.

@@ -6,15 +6,18 @@ import {readCandidate, readReview, reviewResult} from '../apps/control-plane/web
 import {webcrypto} from 'node:crypto';
 const source = (await readFile(new URL('../apps/control-plane/web/isolated.js', import.meta.url), 'utf8')).replace("import {readCandidate, readReview, reviewResult} from './candidate.js';", '');
 const run = id => ({id, state: 'running', state_version: 3, cleanup_state: 'pending'});
-async function page({stored, submit, action, getRun, tasks, submissions, artifacts, handoff, reconcile} = {}) {
-  const elements = new Map(), storage = new Map(stored || []), requests = [], timers = [];
+async function page({stored, submit, action, getRun, tasks, submissions, artifacts, handoff, reconcile, diff} = {}) {
+  const elements = new Map(), storage = new Map(stored || []), requests = [], timers = [], downloads = [];
   const node = id => {
     if (!elements.has(id)) elements.set(id, {value: '0', textContent: '', disabled: false, options: [], listeners: {}, children: [],
       addEventListener(type, fn) {this.listeners[type] = fn;},
       replaceChildren(...children) {this.children = children; this.options = children;}, append(child) {this.children.push(child);}, click() {this.clicked = true;}});
     return elements.get(id);
   };
-  const context = vm.createContext({readCandidate, readReview, reviewResult, Blob, URL, document: {getElementById: node, createElement: () => node(Symbol())},
+  const context = vm.createContext({readCandidate, readReview, reviewResult, Blob, URL: {
+    createObjectURL(blob) {const href = `blob:fixture-${downloads.length}`; downloads.push({href, blob}); return href;},
+    revokeObjectURL() {}
+  }, document: {getElementById: node, createElement: () => node(Symbol())},
     sessionStorage: {getItem: key => storage.get(key) ?? null, setItem: (key, v) => storage.set(key, v), removeItem: key => storage.delete(key)},
     Option: function(text, value) {return {text, value};}, crypto: {randomUUID: () => `key-${requests.length}`},
     setTimeout: fn => {timers.push(fn); return timers.length;}, clearTimeout() {}, Date,
@@ -29,6 +32,7 @@ async function page({stored, submit, action, getRun, tasks, submissions, artifac
       else if (url.endsWith('/runtime')) data = {repositories: [{canonical_repo: 'repo', base_sha: 'a'.repeat(40)}]};
       else if (url.endsWith('/tasks') && options.method === 'POST') data = await (submit ? submit() : Promise.resolve({run: run('A')}));
       else if (url.endsWith('/tasks')) data = {items: tasks ? await tasks() : [{title: 'A', run_id: 'A', state: 'running'}, {title: 'B', run_id: 'B', state: 'running'}]};
+      else if (url.endsWith('/result.diff')) data = await diff(url);
       else if (url.includes('/artifacts')) data = await artifacts(url);
       else if (options.method === 'POST' && (url.endsWith('/reviews') || url.endsWith('/rework'))) data = await handoff(url, options);
       else if (url.endsWith('/actions')) data = await action();
@@ -38,7 +42,7 @@ async function page({stored, submit, action, getRun, tasks, submissions, artifac
   await vm.runInContext(`(async () => {${source}\n})()`, context);
   const flush = async () => {for(let n = 0; n < 10; n++) await Promise.resolve();};
   const submitForm = async () => {await node('task-form').listeners.submit({preventDefault(){}}); await flush();};
-  return {node, storage, requests, submitForm, flush};
+  return {node, storage, requests, submitForm, flush, downloads, links: () => [...elements.values()].filter(x => x.clicked && x.download)};
 }
 test('M2-01: same catalog offers both real subscription vendors only', async () => {
   const p = await page();
@@ -362,5 +366,89 @@ test('U05: remaining unknown and refresh during reconcile retain a usable explic
     assert.equal(current.disabled,false,'remaining unknown must permit a later explicit GET reconciliation');
     assert.equal(p.node('submit-task').disabled,true);
     assert.equal(p.requests.filter(x=>x.method==='POST').length,1);
+  }
+});
+
+
+const finishedDiff = '--- a/example.txt\n+++ b/example.txt\n@@ -1 +1 @@\n-old\n+修正\n';
+const finishedRun = id => ({...run(id), state: 'succeeded', cleanup_state: 'confirmed', result: {diff: finishedDiff, verification: {status: 'passed'}}});
+test('D01: late diff after logout or logout/login never downloads', async () => {
+  for (const loginAgain of [false, true]) {
+    let release;
+    const p = await page({stored: [['fanz-current-run', 'A']], getRun: finishedRun, diff: () => new Promise(resolve => {release = resolve;})});
+    const pending = p.node('download-diff').listeners.click(); await p.flush();
+    await p.node('logout').listeners.click();
+    if (loginAgain) await p.node('login-form').listeners.submit({preventDefault() {}});
+    release(finishedDiff); await pending;
+    assert.equal(p.downloads.length, 0, 'old login must not create a Blob');
+    assert.equal(p.links().length, 0);
+    assert.equal(p.requests.filter(x => x.url.endsWith('/result.diff')).length, 1);
+    assert.equal(p.requests.filter(x => x.method !== 'GET' && !x.url.endsWith('/session')).length, 0);
+  }
+});
+test('D01: A-B-A selection invalidates pending diff even with identical bytes', async () => {
+  let release;
+  const p = await page({stored: [['fanz-current-run', 'A']], getRun: finishedRun, diff: () => new Promise(resolve => {release = resolve;})});
+  const pending = p.node('download-diff').listeners.click(); await p.flush();
+  for (const index of [1, 0]) {p.node('recent-tasks').children[index].children[0].listeners.click(); await p.flush();}
+  assert.equal(p.node('run-id').textContent, 'A');
+  release(finishedDiff); await pending;
+  assert.equal(p.downloads.length, 0); assert.equal(p.links().length, 0);
+  assert.equal(p.requests.filter(x => x.method !== 'GET').length, 0);
+});
+test('D01: observed401 invalidates pending diff and unauthenticated clicks do not read', async () => {
+  let expired = false, release;
+  const p = await page({stored: [['fanz-current-run', 'A']], getRun: finishedRun,
+    submissions: () => expired ? {__status: 401} : {items: [], blocked: false},
+    diff: () => new Promise(resolve => {release = resolve;})});
+  const pending = p.node('download-diff').listeners.click(); await p.flush();
+  expired = true; p.node('refresh').listeners.click(); await p.flush();
+  assert.equal(p.node('task-panel').hidden, true);
+  release(finishedDiff); await pending;
+  assert.equal(p.downloads.length, 0);
+  const before = p.requests.length;
+  await p.node('download-diff').listeners.click();
+  assert.equal(p.requests.length, before);
+});
+test('D02: stale diff failures preserve the new view error', async () => {
+  for (const leave of ['logout', 'select-B', 'select-A-again']) {
+    let reject;
+    const p = await page({stored: [['fanz-current-run', 'A']], getRun: finishedRun, diff: () => new Promise((_, no) => {reject = no;})});
+    const pending = p.node('download-diff').listeners.click(); await p.flush();
+    if (leave === 'logout') await p.node('logout').listeners.click();
+    else {p.node('recent-tasks').children[1].children[0].listeners.click(); await p.flush();}
+    if (leave === 'select-A-again') {p.node('recent-tasks').children[0].children[0].listeners.click(); await p.flush();}
+    p.node('error-message').textContent = 'current view error';
+    reject(new Error('old diff failure')); await pending;
+    assert.equal(p.node('error-message').textContent, 'current view error');
+    assert.equal(p.downloads.length, 0); assert.equal(p.links().length, 0);
+  }
+});
+test('D02: current exact diff downloads once while mismatch/error does not', async () => {
+  for (const response of [finishedDiff, 'different bytes', new Error('network offline')]) {
+    const p = await page({stored: [['fanz-current-run', 'A']], getRun: finishedRun, diff: () => {if (response instanceof Error) throw response; return response;}});
+    assert.equal(p.node('download-diff').disabled, false);
+    await p.node('download-diff').listeners.click();
+    if (response === finishedDiff) {
+      assert.equal(p.downloads.length, 1); assert.equal(p.links().length, 1);
+      assert.equal(await p.downloads[0].blob.text(), finishedDiff);
+      assert.equal(p.downloads[0].blob.type, 'text/plain;charset=utf-8');
+      assert.equal(p.links()[0].download, 'run-A.diff');
+      assert.equal(p.links()[0].href, p.downloads[0].href);
+    } else {
+      assert.equal(p.downloads.length, 0); assert.equal(p.links().length, 0);
+      assert.match(p.node('error-message').textContent, response instanceof Error ? /network offline/ : /diff 與目前任務不符/);
+    }
+    assert.deepEqual(p.requests.filter(x => x.url.endsWith('/result.diff')).map(x => [x.url, x.method]), [['/api/v1/runs/A/result.diff', 'GET']]);
+    assert.equal(p.requests.filter(x => x.method !== 'GET').length, 0);
+  }
+});
+test('D01: disabled or logged-out diff action cannot initiate a read', async () => {
+  for (const logout of [false, true]) {
+    const p = await page({stored: [['fanz-current-run', 'A']], getRun: finishedRun, diff: () => finishedDiff});
+    if (logout) await p.node('logout').listeners.click(); else p.node('download-diff').disabled = true;
+    const before = p.requests.length;
+    await p.node('download-diff').listeners.click();
+    assert.equal(p.requests.length, before); assert.equal(p.downloads.length, 0);
   }
 });

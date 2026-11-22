@@ -291,6 +291,7 @@ async function runNoExecutionScenario(scenario) {
     if(scenario==='no_optin'){
       const posts=browser.requestBodies.length;
       await browser.cdp.send('Page.navigate',{url:new URL('/#view=results',harness.url).href});
+      await waitFor(async () => (await currentHref(browser)).endsWith('#view=results'), 'results navigation');
       await browser.cdp.send('Page.reload');
       await waitFor(()=>browser.evaluate('typeof resultsOnly!=="undefined" && resultsOnly && !document.getElementById("readonly-info").hidden'), 'readonly mode');
       assert(await browser.evaluate('document.getElementById("office-operations").hidden && !document.getElementById("execute").onclick'), 'readonly exposes write controls');

@@ -109,8 +109,9 @@ def inspect_slot(lab=LAB):
 
 
 class Slot:
-    def __init__(self, directory, fd):
+    def __init__(self, directory, fd, inherited=False):
         self.directory, self.fd = directory, fd
+        self.inherited = inherited
         self.started = False
         self.clean = False
         self.retry_parent = None
@@ -173,7 +174,7 @@ def execution_slot(lab=LAB):
             if prior is None or {k:v for k,v in prior.items() if k != 'retry_parent'} != {'schema': 1, 'pid': os.getpid(), 'phase': 'guarded'}:
                 raise SlotError('invalid_inherited_journal')
             os.close(int(inherited))
-        slot = Slot(directory, fd)
+        slot = Slot(directory, fd, inherited=inherited is not None)
         if inherited is not None: slot.retry_parent = prior.get('retry_parent')
         slot.write('guarded')
         _active = slot
@@ -195,6 +196,13 @@ def mark_started():
     if _active is not None:
         _active.started = True
         _active.write('running')
+
+
+def inherited_slot(lab=LAB):
+    """Whether this process adopted this lab's guarded dispatcher exec slot."""
+    return bool(_active is not None and _active.inherited and not _active.started
+                and os.path.samestat(os.fstat(_active.directory),
+                                    os.stat(lab / 'state/dispatch', follow_symlinks=False)))
 
 
 def retry_parent(lab=LAB):

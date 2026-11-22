@@ -212,3 +212,9 @@ T-0028：Pi 遠端重試的一次性授權。CLI 明確建立綁定指定失敗 
 ## T-0030：Cursor 操作台授權
 
 T-0030：將既有一次性授權延伸到固定 Cursor／Composer 2.5 首次合成任務。保持預設120秒、四工具、4096bytes，request／token／金額硬上限未知；不接受 Cursor retry、不改固定 CLI 或全域設定。單一 pending grant（跨 provider）、來源／版本／限制綁定、預檢及執行鎖內消耗、失敗不退款、頁面明確確認與重啟不重跑。驗證用隔離臨時 lab、真實 HTTP／dispatcher／exec lock、Chrome，環境偵測與 provider 為明示替身；不以其宣稱 Cursor 模型或原生取消通過。保留 Pi fresh／retry 回歸及全部歷史證據。
+
+## T-0031：授權控制流程審查
+
+T-0031：owner 重新訂閱 OpenCode 並要求繼續；新單次 Pi／GLM 5.3 唯讀審查已合併的 Cursor grant 控制流程，主導重現可驗證問題、修正必要邊界並交付。固定一請求、零工具、6000 output tokens、180秒、回報成本US$3後停止（非金額硬上限）；不自動重試／fallback。與產品模型驗收分開，沒有 Cursor 產品付費授權。驗證 AC-01／09／11 子集的來源綁定、一次性執行與保守結果；必要 Python／Node／HTTP／瀏覽器回歸及 repo gates。完整MVP／Cursor真實新入口狀態不變。
+
+T-0031 本機結果：主導重現已消耗 Cursor grant id 可被新程序再次帶入的授權指紋歸屬問題，加入 dispatcher 同 PID／繼承鎖／私有消耗收據與排他 runner 領取檢查；失敗不退還。單次 Pi／GLM 5.3 開發審查 HTTP401 Invalid credential，未取得審查，沒有重試／fallback；不是產品模型驗收。詳[證據](evidence/cursor-grant-handoff-2026-11-23.json)。完整 MVP／Cursor 真實新入口仍 pending。

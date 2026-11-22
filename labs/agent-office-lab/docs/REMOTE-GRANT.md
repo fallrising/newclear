@@ -88,3 +88,11 @@ python3 scripts/office_console.py --accept-remote-grant cursor
 限制為 120 秒、一個 prompt、最多四次工具、4096 bytes 產物。請求／token／金額硬上限為 null，頁面顯示無硬上限；不沿用歷史單次240秒批准。停止本機程序不保證服務端立即停止計費。CLI 亦可在當次批准下使用 `run cursor --execute --remote-grant GRANT_ID`，與 `--allow-remote` 互斥。runner 的授權參照會再次核對已消耗紀錄、provider 與來源；對外結果只含指紋。
 
 [控制層證據](evidence/cursor-console-grant-2026-11-22.json)使用真實 HTTP、Chrome、dispatcher、atomic consume 與跨 exec 執行鎖，provider 及環境偵測是隔離臨時 lab 的明示替身。驗證預設拒絕、確認取消不啟動、正確 provider、單次執行、停止、失敗不顯示成功、撤銷、刷新與重啟；無產品模型請求或實際 lab grant。Cursor 真實新入口到產物、原生取消／恢復仍待另一次具體驗收，完整 AC 不變。
+
+## T-0031：Cursor runner 的一次性交接
+
+已消耗 grant 的 id 不是另一份可重用執行許可。Cursor runner 接受 `--authorization-ref` 時，必須持有本 checkout 經 dispatcher exec 繼承的 guarded 執行鎖，並核對消耗收據的 dispatcher 入口、同一 PID、時間及完整來源／provider 綁定。通過後以排他建立的私有 `.runner.json` 收據領取一次；同一程序再次領取或新程序重用都拒絕，且拒絕發生於原生預檢及讀取憑證之前。已領取後即使預檢失敗，也不退還、不自動重跑。
+
+這修正了舊 id 可以被新 runner 帶入、沿用相同授權指紋的紀錄問題；不是瀏覽器自動重試的證據。直接 `--allow-remote` 仍代表操作員另次明確授權，不以舊 grant 作為其依據。這仍是單 checkout 的合作協定，不防擁有本機寫入權者修改程式或收據。既有已消耗紀錄不遷移、不回復為 pending。
+
+[本輪證據](evidence/cursor-grant-handoff-2026-11-23.json)使用實際 Python runner／dispatcher／exec／檔案鎖，原生預檢與 provider 為明示替身；零產品模型請求。單次開發 GLM 審查回覆 401 Invalid credential，沒有取得審查內容、沒有重試或 fallback；修正由主導獨立重現與審查。Cursor 真實新入口與完整 MVP 仍 pending。

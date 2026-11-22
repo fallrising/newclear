@@ -1,5 +1,7 @@
 # 開發交接
 
+T-0031 本機結果：主導重現已消耗 Cursor grant id 可被新程序再次帶入的授權指紋歸屬問題，加入 dispatcher 同 PID／繼承鎖／私有消耗收據與排他 runner 領取檢查；失敗不退還。單次 Pi／GLM 5.3 開發審查 HTTP401 Invalid credential，未取得審查，沒有重試／fallback；不是產品模型驗收。詳[證據](docs/evidence/cursor-grant-handoff-2026-11-23.json)。完整 MVP／Cursor 真實新入口仍 pending。
+
 T-0030：Cursor 固定首次合成任務已接入一次性 grant 與操作台。授權綁定模型、固定 runtime 版本、120 秒／四工具／4096 bytes 與來源（含 CLI lock），跨 provider 仍只有一張 pending grant。明確確認、正確工位派工、原子消耗、停止、失敗結果、撤銷及重啟不重跑以真實 HTTP／dispatcher／跨 exec 鎖及 Chrome 通過；provider 與環境偵測為明示本機替身，沒有 Cursor 模型或原生取消驗收。Pi fresh／retry 回歸通過，原費用／時間上限與不自動重試不變。一次 Pi／GLM 開發審查因 HTTP403 未完成，沒有重試／fallback；主導完成審查。完整 MVP 保持 pending；[證據](docs/evidence/cursor-console-grant-2026-11-22.json)，交付見[任務板](docs/tasks/BOARD.md)。
 
 T-0029 最新：owner 補足餘額並新批一次指定來源重試後，Pi／DeepSeek 從操作台到產物與 Blob 下載的真實流程通過。3 次 HTTP200、2142 input／185 output tokens、30.51 秒，原生同 session、read→write、agent_settled、marker／total 與原始／下載 hash 均核對。新 grant 消耗一次；原 HTTP402 失敗、receipt 與 input bytes 保留不變、沿用相同 fixture；重複計畫拒絕、刷新／操作台重啟不重跑。外層32個受追蹤程序全部退出、鎖釋放，非完整後代樹稽核；沒有自動重試或開發模型委託。見[成功證據](docs/evidence/pi-console-completed-2026-11-22.json)，先前[402 證據](docs/evidence/pi-console-live-2026-11-22.json)保留。僅完成 Pi 子集；其他 provider、完整安全／MVP 仍 pending，無 usable tag；交付見[任務板](docs/tasks/BOARD.md)。

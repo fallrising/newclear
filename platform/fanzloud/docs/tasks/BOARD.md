@@ -239,7 +239,34 @@ when the concrete destination contract is available. Original rows/AC stay uncha
 
 | ID | Task | AC | Status | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| DIFF-01 | Auth and selection invalidation | D01 | in_progress | 2026-11-22T13:03:55Z | | 2026-11-22T13:15:04Z |
-| DIFF-02 | Current bytes and stale errors | D02 | in_progress | 2026-11-22T13:03:55Z | | 2026-11-22T13:15:04Z |
-| DIFF-03 | Regression and browser evidence | D03 | in_progress | 2026-11-22T13:03:55Z | | 2026-11-22T13:15:04Z |
-| DIFF-04 | Review and normal delivery | D04 | in_progress | 2026-11-22T13:03:55Z | | 2026-11-22T13:15:04Z |
+| DIFF-01 | Auth and selection invalidation | D01 | done | 2026-11-22T13:03:55Z | 2026-11-22T13:18:43Z | 2026-11-22T13:20:22Z |
+| DIFF-02 | Current bytes and stale errors | D02 | done | 2026-11-22T13:03:55Z | 2026-11-22T13:18:43Z | 2026-11-22T13:20:22Z |
+| DIFF-03 | Regression and browser evidence | D03 | done | 2026-11-22T13:03:55Z | 2026-11-22T13:18:43Z | 2026-11-22T13:20:22Z |
+| DIFF-04 | Review and normal delivery | D04 | done | 2026-11-22T13:03:55Z | 2026-11-22T13:18:43Z | 2026-11-22T13:20:22Z |
+
+T048 delivered: [PR1062](https://github.com/fallrising/newclear/pull/1062) merged normally
+at 2026-11-22T13:18:43Z as `327d26afe636b4294758df83c98176f7597a6d2c`.
+Final head `e6e7c38c07373e6c8210ab21f1c455244c8a69be` passed
+[Fanzloud CI](https://github.com/fallrising/newclear/actions/runs/45026495375) and
+[Project success contracts](https://github.com/fallrising/newclear/actions/runs/45026495343).
+Native CI includes 49 Web tests, offline parser tests, Rust fmt/clippy/workspace tests
+and application build. Fresh-context source and focused integration reviews ACCEPT;
+[acceptance](../acceptance/T048.acceptance.md) preserves RED44/5 → GREEN49/0/0,
+Chromium held-response/native-download receipts, source hashes and earlier failed attempts.
+
+Remote readback passed in newclear: fetch main, merge ancestry and
+`git diff --exit-code e6e7c38c07373e6c8210ab21f1c455244c8a69be origin/main -- platform/fanzloud`
+returned zero at the merge above. Required local indexes (55 projects / 9 llms), staged
+whitespace and alignment passed; 13-path scope, links and receipt hashes were verified.
+Parallel PR1061 was integrated by normal merge: its entire BOARD and three Office docs
+remain intact; its in_progress / N01–N05 NOT_RUN feature is not closed by T048.
+
+This post-merge record supersedes T048's pre-merge CI/delivery-pending notes. D01–04
+are delivered as a bounded original diff-handler correction. Browser sessions/results
+are synthetic; no live Rust/AP/provider/owner operation is claimed. Original full FN07/M3,
+Cloud AC04/P1 AC05, AP M4 and Office MVP remain incomplete, usable_tag none unchanged.
+No release, deployment, service window or further product milestone is started.
+
+Focused board-only review ACCEPT: prior rows preserved, exact merge ancestry/component
+bytes checked, 55/9 indexes and staged whitespace/alignment passed. Final closure PR
+CI/merge/readback remain the last delivery gates.

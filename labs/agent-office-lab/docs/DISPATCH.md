@@ -15,7 +15,7 @@ python3 scripts/office_dispatch.py run cursor
 
 ## 明確執行
 
-`run` 預設等同 plan。必須有 `--execute` 才啟動一個既有合成檔案 runner；遠端還必須有 `--allow-remote`。下列遠端命令會消耗配額／可能產生費用，僅在取得當次單次授權後執行；先前成功的授權不自動延續。
+`run` 預設等同 plan。必須有 `--execute` 才啟動一個既有合成檔案 runner；遠端還必須有 `--allow-remote`，或 Pi／Cursor 對應的一次性 `--remote-grant`。下列遠端命令會消耗配額／可能產生費用，僅在取得當次單次授權後執行；先前成功的授權不自動延續。
 
 ```sh
 python3 scripts/office_dispatch.py run opencode --execute
@@ -40,7 +40,7 @@ python3 scripts/office_dispatch.py run opencode --execute --check-cancel
 | OpenCode | strata/qwen3.8-flash-next-q2_0 | 原本地合成 runner、32K context 與資源 guard |
 | Grok | grok-4.6 | 240 秒、4 次工具 hook gate、6 原生 turns；hook fail-open 限制仍存在 |
 | Pi | deepseek/deepseek-flash | 180 秒、最多 4 請求、每次最多 512 output tokens |
-| Cursor | composer-2.5 | 120 秒、4 次工具 hook gate |
+| Cursor | composer-2.5 | 120 秒、1 prompt、4 次工具 hook gate、4096 bytes 產物 |
 
 Grok／Cursor 沒有可保證的 request／token／金額硬上限；工具 hook gate 不是服務端費用上限。CLI plan 的 `null` 表示沒有在此保證的上限，不能當成 0。這個入口不會自動套用先前一次性的翻倍批准。
 
@@ -56,7 +56,7 @@ Grok／Cursor 沒有可保證的 request／token／金額硬上限；工具 hook
 
 ## 本機操作台
 
-[操作台](CONSOLE.md) 將偵測、計畫、本地執行與結果整合。`run opencode --execute --keep-open` 可在合成任務完成後保留原生終端，直到中斷；此選項只適用於本地任務，不可混用取消／故障驗收。頁面執行仍走同一個 dispatcher 與執行鎖，不接受遠端付費執行。
+[操作台](CONSOLE.md) 將偵測、計畫、本地執行與結果整合。`run opencode --execute --keep-open` 可在合成任務完成後保留原生終端，直到中斷；此選項只適用於本地任務，不可混用取消／故障驗收。頁面執行仍走同一個 dispatcher 與執行鎖；遠端 Pi／Cursor 只接受 CLI 先建立的一次性 grant。
 
 ## 單一執行與中斷
 
@@ -88,4 +88,4 @@ Pi 亦支援 `run pi --check-cancel` 計畫，加上 `--execute` 以真實 CLI �
 
 操作台的[本地文字任務](LOCAL-TEXT-TASK.md)使用有 hash 的私人快照 request，經 `local-text` 子命令重新檢查後取得同一執行鎖，再交給固定 OpenCode／Strata runner。請從操作台建立計畫，不手寫內部 request；此模式不接受遠端模型、保留終端或生命週期檢查參數。
 
-Pi 固定新任務可使用[持久化一次性 grant](REMOTE-GRANT.md)連接操作台；CLI 的 `grant pi --confirm-paid-remote-run`、`grants`、`grant-revoke GRANT_ID` 管理當次授權。遠端 retry 保持原 CLI 明確授權流程，不能套用 fresh-task grant。
+Pi 與 Cursor 固定新任務可使用[持久化一次性 grant](REMOTE-GRANT.md)連接操作台；CLI 的 `grant pi --confirm-paid-remote-run` 或 `grant cursor --confirm-paid-remote-run`、`grants`、`grant-revoke GRANT_ID` 管理當次授權。Pi 遠端 retry 必須使用綁定指定失敗來源的新 grant，不能套用 fresh-task grant；Cursor 不支援 retry grant。

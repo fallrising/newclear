@@ -1,8 +1,8 @@
-# Pi 遠端任務的一次性授權
+# 遠端任務的一次性授權
 
 T-0029 已完成一次真實 Pi／DeepSeek 操作台指定重試與 Blob 下載驗收；原402失敗保留，新批准只消耗一次，沒有自動重跑。見[成功證據](evidence/pi-console-completed-2026-11-22.json)。
 
-遠端 UI 執行限於 Pi／DeepSeek 的固定合成檔案任務。先由操作員透過 CLI 建立一次性授權，再以明示接受授權的操作台查看計畫、確認並啟動。一般啟動操作台時仍不允許付費派工。
+遠端 UI 執行限於 Pi／DeepSeek 與 Cursor／Composer 2.5 的固定合成檔案任務。先由操作員透過 CLI 建立一次性授權，再以明示接受授權的操作台查看計畫、確認並啟動。一般啟動操作台時仍不允許付費派工。
 
 ## 操作流程
 
@@ -16,7 +16,7 @@ python3 scripts/office_console.py --accept-remote-grant pi
 
 建立授權只保存一張有限期的執行許可，不會啟動模型。CLI 輸出的完整 id 留在本機；操作台只顯示指紋及到期時間。在頁面選 Pi → 合成檔案任務 → 查看執行計畫，確認模型、請求／輸出／時間限制後啟動。頁面確認不能自行建立新授權。
 
-目前固定限制為最多四個 provider 請求、每請求最多 512 output tokens、180 秒；`money_cap` 為 null，沒有金額硬上限。停止會要求 runner 清理，但已送出的遠端請求仍可能計費。首次任務授權與指定重試授權不可互用；兩者都不可用於任意 prompt、私人專案或 Grok／Cursor。
+Pi 固定限制為最多四個 provider 請求、每請求最多 512 output tokens、180 秒；`money_cap` 為 null，沒有金額硬上限。停止會要求 runner 清理，但已送出的遠端請求仍可能計費。首次任務授權與指定重試授權不可互用；兩者都不可用於任意 prompt、私人專案或其他 provider。
 
 查看及撤銷尚未使用的授權：
 
@@ -72,3 +72,19 @@ HTTP 公開授權摘要只增加 `scope=fresh|retry` 與 `retry={parent_ref,root
 成功產物／Blob 下載仍未通過；測試替身及既有歷史成功不替代此次端到端驗收。下一步先由 owner 處理 provider 餘額，再對既有失敗 parent 新批一次指定重試；未建立下一張 grant。限額與失敗歷史不變，詳[白名單證據](evidence/pi-console-live-2026-11-22.json)。
 
 T29 接續結果：新單次批准以綁定原失敗 parent 的 retry grant 執行；3次HTTP200、2142input／185output tokens、30.51秒，原生read／write及agent_settled、相同fixture、正確marker／total、原始及標準格式下載hash通過。Chrome實際下載、重複計畫拒絕、刷新／操作台重啟無重跑，32個外層受追蹤程序全退出。原402證據未改；這次成功不授權額外任務，跨provider與完整安全仍pending。
+
+## T-0030：Cursor 固定首次任務
+
+Cursor 使用同一套授權儲存、執行鎖與消耗機制，固定官方 CLI `2026.10.22-27dcf5f`／`composer-2.5`。取得當次單次付費批准後：
+
+```sh
+python3 scripts/office_dispatch.py plan cursor
+python3 scripts/office_dispatch.py grant cursor --ttl 900 --confirm-paid-remote-run
+python3 scripts/office_console.py --accept-remote-grant cursor
+```
+
+也可明示接受兩者：`--accept-remote-grant pi --accept-remote-grant cursor`，但整個 checkout 同時仍只有一張有效 pending grant，不會各存一張候用。Pi 與 Cursor 的 grant 不可互用；Cursor 僅允許首次合成任務，拒絕 `--retry-of`、任意 prompt 與其他模式。授權來源包含 Cursor runner、hook／wrapper／政策、共用控制程式與 CLI lock；程式更新使舊 grant 失效。version 1 僅支援歷史 Pi 首次任務，Cursor 使用 version 2、retry=null。
+
+限制為 120 秒、一個 prompt、最多四次工具、4096 bytes 產物。請求／token／金額硬上限為 null，頁面顯示無硬上限；不沿用歷史單次240秒批准。停止本機程序不保證服務端立即停止計費。CLI 亦可在當次批准下使用 `run cursor --execute --remote-grant GRANT_ID`，與 `--allow-remote` 互斥。runner 的授權參照會再次核對已消耗紀錄、provider 與來源；對外結果只含指紋。
+
+[控制層證據](evidence/cursor-console-grant-2026-11-22.json)使用真實 HTTP、Chrome、dispatcher、atomic consume 與跨 exec 執行鎖，provider 及環境偵測是隔離臨時 lab 的明示替身。驗證預設拒絕、確認取消不啟動、正確 provider、單次執行、停止、失敗不顯示成功、撤銷、刷新與重啟；無產品模型請求或實際 lab grant。Cursor 真實新入口到產物、原生取消／恢復仍待另一次具體驗收，完整 AC 不變。

@@ -70,7 +70,8 @@
       "pending grant survives restart",
       "spent grant not re-created",
       "refresh and restart do not re-run",
-      "results-only UI retains no POST controls and explicit return to full console"
+      "results-only UI retains no POST controls and explicit return to full console",
+      "finished job and available execution slot both visible after stop"
     ],
     "model_inference_verified": false,
     "native_cursor_cancel_verified": false,

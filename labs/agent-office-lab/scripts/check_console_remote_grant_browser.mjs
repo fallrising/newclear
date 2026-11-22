@@ -346,6 +346,7 @@ async function runGrantScenario() {
     const secrets = await collectGrantSecrets(directory);
     await assertDomNoLeaks(browser, harness.url, secrets);
     assertNoLeaks(browser, harness.url, secrets);
+    await waitFor(()=>browser.evaluate("state?.jobs?.length===1 && state.jobs[0].phase==='finished' && !state.active_job && state.shared_execution.status==='available'"), 'finished job and released slot visible');
     const metrics=await browser.cdp.send('Page.getLayoutMetrics');
     await browser.cdp.send('Page.captureScreenshot',{captureBeyondViewport:true,clip:{x:0,y:0,width:metrics.cssContentSize.width,height:metrics.cssContentSize.height,scale:1}}).then(async image=>writeFile(path.join(harnessRoot,provider+'-stopped.png'),Buffer.from(image.data,'base64')));
     report.scenarios[scenario] = {ok: true, confirmation_dismissed_without_spawn:true, spawn_count: counts.spawn_count, consumed_count: counts.consumed_count};

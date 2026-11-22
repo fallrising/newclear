@@ -421,6 +421,6 @@ Owner 直接指示繼續開發。基準來源 `fallrising/newclear@1c0483e86a825
 
 | ID | 任務 | 對應 AC | 狀態 | start | end | last_activity |
 | --- | --- | --- | --- | --- | --- | --- |
-| T-0030-01 | 固定 Cursor 首次任務 grant、操作台派工／停止與重啟控制層；真實模型及完整 AC 另驗 | AC-01／06／08／09／11 子集 | in_progress | 2026-11-22T14:03:31.768915+00:00 | — | 2026-11-22T14:15:49.178675+00:00 |
+| T-0030-01 | 固定 Cursor 首次任務 grant、操作台派工／停止與重啟控制層；真實模型及完整 AC 另驗 | AC-01／06／08／09／11 子集 | in_progress | 2026-11-22T14:03:31.768915+00:00 | — | 2026-11-22T14:18:03.374779+00:00 |
 
 T30 本機驗收：232 Python／74 Node、Cursor五組Chrome流程（含唯讀模式零POST及明確返回）、Pi首次五組與重試四組回歸通過。實際dispatcher／atomic consume／跨exec鎖；provider與環境偵測明示替身，零產品模型請求／實際lab授權。已保留並整合主線 `6c9cbd0ba596cd5f1ddd6c5466b99ce294dea1d3` 的FZ-OFFICE-NAV，未改其產品範圍。publication223／indexes55contracts9llms／staged diff check通過。單次Pi GLM審查403，未取得審查、無重試；主導審查，不宣稱獨立模型審查。PR／CI／合併尚待完成。
